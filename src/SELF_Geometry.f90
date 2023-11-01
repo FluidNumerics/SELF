@@ -15,9 +15,11 @@ MODULE SELF_Geometry
   IMPLICIT NONE
 
 #include "SELF_Macros.h"
+  TYPE,PUBLIC :: SEMGeometry
+  INTEGER :: nElem
+  END TYPE SEMGeometry
 
-  TYPE,PUBLIC :: Geometry1D
-    INTEGER :: nElem
+  TYPE,EXTENDS(SEMGeometry),PUBLIC :: Geometry1D
     TYPE(Scalar1D) :: x ! Physical Positions
     TYPE(Scalar1D) :: dxds ! Conversion from computational to physical space
 
@@ -35,8 +37,7 @@ MODULE SELF_Geometry
 
   END TYPE Geometry1D
 
-  TYPE,PUBLIC :: SEMQuad
-    INTEGER :: nElem
+  TYPE,EXTENDS(SEMGeometry),PUBLIC :: SEMQuad
     TYPE(Vector2D) :: x ! Physical positions
     TYPE(Tensor2D) :: dxds ! Covariant basis vectors
     TYPE(Tensor2D) :: dsdx ! Contavariant basis vectors
@@ -60,8 +61,7 @@ MODULE SELF_Geometry
 
   END TYPE SEMQuad
 
-  TYPE,PUBLIC :: SEMHex
-    INTEGER :: nElem
+  TYPE,EXTENDS(SEMGeometry),PUBLIC :: SEMHex
     TYPE(Vector3D) :: x ! Physical positions
     TYPE(Tensor3D) :: dxds ! Covariant basis vectors
     TYPE(Tensor3D) :: dsdx ! Contavariant basis vectors

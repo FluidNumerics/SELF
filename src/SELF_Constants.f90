@@ -10,12 +10,11 @@ MODULE SELF_Constants
 
   USE ISO_C_BINDING
   USE ISO_FORTRAN_ENV
-  USE MPI
 
   IMPLICIT NONE
+  INCLUDE "mpif.h"
 
-!  INCLUDE 'mpif.h'
-
+#include "SELF_Macros.h"
 
 #ifdef DOUBLE_PRECISION
   INTEGER,PARAMETER :: prec = real64

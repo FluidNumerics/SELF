@@ -7,16 +7,14 @@
 MODULE SELF_Mesh
 
   USE SELF_Constants
+  USE SELF_HIP
   USE SELF_Lagrange
   USE SELF_Data
   USE SELF_SupportRoutines
   USE SELF_HDF5
+  
   ! External Libs !
   USE HDF5
-  USE MPI
-
-  USE hipfort
-  USE hipfort_check
 
   USE ISO_C_BINDING
 
@@ -881,9 +879,9 @@ CONTAINS
 
 
     IF ( decomp % mpiEnabled )THEN
-      CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
+      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
     ELSE
-      CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
     ENDIF
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
@@ -2018,7 +2016,6 @@ CONTAINS
     this % nElem = 0
     this % mpiEnabled = enableMPI
 
-
     IF (enableMPI) THEN
       this % mpiComm = MPI_COMM_WORLD
       CALL MPI_INIT(ierror)
@@ -2054,7 +2051,6 @@ CONTAINS
       INFO(TRIM(msg))
 
     ENDIF
-
 
   END SUBROUTINE Init_MPILayer
 
@@ -2220,10 +2216,12 @@ CONTAINS
     ! Local
     INTEGER :: ierror
 
+    IF( mpiHandler % mpiEnabled )THEN
     CALL MPI_WaitAll(mpiHandler % msgCount, &
                      mpiHandler % requests(1:mpiHandler % msgCount), &
                      mpiHandler % stats(1:MPI_STATUS_SIZE,1:mpiHandler % msgCount), &
                      iError)
+    ENDIF
 
   END SUBROUTINE FinalizeMPIExchangeAsync
 

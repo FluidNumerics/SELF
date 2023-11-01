@@ -80,6 +80,10 @@ MODULE SELF_Data
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar1D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar1D
 
+    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar1D, WriteHDF5_Scalar1D
+    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar1D
+    PROCEDURE, PRIVATE :: WriteHDF5_Scalar1D
+
 
   END TYPE Scalar1D
 
@@ -108,6 +112,10 @@ MODULE SELF_Data
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar2D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar2D
+
+    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
+    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
+    PROCEDURE, PRIVATE :: WriteHDF5_Scalar2D
 
   END TYPE Scalar2D
 
@@ -175,6 +183,10 @@ MODULE SELF_Data
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
     PROCEDURE,PRIVATE :: SetEquation_Vector2D
 
+    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector2D, WriteHDF5_Vector2D
+    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector2D
+    PROCEDURE, PRIVATE :: WriteHDF5_Vector2D
+
   END TYPE Vector2D
 
   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector3D
@@ -213,6 +225,27 @@ MODULE SELF_Data
 
   END TYPE Vector3D
 
+! ----------------- Two-point Vectors ----------------- !
+
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: P2Vector2D
+
+    TYPE(hfReal_r6) :: interior
+    TYPE(hfReal_r7) :: physical
+    TYPE(hfReal_r5) :: boundary
+    TYPE(hfReal_r5) :: extBoundary
+    TYPE(hfReal_r4) :: boundaryNormal
+
+  CONTAINS
+
+    PROCEDURE,PUBLIC :: Init => Init_P2Vector2D
+    PROCEDURE,PUBLIC :: Free => Free_P2Vector2D
+    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_P2Vector2D
+    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_P2Vector2D
+
+    GENERIC,PUBLIC :: Divergence => Divergence_P2Vector2D
+    PROCEDURE,PRIVATE :: Divergence_P2Vector2D
+
+  END TYPE P2Vector2D
 ! ---------------------- Tensors ---------------------- !
 
   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
@@ -280,6 +313,7 @@ MODULE SELF_Data
   INTEGER,PARAMETER :: selfStrongForm = 0
   INTEGER,PARAMETER :: selfWeakDGForm = 1
   INTEGER,PARAMETER :: selfWeakCGForm = 2
+  INTEGER,PARAMETER :: selfWeakBRForm = 3
 
   INTERFACE
     SUBROUTINE Determinant_Tensor2D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &
@@ -551,6 +585,68 @@ CONTAINS
 
   END SUBROUTINE Equals_Scalar1D
 
+  SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
+    IMPLICIT NONE
+    CLASS(Scalar1D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: group
+    INTEGER(HID_T), INTENT(in) :: fileId
+    INTEGER, INTENT(in) :: elemoffset
+    INTEGER, INTENT(in) :: nglobalelem
+    ! Local
+    INTEGER(HID_T) :: offset(1:3)
+    INTEGER(HID_T) :: bOffset(1:3)
+    INTEGER(HID_T) :: globalDims(1:3)
+    INTEGER(HID_T) :: bGlobalDims(1:3)
+    INTEGER :: ivar
+
+      offset(1:3) = (/0,0,elemoffset/)
+      globalDims(1:3) = (/this % interp % N + 1, &
+                          this % nVar, &
+                          nGlobalElem/)
+
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:3) = (/0,0,elemoffset/)
+      bGlobalDims(1:3) = (/this % nVar, &
+                           2, &
+                           nGlobalElem/)
+  
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
+
+
+  END SUBROUTINE WriteHDF5_MPI_Scalar1D
+
+  SUBROUTINE WriteHDF5_Scalar1D(this,fileId,group)
+    IMPLICIT NONE
+    CLASS(Scalar1D), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+    CHARACTER(*), INTENT(in) :: group
+    ! Local
+    INTEGER :: ivar
+
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
+
+  END SUBROUTINE WriteHDF5_Scalar1D
+
 ! -- Scalar2D -- !
 
   SUBROUTINE Init_Scalar2D(SELFStorage,interp,nVar,nElem)
@@ -735,6 +831,70 @@ CONTAINS
     SELFOut % boundary % hostData = SELFin % boundary % hostData
 
   END SUBROUTINE Equals_Scalar2D
+
+  SUBROUTINE WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
+    IMPLICIT NONE
+    CLASS(Scalar2D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: group
+    INTEGER(HID_T), INTENT(in) :: fileId
+    INTEGER, INTENT(in) :: elemoffset
+    INTEGER, INTENT(in) :: nglobalelem
+    ! Local
+    INTEGER(HID_T) :: offset(1:4)
+    INTEGER(HID_T) :: bOffset(1:4)
+    INTEGER(HID_T) :: globalDims(1:4)
+    INTEGER(HID_T) :: bGlobalDims(1:4)
+    INTEGER :: ivar
+
+      offset(1:4) = (/0,0,0,elemoffset/)
+      globalDims(1:4) = (/this % interp % N + 1, &
+                          this % interp % N + 1, &
+                          this % nVar, &
+                          nglobalelem/)
+
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:4) = (/0,0,0,elemoffset/)
+      bGlobalDims(1:4) = (/this % interp % N + 1, &
+                           this % nVar, &
+                           4, &
+                           nglobalelem/)
+  
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
+
+
+  END SUBROUTINE WriteHDF5_MPI_Scalar2D
+
+  SUBROUTINE WriteHDF5_Scalar2D(this,fileId,group)
+    IMPLICIT NONE
+    CLASS(Scalar2D), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+    CHARACTER(*), INTENT(in) :: group   
+    ! Local
+    INTEGER :: ivar
+
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
+
+  END SUBROUTINE WriteHDF5_Scalar2D
 
 ! -- Scalar3D -- !
 
@@ -1186,6 +1346,72 @@ CONTAINS
 
   END FUNCTION AbsMaxBoundary_Vector2D
 
+  SUBROUTINE WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
+    IMPLICIT NONE
+    CLASS(Vector2D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: group
+    INTEGER(HID_T), INTENT(in) :: fileId
+    INTEGER, INTENT(in) :: elemoffset
+    INTEGER, INTENT(in) :: nglobalelem
+    ! Local
+    INTEGER(HID_T) :: offset(1:5)
+    INTEGER(HID_T) :: bOffset(1:5)
+    INTEGER(HID_T) :: globalDims(1:5)
+    INTEGER(HID_T) :: bGlobalDims(1:5)
+    INTEGER :: ivar
+
+      offset(1:5) = (/0,0,0,0,elemoffset/)
+      globalDims(1:5) = (/2, &
+                          this % interp % N + 1, &
+                          this % interp % N + 1, &
+                          this % nVar, &
+                          nglobalelem/)
+
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:5) = (/0,0,0,0,elemoffset/)
+      bGlobalDims(1:5) = (/2, &
+                           this % interp % N + 1, &
+                           this % nVar, &
+                           4, &
+                           nglobalelem/)
+  
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
+
+
+  END SUBROUTINE WriteHDF5_MPI_Vector2D
+
+  SUBROUTINE WriteHDF5_Vector2D(this,fileId,group)
+    IMPLICIT NONE
+    CLASS(Vector2D), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+    CHARACTER(*), INTENT(in) :: group
+    ! Local
+    INTEGER :: ivar
+
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
+
+  END SUBROUTINE WriteHDF5_Vector2D
+
 ! -- Vector3D -- !
 
   SUBROUTINE Init_Vector3D(SELFStorage,interp,nVar,nElem)
@@ -1426,6 +1652,126 @@ CONTAINS
     SELFOut % boundary % hostData = SELFin % boundary % hostData
 
   END SUBROUTINE Equals_Vector3D
+
+! -- P2Vector2D -- !
+
+  SUBROUTINE Init_P2Vector2D(SELFStorage,interp,nVar,nElem)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(out) :: SELFStorage
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
+    INTEGER,INTENT(in) :: nVar
+    INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
+
+    SELFStorage % interp => interp
+    SELFStorage % nVar = nVar
+    SELFStorage % nElem = nElem
+    N = interp % N
+
+
+    CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
+                                        upBound=(/2,N,N,N,nVar,nElem/))
+
+    CALL SELFStorage % physical % Alloc(loBound=(/1,1,0,0,0,1,1/), &
+                                        upBound=(/2,2,N,N,N,nVar,nElem/))
+
+    CALL SELFStorage % boundary % Alloc(loBound=(/1,0,1,1,1/), &
+                                        upBound=(/2,N,nVar,4,nElem/))
+
+    CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
+                                        upBound=(/N,nVar,4,nElem/))
+
+    CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
+                                           upBound=(/2,N,nVar,4,nElem/))
+
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:2*nVar) )
+
+  END SUBROUTINE Init_P2Vector2D
+
+  SUBROUTINE Free_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+
+    SELFStorage % interp => NULL()
+    SELFStorage % nVar = 0
+    SELFStorage % nElem = 0
+    CALL SELFStorage % interior % Free()
+    CALL SELFStorage % physical % Free()
+    CALL SELFStorage % boundary % Free()
+    CALL SELFStorage % boundaryNormal % Free()
+    CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
+
+  END SUBROUTINE Free_P2Vector2D
+
+  SUBROUTINE UpdateHost_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+
+    CALL SELFStorage % interior % UpdateHost()
+    CALL SELFStorage % physical % UpdateHost()
+    CALL SELFStorage % boundary % UpdateHost()
+    CALL SELFStorage % boundaryNormal % UpdateHost()
+    CALL SELFStorage % extBoundary % UpdateHost()
+
+  END SUBROUTINE UpdateHost_P2Vector2D
+
+  SUBROUTINE UpdateDevice_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+
+    CALL SELFStorage % interior % UpdateDevice()
+    CALL SELFStorage % physical % UpdateDevice()
+    CALL SELFStorage % boundary % UpdateDevice()
+    CALL SELFStorage % boundaryNormal % UpdateDevice()
+    CALL SELFStorage % extBoundary % UpdateDevice()
+
+  END SUBROUTINE UpdateDevice_P2Vector2D
+
+  SUBROUTINE Divergence_P2Vector2D(SELFStorage,SELFOut,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(in) :: SELFStorage
+    TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    INTEGER,INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
+                                                          SELFStorage % boundaryNormal % deviceData, &
+                                                          SELFout % interior % deviceData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % hostData, &
+                                                          SELFStorage % boundaryNormal % hostData, &
+                                                          SELFout % interior % hostData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % deviceData, &
+                                                        SELFout % interior % deviceData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % hostData, &
+                                                        SELFout % interior % hostData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      END IF
+
+    END IF
+
+  END SUBROUTINE Divergence_P2Vector2D
 
 ! -- Tensor2D -- !
 

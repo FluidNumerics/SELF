@@ -1,370 +1,421 @@
+! MIT License
+!
+! Copyright (c) 2010-present David A. Kopriva and other contributors: AUTHORS.md
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+!
+! HOHQMesh contains code that, to the best of our knowledge, has been released as
+! public domain software:
+! * `b3hs_hash_key_jenkins`: originally by Rich Townsend,
+!    https://groups.google.com/forum/#!topic/comp.lang.fortran/RWoHZFt39ng, 2005
+! * `fmin`: originally by George Elmer Forsythe, Michael A. Malcolm, Cleve B. Moler,
+!    Computer Methods for Mathematical Computations, 1977
+! * `spline`: originally by George Elmer Forsythe, Michael A. Malcolm, Cleve B. Moler,
+!    Computer Methods for Mathematical Computations, 1977
+! * `seval`: originally by George Elmer Forsythe, Michael A. Malcolm, Cleve B. Moler,
+!    Computer Methods for Mathematical Computations, 1977
+!
+! --- End License
+!
+!////////////////////////////////////////////////////////////////////////
+!
+!      CommandLineReader.f90
+!      Created: September 13, 2012 11:12 AM
+!      By: David Kopriva
+!
+!      A module for reading command line arguments
+!
+!      Usage
+!         Command line arguments are one of two forms, with no
+!         value or with a value, as used in the following example:
+!
+!         a.out -version -inputFileName f.txt
+!
+!         For arguments with or without a value, test for presence with
+!
+!            LOGICAL present
+!            present = CommandLineArgumentIsPresent("-version")
+!
+!         Any shortened form of the argument can also be used:
+!
+!            present = CommandLineArgumentIsPresent("-v")
+!
+!         To get arguments with a value, use
+!
+!            i = IntegerValueForArgument("-np")
+!            r = RealValueForArgument("-np")
+!            d = DoubleValueForArgument("-np")
+!            l = LogicalValueForArgument("-np")
+!
+!          depending on the TYPE of the argument. If there is no such value
+!          HUGE(TYPE) is returned, or .false. for a logical.
+!
+!         Alternatively, test for presence of the argument and
+!         immediately get its value. Only one value can be retrieved
+!         for each call to CommandLineArgumentIsPresent.
+!
+!            IF ( CommandLineArgumentIsPresent("-np") )     THEN
+!               PRINT *, "np = ", IntegerValueForLastArgument()
+!            END IF
+!
+!         The available functions are:
+!
+!            IntegerValueForLastArgument()
+!            RealValueForLastArgument()
+!            DoubleValueForLastArgument()
+!            LogicalValueForLastArgument()
+!            StringValueForLastArgument()
+!
+!////////////////////////////////////////////////////////////////////////
+!
 MODULE SELF_CLI
-!
-! Copyright 2021-2022 Fluid Numerics LLC
-!
-! ============================================================
-!
-!! Loads options for a self model from a json file
-!! and creates a FLAP command line interface object.
-!!
-!! The provided json file must meet the following schema :
-!!
-!!   {
-!!     "self_model": {
-!!       "name": "",
-!!       "version": "",
-!!       "description":"",
-!!       "license": "",
-!!       "authors": "",
-!!       "options": [
-!!          {
-!!           "type": "real | integer | string | logical",
-!!           "value": "",
-!!           "cli_long": "--this",
-!!           "cli_short": "-t",
-!!           "description": "",
-!!   	    "action": "",
-!!   	    "required": false | true,
-!!           "choices": ""
-!!          }
-!!       ]
-!!     }
-!!   }
-!!
-!!
-
-  USE SELF_Constants
-  ! External Modules
-  USE json_module
-  USE FLAP
-  USE ISO_FORTRAN_ENV
-
-  TYPE,PUBLIC :: CLI
-    TYPE(JSON_FILE) :: json
-    TYPE(COMMAND_LINE_INTERFACE) :: cliObj
-    CHARACTER(SELF_FILE_DEFAULT_LENGTH) :: config
-
-    CONTAINS
-
-      PROCEDURE, PUBLIC :: Init => Init_CLI
-      PROCEDURE, PUBLIC :: Free => Free_CLI
-      PROCEDURE, PRIVATE :: SetOptions_CLI
-      PROCEDURE, PUBLIC :: LoadFromCLI
-
-      GENERIC, PUBLIC :: Get_CLI => Get_CLI_int32, &
-                                    Get_CLI_int64, &
-                                    Get_CLI_real32, &
-                                    Get_CLI_real64, &
-                                    Get_CLI_logical, &
-                                    Get_CLI_char
-
-      PROCEDURE, PRIVATE :: Get_CLI_int32
-      PROCEDURE, PRIVATE :: Get_CLI_int64
-      PROCEDURE, PRIVATE :: Get_CLI_real32
-      PROCEDURE, PRIVATE :: Get_CLI_real64
-      PROCEDURE, PRIVATE :: Get_CLI_logical
-      PROCEDURE, PRIVATE :: Get_CLI_char
-
-  END TYPE CLI 
-
-  INTEGER, PARAMETER :: SELF_JSON_DEFAULT_KEY_LENGTH = 200
-  INTEGER, PARAMETER :: SELF_JSON_DEFAULT_VALUE_LENGTH = 200
-
-  CONTAINS
-
-  SUBROUTINE Init_CLI( this, configFile )
-    !! Initialize an instance of the CLI class using a provided configuration file
-    !! An example configuration file can be found in `self/etc/config_example.json`
-    !! The initialization procedure initilizes a json_file class (from json-fortran)
-    !! and a COMMAND_LINE_INTERFACE class (from FLAP). Further, the CLI options are
-    !! set according to the self_model.options field in the  configuration file.
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(out) :: this
-    CHARACTER(*), INTENT(in) :: configFile
-    !
-    CHARACTER(LEN=:),ALLOCATABLE :: progname
-    CHARACTER(LEN=:),ALLOCATABLE :: version
-    CHARACTER(LEN=:),ALLOCATABLE :: description
-    CHARACTER(LEN=:),ALLOCATABLE :: license
-    CHARACTER(LEN=:),ALLOCATABLE :: authors
-    LOGICAL :: found
-
-      this % config = configFile
-
-      CALL this % json % initialize(stop_on_error = .true., &
-                                    comment_char = '#')
-
-      CALL this % json % load_file(filename = TRIM(this % config))
-
-!      CALL this % json % print_file()
-
-      CALL this % json % get('self_model.name',progname,found)
-      CALL this % json % get('self_model.version',version,found)
-      CALL this % json % get('self_model.description',description,found)
-      CALL this % json % get('self_model.license',license,found)
-      CALL this % json % get('self_model.authors',authors,found)
-
-      CALL this % cliObj % init(progname=TRIM(progname),&
-                             version=TRIM(version),&
-                             description=TRIM(description),&
-                             license=TRIM(license),&
-                             authors=TRIM(authors))
-
-      CALL this % SetOptions_CLI()
-
-      IF( ALLOCATED(progname) ) DEALLOCATE(progname)
-      IF( ALLOCATED(version) ) DEALLOCATE(version)
-      IF( ALLOCATED(description) ) DEALLOCATE(description)
-      IF( ALLOCATED(license) ) DEALLOCATE(license)
-      IF( ALLOCATED(authors) ) DEALLOCATE(authors)
-       
-  END SUBROUTINE Init_CLI
-
-  SUBROUTINE Free_CLI( this )
-    !! Frees the attributes of the CLI class and reset the config attribute
-    !! to an empty string
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-
-      CALL this % json % destroy()
-      this % config = ""
-
-  END SUBROUTINE Free_CLI
-
-  SUBROUTINE SetOptions_CLI( this )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    ! Local
-    INTEGER :: nopts
-    INTEGER :: i
-    CHARACTER(4) :: arrayCount
-    CHARACTER(SELF_JSON_DEFAULT_KEY_LENGTH) :: jsonKey
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjLong
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjShort
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjDescription
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjDefault
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjType
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjAction
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjChoices
-    LOGICAL :: cliObjRequired
-    LOGICAL :: found
-
-      CALL this % json % info('self_model.options',n_children=nopts)
-
-      DO i = 1, nopts
-        WRITE(arrayCount,"(I4)") i
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].cli_long" 
-        CALL this % json % get( TRIM(jsonKey), cliObjLong, found )
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].cli_short" 
-        CALL this % json % get( TRIM(jsonKey), cliObjShort, found )
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].description" 
-        CALL this % json % get( TRIM(jsonKey), cliObjDescription, found )
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].value" 
-        CALL this % json % get( TRIM(jsonKey), cliObjDefault, found )
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].action" 
-        CALL this % json % get( TRIM(jsonKey), cliObjAction, found )
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].choices" 
-        CALL this % json % get( TRIM(jsonKey), cliObjChoices, found )
-
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].required" 
-        CALL this % json % get( TRIM(jsonKey), cliObjRequired, found )
-
-        IF( TRIM(cliObjAction) == "" )THEN
-
-          IF( TRIM(cliObjChoices) == "" )THEN
-
-            CALL this % cliObj % add( switch = TRIM(cliObjLong), &
-                                   switch_ab = TRIM(cliObjShort), &
-                                   help = TRIM(cliObjDescription)//NEW_LINE("A"), &
-                                   def = TRIM(cliObjDefault), &
-                                   required = cliObjRequired )
-
-          ELSE
-
-            CALL this % cliObj % add( switch = TRIM(cliObjLong), &
-                                   switch_ab = TRIM(cliObjShort), &
-                                   help = TRIM(cliObjDescription)//NEW_LINE("A"), &
-                                   def = TRIM(cliObjDefault), &
-                                   choices = TRIM(cliObjChoices), &
-                                   required = cliObjRequired )
-
-          ENDIF
-
-        ELSE
-
-          CALL this % cliObj % add( switch = TRIM(cliObjLong), &
-                                 help = TRIM(cliObjDescription)//NEW_LINE("A"), &
-                                 act = TRIM(cliObjAction), &
-                                 def = TRIM(cliObjDefault), &
-                                 required = cliObjRequired )
-
-        ENDIF
-
-        IF( ALLOCATED(cliObjLong) ) DEALLOCATE(cliObjLong)
-        IF( ALLOCATED(cliObjShort) ) DEALLOCATE(cliObjShort)
-        IF( ALLOCATED(cliObjDescription) ) DEALLOCATE(cliObjDescription)
-        IF( ALLOCATED(cliObjDefault) ) DEALLOCATE(cliObjDefault)
-        IF( ALLOCATED(cliObjType) ) DEALLOCATE(cliObjType)
-        IF( ALLOCATED(cliObjAction) ) DEALLOCATE(cliObjAction)
-        IF( ALLOCATED(cliObjChoices) ) DEALLOCATE(cliObjChoices)
-
-      ENDDO
-
-  END SUBROUTINE SetOptions_CLI
-
-  SUBROUTINE LoadFromCLI( this )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    ! Local
-    INTEGER :: nopts
-    INTEGER :: i
-    CHARACTER(4) :: arrayCount
-    CHARACTER(SELF_JSON_DEFAULT_KEY_LENGTH) :: jsonKey
-    CHARACTER(SELF_JSON_DEFAULT_VALUE_LENGTH) :: tmpVal
-    CHARACTER(LEN=:),ALLOCATABLE :: cliObjLong
-    LOGICAL :: found
-
-      CALL this % json % info('self_model.options',n_children=nopts)
-
-      DO i = 1, nopts
-      
-        ! Get the cli_long option
-        WRITE(arrayCount,"(I4)") i
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].cli_long" 
-        CALL this % json % get( TRIM(jsonKey), cliObjLong, found )
-
-        CALL this % cliObj % get(val=tmpVal,switch=TRIM(cliObjLong))
-
-        ! Set the value for the option in the json object
-        jsonKey = "self_model.options["//&
-                  TRIM(arrayCount)//&
-                  "].value" 
-
-        CALL this % json % update( TRIM(jsonKey), tmpVal, found )
-
-        IF( ALLOCATED(cliObjLong) ) DEALLOCATE(cliObjLong)
-
-      ENDDO
-
-  END SUBROUTINE LoadFromCLI
-
-  SUBROUTINE Get_CLI_int32( this, option, res )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: option
-    INTEGER(int32), INTENT(out) :: res 
-    ! Local
-    INTEGER :: error
-
-      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
-      IF( error /= 0 )THEN
-        PRINT*, "Configuration key not found : "//TRIM(option)
-        STOP 1
-      ENDIF
-
-  END SUBROUTINE Get_CLI_int32
-
-  SUBROUTINE Get_CLI_int64( this, option, res )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: option
-    INTEGER(int64), INTENT(out) :: res 
-    ! Local
-    INTEGER :: error
-
-      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
-      IF( error /= 0 )THEN
-        PRINT*, "Configuration key not found : "//TRIM(option)
-        STOP 1
-      ENDIF
-
-  END SUBROUTINE Get_CLI_int64
-
-  SUBROUTINE Get_CLI_real32( this, option, res )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: option
-    REAL(real32), INTENT(out) :: res 
-    ! Local
-    INTEGER :: error
-
-      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
-      IF( error /= 0 )THEN
-        PRINT*, "Configuration key not found : "//TRIM(option)
-        STOP 1
-      ENDIF
-
-  END SUBROUTINE Get_CLI_real32
-
-  SUBROUTINE Get_CLI_real64( this, option, res )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: option
-    REAL(real64), INTENT(out) :: res 
-    ! Local
-    INTEGER :: error
-
-      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
-      IF( error /= 0 )THEN
-        PRINT*, "Configuration key not found : "//TRIM(option)
-        STOP 1
-      ENDIF
-
-  END SUBROUTINE Get_CLI_real64
-
-  SUBROUTINE Get_CLI_logical( this, option, res )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: option
-    LOGICAL, INTENT(out) :: res 
-    ! Local
-    INTEGER :: error
-
-      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
-      IF( error /= 0 )THEN
-        PRINT*, "Configuration key not found : "//TRIM(option)
-        STOP 1
-      ENDIF
-
-  END SUBROUTINE Get_CLI_logical
-
-  SUBROUTINE Get_CLI_char( this, option, res )
-    IMPLICIT NONE
-    CLASS(CLI), INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: option
-    CHARACTER(*), INTENT(out) :: res 
-    ! Local
-    INTEGER :: error
-
-      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
-      IF( error /= 0 )THEN
-        PRINT*, "Configuration key not found : "//TRIM(option)
-        STOP 1
-      ENDIF
-
-  END SUBROUTINE Get_CLI_char
 
-
+   !Module CommandLineReader
+   IMPLICIT NONE
+
+   INTEGER, PARAMETER :: COMMAND_LINE_ARGUMENT_LENGTH = 128
+   INTEGER, PRIVATE   :: lastArgumentID
+
+   PUBLIC  :: CommandLineArgumentIsPresent, IntegerValueForArgument, &
+      RealValueForArgument, DoubleValueForArgument,          &
+      LogicalValueForArgument, IntegerValueForLastArgument,  &
+      RealValueForLastArgument, DoubleValueForLastArgument,  &
+      LogicalValueForLastArgument
+
+   PRIVATE :: IntegerFromString, RealFromString, LogicalFromString, &
+      DoubleFromString
+   !
+   !     ========
+CONTAINS
+   !     ========
+   !
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   LOGICAL FUNCTION CommandLineArgumentIsPresent(argument)
+      IMPLICIT NONE
+      !
+      !       ---------
+      !       Arguments
+      !       ---------
+      !
+      CHARACTER(LEN=*) :: argument
+      !
+      !       ---------------
+      !       Local Variables
+      !       ---------------
+      !
+      INTEGER                                     :: i
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: arg
+      INTEGER                                     :: argumentLength, substringLength
+      !
+      lastArgumentID               = 0
+      CommandLineArgumentIsPresent = .false.
+      IF(COMMAND_ARGUMENT_COUNT() == 0)   RETURN
+
+      i = 0
+      DO
+         CALL GET_COMMAND_ARGUMENT(i, arg, LENGTH = argumentLength)
+         IF (argumentLength == 0) EXIT
+
+         substringLength = MIN(argumentLength,LEN_TRIM(argument))
+         IF ( TRIM(arg) == TRIM(argument) .OR.&
+            TRIM(arg) == argument(1:substringLength) )      THEN
+            CommandLineArgumentIsPresent = .true.
+            lastArgumentID = i
+            RETURN
+         END IF
+         i = i+1
+      END DO
+
+   END FUNCTION CommandLineArgumentIsPresent
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   INTEGER FUNCTION IntegerValueForArgument(argument)
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return HUGE(Integer)
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=*)                            :: argument
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForArgument(argument)
+      IF ( stringValue == "" )     THEN
+         IntegerValueForArgument = HUGE(IntegerValueForArgument)
+      ELSE
+         IntegerValueForArgument = IntegerFromString(stringValue)
+      END IF
+
+   END FUNCTION IntegerValueForArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   REAL FUNCTION RealValueForArgument(argument)
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return HUGE(Real)
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=*)                            :: argument
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForArgument(argument)
+      IF ( stringValue == "" )     THEN
+         RealValueForArgument = HUGE(RealValueForArgument)
+      ELSE
+         RealValueForArgument = RealFromString(stringValue)
+      END IF
+
+   END FUNCTION RealValueForArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   DOUBLE PRECISION FUNCTION DoubleValueForArgument(argument)
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return HUGE(double precision)
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=*)                            :: argument
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForArgument(argument)
+      IF ( stringValue == "" )     THEN
+         DoubleValueForArgument = HUGE(DoubleValueForArgument)
+      ELSE
+         DoubleValueForArgument = DoubleFromString(stringValue)
+      END IF
+
+   END FUNCTION DoubleValueForArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   LOGICAL FUNCTION LogicalValueForArgument(argument)
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return .false.
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=*)                            :: argument
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForArgument(argument)
+      IF ( stringValue == "" )     THEN
+         LogicalValueForArgument = .false.
+      ELSE
+         LogicalValueForArgument = LogicalFromString(stringValue)
+      END IF
+
+   END FUNCTION LogicalValueForArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   INTEGER FUNCTION IntegerValueForLastArgument()
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return HUGE(Integer)
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForLastArgument()
+      IF ( stringValue == "" )     THEN
+         IntegerValueForLastArgument = HUGE(IntegerValueForLastArgument)
+      ELSE
+         IntegerValueForLastArgument = IntegerFromString(stringValue)
+      END IF
+
+   END FUNCTION IntegerValueForLastArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   REAL FUNCTION RealValueForLastArgument()
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return HUGE(Real)
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForLastArgument()
+      IF ( stringValue == "" )     THEN
+         RealValueForLastArgument = HUGE(RealValueForLastArgument)
+      ELSE
+         RealValueForLastArgument = RealFromString(stringValue)
+      END IF
+
+   END FUNCTION RealValueForLastArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   DOUBLE PRECISION FUNCTION DoubleValueForLastArgument()
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return HUGE(double precision)
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForLastArgument()
+      IF ( stringValue == "" )     THEN
+         DoubleValueForLastArgument = HUGE(DoubleValueForLastArgument)
+      ELSE
+         DoubleValueForLastArgument = DoubleFromString(stringValue)
+      END IF
+
+   END FUNCTION DoubleValueForLastArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   LOGICAL FUNCTION LogicalValueForLastArgument()
+      !
+      !     -------------------------------------------------------------------------
+      !     Returns the value of the argument from the next item in the argument list
+      !     as an integer. If there is no such argument, return .false.
+      !     -------------------------------------------------------------------------
+      !
+      IMPLICIT NONE
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: stringValue
+
+      stringValue = StringValueForLastArgument()
+      IF ( stringValue == "" )     THEN
+         LogicalValueForLastArgument = .false.
+      ELSE
+         LogicalValueForLastArgument = LogicalFromString(stringValue)
+      END IF
+
+   END FUNCTION LogicalValueForLastArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) FUNCTION StringValueForArgument(argument)
+      IMPLICIT NONE
+      !
+      !       ---------
+      !       Arguments
+      !       ---------
+      !
+      CHARACTER(LEN=*) :: argument
+      !
+      !       ---------------
+      !       Local Variables
+      !       ---------------
+      !
+      INTEGER                                     :: i
+      INTEGER                                     :: argumentLength
+      CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) :: arg
+
+      StringValueForArgument = ""
+      IF(COMMAND_ARGUMENT_COUNT() == 0)   RETURN
+      !
+      lastArgumentID = 0
+      i              = 0
+      DO
+         CALL GET_COMMAND_ARGUMENT(i, arg, argumentLength)
+         IF (argumentLength== 0) EXIT
+
+         IF ( TRIM(arg) == TRIM(argument) )      THEN
+            CALL GET_COMMAND_ARGUMENT(i+1, StringValueForArgument)
+            RETURN
+         END IF
+         i = i+1
+      END DO
+
+   END FUNCTION StringValueForArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   CHARACTER(LEN=COMMAND_LINE_ARGUMENT_LENGTH) FUNCTION StringValueForLastArgument()
+      IMPLICIT NONE
+      !
+      !       ---------------
+      !       Local Variables
+      !       ---------------
+      !
+      StringValueForLastArgument = ""
+      IF(COMMAND_ARGUMENT_COUNT() == 0)   RETURN
+      !
+      !       ----------------------------------------------------------------
+      !       If the IsPresent function has been called and found the argument
+      !       then we don't need to search.
+      !       ----------------------------------------------------------------
+      !
+      IF ( lastArgumentID /= 0 )     THEN
+         CALL GET_COMMAND_ARGUMENT(lastArgumentID + 1, StringValueForLastArgument)
+         lastArgumentID = 0
+         RETURN
+      END IF
+
+   END FUNCTION StringValueForLastArgument
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   FUNCTION IntegerFromString(s) RESULT(i)
+      IMPLICIT NONE
+      CHARACTER(LEN=*) :: s
+      INTEGER          :: i
+      READ(s,*) i
+   END FUNCTION IntegerFromString
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   FUNCTION DoubleFromString(s) RESULT(d)
+      IMPLICIT NONE
+      CHARACTER(LEN=*)                  :: s
+      REAL(KIND=SELECTED_REAL_KIND(15)) :: d
+      READ(s,*) d
+   END FUNCTION DoubleFromString
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   FUNCTION RealFromString(s) RESULT(r)
+      IMPLICIT NONE
+      CHARACTER(LEN=*)                 :: s
+      REAL(KIND=SELECTED_REAL_KIND(6)) :: r
+      READ(s,*) r
+   END FUNCTION RealFromString
+   !
+   !////////////////////////////////////////////////////////////////////////
+   !
+   FUNCTION LogicalFromString(s) RESULT(l)
+      IMPLICIT NONE
+      CHARACTER(LEN=*) :: s
+      LOGICAL          :: l
+      READ(s,*) l
+   END FUNCTION LogicalFromString
+
+   !END Module CommandLineReader
 END MODULE SELF_CLI
+

@@ -1,0 +1,17 @@
+
+steps:
+- id: Build Codecov Builder
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '.',
+         '-f',
+         'ci/codecov/Dockerfile',
+         '-t',
+         'us-central1-docker.pkg.dev/${PROJECT_ID}/codecov/codecov:latest']
+  waitFor: ["-"]
+
+images:
+- 'us-central1-docker.pkg.dev/${PROJECT_ID}/codecov/codecov:latest'
+
+
+timeout: 600s

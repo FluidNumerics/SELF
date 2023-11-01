@@ -13,6 +13,8 @@ MODULE SELF_MappedData
   USE SELF_Data
   USE SELF_Mesh
   USE SELF_Geometry
+  USE SELF_HDF5
+  USE HDF5
 
   USE FEQParse
 
@@ -26,6 +28,7 @@ MODULE SELF_MappedData
 
   CONTAINS
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar1D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar1D
     GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
     PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar1D
@@ -100,6 +103,7 @@ MODULE SELF_MappedData
 
     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
+
   END TYPE MappedVector2D
 
   TYPE,EXTENDS(Vector3D),PUBLIC :: MappedVector3D
@@ -126,6 +130,23 @@ MODULE SELF_MappedData
     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector3D
 
   END TYPE MappedVector3D
+
+  TYPE,EXTENDS(P2Vector2D),PUBLIC :: MappedP2Vector2D
+
+  CONTAINS
+
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedP2Vector2D
+
+    GENERIC,PUBLIC :: Divergence => Divergence_MappedP2Vector2D
+
+    PROCEDURE,PRIVATE :: Divergence_MappedP2Vector2D
+    PROCEDURE,PUBLIC :: ContravariantProjection => ContravariantProjection_MappedP2Vector2D
+    !PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedP2Vector2D
+
+    PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedP2Vector2D
+    PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedP2Vector2D
+
+  END TYPE MappedP2Vector2D
 
   TYPE,EXTENDS(Tensor2D),PUBLIC :: MappedTensor2D
 
@@ -258,6 +279,16 @@ MODULE SELF_MappedData
       TYPE(c_ptr) :: vector,dsdx
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantProjection_MappedP2Vector2D_gpu_wrapper(vector,physical,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantProjection_MappedP2Vector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: vector,physical,dsdx
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantProjection_MappedP2Vector2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -714,6 +745,33 @@ CONTAINS
 
   END SUBROUTINE SideExchange_MappedScalar1D
 
+  SUBROUTINE BassiRebaySides_MappedScalar1D(scalar,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(inout) :: scalar
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i
+
+      DO iel = 1,scalar % nElem
+          DO ivar = 1,scalar % nVar
+
+              ! Left side - we account for the -\hat{x} normal
+              scalar % avgBoundary % hostData(ivar,1,iel) = -0.5_prec*( &
+                                                               scalar % boundary % hostData(ivar,1,iel) + &
+                                                               scalar % extBoundary % hostData(ivar,1,iel))
+
+              ! Right side - we account for the +\hat{x} normal
+              scalar % avgBoundary % hostData(ivar,2,iel) = 0.5_prec*( &
+                                                               scalar % boundary % hostData(ivar,2,iel) + &
+                                                               scalar % extBoundary % hostData(ivar,2,iel))
+          END DO
+      END DO
+
+  END SUBROUTINE BassiRebaySides_MappedScalar1D
+
   SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,dForm,gpuAccel)
     ! Strong Form Operator
     !
@@ -746,6 +804,22 @@ CONTAINS
                                                scalar % nElem)
       END IF
 
+    ELSEIF (dForm == selfWeakBRForm) THEN
+
+        IF (gpuAccel) THEN
+          CALL scalar % interp % DGDerivative_1D(scalar % interior % deviceData, &
+                                                 scalar % avgBoundary % deviceData, &
+                                                 df % interior % deviceData, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
+        ELSE
+          CALL scalar % interp % DGDerivative_1D(scalar % interior % hostData, &
+                                                 scalar % avgBoundary % hostData, &
+                                                 df % interior % hostData, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
+        END IF
+        
     ELSEIF (dForm == selfStrongForm) THEN
 
       IF (gpuAccel) THEN
@@ -1344,26 +1418,26 @@ CONTAINS
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(filename), &
-      FORM='formatted', &
-      STATUS='replace')
+      FORM="formatted", &
+      STATUS="replace")
 
     tecHeader = 'VARIABLES = "X", "Y"'
     DO iVar = 1, this % nVar
-      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % meta(iVar) % name)//'"'
+      tecHeader = TRIM(tecHeader)//'", "//TRIM(this % meta(iVar) % name)//"'
     ENDDO
 
     WRITE(fUnit,*) TRIM(tecHeader) 
 
     ! Create format statement
     WRITE(fmat,*) this % nvar+2
-    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+    fmat = "("//TRIM(fmat)//"(ES16.7E3,1x))"
 
     DO iEl = 1, this % nElem
 
       eid = decomp % offSetElem % hostData( decomp % rankId ) + iEl
-      WRITE(zoneID,'(I8.8)') eid 
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % interp % M+1,&
-                                                 ', J=',this % interp % M+1
+      WRITE(zoneID,"(I8.8)") eid 
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I="',this % interp % M+1,&
+                                                 '", J="',this % interp % M+1
 
       DO j = 0, this % interp % M
         DO i = 0, this % interp % M
@@ -4041,6 +4115,350 @@ CONTAINS
     END IF
 
   END SUBROUTINE ApplyFlip_MappedVector3D
+
+  ! ---------------------- Two point Vectors ---------------------- !
+
+  SUBROUTINE SideExchange_MappedP2Vector2D(vector,mesh,decomp,gpuAccel)
+  !! SideExchange_MappedP2Vectorvector2D is used to populate vector % extBoundary
+  !! by finding neighboring elements that share a side and copying the neighboring
+  !! elements solution % boundary data.
+    IMPLICIT NONE
+    CLASS(MappedP2Vector2D),INTENT(inout) :: vector
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(inout) :: decomp
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
+    INTEGER :: neighborRank
+    INTEGER :: i1,i2,ivar
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
+
+    IF (gpuAccel) THEN
+
+      CALL vector % boundary % UpdateHost()
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL vector % extBoundary % UpdateDevice()
+
+      CALL SideExchange_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
+                                                   vector % boundary % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   offset, &
+                                                   vector % interp % N, &
+                                                   vector % nvar, &
+                                                   vector % nElem)
+
+    ELSE
+
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+
+      DO e1 = 1,mesh % nElem
+        DO s1 = 1,4
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
+
+          IF (bcid == 0) THEN
+
+            neighborRank = decomp % elemToRank % hostData(e2Global)
+
+            IF (neighborRank == decomp % rankId) THEN
+
+              IF (flip == 0) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO i1 = 0,vector % interp % N
+                    vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:2,i1,ivar,s2,e2)
+                  END DO
+                END DO
+
+              ELSEIF (flip == 1) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO i1 = 0,vector % interp % N
+                    i2 = vector % interp % N - i1
+                    vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:2,i2,ivar,s2,e2)
+                  END DO
+                END DO
+
+              END IF
+
+            END IF
+
+          END IF
+
+        END DO
+      END DO
+
+      CALL decomp % FinalizeMPIExchangeAsync()
+
+    END IF
+
+    CALL vector % ApplyFlip(decomp,mesh,gpuAccel)
+
+  END SUBROUTINE SideExchange_MappedP2Vector2D
+
+  SUBROUTINE Divergence_MappedP2Vector2D(compVector,geometry,divVector,dForm,gpuAccel)
+    ! Strong Form Operator
+    !
+    ! DG Weak Form Operator
+    !
+    ! Assumes vector has been projected to computational coordinates
+    !
+    IMPLICIT NONE
+    CLASS(MappedP2Vector2D),INTENT(in) :: compVector
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    TYPE(MappedScalar2D),INTENT(inout) :: divVector
+    INTEGER,INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % P2VectorDGDivergence_2D(compVector % interior % deviceData, &
+                                                         compVector % boundaryNormal % deviceData, &
+                                                         divVector % interior % deviceData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ELSE
+        CALL compVector % interp % P2VectorDGDivergence_2D(compVector % interior % hostData, &
+                                                         compVector % boundaryNormal % hostData, &
+                                                         divVector % interior % hostData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % P2VectorDivergence_2D(compVector % interior % deviceData, &
+                                                       divVector % interior % deviceData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ELSE
+        CALL compVector % interp % P2VectorDivergence_2D(compVector % interior % hostData, &
+                                                       divVector % interior % hostData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      END IF
+
+    END IF
+
+    CALL divVector % JacobianWeight(geometry,gpuAccel)
+
+  END SUBROUTINE Divergence_MappedP2Vector2D
+
+  SUBROUTINE ContravariantProjection_MappedP2Vector2D(vector,geometry,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "ContravariantProjection_MappedP2Vector2D"
+    ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
+    ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
+    ! vectors are really the Jacobian weighted contravariant basis vectors
+    IMPLICIT NONE
+    CLASS(MappedP2Vector2D),INTENT(inout) :: vector
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: i,j,n,ivar,iel
+    REAL(prec) :: Fx, Fy
+
+    IF (gpuAccel) THEN
+
+      CALL ContravariantProjection_MappedP2Vector2D_gpu_wrapper(vector % interior % deviceData, &
+                                                              vector % physical % deviceData, &
+                                                              geometry % dsdx % interior % deviceData, &
+                                                              vector % interp % N, &
+                                                              vector % nVar, &
+                                                              vector % nElem)
+
+    ELSE
+      ! Assume that tensor(j,i) is vector i, component j
+      ! => dot product is done along first dimension
+      ! to project onto computational space
+      DO iel = 1,vector % nElem
+        DO ivar = 1,vector % nVar
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
+
+              ! From Winters et al. 2020, Kopriva and Gassner 2014, and Kopriva et al. 2019,  we use two point averaging of the
+              ! metric terms for dealiasing
+              ! > See pages 60-62 of "Construction of Modern Robust Nodal Discontinuous Galerkin Spectral Element Methods for 
+              !   the Compressible Navier-Stokes Equations", Winters et al. 2020
+              DO n = 0, vector % interp % N
+
+                ! I think we need another attribute here, where
+                ! two point values are stored for each Fx, Fy
+                ! for each computational dimension
+                ! Fx_{(i,n),j}, Fx_{i,(j,n)}
+                ! Fy_{(i,n),j}, Fy_{i,(j,n)}
+
+                ! Fx_{(i,n),j}
+                Fx = vector % physical % hostData(1,1,n,i,j,ivar,iel)
+                ! Fy_{(i,n),j}
+                Fy = vector % physical % hostData(2,1,n,i,j,ivar,iel)
+
+                vector % interior % hostData(1,n,i,j,ivar,iel) = &
+                  0.5_prec*( geometry % dsdx % interior % hostData(1,1,i,j,1,iel) + &
+                             geometry % dsdx % interior % hostData(1,1,n,j,1,iel) )*Fx + &
+                  0.5_prec*( geometry % dsdx % interior % hostData(2,1,i,j,1,iel) + &
+                             geometry % dsdx % interior % hostData(2,1,n,j,1,iel) )*Fy
+
+                ! Fx_{i,(j,n)}
+                Fx = vector % physical % hostData(1,2,n,i,j,ivar,iel)
+                ! Fy_{i,(j,n)}
+                Fy = vector % physical % hostData(2,2,n,i,j,ivar,iel)
+                vector % interior % hostData(2,n,i,j,ivar,iel) = &
+                  0.5_prec*( geometry % dsdx % interior % hostData(1,2,i,j,1,iel) + &
+                             geometry % dsdx % interior % hostData(1,2,i,n,1,iel) )*Fx + &
+                  0.5_prec*( geometry % dsdx % interior % hostData(2,2,i,j,1,iel) + &
+                             geometry % dsdx % interior % hostData(2,2,i,n,1,iel) )*Fy
+
+              ENDDO
+
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
+  END SUBROUTINE ContravariantProjection_MappedP2Vector2D
+
+  SUBROUTINE MPIExchangeAsync_MappedP2Vector2D(vector,mpiHandler,mesh,resetCount)
+    IMPLICIT NONE
+    CLASS(MappedP2Vector2D),INTENT(inout) :: vector
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
+    ! Local
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
+    INTEGER :: iError
+    INTEGER :: msgCount
+
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
+        msgCount = 0
+      ELSE
+        msgCount = mpiHandler % msgCount
+      END IF
+
+      DO e1 = 1,vector % nElem
+        DO s1 = 1,4
+
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          IF( e2 > 0 )THEN
+            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+            IF (r2 /= mpiHandler % rankId) THEN
+
+              s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+              globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
+
+              msgCount = msgCount + 1
+              CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
+                             2*(vector % interp % N + 1)*vector % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
+
+              msgCount = msgCount + 1
+              CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
+                             2*(vector % interp % N + 1)*vector % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
+
+            END IF
+          ENDIF
+
+        END DO
+      END DO
+
+      mpiHandler % msgCount = msgCount
+    END IF
+
+  END SUBROUTINE MPIExchangeAsync_MappedP2Vector2D
+
+  SUBROUTINE ApplyFlip_MappedP2Vector2D(vector,mpiHandler,mesh,gpuAccel)
+    ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MappedP2Vector2D),INTENT(inout) :: vector
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2
+    INTEGER :: r2,flip,ivar
+    INTEGER :: globalSideId
+    INTEGER :: bcid
+    REAL(prec) :: extBuff(1:2,0:vector % interp % N)
+
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
+
+        ! Since the boundary data for a p2 vector and a vector are identical,
+        ! we can reuse the applyFlip method for MappedVector here
+        CALL ApplyFlip_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
+                                                  mpiHandler % elemToRank % deviceData, &
+                                                  mpiHandler % rankId, &
+                                                  vector % interp % N, &
+                                                  vector % nVar, &
+                                                  vector % nElem)
+      ELSE
+        DO e1 = 1,vector % nElem
+          DO s1 = 1,4
+
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
+            IF (bcid == 0) THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+              IF (r2 /= mpiHandler % rankId) THEN
+
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
+
+                ! Need to update extBoundary with flip applied
+                IF (flip == 1) THEN
+
+                  DO ivar = 1,vector % nvar
+                    DO i = 0,vector % interp % N
+                      i2 = vector % interp % N - i
+                      extBuff(1:2,i) = vector % extBoundary % hostData(1:2,i2,ivar,s1,e1)
+                    END DO
+                    DO i = 0,vector % interp % N
+                      vector % extBoundary % hostData(1:2,i,ivar,s1,e1) = extBuff(1:2,i)
+                    END DO
+                  END DO
+
+                END IF
+              END IF
+            ENDIF
+
+          END DO
+        END DO
+      END IF
+    END IF
+
+  END SUBROUTINE ApplyFlip_MappedP2Vector2D
+
+  ! ---  Tensors
 
   SUBROUTINE MPIExchangeAsync_MappedTensor3D(tensor,mpiHandler,mesh,resetCount)
     IMPLICIT NONE

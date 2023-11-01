@@ -1,0 +1,89 @@
+
+steps:
+- id: Build Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
+         '--build-arg','BUILD_TYPE=Coverage',
+         '-f',
+         'docker/${_OS}/rocm-${_ROCM_VERSION}/${_HIP_PLATFORM}/Dockerfile',
+         '.',
+         '-t',
+         'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:dev']
+
+
+- id: Run CTests with coverage
+  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:dev'
+  entrypoint: '/bin/bash'
+  args: 
+  - '-c'
+  - |
+      apt-get update -y && apt-get install -y lcov
+
+      cd /self
+
+      lcov --no-external \
+          --capture \
+          --initial \
+          --directory . \
+          --exclude '*/test/*' \
+          --output-file /workspace/lcov_base.info
+
+      # Load dependency packages
+      . /etc/profile.d/z10_spack_environment.sh
+
+      # Run the tests
+      ctest --test-dir /self/test
+
+      lcov --no-external \
+           --capture \
+           --directory . \
+           --exclude '*/test/*' \
+           --output-file /workspace/lcov_ctest.info
+
+- id: Download input decks for integration tests
+  name: gcr.io/google.com/cloudsdktool/cloud-sdk
+  entrypoint: 'gsutil'
+  args: ['cp', '-r',
+         'gs://self-fluids-data/input_decks/mesh',
+         '/workspace/']
+
+- id: Run Integration Tests with coverage
+  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:dev'
+  entrypoint: '/bin/bash'
+  args: 
+  - '-c'
+  - |
+      apt-get update -y && apt-get install -y lcov
+
+      cd /self
+
+      # Load dependency packages
+      . /etc/profile.d/z10_spack_environment.sh
+
+      for example in $(find ./examples/ -mindepth 2 -type d); do
+          echo $example
+          /opt/self/bin/self -i ${example}/input.json || exit 1
+      done
+
+      # Capture coverage for integration tests
+      lcov --no-external \
+           --capture \
+           --directory . \
+           --exclude '*/test/*' \
+           --output-file /workspace/lcov_itest.info
+
+      lcov --add-tracefile /workspace/lcov_base.info \
+           --add-tracefile /workspace/lcov_ctest.info \
+           --add-tracefile /workspace/lcov_itest.info \
+           --output-file /workspace/lcov.info
+
+      rm /workspace/lcov_*.info
+
+timeout: 720s
+
+substitutions:
+  _GPU_TARGET: 'gfx90a'
+  _HIP_PLATFORM: 'amd'
+  _ROCM_VERSION: '5.7'
+  _OS: 'ubuntu2204'
