@@ -75,9 +75,8 @@ MODULE SELF_cns2d
     PROCEDURE :: PreFlux => PreFlux_cns2d
     PROCEDURE :: CalculateEntropy => CalculateEntropy_cns2d
     PROCEDURE :: SetInitialConditions => SetInitialConditions_cns2d
-
+    
     PROCEDURE :: WriteModel => Write_cns2d
-    !PROCEDURE :: WriteTecplot => WriteTecplot_cns2d
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_cns2d
@@ -92,9 +91,8 @@ MODULE SELF_cns2d
     PROCEDURE,PRIVATE :: SetDiagnosticsBoundaryCondition
 
     ! New Methods
-    PROCEDURE :: CheckMinMax => CheckMinMax_cns2d
     PROCEDURE :: SetMaxCFL => SetMaxCFL_cns2d
-  !  PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_cns2d
+    PROCEDURE :: SetWithUVrhoT
 
     ! Interior Hyperbolic Flux methods
     PROCEDURE,PRIVATE :: ConservativeFlux
@@ -160,12 +158,12 @@ MODULE SELF_cns2d
 
   ! ---------------------------------------- !
   !
-  REAL(prec),PRIVATE :: Cp_static != 1.005_PREC
-  REAL(prec),PRIVATE :: Cv_static != 0.718_PREC
-  REAL(prec),PRIVATE :: R_static != 287.0_PREC ! J/kg/K
-  REAL(prec),PRIVATE :: rho_static != 1.2754_PREC ! kg/m^3
-  REAL(prec),PRIVATE :: T_static != 273.0_PREC ! K
-  REAL(prec),PRIVATE :: e_static != 1.5_PREC*R_static*T_static ! J/kg
+  ! REAL(prec),PRIVATE :: Cp_static != 1.005_PREC
+  ! REAL(prec),PRIVATE :: Cv_static != 0.718_PREC
+  ! REAL(prec),PRIVATE :: R_static != 287.0_PREC ! J/kg/K
+  ! REAL(prec),PRIVATE :: rho_static != 1.2754_PREC ! kg/m^3
+  ! REAL(prec),PRIVATE :: T_static != 273.0_PREC ! K
+  ! REAL(prec),PRIVATE :: e_static != 1.5_PREC*R_static*T_static ! J/kg
 
   INTERFACE
     SUBROUTINE Flux_cns2d(this)
@@ -458,7 +456,7 @@ CONTAINS
     CHARACTER(LEN=self_EquationLength) :: featureType
     CHARACTER(LEN=SELF_JSON_DEFAULT_KEY_LENGTH) :: jsonKey
     CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
-    CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocity(1:2)
+    CHARACTER(LEN=self_EquationLength) :: velocity(1:2)
     INTEGER,PARAMETER :: ucs2 = SELECTED_CHAR_KIND('ISO_10646')
     CHARACTER(KIND=ucs2,len=20) :: tUSC
     CHARACTER(KIND=ucs2,len=20) :: rhoUSC
@@ -469,42 +467,22 @@ CONTAINS
     REAL(prec) :: momentumMax
     INTEGER :: i,nfeatures
     REAL(prec) :: featureParams(1:10)
+    REAL(prec) :: rho_static, T_static
 
     ! Get static parameters
     CALL config % Get("cns2d.initial_conditions.static_state",setStaticState)
-    CALL config % Get("cns2d.fluid.Cp",Cp_static)
-    CALL config % Get("cns2d.fluid.Cv",Cv_static)
-    CALL config % Get("cns2d.fluid.R",R_static)
+    CALL config % Get("cns2d.fluid.Cp",this % Cp)
+    CALL config % Get("cns2d.fluid.Cv",this % Cv)
+    CALL config % Get("cns2d.fluid.R",this % R)
     CALL config % Get("cns2d.fluid.rho",rho_static)
     CALL config % Get("cns2d.fluid.T",T_static)
-    CALL config % Get("cns2d.fluid.energy",e_static)
     CALL config % Get("cns2d.fluid.viscosity",this % viscosity)
     CALL config % Get("cns2d.fluid.diffusivity",this % diffusivity)
 
-    IF (setStaticState) THEN
-      ! INFO("Set fluid to static state")
-      ! WRITE (tUSC,"(ES16.7E3)") T_static
-      ! str = usc2_'T\u2070 = '//TRIM(tUSC)
-      ! INFO(str)
-
-      ! WRITE (rhoUSC,"(ES16.7E3)") rho_static
-      ! str = usc2_'\u03C1\u2070 = '//TRIM(rhoUSC)
-      ! INFO(str)
-
-      ! WRITE (CpUSC,"(ES16.7E3)") Cp_static
-      ! str = usc2_'C\u209A = '//TRIM(CpUSC)
-      ! INFO(str)
-
-      ! WRITE (CvUSC,"(ES16.7E3)") Cv_static
-      ! str = usc2_'C\u1D65 = '//TRIM(CvUSC)
-      ! INFO(str)
-
-      CALL this % SetStatic() ! Set field and parameters to STP
-    END IF
+    this % expansionFactor = this % Cp/this % Cv
 
     ! Get environmental parameters
     CALL config % Get("cns2d.environment.potential",gp)
-
     ! If the character is empty - default the gravitational
     ! potential to 0
     IF (TRIM(gp) == "") THEN
@@ -513,30 +491,26 @@ CONTAINS
     ! Configure environmentals
     CALL this % SetGravity(gp)
 
-    ! CALL config % Get("cns2d.initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
-    ! IF (hydrostaticAdjust) THEN
-    !   CALL config % Get("cns2d.initial_conditions.hydrostatic_momentum_max",momentumMax)
-    !   CALL this % HydrostaticAdjustment(momentumMax)
+    IF (setStaticState) THEN
+      CALL this % SetStatic(rho_static, T_static) ! Set field and parameters to STP
+    ELSE
+      ! Get additional initial conditions 
+      CALL config % Get("cns2d.initial_conditions.u",u)
+      CALL config % Get("cns2d.initial_conditions.v",v)
+      CALL config % Get("cns2d.initial_conditions.rho",rho)
+      CALL config % Get("cns2d.initial_conditions.T",T)
 
-    ! END IF
+      ! If the character is empty - default the velocity
+      ! components to zero
+      IF (TRIM(u) == "") THEN
+        u = "u = 0.0"
+      END IF
+      IF (TRIM(u) == "") THEN
+        v = "v = 0.0"
+      END IF
 
-    ! Get additional initial conditions (add to static state if provided)
-    CALL config % Get("cns2d.initial_conditions.u",u)
-    CALL config % Get("cns2d.initial_conditions.v",v)
-    CALL config % Get("cns2d.initial_conditions.rho",rho)
-    CALL config % Get("cns2d.initial_conditions.T",T)
-
-    ! If the character is empty - default the velocity
-    ! components to zero
-    IF (TRIM(u) == "") THEN
-      u = "u = 0.0"
-    END IF
-    IF (TRIM(u) == "") THEN
-      v = "v = 0.0"
-    END IF
-
-    velocity = (/u,v/)
-    CALL this % SetVelocity(velocity)
+      CALL this % SetWithUVrhoT(u,v,rho,T)
+    ENDIF
 
     ! Set the time integrator
     CALL config % Get("time_options.integrator",integrator)
@@ -570,7 +544,6 @@ CONTAINS
 
     CALL this % SetPrescribedSolution()
 
-    CALL this % CheckMinMax()
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
@@ -610,6 +583,77 @@ CONTAINS
     END SELECT
 
   END SUBROUTINE SetFluxMethod_withChar
+
+  SUBROUTINE SetWithUVrhoT(this,uEqn,vEqn,rhoEqn,tEqn)
+    !! Sets the conservative, primitive and entropy variables
+    !! give equations for u, v, rho, t
+    IMPLICIT NONE
+    CLASS(cns2d),INTENT(inout) :: this
+    CHARACTER(LEN=self_EquationLength),INTENT(in) :: uEqn
+    CHARACTER(LEN=self_EquationLength),INTENT(in) :: vEqn
+    CHARACTER(LEN=self_EquationLength),INTENT(in) :: rhoEqn
+    CHARACTER(LEN=self_EquationLength),INTENT(in) :: tEqn
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: rho,u,v,temperature,internalE,KE
+
+    ! u
+    CALL this % primitive % SetEquation(1,uEqn)
+    CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
+    
+    ! v
+    CALL this % primitive % SetEquation(2,vEqn)
+    CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
+
+    ! rho
+    CALL this % primitive % SetEquation(3,rhoEqn)
+    CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
+    PRINT*, "Min rho: ", MINVAL(this % primitive % interior % hostData(:,:,3,:))
+    PRINT*, "Max rho: ", MAXVAL(this % primitive % interior % hostData(:,:,3,:))
+
+    ! Temperature
+    CALL this % diagnostics % SetEquation(4,tEqn)
+    CALL this % diagnostics % SetInteriorFromEquation(this % geometry,this % t)
+    PRINT*, "Min T: ", MINVAL(this % diagnostics % interior % hostData(:,:,4,:))
+    PRINT*, "Max T: ", MAXVAL(this % diagnostics % interior % hostData(:,:,4,:))
+
+    DO iEl = 1,this % source % nElem
+      DO j = 0,this % source % interp % N
+        DO i = 0,this % source % interp % N
+          
+          u = this % primitive % interior % hostData(i,j,1,iEl)
+          v = this % primitive % interior % hostData(i,j,2,iEl)
+          rho = this % primitive % interior % hostData(i,j,3,iEl)
+          KE = rho*(u*u + v*v)*0.5_PREC
+
+          temperature = this % diagnostics % interior % hostData(i,j,4,iEl)
+          internalE = 1.5_PREC*rho*this % R*temperature ! Internal energy
+
+          this % solution % interior % hostData(i,j,1,iEl) = rho*u          ! rho*u
+          this % solution % interior % hostData(i,j,2,iEl) = rho*v          ! rho*v
+          this % solution % interior % hostData(i,j,3,iEl) = rho            ! rho
+          this % solution % interior % hostData(i,j,4,iEl) = internalE + KE ! rho*E
+        END DO
+      END DO
+    END DO
+
+    IF (this % gpuAccel) THEN
+      CALL this % solution % UpdateDevice()
+    END IF
+
+    CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
+
+    IF (this % gpuAccel) THEN
+      CALL this % solution % UpdateHost()
+      CALL this % primitive % UpdateHost()
+      CALL this % diagnostics % UpdateHost()
+      CALL this % entropyVars % UpdateHost()
+    END IF
+
+  END SUBROUTINE SetWithUVrhoT
 
   SUBROUTINE AddThermalBubble(this,xc,R,Tmax)
     !! Adds a temperature anomaly to the fluid state
@@ -672,24 +716,23 @@ CONTAINS
 
   END SUBROUTINE AddThermalBubble
 
-  SUBROUTINE SetStatic_cns2d(this)
+  SUBROUTINE SetStatic_cns2d(this, rho_static, T_static)
   !! Sets the default fluid state as "air" at STP with
   !! no motion
     IMPLICIT NONE
     CLASS(cns2d),INTENT(inout) :: this
+    REAL(prec),INTENT(in) :: rho_static
+    REAL(prec),INTENT(in) :: T_static
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    CALL this % SetCv(Cv_static)
-    CALL this % SetCp(Cp_static)
-    CALL this % SetGasConstant(R_static)
     DO iEl = 1,this % source % nElem
       DO j = 0,this % source % interp % N
         DO i = 0,this % source % interp % N
           this % solution % interior % hostData(i,j,1,iEl) = 0.0_PREC ! rho*u
           this % solution % interior % hostData(i,j,2,iEl) = 0.0_PREC ! rho*v
           this % solution % interior % hostData(i,j,3,iEl) = rho_static ! rho
-          this % solution % interior % hostData(i,j,4,iEl) = rho_static*e_static ! rho*E
+          this % solution % interior % hostData(i,j,4,iEl) = 1.5_PREC*rho_static*this % R*t_static ! rho*E
         END DO
       END DO
     END DO
@@ -707,6 +750,7 @@ CONTAINS
       CALL this % solution % UpdateHost()
       CALL this % primitive % UpdateHost()
       CALL this % diagnostics % UpdateHost()
+      CALL this % entropyVars % UpdateHost()
     END IF
 
   END SUBROUTINE SetStatic_cns2d
@@ -720,7 +764,7 @@ CONTAINS
   !! in-situ temperature) and the new kinetic energy field.
     IMPLICIT NONE
     CLASS(cns2d),INTENT(inout) :: this
-    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
+    CHARACTER(LEN=self_EquationLength),INTENT(in) :: eqnChar(1:2)
     ! Local
     INTEGER :: i,j,iEl,iVar
     REAL(prec) :: rho,u,v,temperature,internalE,KE
@@ -837,7 +881,7 @@ CONTAINS
   SUBROUTINE SetPrescribedSolutionFromChar_cns2d(this,eqnChar)
     IMPLICIT NONE
     CLASS(cns2d),INTENT(inout) :: this
-    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % prescribedSolution % nVar)
+    CHARACTER(LEN=self_EquationLength),INTENT(in) :: eqnChar(1:this % prescribedSolution % nVar)
     ! Local
     INTEGER :: iVar
 
@@ -985,52 +1029,6 @@ CONTAINS
 
   END SUBROUTINE CalculateEntropy_cns2d
 
-  SUBROUTINE CheckMinMax_cns2d(this)
-    IMPLICIT NONE
-    CLASS(cns2d),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iVar
-
-    IF (this % gpuAccel) THEN
-      CALL this % solution % UpdateHost()
-      CALL this % environmentals % UpdateHost()
-      CALL this % primitive % UpdateHost()
-      CALL this % diagnostics % UpdateHost()
-    END IF
-
-    PRINT *, '---------------------'
-    DO iVar = 1,this % solution % nVar
-      PRINT *, TRIM(this % solution % meta(iVar) % name)//" (t, min, max) :", &
-        this % t, &
-        MINVAL(this % solution % interior % hostData(:,:,iVar,:)), &
-        MAXVAL(this % solution % interior % hostData(:,:,iVar,:))
-    END DO
-
-    DO iVar = 1,this % environmentals % nVar
-      PRINT *, TRIM(this % environmentals % meta(iVar) % name)//" (t, min, max) :", &
-        this % t, &
-        MINVAL(this % environmentals % interior % hostData(:,:,iVar,:)), &
-        MAXVAL(this % environmentals % interior % hostData(:,:,iVar,:))
-    END DO
-
-    DO iVar = 1,this % primitive % nVar
-      PRINT *, TRIM(this % primitive % meta(iVar) % name)//" (t, min, max) :", &
-        this % t, &
-        MINVAL(this % primitive % interior % hostData(:,:,iVar,:)), &
-        MAXVAL(this % primitive % interior % hostData(:,:,iVar,:))
-    END DO
-
-    DO iVar = 1,this % diagnostics % nVar
-      PRINT *, TRIM(this % diagnostics % meta(iVar) % name)//" (t, min, max) :", &
-        this % t, &
-        MINVAL(this % diagnostics % interior % hostData(:,:,iVar,:)), &
-        MAXVAL(this % diagnostics % interior % hostData(:,:,iVar,:))
-    END DO
-
-    PRINT *, '---------------------'
-
-  END SUBROUTINE CheckMinMax_cns2d
-
   SUBROUTINE SetMaxCFL_cns2d(this,cfl)
     !! This method uses the model grid and sound speed
     !! to set the time step size so that the desired
@@ -1059,86 +1057,6 @@ CONTAINS
     PRINT *, "Adjusted time step size : ",this % dt
 
   END SUBROUTINE SetMaxCFL_cns2d
-
-  ! SUBROUTINE HydrostaticAdjustment_cns2d(this,tolerance)
-  !   !! This method can be used to adjust a compressible fluid
-  !   !! to hydrostatic equilibrium. On input, the cns2d
-  !   !! object is expected to have the gravitational potential set to
-  !   !! a non-zero field, the density and temperature fields are
-  !   !! assumed uniform, and the velocity field corresponds to a motionless
-  !   !! fluid.
-  !   !!
-  !   !! To adjust the fluid to hydrostatic equilibrium, an artificial
-  !   !! momentum drag term is introduced to the momentum equations. The model
-  !   !! is stepped forward until the fluid tendency absolute max value is
-  !   !! less than a specified tolerance (optional input).
-  !   !!
-  !   !! The drag coefficient size is chosen to be
-  !   !!
-  !   !!  Cd = rac{max(c)}{min(\Delta x)}
-  !   !!
-  !   !! In this subroutine, the time step is chosen so that the sound-wave
-  !   !! maximum CFL number is 0.75
-  !   !!
-  !   !!   CFL = rac{max(c) \Delta t}{min(\Delta x)} = 0.75
-  !   !!
-  !   !!
-  !   !!
-  !   !! ightarrow\Delta t = 0.75rac{MIN(\Delta x) }{\max{c}}
-  !   !!
-  !   !! After adjustment, the
-  !   IMPLICIT NONE
-  !   CLASS(cns2d),INTENT(inout) :: this
-  !   REAL(prec),INTENT(in) :: tolerance
-  !   ! Local
-  !   INTEGER :: i
-  !   REAL(prec) :: currentDt,currentTime,tn
-  !   REAL(prec) :: Cd
-  !   REAL(prec) :: dsdtMax(this % solution % nVar)
-  !   REAL(prec) :: sMax(this % solution % nVar)
-  !   REAL(prec) :: dxMin
-  !   REAL(prec) :: diagMax(nDiagnostics)
-
-  !   dxMin = this % geometry % CovariantArcMin()
-  !   diagMax = this % diagnostics % AbsMaxInterior() ! Get the absolute max of the diagnostics
-
-  !   ! Reassign the time step for the hydrostatic adjustment
-  !   ! so that the max CFL number is 0.5
-  !   currentDt = this % dt
-  !   CALL this % SetMaxCFL(0.5_PREC)
-
-  !   ! Calculate the drag coefficient
-  !   Cd = 0.3*diagMax(3)/dxMin
-
-  !   PRINT *, "Drag coefficient : ",Cd
-
-  !   CALL this % SetDrag(Cd)
-
-  !   ! Save the current time
-  !   currentTime = this % t
-
-  !   tn = 1000.0_PREC*this % dt
-  !   DO i = 1,hydrostaticAdjMaxIters
-
-  !     this % t = 0.0_PREC
-  !     CALL this % ForwardStep(tn)
-
-  !     sMax = this % solution % AbsMaxInterior()
-
-  !     PRINT *, "Momentum Max : ",SQRT(sMax(1)**2 + sMax(2)**2)
-
-  !     ! Check if momentum max is small in comparison to tolerance
-  !     IF (SQRT(sMax(1)**2 + sMax(2)**2) <= tolerance) THEN
-  !       PRINT *, "Reached hydrostatic equilibrium in ",i," iterations"
-  !       EXIT
-  !     END IF
-  !   END DO
-
-  !   ! Reset delta t and time
-  !   this % dt = currentDt
-  !   this % t = currentTime
-
-  ! END SUBROUTINE HydrostaticAdjustment_cns2d
 
   SUBROUTINE PreTendency_cns2d(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
@@ -1205,12 +1123,10 @@ CONTAINS
     !!
     !!  We use the Ideal Gas Law
     !!
-    !!     p = (\gamma-1)*
-    !! ho*e
+    !!     p = (\gamma-1)*\rho*e
     !!
-    !!  where $\gamma = rac{C_p}{C_v}$ is the expansion coefficient,
-    !!  $
-    !! ho$is the fluid density,and the internal energy.
+    !!  where $\gamma = \frac{C_p}{C_v}$ is the expansion coefficient,
+    !!  $\rho$ is the fluid density,and the internal energy.
     !!
     !!  We calculate $
     !! ho*e$as
@@ -1224,7 +1140,7 @@ CONTAINS
     !!
     !!  The speed of sound is defined through the relation
     !!
-    !!    rac{\partial P}{\partial
+    !!    \frac{\partial P}{\partial
     !! ho} = c^{2}
     !!
     !!  Then, we have that
