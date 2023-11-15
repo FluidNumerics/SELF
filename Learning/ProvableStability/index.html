@@ -9,7 +9,7 @@
 <meta content="Fluid Numerics" name="author"/>
 <link href="../../assets/images/favicon.png" rel="icon"/>
 <meta content="mkdocs-1.4.0, mkdocs-material-8.5.3" name="generator"/>
-<title>Software Architecture - Spectral Element Library in Fortran</title>
+<title>Provable Stability - Spectral Element Library in Fortran</title>
 <link href="../../assets/stylesheets/main.7a952b86.min.css" rel="stylesheet"/>
 <link href="../../assets/stylesheets/palette.cbb835fc.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -23,7 +23,7 @@
 <input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
 <label class="md-overlay" for="__drawer"></label>
 <div data-md-component="skip">
-<a class="md-skip" href="#software-architecture">
+<a class="md-skip" href="#provable-stability">
           Skip to content
         </a>
 </div>
@@ -47,7 +47,7 @@
 <div class="md-header__topic" data-md-component="header-topic">
 <span class="md-ellipsis">
             
-              Software Architecture
+              Provable Stability
             
           </span>
 </div>
@@ -191,8 +191,8 @@
           Learning
         </label>
 <ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" id="__nav_5_1" type="checkbox"/>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" id="__nav_5_1" type="checkbox"/>
 <label class="md-nav__link" for="__nav_5_1">
           Theory
           <span class="md-nav__icon md-icon"></span>
@@ -213,16 +213,58 @@
         Differential Geometry
       </a>
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../ProvableStability/">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          Provable Stability
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
         Provable Stability
       </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#motivation">
+    Motivation
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#stability-in-terms-of-mathematical-entropy">
+    Stability in terms of Mathematical Entropy
+  </a>
+<nav aria-label="Stability in terms of Mathematical Entropy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example-1-d-advection">
+    Example : 1-D Advection
+  </a>
 </li>
 </ul>
 </nav>
 </li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" id="__nav_5_2" type="checkbox"/>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#split-form-equations">
+    Split form equations
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#two-point-flux">
+    Two-point flux
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" id="__nav_5_2" type="checkbox"/>
 <label class="md-nav__link" for="__nav_5_2">
           Code
           <span class="md-nav__icon md-icon"></span>
@@ -233,72 +275,10 @@
           Code
         </label>
 <ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
-          Software Architecture
-          <span class="md-nav__icon md-icon"></span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="./">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../SoftwareArchitecture/">
         Software Architecture
       </a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#universal-constants">
-    Universal constants
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#memory-management">
-    Memory Management
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#quadrature">
-    Quadrature
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#lagrange-polynomials">
-    Lagrange Polynomials
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#data-types">
-    Data Types
-  </a>
-<nav aria-label="Data Types" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#scalars">
-    Scalars
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#vectors">
-    Vectors
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#two-point-vectors">
-    Two-point vectors
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#tensors">
-    Tensors
-  </a>
-</li>
-</ul>
-</nav>
-</li>
-</ul>
-</nav>
 </li>
 </ul>
 </nav>
@@ -361,53 +341,33 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#universal-constants">
-    Universal constants
+<a class="md-nav__link" href="#motivation">
+    Motivation
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#memory-management">
-    Memory Management
+<a class="md-nav__link" href="#stability-in-terms-of-mathematical-entropy">
+    Stability in terms of Mathematical Entropy
   </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#quadrature">
-    Quadrature
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#lagrange-polynomials">
-    Lagrange Polynomials
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#data-types">
-    Data Types
-  </a>
-<nav aria-label="Data Types" class="md-nav">
+<nav aria-label="Stability in terms of Mathematical Entropy" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#scalars">
-    Scalars
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#vectors">
-    Vectors
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#two-point-vectors">
-    Two-point vectors
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#tensors">
-    Tensors
+<a class="md-nav__link" href="#example-1-d-advection">
+    Example : 1-D Advection
   </a>
 </li>
 </ul>
 </nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#split-form-equations">
+    Split form equations
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#two-point-flux">
+    Two-point flux
+  </a>
 </li>
 </ul>
 </nav>
@@ -416,99 +376,85 @@
 </div>
 <div class="md-content" data-md-component="content">
 <article class="md-content__inner md-typeset">
-<a class="md-content__button md-icon" href="https://github.com/fluidnumerics/SELF/edit/main/docs/mkdocs/Learning/SoftwareArchitecture.md" title="Edit this page">
+<a class="md-content__button md-icon" href="https://github.com/fluidnumerics/SELF/edit/main/docs/mkdocs/Learning/ProvableStability.md" title="Edit this page">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
-<h1 id="software-architecture">Software Architecture</h1>
-<p>The Spectral Element Library in Fortran (SELF) uses a pattern driven design that starts with a few core classes and bootstraps its way to discrete calculus operations in complex geometry and workflows for PDE solvers. In this section of the documentation, you will learn about </p>
-<ul>
-<li>The conceptual design of SELF</li>
-<li>The project scaffolding</li>
-</ul>
-<h2 id="universal-constants">Universal constants</h2>
-<p>Every universe has constants, so why shouldn't SELF ? </p>
-<p>The <code>SELF_Constants</code> module provides definitions for floating point precision across the entirety of the SELF. Additionally, there are some other useful constants, like <span class="arithmatex">\(\pi\)</span>, machine precision, and various <code>CHARACTER</code> lengths. Floating point precision is set using a C-preprocessing conditional. If the CPP flag <code>DOUBLE_PRECISION</code> is defined at build time, then <code>prec=real64</code> (from the <code>ISO_FORTRAN_ENV</code> module); alternatively <code>prec=real32</code>. Throughout the rest of SELF, <code>REAL</code> types are declared with <code>prec</code> precision, e.g. <code>REAL(prec)</code>.</p>
-<h2 id="memory-management">Memory Management</h2>
-<p>SELF is designed to provide a simplified interface for managing memory on GPU accelerated systems. Because of this, the bottom end of SELF is a set of classes that manage arrays of 32-bit integers, 64-bit integers, and floating point values (floating point precision is determined at build-time). Classes in <code>SELF_Memory</code> define structure for 1-D through 7-D arrays for each type, giving 21 classes. </p>
-<p>Each class is named according to the underlying data-type and the rank of the underlying array. The convention we use is</p>
-<pre><code>hfTYPE_rN
-</code></pre>
-<p>where <code>TYPE</code> is <code>int32</code>, <code>int64</code>, or <code>real</code> and <code>N</code> is the rank and varies between one and 7. The examples below should help you better understand the naming convention</p>
-<ul>
-<li><code>hfInt32_r3</code> - A structure for working with a rank 3 arrays of 32-bit integers on CPU and GPU</li>
-<li><code>hfReal_r7</code> - A structure for working with rank 7 arrays of floating point values on CPU and GPU</li>
-<li><code>hfInt64_r1</code> - A structure for working with rank 1 arrays of 64-bit floating point values on CPU and GPU</li>
-</ul>
-<p>Each class has a <code>hostData</code> and <code>deviceData</code> attribute. Data within these classes that are stored on the CPU side (<code>hostData</code>) are Fortran <code>POINTER</code>s, while data stored on the GPU side (<code>deviceData</code>) side are <code>TYPE(c_ptr)</code>s from the <code>ISO_C_BINDING</code> module. Memory allocation and deallocation on the host are handled by Fortran's intrinsic <code>ALLOCATE</code> and <code>DEALLOCATE</code> methods. On the device, GPU memory is allocated and deallocated using <code>hipMalloc</code> and <code>hipFree</code>, respectively, from AMD's HIP/HIPFort. </p>
-<p>From the user's perspective, you can work with these classes using their type-bound procedures for</p>
-<ul>
-<li>Memory allocation</li>
-<li>Memory deallocation</li>
-<li>Memory copy from host to device</li>
-<li>Memory copy from device to host</li>
-</ul>
-<p>Accessing data is fairly straightforward using Fortran syntax for access class attributes.</p>
-<pre><code>USE SELF_Memory
-
-TYPE(hfReal_r4) :: mydata
-
-CALL mydata % Alloc(loBound=(/1,1,1,1/),&amp;
-                    upBound=(/10,10,10,10/))
-
-mydata % hostData = 1.0_prec
-
-CALL myData % UpdateDevice()
-
-CALL myData % Free()
-</code></pre>
-<h2 id="quadrature">Quadrature</h2>
-<p>Polynomial-based spectral and spectral element methods use discrete quadrature to approximate integrals. In nodal spectral element methods, like those implemented in SELF, functions are represented as interpolants whose interpolation knots are chosen to match specific quadrature points. The quadrature points and weights are chosen to preserve discrete orthogonality for specific polynomial basis, like Chebyshev or Legendre polynomials.</p>
-<p>The <code>SELF_Quadrature</code> module provides routines for generating Gauss, Gauss-Lobatto, and Gauss-Radau quadrature for both Chebyshev and Legendre basis. This module is primarily used by the <code>SELF_Lagrange</code> module for building Lagrange interpolating polynomials that exhibit spectral accuracy.</p>
-<h2 id="lagrange-polynomials">Lagrange Polynomials</h2>
-<h2 id="data-types">Data Types</h2>
-<h3 id="scalars">Scalars</h3>
-<h3 id="vectors">Vectors</h3>
-<h3 id="two-point-vectors">Two-point vectors</h3>
-<p>Two-point vectors are used in the construction of Entropy-Conservative nodal DGSEM (ECDGSEM).</p>
-<p>Using notation similar to [Winters et al. 2020], we write the flux vector in a conservation law as a block vector : </p>
+<h1 id="provable-stability">Provable stability</h1>
+<h2 id="motivation">Motivation</h2>
+<p>When we develop numerical methods, we want to know if the method we are going to spend time on is supposed to be <strong>stable</strong>. Numerical methods for conservation laws will iteratively apply the same operations over and over. Successive iterations form a sequence of values that we ascribe physical meaning to through a mathematical model. It's important that the generated sequence does not "blow up" and the iterations don't result in arbitrarily large values. In some sense, this is what many of us mean when we say a method is unstable.</p>
+<p>Hyperbolic systems, like one-way advection, or the two-way wave equation are models for information transmission between locations. They do not amplify or deamplify the original amount of energy stored in a system; instead, they move it around. Some hyperbolic systems, like variable advection and the nonlinear "Burgers Equation", can develop discontinuities, independent of the structure of the initial condition. For nonlinear hyperbolic systems, there can be a number of possible solutions to the PDE when discontinuities are present. Physically, this is often interpreted as a breakdown of the assumptions of the original model and we know that some other dynamics needs to take over to "smooth out" the discontinuities. In the cases where smoothing occurs, the model incorporates some mechanism to dissipate energy that accumulates in the vicinity of a discontinuity.</p>
+<p>With this kind of thinking, we have the idea that the "energy" associated with a hyperbolic conservation law ought to be bounded by the initial amount of energy that we started with. When the solution does not develop discontinuites, the total energy remains constant. When discontinuities do arise, the total energy decreases. To formulate this mathematically, we start with the definition of our conservation law, which is generally,</p>
 <div class="arithmatex">\[\begin{equation}
-  \overleftrightarrow{\mathbf{F}} = \mathbf{F}^1 \hat{\xi_1} + \mathbf{F}^2 \hat{\xi_2} + \mathbf{F}^3 \hat{\xi_3}
+  \mathbf{s}_t + \vec{\nabla} \cdot \vec{\mathbf{f}} = 0 
 \end{equation}\]</div>
-<p>where <span class="arithmatex">\(\hat{\xi_i}\)</span> is the <span class="arithmatex">\(i^{th}\)</span> computational coordinate direction and <span class="arithmatex">\(\mathbf{F}^i\)</span> is a state vector for the flux in the <span class="arithmatex">\(i^{th}\)</span> computational direction. When a two-point vector is used to represent the flux, the discrete divergence operation can be written</p>
+<p>where <span class="arithmatex">\(\mathbf{s}\)</span> is a state vector containing the prognostic variables we are modeling and <span class="arithmatex">\(\vec{\mathbf{f}}\)</span> is a "block vector" containing the physical flux vector for each prognostic variable. We've explicitly ignored non-conservative source terms, for the sake of the discussion here.</p>
+<h2 id="stability-in-terms-of-mathematical-entropy">Stability in terms of Mathematical Entropy</h2>
+<p>In spectral element literature, researchers will focus on stability criteria with respect to <strong>convex (mathematical) entropy</strong> functions. The term "entropy" is used because its use is motivated by thermodynamic entropy in the context of computational fluid dynamics. An entropy function is a nonlinear scalar function of the prognostic variables</p>
 <div class="arithmatex">\[\begin{equation}
- \nabla \cdot \overleftrightarrow{\mathbf{F}} = 2 \sum_{n=0}^{N} \left( \mathbf{F}^1_{(i,n),j,k} D_{i,n} + \mathbf{F}^2_{i,(j,n),k} D_{j,n} + \mathbf{F}^3_{i,j,(k,n)} D_{k,n} \right)
+  q = q(\mathbf{s})
 \end{equation}\]</div>
-<p>The details of how the two-point flux are calculated is best reserved for discussions in the development of specific conservation law solvers. However, to illustrate how they are used in practice, we consider a linear flux</p>
+<p>The entropy function is called convex if</p>
 <div class="arithmatex">\[\begin{equation}
-  \overleftrightarrow{\mathbf{F}} = A^1 \mathbf{s} \hat{\xi_1} + A^2 \mathbf{s} \hat{\xi_2} + A^3 \mathbf{s} \hat{\xi_3}
+  \mathbf{v}^T \frac{\partial^2 q}{\partial \mathbf{s}^2}\mathbf{v} &gt; 0, \hspace{2mm} \forall \mathbf{v} \neq 0
 \end{equation}\]</div>
-<p>where the <span class="arithmatex">\(A^i\)</span> are scalar functions that do not depend on <span class="arithmatex">\(\mathbf{s}\)</span>. Often the two-point fluxes are defined so that they provide equivalent discretizations that would be obtained if one started from the split form of the PDE. The two-point flux in this case is taken as the product of averages of the <span class="arithmatex">\(A^i\)</span> and <span class="arithmatex">\(\vec{s}\)</span>, e.g.</p>
+<p>We can create another conservation law for the entropy function that is consistent with the original conservation law. First, we define the "entropy variables" as the derivatives of the entropy function with respect to each prognostic variable</p>
 <div class="arithmatex">\[\begin{equation}
-\mathbf{F}^1_{(i,n),j,k} = \left( \frac{A^1_{i,j,k} + A^1_{n,j,k}}{2} \right) \left(\frac{\mathbf{s}_{i,j,k} + \mathbf{s}_{n,j,k}}{2} \right)
+  \mathbf{w} = \begin{pmatrix}
+                \frac{\partial q}{\partial s_1} \\
+                \frac{\partial q}{\partial s_2} \\
+                \frac{\partial q}{\partial s_3} \\
+                 ... \\
+                \frac{\partial q}{\partial s_M} \\
+                \end{pmatrix}
 \end{equation}\]</div>
+<p>With this defintion in mind, the time derivative of the entropy function can be written as follows :
+\begin{equation}
+q_t = \sum_{m} \frac{\partial q}{\partial s_m} \frac{\partial s_m}{\partial t} = \mathbf{w}^T \mathbf{s}_t
+\end{equation} </p>
+<p>Performing a dot-product of the conservation law with the entropy variables gives</p>
 <div class="arithmatex">\[\begin{equation}
-\mathbf{F}^2_{i,(j,n),k} = \left( \frac{A^2_{i,j,k} + A^2_{i,n,k}}{2} \right) \left(\frac{\mathbf{s}_{i,j,k} + \mathbf{s}_{i,n,k}}{2} \right)
+  \mathbf{w}^T \mathbf{s}_t + \mathbf{w}^T \vec{\nabla} \cdot \vec{\mathbf{f}} = q_t + \mathbf{w}^T \vec{\nabla} \cdot \vec{\mathbf{f}} = 0
 \end{equation}\]</div>
+<p>Approaching this from another perspective, we want the entropy to be conservative so that the entropy magnitude is bounded by its initial value and the boundary contributions. The entropy function obeys a conservation law of the form</p>
 <div class="arithmatex">\[\begin{equation}
-\mathbf{F}^3_{i,j,(k,n)} = \left( \frac{A^3_{i,j,k} + A^3_{i,j,n}}{2} \right) \left(\frac{\mathbf{s}_{i,j,k} + \mathbf{s}_{i,j,n}}{2} \right)
+q_t + \vec{\nabla} \cdot \vec{\Psi} = 0
 \end{equation}\]</div>
-<p>This has been shown to be an equivalent discretization for the split form of the advective operator.</p>
-<p>As a practical aspect, we see that the two-point flux adds a dimension in the computational coordinates, relative to the standard "vectors" implemented in SELF. Because of this, we use the following memory layout for two-point vectors :</p>
-<p>In 2-D </p>
-<pre><code class="language-fortran">F(1:2,0:N,0:N,0:N,1:nVar,1:nEl)
-</code></pre>
-<p>and in 3-D</p>
-<pre><code class="language-fortran">F(1:3,0:N,0:N,0:N,0:N,1:nVar,1:nEl)
-</code></pre>
-<p>The first dimension refers to the directional component (physical or computational) of the vector. The second dimension is a computational coordinate direction and variations in this dimensions are equivalent to looping over <span class="arithmatex">\(n\)</span> in the two-point vector representation shown above. The remaining array dimensions of size <code>0:N</code> are computational coordinate directions and are the usual <code>(i,j,k)</code> dimensions, in this order. This is followed by the dimension over the solution variables and then the elements. </p>
-<h3 id="tensors">Tensors</h3>
+<p>where <span class="arithmatex">\(\vec{\Psi}\)</span> is the "entropy flux". The entropy function is usually defined in such a way that</p>
+<div class="arithmatex">\[\begin{equation}
+ \mathbf{w}^T \vec{\nabla} \cdot \vec{\mathbf{f}} = \vec{\nabla}\cdot\vec{\Psi}
+\end{equation}\]</div>
+<p>This contraction is important, as it allows us to treat the entropy as a conserved quantity. Integration over space and time for the entropy then results in</p>
+<div class="arithmatex">\[\begin{equation}
+  \int_{V} q(T) \hspace{1mm} dV = \int_{V} q(0) \hspace{1mm} dV + \int_{0}^T \oint_{\partial V} \vec{\Psi} \cdot \hat{n} \hspace{1mm} dS 
+\end{equation}\]</div>
+<p>which indicates that the total entropy at a later time is equal to the initial total entropy plus any additional entropy brought in through boundary conditions. A closed system is one in which no entropy is introduced at the boundaries, so that the total entropy at a later time is equivalent to the total entropy at the initial time. As we alluded to previously, when discontinuities develop in the solution, we expect that smoothing of the solution is necessary in such a way that the entropy is reduced (our previous discussion used "energy" as a hopefully more familiar analogy). </p>
+<p>To summarize, we express stability as </p>
+<div class="arithmatex">\[\begin{equation}
+  \int_{V} q(T) \hspace{1mm} dV \leq \int_{V} q(0) \hspace{1mm} dV + \int_{0}^T \oint_{\partial V} \vec{\Psi} \cdot \hat{n} \hspace{1mm} dS 
+\end{equation}\]</div>
+<p>When developing a provably stable numerical methods, we need to do the following :</p>
+<ol>
+<li>Define a nonlinear convex entropy function that satisfies the entropy flux contraction <span class="arithmatex">\(\mathbf{w}^T \vec{\nabla} \cdot \vec{\mathbf{f}} = \vec{\nabla}\cdot\vec{\Psi} \rightarrow \vec{\mathbf{f}}^T \cdot \vec{\nabla} \mathbf{w} = 0\)</span></li>
+<li>Define a discretization for the original conservation law that discretely satisfies entropy conservation</li>
+</ol>
+<h3 id="example-1-d-advection">Example : 1-D Advection</h3>
+<p>To help conceptualize this, let's consider a simple 1-D advection problem,</p>
+<div class="arithmatex">\[\begin{equation}
+  s_t + \frac{\partial}{\partial x}(u s)  = 0
+\end{equation}\]</div>
+<p>where <span class="arithmatex">\(s\)</span> is the solution and <span class="arithmatex">\(u\)</span> is a velocity field. A convex entropy function here could be </p>
+<div class="arithmatex">\[\begin{equation}
+  q(s) = s^2
+\end{equation}\]</div>
+<h2 id="split-form-equations">Split form equations</h2>
+<h2 id="two-point-flux">Two-point flux</h2>
 </article>
 </div>
 </div>
 </main>
 <footer class="md-footer">
 <nav aria-label="Footer" class="md-footer__inner md-grid">
-<a aria-label="Previous: Provable Stability" class="md-footer__link md-footer__link--prev" href="../ProvableStability/" rel="prev">
+<a aria-label="Previous: Differential Geometry" class="md-footer__link md-footer__link--prev" href="../DifferentialGeometry/" rel="prev">
 <div class="md-footer__button md-icon">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
 </div>
@@ -517,17 +463,17 @@ CALL myData % Free()
 <span class="md-footer__direction">
                 Previous
               </span>
-              Provable Stability
+              Differential Geometry
             </div>
 </div>
 </a>
-<a aria-label="Next: Linear Shallow Water Rossby Wave" class="md-footer__link md-footer__link--next" href="../../Examples/LinearShallowWater/RossbyWave/" rel="next">
+<a aria-label="Next: Software Architecture" class="md-footer__link md-footer__link--next" href="../SoftwareArchitecture/" rel="next">
 <div class="md-footer__title">
 <div class="md-ellipsis">
 <span class="md-footer__direction">
                 Next
               </span>
-              Linear Shallow Water Rossby Wave
+              Software Architecture
             </div>
 </div>
 <div class="md-footer__button md-icon">

@@ -8,9 +8,9 @@
 <meta content="SELF Documentation" name="description"/>
 <meta content="Fluid Numerics" name="author"/>
 <link href="../../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.3.1, mkdocs-material-8.5.1" name="generator"/>
+<meta content="mkdocs-1.4.0, mkdocs-material-8.5.3" name="generator"/>
 <title>Installation - Spectral Element Library in Fortran</title>
-<link href="../../assets/stylesheets/main.2e8b5541.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/main.7a952b86.min.css" rel="stylesheet"/>
 <link href="../../assets/stylesheets/palette.cbb835fc.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
@@ -104,14 +104,49 @@
         Home
       </a>
 </li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" id="__nav_2" type="checkbox"/>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" id="__nav_2" type="checkbox"/>
 <label class="md-nav__link" for="__nav_2">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Tutorials" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" id="__nav_2_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2_1">
+          Run with Docker
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Run with Docker" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_2_1">
+<span class="md-nav__icon md-icon"></span>
+          Run with Docker
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Tutorials/docker/lswGravityWave/">
+        Linear Shallow Water Gravity Wave
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3">
           Getting Started
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Getting Started" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_2">
+<label class="md-nav__title" for="__nav_3">
 <span class="md-nav__icon md-icon"></span>
           Getting Started
         </label>
@@ -138,14 +173,42 @@
 <nav aria-label="Bare Metal Install" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#install-self-dependencies">
-    Install SELF Dependencies
+<a class="md-nav__link" href="#dependency-installation">
+    Dependency installation
   </a>
+<nav aria-label="Dependency installation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ubuntu-2004-2204-with-spack">
+    Ubuntu 20.04 / 22.04 with Spack
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#install-self_1">
     Install SELF
   </a>
+<nav aria-label="Install SELF" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#build-variables">
+    Build Variables
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#building-for-an-nvidia-gpu">
+    Building for an Nvidia GPU
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#install-self_2">
+    Install SELF
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 </ul>
 </nav>
@@ -157,18 +220,8 @@
 <nav aria-label="Build a Docker Container" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#installing-base-containers">
-    Installing Base Containers
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#build-with-cloud-build-local-recommended">
-    Build with Cloud-Build-Local (Recommended)
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#build-with-docker">
-    Build with Docker
+<a class="md-nav__link" href="#test-run-the-docker-container">
+    Test run the Docker container
   </a>
 </li>
 </ul>
@@ -181,25 +234,45 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
-<label class="md-nav__link" for="__nav_3">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Tutorials" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Tutorials/TravelingShock/">
+        Traveling shockwave in 1-D
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5">
           Learning
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Learning" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_3">
+<label class="md-nav__title" for="__nav_5">
 <span class="md-nav__icon md-icon"></span>
           Learning
         </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_1" id="__nav_3_1" type="checkbox"/>
-<label class="md-nav__link" for="__nav_3_1">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" id="__nav_5_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_1">
           Theory
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Theory" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_3_1">
+<label class="md-nav__title" for="__nav_5_1">
 <span class="md-nav__icon md-icon"></span>
           Theory
         </label>
@@ -214,17 +287,22 @@
         Differential Geometry
       </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Learning/ProvableStability/">
+        Provable Stability
+      </a>
+</li>
 </ul>
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_2" id="__nav_3_2" type="checkbox"/>
-<label class="md-nav__link" for="__nav_3_2">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" id="__nav_5_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5_2">
           Code
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Code" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_3_2">
+<label class="md-nav__title" for="__nav_5_2">
 <span class="md-nav__icon md-icon"></span>
           Code
         </label>
@@ -241,13 +319,13 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
-<label class="md-nav__link" for="__nav_4">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6">
           Examples
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Examples" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_4">
+<label class="md-nav__title" for="__nav_6">
 <span class="md-nav__icon md-icon"></span>
           Examples
         </label>
@@ -261,13 +339,13 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
-<label class="md-nav__link" for="__nav_5">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7">
           Contributing
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Contributing" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_5">
+<label class="md-nav__title" for="__nav_7">
 <span class="md-nav__icon md-icon"></span>
           Contributing
         </label>
@@ -301,14 +379,42 @@
 <nav aria-label="Bare Metal Install" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#install-self-dependencies">
-    Install SELF Dependencies
+<a class="md-nav__link" href="#dependency-installation">
+    Dependency installation
   </a>
+<nav aria-label="Dependency installation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ubuntu-2004-2204-with-spack">
+    Ubuntu 20.04 / 22.04 with Spack
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#install-self_1">
     Install SELF
   </a>
+<nav aria-label="Install SELF" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#build-variables">
+    Build Variables
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#building-for-an-nvidia-gpu">
+    Building for an Nvidia GPU
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#install-self_2">
+    Install SELF
+  </a>
+</li>
+</ul>
+</nav>
 </li>
 </ul>
 </nav>
@@ -320,18 +426,8 @@
 <nav aria-label="Build a Docker Container" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#installing-base-containers">
-    Installing Base Containers
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#build-with-cloud-build-local-recommended">
-    Build with Cloud-Build-Local (Recommended)
-  </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#build-with-docker">
-    Build with Docker
+<a class="md-nav__link" href="#test-run-the-docker-container">
+    Test run the Docker container
   </a>
 </li>
 </ul>
@@ -353,117 +449,181 @@
 <li>Fortran 2008 compliant compiler</li>
 <li>MPI, e.g. <a href="https://www.open-mpi.org/">OpenMPI</a></li>
 <li><a href="https://www.gnu.org/software/make/">GNU Make</a></li>
-<li><a href="https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html">ROCm</a> ( &gt;= 4.2 )</li>
-<li><a href="https://github.com/ROCmSoftwarePlatform/hipfort">HIPFort</a> ( &gt;= 4.2 ; Must be built with the Fortran compiler you will build SELF with. )</li>
+<li><a href="https://cmake.org/resources/">Cmake (v3.21 or greater)</a></li>
+<li>Fortran compiler ( <code>gfortran</code> recommended )</li>
+<li><a href="https://rocm.docs.amd.com/en/latest/deploy/linux/quick_start.html">HIP</a></li>
+<li>(Optional) <a href="">CUDA Toolkit</a>, if you are building for Nvidia GPU hardware.</li>
 <li><a href="https://www.hdfgroup.org/solutions/hdf5/">HDF5</a></li>
-<li><a href="https://github.com/FluidNumerics/feq-parse">FEQParse</a></li>
-<li><a href="https://github.com/szaghi/FLAP">FLAP</a></li>
-<li><a href="https://github.com/jacobwilliams/json-fortran">JSON-Fortran</a></li>
+<li><a href="https://github.com/FluidNumerics/feq-parse">FluidNumerics/feq-parse</a></li>
+<li><a href="https://github.com/jacobwilliams/json-fortran">jacobwilliams/JSON-Fortran</a></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since HIP is officially supported only on CentOS, RHEL, Ubuntu, SLES, and Windows operating systems, SELF currently can only be built on these operating systems. For deployment on MacOS systems, consider using the containerized builds. For building on Windows, you will need the <a href="https://www.amd.com/en/developer/rocm-hub/hip-sdk.html">AMD HIP SDK for Windows</a></p>
+</div>
+<p>You can install SELF in two possible ways</p>
+<ol>
+<li>Bare Metal Installation</li>
+<li>Docker image</li>
+</ol>
+<p>A bare metal installation will require that you have a CentOS/RHEL 7 or 8, SLES, Ubuntu 20.04 (focal) or 22.04 (jammy), or Windows operating system. You will also need to ensure that all of the dependencies are installed on your system before installing SELF.</p>
+<p>A Docker image installation uses the Ubuntu 22.04 Docker image as a base and takes care of installing all of the dependencies for you. The resulting Docker image can be run using Docker or Singularity/Apptainer. </p>
+<p>This documentation will walk through steps to install SELF using bare metal installation and the Docker image approaches.</p>
 <h2 id="bare-metal-install">Bare Metal Install</h2>
-<h3 id="install-self-dependencies">Install SELF Dependencies</h3>
-<p>Before getting started, make sure that you the following installed on your system : </p>
-<ul>
-<li>C++ Compiler (<code>g++</code> recommended)</li>
-<li>Fortran Compiler (<code>gfortran</code> recommended)</li>
-<li>GNU Make</li>
-<li><a href="https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html">ROCm</a></li>
-</ul>
-<p>Keep in mind that ROCm is officially supported only on CentOS, RHEL, Ubuntu, and SLES 15.</p>
-<p>On Ubuntu, you can install these dependencies using the following</p>
-<pre><code>sudo apt-get update
-sudo apt-get install gcc g++ gfortran build-essential libnuma-dev
-sudo apt install wget gnupg2
-wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
-echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
-sudo apt update
-sudo apt install rocm-dev
-sudo reboot
+<h3 id="dependency-installation">Dependency installation</h3>
+<h4 id="ubuntu-2004-2204-with-spack">Ubuntu 20.04 / 22.04 with Spack</h4>
+<p>On your system, make sure that you have a 2008 standard compliant Fortran compiler and GNU Make installed. On Ubuntu,</p>
+<pre><code>sudo apt-get install build-essential gcc gfortran
 </code></pre>
+<p>Additionally, you will need to <a href="https://rocm.docs.amd.com/en/latest/deploy/linux/os-native/install.html">install ROCm (v5.7.0  or greater)</a></p>
 <p>To help install the remainder of SELF's dependencies, we recommend that you use <a href="https://spack.io">Spack</a>. SELF comes with a Spack environment file that can be used to create a spack environment on your system.</p>
 <p>First, install Spack</p>
 <pre><code>git clone https://github.com/spack/spack ~/spack
 source ~/spack/share/spack/setup-env.sh
 </code></pre>
-<p>Download the SELF source code and activate the spack environment</p>
-<pre><code>git clone https://github.com/fluidnumerics/SELF ~/SELF
-spack env activate -d ~/SELF/env
+<p>You can instruct Spack to use packages that are included with your operating system. This can help speed up the installation process, and we recommend that you leverage packages already installed on your system. You can do this by running the following command : </p>
+<pre><code>spack external find --not-buildable
 </code></pre>
-<p>Once the environment is activated, show which packages will be installed and verify the output appears like what is shown below</p>
+<p>SELF comes with a <a href="https://spack.readthedocs.io/en/latest/environments.html">spack environment</a> file (<code>SELF/env/spack.yaml</code>) that defines the packages to install (<code>hdf5</code>, <code>json-fortran</code>, and <code>feq-parse</code>). You can use this environment file to easily install and make available these packages. To get started, clone the SELF repository</p>
+<pre><code>git clone https://github.com/fluidnumerics/SELF ~/SELF
+</code></pre>
+<p>Edit the <code>~/SELF/env/spack.yaml</code> file to set the following parameters</p>
+<ul>
+<li><code>install_tree</code> (Default <code>/opt/software/self</code> ) - This is the path where the dependencies are installed within their own directory space</li>
+<li><code>view</code> (Default <code>/opt/view/self</code>) - This is the path where all package <code>bin/</code>, <code>lib/</code>, <code>lib64/</code>, <code>include/</code>, <code>etc/</code>, and <code>share/</code> directories are symlinked.</li>
+</ul>
+<p>When setting both of these locations, ensure that you have read, write, and executable access to the <code>install_tree</code> and <code>view</code> paths.</p>
+<p>Once you've configured the environment, activate the environment</p>
+<pre><code>spack env activate -d ~/SELF/env
+</code></pre>
+<p>Once the environment is activated, you can use <code>spack find</code> show which packages will be installed and verify the output appears like what is shown below</p>
 <pre><code>$ spack find
-==&gt; In environment /home/joe/SELF/env
+==&gt; In environment /home/joe/apps/SELF/env
 ==&gt; Root specs
-feq-parse@1.1.0  flap@master  hdf5@1.12.0 +cxx+fortran+mpi  hipfort@4.5.2  json-fortran@7.1.0
+feq-parse@1.1.0  hdf5@1.12.2 +cxx+fortran+mpi  json-fortran@8.3.0
 
 ==&gt; 0 installed packages
 </code></pre>
 <p>Next, you can install the dependencies</p>
 <pre><code>spack install
 </code></pre>
-<p>Keep in mind, this installation process can take up to two hours.</p>
+<p>Installing the dependencies can take up to 30 minutes.</p>
 <h3 id="install-self_1">Install SELF</h3>
-<p>SELF comes with a <a href="https://github.com/FluidNumerics/SELF/blob/main/install.sh">simple bash script</a> that can be used to install SELF. Provided you followed the steps above to install SELF dependencies, you can simply run this script.</p>
-<pre><code>cd ~/SELF
-./install.sh
-</code></pre>
-<p>This will install SELF under <code>${HOME}/view/self</code>. By default, this script is configured to build with serial, MPI, and GPU support with the target GPU set to AMD MI100 (<code>gfx900</code>). To change the behavior of the installation script, you can set the following environment variables before calling the script</p>
+<p>SELF comes with a Cmake build system that defines the build and installation process. When you install SELF, you will install the following artifacts</p>
 <ul>
-<li><code>VIEW</code> - The path to the spack environment view.</li>
-<li><code>SELF_PREFIX</code> - The path to install SELF. Defaults to <code>$VIEW</code></li>
-<li><code>GPU_TARGET</code> - GPU microarchitecture code to build for. Defaults to <code>gfx900</code> (AMD MI100)</li>
-<li><code>PREC</code> - Floating point precision to build with. Defaults to <code>double</code>. Change to <code>single</code> to build using 32-bit floating point arithmetic.</li>
-<li><code>SELF_FFLAGS</code> - compiler flags to build SELF.</li>
+<li><code>${CMAKE_INSTALL_PREFIX}/bin/self</code> - The main program for SELF that can be used to run unit tests, integration tests, and various conservation law solvers supported by the SELF developers, including Compressible Navier Stokes (2D), viscous Burger's Equation (1D), and Shallow Water Equations (2D).</li>
+<li><code>${CMAKE_INSTALL_PREFIX}/lib/libself.a</code> - A static library for the SELF API, in case you want to build your own programs and solvers using Spectral Element Methods.</li>
+<li><code>${CMAKE_INSTALL_PREFIX}/include/*.mod</code> - Module files generated by the Fortran compiler during the build process. </li>
 </ul>
+<p>This part of the documentation will provide you with an overview of the environment variables that control the build process, show you how to target different GPUs for GPU acceleration, and how to install SELF to a preferred directory on your system.</p>
+<h4 id="build-variables">Build Variables</h4>
+<p>There are a number of environment variables you can use to control the behavior of the build and installation process. Importantly, some of these environment variables are necessary to tell the build system where dependencies can be found.</p>
+<ul>
+<li><code>CMAKE_HIP_ARCHITECTURES</code>   The target GPU architecture to build for (e.g. gfx906, gfx90a, sm_72)</li>
+<li><code>CMAKE_INSTALL_PREFIX</code>      The installation path for SELF</li>
+<li><code>CMAKE_BUILD_TYPE</code>          Type of build, one of <code>Release</code>, <code>Debug</code>, or <code>Coverage</code></li>
+</ul>
+<p>The default values of these variables will work for you if the following conditions are met
+* You've used the spack environment installation for the dependencies, with the <code>view</code> set to <code>/opt/view/self</code>.
+* The spack environment is active
+* ROCm is installed in a default location</p>
+<h4 id="building-for-an-nvidia-gpu">Building for an Nvidia GPU</h4>
+<p>To build SELF for running on Nvidia GPUs, you will need to have both HIP and the CUDA toolkit installed on your system.</p>
+<p>Next, you will need to set the <code>CMAKE_HIP_ARCHITECTURES</code> build variable to the microarchicture code for the specific GPU you are targeting (see the table below). </p>
+<table>
+<thead>
+<tr>
+<th>Pascal (P100)</th>
+<th>Volta (V100)</th>
+<th>Ampere (A100)</th>
+<th>Hopper (H100)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sm_60, sm_61, sm_62</td>
+<td>sm_70, sm_72</td>
+<td>sm_80, sm_86, sm_87</td>
+<td>sm_90, sm_90a</td>
+</tr>
+</tbody>
+</table>
+<h4 id="install-self_2">Install SELF</h4>
+<p>First, clone the SELF repository (if you haven't already)</p>
+<pre><code>git clone https://github.com/fluidnumerics/SELF ~/SELF
+</code></pre>
+<p>Next, create a build directory for Cmake to stage intermediate files</p>
+<pre><code>mkdir ~/SELF/build
+cd ~/SELF/build
+</code></pre>
+<p>Use Cmake to build the make system</p>
+<pre><code> FC=gfortran \
+    cmake -DCMAKE_PREFIX_PATH=/opt/rocm
+          -DCMAKE_HIP_ARCHITECTURES=gfx90a \
+          -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self \
+          -DCMAKE_BUILD_TYPE=Release \
+          ./ 
+</code></pre>
+<p>In this example, 
+* <code>FC=gfortran</code> sets the fortran compiler to <code>gfortran</code>.
+* <code>CMAKE_PREFIX_PATH</code> instructs Cmake to search for Cmake configuration files for ROCm underneath <code>/opt/rocm</code>
+* <code>CMAKE_HIP_ARCHITECTURES=gfx90a</code> sets the target GPU architecture to the AMD MI200 series GPUs
+* <code>CMAKE_INSTALL_PREFIX=${HOME}/opt/self</code> sets the installation path for SELF to <code>${HOME}/opt/self</code>; when setting this variable, make sure it is a location where you have read and write permissions
+* <code>CMAKE_BUILD_TYPE=Release</code> sets the build type to <code>Release</code>, which enables <code>-O3</code> optimizations. If you are troubleshooting an issue, it is best to set this to <code>Debug</code>.</p>
+<p>After running <code>cmake</code>, you can build SELF,</p>
+<pre><code>make VERBOSE=1
+</code></pre>
+<p>We recommend that you run the unit tests included with SELF,</p>
+<pre><code>ctest --test-dir ~/SELF/build/test
+</code></pre>
+<p>If all of the tests pass, install SELF</p>
+<pre><code>make install
+</code></pre>
+<p>At the end of this process, the <code>self</code> application is installed under <code>${HOME}/opt/self/bin</code>. Additionally, the SELF static library can be found under <code>${HOME}/opt/self/lib</code> and the <code>.mod</code> files for all of the SELF modules are under <code>${HOME}/opt/self/include</code>.</p>
+<p><a href="https://github.com/FluidNumerics/SELF/issues/new/choose">If you encounter any problems, feel free to open an new issue</a></p>
 <h2 id="build-a-docker-container">Build a Docker Container</h2>
-<p>SELF comes with Dockerfiles to create builds that target specific GPU platforms. To build Docker containers, you will need to install <a href="https://www.docker.com/">Docker</a>. The SELF build process for Docker containers involves two steps</p>
-<ol>
-<li>Build a base container with all of the necessary dependencies</li>
-<li>Build SELF for the target architecture using the appropriate base container.</li>
-</ol>
-<p>We've opted to split the build process into these two distinct stages, since installing SELF's dependencies takes 1-2 hours. Further, the Docker container builds are used as part of the continuous integration process and this approach reduces the costs associated with Google Cloud Build.</p>
-<h3 id="installing-base-containers">Installing Base Containers</h3>
-<p>Base containers are hosted by Fluid Numerics at <code>gcr.io/self-fluids/self-base</code>. Tags are used to mark the target platform in addition to the ROCm version and CUDA version (if applicable). For example, <code>gcr.io/self-fluids/self-base:amd-rocm4.3</code> is the base container used for build SELF for AMD GPU's using ROCm 4.3. Below is a list of currently available base container</p>
+<p>SELF comes with Docker files defined under the <code>docker/</code> subdirectory. Currently, there are recipes for building container images for AMD GPUs (<code>Dockerfile.rocm</code>) and Nvidia GPUs (<code>Dockerfile.cuda</code>). The recipes will install all of SELF's dependencies and SELF in a container image based on the Ubuntu 22.04 image. To bake a SELF image, first clone the SELF repository and navigate to the source code directory</p>
+<pre><code>git clone https://github.com/fluidnumerics/SELF ${HOME}/SELF
+cd ${HOME}/SELF
+</code></pre>
+<p>In this example, SELF is cloned to <code>${HOME}/SELF</code>. From the main directory of the SELF repository, you can use <code>docker build</code> to build a container image.</p>
+<pre><code>docker build -f docker/rocm-5.7/amd/Dockerfile -t self:latest .
+</code></pre>
+<p>This command will create a Docker image for running SELF on AMD MI50 GPUs and the image is tagged <code>self:latest</code>; this is the name of the image that you will reference when running SELF.</p>
+<p>By default, this will build SELF with double precision floating point arithmetic, no optimizations (debug build), and with GPU kernels offloaded to a AMD MI50 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available</p>
 <ul>
-<li><code>gcr.io/self-fluids/self-base:amd-rocm4.3</code></li>
-<li><code>gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3</code></li>
-<li><code>gcr.io/self-fluids/self-base:amd-rocm5.2</code></li>
-<li><code>gcr.io/self-fluids/self-base:nvidia-cuda11.4.2-rocm5.2</code></li>
+<li><code>_GPU_TARGET</code>: GPU microarchitecture code to build for. Defaults to <code>gfx906</code> (AMD MI50)</li>
 </ul>
-<p>To access these base containers, reach out to support@fluidnumerics.com to arrange a subscription.</p>
-<p>Alternatively, you will need to build base container image. Container recipes for base containers can be found under <code>SELF/docker/base/{HIP_PLATFORM}</code>, where <code>{HIP_PLATFORM}</code> is one of <code>nvidia</code> or <code>amd</code>. To install the base containers locally, you can run</p>
-<pre><code>docker build . -f docker/base/nvidia/Dockerfile -t self-base:nvidia-cuda11.4.2-rocm5.2
-docker build . -f docker/base/amd/Dockerfile -t self-base:amd-rocm5.2
-</code></pre>
-<h3 id="build-with-cloud-build-local-recommended">Build with Cloud-Build-Local (Recommended)</h3>
-<p>To build a Docker container with SELF pre-installed, the SELF repository comes with a Cloud Build pipeline for use on your local system. This pipeline will execute <code>docker run</code> with the appropriate Dockerfile, depending on the target GPU architecture specified in the build substitutions. To use cloud-build-local, you will need to install <a href="https://www.docker.com/">Docker</a>, the <a href="https://cloud.google.com/sdk/docs/install">gcloud CLI, and google-cloud-sdk-cloud-build-local</a>.</p>
-<p>Once installed, you can simply build SELF using the following command from the root of the SELF repository.</p>
-<pre><code>cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false .
-</code></pre>
-<p>By default, this will build SELF with double precision floating point arithmetic and with GPU kernels offloaded to Nvidia V100 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available</p>
+<h3 id="test-run-the-docker-container">Test run the Docker container</h3>
+<p>Running SELF requires a JSON file and often requires mesh file; together, these are often referred to as the "input deck". Models that work in 1-D (e.g. viscous Burger's equation) do not require a mesh file. You can provide the input deck to a SELF container through a <a href="https://docs.docker.com/storage/bind-mounts/">bind mount</a> that maps a directory from your host system that contains the input deck to a path inside the container. </p>
+<p>The SELF repository comes with an <code>examples/</code> subdirectory which contains example input decks for various configurations of the available solvers. The subdirectories under <code>examples/</code> are</p>
 <ul>
-<li><code>_PREC</code> : The floating point precision to use in SELF; either <code>single</code> or <code>double</code></li>
-<li><code>_GPU_TARGET</code>: GPU microarchitecture code to build for. Defaults to <code>sm_72</code> (Nvidia V100)</li>
-<li><code>_HIP_PLATFORM</code>: The value to set for the <code>HIP_PLATFORM</code> environment variable. Either <code>nvidia</code> or <code>amd</code></li>
+<li><code>brg1d/</code> - Examples for the viscous Burger's equation in 1-D</li>
+<li><code>cns2d/</code> - Examples for the compressible navier stokes in 2-D</li>
+<li><code>lsw2d/</code> - Examples for the linear shallow water in 2-D</li>
+<li><code>nlsw2d/</code> - Examples for the nonlinear shallow water in 2-D</li>
 </ul>
-<p>As an example, you can specify these substitution variables using something like the following</p>
-<pre><code>cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false . --substitutions=_PREC=single,_GPU_TARGET=gfx900,_HIP_PLATFORM=amd
+<p>In this example, we will run the travelling shock example for the viscous Burger's equation in 1-D.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is assumed that you have created a Docker image for SELF as described in the previous section of this documentation. Make sure that you have a Docker container image of SELF on your system before proceeding further</p>
+</div>
+<p>First, navigate to the main directory of the SELF repository that is locally cloned on your system, e.g.</p>
+<pre><code>cd ${HOME}/SELF
 </code></pre>
-<p>The Dockerfile that <code>cloud-build-local</code> uses for the build recipe is under <code>SELF/docker/${_HIP_PLATFORM}/Dockerfile</code>. The resulting Docker image when using <code>cloud-build-local</code> is <code>self:dev-${_PREC}-${_GPU_TARGET}</code></p>
-<h3 id="build-with-docker">Build with Docker</h3>
-<p>If you prefer to build SELF using Docker directly, you can easily do so using the Dockerfile recipes under the <code>SELF/docker/{HIP_PLATFORM}</code> directory. The <code>{HIP_PLATFORM}</code> is either <code>nvidia</code> or <code>amd</code>. </p>
-<pre><code>docker build --build-arg GPU_TARGET=${_GPU_TARGET} \
-             --build-arg HIP_PLATFORM=${_HIP_PLATFORM} \
-             --build-arg PREC=${_PREC} \
-             -f docker/${_HIP_PLATFORM}/Dockerfile \
-             . -t self:dev-${_PREC}-${_GPU_TARGET}
+<p>Next, you will use <code>docker run</code> with a bind mount to the <code>examples/brg1d/traveling_shock</code> subdirectory; this directory on your system will be mounted to the <code>/self</code> directory inside the Docker container.</p>
+<pre><code>docker run --mount type=bind,source="$(pwd)/examples/brg1d/traveling_shock",target="/self" \
+           self:latest \
+           "cd /self &amp;&amp; /opt/self/bin/self -i /self/input.json"
 </code></pre>
+<p>Note that the command being run inside the container is <code>/opt/self/bin/self</code> which is the full path to the main SELF program in the container image. This program takes <code>/self/input.json</code> as its main input. All of the model output for</p>
 </article>
 </div>
 </div>
 </main>
 <footer class="md-footer">
 <nav aria-label="Footer" class="md-footer__inner md-grid">
-<a aria-label="Previous: Home" class="md-footer__link md-footer__link--prev" href="../.." rel="prev">
+<a aria-label="Previous: Linear Shallow Water Gravity Wave" class="md-footer__link md-footer__link--prev" href="../../Tutorials/docker/lswGravityWave/" rel="prev">
 <div class="md-footer__button md-icon">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
 </div>
@@ -472,17 +632,17 @@ docker build . -f docker/base/amd/Dockerfile -t self-base:amd-rocm5.2
 <span class="md-footer__direction">
                 Previous
               </span>
-              Home
+              Linear Shallow Water Gravity Wave
             </div>
 </div>
 </a>
-<a aria-label="Next: Spectral Approximations" class="md-footer__link md-footer__link--next" href="../../Learning/SpectralApproximations/" rel="next">
+<a aria-label="Next: Traveling shockwave in 1-D" class="md-footer__link md-footer__link--next" href="../../Tutorials/TravelingShock/" rel="next">
 <div class="md-footer__title">
 <div class="md-ellipsis">
 <span class="md-footer__direction">
                 Next
               </span>
-              Spectral Approximations
+              Traveling shockwave in 1-D
             </div>
 </div>
 <div class="md-footer__button md-icon">
@@ -507,8 +667,8 @@ docker build . -f docker/base/amd/Dockerfile -t self-base:amd-rocm5.2
 <div class="md-dialog" data-md-component="dialog">
 <div class="md-dialog__inner md-typeset"></div>
 </div>
-<script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
-<script src="../../assets/javascripts/bundle.d691e9de.min.js"></script>
+<script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.5bf1dace.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.37e9125f.min.js"></script>
 <script src="../../javascripts/mathjax.js"></script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
