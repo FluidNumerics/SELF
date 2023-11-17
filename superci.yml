@@ -1,0 +1,16 @@
+steps:
+  - name : "Build, Test, and get coverage"
+    sbatch_options: 
+      - "--ntasks=1"
+      - "--time=5:00"
+    modules:
+    env:
+      BUILD_DIR: ${WORKSPACE}/build
+      PREFIX: ${WORKSPACE}/opt/self
+      OUTDIR: ${WORKSPACE}/local
+      BUILD_TYPE: "Coverage"
+    commands: 
+      - |
+        hostname
+        env
+        sleep 10
