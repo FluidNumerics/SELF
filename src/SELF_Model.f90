@@ -13,7 +13,6 @@ MODULE SELF_Model
   USE SELF_HDF5
   USE HDF5
   USE FEQParse
-  USE SELF_Config
 
   IMPLICIT NONE
 
@@ -497,12 +496,11 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
 
   END SUBROUTINE EnableGPUAccel_Model
 
-  SUBROUTINE SetInitialConditions_Model(this, config)
+  SUBROUTINE SetInitialConditions_Model(this)
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
-    TYPE(SELFConfig), INTENT(inout) :: config
 
     INFO("No model, so nothing to set")
 

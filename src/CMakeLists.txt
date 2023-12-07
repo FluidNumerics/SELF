@@ -11,20 +11,18 @@ set_source_files_properties(
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
 # add_library(self SHARED ${SELF_FSRC} ${SELF_HIPSRC})
-# target_link_libraries(self PRIVATE ${libjsonfortran} ${libfeqparse} ${HDF5_LIBRARIES} ${MPI_Fortran_LIBRARIES})
-# target_include_directories(self PRIVATE ${incjsonfortran} ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
+# target_link_libraries(self PRIVATE ${libfeqparse} ${HDF5_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+# target_include_directories(self PRIVATE ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
 # target_compile_options(self PRIVATE -fPIC)
 
 add_library(self-static STATIC ${SELF_FSRC} ${SELF_HIPSRC})
 
 target_link_libraries(self-static PRIVATE 
-                        ${JSONFORTRAN_LIBRARIES} 
                         ${FEQPARSE_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${MPI_Fortran_LIBRARIES})
 
 target_include_directories(self-static PRIVATE 
-                        ${JSONFORTRAN_INCLUDE_DIRS} 
                         ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS})

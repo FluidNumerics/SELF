@@ -59,9 +59,9 @@ find_package(MPI COMPONENTS Fortran REQUIRED)
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)
 
-# JSON-Fortran
-find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
-find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+# # JSON-Fortran
+# find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
+# find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
 
 
 # FEQ-Parse
@@ -73,9 +73,6 @@ find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
-
-# Driver programs
-add_subdirectory(${CMAKE_SOURCE_DIR}/bin)
 
 # Tests
 add_subdirectory(${CMAKE_SOURCE_DIR}/test)
