@@ -139,21 +139,6 @@ MODULE SELF_Mesh
   INTEGER, PARAMETER :: SELF_MESH_HOPR_2D = 3
   INTEGER, PARAMETER :: SELF_MESH_HOPR_3D = 4
 
-  TYPE MeshSpec
-    CHARACTER(self_FileNameLength) :: filename
-    INTEGER :: fileType
-
-    LOGICAL :: blockMesh
-    INTEGER :: blockMesh_nGeo
-    INTEGER :: blockMesh_nElemX
-    INTEGER :: blockMesh_nElemY
-    INTEGER :: blockMesh_nElemZ
-    REAL(prec) :: blockMesh_x0,blockMesh_x1
-    REAL(prec) :: blockMesh_y0,blockMesh_y1
-    REAL(prec) :: blockMesh_z0,blockMesh_z1
-
-  END TYPE MeshSpec
-
   TYPE MPILayer
     LOGICAL :: mpiEnabled
     INTEGER :: mpiComm
@@ -213,8 +198,7 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
-    GENERIC,PUBLIC  :: Read_HOPr => Read_HOPr_Mesh1D_serial,Read_HOPr_Mesh1D_parallel
-    PROCEDURE,PRIVATE :: Read_HOPr_Mesh1D_serial,Read_HOPr_Mesh1D_parallel
+    PROCEDURE,PUBLIC  :: Read_HOPr => Read_HOPr_Mesh1D
 
     PROCEDURE,PUBLIC  :: Write_Mesh => Write_Mesh1D
 
@@ -242,8 +226,6 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D
 
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D
-    !Read_HOPr_Mesh2D_serial,Read_HOPr_Mesh2D_parallel
-    !PROCEDURE,PRIVATE :: Read_HOPr_Mesh2D_serial,Read_HOPr_Mesh2D_parallel
 
     PROCEDURE,PUBLIC :: Write_Mesh => Write_Mesh2D
 
@@ -417,7 +399,7 @@ CONTAINS
 
   END SUBROUTINE UniformBlockMesh_Mesh1D
 
-  SUBROUTINE Read_HOPr_Mesh1D_serial(myMesh,meshFile)
+  SUBROUTINE Read_HOPr_Mesh1D(myMesh,meshFile)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
     IMPLICIT NONE
@@ -479,84 +461,7 @@ CONTAINS
     CALL nodeCoords % Free()
     CALL globalNodeIDs % Free()
 
-  END SUBROUTINE Read_HOPr_Mesh1D_serial
-
-  SUBROUTINE Read_HOPr_Mesh1D_parallel(myMesh,meshFile,decomp)
-    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-    ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(out) :: myMesh
-    CHARACTER(*),INTENT(in) :: meshFile
-    TYPE(MPILayer),INTENT(inout) :: decomp
-    ! Local
-    INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: offset(1:2),gOffset(1)
-    INTEGER :: nGlobalElem
-    INTEGER :: firstElem,nLocalElems
-    INTEGER :: firstNode,nLocalNodes
-    INTEGER :: nGeo,nBCs
-    TYPE(hfInt32_r2) :: elemInfo
-    TYPE(hfReal_r1) :: nodeCoords
-    TYPE(hfInt32_r1) :: globalNodeIDs
-    TYPE(hfInt32_r2) :: bcType
-
-    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
-
-    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
-    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
-
-    CALL decomp % SetElemToRank(nGlobalElem)
-
-    ! Read BCType
-    CALL bcType % Alloc(loBound=(/1,1/), &
-                        upBound=(/4,nBCs/))
-    offset(:) = 0
-    CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
-
-    ! Read local subarray of ElemInfo
-    firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
-                  decomp % offsetElem % hostData(decomp % rankId)
-
-    ! Allocate Space for elemInfo!
-    CALL elemInfo % Alloc(loBound=(/1,1/), &
-                               upBound=(/6,nLocalElems/))
-
-    offset = (/0,firstElem - 1/)
-    CALL ReadArray_HDF5(fileId,'ElemInfo',elemInfo,offset)
-
-    ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode = elemInfo % hostData(5,1) + 1
-    nLocalNodes = elemInfo % hostData(6,nLocalElems) - elemInfo % hostData(5,1)
-
-    ! Allocate Space for nodeCoords and globalNodeIDs !
-    CALL nodeCoords % Alloc(loBound=1, &
-                                 upBound=nLocalNodes)
-
-    CALL globalNodeIDs % Alloc(loBound=1, &
-                                    upBound=nLocalNodes)
-
-    gOffset = (/firstNode - 1/)
-    CALL ReadArray_HDF5(fileId,'NodeCoords',nodeCoords,gOffset)
-    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',globalNodeIDs,gOffset)
-
-    CALL Close_HDF5(fileID)
-
-    CALL myMesh % Init(nGeo,nLocalElems,nLocalNodes,nBCs)
-
-    ! Copy data from local arrays into myMesh
-    myMesh % elemInfo = elemInfo
-    myMesh % nodeCoords = nodeCoords
-    myMesh % globalNodeIDs = globalNodeIDs
-
-    CALL myMesh % UpdateDevice()
-
-    CALL elemInfo % Free()
-    CALL nodeCoords % Free()
-    CALL globalNodeIDs % Free()
-
-  END SUBROUTINE Read_HOPr_Mesh1D_parallel
+  END SUBROUTINE Read_HOPr_Mesh1D
 
   SUBROUTINE Write_Mesh1D(myMesh,meshFile)
     ! Writes mesh output in HOPR format (serial IO only)
@@ -715,137 +620,6 @@ CONTAINS
     ENDDO
 
   END SUBROUTINE ResetBoundaryConditionType_Mesh2D 
-
-!  SUBROUTINE Read_HOPr_Mesh2D_serial(myMesh,meshFile)
-!    !! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-!    !! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
-!    !! 
-!    !! This reader assumes that an extruded 3-D mesh is created with a single
-!    !! extrusion layer in HOPr so that the element connectivity information
-!    !! is preserved.
-!    IMPLICIT NONE
-!    CLASS(Mesh2D),INTENT(out) :: myMesh
-!    CHARACTER(*),INTENT(in) :: meshFile
-!    ! Local
-!    INTEGER(HID_T) :: fileId
-!    INTEGER :: nGlobalElem
-!    INTEGER :: nLocalNodes3D
-!    INTEGER :: nLocalSides3D
-!    INTEGER :: nUniqueSides3D
-!    INTEGER :: nLocalNodes2D
-!    INTEGER :: nLocalSides2D
-!    INTEGER :: nUniqueSides2D
-!    INTEGER :: nGeo,nBCs
-!    INTEGER :: eid, lsid, iSide, nid
-!    INTEGER :: i, j
-!    TYPE(hfInt32_r2) :: hopr_elemInfo
-!    TYPE(hfInt32_r2) :: hopr_sideInfo
-!    TYPE(hfReal_r2) :: hopr_nodeCoords
-!    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
-!    TYPE(hfInt32_r2) :: bcType
-!
-!    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
-!
-!    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
-!    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
-!    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
-!    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
-!
-!    ! Read BCType
-!    CALL bcType % Alloc(loBound=(/1,1/), &
-!                        upBound=(/4,nBCs/))
-!    CALL ReadArray_HDF5(fileId,'BCType',bcType)
-!
-!    ! ---- This section reads in the 3-D mesh information ---- !
-!
-!    ! Allocate Space for hopr_elemInfo!
-!    CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-!                               upBound=(/6,nGlobalElem/))
-!
-!    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
-!
-!    ! Read local subarray of NodeCoords and GlobalNodeIDs
-!    nLocalNodes3D = hopr_elemInfo % hostData(6,nGlobalElem) - hopr_elemInfo % hostData(5,1)
-!
-!    ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
-!    CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-!                                 upBound=(/3,nLocalNodes3D/))
-!
-!    CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-!                                    upBound=nLocalNodes3D)
-!
-!    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
-!    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
-!
-!    ! Read local subarray of SideInfo
-!    nLocalSides3D = hopr_elemInfo % hostData(4,nGlobalElem) - hopr_elemInfo % hostData(3,1)
-!
-!    ! Allocate space for hopr_sideInfo
-!    CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
-!                               upBound=(/5,nLocalSides3D/))
-!
-!    CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
-!
-!    CALL Close_HDF5(fileID)
-!    ! ---- Done reading 3-D Mesh information ---- !
-!
-!    ! Now we need to convert from 3-D to 2-D !
-!    nLocalSides2D = nLocalSides3D - 2*nGlobalElem
-!    nUniqueSides2D = nUniqueSides3D - 2*nGlobalElem ! Remove the "top" and "bottom" faces
-!    nLocalNodes2D = nLocalNodes2D - nGlobalElem*nGeo*(nGeo+1)**2 ! Remove the third dimension
-!
-!    CALL myMesh % Init(nGeo,nGlobalElem,nLocalSides2D,nLocalNodes2D,nBCs)
-!
-!    ! Copy data from local arrays into myMesh
-!    !  elemInfo(1:6,iEl)
-!    !    1 - Element Type
-!    !    2 - Zone
-!    !    3 - offset index for side array (not needed when all quads are assumed)
-!    !    4 - last index for side array (not needed when all quads are assumed)
-!    !    5 - offset index for node array (not needed when all quads are assumed)
-!    !    6 - last index for node array (not needed when all quads are assumed)
-!    myMesh % elemInfo % hostData = hopr_elemInfo % hostData
-!    myMesh % quadrature = UNIFORM  ! HOPr uses uniformly spaced points
-!
-!    ! Grab the node coordinates (x and y only) from the "bottom" layer of the extruded mesh
-!    DO eid = 1, myMesh % nElem
-!      DO j = 0, nGeo
-!        DO i = 0, nGeo
-!          nid = i+1 + (nGeo+1)*(j + (nGeo+1)*((nGeo+1)*(eid-1)))
-!          myMesh % nodeCoords % hostData(1:2,i,j,eid) = hopr_nodeCoords % hostData(1:2,nid)
-!          myMesh % globalNodeIDs % hostData(i,j,eid) = hopr_globalNodeIDs % hostData(nid)
-!        ENDDO
-!      ENDDO
-!    ENDDO
-!
-!    ! Grab the south, west, north, and south sides of the elements 
-!    !  sideInfo(1:5,iSide,iEl)
-!    !
-!    !    1 - Side Type (currently unused in SELF)
-!    !    2 - Global Side ID (Used for message passing. Don't need to change)
-!    !    3 - Neighbor Element ID (Can stay the same)
-!    !    4 - 10*( neighbor local side )  + flip (Need to recalculate flip)
-!    !    5 - Boundary Condition ID (Can stay the same)
-!    DO eid = 1,myMesh % nElem
-!      DO lsid = 1,4
-!        ! Calculate the 3-D side ID from the 2-D local side id and element ID
-!        iSide = lsid + 1 + 6*(eid-1)
-!        myMesh % sideInfo % hostData(1:5,lsid,eid) = hopr_sideInfo % hostData(1:5,iSide)
-!        ! Adjust the secondary side index for 2-D
-!        myMesh % sideInfo % hostData(4,lsid,eid) = myMesh % sideInfo % hostData(4,lsid,eid)-10
-!      ENDDO
-!    ENDDO
-!
-!    CALL myMesh % RecalculateFlip()
-!
-!    CALL myMesh % UpdateDevice()
-!
-!    CALL hopr_elemInfo % Free()
-!    CALL hopr_nodeCoords % Free()
-!    CALL hopr_globalNodeIDs % Free()
-!    CALL hopr_sideInfo % Free()
-!
-!  END SUBROUTINE Read_HOPr_Mesh2D_serial
 
   SUBROUTINE Read_HOPr_Mesh2D(myMesh,meshFile,decomp)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
@@ -1974,28 +1748,28 @@ CONTAINS
 !    P = P1 + P2 + P3
 !
 !  END FUNCTION TransfiniteInterpolation
-  FUNCTION Unidirectional(valLeft,valRight,a) RESULT(P)
-    !
-    ! =============================================================================================== !
-    ! DECLARATIONS
-    IMPLICIT NONE
-    REAL(prec) :: valLeft(1:3),valRight(1:3)
-    REAL(prec) :: a
-    REAL(prec) :: P(1:3)
+  ! FUNCTION Unidirectional(valLeft,valRight,a) RESULT(P)
+  !   !
+  !   ! =============================================================================================== !
+  !   ! DECLARATIONS
+  !   IMPLICIT NONE
+  !   REAL(prec) :: valLeft(1:3),valRight(1:3)
+  !   REAL(prec) :: a
+  !   REAL(prec) :: P(1:3)
 
-    P = 0.5_prec*((1.0_prec - a)*valLeft + (1.0_prec + a)*valRight)
+  !   P = 0.5_prec*((1.0_prec - a)*valLeft + (1.0_prec + a)*valRight)
 
-  END FUNCTION Unidirectional
-  FUNCTION LinearBlend(a) RESULT(weights)
+  ! END FUNCTION Unidirectional
+  ! FUNCTION LinearBlend(a) RESULT(weights)
 
-    IMPLICIT NONE
-    REAL(prec) :: a
-    REAL(prec) :: weights(1:2)
+  !   IMPLICIT NONE
+  !   REAL(prec) :: a
+  !   REAL(prec) :: weights(1:2)
 
-    weights(1) = 0.5_prec*(1.0_prec - a)
-    weights(2) = 0.5_prec*(1.0_prec + a)
+  !   weights(1) = 0.5_prec*(1.0_prec - a)
+  !   weights(2) = 0.5_prec*(1.0_prec + a)
 
-  END FUNCTION LinearBlend
+  ! END FUNCTION LinearBlend
 
   SUBROUTINE Init_MPILayer(this,enableMPI)
 #undef __FUNC__
