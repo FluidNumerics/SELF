@@ -59,34 +59,35 @@ CONTAINS
 
   END SUBROUTINE SetUnits_Metadata
 
-  SUBROUTINE WriteHDF5_Metadata(mtd,group,fileId)
+  SUBROUTINE WriteHDF5_Metadata(mtd,group,varid,fileId)
   !! Writes the metadata to a HDF5 file using the 
   !! fields :
-  !!  * `/metadata/{group}/{name}/`
-  !!  * `/metadata/{group}/{name}/description`
-  !!  * `/metadata/{group}/{name}/units`
+  !!  * `/metadata/{group}/name/{varid}`
+  !!  * `/metadata/{group}/description/{varid}`
+  !!  * `/metadata/{group}/units/{varid}`
   !!
   !! This method assumes that an HDF5 file is already
   !! open for writing and is associated with the `fileId` 
   !! input.
     CLASS(Metadata), INTENT(in) :: mtd
     CHARACTER(*), INTENT(in) :: group
+    INTEGER, INTENT(in) :: varid
     INTEGER(HID_T), INTENT(in) :: fileId
     ! Local
     CHARACTER(4) :: varNumber
 
     ! Add variable names to the file
     CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/"//TRIM(mtd % name))
-    ! CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/"//TRIM(mtd % name)//"/description")
-    ! CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/"//TRIM(mtd % name)//"/units")
+    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/name")
+    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/description")
+    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/units")
   
     WRITE (varNumber,"(I0)") varid
     CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/name/"//TRIM(varnumber), &
                                    TRIM(mtd % name))
-    CALL WriteCharacter_HDF5(fileId,TRIM(group)//"/metadata/"//TRIM(mtd % name)//"/description", &
+    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/description/"//TRIM(varnumber), &
                                 TRIM(mtd % description))
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/"//TRIM(mtd % name)//"/units", &
+    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/units/"//TRIM(varnumber), &
                                 TRIM(mtd % units))
   END SUBROUTINE WriteHDF5_Metadata
 
