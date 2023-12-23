@@ -1,0 +1,53 @@
+steps:
+  - name : "Build on Noether"
+    slurm_options: 
+      - "--partition=mi210"
+      - "--gpus=1"
+      - "--ntasks=1"
+      - "--cpus-per-task=16"
+      - "--time=15:00"
+    modules:
+      - gcc/13.2.0
+      - openmpi/5.0.0
+      - hdf5
+      - feq-parse
+      - jsonfortran
+    env:
+      BUILD_DIR: ${WORKSPACE}/build
+      PREFIX: ${WORKSPACE}/opt/self
+      OUTDIR: ${WORKSPACE}/local
+      GPU_TARGET: gfx90a
+    commands: 
+      - |
+        mkdir -p ${WORKSPACE}/build
+        cd ${WORKSPACE}/build
+        FC=gfortran \
+        FFLAGS="-DDOUBLE_PRECISION" \
+        cmake -DCMAKE_PREFIX_PATH=/opt/rocm \
+              -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
+              -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/opt/self \
+              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              ../
+        make VERBOSE=1
+        make install
+
+        # Initialize coverage
+        mkdir -p ${WORKSPACE}/tmp/
+        lcov --no-external \
+              --capture \
+              --initial \
+              --directory ${BUILD_DIR} \
+              --output-file ${WORKSPACE}/tmp/lcov_base.info
+
+        # Run ctests
+        ctest --test-dir ${BUILD_DIR}/build/test
+
+        # Compile coverage information
+        lcov --no-external \
+            --capture \
+            --directory ${BUILD_DIR} \
+            --output-file ${WORKSPACE}/tmp/lcov_test.info
+
+        lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
+             --add-tracefile ${WORKSPACE}/tmp/lcov_test.info \ 
+             --output-file ${OUTDIR}/lcov.info
