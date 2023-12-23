@@ -422,25 +422,25 @@ MODULE SELF_Lagrange
     END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
   END INTERFACE
 
-  ! INTERFACE
-  !   SUBROUTINE P2VectorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="P2VectorDivergence_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE P2VectorDivergence_2D_gpu_wrapper
-  ! END INTERFACE
+  INTERFACE
+    SUBROUTINE P2VectorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="P2VectorDivergence_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE P2VectorDivergence_2D_gpu_wrapper
+  END INTERFACE
 
-  ! INTERFACE
-  !  SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="P2VectorDGDivergence_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper
-  ! END INTERFACE
+  INTERFACE
+   SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="P2VectorDGDivergence_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper
+  END INTERFACE
 
   INTERFACE
     SUBROUTINE VectorCurl_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
@@ -702,7 +702,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{m,iEl,iVar} = \sum_{i=0}^N f_{i,iEl,iVar} I_{i,m} $$
+    !! $$ \tilde{f}_{m,ivar,iel} = \sum_{i=0}^N f_{i,ivar,iel} I_{i,m} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -711,19 +711,19 @@ CONTAINS
     !! The number of variables/functions that are interpolated
     INTEGER,INTENT(in)     :: nElements
     !! The number of spectral elements in the SEM grid
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nVariables,1:nElements)
     !! (Input) Array of function values, defined on the control grid
-    REAL(prec),INTENT(out) :: fInterp(0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: fInterp(0:myPoly % M,1:nVariables,1:nElements)
     !! (Output) Array of function values, defined on the target grid
     ! Local
-    INTEGER :: iEl,iVar,i,ii
+    INTEGER :: iVar,iEl,i,ii
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO i = 0,myPoly % M
-          fInterp(i,iEl,iVar) = 0.0_prec
+          fInterp(i,iVar,iEl) = 0.0_prec
           DO ii = 0,myPoly % N
-            fInterp(i,iEl,iVar) = fInterp(i,iEl,iVar) + myPoly % iMatrix % hostData(ii,i)*f(ii,iEl,iVar)
+            fInterp(i,iVar,iEl) = fInterp(i,iVar,iEl) + myPoly % iMatrix % hostData(ii,i)*f(ii,iVar,iEl)
           END DO
         END DO
       END DO
@@ -743,7 +743,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{m,iEl,iVar} = \sum_{i=0}^N f_{i,iEl,iVar} I_{i,m} $$
+    !! $$ \tilde{f}_{m,ivar,iel} = \sum_{i=0}^N f_{i,ivar,iel} I_{i,m} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -775,7 +775,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{m,n,iEl,iVar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iEl,iVar} I_{i,m} I_{j,n} $$
+    !! $$ \tilde{f}_{m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,ivar,iel} I_{i,m} I_{j,n} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -784,16 +784,16 @@ CONTAINS
     !! The number of variables/functions that are interpolated
     INTEGER,INTENT(in)     :: nElements
     !! The number of spectral elements in the SEM grid
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     !! (Input) Array of function values, defined on the control grid
-    REAL(prec),INTENT(out) :: fNew(0:myPoly % M,0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: fNew(0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi,fij
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % M
           DO i = 0,myPoly % M
 
@@ -801,11 +801,11 @@ CONTAINS
             DO jj = 0,myPoly % N
               fi = 0.0_prec
               DO ii = 0,myPoly % N
-                fi = fi + f(ii,jj,iEl,iVar)*myPoly % iMatrix % hostData(ii,i)
+                fi = fi + f(ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
               END DO
               fij = fij + fi*myPoly % iMatrix % hostData(jj,j)
             END DO
-            fNew(i,j,iEl,iVar) = fij
+            fNew(i,j,iVar,iEl) = fij
 
           END DO
         END DO
@@ -826,7 +826,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{m,n,iEl,iVar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iEl,iVar} I_{i,m} I_{j,n} $$
+    !! $$ \tilde{f}_{m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,ivar,iel} I_{i,m} I_{j,n} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -858,7 +858,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{dir,m,n,iEl,iVar} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,iEl,iVar} I_{i,m} I_{j,n} $$
+    !! $$ \tilde{f}_{dir,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,ivar,iel} I_{i,m} I_{j,n} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -867,30 +867,30 @@ CONTAINS
     !! The number of variables/functions that are interpolated
     INTEGER,INTENT(in)     :: nElements
     !! The number of spectral elements in the SEM grid
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     !! (Input) Array of function values, defined on the control grid
-    REAL(prec),INTENT(out) :: fNew(1:2,0:myPoly % M,0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: fNew(1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi(1:2)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % M
           DO i = 0,myPoly % M
 
-            fNew(1,i,j,iEl,iVar) = 0.0_prec
-            fNew(2,i,j,iEl,iVar) = 0.0_prec
+            fNew(1,i,j,iVar,iEl) = 0.0_prec
+            fNew(2,i,j,iVar,iEl) = 0.0_prec
 
             DO jj = 0,myPoly % N
 
               fi(1:2) = 0.0_prec
               DO ii = 0,myPoly % N
-                fi(1:2) = fi(1:2) + f(1:2,ii,jj,iEl,iVar)*myPoly % iMatrix % hostData(ii,i)
+                fi(1:2) = fi(1:2) + f(1:2,ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
               END DO
 
-              fNew(1:2,i,j,iEl,iVar) = fNew(1:2,i,j,iEl,iVar) + fi(1:2)*myPoly % iMatrix % hostData(jj,j)
+              fNew(1:2,i,j,iVar,iEl) = fNew(1:2,i,j,iVar,iEl) + fi(1:2)*myPoly % iMatrix % hostData(jj,j)
 
             END DO
 
@@ -913,7 +913,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{dir,m,n,iEl,iVar} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,iEl,iVar} I_{i,m} I_{j,n} $$
+    !! $$ \tilde{f}_{dir,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,ivar,iel} I_{i,m} I_{j,n} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -945,7 +945,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-tensor multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{row,col,m,n,iEl,iVar} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,iEl,iVar} I_{i,m} I_{j,n} $$
+    !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -954,29 +954,29 @@ CONTAINS
     !! The number of variables/functions that are interpolated
     INTEGER,INTENT(in)     :: nElements
     !! The number of spectral elements in the SEM grid
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     !! (Input) Array of function values, defined on the control grid
-    REAL(prec),INTENT(out) :: fNew(1:2,1:2,0:myPoly % M,0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: fNew(1:2,1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi(1:2,1:2)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % M
           DO i = 0,myPoly % M
 
-            fNew(1:2,1:2,i,j,iEl,iVar) = 0.0_prec
+            fNew(1:2,1:2,i,j,iVar,iEl) = 0.0_prec
 
             DO jj = 0,myPoly % N
 
               fi(1:2,1:2) = 0.0_prec
               DO ii = 0,myPoly % N
-                fi(1:2,1:2) = fi(1:2,1:2) + f(1:2,1:2,ii,jj,iEl,iVar)*myPoly % iMatrix % hostData(ii,i)
+                fi(1:2,1:2) = fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
               END DO
 
-              fNew(1:2,1:2,i,j,iEl,iVar) = fNew(1:2,1:2,i,j,iEl,iVar) + fi(1:2,1:2)*myPoly % iMatrix % hostData(jj,j)
+              fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrix % hostData(jj,j)
 
             END DO
 
@@ -999,7 +999,7 @@ CONTAINS
     !! Interpolation is applied using a series of matrix-vector multiplications, using
     !! the Lagrange class's interpolation matrix
     !!
-    !! $$ \tilde{f}_{row,col,m,n,iEl,iVar} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,iEl,iVar} I_{i,m} I_{j,n} $$
+    !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
     !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1024,14 +1024,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: fInterp(0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: fInterp(0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     ! Local
     INTEGER :: iEl,iVar,i,j,k,ii,jj,kk
     REAL(prec) :: fi,fij,fijk
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % M
           DO j = 0,myPoly % M
             DO i = 0,myPoly % M
@@ -1042,13 +1042,13 @@ CONTAINS
                 DO jj = 0,myPoly % N
                   fi = 0.0_prec
                   DO ii = 0,myPoly % N
-                    fi = fi + f(ii,jj,kk,iEl,iVar)*myPoly % iMatrix % hostData(ii,i)
+                    fi = fi + f(ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                   END DO
                   fij = fij + fi*myPoly % iMatrix % hostData(jj,j)
                 END DO
                 fijk = fijk + fij*myPoly % iMatrix % hostData(kk,k)
               END DO
-              fInterp(i,j,k,iEl,iVar) = fijk
+              fInterp(i,j,k,iVar,iEl) = fijk
 
             END DO
           END DO
@@ -1076,29 +1076,29 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: fInterp(1:3,0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: fInterp(1:3,0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     ! Local
     INTEGER :: iEl,iVar,i,j,k,ii,jj,kk
     REAL(prec) :: fi(1:3),fij(1:3)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % M
           DO j = 0,myPoly % M
             DO i = 0,myPoly % M
 
-              fInterp(1:3,i,j,k,iEl,iVar) = 0.0_prec
+              fInterp(1:3,i,j,k,iVar,iEl) = 0.0_prec
               DO kk = 0,myPoly % N
                 fij(1:3) = 0.0_prec
                 DO jj = 0,myPoly % N
                   fi(1:3) = 0.0_prec
                   DO ii = 0,myPoly % N
-                    fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iEl,iVar)*myPoly % iMatrix % hostData(ii,i)
+                    fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                   END DO
                   fij(1:3) = fij(1:3) + fi(1:3)*myPoly % iMatrix % hostData(jj,j)
                 END DO
-                fInterp(1:3,i,j,k,iEl,iVar) = fInterp(1:3,i,j,k,iEl,iVar) + fij(1:3)*myPoly % iMatrix % hostData(kk,k)
+                fInterp(1:3,i,j,k,iVar,iEl) = fInterp(1:3,i,j,k,iVar,iEl) + fij(1:3)*myPoly % iMatrix % hostData(kk,k)
               END DO
 
             END DO
@@ -1127,29 +1127,29 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: fInterp(1:3,1:3,0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: fInterp(1:3,1:3,0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     ! Local
     INTEGER :: iEl,iVar,i,j,k,ii,jj,kk
     REAL(prec) :: fi(1:3,1:3),fij(1:3,1:3)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % M
           DO j = 0,myPoly % M
             DO i = 0,myPoly % M
 
-              fInterp(1:3,1:3,i,j,k,iEl,iVar) = 0.0_prec
+              fInterp(1:3,1:3,i,j,k,iVar,iEl) = 0.0_prec
               DO kk = 0,myPoly % N
                 fij(1:3,1:3) = 0.0_prec
                 DO jj = 0,myPoly % N
                   fi(1:3,1:3) = 0.0_prec
                   DO ii = 0,myPoly % N
-                    fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iEl,iVar)*myPoly % iMatrix % hostData(ii,i)
+                    fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                   END DO
                   fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrix % hostData(jj,j)
                 END DO
-                fInterp(1:3,1:3,i,j,k,iEl,iVar) = fInterp(1:3,1:3,i,j,k,iEl,iVar) + &
+                fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + &
                                                   fij(1:3,1:3)*myPoly % iMatrix % hostData(kk,k)
               END DO
 
@@ -1195,8 +1195,8 @@ CONTAINS
 !
 !     TYPE(Lagrange) :: interp
 !     INTEGER        :: nVariables, nElements
-!     REAL(prec)     :: f(0:interp % N,1:nElements,1:nVariables)
-!     REAL(prec)     :: derF(0:interp % N,1:nElements,1:nVariables)
+!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements)
+!     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements)
 !
 !       CALL interp % Derivative_1D( f, derF, nVariables, nElements )
 !
@@ -1223,18 +1223,18 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: df(0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: df(0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i,ii,iEl,iVar
+    INTEGER :: i,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO i = 0,myPoly % N
 
-          df(i,iEl,iVar) = 0.0_prec
+          df(i,iVar,iEl) = 0.0_prec
           DO ii = 0,myPoly % N
-            df(i,iEl,iVar) = df(i,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(ii,iEl,iVar)
+            df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,iVar,iEl)
           END DO
 
         END DO
@@ -1261,24 +1261,24 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bf(1:nVariables,1:2,1:nElements)
-    REAL(prec),INTENT(out) :: df(0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: df(0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i,ii,iEl,iVar
+    INTEGER :: i,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO i = 0,myPoly % N
 
           ! Interior Derivative Matrix Application
-          df(i,iEl,iVar) = 0.0_prec
+          df(i,iVar,iEl) = 0.0_prec
           DO ii = 0,myPoly % N
-            df(i,iEl,iVar) = df(i,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(ii,iEl,iVar)
+            df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(ii,iVar,iEl)
           END DO
 
           ! Boundary Contribution
-          df(i,iEl,iVar) = df(i,iEl,iVar) + (bf(iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
+          df(i,iVar,iEl) = df(i,iVar,iEl) + (bf(iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
                                              bf(iVar,1,iEl)*myPoly % bMatrix % hostData(i,0))/ &
                            myPoly % qWeights % hostData(i)
 
@@ -1327,8 +1327,8 @@ CONTAINS
 !
 !     TYPE(Lagrange) :: interp
 !     INTEGER        :: nVariables, nElements
-!     REAL(prec)     :: f(0:interp % N,0:interp % N,1:nElements,1:nVariables)
-!     REAL(prec)     :: gradF(1:2,0:interp % N,0:interp % N,1:nElements,1:nVariables)
+!     REAL(prec)     :: f(0:interp % N,0:interp % N,1:nVariables,1:nElements)
+!     REAL(prec)     :: gradF(1:2,0:interp % N,0:interp % N,1:nVariables,1:nElements)
 !
 !       CALL interp % CalculateGradient_2D( f, gradF, nVariables, nElements )
 !
@@ -1355,21 +1355,21 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            gradF(1,i,j,iEl,iVar) = 0.0_prec
-            gradF(2,i,j,iEl,iVar) = 0.0_prec
+            gradF(1,i,j,iVar,iEl) = 0.0_prec
+            gradF(2,i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              gradF(1,i,j,iEl,iVar) = gradF(1,i,j,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,iEl,iVar)
-              gradF(2,i,j,iEl,iVar) = gradF(2,i,j,iEl,iVar) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,iEl,iVar)
+              gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,iVar,iEl)
+              gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,iVar,iEl)
             END DO
 
           END DO
@@ -1397,30 +1397,30 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bf(0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            gradF(1,i,j,iEl,iVar) = 0.0_prec
-            gradF(2,i,j,iEl,iVar) = 0.0_prec
+            gradF(1,i,j,iVar,iEl) = 0.0_prec
+            gradF(2,i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              gradF(1,i,j,iEl,iVar) = gradF(1,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(ii,j,iEl,iVar)
-              gradF(2,i,j,iEl,iVar) = gradF(2,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,j)*f(i,ii,iEl,iVar)
+              gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(ii,j,iVar,iEl)
+              gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(i,ii,iVar,iEl)
             END DO
 
             ! Boundary Contribution
-            gradF(1,i,j,iEl,iVar) = gradF(1,i,j,iEl,iVar) + (bf(j,iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
+            gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + (bf(j,iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
                                                              bf(j,iVar,4,iEl)*myPoly % bMatrix % hostData(i,0))/ &
                                     myPoly % qWeights % hostData(i)
 
-            gradF(2,i,j,iEl,iVar) = gradF(2,i,j,iEl,iVar) + (bf(i,iVar,3,iEl)*myPoly % bMatrix % hostData(j,1) + &
+            gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + (bf(i,iVar,3,iEl)*myPoly % bMatrix % hostData(j,1) + &
                                                              bf(i,iVar,1,iEl)*myPoly % bMatrix % hostData(j,0))/ &
                                     myPoly % qWeights % hostData(j)
 
@@ -1458,14 +1458,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
     REAL(prec) :: gf(1:2,1:2)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
@@ -1474,12 +1474,12 @@ CONTAINS
             gf(1,2) = 0.0_prec
             gf(2,2) = 0.0_prec
             DO ii = 0,myPoly % N
-              gf(1,1) = gf(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iEl,iVar)
-              gf(2,1) = gf(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iEl,iVar)
-              gf(1,2) = gf(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iEl,iVar)
-              gf(2,2) = gf(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iEl,iVar)
+              gf(1,1) = gf(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+              gf(2,1) = gf(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+              gf(1,2) = gf(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+              gf(2,2) = gf(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
-            gradF(1:2,1:2,i,j,iEl,iVar) = gf(1:2,1:2)
+            gradF(1:2,1:2,i,j,iVar,iEl) = gf(1:2,1:2)
 
           END DO
         END DO
@@ -1512,40 +1512,40 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bf(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            gradF(1,1,i,j,iEl,iVar) = 0.0_prec
-            gradF(2,1,i,j,iEl,iVar) = 0.0_prec
-            gradF(1,2,i,j,iEl,iVar) = 0.0_prec
-            gradF(2,2,i,j,iEl,iVar) = 0.0_prec
+            gradF(1,1,i,j,iVar,iEl) = 0.0_prec
+            gradF(2,1,i,j,iVar,iEl) = 0.0_prec
+            gradF(1,2,i,j,iVar,iEl) = 0.0_prec
+            gradF(2,2,i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              gradF(1,1,i,j,iEl,iVar) = gradF(1,1,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iEl,iVar)
-              gradF(2,1,i,j,iEl,iVar) = gradF(2,1,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(2,ii,j,iEl,iVar)
-              gradF(1,2,i,j,iEl,iVar) = gradF(1,2,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,j)*f(1,i,ii,iEl,iVar)
-              gradF(2,2,i,j,iEl,iVar) = gradF(2,2,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iEl,iVar)
+              gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+              gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+              gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+              gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
-            gradF(1,1,i,j,iEl,iVar) = gradF(1,1,i,j,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) + &
+            gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) + &
                                                                  myPoly % bMatrix % hostData(i,0)*bf(1,j,iVar,4,iEl))/ &
                                       myPoly % qWeights % hostData(i)
 
-            gradF(2,1,i,j,iEl,iVar) = gradF(2,1,i,j,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) + &
+            gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) + &
                                                                  myPoly % bMatrix % hostData(i,0)*bf(2,j,iVar,4,iEl))/ &
                                       myPoly % qWeights % hostData(i)
 
-            gradF(1,2,i,j,iEl,iVar) = gradF(1,2,i,j,iEl,iVar) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) + &
+            gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) + &
                                                                  myPoly % bMatrix % hostData(j,0)*bf(1,i,iVar,1,iEl))/ &
                                       myPoly % qWeights % hostData(j)
 
-            gradF(2,2,i,j,iEl,iVar) = gradF(2,2,i,j,iEl,iVar) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) + &
+            gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) + &
                                                                  myPoly % bMatrix % hostData(j,0)*bf(2,i,iVar,1,iEl))/ &
                                       myPoly % qWeights % hostData(j)
 
@@ -1576,20 +1576,20 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            dF(i,j,iEl,iVar) = 0.0_prec
+            dF(i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(i,j,iEl,iVar) = dF(i,j,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iEl,iVar) + &
-                                 myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iEl,iVar)
+              dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
+                                 myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
           END DO
@@ -1617,22 +1617,22 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     REAL(prec) :: dfLoc
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
             dfLoc = 0.0_prec
             DO ii = 0,myPoly % N
-              dfLoc = dfLoc + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iEl,iVar) + &
-                              myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iEl,iVar)
+              dfLoc = dfLoc + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
+                              myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
             dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
@@ -1641,7 +1641,7 @@ CONTAINS
                             (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
                              myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
-            dF(i,j,iEl,iVar) = dFLoc
+            dF(i,j,iVar,iEl) = dFLoc
 
           END DO
         END DO
@@ -1670,20 +1670,20 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            dF(i,j,iEl,iVar) = 0.0_prec
+            dF(i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(i,j,iEl,iVar) = dF(i,j,iEl,iVar) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iEl,iVar) - &
-                                 myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iEl,iVar)
+              dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl) - &
+                                 myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
             END DO
 
           END DO
@@ -1706,125 +1706,125 @@ CONTAINS
 
   END SUBROUTINE VectorCurl_2D_gpu
 
-  ! SUBROUTINE P2VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
-  !   IMPLICIT NONE
-  !   CLASS(Lagrange),INTENT(in) :: myPoly
-  !   INTEGER,INTENT(in)     :: nVariables,nElements
-  !   REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-  !   REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-  !   ! Local
-  !   INTEGER    :: i,j,n,iEl,iVar
-  !   REAL(prec) :: dfloc
+  SUBROUTINE P2VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,n,iVar,iEl
+    REAL(prec) :: dfloc
 
-  !   DO iVar = 1,nVariables
-  !     DO iEl = 1,nElements
-  !       DO j = 0,myPoly % N
-  !         DO i = 0,myPoly % N
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
 
-  !           dfloc = 0.0_prec
-  !           DO n = 0,myPoly % N
-  !             dfloc = dfloc + myPoly % dMatrix % hostData(n,i)*f(1,n,i,j,iEl,iVar) + &
-  !                             myPoly % dMatrix % hostData(n,j)*f(2,n,i,j,iEl,iVar)
-  !           END DO
+            dfloc = 0.0_prec
+            DO n = 0,myPoly % N
+              dfloc = dfloc + myPoly % dMatrix % hostData(n,i)*f(1,n,i,j,iVar,iEl) + &
+                              myPoly % dMatrix % hostData(n,j)*f(2,n,i,j,iVar,iEl)
+            END DO
 
-  !           dF(i,j,iEl,iVar) = 2.0_prec*dfloc
+            dF(i,j,iVar,iEl) = 2.0_prec*dfloc
 
-  !         END DO
-  !       END DO
-  !     END DO
-  !   END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-  ! END SUBROUTINE P2VectorDivergence_2D_cpu
+  END SUBROUTINE P2VectorDivergence_2D_cpu
 
-  ! SUBROUTINE P2VectorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-  !   IMPLICIT NONE
-  !   CLASS(Lagrange),INTENT(in) :: myPoly
-  !   INTEGER,INTENT(in)         :: nVariables,nElements
-  !   TYPE(c_ptr),INTENT(in)     :: f_dev
-  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
+  SUBROUTINE P2VectorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-  !   CALL P2VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-  !                                        f_dev,dF_dev,myPoly % N, &
-  !                                        nVariables,nElements)
+    CALL P2VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+                                         f_dev,dF_dev,myPoly % N, &
+                                         nVariables,nElements)
 
-  ! END SUBROUTINE P2VectorDivergence_2D_gpu
+  END SUBROUTINE P2VectorDivergence_2D_gpu
 
-  ! SUBROUTINE P2VectorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
-  !   ! Assumes bF is the vector component in the direction normal to the boundary
-  !   IMPLICIT NONE
-  !   CLASS(Lagrange),INTENT(in) :: myPoly
-  !   INTEGER,INTENT(in)     :: nVariables,nElements
-  !   REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-  !   REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
-  !   REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-  !   ! Local
-  !   REAL(prec) :: dfLoc
-  !   INTEGER    :: i,j,n,iEl,iVar
+  SUBROUTINE P2VectorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+    ! Assumes bF is the vector component in the direction normal to the boundary
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    REAL(prec) :: dfLoc
+    INTEGER    :: i,j,n,iVar,iEl
 
-  !   DO iVar = 1,nVariables
-  !     DO iEl = 1,nElements
-  !       DO j = 0,myPoly % N
-  !         DO i = 0,myPoly % N
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
 
-  !           dfLoc = 0.0_prec
-  !           DO n = 0,myPoly % N
-  !             dfLoc = dfLoc + myPoly % dgMatrix % hostData(n,i)*f(1,n,i,j,iEl,iVar) + &
-  !                             myPoly % dgMatrix % hostData(n,j)*f(2,n,i,j,iEl,iVar)
-  !           END DO
+            dfLoc = 0.0_prec
+            DO n = 0,myPoly % N
+              dfLoc = dfLoc + myPoly % dgMatrix % hostData(n,i)*f(1,n,i,j,iVar,iEl) + &
+                              myPoly % dgMatrix % hostData(n,j)*f(2,n,i,j,iVar,iEl)
+            END DO
 
-  !           dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
-  !                            myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
-  !                              myPoly % qWeights % hostData(i) + &
-  !                           (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
-  !                            myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
-  !                              myPoly % qWeights % hostData(j)
-  !           dF(i,j,iEl,iVar) = dFLoc
+            dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
+                             myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
+                               myPoly % qWeights % hostData(i) + &
+                            (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
+                             myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
+                               myPoly % qWeights % hostData(j)
+            dF(i,j,iVar,iEl) = dFLoc
 
-  !         END DO
-  !       END DO
-  !     END DO
-  !   END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-  ! END SUBROUTINE P2VectorDGDivergence_2D_cpu
+  END SUBROUTINE P2VectorDGDivergence_2D_cpu
 
-  ! SUBROUTINE P2VectorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-  !   IMPLICIT NONE
-  !   CLASS(Lagrange),INTENT(in) :: myPoly
-  !   INTEGER,INTENT(in)         :: nVariables,nElements
-  !   TYPE(c_ptr),INTENT(in)     :: f_dev
-  !   TYPE(c_ptr),INTENT(in)     :: bF_dev
-  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
+  SUBROUTINE P2VectorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: bF_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-  !   CALL P2VectorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-  !                                          myPoly % bMatrix % deviceData, &
-  !                                          myPoly % qWeights % deviceData, &
-  !                                          f_dev,bF_dev,dF_dev,myPoly % N, &
-  !                                          nVariables,nElements)
+    CALL P2VectorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+                                           myPoly % bMatrix % deviceData, &
+                                           myPoly % qWeights % deviceData, &
+                                           f_dev,bF_dev,dF_dev,myPoly % N, &
+                                           nVariables,nElements)
 
-  ! END SUBROUTINE P2VectorDGDivergence_2D_gpu
+  END SUBROUTINE P2VectorDGDivergence_2D_gpu
 
   SUBROUTINE TensorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
     ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            dF(1,i,j,iEl,iVar) = 0.0_prec
-            dF(2,i,j,iEl,iVar) = 0.0_prec
+            dF(1,i,j,iVar,iEl) = 0.0_prec
+            dF(2,i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(1,i,j,iEl,iVar) = dF(1,i,j,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,iEl,iVar) + &
-                                   myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,iEl,iVar)
-              dF(2,i,j,iEl,iVar) = dF(2,i,j,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,iEl,iVar) + &
-                                   myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,iEl,iVar)
+              dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
+                                   myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
+              dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
+                                   myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
             END DO
 
           END DO
@@ -1852,34 +1852,34 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bf(1:2,1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,ii,iEl,iVar
+    INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            dF(1,i,j,iEl,iVar) = 0.0_prec
-            dF(2,i,j,iEl,iVar) = 0.0_prec
+            dF(1,i,j,iVar,iEl) = 0.0_prec
+            dF(2,i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(1,i,j,iEl,iVar) = dF(1,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,iEl,iVar) + &
-                                   myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,iEl,iVar)
-              dF(2,i,j,iEl,iVar) = dF(2,i,j,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,iEl,iVar) + &
-                                   myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,iEl,iVar)
+              dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
+                                   myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
+              dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
+                                   myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
             END DO
 
-            dF(1,i,j,iEl,iVar) = dF(1,i,j,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,2,iEl) + &
+            dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,2,iEl) + &
                                                        myPoly % bMatrix % hostData(i,0)*bf(1,1,j,iVar,4,iEl))/ &
                                  myPoly % qWeights % hostData(i) + &
                                  (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,3,iEl) + &
                                   myPoly % bMatrix % hostData(j,0)*bf(2,1,i,iVar,1,iEl))/ &
                                  myPoly % qWeights % hostData(j)
 
-            dF(2,i,j,iEl,iVar) = dF(2,i,j,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,2,iEl) + &
+            dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,2,iEl) + &
                                                        myPoly % bMatrix % hostData(i,0)*bf(1,2,j,iVar,4,iEl))/ &
                                  myPoly % qWeights % hostData(i) + &
                                  (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,3,iEl) + &
@@ -1912,14 +1912,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
     REAL(prec) :: gf(1:3)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
@@ -1928,14 +1928,14 @@ CONTAINS
               gF(2) = 0.0_prec
               gF(3) = 0.0_prec
               DO ii = 0,myPoly % N
-                gF(1) = gF(1) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iEl,iVar)
-                gF(2) = gF(2) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iEl,iVar)
-                gF(3) = gF(3) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iEl,iVar)
+                gF(1) = gF(1) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iVar,iEl)
+                gF(2) = gF(2) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iVar,iEl)
+                gF(3) = gF(3) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iVar,iEl)
               END DO
 
-              gradF(1,i,j,k,iEl,iVar) = gF(1)
-              gradF(2,i,j,k,iEl,iVar) = gF(2)
-              gradF(3,i,j,k,iEl,iVar) = gF(3)
+              gradF(1,i,j,k,iVar,iEl) = gF(1)
+              gradF(2,i,j,k,iVar,iEl) = gF(2)
+              gradF(3,i,j,k,iVar,iEl) = gF(3)
 
             END DO
           END DO
@@ -1971,40 +1971,40 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: gradF(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: gradF(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
     REAL(prec) :: gF(1:3,1:3)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
               gF = 0.0_prec
               DO ii = 0,myPoly % N
-                gF(1,1) = gF(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iEl,iVar)
-                gF(2,1) = gF(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iEl,iVar)
-                gF(3,1) = gF(3,1) + myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iEl,iVar)
-                gF(1,2) = gF(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iEl,iVar)
-                gF(2,2) = gF(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iEl,iVar)
-                gF(3,2) = gF(3,2) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iEl,iVar)
-                gF(1,3) = gF(1,3) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iEl,iVar)
-                gF(2,3) = gF(2,3) + myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iEl,iVar)
-                gF(3,3) = gF(3,3) + myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iEl,iVar)
+                gF(1,1) = gF(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl)
+                gF(2,1) = gF(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl)
+                gF(3,1) = gF(3,1) + myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+                gF(1,2) = gF(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
+                gF(2,2) = gF(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl)
+                gF(3,2) = gF(3,2) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl)
+                gF(1,3) = gF(1,3) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl)
+                gF(2,3) = gF(2,3) + myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+                gF(3,3) = gF(3,3) + myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
 
-              gradF(1,1,i,j,k,iEl,iVar) = gF(1,1) 
-              gradF(2,1,i,j,k,iEl,iVar) = gF(2,1) 
-              gradF(3,1,i,j,k,iEl,iVar) = gF(3,1) 
-              gradF(1,2,i,j,k,iEl,iVar) = gF(1,2) 
-              gradF(2,2,i,j,k,iEl,iVar) = gF(2,2) 
-              gradF(3,2,i,j,k,iEl,iVar) = gF(3,2) 
-              gradF(1,3,i,j,k,iEl,iVar) = gF(1,3) 
-              gradF(2,3,i,j,k,iEl,iVar) = gF(2,3) 
-              gradF(3,3,i,j,k,iEl,iVar) = gF(3,3) 
+              gradF(1,1,i,j,k,iVar,iEl) = gF(1,1) 
+              gradF(2,1,i,j,k,iVar,iEl) = gF(2,1) 
+              gradF(3,1,i,j,k,iVar,iEl) = gF(3,1) 
+              gradF(1,2,i,j,k,iVar,iEl) = gF(1,2) 
+              gradF(2,2,i,j,k,iVar,iEl) = gF(2,2) 
+              gradF(3,2,i,j,k,iVar,iEl) = gF(3,2) 
+              gradF(1,3,i,j,k,iVar,iEl) = gF(1,3) 
+              gradF(2,3,i,j,k,iVar,iEl) = gF(2,3) 
+              gradF(3,3,i,j,k,iVar,iEl) = gF(3,3) 
 
             END DO
           END DO
@@ -2031,22 +2031,22 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              dF(i,j,k,iEl,iVar) = 0.0_prec
+              dF(i,j,k,iVar,iEl) = 0.0_prec
               DO ii = 0,myPoly % N
-                dF(i,j,k,iEl,iVar) = dF(i,j,k,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iEl,iVar) + &
-                                     myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iEl,iVar) + &
-                                     myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iEl,iVar)
+                dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl) + &
+                                     myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl) + &
+                                     myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
 
             END DO
@@ -2075,26 +2075,26 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bf(0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              dF(i,j,k,iEl,iVar) = 0.0_prec
+              dF(i,j,k,iVar,iEl) = 0.0_prec
               DO ii = 0,myPoly % N
-                dF(i,j,k,iEl,iVar) = dF(i,j,k,iEl,iVar) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,k,iEl,iVar) + &
-                                     myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,k,iEl,iVar) + &
-                                     myPoly % dgMatrix % hostData(ii,k)*f(3,i,j,ii,iEl,iVar)
+                dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl) + &
+                                     myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl) + &
+                                     myPoly % dgMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
 
-              dF(i,j,k,iEl,iVar) = dF(i,j,k,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bF(j,k,iVar,3,iEl) + & ! east
+              dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(j,k,iVar,3,iEl) + & ! east
                                                          myPoly % bMatrix % hostData(i,0)*bF(j,k,iVar,5,iEl))/ &  ! west
                                    myPoly % qWeights % hostData(i) + &
                                    (myPoly % bMatrix % hostData(j,1)*bF(i,k,iVar,4,iEl) + & ! north
@@ -2132,27 +2132,27 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              dF(1,i,j,k,iEl,iVar) = 0.0_prec
-              dF(2,i,j,k,iEl,iVar) = 0.0_prec
-              dF(3,i,j,k,iEl,iVar) = 0.0_prec
+              dF(1,i,j,k,iVar,iEl) = 0.0_prec
+              dF(2,i,j,k,iVar,iEl) = 0.0_prec
+              dF(3,i,j,k,iVar,iEl) = 0.0_prec
               DO ii = 0,myPoly % N
-                dF(1,i,j,k,iEl,iVar) = dF(1,i,j,k,iEl,iVar) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iEl,iVar) - &
-                                       myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iEl,iVar)
-                dF(2,i,j,k,iEl,iVar) = dF(2,i,j,k,iEl,iVar) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iEl,iVar) - &
-                                       myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iEl,iVar)
-                dF(3,i,j,k,iEl,iVar) = dF(3,i,j,k,iEl,iVar) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iEl,iVar) - &
-                                       myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iEl,iVar)
+                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl) - &
+                                       myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl) - &
+                                       myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl) - &
+                                       myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
               END DO
 
             END DO
@@ -2181,35 +2181,35 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
-    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              dF(1,i,j,k,iEl,iVar) = 0.0_prec
-              dF(2,i,j,k,iEl,iVar) = 0.0_prec
-              dF(3,i,j,k,iEl,iVar) = 0.0_prec
+              dF(1,i,j,k,iVar,iEl) = 0.0_prec
+              dF(2,i,j,k,iVar,iEl) = 0.0_prec
+              dF(3,i,j,k,iVar,iEl) = 0.0_prec
               DO ii = 0,myPoly % N
-                dF(1,i,j,k,iEl,iVar) = dF(1,i,j,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,k)*f(3,1,i,j,ii,iEl,iVar)
+                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
 
-                dF(2,i,j,k,iEl,iVar) = dF(2,i,j,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,k)*f(3,2,i,j,ii,iEl,iVar)
+                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
 
-                dF(3,i,j,k,iEl,iVar) = dF(3,i,j,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,i)*f(1,3,ii,j,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,j)*f(2,3,i,ii,k,iEl,iVar) + &
-                                       myPoly % dMatrix % hostData(ii,k)*f(3,3,i,j,ii,iEl,iVar)
+                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
+                                       myPoly % dMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
               END DO
 
             END DO
@@ -2238,39 +2238,39 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(in)  :: bF(1:3,1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER    :: i,j,k,ii,iEl,iVar
+    INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO k = 0,myPoly % N
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              dF(1,i,j,k,iEl,iVar) = 0.0_prec
-              dF(2,i,j,k,iEl,iVar) = 0.0_prec
-              dF(3,i,j,k,iEl,iVar) = 0.0_prec
+              dF(1,i,j,k,iVar,iEl) = 0.0_prec
+              dF(2,i,j,k,iVar,iEl) = 0.0_prec
+              dF(3,i,j,k,iVar,iEl) = 0.0_prec
               DO ii = 0,myPoly % N
-                dF(1,i,j,k,iEl,iVar) = dF(1,i,j,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,k)*f(3,1,i,j,ii,iEl,iVar)
+                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
 
-                dF(2,i,j,k,iEl,iVar) = dF(2,i,j,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,k)*f(3,2,i,j,ii,iEl,iVar)
+                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
 
-                dF(3,i,j,k,iEl,iVar) = dF(3,i,j,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,i)*f(1,3,ii,j,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,j)*f(2,3,i,ii,k,iEl,iVar) + &
-                                       myPoly % dgMatrix % hostData(ii,k)*f(3,3,i,j,ii,iEl,iVar)
+                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
               END DO
 
-              dF(1,i,j,k,iEl,iVar) = dF(1,i,j,k,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bF(1,1,j,k,iVar,3,iEl) + & ! east
+              dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,1,j,k,iVar,3,iEl) + & ! east
                                                      myPoly % bMatrix % hostData(i,0)*bF(1,1,j,k,iVar,5,iEl))/ &  ! west
                                      myPoly % qWeights % hostData(i) + &
                                      (myPoly % bMatrix % hostData(j,1)*bF(2,1,i,k,iVar,4,iEl) + & ! north
@@ -2280,7 +2280,7 @@ CONTAINS
                                       myPoly % bMatrix % hostData(k,0)*bF(3,1,i,j,iVar,1,iEl))/ &  ! bottom
                                      myPoly % qWeights % hostData(k)
 
-              dF(2,i,j,k,iEl,iVar) = dF(2,i,j,k,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bF(1,2,j,k,iVar,3,iEl) + & ! east
+              dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,2,j,k,iVar,3,iEl) + & ! east
                                                      myPoly % bMatrix % hostData(i,0)*bF(1,2,j,k,iVar,5,iEl))/ &  ! west
                                      myPoly % qWeights % hostData(i) + &
                                      (myPoly % bMatrix % hostData(j,1)*bF(2,2,i,k,iVar,4,iEl) + & ! north
@@ -2290,7 +2290,7 @@ CONTAINS
                                       myPoly % bMatrix % hostData(k,0)*bF(3,2,i,j,iVar,1,iEl))/ &  ! bottom
                                      myPoly % qWeights % hostData(k)
 
-              dF(3,i,j,k,iEl,iVar) = dF(3,i,j,k,iEl,iVar) + (myPoly % bMatrix % hostData(i,1)*bF(1,3,j,k,iVar,3,iEl) + & ! east
+              dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,3,j,k,iVar,3,iEl) + & ! east
                                                      myPoly % bMatrix % hostData(i,0)*bF(1,3,j,k,iVar,5,iEl))/ &  ! west
                                      myPoly % qWeights % hostData(i) + &
                                      (myPoly % bMatrix % hostData(j,1)*bF(2,3,i,k,iVar,4,iEl) + & ! north
@@ -2330,18 +2330,18 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)         :: nVariables,nElements
-    REAL(prec),INTENT(in)      :: f(0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)      :: f(0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)     :: fBound(1:nVariables,1:2,1:nElements)
     ! Local
-    INTEGER :: ii,iEl,iVar
+    INTEGER :: ii,iVar,iEl
     REAL(prec) :: fb(1:2)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         fb(1:2) = 0.0_prec
         DO ii = 0,myPoly % N
-          fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(ii,iEl,iVar) ! West
-          fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,iEl,iVar) ! East
+          fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(ii,iVar,iEl) ! West
+          fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,iVar,iEl) ! East
         END DO
         fBound(iVar,1:2,iEl) = fb(1:2)
       END DO
@@ -2365,23 +2365,23 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)         :: nVariables,nElements
-    REAL(prec),INTENT(in)      :: f(0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)      :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)     :: fBound(0:myPoly % N,1:nVariables,1:4,1:nElements)
     ! Local
-    INTEGER :: i,ii,iEl,iVar
+    INTEGER :: i,ii,iVar,iEl
     REAL(prec) :: fb(1:4)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO i = 0,myPoly % N
 
           fb(1:4) = 0.0_prec
 
           DO ii = 0,myPoly % N
-            fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,iEl,iVar) ! South
-            fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,iEl,iVar) ! East
-            fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,iEl,iVar) ! North
-            fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,iEl,iVar) ! West
+            fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,iVar,iEl) ! South
+            fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,iVar,iEl) ! East
+            fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,iVar,iEl) ! North
+            fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,iVar,iEl) ! West
           END DO
 
           fBound(i,iVar,1:4,iEl) = fb(1:4)
@@ -2408,23 +2408,23 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)  :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)  :: fBound(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
     ! Local
-    INTEGER :: i,ii,idir,iEl,iVar
+    INTEGER :: i,ii,idir,iVar,iEl
     REAL(prec) :: fb(1:2,1:4)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO i = 0,myPoly % N
 
           fb(1:2,1:4) = 0.0_prec
           DO ii = 0,myPoly % N
             DO idir = 1,2
-              fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,iEl,iVar) ! South
-              fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,iEl,iVar) ! East
-              fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,iEl,iVar) ! North
-              fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,iEl,iVar) ! West
+              fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,iVar,iEl) ! South
+              fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,iVar,iEl) ! East
+              fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,iVar,iEl) ! North
+              fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,iVar,iEl) ! West
             END DO
           END DO
 
@@ -2454,24 +2454,24 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)  :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)  :: fBound(1:2,1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
     ! Local
-    INTEGER :: i,ii,idir,jdir,iEl,iVar
+    INTEGER :: i,ii,idir,jdir,iVar,iEl
     REAL(prec) :: fb(1:2,1:2,1:4)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO i = 0,myPoly % N
 
           fb(1:2,1:2,1:4) = 0.0_prec
           DO ii = 0,myPoly % N
             DO jdir = 1,2
               DO idir = 1,2
-                fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,iEl,iVar) ! South
-                fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,iEl,iVar) ! East
-                fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,iEl,iVar) ! North
-                fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,iEl,iVar) ! West
+                fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,iVar,iEl) ! South
+                fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,iVar,iEl) ! East
+                fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,iVar,iEl) ! North
+                fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,iVar,iEl) ! West
               END DO
             END DO
           END DO
@@ -2504,26 +2504,26 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)         :: nVariables,nElements
-    REAL(prec),INTENT(in)      :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)      :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)     :: fBound(0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,iEl,iVar
+    INTEGER :: i,j,ii,iVar,iEl
     REAL(prec) :: fb(1:6)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
             fb(1:6) = 0.0_prec
 
             DO ii = 0,myPoly % N
-              fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,j,ii,iEl,iVar) ! Bottom
-              fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,j,iEl,iVar) ! South
-              fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,j,iEl,iVar) ! East
-              fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,j,iEl,iVar) ! North
-              fb(5) = fb(5) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,j,iEl,iVar) ! West
-              fb(6) = fb(6) + myPoly % bMatrix % hostData(ii,1)*f(i,j,ii,iEl,iVar) ! Top
+              fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,j,ii,iVar,iEl) ! Bottom
+              fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,j,iVar,iEl) ! South
+              fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,j,iVar,iEl) ! East
+              fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,j,iVar,iEl) ! North
+              fb(5) = fb(5) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,j,iVar,iEl) ! West
+              fb(6) = fb(6) + myPoly % bMatrix % hostData(ii,1)*f(i,j,ii,iVar,iEl) ! Top
             END DO
 
             fBound(i,j,iVar,1:6,iEl) = fb(1:6)
@@ -2551,26 +2551,26 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)  :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)  :: fBound(1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,idir,iEl,iVar
+    INTEGER :: i,j,ii,idir,iVar,iEl
     REAL(prec) :: fb(1:3,1:6)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
             fb(1:3,1:6) = 0.0_prec
             DO ii = 0,myPoly % N
               DO idir = 1,3
-                fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,j,ii,iEl,iVar) ! Bottom
-                fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,j,iEl,iVar) ! South
-                fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,j,iEl,iVar) ! East
-                fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,j,iEl,iVar) ! North
-                fb(idir,5) = fb(idir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,j,iEl,iVar) ! West
-                fb(idir,6) = fb(idir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,j,ii,iEl,iVar) ! Top
+                fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,j,ii,iVar,iEl) ! Bottom
+                fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,j,iVar,iEl) ! South
+                fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,j,iVar,iEl) ! East
+                fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,j,iVar,iEl) ! North
+                fb(idir,5) = fb(idir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,j,iVar,iEl) ! West
+                fb(idir,6) = fb(idir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,j,ii,iVar,iEl) ! Top
               END DO
             END DO
 
@@ -2601,14 +2601,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)  :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElements,1:nVariables)
+    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)  :: fBound(1:3,1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,idir,jdir,iEl,iVar
+    INTEGER :: i,j,ii,idir,jdir,iVar,iEl
     REAL(prec) :: fb(1:3,1:3,1:6)
 
-    DO iVar = 1,nVariables
-      DO iEl = 1,nElements
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
@@ -2616,12 +2616,12 @@ CONTAINS
             DO ii = 0,myPoly % N
               DO jdir = 1,3
                 DO idir = 1,3
-                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,j,ii,iEl,iVar) ! Bottom
-                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,j,iEl,iVar) ! South
-                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,j,iEl,iVar) ! East
-                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,j,iEl,iVar) ! North
-                  fb(idir,jdir,5) = fb(idir,jdir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,j,iEl,iVar) ! West
-                  fb(idir,jdir,6) = fb(idir,jdir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,j,ii,iEl,iVar) ! Top
+                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,j,ii,iVar,iEl) ! Bottom
+                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,j,iVar,iEl) ! South
+                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,j,iVar,iEl) ! East
+                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,j,iVar,iEl) ! North
+                  fb(idir,jdir,5) = fb(idir,jdir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,j,iVar,iEl) ! West
+                  fb(idir,jdir,6) = fb(idir,jdir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,j,ii,iVar,iEl) ! Top
                 END DO
               END DO
             END DO

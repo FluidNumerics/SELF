@@ -17,7 +17,7 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
     endif()
 endif()
-find_program(CMAKE_CXX_COMPILER "hipcc" PATHS ${ROCM_PATH})
+#find_program(CMAKE_CXX_COMPILER "hipcc" PATHS ${ROCM_PATH})
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package

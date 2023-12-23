@@ -66,6 +66,7 @@ MODULE SELF_Model1D
 
     PROCEDURE :: ReadModel => Read_Model1D
     PROCEDURE :: WriteModel => Write_Model1D
+    PROCEDURE :: WriteTecplot => WriteTecplot_Model1D
 
   END TYPE Model1D
 
@@ -317,7 +318,7 @@ CONTAINS
     REAL(prec),OPTIONAL,INTENT(in) :: dt
     ! Local
     REAL(prec) :: dtLoc
-    INTEGER :: i,iEl,iVar
+    INTEGER :: i,iVar,iEl
 
     IF (PRESENT(dt)) THEN
       dtLoc = dt
@@ -336,13 +337,13 @@ CONTAINS
 
     ELSE
 
-      DO iVar = 1,this % solution % nVar
-        DO iEl = 1,this % solution % nElem
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
           DO i = 0,this % solution % interp % N
 
-            this % solution % interior % hostData(i,iEl,iVar) = &
-              this % solution % interior % hostData(i,iEl,iVar) + &
-              dtLoc*this % dSdt % interior % hostData(i,iEl,iVar)
+            this % solution % interior % hostData(i,iVar,iEl) = &
+              this % solution % interior % hostData(i,iVar,iEl) + &
+              dtLoc*this % dSdt % interior % hostData(i,iVar,iEl)
 
           END DO
         END DO
@@ -357,7 +358,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,nVar,iEl,iVar
+    INTEGER :: i,nVar,iVar,iEl
 
     IF (this % gpuAccel) THEN
 
@@ -374,11 +375,11 @@ CONTAINS
       ! ab2_weight
       IF (m == 0) THEN ! Initialization step - store the solution in the prevSol
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-              this % prevSol % interior % hostData(i,iEl,iVar) = this % solution % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -386,11 +387,11 @@ CONTAINS
 
       ELSEIF (m == 1) THEN ! Copy the solution back from prevsol
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-              this % solution % interior % hostData(i,iEl,iVar) = this % prevSol % interior % hostData(i,iEl,iVar)
+              this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -399,20 +400,20 @@ CONTAINS
       ELSE ! Main looping section - nVar the previous solution, store the new solution, and
         ! create an interpolated solution to use for tendency calculation
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
               ! Bump the last solution
               nVar = this % solution % nVar
-              this % prevSol % interior % hostData(i,iEl,nvar+iVar) = this % prevSol % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
               ! Store the new solution
-              this % prevSol % interior % hostData(i,iEl,iVar) = this % solution % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
-              this % solution % interior % hostData(i,iEl,iVar) = &
-                1.5_PREC*this % prevSol % interior % hostData(i,iEl,iVar) - &
-                0.5_PREC*this % prevSol % interior % hostData(i,iEl,nvar+iVar)
+              this % solution % interior % hostData(i,iVar,iEl) = &
+                1.5_PREC*this % prevSol % interior % hostData(i,iVar,iEl) - &
+                0.5_PREC*this % prevSol % interior % hostData(i,nVar + iVar,iEl)
             END DO
           END DO
         END DO
@@ -427,7 +428,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,nVar,iEl,iVar
+    INTEGER :: i,nVar,iVar,iEl
 
     IF (this % gpuAccel) THEN
 
@@ -444,11 +445,11 @@ CONTAINS
       IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
 
         nVar = this % solution % nVar
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-             this % prevSol % interior % hostData(i,iEl,nvar+iVar) = this % solution % interior % hostData(i,iEl,iVar)
+             this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -456,11 +457,11 @@ CONTAINS
 
       ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-              this % prevSol % interior % hostData(i,iEl,iVar) = this % solution % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -468,11 +469,11 @@ CONTAINS
 
       ELSEIF (m == 2) THEN ! Copy the solution back from the most recent prevsol
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-              this % solution % interior % hostData(i,iEl,iVar) = this % prevSol % interior % hostData(i,iEl,iVar)
+              this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -481,22 +482,22 @@ CONTAINS
       ELSE ! Main looping section - nVar the previous solution, store the new solution, and
         ! create an interpolated solution to use for tendency calculation
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
               ! Bump the last two stored solutions
               nVar = this % solution % nVar
-     this % prevSol % interior % hostData(i,iEl,2*nVar + iVar) = this % prevSol % interior % hostData(i,iEl,nVar+iVar)
-              this % prevSol % interior % hostData(i,iEl,nvar+iVar) = this % prevSol % interior % hostData(i,iEl,iVar)
+     this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,nVar + iVar,iEl)
+              this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
               ! Store the new solution
-              this % prevSol % interior % hostData(i,iEl,iVar) = this % solution % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
-              this % solution % interior % hostData(i,iEl,iVar) = &
-                (23.0_PREC*this % prevSol % interior % hostData(i,iEl,iVar) - &
-                 16.0_PREC*this % prevSol % interior % hostData(i,iEl,nvar+iVar) + &
-                 5.0_PREC*this % prevSol % interior % hostData(i,iEl,2*nvar+iVar))/12.0_PREC
+              this % solution % interior % hostData(i,iVar,iEl) = &
+                (23.0_PREC*this % prevSol % interior % hostData(i,iVar,iEl) - &
+                 16.0_PREC*this % prevSol % interior % hostData(i,nVar + iVar,iEl) + &
+                 5.0_PREC*this % prevSol % interior % hostData(i,2*nVar + iVar,iEl))/12.0_PREC
 
             END DO
           END DO
@@ -513,7 +514,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,nVar,iEl,iVar
+    INTEGER :: i,nVar,iVar,iEl
 
     IF (this % gpuAccel) THEN
 
@@ -530,11 +531,11 @@ CONTAINS
       IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
 
         nVar = this % solution % nVar
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-           this % prevSol % interior % hostData(i,iEl,2*nvar+iVar) = this % solution % interior % hostData(i,iEl,iVar)
+           this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -543,11 +544,11 @@ CONTAINS
       ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
 
         nVar = this % solution % nVar
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-             this % prevSol % interior % hostData(i,iEl,nvar+iVar) = this % solution % interior % hostData(i,iEl,iVar)
+             this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -555,11 +556,11 @@ CONTAINS
 
       ELSEIF (m == 2) THEN ! Initialization step - store the solution in the prevSol at ivar
 
-        DO iVar = 1,this % solution % nVa
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-              this % prevSol % interior % hostData(i,iEl,iVar) = this % solution % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -567,11 +568,11 @@ CONTAINS
 
       ELSEIF (m == 3) THEN ! Copy the solution back from the most recent prevsol
 
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
-              this % solution % interior % hostData(i,iEl,iVar) = this % prevSol % interior % hostData(i,iEl,iVar)
+              this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
             END DO
           END DO
@@ -581,23 +582,23 @@ CONTAINS
         ! create an interpolated solution to use for tendency calculation
 
         nVar = this % solution % nVar
-        DO iVar = 1,this % solution % nVar
         DO iEl = 1,this % solution % nElem
+          DO iVar = 1,this % solution % nVar
             DO i = 0,this % solution % interp % N
 
               ! Bump the last two stored solutions
-   this % prevSol % interior % hostData(i,iEl,3*nVar + iVar) = this % prevSol % interior % hostData(i,iEl,2*nVar + iVar)
-     this % prevSol % interior % hostData(i,iEl,2*nVar + iVar) = this % prevSol % interior % hostData(i,iEl,nVar + iVar)
-              this % prevSol % interior % hostData(i,iEl,nVar + iVar) = this % prevSol % interior % hostData(i,iEl,iVar)
+   this % prevSol % interior % hostData(i,3*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,2*nVar + iVar,iEl)
+     this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,nVar + iVar,iEl)
+              this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
               ! Store the new solution
-              this % prevSol % interior % hostData(i,iEl,iVar) = this % solution % interior % hostData(i,iEl,iVar)
+              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
-              this % solution % interior % hostData(i,iEl,iVar) = &
-                (55.0_PREC*this % prevSol % interior % hostData(i,iEl,iVar) - &
-                 59.0_PREC*this % prevSol % interior % hostData(i,iEl,nVar + iVar) + &
-                 37.0_PREC*this % prevSol % interior % hostData(i,iEl,2*nVar + iVar) - &
-                 9.0_PREC*this % prevSol % interior % hostData(i,iEl,3*nVar + iVar))/24.0_PREC
+              this % solution % interior % hostData(i,iVar,iEl) = &
+                (55.0_PREC*this % prevSol % interior % hostData(i,iVar,iEl) - &
+                 59.0_PREC*this % prevSol % interior % hostData(i,nVar + iVar,iEl) + &
+                 37.0_PREC*this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) - &
+                 9.0_PREC*this % prevSol % interior % hostData(i,3*nVar + iVar,iEl))/24.0_PREC
 
             END DO
           END DO
@@ -614,7 +615,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,iEl,iVar
+    INTEGER :: i,iVar,iEl
 
     IF (this % gpuAccel) THEN
 
@@ -629,17 +630,17 @@ CONTAINS
 
     ELSE
 
-      DO iVar = 1,this % solution % nVar
       DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
           DO i = 0,this % solution % interp % N
 
-            this % workSol % interior % hostData(i,iEl,iVar) = rk2_a(m)* &
-                                                               this % workSol % interior % hostData(i,iEl,iVar) + &
-                                                               this % dSdt % interior % hostData(i,iEl,iVar)
+            this % workSol % interior % hostData(i,iVar,iEl) = rk2_a(m)* &
+                                                               this % workSol % interior % hostData(i,iVar,iEl) + &
+                                                               this % dSdt % interior % hostData(i,iVar,iEl)
 
-            this % solution % interior % hostData(i,iEl,iVar) = &
-              this % solution % interior % hostData(i,iEl,iVar) + &
-              rk2_g(m)*this % dt*this % workSol % interior % hostData(i,iEl,iVar)
+            this % solution % interior % hostData(i,iVar,iEl) = &
+              this % solution % interior % hostData(i,iVar,iEl) + &
+              rk2_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
 
           END DO
         END DO
@@ -654,7 +655,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,iEl,iVar
+    INTEGER :: i,iVar,iEl
 
     IF (this % gpuAccel) THEN
 
@@ -669,17 +670,17 @@ CONTAINS
 
     ELSE
 
-      DO iVar = 1,this % solution % nVar
       DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
           DO i = 0,this % solution % interp % N
 
-            this % workSol % interior % hostData(i,iEl,iVar) = rk3_a(m)* &
-                                                               this % workSol % interior % hostData(i,iEl,iVar) + &
-                                                               this % dSdt % interior % hostData(i,iEl,iVar)
+            this % workSol % interior % hostData(i,iVar,iEl) = rk3_a(m)* &
+                                                               this % workSol % interior % hostData(i,iVar,iEl) + &
+                                                               this % dSdt % interior % hostData(i,iVar,iEl)
 
-            this % solution % interior % hostData(i,iEl,iVar) = &
-              this % solution % interior % hostData(i,iEl,iVar) + &
-              rk3_g(m)*this % dt*this % workSol % interior % hostData(i,iEl,iVar)
+            this % solution % interior % hostData(i,iVar,iEl) = &
+              this % solution % interior % hostData(i,iVar,iEl) + &
+              rk3_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
 
           END DO
         END DO
@@ -694,7 +695,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,iEl,iVar
+    INTEGER :: i,iVar,iEl
 
     IF (this % gpuAccel) THEN
 
@@ -709,17 +710,17 @@ CONTAINS
 
     ELSE
 
-      DO iVar = 1,this % solution % nVar
       DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
           DO i = 0,this % solution % interp % N
 
-            this % workSol % interior % hostData(i,iEl,iVar) = rk4_a(m)* &
-                                                               this % workSol % interior % hostData(i,iEl,iVar) + &
-                                                               this % dSdt % interior % hostData(i,iEl,iVar)
+            this % workSol % interior % hostData(i,iVar,iEl) = rk4_a(m)* &
+                                                               this % workSol % interior % hostData(i,iVar,iEl) + &
+                                                               this % dSdt % interior % hostData(i,iVar,iEl)
 
-            this % solution % interior % hostData(i,iEl,iVar) = &
-              this % solution % interior % hostData(i,iEl,iVar) + &
-              rk4_g(m)*this % dt*this % workSol % interior % hostData(i,iEl,iVar)
+            this % solution % interior % hostData(i,iVar,iEl) = &
+              this % solution % interior % hostData(i,iVar,iEl) + &
+              rk4_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
 
           END DO
         END DO
@@ -744,7 +745,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     ! Local
-    INTEGER :: i,iEl,iVar
+    INTEGER :: i,iVar,iEl
 
     CALL this % PreTendency()
     CALL this % solution % BoundaryInterp(this % gpuAccel)
@@ -766,13 +767,13 @@ CONTAINS
 
     ELSE
 
-      DO iVar = 1,this % solution % nVar
       DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
           DO i = 0,this % solution % interp % N
 
-            this % dSdt % interior % hostData(i,iEl,iVar) = &
-              this % source % interior % hostData(i,iEl,iVar) - &
-              this % fluxDivergence % interior % hostData(i,iEl,iVar)
+            this % dSdt % interior % hostData(i,iVar,iEl) = &
+              this % source % interior % hostData(i,iVar,iEl) - &
+              this % fluxDivergence % interior % hostData(i,iVar,iEl)
 
           END DO
         END DO
@@ -962,5 +963,87 @@ CONTAINS
     END IF
 
   END SUBROUTINE Read_Model1D
+
+  SUBROUTINE WriteTecplot_Model1D(this,filename)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    CHARACTER(*),INTENT(in),OPTIONAL :: filename
+    ! Local
+    CHARACTER(8) :: zoneID
+    INTEGER :: fUnit
+    INTEGER :: iEl,i,iVar
+    CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
+    CHARACTER(LEN=self_FormatLength) :: fmat
+    CHARACTER(13) :: timeStampString
+    CHARACTER(5) :: rankString
+    TYPE(Scalar1D) :: solution
+    TYPE(Scalar1D) :: x
+    TYPE(Lagrange),TARGET :: interp
+
+    IF (PRESENT(filename)) THEN
+      tecFile = filename
+    ELSE
+      ! Create a 0-padded integer for the output iterate
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
+      ! Increment the ioIterate
+      this % ioIterate = this % ioIterate + 1
+      tecFile = 'solution.'//timeStampString//'.curve'
+
+    END IF
+
+    ! Create an interpolant for the uniform grid
+    CALL interp % Init(this % solution % interp % M, &
+                       this % solution % interp % targetNodeType, &
+                       this % solution % interp % N, &
+                       this % solution % interp % controlNodeType)
+
+    CALL solution % Init(interp, &
+                         this % solution % nVar,this % solution % nElem)
+
+    CALL x % Init(interp,1,this % solution % nElem)
+
+    ! Map the mesh positions to the target grid
+    CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+    ! Map the solution to the target grid
+    CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+    fmat = '(2(ES16.7E3,1x))'
+    ! Let's write some tecplot!!
+    OPEN (UNIT=NEWUNIT(fUnit), &
+          FILE=TRIM(tecFile), &
+          FORM='formatted', &
+          STATUS='replace')
+
+    DO iVar = 1,this % solution % nVar
+      WRITE (tecHeader,'(E15.6)') this % t
+      tecHeader = "#TIME "//TRIM(tecHeader)
+      WRITE (fUnit,*) TRIM(tecHeader)
+
+      tecHeader = "#"//TRIM(this % solution % meta(iVar) % name)//" vs position"
+      WRITE (fUnit,*) TRIM(tecHeader)
+      DO iEl = 1,this % solution % nElem
+
+        !WRITE (zoneID,'(I8.8)') iEl
+        !WRITE (fUnit,*) 'ZONE T="el'//TRIM(zoneID)//'", I=',this % solution % interp % M + 1
+
+        DO i = 0,this % solution % interp % M
+
+          WRITE (fUnit,fmat) x % interior % hostData(i,1,iEl), &
+            solution % interior % hostData(i,ivar,iEl)
+
+        END DO
+
+      END DO
+    END DO
+
+    CLOSE (UNIT=fUnit)
+
+    CALL x % Free()
+    CALL solution % Free()
+    CALL interp % Free()
+
+  END SUBROUTINE WriteTecplot_Model1D
 
 END MODULE SELF_Model1D

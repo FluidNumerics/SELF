@@ -75,6 +75,10 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Derivative_Scalar1D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar1D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar1D
+
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar1D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar1D
 
     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar1D, WriteHDF5_Scalar1D
     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar1D
@@ -104,9 +108,10 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Gradient_Scalar2D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar2D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar2D
 
-    GENERIC,PUBLIC :: SetEquation => SetEquation_Scalar2D
-    PROCEDURE,PRIVATE :: SetEquation_Scalar2D
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar2D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar2D
 
     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
@@ -135,13 +140,10 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Gradient_Scalar3D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar3D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar3D
 
-    GENERIC,PUBLIC :: SetEquation => SetEquation_Scalar3D
-    PROCEDURE,PRIVATE :: SetEquation_Scalar3D
-
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
-    PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar3D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar3D
 
   END TYPE Scalar3D
 
@@ -173,6 +175,10 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Curl_Vector2D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector2D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Vector2D
+
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Vector2D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Vector2D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
     PROCEDURE,PRIVATE :: SetEquation_Vector2D
@@ -209,37 +215,37 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Curl_Vector3D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector3D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Vector3D
+
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Vector3D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Vector3D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
     PROCEDURE,PRIVATE :: SetEquation_Vector3D
-
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector3D, WriteHDF5_Vector3D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector3D
-    PROCEDURE, PRIVATE :: WriteHDF5_Vector3D
 
   END TYPE Vector3D
 
 ! ----------------- Two-point Vectors ----------------- !
 
-  ! TYPE,EXTENDS(SELF_DataObj),PUBLIC :: P2Vector2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: P2Vector2D
 
-  !   TYPE(hfReal_r6) :: interior
-  !   TYPE(hfReal_r7) :: physical
-  !   TYPE(hfReal_r5) :: boundary
-  !   TYPE(hfReal_r5) :: extBoundary
-  !   TYPE(hfReal_r4) :: boundaryNormal
+    TYPE(hfReal_r6) :: interior
+    TYPE(hfReal_r7) :: physical
+    TYPE(hfReal_r5) :: boundary
+    TYPE(hfReal_r5) :: extBoundary
+    TYPE(hfReal_r4) :: boundaryNormal
 
-  ! CONTAINS
+  CONTAINS
 
-  !   PROCEDURE,PUBLIC :: Init => Init_P2Vector2D
-  !   PROCEDURE,PUBLIC :: Free => Free_P2Vector2D
-  !   PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_P2Vector2D
-  !   PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_P2Vector2D
+    PROCEDURE,PUBLIC :: Init => Init_P2Vector2D
+    PROCEDURE,PUBLIC :: Free => Free_P2Vector2D
+    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_P2Vector2D
+    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_P2Vector2D
 
-  !   GENERIC,PUBLIC :: Divergence => Divergence_P2Vector2D
-  !   PROCEDURE,PRIVATE :: Divergence_P2Vector2D
+    GENERIC,PUBLIC :: Divergence => Divergence_P2Vector2D
+    PROCEDURE,PRIVATE :: Divergence_P2Vector2D
 
-  ! END TYPE P2Vector2D
+  END TYPE P2Vector2D
 ! ---------------------- Tensors ---------------------- !
 
   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
@@ -263,6 +269,10 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Divergence_Tensor2D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor2D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Tensor2D
+
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Tensor2D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Tensor2D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor2D
     PROCEDURE,PRIVATE :: SetEquation_Tensor2D
@@ -290,6 +300,10 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE :: Divergence_Tensor3D
 
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor3D
+    PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Tensor3D
+
+    GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Tensor3D
+    PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Tensor3D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor3D
     PROCEDURE,PRIVATE :: SetEquation_Tensor3D
@@ -301,10 +315,30 @@ MODULE SELF_Data
   INTEGER,PARAMETER :: selfWeakCGForm = 2
   INTEGER,PARAMETER :: selfWeakBRForm = 3
 
+  INTERFACE
+    SUBROUTINE Determinant_Tensor2D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &
+      bind(c,name="Determinant_Tensor2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor_dev,detTensor_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE Determinant_Tensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE Determinant_Tensor3D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &
+      bind(c,name="Determinant_Tensor3D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor_dev,detTensor_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE Determinant_Tensor3D_gpu_wrapper
+  END INTERFACE
+
 CONTAINS
 
 ! -- DataObj -- !
-  SUBROUTINE Init_DataObj(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_DataObj(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(SELF_DataObj),INTENT(out)  :: SELFStorage
     TYPE(Lagrange),INTENT(in),TARGET :: interp
@@ -376,7 +410,7 @@ CONTAINS
 
 ! -- Scalar1D -- !
 
-  SUBROUTINE Init_Scalar1D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Scalar1D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),INTENT(in),TARGET :: interp
@@ -388,19 +422,19 @@ CONTAINS
     SELFStorage % nElem = nElem
 
     CALL SELFStorage % interior % Alloc(loBound=(/0,1,1/), &
-                                        upBound=(/interp % N,nElem,nVar/))
+                                        upBound=(/interp % N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/1,1,1/), &
-                                        upBound=(/2,nElem,nVar/))
+                                        upBound=(/nVar,2,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,1/), &
-                                           upBound=(/2,nElem,nVar/))
+                                           upBound=(/nVar,2,nElem/))
 
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/1,1,1/), &
-                                           upBound=(/2,nElem,nVar/))
+                                           upBound=(/nVar,2,nElem/))
 
     CALL SELFStorage % jumpBoundary % Alloc(loBound=(/1,1,1/), &
-                                           upBound=(/2,nElem,nVar/))
+                                           upBound=(/nVar,2,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
@@ -510,15 +544,46 @@ CONTAINS
     CLASS(Scalar1D) :: scalar
     REAL(prec) :: absMax(1:scalar % nVar)
     ! Local
-    INTEGER :: iVar
+    INTEGER :: iEl,iVar,i
 
     absMax = 0.0_prec
-    
-    DO iVar = 1,scalar % nVar
-      absMax(iVar) = MAXVAL(ABS(scalar % interior % hostData(:,:,iVar)))
+    DO iEl = 1,scalar % nElem
+      DO iVar = 1,scalar % nVar
+        DO i = 0,scalar % interp % N
+          absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,iVar,iEl)),absMax(iVar))
+        END DO
+      END DO
     END DO
 
   END FUNCTION AbsMaxInterior_Scalar1D
+
+  FUNCTION AbsMaxBoundary_Scalar1D(scalar) RESULT(absMax)
+    IMPLICIT NONE
+    CLASS(Scalar1D) :: scalar
+    REAL(prec) :: absMax(1:scalar % nVar,1:2)
+    ! Local
+    INTEGER :: iEl,iVar,iSide
+
+    absMax = 0.0_prec
+    DO iEl = 1,scalar % nElem
+      DO iSide = 1,2
+        DO iVar = 1,scalar % nVar
+          absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(iVar,iSide,iEl)),absMax(iVar,iSide))
+        END DO
+      END DO
+    END DO
+
+  END FUNCTION AbsMaxBoundary_Scalar1D
+
+  SUBROUTINE Equals_Scalar1D(SELFOut,SELFin)
+    IMPLICIT NONE
+    CLASS(Scalar1D),INTENT(inout) :: SELFOut
+    TYPE(Scalar1D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Scalar1D
 
   SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -528,33 +593,34 @@ CONTAINS
     INTEGER, INTENT(in) :: elemoffset
     INTEGER, INTENT(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:2)
-    INTEGER(HID_T) :: bOffset(1:2)
-    INTEGER(HID_T) :: globalDims(1:2)
-    INTEGER(HID_T) :: bGlobalDims(1:2)
+    INTEGER(HID_T) :: offset(1:3)
+    INTEGER(HID_T) :: bOffset(1:3)
+    INTEGER(HID_T) :: globalDims(1:3)
+    INTEGER(HID_T) :: bGlobalDims(1:3)
     INTEGER :: ivar
 
-      offset(1:2) = (/0,elemoffset/)
-      globalDims(1:2) = (/this % interp % N + 1, &
+      offset(1:3) = (/0,0,elemoffset/)
+      globalDims(1:3) = (/this % interp % N + 1, &
+                          this % nVar, &
                           nGlobalElem/)
 
       ! Offsets and dimensions for element boundary data
-      bOffset(1:2) = (/0,elemoffset/)
-      bGlobalDims(1:2) = (/2,nGlobalElem/)
+      bOffset(1:3) = (/0,0,elemoffset/)
+      bGlobalDims(1:3) = (/this % nVar, &
+                           2, &
+                           nGlobalElem/)
   
       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
       DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
 
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior,offset,globalDims)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/boundary", &
-                            this % boundary,bOffset,bGlobalDims)
-      enddo
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
 
 
   END SUBROUTINE WriteHDF5_MPI_Scalar1D
@@ -570,22 +636,20 @@ CONTAINS
       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
       DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-        
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior)
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % boundary)
-      enddo
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
 
   END SUBROUTINE WriteHDF5_Scalar1D
 
 ! -- Scalar2D -- !
 
-  SUBROUTINE Init_Scalar2D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Scalar2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),INTENT(in),TARGET :: interp
@@ -597,23 +661,24 @@ CONTAINS
     SELFStorage % nElem = nElem
 
     CALL SELFStorage % interior % Alloc(loBound=(/0,0,1,1/), &
-                                        upBound=(/interp % N,interp % N,nElem,nVar/))
+                                        upBound=(/interp % N,interp % N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/0,1,1,1/), &
-                                        upBound=(/interp % N,4,nElem,nVar/))
+                                        upBound=(/interp % N,nVar,4,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/0,1,1,1/), &
-                                           upBound=(/interp % N,4,nElem,nVar/))
+                                           upBound=(/interp % N,nVar,4,nElem/))
 
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,1,1,1/), &
-                                           upBound=(/interp % N,4,nElem,nVar/))
+                                           upBound=(/interp % N,nVar,4,nElem/))
 
     CALL SELFStorage % jumpBoundary % Alloc(loBound=(/0,1,1,1/), &
-                                           upBound=(/interp % N,4,nElem,nVar/))
+                                           upBound=(/interp % N,nVar,4,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
  
+
   END SUBROUTINE Init_Scalar2D
 
   SUBROUTINE Free_Scalar2D(SELFStorage)
@@ -722,14 +787,50 @@ CONTAINS
     CLASS(Scalar2D) :: scalar
     REAL(prec) :: absMax(1:scalar % nVar)
     ! Local
-    INTEGER :: iVar
+    INTEGER :: iEl,iVar,i,j
 
     absMax = 0.0_prec
-    DO iVar = 1,scalar % nVar
-      absMax(iVar) = MAXVAL(ABS(scalar % interior % hostData(:,:,:iVar)))
+    DO iEl = 1,scalar % nElem
+      DO iVar = 1,scalar % nVar
+        DO j = 0,scalar % interp % N
+          DO i = 0,scalar % interp % N
+            absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,iVar,iEl)),absMax(iVar))
+          END DO
+        END DO
+      END DO
     END DO
 
   END FUNCTION AbsMaxInterior_Scalar2D
+
+  FUNCTION AbsMaxBoundary_Scalar2D(scalar) RESULT(absMax)
+    IMPLICIT NONE
+    CLASS(Scalar2D) :: scalar
+    REAL(prec) :: absMax(1:scalar % nVar,1:4)
+    ! Local
+    INTEGER :: iEl,iVar,i,iSide
+
+    absMax = 0.0_prec
+    DO iEl = 1,scalar % nElem
+      DO iSide = 1,4
+        DO iVar = 1,scalar % nVar
+          DO i = 0,scalar % interp % N
+            absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(i,iVar,iSide,iEl)),absMax(iVar,iSide))
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END FUNCTION AbsMaxBoundary_Scalar2D
+
+  SUBROUTINE Equals_Scalar2D(SELFOut,SELFin)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(inout) :: SELFOut
+    TYPE(Scalar2D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Scalar2D
 
   SUBROUTINE WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -739,36 +840,36 @@ CONTAINS
     INTEGER, INTENT(in) :: elemoffset
     INTEGER, INTENT(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:3)
-    INTEGER(HID_T) :: bOffset(1:3)
-    INTEGER(HID_T) :: globalDims(1:3)
-    INTEGER(HID_T) :: bGlobalDims(1:3)
+    INTEGER(HID_T) :: offset(1:4)
+    INTEGER(HID_T) :: bOffset(1:4)
+    INTEGER(HID_T) :: globalDims(1:4)
+    INTEGER(HID_T) :: bGlobalDims(1:4)
     INTEGER :: ivar
 
-      offset(1:3) = (/0,0,elemoffset/)
-      globalDims(1:3) = (/this % interp % N + 1, &
+      offset(1:4) = (/0,0,0,elemoffset/)
+      globalDims(1:4) = (/this % interp % N + 1, &
                           this % interp % N + 1, &
+                          this % nVar, &
                           nglobalelem/)
 
       ! Offsets and dimensions for element boundary data
-      bOffset(1:3) = (/0,0,elemoffset/)
-      bGlobalDims(1:3) = (/this % interp % N + 1, &
+      bOffset(1:4) = (/0,0,0,elemoffset/)
+      bGlobalDims(1:4) = (/this % interp % N + 1, &
+                           this % nVar, &
                            4, &
                            nglobalelem/)
   
       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
       DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
 
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior,offset,globalDims)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/boundary", &
-                            this % boundary,bOffset,bGlobalDims)
-      enddo
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
 
 
   END SUBROUTINE WriteHDF5_MPI_Scalar2D
@@ -784,23 +885,20 @@ CONTAINS
       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
       DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-        
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior)
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % boundary)
-      enddo
-
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
 
   END SUBROUTINE WriteHDF5_Scalar2D
 
 ! -- Scalar3D -- !
 
-  SUBROUTINE Init_Scalar3D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Scalar3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),TARGET,INTENT(in) :: interp
@@ -815,19 +913,19 @@ CONTAINS
     N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/0,0,0,1,1/), &
-                                        upBound=(/N,N,N,nElem,nVar/))
+                                        upBound=(/N,N,N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/0,0,1,1,1/), &
-                                        upBound=(/N,N,6,nElem,nVar/))
+                                        upBound=(/N,N,nVar,6,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/0,0,1,1,1/), &
-                                           upBound=(/N,N,6,nElem,nVar/))
+                                           upBound=(/N,N,nVar,6,nElem/))
 
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,0,1,1,1/), &
-                                           upBound=(/N,N,6,nElem,nVar/))
+                                           upBound=(/N,N,nVar,6,nElem/))
 
     CALL SELFStorage % jumpBoundary % Alloc(loBound=(/0,0,1,1,1/), &
-                                           upBound=(/N,N,6,nElem,nVar/))
+                                           upBound=(/N,N,nVar,6,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
@@ -935,92 +1033,63 @@ CONTAINS
 
   END SUBROUTINE Gradient_Scalar3D
 
+  SUBROUTINE Equals_Scalar3D(SELFOut,SELFin)
+    IMPLICIT NONE
+    CLASS(Scalar3D),INTENT(inout) :: SELFOut
+    TYPE(Scalar3D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Scalar3D
+
   FUNCTION AbsMaxInterior_Scalar3D(scalar) RESULT(absMax)
     IMPLICIT NONE
     CLASS(Scalar3D) :: scalar
     REAL(prec) :: absMax(1:scalar % nVar)
     ! Local
-    INTEGER :: iVar
+    INTEGER :: iEl,iVar,i,j,k
 
     absMax = 0.0_prec
-    DO iVar = 1,scalar % nVar
-      absMax(iVar) = MAXVAL(ABS(scalar % interior % hostData(:,:,:,:,iVar)))
-    ENDDO
+    DO iEl = 1,scalar % nElem
+      DO iVar = 1,scalar % nVar
+        DO k = 0,scalar % interp % N
+          DO j = 0,scalar % interp % N
+            DO i = 0,scalar % interp % N
+              absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,k,iVar,iEl)),absMax(iVar))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
   END FUNCTION AbsMaxInterior_Scalar3D
 
-  SUBROUTINE WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
+  FUNCTION AbsMaxBoundary_Scalar3D(scalar) RESULT(absMax)
     IMPLICIT NONE
-    CLASS(Scalar2D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+    CLASS(Scalar3D) :: scalar
+    REAL(prec) :: absMax(1:scalar % nVar,1:6)
     ! Local
-    INTEGER(HID_T) :: offset(1:4)
-    INTEGER(HID_T) :: bOffset(1:4)
-    INTEGER(HID_T) :: globalDims(1:4)
-    INTEGER(HID_T) :: bGlobalDims(1:4)
-    INTEGER :: ivar
+    INTEGER :: iEl,iVar,i,j,iSide
 
-      offset(1:4) = (/0,0,0,elemoffset/)
-      globalDims(1:4) = (/this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          nglobalelem/)
+    absMax = 0.0_prec
+    DO iEl = 1,scalar % nElem
+      DO iSide = 1,6
+        DO iVar = 1,scalar % nVar
+          DO j = 0,scalar % interp % N
+            DO i = 0,scalar % interp % N
+              absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:4) = (/0,0,0,elemoffset/)
-      bGlobalDims(1:4) = (/this % interp % N + 1, &
-                           this % interp % N + 1, &
-                           6, &
-                           nglobalelem/)
-  
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
-
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior,offset,globalDims)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/boundary", &
-                            this % boundary,bOffset,bGlobalDims)
-      enddo
-
-
-  END SUBROUTINE WriteHDF5_MPI_Scalar3D
-
-  SUBROUTINE WriteHDF5_Scalar3D(this,fileId,group)
-    IMPLICIT NONE
-    CLASS(Scalar3D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group   
-    ! Local
-    INTEGER :: ivar
-
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
-
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-        
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % boundary)
-      enddo
-
-
-  END SUBROUTINE WriteHDF5_Scalar3D
+  END FUNCTION AbsMaxBoundary_Scalar3D
 
 ! -- Vector2D -- !
 
-  SUBROUTINE Init_Vector2D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Vector2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),TARGET,INTENT(in) :: interp
@@ -1034,17 +1103,18 @@ CONTAINS
     SELFStorage % nElem = nElem
     N = interp % N
 
+
     CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,1,1/), &
-                                        upBound=(/2,N,N,nElem,nVar/))
+                                        upBound=(/2,N,N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/1,0,1,1,1/), &
-                                        upBound=(/2,N,4,nElem,nVar/))
+                                        upBound=(/2,N,nVar,4,nElem/))
 
     CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
-                                        upBound=(/N,4,nElem,nVar/))
+                                        upBound=(/N,nVar,4,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
-                                           upBound=(/2,N,4,nElem,nVar/))
+                                           upBound=(/2,N,nVar,4,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:2*nVar) )
@@ -1222,22 +1292,59 @@ CONTAINS
 
   END SUBROUTINE Curl_Vector2D
 
+  SUBROUTINE Equals_Vector2D(SELFOut,SELFin)
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: SELFOut
+    TYPE(Vector2D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Vector2D
+
   FUNCTION AbsMaxInterior_Vector2D(vector) RESULT(absMax)
     IMPLICIT NONE
     CLASS(Vector2D) :: vector
-    REAL(prec) :: absMax(1:2,1:vector % nVar)
+    REAL(prec) :: absMax(1:vector % nVar)
     ! Local
-    INTEGER :: iVar
+    INTEGER :: iEl,iVar,i,j,iDir
 
     absMax = 0.0_prec
-    DO iVar = 1,vector % nVar
-
-      absMax(1,iVar) = MAXVAL(ABS(vector % interior % hostData(1,:,:,:,iVar)))
-      absMax(2,iVar) = MAXVAL(ABS(vector % interior % hostData(2,:,:,:,iVar)))
-
+    DO iEl = 1,vector % nElem
+      DO iVar = 1,vector % nVar
+        DO j = 0,vector % interp % N
+          DO i = 0,vector % interp % N
+            DO iDir = 1,2
+              absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,iVar,iEl)),absMax(iVar))
+            END DO
+          END DO
+        END DO
+      END DO
     END DO
 
   END FUNCTION AbsMaxInterior_Vector2D
+
+  FUNCTION AbsMaxBoundary_Vector2D(vector) RESULT(absMax)
+    IMPLICIT NONE
+    CLASS(Vector2D) :: vector
+    REAL(prec) :: absMax(1:vector % nVar,1:4)
+    ! Local
+    INTEGER :: iEl,iVar,i,iDir,iSide
+
+    absMax = 0.0_prec
+    DO iEl = 1,vector % nElem
+      DO iSide = 1,4
+        DO iVar = 1,vector % nVar
+          DO i = 0,vector % interp % N
+            DO iDir = 1,2
+              absMax(iVar,iSide) = MAX(ABS(vector % boundary % hostData(iDir,i,iVar,iSide,iEl)),absMax(iVar,iSide))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END FUNCTION AbsMaxBoundary_Vector2D
 
   SUBROUTINE WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -1247,38 +1354,38 @@ CONTAINS
     INTEGER, INTENT(in) :: elemoffset
     INTEGER, INTENT(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:4)
-    INTEGER(HID_T) :: bOffset(1:4)
-    INTEGER(HID_T) :: globalDims(1:4)
-    INTEGER(HID_T) :: bGlobalDims(1:4)
+    INTEGER(HID_T) :: offset(1:5)
+    INTEGER(HID_T) :: bOffset(1:5)
+    INTEGER(HID_T) :: globalDims(1:5)
+    INTEGER(HID_T) :: bGlobalDims(1:5)
     INTEGER :: ivar
 
-      offset(1:4) = (/0,0,0,elemoffset/)
-      globalDims(1:4) = (/2, &
+      offset(1:5) = (/0,0,0,0,elemoffset/)
+      globalDims(1:5) = (/2, &
                           this % interp % N + 1, &
                           this % interp % N + 1, &
+                          this % nVar, &
                           nglobalelem/)
 
       ! Offsets and dimensions for element boundary data
-      bOffset(1:4) = (/0,0,0,elemoffset/)
-      bGlobalDims(1:4) = (/2, &
+      bOffset(1:5) = (/0,0,0,0,elemoffset/)
+      bGlobalDims(1:5) = (/2, &
                            this % interp % N + 1, &
+                           this % nVar, &
                            4, &
                            nglobalelem/)
   
       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
       DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
 
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior,offset,globalDims)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/boundary", &
-                            this % boundary,bOffset,bGlobalDims)
-      enddo
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
 
 
   END SUBROUTINE WriteHDF5_MPI_Vector2D
@@ -1294,22 +1401,20 @@ CONTAINS
       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
       DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-        
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior)
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
 
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % boundary)
-      enddo
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
 
   END SUBROUTINE WriteHDF5_Vector2D
 
 ! -- Vector3D -- !
 
-  SUBROUTINE Init_Vector3D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Vector3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),TARGET,INTENT(in) :: interp
@@ -1324,16 +1429,16 @@ CONTAINS
     N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
-                                        upBound=(/3,N,N,N,nElem,nVar/))
+                                        upBound=(/3,N,N,N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/1,0,0,1,1,1/), &
-                                        upBound=(/3,N,N,6,nElem,nVar/))
+                                        upBound=(/3,N,N,nVar,6,nElem/))
 
     CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,0,1,1,1/), &
-                                        upBound=(/N,N,6,nElem,nVar/))
+                                        upBound=(/N,N,nVar,6,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,0,1,1,1/), &
-                                           upBound=(/3,N,N,6,nElem,nVar/))
+                                           upBound=(/3,N,N,nVar,6,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:3*nVar) )
@@ -1504,7 +1609,7 @@ CONTAINS
           DO j = 0,vector % interp % N
             DO i = 0,vector % interp % N
               DO iDir = 1,3
-                absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,k,iEl,iVar)),absMax(iVar))
+                absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,k,iVar,iEl)),absMax(iVar))
               END DO
             END DO
           END DO
@@ -1514,199 +1619,163 @@ CONTAINS
 
   END FUNCTION AbsMaxInterior_Vector3D
 
-  SUBROUTINE WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
+  FUNCTION AbsMaxBoundary_Vector3D(vector) RESULT(absMax)
     IMPLICIT NONE
-    CLASS(Vector3D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+    CLASS(Vector3D) :: vector
+    REAL(prec) :: absMax(1:vector % nVar,1:6)
     ! Local
-    INTEGER(HID_T) :: offset(1:5)
-    INTEGER(HID_T) :: bOffset(1:5)
-    INTEGER(HID_T) :: globalDims(1:5)
-    INTEGER(HID_T) :: bGlobalDims(1:5)
-    INTEGER :: ivar
+    INTEGER :: iEl,iVar,i,j,iSide,iDir
 
-      offset(1:5) = (/0,0,0,0,elemoffset/)
-      globalDims(1:5) = (/3, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          nglobalelem/)
+    absMax = 0.0_prec
+    DO iEl = 1,vector % nElem
+      DO iSide = 1,6
+        DO iVar = 1,vector % nVar
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
+              DO iDir = 1,3
+                absMax(iVar,iSide) = MAX(ABS(vector % boundary % hostData(iDir,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:5) = (/0,0,0,0,elemoffset/)
-      bGlobalDims(1:5) = (/3, &
-                           this % interp % N + 1, &
-                           this % interp % N + 1, &
-                           6, &
-                           nglobalelem/)
-  
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+  END FUNCTION AbsMaxBoundary_Vector3D
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior,offset,globalDims)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/boundary", &
-                            this % boundary,bOffset,bGlobalDims)
-      enddo
-
-
-  END SUBROUTINE WriteHDF5_MPI_Vector3D
-
-  SUBROUTINE WriteHDF5_Vector3D(this,fileId,group)
+  SUBROUTINE Equals_Vector3D(SELFOut,SELFin)
     IMPLICIT NONE
-    CLASS(Vector3D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group
+    CLASS(Vector3D),INTENT(inout) :: SELFOut
+    TYPE(Vector3D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Vector3D
+
+! -- P2Vector2D -- !
+
+  SUBROUTINE Init_P2Vector2D(SELFStorage,interp,nVar,nElem)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(out) :: SELFStorage
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
+    INTEGER,INTENT(in) :: nVar
+    INTEGER,INTENT(in) :: nElem
     ! Local
-    INTEGER :: ivar
+    INTEGER :: N
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
-
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, fileId )
-        
-        CALL CreateGroup_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name))
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % interior)
-
-        CALL WriteArray_HDF5(fileId,TRIM(group)//TRIM(this % meta(ivar) % name)//"/interior", &
-                            this % boundary)
-      enddo
-
-  END SUBROUTINE WriteHDF5_Vector3D
-
-! ! -- P2Vector2D -- !
-
-!   SUBROUTINE Init_P2Vector2D(SELFStorage,interp,nElem,nVar)
-!     IMPLICIT NONE
-!     CLASS(P2Vector2D),INTENT(out) :: SELFStorage
-!     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
-!     ! Local
-!     INTEGER :: N
-
-!     SELFStorage % interp => interp
-!     SELFStorage % nVar = nVar
-!     SELFStorage % nElem = nElem
-!     N = interp % N
+    SELFStorage % interp => interp
+    SELFStorage % nVar = nVar
+    SELFStorage % nElem = nElem
+    N = interp % N
 
 
-!     CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
-!                                         upBound=(/2,N,N,N,nElem,nVar/))
+    CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
+                                        upBound=(/2,N,N,N,nVar,nElem/))
 
-!     CALL SELFStorage % physical % Alloc(loBound=(/1,1,0,0,0,1,1/), &
-!                                         upBound=(/2,2,N,N,N,nElem,nVar/))
+    CALL SELFStorage % physical % Alloc(loBound=(/1,1,0,0,0,1,1/), &
+                                        upBound=(/2,2,N,N,N,nVar,nElem/))
 
-!     CALL SELFStorage % boundary % Alloc(loBound=(/1,0,1,1,1/), &
-!                                         upBound=(/2,N,4,nElem,nVar/))
+    CALL SELFStorage % boundary % Alloc(loBound=(/1,0,1,1,1/), &
+                                        upBound=(/2,N,nVar,4,nElem/))
 
-!     CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
-!                                         upBound=(/N,4,nElem,nVar/))
+    CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
+                                        upBound=(/N,nVar,4,nElem/))
 
-!     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
-!                                            upBound=(/2,N,4,nElem,nVar/))
+    CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
+                                           upBound=(/2,N,nVar,4,nElem/))
 
-!     ALLOCATE( SELFStorage % meta(1:nVar) )
-!     ALLOCATE( SELFStorage % eqn(1:2*nVar) )
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:2*nVar) )
 
-!   END SUBROUTINE Init_P2Vector2D
+  END SUBROUTINE Init_P2Vector2D
 
-!   SUBROUTINE Free_P2Vector2D(SELFStorage)
-!     IMPLICIT NONE
-!     CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+  SUBROUTINE Free_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
 
-!     SELFStorage % interp => NULL()
-!     SELFStorage % nVar = 0
-!     SELFStorage % nElem = 0
-!     CALL SELFStorage % interior % Free()
-!     CALL SELFStorage % physical % Free()
-!     CALL SELFStorage % boundary % Free()
-!     CALL SELFStorage % boundaryNormal % Free()
-!     CALL SELFStorage % extBoundary % Free()
+    SELFStorage % interp => NULL()
+    SELFStorage % nVar = 0
+    SELFStorage % nElem = 0
+    CALL SELFStorage % interior % Free()
+    CALL SELFStorage % physical % Free()
+    CALL SELFStorage % boundary % Free()
+    CALL SELFStorage % boundaryNormal % Free()
+    CALL SELFStorage % extBoundary % Free()
 
-!     DEALLOCATE( SELFStorage % meta )
-!     DEALLOCATE( SELFStorage % eqn )
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
 
-!   END SUBROUTINE Free_P2Vector2D
+  END SUBROUTINE Free_P2Vector2D
 
-!   SUBROUTINE UpdateHost_P2Vector2D(SELFStorage)
-!     IMPLICIT NONE
-!     CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+  SUBROUTINE UpdateHost_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
 
-!     CALL SELFStorage % interior % UpdateHost()
-!     CALL SELFStorage % physical % UpdateHost()
-!     CALL SELFStorage % boundary % UpdateHost()
-!     CALL SELFStorage % boundaryNormal % UpdateHost()
-!     CALL SELFStorage % extBoundary % UpdateHost()
+    CALL SELFStorage % interior % UpdateHost()
+    CALL SELFStorage % physical % UpdateHost()
+    CALL SELFStorage % boundary % UpdateHost()
+    CALL SELFStorage % boundaryNormal % UpdateHost()
+    CALL SELFStorage % extBoundary % UpdateHost()
 
-!   END SUBROUTINE UpdateHost_P2Vector2D
+  END SUBROUTINE UpdateHost_P2Vector2D
 
-!   SUBROUTINE UpdateDevice_P2Vector2D(SELFStorage)
-!     IMPLICIT NONE
-!     CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+  SUBROUTINE UpdateDevice_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
 
-!     CALL SELFStorage % interior % UpdateDevice()
-!     CALL SELFStorage % physical % UpdateDevice()
-!     CALL SELFStorage % boundary % UpdateDevice()
-!     CALL SELFStorage % boundaryNormal % UpdateDevice()
-!     CALL SELFStorage % extBoundary % UpdateDevice()
+    CALL SELFStorage % interior % UpdateDevice()
+    CALL SELFStorage % physical % UpdateDevice()
+    CALL SELFStorage % boundary % UpdateDevice()
+    CALL SELFStorage % boundaryNormal % UpdateDevice()
+    CALL SELFStorage % extBoundary % UpdateDevice()
 
-!   END SUBROUTINE UpdateDevice_P2Vector2D
+  END SUBROUTINE UpdateDevice_P2Vector2D
 
-!   SUBROUTINE Divergence_P2Vector2D(SELFStorage,SELFOut,dForm,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(P2Vector2D),INTENT(in) :: SELFStorage
-!     TYPE(Scalar2D),INTENT(inout) :: SELFOut
-!     INTEGER,INTENT(in) :: dForm
-!     LOGICAL,INTENT(in) :: gpuAccel
+  SUBROUTINE Divergence_P2Vector2D(SELFStorage,SELFOut,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(in) :: SELFStorage
+    TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    INTEGER,INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
 
-!     IF (dForm == selfWeakDGForm) THEN
+    IF (dForm == selfWeakDGForm) THEN
 
-!       IF (gpuAccel) THEN
-!         CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
-!                                                           SELFStorage % boundaryNormal % deviceData, &
-!                                                           SELFout % interior % deviceData, &
-!                                                           SELFStorage % nVar, &
-!                                                           SELFStorage % nElem)
-!       ELSE
-!         CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % hostData, &
-!                                                           SELFStorage % boundaryNormal % hostData, &
-!                                                           SELFout % interior % hostData, &
-!                                                           SELFStorage % nVar, &
-!                                                           SELFStorage % nElem)
-!       END IF
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
+                                                          SELFStorage % boundaryNormal % deviceData, &
+                                                          SELFout % interior % deviceData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % hostData, &
+                                                          SELFStorage % boundaryNormal % hostData, &
+                                                          SELFout % interior % hostData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      END IF
 
-!     ELSE IF (dForm == selfStrongForm) THEN
+    ELSE IF (dForm == selfStrongForm) THEN
 
-!       IF (gpuAccel) THEN
-!         CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % deviceData, &
-!                                                         SELFout % interior % deviceData, &
-!                                                         SELFStorage % nVar, &
-!                                                         SELFStorage % nElem)
-!       ELSE
-!         CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % hostData, &
-!                                                         SELFout % interior % hostData, &
-!                                                         SELFStorage % nVar, &
-!                                                         SELFStorage % nElem)
-!       END IF
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % deviceData, &
+                                                        SELFout % interior % deviceData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % hostData, &
+                                                        SELFout % interior % hostData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      END IF
 
-!     END IF
+    END IF
 
-!   END SUBROUTINE Divergence_P2Vector2D
+  END SUBROUTINE Divergence_P2Vector2D
 
 ! -- Tensor2D -- !
 
-  SUBROUTINE Init_Tensor2D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Tensor2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),TARGET,INTENT(in) :: interp
@@ -1721,13 +1790,13 @@ CONTAINS
     N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,1,0,0,1,1/), &
-                                        upBound=(/2,2,N,N,nElem,nVar/))
+                                        upBound=(/2,2,N,N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/1,1,0,1,1,1/), &
-                                        upBound=(/2,2,N,4,nElem,nVar/))
+                                        upBound=(/2,2,N,nVar,4,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,0,1,1,1/), &
-                                           upBound=(/2,2,N,4,nElem,nVar/))
+                                           upBound=(/2,2,N,nVar,4,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:4*nVar) )
@@ -1844,55 +1913,106 @@ CONTAINS
 
   END SUBROUTINE Divergence_Tensor2D
 
-  SUBROUTINE Determinant_Tensor2D(SELFStorage,SELFout)
+  SUBROUTINE Determinant_Tensor2D(SELFStorage,SELFout,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "Determinant_Tensor2D"
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(in) :: SELFStorage
     TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
 
+    IF (gpuAccel) THEN
+
+      CALL Determinant_Tensor2D_gpu_wrapper(SELFStorage % interior % deviceData, &
+                                            SELFOut % interior % deviceData, &
+                                            SELFStorage % interp % N, &
+                                            SELFStorage % nVar, &
+                                            SELFStorage % nElem)
+
+    ELSE
 
       DO iEl = 1,SELFStorage % nElem
         DO iVar = 1,SELFStorage % nVar
           DO j = 0,SELFStorage % interp % N
             DO i = 0,SELFStorage % interp % N
 
-              SELFOut % interior % hostData(i,j,iEl,iVar) = SELFStorage % interior % hostData(1,1,i,j,iEl,iVar)* &
-                                                            SELFStorage % interior % hostData(2,2,i,j,iEl,iVar) - &
-                                                            SELFStorage % interior % hostData(1,2,i,j,iEl,iVar)* &
-                                                            SELFStorage % interior % hostData(2,1,i,j,iEl,iVar)
+              SELFOut % interior % hostData(i,j,iVar,iEl) = SELFStorage % interior % hostData(1,1,i,j,iVar,iEl)* &
+                                                            SELFStorage % interior % hostData(2,2,i,j,iVar,iEl) - &
+                                                            SELFStorage % interior % hostData(1,2,i,j,iVar,iEl)* &
+                                                            SELFStorage % interior % hostData(2,1,i,j,iVar,iEl)
 
             END DO
           END DO
         END DO
       END DO
 
+    END IF
 
   END SUBROUTINE Determinant_Tensor2D
 
   FUNCTION AbsMaxInterior_Tensor2D(tensor) RESULT(absMax)
     IMPLICIT NONE
     CLASS(Tensor2D) :: tensor
-    REAL(prec) :: absMax(1:2,1:2,1:tensor % nVar)
+    REAL(prec) :: absMax(1:tensor % nVar)
     ! Local
-    INTEGER :: iVar,row,col
+    INTEGER :: iEl,iVar,i,j,row,col
 
     absMax = 0.0_prec
-    DO iVar = 1,tensor % nVar
-      DO col = 1,2
-        DO row = 1,2
-          absMax(iVar) = MAXVAL(ABS(tensor % interior % hostData(row,col,:,:,:,iVar)))
+    DO iEl = 1,tensor % nElem
+      DO iVar = 1,tensor % nVar
+        DO j = 0,tensor % interp % N
+          DO i = 0,tensor % interp % N
+            DO col = 1,2
+              DO row = 1,2
+                absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,iVar,iEl)),absMax(iVar))
+              END DO
+            END DO
+          END DO
         END DO
       END DO
     END DO
 
   END FUNCTION AbsMaxInterior_Tensor2D
 
+  FUNCTION AbsMaxBoundary_Tensor2D(tensor) RESULT(absMax)
+    IMPLICIT NONE
+    CLASS(Tensor2D) :: tensor
+    REAL(prec) :: absMax(1:tensor % nVar,1:4)
+    ! Local
+    INTEGER :: iEl,iVar,i,iSide,row,col
+
+    absMax = 0.0_prec
+    DO iEl = 1,tensor % nElem
+      DO iSide = 1,4
+        DO iVar = 1,tensor % nVar
+          DO i = 0,tensor % interp % N
+            DO col = 1,2
+              DO row = 1,2
+                absMax(iVar,iSide) = MAX(ABS(tensor % boundary % hostData(row,col,i,iVar,iSide,iEl)),absMax(iVar,iSide))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END FUNCTION AbsMaxBoundary_Tensor2D
+
+  SUBROUTINE Equals_Tensor2D(SELFOut,SELFin)
+    IMPLICIT NONE
+    CLASS(Tensor2D),INTENT(inout) :: SELFOut
+    TYPE(Tensor2D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Tensor2D
+
 ! -- Tensor3D -- !
 
-  SUBROUTINE Init_Tensor3D(SELFStorage,interp,nElem,nVar)
+  SUBROUTINE Init_Tensor3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(out) :: SELFStorage
     TYPE(Lagrange),TARGET,INTENT(in) :: interp
@@ -1907,13 +2027,13 @@ CONTAINS
     N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,1,0,0,0,1,1/), &
-                                        upBound=(/3,3,N,N,N,nElem,nVar/))
+                                        upBound=(/3,3,N,N,N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/1,1,0,0,1,1,1/), &
-                                        upBound=(/3,3,N,N,6,nElem,nVar/))
+                                        upBound=(/3,3,N,N,nVar,6,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,0,0,1,1,1/), &
-                                           upBound=(/3,3,N,N,6,nElem,nVar/))
+                                           upBound=(/3,3,N,N,nVar,6,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:9*nVar) )
@@ -2030,15 +2150,25 @@ CONTAINS
 
   END SUBROUTINE Divergence_Tensor3D
 
-  SUBROUTINE Determinant_Tensor3D(SELFStorage,SELFOut)
+  SUBROUTINE Determinant_Tensor3D(SELFStorage,SELFOut,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "Determinant_Tensor3D"
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(in) :: SELFStorage
     TYPE(Scalar3D),INTENT(inout) :: SELFOut
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
 
+    IF (gpuAccel) THEN
+
+      CALL Determinant_Tensor3D_gpu_wrapper(SELFStorage % interior % deviceData, &
+                                            SELFOut % interior % deviceData, &
+                                            SELFStorage % interp % N, &
+                                            SELFStorage % nVar, &
+                                            SELFStorage % nElem)
+
+    ELSE
 
       DO iEl = 1,SELFStorage % nElem
         DO iVar = 1,SELFStorage % nVar
@@ -2046,22 +2176,22 @@ CONTAINS
             DO j = 0,SELFStorage % interp % N
               DO i = 0,SELFStorage % interp % N
 
-                SELFOut % interior % hostData(i,j,k,iEl,iVar) = &
-                  SELFStorage % interior % hostData(1,1,i,j,k,iEl,iVar)* &
-                  (SELFStorage % interior % hostData(2,2,i,j,k,iEl,iVar)* &
-                   SELFStorage % interior % hostData(3,3,i,j,k,iEl,iVar) - &
-                   SELFStorage % interior % hostData(2,3,i,j,k,iEl,iVar)* &
-                   SELFStorage % interior % hostData(3,2,i,j,k,iEl,iVar)) - &
-                  SELFStorage % interior % hostData(2,1,i,j,k,iEl,iVar)* &
-                  (SELFStorage % interior % hostData(1,2,i,j,k,iEl,iVar)* &
-                   SELFStorage % interior % hostData(3,3,i,j,k,iEl,iVar) - &
-                   SELFStorage % interior % hostData(1,3,i,j,k,iEl,iVar)* &
-                   SELFStorage % interior % hostData(3,2,i,j,k,iEl,iVar)) + &
-                  SELFStorage % interior % hostData(3,1,i,j,k,iEl,iVar)* &
-                  (SELFStorage % interior % hostData(1,2,i,j,k,iEl,iVar)* &
-                   SELFStorage % interior % hostData(2,3,i,j,k,iEl,iVar) - &
-                   SELFStorage % interior % hostData(1,3,i,j,k,iEl,iVar)* &
-                   SELFStorage % interior % hostData(2,2,i,j,k,iEl,iVar))
+                SELFOut % interior % hostData(i,j,k,iVar,iEl) = &
+                  SELFStorage % interior % hostData(1,1,i,j,k,iVar,iEl)* &
+                  (SELFStorage % interior % hostData(2,2,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,3,i,j,k,iVar,iEl) - &
+                   SELFStorage % interior % hostData(2,3,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,2,i,j,k,iVar,iEl)) - &
+                  SELFStorage % interior % hostData(2,1,i,j,k,iVar,iEl)* &
+                  (SELFStorage % interior % hostData(1,2,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,3,i,j,k,iVar,iEl) - &
+                   SELFStorage % interior % hostData(1,3,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,2,i,j,k,iVar,iEl)) + &
+                  SELFStorage % interior % hostData(3,1,i,j,k,iVar,iEl)* &
+                  (SELFStorage % interior % hostData(1,2,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(2,3,i,j,k,iVar,iEl) - &
+                   SELFStorage % interior % hostData(1,3,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(2,2,i,j,k,iVar,iEl))
 
               END DO
             END DO
@@ -2069,24 +2199,70 @@ CONTAINS
         END DO
       END DO
 
+    END IF
+
   END SUBROUTINE Determinant_Tensor3D
 
   FUNCTION AbsMaxInterior_Tensor3D(tensor) RESULT(absMax)
     IMPLICIT NONE
     CLASS(Tensor3D) :: tensor
-    REAL(prec) :: absMax(1:3,1:3,1:tensor % nVar)
+    REAL(prec) :: absMax(1:tensor % nVar)
     ! Local
-    INTEGER :: iVar,row,col
+    INTEGER :: iEl,iVar,i,j,k,row,col
 
     absMax = 0.0_prec
-    DO iVar = 1,tensor % nVar
-      DO col = 1,3
-        DO row = 1,3
-          absMax(row,col,iVar) = MAXVAL(ABS(tensor % interior % hostData(row,col,:,:,:,:,iVar)))
-        enddo
-      enddo
+    DO iEl = 1,tensor % nElem
+      DO iVar = 1,tensor % nVar
+        DO k = 0,tensor % interp % N
+          DO j = 0,tensor % interp % N
+            DO i = 0,tensor % interp % N
+              DO col = 1,3
+                DO row = 1,3
+                  absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,k,iVar,iEl)),absMax(iVar))
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
     END DO
 
   END FUNCTION AbsMaxInterior_Tensor3D
+
+  FUNCTION AbsMaxBoundary_Tensor3D(tensor) RESULT(absMax)
+    IMPLICIT NONE
+    CLASS(Tensor3D) :: tensor
+    REAL(prec) :: absMax(1:tensor % nVar,1:6)
+    ! Local
+    INTEGER :: iEl,iVar,i,j,iSide,row,col
+
+    absMax = 0.0_prec
+    DO iEl = 1,tensor % nElem
+      DO iSide = 1,6
+        DO iVar = 1,tensor % nVar
+          DO j = 0,tensor % interp % N
+            DO i = 0,tensor % interp % N
+              DO col = 1,3
+                DO row = 1,3
+              absMax(iVar,iSide) = MAX(ABS(tensor % boundary % hostData(row,col,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END FUNCTION AbsMaxBoundary_Tensor3D
+
+  SUBROUTINE Equals_Tensor3D(SELFOut,SELFin)
+    IMPLICIT NONE
+    CLASS(Tensor3D),INTENT(inout) :: SELFOut
+    TYPE(Tensor3D),INTENT(in) :: SELFin
+
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
+
+  END SUBROUTINE Equals_Tensor3D
 
 END MODULE SELF_Data
