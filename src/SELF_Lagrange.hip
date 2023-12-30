@@ -211,7 +211,7 @@ extern "C"
   void VectorGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  VectorGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
+          HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 

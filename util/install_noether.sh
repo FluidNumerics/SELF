@@ -10,7 +10,10 @@ set -x
 module load gcc/13.2.0
 module load openmpi hdf5 feq-parse
 
+# Clean out any old builds
 rm -rf ${BUILD_DIR}
+rm -rf ${WORKSPACE}/*
+
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
