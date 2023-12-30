@@ -24,9 +24,12 @@ cmake -DCMAKE_PREFIX_PATH=/opt/rocm \
       -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/opt/self \
       -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
       ${SRC_DIR}
-make VERBOSE=1
+make VERBOSE=1 || exit 1
 make install
 
+
+# Set SELF_PREFIX for tests that require input mesh
+export SELF_PREFIX=${SRC_DIR}
 
 # Initialize coverage
 mkdir -p ${WORKSPACE}/tmp/
