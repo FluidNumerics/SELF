@@ -101,4 +101,6 @@ add_fortran_test_executable (
     "mappedscalarderivative_1d_gpu_constant.f90"
     "mappedscalarbrderivative_1d_cpu_constant.f90"
     "mappedscalarbrderivative_1d_gpu_constant.f90"
+    "mappedscalardgderivative_1d_cpu_constant.f90"
+    "mappedscalardgderivative_1d_gpu_constant.f90"
     )
