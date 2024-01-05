@@ -676,25 +676,10 @@ CONTAINS
       rankId = decomp % rankId
       offset = decomp % offsetElem % hostData(rankId)
 
-  !  IF (gpuAccel) THEN
+      if( gpuAccel )then
+        call scalar % boundary % updatehost()
+      endif
 
-  !    CALL scalar % boundary % UpdateHost()
-  !    CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-  !    CALL decomp % FinalizeMPIExchangeAsync()
-  !    CALL scalar % extBoundary % UpdateDevice()
-
-  !    CALL SideExchange_MappedScalar1D_gpu_wrapper(scalar % extBoundary % deviceData, &
-  !                                                 scalar % boundary % deviceData, &
-  !                                                 mesh % sideInfo % deviceData, &
-  !                                                 decomp % elemToRank % deviceData, &
-  !                                                 decomp % rankId, &
-  !                                                 offset, &
-  !                                                 scalar % interp % N, &
-  !                                                 scalar % nvar, &
-  !                                                 scalar % nElem)
-  !  ELSE
-
-      !CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1,mesh % nElem
         
         IF( e1 == 1 )THEN
@@ -739,9 +724,10 @@ CONTAINS
 
       ENDDO
 
-      !CALL decomp % FinalizeMPIExchangeAsync()
+      if( gpuAccel )then
+        call scalar % extBoundary % updatedevice()
+      endif
 
-  !  END IF
 
   END SUBROUTINE SideExchange_MappedScalar1D
 
@@ -754,6 +740,11 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
+
+      if( gpuAccel )then
+        call scalar % boundary % updatehost()
+        call scalar % extBoundary % updatehost()
+      endif
 
       DO iel = 1,scalar % nElem
           DO ivar = 1,scalar % nVar
@@ -769,6 +760,10 @@ CONTAINS
                                                                scalar % extBoundary % hostData(ivar,2,iel))
           END DO
       END DO
+
+      if( gpuAccel )then
+        call scalar % avgBoundary % updateDevice()
+      endif
 
   END SUBROUTINE BassiRebaySides_MappedScalar1D
 

@@ -21,8 +21,6 @@ integer function mesh2d_setup() result(r)
   CHARACTER(LEN=255) :: SELF_PREFIX
 
 
-  call get_environment_variable("SELF_PREFIX",SELF_PREFIX)
-
   ! Initialize a domain decomposition
   ! Here MPI is disabled, since scaling is currently
   ! atrocious with the uniform block mesh

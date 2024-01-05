@@ -586,7 +586,7 @@ __global__ void DGDerivative_1D_gpu(real *dMatrix, real *bMatrix, real *qWeight,
     fm += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
   }
 
-  fm += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)]-
+  fm += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)]+
 	 bMatrix[i]*bf[SCB_1D_INDEX(iVar,0,iEl,N,nVar)])/qWeight[i];
 
   df[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = fm;

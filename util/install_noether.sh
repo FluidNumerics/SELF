@@ -6,7 +6,6 @@ BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
 BUILD_DIR=${SRC_DIR}/build
 
-set -x
 module load gcc/13.2.0
 module load openmpi hdf5 feq-parse
 
