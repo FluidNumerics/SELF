@@ -40,7 +40,7 @@ steps:
         lcov --no-external \
               --capture \
               --initial \
-              --directory ${BUILD_DIR} \
+              --directory ${WORKSPACE} \
               --output-file ${WORKSPACE}/tmp/lcov_base.info
 
         # Run ctests
@@ -49,7 +49,7 @@ steps:
         # Compile coverage information
         lcov --no-external \
             --capture \
-            --directory ${BUILD_DIR} \
+            --directory ${WORKSPACE} \
             --output-file ${WORKSPACE}/tmp/lcov_test.info
 
         lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
