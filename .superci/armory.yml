@@ -41,6 +41,7 @@ steps:
         lcov --no-external \
               --capture \
               --initial \
+              --exclude 'test/*' \
               --directory ${WORKSPACE} \
               --output-file ${WORKSPACE}/tmp/lcov_base.info
 
@@ -51,6 +52,7 @@ steps:
         lcov --no-external \
             --capture \
             --directory ${WORKSPACE} \
+            --exclude 'test/*' \
             --output-file ${WORKSPACE}/tmp/lcov_test.info
 
         lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \

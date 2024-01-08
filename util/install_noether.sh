@@ -38,6 +38,7 @@ lcov --no-external \
       --capture \
       --initial \
       --directory ${SRC_DIR} \
+      --exclude 'test/*' \
       --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
 
 # Run ctests
@@ -47,6 +48,7 @@ ctest --test-dir ${BUILD_DIR}/test
 lcov --no-external \
     --capture \
     --directory ${SRC_DIR} \
+    --exclude 'test/*' \
     --output-file ${WORKSPACE_ROOT}/tmp/lcov_test.info
 
 lcov --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_base.info \
