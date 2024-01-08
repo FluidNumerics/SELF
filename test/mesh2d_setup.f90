@@ -18,7 +18,7 @@ integer function mesh2d_setup() result(r)
   type(Mesh2D),TARGET :: mesh
   type(SEMQuad),TARGET :: geometry
   type(MPILayer),TARGET :: decomp
-  CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=255) :: WORKSPACE
 
 
   ! Initialize a domain decomposition
@@ -33,8 +33,8 @@ integer function mesh2d_setup() result(r)
                      targetNodeType=UNIFORM)
 
   ! Create a uniform block mesh
-  call get_environment_variable("SELF_PREFIX",SELF_PREFIX)
-  call mesh % Read_HOPr(trim(SELF_PREFIX)//"/share/mesh/Block2D/Block2D_mesh.h5",decomp)
+  call get_environment_variable("WORKSPACE",WORKSPACE)
+  call mesh % Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",decomp)
 
   ! Generate geometry (metric terms) from the mesh elements
   call geometry % Init(interp,mesh % nElem)
