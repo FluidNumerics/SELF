@@ -6,6 +6,8 @@ steps:
       - "--ntasks=1"
       - "--cpus-per-task=16"
       - "--time=15:00"
+    prerequisites:
+      - "source /etc/profile.d/z11_lmod.sh"
     modules:
       - gcc/13.2.0
       - openmpi/5.0.0
@@ -19,7 +21,8 @@ steps:
       GPU_TARGET: gfx90a
     commands: 
       - |
-        mkdir -p ${WORKSPACE}/build
+        mkdir -p ${BUILD_DIR}
+        mkdir -p ${OUTDIR}
         cd ${WORKSPACE}/build
         FC=gfortran \
         FFLAGS="-DDOUBLE_PRECISION" \
@@ -40,7 +43,7 @@ steps:
               --output-file ${WORKSPACE}/tmp/lcov_base.info
 
         # Run ctests
-        ctest --test-dir ${BUILD_DIR}/build/test
+        ctest --test-dir ${BUILD_DIR}/test
 
         # Compile coverage information
         lcov --no-external \
@@ -51,3 +54,8 @@ steps:
         lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
              --add-tracefile ${WORKSPACE}/tmp/lcov_test.info \ 
              --output-file ${OUTDIR}/lcov.info
+
+        ${HOME}/.local/bin/codecov-linux -t "${CODECOV_TOKEN}" \
+                            --sha "${COMMIT_SHA}" \
+                            --branch "${BRANCH_NAME}" \
+                            --pr "${PR_NUMBER}"
