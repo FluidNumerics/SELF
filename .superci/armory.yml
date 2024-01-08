@@ -21,6 +21,7 @@ steps:
       GPU_TARGET: gfx90a
     commands: 
       - |
+        set -e
         mkdir -p ${BUILD_DIR}
         mkdir -p ${OUTDIR}
         cd ${WORKSPACE}/build
@@ -52,7 +53,7 @@ steps:
             --output-file ${WORKSPACE}/tmp/lcov_test.info
 
         lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
-             --add-tracefile ${WORKSPACE}/tmp/lcov_test.info \ 
+             --add-tracefile ${WORKSPACE}/tmp/lcov_test.info \
              --output-file ${WORKSPACE}/lcov.info
 
         ${HOME}/.local/bin/codecov-linux -t "${CODECOV_TOKEN}" \
