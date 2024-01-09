@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env -S bash -e
 
 GPU_TARGET=gfx90a
 WORKSPACE_ROOT=$HOME/.local/workspace/
