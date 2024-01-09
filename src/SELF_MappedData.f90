@@ -44,8 +44,10 @@ MODULE SELF_MappedData
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar2D
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar2D
 
-    PROCEDURE,PUBLIC :: GradientSF => GradientSF_MappedScalar2D ! Strong-Form Gradient
-    PROCEDURE,PUBLIC :: GradientBR => GradientBR_MappedScalar2D ! Bassi-Rebay Gradient
+    GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
+    PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
+    PROCEDURE,PRIVATE :: GradientSF_MappedScalar2D ! Strong-Form Gradient
+    PROCEDURE,PRIVATE :: GradientBR_MappedScalar2D ! Bassi-Rebay Gradient
 
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar2D
@@ -1145,6 +1147,22 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE GradientBR_MappedScalar2D
+
+  SUBROUTINE Gradient_MappedScalar2D(scalar,geometry,gradF,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    TYPE(MappedVector2D),INTENT(inout) :: gradF
+    INTEGER, INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+
+      if( dForm == selfStrongForm )then
+        call scalar % GradientSF_MappedScalar2D( geometry, gradF, gpuAccel ) 
+      elseif( dForm == selfWeakBRForm )then
+        call scalar % GradientBR_MappedScalar2D( geometry, gradF, gpuAccel ) 
+      endif
+
+  END SUBROUTINE Gradient_MappedScalar2D
 
   SUBROUTINE GradientSF_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
     !! Calculates the gradient of a scalar 2D function using the conservative form of the
