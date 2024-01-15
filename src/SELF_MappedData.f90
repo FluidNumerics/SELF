@@ -49,7 +49,7 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: GradientSF_MappedScalar2D ! Strong-Form Gradient
     PROCEDURE,PRIVATE :: GradientBR_MappedScalar2D ! Bassi-Rebay Gradient
 
-    PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
+!    PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar2D
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D
@@ -69,9 +69,16 @@ MODULE SELF_MappedData
 
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar3D
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar3D
+    
+    !GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar3D
+    !PROCEDURE,PRIVATE :: Gradient_MappedScalar3D
+
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar3D
-    PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar3D
+    PROCEDURE,PRIVATE :: GradientSF_MappedScalar3D ! Strong-Form Gradient
+    PROCEDURE,PRIVATE :: GradientBR_MappedScalar3D ! Bassi-Rebay Gradient
+
+!    PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar3D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar3D
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar3D
@@ -89,11 +96,11 @@ MODULE SELF_MappedData
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedVector2D
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
-    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
+!    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
 !    GENERIC,PUBLIC :: Curl => Curl_MappedVector2D
 
     PROCEDURE,PRIVATE :: Divergence_MappedVector2D
-    PROCEDURE,PRIVATE :: Gradient_MappedVector2D
+!    PROCEDURE,PRIVATE :: Gradient_MappedVector2D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector2D
     PROCEDURE,PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector2D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector2D
@@ -117,10 +124,10 @@ MODULE SELF_MappedData
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
 !    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
-    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
+!    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: Divergence_MappedVector3D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector3D
-    PROCEDURE,PRIVATE :: Gradient_MappedVector3D
+!    PROCEDURE,PRIVATE :: Gradient_MappedVector3D
     PROCEDURE,PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector3D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector3D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector3D
@@ -204,6 +211,27 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE GradientBR_MappedScalar3D_gpu_wrapper(scalar,avgBoundary,dsdx,jacobian,nHat,nScale,&
+                    gradF,dgMatrix,bMatrix,qWeights,N,nVar,nEl) &
+      bind(c,name="GradientBR_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,avgBoundary,dsdx,jacobian,nHat,nScale,gradF,dgMatrix,bMatrix,qWeights
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE GradientBR_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE GradientSF_MappedScalar3D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
+      bind(c,name="GradientSF_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,dsdx,jacobian,gradF,dMatrix
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE GradientSF_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
       bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -233,45 +261,45 @@ MODULE SELF_MappedData
     END SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
-  INTERFACE
-    SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-      bind(c,name="ContravariantWeight_MappedScalar2D_gpu_wrapper")
-      USE ISO_C_BINDING
-      IMPLICIT NONE
-      TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper
-  END INTERFACE
+!  INTERFACE
+!    SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+!      bind(c,name="ContravariantWeight_MappedScalar2D_gpu_wrapper")
+!      USE ISO_C_BINDING
+!      IMPLICIT NONE
+!      TYPE(c_ptr) :: scalar,workTensor,dsdx
+!      INTEGER(C_INT),VALUE :: N,nVar,nEl
+!    END SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper
+!  END INTERFACE
 
-  INTERFACE
-    SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-      bind(c,name="ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper")
-      USE ISO_C_BINDING
-      IMPLICIT NONE
-      TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-      bind(c,name="ContravariantWeight_MappedScalar3D_gpu_wrapper")
-      USE ISO_C_BINDING
-      IMPLICIT NONE
-      TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-      bind(c,name="ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper")
-      USE ISO_C_BINDING
-      IMPLICIT NONE
-      TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper
-  END INTERFACE
+!  INTERFACE
+!    SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+!      bind(c,name="ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper")
+!      USE ISO_C_BINDING
+!      IMPLICIT NONE
+!      TYPE(c_ptr) :: scalar,workTensor,dsdx
+!      INTEGER(C_INT),VALUE :: N,nVar,nEl
+!    END SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper
+!  END INTERFACE
+!
+!  INTERFACE
+!    SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+!      bind(c,name="ContravariantWeight_MappedScalar3D_gpu_wrapper")
+!      USE ISO_C_BINDING
+!      IMPLICIT NONE
+!      TYPE(c_ptr) :: scalar,workTensor,dsdx
+!      INTEGER(C_INT),VALUE :: N,nVar,nEl
+!    END SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper
+!  END INTERFACE
+!
+!  INTERFACE
+!    SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+!      bind(c,name="ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper")
+!      USE ISO_C_BINDING
+!      IMPLICIT NONE
+!      TYPE(c_ptr) :: scalar,workTensor,dsdx
+!      INTEGER(C_INT),VALUE :: N,nVar,nEl
+!    END SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper
+!  END INTERFACE
 
   INTERFACE
     SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(vector,dsdx,N,nVar,nEl) &
@@ -1023,6 +1051,22 @@ CONTAINS
 
   END SUBROUTINE BassiRebaySides_MappedScalar2D
 
+  SUBROUTINE Gradient_MappedScalar2D(scalar,geometry,gradF,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    TYPE(MappedVector2D),INTENT(inout) :: gradF
+    INTEGER, INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+
+      if( dForm == selfStrongForm )then
+        call scalar % GradientSF_MappedScalar2D( geometry, gradF, gpuAccel ) 
+      elseif( dForm == selfWeakBRForm )then
+        call scalar % GradientBR_MappedScalar2D( geometry, gradF, gpuAccel ) 
+      endif
+
+  END SUBROUTINE Gradient_MappedScalar2D
+
   SUBROUTINE GradientBR_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
     !! Calculates the gradient of a scalar 2D function using a bassi-rebay method
     !!
@@ -1148,22 +1192,6 @@ CONTAINS
 
   END SUBROUTINE GradientBR_MappedScalar2D
 
-  SUBROUTINE Gradient_MappedScalar2D(scalar,geometry,gradF,dForm,gpuAccel)
-    IMPLICIT NONE
-    CLASS(MappedScalar2D),INTENT(inout) :: scalar
-    TYPE(SEMQuad),INTENT(in) :: geometry
-    TYPE(MappedVector2D),INTENT(inout) :: gradF
-    INTEGER, INTENT(in) :: dForm
-    LOGICAL,INTENT(in) :: gpuAccel
-
-      if( dForm == selfStrongForm )then
-        call scalar % GradientSF_MappedScalar2D( geometry, gradF, gpuAccel ) 
-      elseif( dForm == selfWeakBRForm )then
-        call scalar % GradientBR_MappedScalar2D( geometry, gradF, gpuAccel ) 
-      endif
-
-  END SUBROUTINE Gradient_MappedScalar2D
-
   SUBROUTINE GradientSF_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
     !! Calculates the gradient of a scalar 2D function using the conservative form of the
     !! mapped gradient operator
@@ -1235,89 +1263,89 @@ CONTAINS
 
   END SUBROUTINE GradientSF_MappedScalar2D
 
-  SUBROUTINE ContravariantWeight_MappedScalar2D(scalar,geometry,workTensor,gpuAccel)
-#undef __FUNC__
-#define __FUNC__ "ContravariantWeight_MappedScalar2D"
-    IMPLICIT NONE
-    CLASS(MappedScalar2D),INTENT(in) :: scalar
-    TYPE(SEMQuad),INTENT(in) :: geometry
-    LOGICAL,INTENT(in):: gpuAccel
-    TYPE(MappedTensor2D),INTENT(inout) :: workTensor
-    ! Local
-    INTEGER :: i,j,iVar,iEl,iside
-
-    IF (gpuAccel) THEN
-
-      CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
-                                                          workTensor % interior % deviceData, &
-                                                          geometry % dsdx % interior % deviceData, &
-                                                          scalar % interp % N, &
-                                                          scalar % nVar, &
-                                                          scalar % nElem)
-
-      CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % avgBoundary % deviceData, &
-                                                                  workTensor % boundary % deviceData, &
-                                                                  geometry % dsdx % boundary % deviceData, &
-                                                                  scalar % interp % N, &
-                                                                  scalar % nVar, &
-                                                                  scalar % nElem)
-    ELSE
-
-      DO iEl = 1,scalar % nElem
-        DO iVar = 1,scalar % nVar
-          DO j = 0,scalar % interp % N
-            DO i = 0,scalar % interp % N
-
-              workTensor % interior % hostData(1,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
-                                                                   hostData(1,1,i,j,1,iEl)* &
-                                                                   scalar % interior % hostData(i,j,iVar,iEl)
-
-              workTensor % interior % hostData(2,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
-                                                                   hostData(1,2,i,j,1,iEl)* &
-                                                                   scalar % interior % hostData(i,j,iVar,iEl)
-
-              workTensor % interior % hostData(1,2,i,j,iVar,iEl) = geometry % dsdx % interior % &
-                                                                   hostData(2,1,i,j,1,iEl)* &
-                                                                   scalar % interior % hostData(i,j,iVar,iEl)
-
-              workTensor % interior % hostData(2,2,i,j,iVar,iEl) = geometry % dsdx % interior % &
-                                                                   hostData(2,2,i,j,1,iEl)* &
-                                                                   scalar % interior % hostData(i,j,iVar,iEl)
-
-            END DO
-          END DO
-        END DO
-      END DO
-
-      ! Boundary Terms
-      DO iEl = 1,scalar % nElem
-        DO iside = 1,4
-          DO iVar = 1,scalar % nVar
-            DO j = 0,scalar % interp % N
-              workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(1,1,j,1,iside,iEl)* &
-                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
-
-              workTensor % boundary % hostData(2,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(1,2,j,1,iside,iEl)* &
-                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
-
-              workTensor % boundary % hostData(1,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(2,1,j,1,iside,iEl)* &
-                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
-
-              workTensor % boundary % hostData(2,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(2,2,j,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
-
-            END DO
-          END DO
-        END DO
-      END DO
-
-    END IF
-
-  END SUBROUTINE ContravariantWeight_MappedScalar2D
+!  SUBROUTINE ContravariantWeight_MappedScalar2D(scalar,geometry,workTensor,gpuAccel)
+!#undef __FUNC__
+!#define __FUNC__ "ContravariantWeight_MappedScalar2D"
+!    IMPLICIT NONE
+!    CLASS(MappedScalar2D),INTENT(in) :: scalar
+!    TYPE(SEMQuad),INTENT(in) :: geometry
+!    LOGICAL,INTENT(in):: gpuAccel
+!    TYPE(MappedTensor2D),INTENT(inout) :: workTensor
+!    ! Local
+!    INTEGER :: i,j,iVar,iEl,iside
+!
+!    IF (gpuAccel) THEN
+!
+!      CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+!                                                          workTensor % interior % deviceData, &
+!                                                          geometry % dsdx % interior % deviceData, &
+!                                                          scalar % interp % N, &
+!                                                          scalar % nVar, &
+!                                                          scalar % nElem)
+!
+!      CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % avgBoundary % deviceData, &
+!                                                                  workTensor % boundary % deviceData, &
+!                                                                  geometry % dsdx % boundary % deviceData, &
+!                                                                  scalar % interp % N, &
+!                                                                  scalar % nVar, &
+!                                                                  scalar % nElem)
+!    ELSE
+!
+!      DO iEl = 1,scalar % nElem
+!        DO iVar = 1,scalar % nVar
+!          DO j = 0,scalar % interp % N
+!            DO i = 0,scalar % interp % N
+!
+!              workTensor % interior % hostData(1,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                   hostData(1,1,i,j,1,iEl)* &
+!                                                                   scalar % interior % hostData(i,j,iVar,iEl)
+!
+!              workTensor % interior % hostData(2,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                   hostData(1,2,i,j,1,iEl)* &
+!                                                                   scalar % interior % hostData(i,j,iVar,iEl)
+!
+!              workTensor % interior % hostData(1,2,i,j,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                   hostData(2,1,i,j,1,iEl)* &
+!                                                                   scalar % interior % hostData(i,j,iVar,iEl)
+!
+!              workTensor % interior % hostData(2,2,i,j,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                   hostData(2,2,i,j,1,iEl)* &
+!                                                                   scalar % interior % hostData(i,j,iVar,iEl)
+!
+!            END DO
+!          END DO
+!        END DO
+!      END DO
+!
+!      ! Boundary Terms
+!      DO iEl = 1,scalar % nElem
+!        DO iside = 1,4
+!          DO iVar = 1,scalar % nVar
+!            DO j = 0,scalar % interp % N
+!              workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                       hostData(1,1,j,1,iside,iEl)* &
+!                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
+!
+!              workTensor % boundary % hostData(2,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                       hostData(1,2,j,1,iside,iEl)* &
+!                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
+!
+!              workTensor % boundary % hostData(1,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                       hostData(2,1,j,1,iside,iEl)* &
+!                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
+!
+!              workTensor % boundary % hostData(2,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                       hostData(2,2,j,1,iside,iEl)* &
+!                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
+!
+!            END DO
+!          END DO
+!        END DO
+!      END DO
+!
+!    END IF
+!
+!  END SUBROUTINE ContravariantWeight_MappedScalar2D
 
   SUBROUTINE JacobianWeight_MappedScalar2D(scalar,geometry,gpuAccel)
 #undef __FUNC__
@@ -1687,199 +1715,521 @@ CONTAINS
 
   END SUBROUTINE BassiRebaySides_MappedScalar3D
 
-  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
-    ! Strong Form Operator
-    !
-    ! Calculates the gradient of a scalar 3D function using the conservative form of the
-    ! mapped gradient operator
-    !
-    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
-    !
-    ! where the sum over i is implied.
+  SUBROUTINE Gradient_MappedScalar3D(scalar,geometry,gradF,dForm,gpuAccel)
     IMPLICIT NONE
-    CLASS(MappedScalar3D),INTENT(in) :: scalar
-    TYPE(MappedTensor3D),INTENT(inout) :: workTensor
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
     TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(MappedVector3D),INTENT(inout) :: gradF
-    INTEGER,INTENT(in) :: dForm
+    INTEGER, INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
-    IF (dForm == selfWeakDGForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
-                                                         workTensor % boundary % deviceData, &
-                                                         gradF % interior % deviceData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
-                                                         workTensor % boundary % hostData, &
-                                                         gradF % interior % hostData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      END IF
-
-    ELSE IF (dForm == selfStrongForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
-                                                       gradF % interior % deviceData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
-                                                       gradF % interior % hostData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
-      END IF
-
-    END IF
-    CALL gradF % JacobianWeight(geometry,gpuAccel)
+      if( dForm == selfStrongForm )then
+        call scalar % GradientSF_MappedScalar3D( geometry, gradF, gpuAccel ) 
+      elseif( dForm == selfWeakBRForm )then
+        call scalar % GradientBR_MappedScalar3D( geometry, gradF, gpuAccel ) 
+      endif
 
   END SUBROUTINE Gradient_MappedScalar3D
 
-  SUBROUTINE ContravariantWeight_MappedScalar3D(scalar,geometry,workTensor,gpuAccel)
-#undef __FUNC__
-#define __FUNC__ "ContravariantWeight_MappedScalar3D"
+  SUBROUTINE GradientBR_MappedScalar3D(scalar,geometry,gradF,gpuAccel)
+    !! Calculates the gradient of a scalar 3D function using a bassi-rebay method
+    !!
+    !! This method will call the BassiRebaySides method, which assumes the SideExchange
+    !! has already been completed, to update the avgBoundary attribute.
+    !!
+    IMPLICIT NONE
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
+    TYPE(SEMHex),INTENT(in) :: geometry
+    TYPE(MappedVector3D),INTENT(inout) :: gradF
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER    :: i,j,k,ii,iVar,iEl
+    REAL(prec) :: gFx, gFy, gFz
+    REAL(prec) :: f1, f2, f3
+     
+    CALL scalar % BassiRebaySides( gpuAccel )
+
+    IF( gpuAccel )THEN
+
+      CALL GradientBR_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
+                                                 scalar % avgBoundary % deviceData, &
+                                                 geometry % dsdx % interior % deviceData, &
+                                                 geometry % J % interior % deviceData, &
+                                                 geometry % nHat % boundary % deviceData, &
+                                                 geometry % nScale % boundary % deviceData, &
+                                                 gradF % interior % deviceData, &
+                                                 scalar % interp % dgMatrix % deviceData, &
+                                                 scalar % interp % bMatrix % deviceData, &
+                                                 scalar % interp % qWeights % deviceData, &
+                                                 scalar % interp % N, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
+    ELSE
+
+     DO iEl = 1, scalar % nElem
+       DO iVar = 1, scalar % nVar
+         DO k = 0, scalar % interp % N
+           DO j = 0, scalar % interp % N
+             DO i = 0, scalar % interp % N
+
+               gFx = 0.0_prec
+               gFy = 0.0_prec
+               gFz = 0.0_prec
+               DO ii = 0, scalar % interp % N
+
+                 f1 = scalar % interior % hostData(ii,j,k,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(1,1,ii,j,k,1,iEl)
+
+                 f2 = scalar % interior % hostData(i,ii,k,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(1,2,i,ii,k,1,iEl)
+
+                 f3 = scalar % interior % hostData(i,j,ii,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(1,3,i,j,ii,1,iEl)
+
+                 gFx = gFx + scalar % interp % dgMatrix % hostData(ii,i)*f1 +&
+                             scalar % interp % dgMatrix % hostData(ii,j)*f2 +&
+                             scalar % interp % dgMatrix % hostData(ii,k)*f3
+
+                 f1 = scalar % interior % hostData(ii,j,k,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(2,1,ii,j,k,1,iEl)
+
+                 f2 = scalar % interior % hostData(i,ii,k,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(2,2,i,ii,k,1,iEl)
+
+                 f3 = scalar % interior % hostData(i,j,ii,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(2,3,i,j,ii,1,iEl)
+
+                 gFy = gFy + scalar % interp % dgMatrix % hostData(ii,i)*f1 +&
+                             scalar % interp % dgMatrix % hostData(ii,j)*f2 +&
+                             scalar % interp % dgMatrix % hostData(ii,k)*f3
+
+                 f1 = scalar % interior % hostData(ii,j,k,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(3,1,ii,j,k,1,iEl)
+
+                 f2 = scalar % interior % hostData(i,ii,k,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(3,2,i,ii,k,1,iEl)
+
+                 f3 = scalar % interior % hostData(i,j,ii,iVar,iEl)*&
+                        geometry % dsdx % interior % hostData(3,3,i,j,ii,1,iEl)
+
+                 gFz = gFz + scalar % interp % dgMatrix % hostData(ii,i)*f1 +&
+                             scalar % interp % dgMatrix % hostData(ii,j)*f2 +&
+                             scalar % interp % dgMatrix % hostData(ii,k)*f3
+
+               END DO
+
+               ! Boundary Contribution
+               f1 = scalar % avgBoundary % hostData(j,k,iVar,2,iEl)*&
+                       geometry % nHat % boundary % hostData(1,j,k,1,2,iEl)*&
+                       geometry % nScale % boundary % hostData(j,k,1,2,iEl) ! East
+
+               f2 = scalar % avgBoundary % hostData(j,k,iVar,4,iEl)*&
+                       geometry % nHat % boundary % hostData(1,j,k,1,4,iEl)*&
+                       geometry % nScale % boundary % hostData(j,k,1,4,iEl) ! West
+
+               gFx = gFx + (f1*scalar % interp % bMatrix % hostData(i,1) + &
+                            f2*scalar % interp % bMatrix % hostData(i,0))/ &
+                       scalar % interp % qWeights % hostData(i)
+
+               f1 = scalar % avgBoundary % hostData(i,k,iVar,3,iEl)*&
+                       geometry % nHat % boundary % hostData(1,i,k,1,3,iEl)*&
+                       geometry % nScale % boundary % hostData(i,k,1,3,iEl) ! North
+
+               f2 = scalar % avgBoundary % hostData(i,k,iVar,1,iEl)*&
+                       geometry % nHat % boundary % hostData(1,i,k,1,1,iEl)*&
+                       geometry % nScale % boundary % hostData(i,k,1,1,iEl) ! South
+
+               gFx = gFx + (f1*scalar % interp % bMatrix % hostData(j,1) + &
+                            f2*scalar % interp % bMatrix % hostData(j,0))/ &
+                       scalar % interp % qWeights % hostData(j)
+
+               f1 = scalar % avgBoundary % hostData(i,j,iVar,6,iEl)*&
+                       geometry % nHat % boundary % hostData(1,i,j,1,6,iEl)*&
+                       geometry % nScale % boundary % hostData(i,j,1,6,iEl) ! Top
+
+               f2 = scalar % avgBoundary % hostData(i,j,iVar,5,iEl)*&
+                       geometry % nHat % boundary % hostData(1,i,j,1,5,iEl)*&
+                       geometry % nScale % boundary % hostData(i,j,1,5,iEl) ! Bottom
+
+               gFx = gFx + (f1*scalar % interp % bMatrix % hostData(k,1) + &
+                            f2*scalar % interp % bMatrix % hostData(k,0))/ &
+                       scalar % interp % qWeights % hostData(k)
+
+               f1 = scalar % avgBoundary % hostData(j,k,iVar,2,iEl)*&
+                       geometry % nHat % boundary % hostData(2,j,k,1,2,iEl)*&
+                       geometry % nScale % boundary % hostData(j,k,1,2,iEl) ! East
+
+               f2 = scalar % avgBoundary % hostData(j,k,iVar,4,iEl)*&
+                       geometry % nHat % boundary % hostData(2,j,k,1,4,iEl)*&
+                       geometry % nScale % boundary % hostData(j,k,1,4,iEl) ! West
+
+               gFy = gFy + (f1*scalar % interp % bMatrix % hostData(i,1) + &
+                            f2*scalar % interp % bMatrix % hostData(i,0))/ &
+                       scalar % interp % qWeights % hostData(i)
+
+               f1 = scalar % avgBoundary % hostData(i,k,iVar,3,iEl)*&
+                       geometry % nHat % boundary % hostData(2,i,k,1,3,iEl)*&
+                       geometry % nScale % boundary % hostData(i,k,1,3,iEl) ! North
+
+               f2 = scalar % avgBoundary % hostData(i,k,iVar,1,iEl)*&
+                       geometry % nHat % boundary % hostData(2,i,k,1,1,iEl)*&
+                       geometry % nScale % boundary % hostData(i,k,1,1,iEl) ! South
+
+               gFy = gFy + (f1*scalar % interp % bMatrix % hostData(j,1) + &
+                            f2*scalar % interp % bMatrix % hostData(j,0))/ &
+                       scalar % interp % qWeights % hostData(j)
+
+               f1 = scalar % avgBoundary % hostData(i,j,iVar,6,iEl)*&
+                       geometry % nHat % boundary % hostData(2,i,j,1,6,iEl)*&
+                       geometry % nScale % boundary % hostData(i,j,1,6,iEl) ! Top
+
+               f2 = scalar % avgBoundary % hostData(i,j,iVar,5,iEl)*&
+                       geometry % nHat % boundary % hostData(2,i,j,1,5,iEl)*&
+                       geometry % nScale % boundary % hostData(i,j,1,5,iEl) ! Bottom
+
+               gFy = gFy + (f1*scalar % interp % bMatrix % hostData(k,1) + &
+                            f2*scalar % interp % bMatrix % hostData(k,0))/ &
+                       scalar % interp % qWeights % hostData(k)
+
+               f1 = scalar % avgBoundary % hostData(j,k,iVar,2,iEl)*&
+                       geometry % nHat % boundary % hostData(3,j,k,1,2,iEl)*&
+                       geometry % nScale % boundary % hostData(j,k,1,2,iEl) ! East
+
+               f2 = scalar % avgBoundary % hostData(j,k,iVar,4,iEl)*&
+                       geometry % nHat % boundary % hostData(3,j,k,1,4,iEl)*&
+                       geometry % nScale % boundary % hostData(j,k,1,4,iEl) ! West
+
+               gFz = gFz + (f1*scalar % interp % bMatrix % hostData(i,1) + &
+                            f2*scalar % interp % bMatrix % hostData(i,0))/ &
+                       scalar % interp % qWeights % hostData(i)
+
+               f1 = scalar % avgBoundary % hostData(i,k,iVar,3,iEl)*&
+                       geometry % nHat % boundary % hostData(3,i,k,1,3,iEl)*&
+                       geometry % nScale % boundary % hostData(i,k,1,3,iEl) ! North
+
+               f2 = scalar % avgBoundary % hostData(i,k,iVar,1,iEl)*&
+                       geometry % nHat % boundary % hostData(3,i,k,1,1,iEl)*&
+                       geometry % nScale % boundary % hostData(i,k,1,1,iEl) ! South
+
+               gFz = gFz + (f1*scalar % interp % bMatrix % hostData(j,1) + &
+                            f2*scalar % interp % bMatrix % hostData(j,0))/ &
+                       scalar % interp % qWeights % hostData(j)
+
+               f1 = scalar % avgBoundary % hostData(i,j,iVar,6,iEl)*&
+                       geometry % nHat % boundary % hostData(3,i,j,1,6,iEl)*&
+                       geometry % nScale % boundary % hostData(i,j,1,6,iEl) ! Top
+
+               f2 = scalar % avgBoundary % hostData(i,j,iVar,5,iEl)*&
+                       geometry % nHat % boundary % hostData(3,i,j,1,5,iEl)*&
+                       geometry % nScale % boundary % hostData(i,j,1,5,iEl) ! Bottom
+
+               gFz = gFz + (f1*scalar % interp % bMatrix % hostData(k,1) + &
+                            f2*scalar % interp % bMatrix % hostData(k,0))/ &
+                       scalar % interp % qWeights % hostData(k)
+
+               gradF % interior % hostData(1,i,j,k,iVar,iEl) = gFx/geometry % J % interior % hostData(i,j,k,1,iEl)
+               gradF % interior % hostData(2,i,j,k,iVar,iEl) = gFy/geometry % J % interior % hostData(i,j,k,1,iEl)
+               gradF % interior % hostData(3,i,j,k,iVar,iEl) = gFz/geometry % J % interior % hostData(i,j,k,1,iEl)
+
+             END DO
+           END DO
+         END DO
+       END DO
+     END DO
+
+    ENDIF
+
+  END SUBROUTINE GradientBR_MappedScalar3D
+
+  SUBROUTINE GradientSF_MappedScalar3D(scalar,geometry,gradF,gpuAccel)
+    !! Calculates the gradient of a scalar 3D function using the conservative form of the
+    !! mapped gradient operator
+    !!
+    !! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
+    !!
+    !! where the sum over i is implied.
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(in) :: scalar
     TYPE(SEMHex),INTENT(in) :: geometry
+    TYPE(MappedVector3D),INTENT(inout) :: gradF
     LOGICAL,INTENT(in) :: gpuAccel
-    TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     ! Local
-    INTEGER :: i,j,k,iVar,iEl,iside
+    INTEGER    :: i,j,k,ii,iVar,iEl
+    REAL(prec) :: gFx, gFy, gFz
+    REAL(prec) :: f1, f2, f3
 
     IF (gpuAccel) THEN
-
-      CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
-                                                          workTensor % interior % deviceData, &
-                                                          geometry % dsdx % interior % deviceData, &
-                                                          scalar % interp % N, &
-                                                          scalar % nVar, &
-                                                          scalar % nElem)
-
-      CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % avgBoundary % deviceData, &
-                                                                  workTensor % boundary % deviceData, &
-                                                                  geometry % dsdx % boundary % deviceData, &
-                                                                  scalar % interp % N, &
-                                                                  scalar % nVar, &
-                                                                  scalar % nElem)
+      CALL GradientSF_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
+                                               geometry % dsdx % interior % deviceData, &
+                                               geometry % J % interior % deviceData, &
+                                               gradF % interior % deviceData, &
+                                               scalar % interp % dMatrix % deviceData, &
+                                               scalar % interp % N, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
 
     ELSE
 
-      DO iEl = 1,scalar % nElem
-        DO iVar = 1,scalar % nVar
-          DO k = 0,scalar % interp % N
-            DO j = 0,scalar % interp % N
-              DO i = 0,scalar % interp % N
 
-                ! Get the x-component of the Jacobian weighted
-                ! contravariant basis vectors multipled by the scalar
-                workTensor % interior % hostData(1,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(1,1,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+      DO iEl = 1, scalar % nElem
+        DO iVar = 1, scalar % nVar
+          DO k = 0, scalar % interp % N
+            DO j = 0, scalar % interp % N
+              DO i = 0, scalar % interp % N
 
-                workTensor % interior % hostData(2,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(1,2,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                gFx = 0.0_prec
+                gFy = 0.0_prec
+                gFz = 0.0_prec
+                DO ii = 0, scalar % interp % N
 
-                workTensor % interior % hostData(3,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(1,3,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  f1 = scalar % interior % hostData(ii,j,k,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(1,1,ii,j,k,1,iEl)
 
-                ! Get the y-component of the Jacobian weighted
-                ! contravariant basis vectors multipled by the scalar
-                workTensor % interior % hostData(1,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(2,1,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  f2 = scalar % interior % hostData(i,ii,k,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(1,2,i,ii,k,1,iEl)
 
-                workTensor % interior % hostData(2,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(2,2,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  f3 = scalar % interior % hostData(i,j,ii,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(1,3,i,j,ii,1,iEl)
 
-                workTensor % interior % hostData(3,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(2,3,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  gFx = gFx + scalar % interp % dMatrix % hostData(ii,i)*f1 +&
+                              scalar % interp % dMatrix % hostData(ii,j)*f2 +&
+                              scalar % interp % dMatrix % hostData(ii,k)*f3
 
-                ! Get the z-component of the Jacobian weighted
-                ! contravariant basis vectors multipled by the scalar
-                workTensor % interior % hostData(1,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(3,1,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  f1 = scalar % interior % hostData(ii,j,k,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(2,1,ii,j,k,1,iEl)
 
-                workTensor % interior % hostData(2,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(3,2,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  f2 = scalar % interior % hostData(i,ii,k,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(2,2,i,ii,k,1,iEl)
 
-                workTensor % interior % hostData(3,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(3,3,i,j,k,1,iEl)* &
-                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+                  f3 = scalar % interior % hostData(i,j,ii,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(2,2,i,j,ii,1,iEl)
 
-              END DO
-            END DO
-          END DO
-        END DO
-      END DO
+                  gFy = gFy + scalar % interp % dMatrix % hostData(ii,i)*f1 +&
+                              scalar % interp % dMatrix % hostData(ii,j)*f2 +&
+                              scalar % interp % dMatrix % hostData(ii,k)*f3
 
-      ! Boundary Term
-      DO iEl = 1,scalar % nElem
-        DO iside = 1,6
-          DO iVar = 1,scalar % nVar
-            DO k = 0,scalar % interp % N
-              DO j = 0,scalar % interp % N
-                ! Get the x-component of the Jacobian weighted
-                ! contravariant basis vectors multipled by the scalar
-                workTensor % boundary % hostData(1,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(1,1,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                  f1 = scalar % interior % hostData(ii,j,k,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(3,1,ii,j,k,1,iEl)
 
-                workTensor % boundary % hostData(2,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(1,2,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+                  f2 = scalar % interior % hostData(i,ii,k,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(3,2,i,ii,k,1,iEl)
 
-                workTensor % boundary % hostData(3,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(1,3,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+                  f3 = scalar % interior % hostData(i,j,ii,iVar,iEl)*&
+                         geometry % dsdx % interior % hostData(3,2,i,j,ii,1,iEl)
 
-                ! Get the y-component of the Jacobian weighted
-                ! contravariant basis vectors multipled by the scalar
-                workTensor % boundary % hostData(1,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(2,1,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+                  gFz = gFz + scalar % interp % dMatrix % hostData(ii,i)*f1 +&
+                              scalar % interp % dMatrix % hostData(ii,j)*f2 +&
+                              scalar % interp % dMatrix % hostData(ii,k)*f3
 
-                workTensor % boundary % hostData(2,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(2,2,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+                END DO
 
-                workTensor % boundary % hostData(3,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(2,3,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
-
-                ! Get the z-component of the Jacobian weighted
-                ! contravariant basis vectors multipled by the scalar
-                workTensor % boundary % hostData(1,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(3,1,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
-
-                workTensor % boundary % hostData(2,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(3,2,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
-
-                workTensor % boundary % hostData(3,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                           hostData(3,3,j,k,1,iside,iEl)* &
-                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+                gradF % interior % hostData(1,i,j,k,iVar,iEl) = gFx/geometry % J % interior % hostData(i,j,k,1,iEl)
+                gradF % interior % hostData(2,i,j,k,iVar,iEl) = gFy/geometry % J % interior % hostData(i,j,k,1,iEl)
+                gradF % interior % hostData(3,i,j,k,iVar,iEl) = gFz/geometry % J % interior % hostData(i,j,k,1,iEl)
 
               END DO
             END DO
-          END DO
+          ENDDO
         END DO
       END DO
 
     END IF
 
-  END SUBROUTINE ContravariantWeight_MappedScalar3D
+  END SUBROUTINE GradientSF_MappedScalar3D
+
+!  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
+!    ! Strong Form Operator
+!    !
+!    ! Calculates the gradient of a scalar 3D function using the conservative form of the
+!    ! mapped gradient operator
+!    !
+!    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
+!    !
+!    ! where the sum over i is implied.
+!    IMPLICIT NONE
+!    CLASS(MappedScalar3D),INTENT(in) :: scalar
+!    TYPE(MappedTensor3D),INTENT(inout) :: workTensor
+!    TYPE(SEMHex),INTENT(in) :: geometry
+!    TYPE(MappedVector3D),INTENT(inout) :: gradF
+!    INTEGER,INTENT(in) :: dForm
+!    LOGICAL,INTENT(in) :: gpuAccel
+!
+!    CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
+!    IF (dForm == selfWeakDGForm) THEN
+!
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
+!                                                         workTensor % boundary % deviceData, &
+!                                                         gradF % interior % deviceData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
+!                                                         workTensor % boundary % hostData, &
+!                                                         gradF % interior % hostData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      END IF
+!
+!    ELSE IF (dForm == selfStrongForm) THEN
+!
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+!                                                       gradF % interior % deviceData, &
+!                                                       workTensor % nVar, &
+!                                                       workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
+!                                                       gradF % interior % hostData, &
+!                                                       workTensor % nVar, &
+!                                                       workTensor % nElem)
+!      END IF
+!
+!    END IF
+!    CALL gradF % JacobianWeight(geometry,gpuAccel)
+!
+!  END SUBROUTINE Gradient_MappedScalar3D
+
+!  SUBROUTINE ContravariantWeight_MappedScalar3D(scalar,geometry,workTensor,gpuAccel)
+!#undef __FUNC__
+!#define __FUNC__ "ContravariantWeight_MappedScalar3D"
+!    IMPLICIT NONE
+!    CLASS(MappedScalar3D),INTENT(in) :: scalar
+!    TYPE(SEMHex),INTENT(in) :: geometry
+!    LOGICAL,INTENT(in) :: gpuAccel
+!    TYPE(MappedTensor3D),INTENT(inout) :: workTensor
+!    ! Local
+!    INTEGER :: i,j,k,iVar,iEl,iside
+!
+!    IF (gpuAccel) THEN
+!
+!      CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
+!                                                          workTensor % interior % deviceData, &
+!                                                          geometry % dsdx % interior % deviceData, &
+!                                                          scalar % interp % N, &
+!                                                          scalar % nVar, &
+!                                                          scalar % nElem)
+!
+!      CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % avgBoundary % deviceData, &
+!                                                                  workTensor % boundary % deviceData, &
+!                                                                  geometry % dsdx % boundary % deviceData, &
+!                                                                  scalar % interp % N, &
+!                                                                  scalar % nVar, &
+!                                                                  scalar % nElem)
+!
+!    ELSE
+!
+!      DO iEl = 1,scalar % nElem
+!        DO iVar = 1,scalar % nVar
+!          DO k = 0,scalar % interp % N
+!            DO j = 0,scalar % interp % N
+!              DO i = 0,scalar % interp % N
+!
+!                ! Get the x-component of the Jacobian weighted
+!                ! contravariant basis vectors multipled by the scalar
+!                workTensor % interior % hostData(1,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(1,1,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                workTensor % interior % hostData(2,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(1,2,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                workTensor % interior % hostData(3,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(1,3,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                ! Get the y-component of the Jacobian weighted
+!                ! contravariant basis vectors multipled by the scalar
+!                workTensor % interior % hostData(1,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(2,1,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                workTensor % interior % hostData(2,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(2,2,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                workTensor % interior % hostData(3,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(2,3,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                ! Get the z-component of the Jacobian weighted
+!                ! contravariant basis vectors multipled by the scalar
+!                workTensor % interior % hostData(1,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(3,1,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                workTensor % interior % hostData(2,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(3,2,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!                workTensor % interior % hostData(3,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
+!                                                                       hostData(3,3,i,j,k,1,iEl)* &
+!                                                                       scalar % interior % hostData(i,j,k,iVar,iEl)
+!
+!              END DO
+!            END DO
+!          END DO
+!        END DO
+!      END DO
+!
+!      ! Boundary Term
+!      DO iEl = 1,scalar % nElem
+!        DO iside = 1,6
+!          DO iVar = 1,scalar % nVar
+!            DO k = 0,scalar % interp % N
+!              DO j = 0,scalar % interp % N
+!                ! Get the x-component of the Jacobian weighted
+!                ! contravariant basis vectors multipled by the scalar
+!                workTensor % boundary % hostData(1,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(1,1,j,k,1,iside,iEl)* &
+!                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+!
+!                workTensor % boundary % hostData(2,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(1,2,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                workTensor % boundary % hostData(3,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(1,3,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                ! Get the y-component of the Jacobian weighted
+!                ! contravariant basis vectors multipled by the scalar
+!                workTensor % boundary % hostData(1,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(2,1,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                workTensor % boundary % hostData(2,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(2,2,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                workTensor % boundary % hostData(3,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(2,3,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                ! Get the z-component of the Jacobian weighted
+!                ! contravariant basis vectors multipled by the scalar
+!                workTensor % boundary % hostData(1,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(3,1,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                workTensor % boundary % hostData(2,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(3,2,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!                workTensor % boundary % hostData(3,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+!                                                                           hostData(3,3,j,k,1,iside,iEl)* &
+!                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
+!
+!              END DO
+!            END DO
+!          END DO
+!        END DO
+!      END DO
+!
+!    END IF
+!
+!  END SUBROUTINE ContravariantWeight_MappedScalar3D
 
   SUBROUTINE JacobianWeight_MappedScalar3D(scalar,geometry,gpuAccel)
 #undef __FUNC__
@@ -2132,66 +2482,66 @@ CONTAINS
 
   END SUBROUTINE Divergence_MappedVector2D
 
-  SUBROUTINE Gradient_MappedVector2D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
-    ! Strong Form Operator - (Conservative Form)
-    !
-    ! Calculates the gradient of a scalar 2D function using the conservative form of the
-    ! mapped gradient operator
-    !
-    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
-    !
-    ! where the sum over i is implied.
-    IMPLICIT NONE
-    CLASS(MappedVector2D),INTENT(in) :: vector
-    TYPE(MappedScalar2D),INTENT(inout) :: workScalar ! (scalar) nvar = 2*nvar
-    TYPE(MappedVector2D),INTENT(inout) :: workVector ! (scalar) nvar = 2*nvar
-    TYPE(MappedTensor2D),INTENT(inout) :: workTensor ! (tensor) nvar = 2*nvar
-    TYPE(SEMQuad),INTENT(in) :: geometry
-    TYPE(MappedTensor2D),INTENT(inout) :: gradF
-    INTEGER,INTENT(in) :: dForm
-    LOGICAL,INTENT(in) :: gpuAccel
-
-    CALL vector % MapToScalar(workScalar,gpuAccel)
-
-    CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
-
-    IF (dForm == selfWeakDGForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
-                                                         workTensor % boundary % deviceData, &
-                                                         workVector % interior % deviceData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
-                                                         workTensor % boundary % hostData, &
-                                                         workVector % interior % hostData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      END IF
-
-    ELSE IF (dForm == selfStrongForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
-                                                       workVector % interior % deviceData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
-                                                       workVector % interior % hostData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
-      END IF
-
-    END IF
-
-    CALL workVector % MapToTensor(gradF,gpuAccel)
-
-    CALL gradF % JacobianWeight(geometry,gpuAccel)
-
-  END SUBROUTINE Gradient_MappedVector2D
+!  SUBROUTINE Gradient_MappedVector2D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
+!    ! Strong Form Operator - (Conservative Form)
+!    !
+!    ! Calculates the gradient of a scalar 2D function using the conservative form of the
+!    ! mapped gradient operator
+!    !
+!    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
+!    !
+!    ! where the sum over i is implied.
+!    IMPLICIT NONE
+!    CLASS(MappedVector2D),INTENT(in) :: vector
+!    TYPE(MappedScalar2D),INTENT(inout) :: workScalar ! (scalar) nvar = 2*nvar
+!    TYPE(MappedVector2D),INTENT(inout) :: workVector ! (scalar) nvar = 2*nvar
+!    TYPE(MappedTensor2D),INTENT(inout) :: workTensor ! (tensor) nvar = 2*nvar
+!    TYPE(SEMQuad),INTENT(in) :: geometry
+!    TYPE(MappedTensor2D),INTENT(inout) :: gradF
+!    INTEGER,INTENT(in) :: dForm
+!    LOGICAL,INTENT(in) :: gpuAccel
+!
+!    CALL vector % MapToScalar(workScalar,gpuAccel)
+!
+!    CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
+!
+!    IF (dForm == selfWeakDGForm) THEN
+!
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
+!                                                         workTensor % boundary % deviceData, &
+!                                                         workVector % interior % deviceData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
+!                                                         workTensor % boundary % hostData, &
+!                                                         workVector % interior % hostData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      END IF
+!
+!    ELSE IF (dForm == selfStrongForm) THEN
+!
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
+!                                                       workVector % interior % deviceData, &
+!                                                       workTensor % nVar, &
+!                                                       workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
+!                                                       workVector % interior % hostData, &
+!                                                       workTensor % nVar, &
+!                                                       workTensor % nElem)
+!      END IF
+!
+!    END IF
+!
+!    CALL workVector % MapToTensor(gradF,gpuAccel)
+!
+!    CALL gradF % JacobianWeight(geometry,gpuAccel)
+!
+!  END SUBROUTINE Gradient_MappedVector2D
 
   SUBROUTINE MapToScalar_MappedVector2D(vector,scalar,gpuAccel)
 #undef __FUNC__
@@ -2653,66 +3003,66 @@ CONTAINS
 
   END SUBROUTINE Divergence_MappedVector3D
 
-  SUBROUTINE Gradient_MappedVector3D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
-    ! Strong Form Operator - (Conservative Form)
-    !
-    ! Calculates the gradient of a scalar 3D function using the conservative form of the
-    ! mapped gradient operator
-    !
-    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
-    !
-    ! where the sum over i is implied.
-    IMPLICIT NONE
-    CLASS(MappedVector3D),INTENT(in) :: vector
-    TYPE(MappedScalar3D),INTENT(inout) :: workScalar ! (scalar) nvar = 3*nvar
-    TYPE(MappedVector3D),INTENT(inout) :: workVector ! (vector) nvar = 3*nvar
-    TYPE(MappedTensor3D),INTENT(inout) :: workTensor ! (tensor) nvar = 3*nvar
-    TYPE(SEMHex),INTENT(in) :: geometry
-    TYPE(MappedTensor3D),INTENT(inout) :: gradF
-    INTEGER,INTENT(in) :: dForm
-    LOGICAL,INTENT(in) :: gpuAccel
-
-    CALL vector % MapToScalar(workScalar,gpuAccel)
-
-    CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
-
-    IF (dForm == selfWeakDGForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
-                                                         workTensor % boundary % deviceData, &
-                                                         workVector % interior % deviceData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
-                                                         workTensor % boundary % hostData, &
-                                                         workVector % interior % hostData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      END IF
-
-    ELSE IF (dForm == selfStrongForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
-                                                       workVector % interior % deviceData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
-                                                       workVector % interior % hostData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
-      END IF
-
-    END IF
-
-    CALL workVector % MapToTensor(gradF,gpuAccel)
-
-    CALL gradF % JacobianWeight(geometry,gpuAccel)
-
-  END SUBROUTINE Gradient_MappedVector3D
+!  SUBROUTINE Gradient_MappedVector3D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
+!    ! Strong Form Operator - (Conservative Form)
+!    !
+!    ! Calculates the gradient of a scalar 3D function using the conservative form of the
+!    ! mapped gradient operator
+!    !
+!    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
+!    !
+!    ! where the sum over i is implied.
+!    IMPLICIT NONE
+!    CLASS(MappedVector3D),INTENT(in) :: vector
+!    TYPE(MappedScalar3D),INTENT(inout) :: workScalar ! (scalar) nvar = 3*nvar
+!    TYPE(MappedVector3D),INTENT(inout) :: workVector ! (vector) nvar = 3*nvar
+!    TYPE(MappedTensor3D),INTENT(inout) :: workTensor ! (tensor) nvar = 3*nvar
+!    TYPE(SEMHex),INTENT(in) :: geometry
+!    TYPE(MappedTensor3D),INTENT(inout) :: gradF
+!    INTEGER,INTENT(in) :: dForm
+!    LOGICAL,INTENT(in) :: gpuAccel
+!
+!    CALL vector % MapToScalar(workScalar,gpuAccel)
+!
+!    CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
+!
+!    IF (dForm == selfWeakDGForm) THEN
+!
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
+!                                                         workTensor % boundary % deviceData, &
+!                                                         workVector % interior % deviceData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
+!                                                         workTensor % boundary % hostData, &
+!                                                         workVector % interior % hostData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      END IF
+!
+!    ELSE IF (dForm == selfStrongForm) THEN
+!
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+!                                                       workVector % interior % deviceData, &
+!                                                       workTensor % nVar, &
+!                                                       workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
+!                                                       workVector % interior % hostData, &
+!                                                       workTensor % nVar, &
+!                                                       workTensor % nElem)
+!      END IF
+!
+!    END IF
+!
+!    CALL workVector % MapToTensor(gradF,gpuAccel)
+!
+!    CALL gradF % JacobianWeight(geometry,gpuAccel)
+!
+!  END SUBROUTINE Gradient_MappedVector3D
 
   SUBROUTINE MapToScalar_MappedVector3D(vector,scalar,gpuAccel)
 #undef __FUNC__
