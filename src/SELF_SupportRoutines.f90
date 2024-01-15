@@ -19,6 +19,11 @@ MODULE SELF_SupportRoutines
 
   IMPLICIT NONE
 
+  INTERFACE AlmostEqual
+    MODULE PROCEDURE AlmostEqual_r64
+  END INTERFACE AlmostEqual
+
+
   REAL(prec),PRIVATE,PARAMETER :: tolerance = 10.0**(-10)
 
 CONTAINS
@@ -52,27 +57,27 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
-  FUNCTION AlmostEqual(a,b) RESULT(AisB)
+  FUNCTION AlmostEqual_r64(a,b) RESULT(AisB)
 
     IMPLICIT NONE
-    REAL(prec) :: a,b
+    REAL(real64) :: a,b
     LOGICAL :: AisB
 
-    IF (a == 0.0_prec .OR. b == 0.0_prec) THEN
-      IF (ABS(a - b) <= EPSILON(1.0_prec)) THEN
+    IF (a == 0.0_real64 .OR. b == 0.0_real64) THEN
+      IF (ABS(a - b) <= EPSILON(1.0_real64)) THEN
         AisB = .TRUE.
       ELSE
         AisB = .FALSE.
       END IF
     ELSE
-      IF ((abs(a - b) <= EPSILON(1.0_prec)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_prec)*abs(b))) THEN
+      IF ((abs(a - b) <= EPSILON(1.0_real64)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_real64)*abs(b))) THEN
         AisB = .TRUE.
       ELSE
         AisB = .FALSE.
       END IF
     END IF
 
-  END FUNCTION AlmostEqual
+  END FUNCTION AlmostEqual_r64
 
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -296,5 +301,46 @@ CONTAINS
     END IF
 
   END FUNCTION TimeStamp
+
+  integer function newunit(unit)
+  !  https://fortranwiki.org/fortran/show/newunit
+  integer, intent(out), optional :: unit
+! local
+  integer, parameter :: LUN_MIN=10, LUN_MAX=1000
+  logical :: opened
+  integer :: lun
+! begin
+  newunit=-1
+  do lun=LUN_MIN,LUN_MAX
+    inquire(unit=lun,opened=opened)
+    if (.not. opened) then
+      newunit=lun
+      exit
+    end if
+  end do
+  if (present(unit)) unit=newunit
+  end function newunit
+
+  FUNCTION UpperCase(str) RESULT(upper)
+
+    Implicit None
+    CHARACTER(*),INTENT(In) :: str
+    CHARACTER(LEN(str))      :: Upper
+
+    INTEGER :: ic,i
+
+    CHARACTER(27),PARAMETER :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ '
+    CHARACTER(27),PARAMETER :: low = 'abcdefghijklmnopqrstuvwxyz '
+
+    DO i = 1,LEN(str)
+      ic = INDEX(low,str(i:i))
+      IF (ic > 0) THEN
+        Upper(i:i) = cap(ic:ic)
+      ELSE
+        Upper(i:i) = str(i:i)
+      END IF
+    END DO
+
+  END FUNCTION UpperCase
 
 END MODULE SELF_SupportRoutines
