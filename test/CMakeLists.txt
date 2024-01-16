@@ -104,6 +104,7 @@ add_fortran_test_executable (
     "mappedscalardgderivative_1d_cpu_constant.f90"
     "mappedscalardgderivative_1d_gpu_constant.f90"
     "mappedvectordivergence_2d_cpu_constant.f90"
+    "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
     "mappedvectordivergence_2d_gpu_constant.f90"
     "mappedscalargradient_2d_cpu_constant.f90"
     "mappedscalargradient_2d_gpu_constant.f90"
