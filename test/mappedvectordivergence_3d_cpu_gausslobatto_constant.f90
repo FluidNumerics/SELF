@@ -1,4 +1,4 @@
-integer function mappedvectordivergence_3d_gpu_constant() result(r)
+integer function mappedvectordivergence_3d_cpu_gausslobatto_constant() result(r)
 
   use SELF_Constants
   use SELF_Lagrange
@@ -32,7 +32,7 @@ integer function mappedvectordivergence_3d_gpu_constant() result(r)
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -54,11 +54,7 @@ integer function mappedvectordivergence_3d_gpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
 
-  call f % interior % updatedevice()
-
-  call f % Divergence( geometry, df, selfStrongForm, .true. ) 
-
-  call df % interior % updatehost()
+  call f % Divergence( geometry, df, selfStrongForm, .false. ) 
 
   ! Calculate diff from exact
   df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
@@ -79,4 +75,4 @@ integer function mappedvectordivergence_3d_gpu_constant() result(r)
     
   r = 0
 
-end function mappedvectordivergence_3d_gpu_constant
+end function mappedvectordivergence_3d_cpu_gausslobatto_constant

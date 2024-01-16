@@ -49,6 +49,7 @@ integer function mappedvectordivergence_3d_cpu_constant() result(r)
 
   call f % SetEquation( 1, 1, 'f = 1.0') ! x-component
   call f % SetEquation( 2, 1, 'f = 1.0') ! y-component
+  call f % SetEquation( 3, 1, 'f = 1.0') ! z-component
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
