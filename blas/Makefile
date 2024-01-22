@@ -1,2 +1,0 @@
-FC = gfortran
-FLIBS = 
