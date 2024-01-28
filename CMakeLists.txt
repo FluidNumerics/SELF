@@ -74,5 +74,10 @@ find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
+enable_testing()
+
 # Tests
 add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+
+# Examples (additional tests; standalone models)
+add_subdirectory(${CMAKE_SOURCE_DIR}/example)

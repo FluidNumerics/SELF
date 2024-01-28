@@ -61,11 +61,6 @@ MODULE SELF_Model2D
     PROCEDURE,PRIVATE :: SetSolutionFromChar_Model2D
     PROCEDURE,PRIVATE :: SetSolutionFromEqn_Model2D
 
-!    GENERIC :: SetVelocityField => SetVelocityFieldFromChar_Model2D,&
-!                              SetVelocityFieldFromEqn_Model2D
-!    PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Model2D
-!    PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Model2D
-
     PROCEDURE :: ReprojectFlux => ReprojectFlux_Model2D
 
     PROCEDURE :: ReadModel => Read_Model2D

@@ -59,11 +59,6 @@ MODULE SELF_Model1D
     PROCEDURE,PRIVATE :: SetSolutionFromChar_Model1D
     PROCEDURE,PRIVATE :: SetSolutionFromEqn_Model1D
 
-    GENERIC :: SetVelocityField => SetVelocityFieldFromChar_Model1D, &
-      SetVelocityFieldFromEqn_Model1D
-    PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Model1D
-    PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Model1D
-
     PROCEDURE :: ReadModel => Read_Model1D
     PROCEDURE :: WriteModel => Write_Model1D
     PROCEDURE :: WriteTecplot => WriteTecplot_Model1D
@@ -270,45 +265,6 @@ CONTAINS
     END IF
 
   END SUBROUTINE SetSolutionFromChar_Model1D
-
-  SUBROUTINE SetVelocityFieldFromEqn_Model1D(this,eqn)
-    IMPLICIT NONE
-    CLASS(Model1D),INTENT(inout) :: this
-    TYPE(EquationParser),INTENT(in) :: eqn
-
-    ! Copy the equation parser
-    ! Set the x-component of the velocity
-    CALL this % velocity % SetEquation(1,eqn % equation)
-
-    ! Set the velocity values using the equation parser
-    CALL this % velocity % SetInteriorFromEquation(this % geometry,this % t)
-
-    CALL this % velocity % BoundaryInterp(gpuAccel=.FALSE.)
-
-    IF (this % gpuAccel) THEN
-      CALL this % velocity % UpdateDevice()
-    END IF
-
-  END SUBROUTINE SetVelocityFieldFromEqn_Model1D
-
-  SUBROUTINE SetVelocityFieldFromChar_Model1D(this,eqnChar)
-    IMPLICIT NONE
-    CLASS(Model1D),INTENT(inout) :: this
-    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
-
-    ! Set the x-component of the velocity
-    CALL this % velocity % SetEquation(1,eqnChar)
-
-    ! Set the velocity values using the equation parser
-    CALL this % velocity % SetInteriorFromEquation(this % geometry,this % t)
-
-    CALL this % velocity % BoundaryInterp(gpuAccel=.FALSE.)
-
-    IF (this % gpuAccel) THEN
-      CALL this % velocity % UpdateDevice()
-    END IF
-
-  END SUBROUTINE SetVelocityFieldFromChar_Model1D
 
   SUBROUTINE UpdateSolution_Model1D(this,dt)
     !! Computes a solution update as , where dt is either provided through the interface
@@ -747,9 +703,9 @@ CONTAINS
     ! Local
     INTEGER :: i,iVar,iEl
 
-    CALL this % PreTendency()
     CALL this % solution % BoundaryInterp(this % gpuAccel)
     CALL this % solution % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+    CALL this % PreTendency()
     CALL this % SetBoundaryCondition()
     CALL this % SourceMethod()
     CALL this % RiemannSolver()

@@ -42,7 +42,7 @@ lcov --no-external \
       --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
 
 # Run ctests
-ctest --test-dir ${BUILD_DIR}/test
+ctest --test-dir ${BUILD_DIR}
 
 # Compile coverage information
 lcov --no-external \
