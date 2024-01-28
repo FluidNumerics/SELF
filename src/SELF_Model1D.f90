@@ -753,10 +753,10 @@ CONTAINS
     CHARACTER(LEN=self_FileNameLength) :: pickupFile
     CHARACTER(13) :: timeStampString
 
+    WRITE (timeStampString,'(I13.13)') this % ioIterate
     IF (PRESENT(filename)) THEN
-      pickupFile = filename
+      pickupFile = TRIM(filename)//timeStampString//'.h5'
     ELSE
-      WRITE (timeStampString,'(I13.13)') this % ioIterate
       pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 

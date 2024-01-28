@@ -39,17 +39,34 @@ contains
   ! on the gradient field
   implicit none
   class(advdiff1d), intent(inout) :: this
+  ! local
+  integer :: ivar
+  integer :: N, nelem
 
+    nelem = this % geometry % nelem ! number of elements in the mesh
+    N = this % solution % interp % N ! polynomial degree
+
+    do ivar = 1, this % solution % nvar
+
+      ! left-most boundary
+      this % solution % extBoundary % hostdata(ivar,1,1) = &
+        this % solution % boundary % hostdata(ivar,2,nelem)
+
+      ! right-most boundary
+      this % solution % extBoundary % hostdata(ivar,2,nelem) = &
+        this % solution % boundary % hostdata(ivar,1,1)
+
+    enddo
 
     ! calculate the averages of the solutions on the element
     ! boundaries and store is this % solution % avgBoundary
     call this % solution % BassiRebaySides(this % gpuaccel)
-  
+
     ! calculate the derivative using the bassi-rebay form
     call this % solution % Derivative(this % geometry, &
             this % solutionGradient, selfWeakBRForm, &
             this % gpuaccel)
-  
+
     ! interpolate the solutiongradient to the element boundaries
     call this % solutionGradient % BoundaryInterp(this % gpuaccel)
   
@@ -57,6 +74,8 @@ contains
     ! solutionGradient % extBoundary attribute
     call this % solutionGradient % SideExchange(this % mesh, &
            this % decomp, this % gpuaccel) 
+
+    call this % solutionGradient % BassiRebaySides(this % gpuaccel)
 
   end subroutine pretendency_advdiff1d
 
@@ -78,18 +97,20 @@ contains
     do ivar = 1, this % solution % nvar
 
       ! left-most boundary
-      this % solution % extBoundary % hostdata(ivar,1,1) = &
-        this % solution % boundary % hostdata(ivar,2,nelem)
-
       this% solutionGradient % extBoundary % hostdata(ivar,1,1) = &
         this % solutionGradient % boundary % hostdata(ivar,2,nelem)
 
-      ! right-most boundary
-      this % solution % extBoundary % hostdata(ivar,2,nelem) = &
-        this % solution % boundary % hostdata(ivar,1,1)
+      this% solutionGradient % avgBoundary % hostdata(ivar,1,1) = &
+        -0.5_prec*(this% solutionGradient % extBoundary % hostdata(ivar,1,1) + &
+        this% solutionGradient % boundary % hostdata(ivar,1,1))
 
+      ! right-most boundary
       this % solutionGradient % extBoundary % hostdata(ivar,2,nelem) = &
         this % solutionGradient % boundary % hostdata(ivar,1,1)
+
+      this% solutionGradient % avgBoundary % hostdata(ivar,2,nelem) = &
+        0.5_prec*(this% solutionGradient % extBoundary % hostdata(ivar,2,nelem) + &
+        this% solutionGradient % boundary % hostdata(ivar,2,nelem))
     enddo
 
   end subroutine setboundarycondition_advdiff1d
@@ -112,7 +133,7 @@ contains
           f = this % solution % interior % hostdata(i,ivar,iel)
           dfdx = this % solutionGradient % interior % hostdata(i,ivar,iel)
 
-          this % flux % interior % hostdata(i,ivar,iel) = -u*f + nu*dfdx  ! advective flux + diffusive flux
+          this % flux % interior % hostdata(i,ivar,iel) = u*f - nu*dfdx  ! advective flux + diffusive flux
 
         enddo
       enddo
@@ -148,9 +169,9 @@ contains
 
           fin = this % solution % boundary % hostdata(ivar,iside,iel) ! interior solution
           fout = this % solution % extboundary % hostdata(ivar,iside,iel) ! exterior solution
-          dfavg = this % solutionGradient % avgboundary % hostdata(ivar,iside,iel) ! average solution gradient
+          dfavg = this % solutionGradient % avgboundary % hostdata(ivar,iside,iel) ! average solution gradient (with direction taken into account)
 
-          this % flux % boundary % hostdata(ivar,iside,iel) = -0.5_prec*( un*(fin + fout) + abs(un)*(fin - fout) ) +& ! advective flux
+          this % flux % boundary % hostdata(ivar,iside,iel) = 0.5_prec*( un*(fin + fout) + abs(un)*(fin - fout) ) -& ! advective flux
                                                               this % nu*dfavg ! diffusive flux
 
         enddo
@@ -177,7 +198,7 @@ program advection_diffusion_1d
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
   real(prec), parameter :: u = 1.0_prec ! velocity
-  real(prec), parameter :: nu = 0.0_prec ! diffusivity
+  real(prec), parameter :: nu = 0.01_prec ! diffusivity
   real(prec), parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec), parameter :: endtime = 1.0_prec
   real(prec), parameter :: iointerval = 0.1_prec
