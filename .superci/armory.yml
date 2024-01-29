@@ -42,17 +42,19 @@ steps:
               --capture \
               --initial \
               --exclude 'test/*' \
+              --exclude 'example/*' \
               --directory ${WORKSPACE} \
               --output-file ${WORKSPACE}/tmp/lcov_base.info
 
         # Run ctests
-        ctest --test-dir ${BUILD_DIR}/test
+        ctest --test-dir ${BUILD_DIR}
 
         # Compile coverage information
         lcov --no-external \
             --capture \
             --directory ${WORKSPACE} \
             --exclude 'test/*' \
+            --exclude 'example/*' \
             --output-file ${WORKSPACE}/tmp/lcov_test.info
 
         lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
