@@ -96,8 +96,8 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
     PROCEDURE,PRIVATE :: VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
 
-    GENERIC,PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu,TensorGridInterp_2D_gpu
-    PROCEDURE,PRIVATE :: TensorGridInterp_2D_cpu,TensorGridInterp_2D_gpu
+    ! GENERIC,PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu,TensorGridInterp_2D_gpu
+    ! PROCEDURE,PRIVATE :: TensorGridInterp_2D_cpu,TensorGridInterp_2D_gpu
 
     GENERIC,PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
     PROCEDURE,PRIVATE :: ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
@@ -105,8 +105,8 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
     PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
 
-    GENERIC,PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu,TensorGridInterp_3D_gpu
-    PROCEDURE,PRIVATE :: TensorGridInterp_3D_cpu,TensorGridInterp_3D_gpu
+    ! GENERIC,PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu,TensorGridInterp_3D_gpu
+    ! PROCEDURE,PRIVATE :: TensorGridInterp_3D_cpu,TensorGridInterp_3D_gpu
 
     GENERIC,PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
     PROCEDURE,PRIVATE :: ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
@@ -138,14 +138,14 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
     PROCEDURE,PRIVATE :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
 
-    GENERIC,PUBLIC :: ScalarDGGradient_2D => ScalarDGGradient_2D_cpu,ScalarDGGradient_2D_gpu
-    PROCEDURE,PRIVATE :: ScalarDGGradient_2D_cpu,ScalarDGGradient_2D_gpu
+    ! GENERIC,PUBLIC :: ScalarDGGradient_2D => ScalarDGGradient_2D_cpu,ScalarDGGradient_2D_gpu
+    ! PROCEDURE,PRIVATE :: ScalarDGGradient_2D_cpu,ScalarDGGradient_2D_gpu
 
     GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
     PROCEDURE,PRIVATE :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
 
-    GENERIC,PUBLIC :: VectorDGGradient_2D => VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
-    PROCEDURE,PRIVATE :: VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
+    ! GENERIC,PUBLIC :: VectorDGGradient_2D => VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
+    ! PROCEDURE,PRIVATE :: VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
 
     GENERIC,PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
@@ -159,14 +159,14 @@ MODULE SELF_Lagrange
     ! GENERIC,PUBLIC :: P2VectorDGDivergence_2D => P2VectorDGDivergence_2D_cpu,P2VectorDGDivergence_2D_gpu
     ! PROCEDURE,PRIVATE :: P2VectorDGDivergence_2D_cpu,P2VectorDGDivergence_2D_gpu
 
-    GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
-    PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
+    ! GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
+    ! PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
 
-    GENERIC,PUBLIC :: TensorDivergence_2D => TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
+    ! GENERIC,PUBLIC :: TensorDivergence_2D => TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
+    ! PROCEDURE,PRIVATE :: TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
 
-    GENERIC,PUBLIC :: TensorDGDivergence_2D => TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
+    ! GENERIC,PUBLIC :: TensorDGDivergence_2D => TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
+    ! PROCEDURE,PRIVATE :: TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
 
     GENERIC,PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
     PROCEDURE,PRIVATE :: ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
@@ -180,14 +180,14 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
     PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
 
-    GENERIC,PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu,VectorCurl_3D_gpu
-    PROCEDURE,PRIVATE :: VectorCurl_3D_cpu,VectorCurl_3D_gpu
+    ! GENERIC,PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu,VectorCurl_3D_gpu
+    ! PROCEDURE,PRIVATE :: VectorCurl_3D_cpu,VectorCurl_3D_gpu
 
-    GENERIC,PUBLIC :: TensorDivergence_3D => TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
+    ! GENERIC,PUBLIC :: TensorDivergence_3D => TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
+    ! PROCEDURE,PRIVATE :: TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
 
-    GENERIC,PUBLIC :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+    ! GENERIC,PUBLIC :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+    ! PROCEDURE,PRIVATE :: TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
 
     PROCEDURE,PUBLIC :: WriteHDF5 => WriteHDF5_Lagrange
     PROCEDURE,PRIVATE :: CalculateBarycentricWeights
@@ -227,15 +227,15 @@ MODULE SELF_Lagrange
     END SUBROUTINE VectorGridInterp_2D_gpu_wrapper
   END INTERFACE
 
-  INTERFACE
-    SUBROUTINE TensorGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="TensorGridInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
-    END SUBROUTINE TensorGridInterp_2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE TensorGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
+  !     bind(c,name="TensorGridInterp_2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
+  !     INTEGER(C_INT),VALUE :: N,M,nVar,nEl
+  !   END SUBROUTINE TensorGridInterp_2D_gpu_wrapper
+  ! END INTERFACE
 
   INTERFACE
     SUBROUTINE ScalarGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
@@ -257,15 +257,15 @@ MODULE SELF_Lagrange
     END SUBROUTINE VectorGridInterp_3D_gpu_wrapper
   END INTERFACE
 
-  INTERFACE
-    SUBROUTINE TensorGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="TensorGridInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
-    END SUBROUTINE TensorGridInterp_3D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE TensorGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
+  !     bind(c,name="TensorGridInterp_3D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
+  !     INTEGER(C_INT),VALUE :: N,M,nVar,nEl
+  !   END SUBROUTINE TensorGridInterp_3D_gpu_wrapper
+  ! END INTERFACE
 
   ! /////////////// !
   ! Boundary Interpolation Routines
@@ -372,15 +372,15 @@ MODULE SELF_Lagrange
     END SUBROUTINE ScalarGradient_2D_gpu_wrapper
   END INTERFACE
 
-  INTERFACE
-    SUBROUTINE ScalarDGGradient_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="ScalarDGGradient_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarDGGradient_2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE ScalarDGGradient_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="ScalarDGGradient_2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE ScalarDGGradient_2D_gpu_wrapper
+  ! END INTERFACE
 
   INTERFACE
     SUBROUTINE VectorGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
@@ -442,35 +442,35 @@ MODULE SELF_Lagrange
   !   END SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper
   ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE VectorCurl_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorCurl_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorCurl_2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE VectorCurl_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="VectorCurl_2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE VectorCurl_2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE TensorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDivergence_2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE TensorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="TensorDivergence_2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE TensorDivergence_2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE TensorDGDivergence_2D_gpu_wrapper(dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDGDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDGDivergence_2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE TensorDGDivergence_2D_gpu_wrapper(dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="TensorDGDivergence_2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE TensorDGDivergence_2D_gpu_wrapper
+  ! END INTERFACE
 
   INTERFACE
     SUBROUTINE ScalarGradient_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
@@ -512,35 +512,35 @@ MODULE SELF_Lagrange
     END SUBROUTINE VectorDGDivergence_3D_gpu_wrapper
   END INTERFACE
 
-  INTERFACE
-    SUBROUTINE VectorCurl_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorCurl_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorCurl_3D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE VectorCurl_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="VectorCurl_3D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE VectorCurl_3D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE TensorDivergence_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDivergence_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDivergence_3D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE TensorDivergence_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="TensorDivergence_3D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE TensorDivergence_3D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-   SUBROUTINE TensorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDGDivergence_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDGDivergence_3D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !  SUBROUTINE TensorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="TensorDGDivergence_3D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE TensorDGDivergence_3D_gpu_wrapper
+  ! END INTERFACE
 
 CONTAINS
 
@@ -934,91 +934,91 @@ CONTAINS
 
   END SUBROUTINE VectorGridInterp_2D_gpu
 
-  SUBROUTINE TensorGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
-    !! Host (CPU) implementation of the TensorGridInterp_2D interface.
-    !! In most cases, you should use the `TensorGridInterp_2D` generic interface,
-    !! rather than calling this routine directly.
-    !! Interpolate a tensor-2D (real) array from the control grid to the target grid.
-    !! The control and target grids are the ones associated with an initialized 
-    !! Lagrange instance.
-    !!
-    !! Interpolation is applied using a series of matrix-tensor multiplications, using
-    !! the Lagrange class's interpolation matrix
-    !!
-    !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
-    !! 
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    !! Lagrange class instance
-    INTEGER,INTENT(in)     :: nVariables
-    !! The number of variables/functions that are interpolated
-    INTEGER,INTENT(in)     :: nElements
-    !! The number of spectral elements in the SEM grid
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    !! (Input) Array of function values, defined on the control grid
-    REAL(prec),INTENT(out) :: fNew(1:2,1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
-    !! (Output) Array of function values, defined on the target grid
-    ! Local
-    INTEGER :: i,j,ii,jj,iEl,iVar
-    REAL(prec) :: fi(1:2,1:2)
+!   SUBROUTINE TensorGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
+!     !! Host (CPU) implementation of the TensorGridInterp_2D interface.
+!     !! In most cases, you should use the `TensorGridInterp_2D` generic interface,
+!     !! rather than calling this routine directly.
+!     !! Interpolate a tensor-2D (real) array from the control grid to the target grid.
+!     !! The control and target grids are the ones associated with an initialized 
+!     !! Lagrange instance.
+!     !!
+!     !! Interpolation is applied using a series of matrix-tensor multiplications, using
+!     !! the Lagrange class's interpolation matrix
+!     !!
+!     !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
+!     !! 
+!     IMPLICIT NONE
+!     CLASS(Lagrange),INTENT(in) :: myPoly
+!     !! Lagrange class instance
+!     INTEGER,INTENT(in)     :: nVariables
+!     !! The number of variables/functions that are interpolated
+!     INTEGER,INTENT(in)     :: nElements
+!     !! The number of spectral elements in the SEM grid
+!     REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+!     !! (Input) Array of function values, defined on the control grid
+!     REAL(prec),INTENT(out) :: fNew(1:2,1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
+!     !! (Output) Array of function values, defined on the target grid
+!     ! Local
+!     INTEGER :: i,j,ii,jj,iEl,iVar
+!     REAL(prec) :: fi(1:2,1:2)
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % M
-          DO i = 0,myPoly % M
+!     DO iEl = 1,nElements
+!       DO iVar = 1,nVariables
+!         DO j = 0,myPoly % M
+!           DO i = 0,myPoly % M
 
-            fNew(1:2,1:2,i,j,iVar,iEl) = 0.0_prec
+!             fNew(1:2,1:2,i,j,iVar,iEl) = 0.0_prec
 
-            DO jj = 0,myPoly % N
+!             DO jj = 0,myPoly % N
 
-              fi(1:2,1:2) = 0.0_prec
-              DO ii = 0,myPoly % N
-                fi(1:2,1:2) = fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
-              END DO
+!               fi(1:2,1:2) = 0.0_prec
+!               DO ii = 0,myPoly % N
+!                 fi(1:2,1:2) = fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
+!               END DO
 
-              fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrix % hostData(jj,j)
+!               fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrix % hostData(jj,j)
 
-            END DO
+!             END DO
 
-          END DO
-        END DO
-      END DO
-    END DO
+!           END DO
+!         END DO
+!       END DO
+!     END DO
 
-  END SUBROUTINE TensorGridInterp_2D_cpu
-!
-  SUBROUTINE TensorGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    !! Device (GPU) implementation of the TensorGridInterp_2D interface.
-    !! In most cases, you should use the `TensorGridInterp_2D` generic interface,
-    !! rather than calling this routine directly.
-    !! This routine calls hip/SELF_Lagrange.cpp:TensorGridInterp_2D_gpu_wrapper
-    !! Interpolate a tensor-2D (real) array from the control grid to the target grid.
-    !! The control and target grids are the ones associated with an initialized 
-    !! Lagrange instance.
-    !!
-    !! Interpolation is applied using a series of matrix-vector multiplications, using
-    !! the Lagrange class's interpolation matrix
-    !!
-    !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
-    !! 
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    !! Lagrange class instance
-    INTEGER,INTENT(in) :: nVariables
-    !! The number of variables/functions that are interpolated
-    INTEGER,INTENT(in) :: nElements
-    !! The number of spectral elements in the SEM grid
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    !! (Input) Array of function values, defined on the control grid
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-    !! (Output) Array of function values, defined on the target grid
+!   END SUBROUTINE TensorGridInterp_2D_cpu
+! !
+!   SUBROUTINE TensorGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
+!     !! Device (GPU) implementation of the TensorGridInterp_2D interface.
+!     !! In most cases, you should use the `TensorGridInterp_2D` generic interface,
+!     !! rather than calling this routine directly.
+!     !! This routine calls hip/SELF_Lagrange.cpp:TensorGridInterp_2D_gpu_wrapper
+!     !! Interpolate a tensor-2D (real) array from the control grid to the target grid.
+!     !! The control and target grids are the ones associated with an initialized 
+!     !! Lagrange instance.
+!     !!
+!     !! Interpolation is applied using a series of matrix-vector multiplications, using
+!     !! the Lagrange class's interpolation matrix
+!     !!
+!     !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
+!     !! 
+!     IMPLICIT NONE
+!     CLASS(Lagrange),INTENT(in) :: myPoly
+!     !! Lagrange class instance
+!     INTEGER,INTENT(in) :: nVariables
+!     !! The number of variables/functions that are interpolated
+!     INTEGER,INTENT(in) :: nElements
+!     !! The number of spectral elements in the SEM grid
+!     TYPE(c_ptr),INTENT(in)  :: f_dev
+!     !! (Input) Array of function values, defined on the control grid
+!     TYPE(c_ptr),INTENT(out) :: fInterp_dev
+!     !! (Output) Array of function values, defined on the target grid
 
-    CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
+!     CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
+!                                          f_dev,fInterp_dev, &
+!                                          myPoly % N,myPoly % M, &
+!                                          nVariables,nElements)
 
-  END SUBROUTINE TensorGridInterp_2D_gpu
+!   END SUBROUTINE TensorGridInterp_2D_gpu
 
   SUBROUTINE ScalarGridInterp_3D_cpu(myPoly,f,fInterp,nVariables,nElements)
     IMPLICIT NONE
@@ -1123,57 +1123,57 @@ CONTAINS
 
   END SUBROUTINE VectorGridInterp_3D_gpu
 
-  SUBROUTINE TensorGridInterp_3D_cpu(myPoly,f,fInterp,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(out) :: fInterp(1:3,1:3,0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
-    ! Local
-    INTEGER :: iEl,iVar,i,j,k,ii,jj,kk
-    REAL(prec) :: fi(1:3,1:3),fij(1:3,1:3)
+!   SUBROUTINE TensorGridInterp_3D_cpu(myPoly,f,fInterp,nVariables,nElements)
+!     IMPLICIT NONE
+!     CLASS(Lagrange),INTENT(in) :: myPoly
+!     INTEGER,INTENT(in)     :: nVariables,nElements
+!     REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+!     REAL(prec),INTENT(out) :: fInterp(1:3,1:3,0:myPoly % M,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
+!     ! Local
+!     INTEGER :: iEl,iVar,i,j,k,ii,jj,kk
+!     REAL(prec) :: fi(1:3,1:3),fij(1:3,1:3)
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO k = 0,myPoly % M
-          DO j = 0,myPoly % M
-            DO i = 0,myPoly % M
+!     DO iEl = 1,nElements
+!       DO iVar = 1,nVariables
+!         DO k = 0,myPoly % M
+!           DO j = 0,myPoly % M
+!             DO i = 0,myPoly % M
 
-              fInterp(1:3,1:3,i,j,k,iVar,iEl) = 0.0_prec
-              DO kk = 0,myPoly % N
-                fij(1:3,1:3) = 0.0_prec
-                DO jj = 0,myPoly % N
-                  fi(1:3,1:3) = 0.0_prec
-                  DO ii = 0,myPoly % N
-                    fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
-                  END DO
-                  fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrix % hostData(jj,j)
-                END DO
-                fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + &
-                                                  fij(1:3,1:3)*myPoly % iMatrix % hostData(kk,k)
-              END DO
+!               fInterp(1:3,1:3,i,j,k,iVar,iEl) = 0.0_prec
+!               DO kk = 0,myPoly % N
+!                 fij(1:3,1:3) = 0.0_prec
+!                 DO jj = 0,myPoly % N
+!                   fi(1:3,1:3) = 0.0_prec
+!                   DO ii = 0,myPoly % N
+!                     fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
+!                   END DO
+!                   fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrix % hostData(jj,j)
+!                 END DO
+!                 fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + &
+!                                                   fij(1:3,1:3)*myPoly % iMatrix % hostData(kk,k)
+!               END DO
 
-            END DO
-          END DO
-        END DO
-      END DO
-    END DO
+!             END DO
+!           END DO
+!         END DO
+!       END DO
+!     END DO
 
-  END SUBROUTINE TensorGridInterp_3D_cpu
-!
-  SUBROUTINE TensorGridInterp_3D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
+!   END SUBROUTINE TensorGridInterp_3D_cpu
+! !
+!   SUBROUTINE TensorGridInterp_3D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
+!     IMPLICIT NONE
+!     CLASS(Lagrange),INTENT(in) :: myPoly
+!     INTEGER,INTENT(in) :: nVariables,nElements
+!     TYPE(c_ptr),INTENT(in)  :: f_dev
+!     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-    CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
+!     CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
+!                                          f_dev,fInterp_dev, &
+!                                          myPoly % N,myPoly % M, &
+!                                          nVariables,nElements)
 
-  END SUBROUTINE TensorGridInterp_3D_gpu
+!   END SUBROUTINE TensorGridInterp_3D_gpu
 ! ================================================================================================ !
 !
 ! Derivative_1D
@@ -1393,59 +1393,59 @@ CONTAINS
   END SUBROUTINE ScalarGradient_2D_gpu
 !
 !
-  SUBROUTINE ScalarDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bf(0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
+  ! SUBROUTINE ScalarDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(in)  :: bf(0:myPoly % N,1:nVariables,1:4,1:nElements)
+  !   REAL(prec),INTENT(out) :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % N
-          DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO j = 0,myPoly % N
+  !         DO i = 0,myPoly % N
 
-            gradF(1,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,i,j,iVar,iEl) = 0.0_prec
-            DO ii = 0,myPoly % N
-              gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(ii,j,iVar,iEl)
-              gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(i,ii,iVar,iEl)
-            END DO
+  !           gradF(1,i,j,iVar,iEl) = 0.0_prec
+  !           gradF(2,i,j,iVar,iEl) = 0.0_prec
+  !           DO ii = 0,myPoly % N
+  !             gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(ii,j,iVar,iEl)
+  !             gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(i,ii,iVar,iEl)
+  !           END DO
 
-            ! Boundary Contribution
-            gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + (bf(j,iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
-                                                             bf(j,iVar,4,iEl)*myPoly % bMatrix % hostData(i,0))/ &
-                                    myPoly % qWeights % hostData(i)
+  !           ! Boundary Contribution
+  !           gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + (bf(j,iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
+  !                                                            bf(j,iVar,4,iEl)*myPoly % bMatrix % hostData(i,0))/ &
+  !                                   myPoly % qWeights % hostData(i)
 
-            gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + (bf(i,iVar,3,iEl)*myPoly % bMatrix % hostData(j,1) + &
-                                                             bf(i,iVar,1,iEl)*myPoly % bMatrix % hostData(j,0))/ &
-                                    myPoly % qWeights % hostData(j)
+  !           gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + (bf(i,iVar,3,iEl)*myPoly % bMatrix % hostData(j,1) + &
+  !                                                            bf(i,iVar,1,iEl)*myPoly % bMatrix % hostData(j,0))/ &
+  !                                   myPoly % qWeights % hostData(j)
 
-          END DO
-        END DO
-      END DO
-    END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE ScalarDGGradient_2D_cpu
+  ! END SUBROUTINE ScalarDGGradient_2D_cpu
 
-  SUBROUTINE ScalarDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bf_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
+  ! SUBROUTINE ScalarDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(in)     :: bf_dev
+  !   TYPE(c_ptr),INTENT(out)    :: gradF_dev
 
-    CALL ScalarDGGradient_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                         myPoly % bMatrix % deviceData, &
-                                         myPoly % qWeights % deviceData, &
-                                         f_dev,bf_dev,gradF_dev,myPoly % N, &
-                                         nVariables,nElements)
+  !   CALL ScalarDGGradient_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+  !                                        myPoly % bMatrix % deviceData, &
+  !                                        myPoly % qWeights % deviceData, &
+  !                                        f_dev,bf_dev,gradF_dev,myPoly % N, &
+  !                                        nVariables,nElements)
 
-  END SUBROUTINE ScalarDGGradient_2D_gpu
+  ! END SUBROUTINE ScalarDGGradient_2D_gpu
 
   SUBROUTINE VectorGradient_2D_cpu(myPoly,f,gradF,nVariables,nElements)
     !
@@ -1501,76 +1501,76 @@ CONTAINS
 
   END SUBROUTINE VectorGradient_2D_gpu
 
-  SUBROUTINE VectorDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
-    !
-    ! Input : Vector(1:2,...)
-    ! Output : Tensor(1:2,1:2,....)
-    !          > Tensor(1,1) = d/ds1( Vector(1,...) )
-    !          > Tensor(2,1) = d/ds1( Vector(2,...) )
-    !          > Tensor(1,2) = d/ds2( Vector(1,...) )
-    !          > Tensor(2,2) = d/ds2( Vector(2,...) )
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bf(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
+  ! SUBROUTINE VectorDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
+  !   !
+  !   ! Input : Vector(1:2,...)
+  !   ! Output : Tensor(1:2,1:2,....)
+  !   !          > Tensor(1,1) = d/ds1( Vector(1,...) )
+  !   !          > Tensor(2,1) = d/ds1( Vector(2,...) )
+  !   !          > Tensor(1,2) = d/ds2( Vector(1,...) )
+  !   !          > Tensor(2,2) = d/ds2( Vector(2,...) )
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(in)  :: bf(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
+  !   REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % N
-          DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO j = 0,myPoly % N
+  !         DO i = 0,myPoly % N
 
-            gradF(1,1,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,1,i,j,iVar,iEl) = 0.0_prec
-            gradF(1,2,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,2,i,j,iVar,iEl) = 0.0_prec
-            DO ii = 0,myPoly % N
-              gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
-              gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
-              gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
-              gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
-            END DO
-            gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) + &
-                                                                 myPoly % bMatrix % hostData(i,0)*bf(1,j,iVar,4,iEl))/ &
-                                      myPoly % qWeights % hostData(i)
+  !           gradF(1,1,i,j,iVar,iEl) = 0.0_prec
+  !           gradF(2,1,i,j,iVar,iEl) = 0.0_prec
+  !           gradF(1,2,i,j,iVar,iEl) = 0.0_prec
+  !           gradF(2,2,i,j,iVar,iEl) = 0.0_prec
+  !           DO ii = 0,myPoly % N
+  !             gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+  !             gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+  !             gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+  !             gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
+  !           END DO
+  !           gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) + &
+  !                                                                myPoly % bMatrix % hostData(i,0)*bf(1,j,iVar,4,iEl))/ &
+  !                                     myPoly % qWeights % hostData(i)
 
-            gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) + &
-                                                                 myPoly % bMatrix % hostData(i,0)*bf(2,j,iVar,4,iEl))/ &
-                                      myPoly % qWeights % hostData(i)
+  !           gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) + &
+  !                                                                myPoly % bMatrix % hostData(i,0)*bf(2,j,iVar,4,iEl))/ &
+  !                                     myPoly % qWeights % hostData(i)
 
-            gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) + &
-                                                                 myPoly % bMatrix % hostData(j,0)*bf(1,i,iVar,1,iEl))/ &
-                                      myPoly % qWeights % hostData(j)
+  !           gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) + &
+  !                                                                myPoly % bMatrix % hostData(j,0)*bf(1,i,iVar,1,iEl))/ &
+  !                                     myPoly % qWeights % hostData(j)
 
-            gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) + &
-                                                                 myPoly % bMatrix % hostData(j,0)*bf(2,i,iVar,1,iEl))/ &
-                                      myPoly % qWeights % hostData(j)
+  !           gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) + &
+  !                                                                myPoly % bMatrix % hostData(j,0)*bf(2,i,iVar,1,iEl))/ &
+  !                                     myPoly % qWeights % hostData(j)
 
-          END DO
-        END DO
-      END DO
-    END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE VectorDGGradient_2D_cpu
+  ! END SUBROUTINE VectorDGGradient_2D_cpu
 
-  SUBROUTINE VectorDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bf_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
+  ! SUBROUTINE VectorDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(in)     :: bf_dev
+  !   TYPE(c_ptr),INTENT(out)    :: gradF_dev
 
-    CALL VectorDGGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         myPoly % bMatrix % deviceData, &
-                                         myPoly % qWeights % deviceData, &
-                                         f_dev,bf_dev,gradF_dev,myPoly % N, &
-                                         nVariables,nElements)
+  !   CALL VectorDGGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+  !                                        myPoly % bMatrix % deviceData, &
+  !                                        myPoly % qWeights % deviceData, &
+  !                                        f_dev,bf_dev,gradF_dev,myPoly % N, &
+  !                                        nVariables,nElements)
 
-  END SUBROUTINE VectorDGGradient_2D_gpu
+  ! END SUBROUTINE VectorDGGradient_2D_gpu
 
   SUBROUTINE VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
@@ -1666,45 +1666,45 @@ CONTAINS
 
   END SUBROUTINE VectorDGDivergence_2D_gpu
 
-  SUBROUTINE VectorCurl_2D_cpu(myPoly,f,dF,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
+  ! SUBROUTINE VectorCurl_2D_cpu(myPoly,f,dF,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % N
-          DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO j = 0,myPoly % N
+  !         DO i = 0,myPoly % N
 
-            dF(i,j,iVar,iEl) = 0.0_prec
-            DO ii = 0,myPoly % N
-              dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl) - &
-                                 myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
-            END DO
+  !           dF(i,j,iVar,iEl) = 0.0_prec
+  !           DO ii = 0,myPoly % N
+  !             dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl) - &
+  !                                myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+  !           END DO
 
-          END DO
-        END DO
-      END DO
-    END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE VectorCurl_2D_cpu
+  ! END SUBROUTINE VectorCurl_2D_cpu
 
-  SUBROUTINE VectorCurl_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
+  ! SUBROUTINE VectorCurl_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-    CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                   f_dev,dF_dev,myPoly % N, &
-                                   nVariables,nElements)
+  !   CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+  !                                  f_dev,dF_dev,myPoly % N, &
+  !                                  nVariables,nElements)
 
-  END SUBROUTINE VectorCurl_2D_gpu
+  ! END SUBROUTINE VectorCurl_2D_gpu
 
   ! SUBROUTINE P2VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
   !   IMPLICIT NONE
@@ -1803,110 +1803,110 @@ CONTAINS
 
   ! END SUBROUTINE P2VectorDGDivergence_2D_gpu
 
-  SUBROUTINE TensorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
-    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
+  ! SUBROUTINE TensorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
+  !   ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % N
-          DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO j = 0,myPoly % N
+  !         DO i = 0,myPoly % N
 
-            dF(1,i,j,iVar,iEl) = 0.0_prec
-            dF(2,i,j,iVar,iEl) = 0.0_prec
-            DO ii = 0,myPoly % N
-              dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
-                                   myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
-              dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
-                                   myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
-            END DO
+  !           dF(1,i,j,iVar,iEl) = 0.0_prec
+  !           dF(2,i,j,iVar,iEl) = 0.0_prec
+  !           DO ii = 0,myPoly % N
+  !             dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
+  !                                  myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
+  !             dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
+  !                                  myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
+  !           END DO
 
-          END DO
-        END DO
-      END DO
-    END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE TensorDivergence_2D_cpu
+  ! END SUBROUTINE TensorDivergence_2D_cpu
 
-  SUBROUTINE TensorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
+  ! SUBROUTINE TensorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-    CALL TensorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         f_dev,dF_dev,myPoly % N, &
-                                         nVariables,nElements)
+  !   CALL TensorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+  !                                        f_dev,dF_dev,myPoly % N, &
+  !                                        nVariables,nElements)
 
-  END SUBROUTINE TensorDivergence_2D_gpu
+  ! END SUBROUTINE TensorDivergence_2D_gpu
 
-  SUBROUTINE TensorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
-    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bf(1:2,1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
+  ! SUBROUTINE TensorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+  !   ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(in)  :: bf(1:2,1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
+  !   REAL(prec),INTENT(out) :: dF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % N
-          DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO j = 0,myPoly % N
+  !         DO i = 0,myPoly % N
 
-            dF(1,i,j,iVar,iEl) = 0.0_prec
-            dF(2,i,j,iVar,iEl) = 0.0_prec
-            DO ii = 0,myPoly % N
-              dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
-                                   myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
-              dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
-                                   myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
-            END DO
+  !           dF(1,i,j,iVar,iEl) = 0.0_prec
+  !           dF(2,i,j,iVar,iEl) = 0.0_prec
+  !           DO ii = 0,myPoly % N
+  !             dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
+  !                                  myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
+  !             dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
+  !                                  myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
+  !           END DO
 
-            dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,2,iEl) + &
-                                                       myPoly % bMatrix % hostData(i,0)*bf(1,1,j,iVar,4,iEl))/ &
-                                 myPoly % qWeights % hostData(i) + &
-                                 (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,3,iEl) + &
-                                  myPoly % bMatrix % hostData(j,0)*bf(2,1,i,iVar,1,iEl))/ &
-                                 myPoly % qWeights % hostData(j)
+  !           dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,2,iEl) + &
+  !                                                      myPoly % bMatrix % hostData(i,0)*bf(1,1,j,iVar,4,iEl))/ &
+  !                                myPoly % qWeights % hostData(i) + &
+  !                                (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,3,iEl) + &
+  !                                 myPoly % bMatrix % hostData(j,0)*bf(2,1,i,iVar,1,iEl))/ &
+  !                                myPoly % qWeights % hostData(j)
 
-            dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,2,iEl) + &
-                                                       myPoly % bMatrix % hostData(i,0)*bf(1,2,j,iVar,4,iEl))/ &
-                                 myPoly % qWeights % hostData(i) + &
-                                 (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,3,iEl) + &
-                                  myPoly % bMatrix % hostData(j,0)*bf(2,2,i,iVar,1,iEl))/ &
-                                 myPoly % qWeights % hostData(j)
-          END DO
-        END DO
-      END DO
-    END DO
+  !           dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,2,iEl) + &
+  !                                                      myPoly % bMatrix % hostData(i,0)*bf(1,2,j,iVar,4,iEl))/ &
+  !                                myPoly % qWeights % hostData(i) + &
+  !                                (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,3,iEl) + &
+  !                                 myPoly % bMatrix % hostData(j,0)*bf(2,2,i,iVar,1,iEl))/ &
+  !                                myPoly % qWeights % hostData(j)
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE TensorDGDivergence_2D_cpu
+  ! END SUBROUTINE TensorDGDivergence_2D_cpu
 
-  SUBROUTINE TensorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bf_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
+  ! SUBROUTINE TensorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(in)     :: bf_dev
+  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-    CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,bF_dev,dF_dev,myPoly % N, &
-                                           nVariables,nElements)
+  !   CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+  !                                          myPoly % bMatrix % deviceData, &
+  !                                          myPoly % qWeights % deviceData, &
+  !                                          f_dev,bF_dev,dF_dev,myPoly % N, &
+  !                                          nVariables,nElements)
 
-  END SUBROUTINE TensorDGDivergence_2D_gpu
+  ! END SUBROUTINE TensorDGDivergence_2D_gpu
 
   SUBROUTINE ScalarGradient_3D_cpu(myPoly,f,gradF,nVariables,nElements)
     IMPLICIT NONE
@@ -2128,201 +2128,201 @@ CONTAINS
 
   END SUBROUTINE VectorDGDivergence_3D_gpu
 
-  SUBROUTINE VectorCurl_3D_cpu(myPoly,f,dF,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,k,ii,iVar,iEl
+  ! SUBROUTINE VectorCurl_3D_cpu(myPoly,f,dF,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO k = 0,myPoly % N
-          DO j = 0,myPoly % N
-            DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO k = 0,myPoly % N
+  !         DO j = 0,myPoly % N
+  !           DO i = 0,myPoly % N
 
-              dF(1,i,j,k,iVar,iEl) = 0.0_prec
-              dF(2,i,j,k,iVar,iEl) = 0.0_prec
-              dF(3,i,j,k,iVar,iEl) = 0.0_prec
-              DO ii = 0,myPoly % N
-                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl) - &
-                                       myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
-                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl) - &
-                                       myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
-                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl) - &
-                                       myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
-              END DO
+  !             dF(1,i,j,k,iVar,iEl) = 0.0_prec
+  !             dF(2,i,j,k,iVar,iEl) = 0.0_prec
+  !             dF(3,i,j,k,iVar,iEl) = 0.0_prec
+  !             DO ii = 0,myPoly % N
+  !               dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl) - &
+  !                                      myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+  !               dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl) - &
+  !                                      myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+  !               dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl) - &
+  !                                      myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
+  !             END DO
 
-            END DO
-          END DO
-        END DO
-      END DO
-    END DO
+  !           END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE VectorCurl_3D_cpu
+  ! END SUBROUTINE VectorCurl_3D_cpu
 
-  SUBROUTINE VectorCurl_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
+  ! SUBROUTINE VectorCurl_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-    CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                   f_dev,dF_dev,myPoly % N, &
-                                   nVariables,nElements)
+  !   CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+  !                                  f_dev,dF_dev,myPoly % N, &
+  !                                  nVariables,nElements)
 
-  END SUBROUTINE VectorCurl_3D_gpu
+  ! END SUBROUTINE VectorCurl_3D_gpu
 
-  SUBROUTINE TensorDivergence_3D_cpu(myPoly,f,dF,nVariables,nElements)
-    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,k,ii,iVar,iEl
+  ! SUBROUTINE TensorDivergence_3D_cpu(myPoly,f,dF,nVariables,nElements)
+  !   ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO k = 0,myPoly % N
-          DO j = 0,myPoly % N
-            DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO k = 0,myPoly % N
+  !         DO j = 0,myPoly % N
+  !           DO i = 0,myPoly % N
 
-              dF(1,i,j,k,iVar,iEl) = 0.0_prec
-              dF(2,i,j,k,iVar,iEl) = 0.0_prec
-              dF(3,i,j,k,iVar,iEl) = 0.0_prec
-              DO ii = 0,myPoly % N
-                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
+  !             dF(1,i,j,k,iVar,iEl) = 0.0_prec
+  !             dF(2,i,j,k,iVar,iEl) = 0.0_prec
+  !             dF(3,i,j,k,iVar,iEl) = 0.0_prec
+  !             DO ii = 0,myPoly % N
+  !               dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
 
-                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
+  !               dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
 
-                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
-                                       myPoly % dMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
-              END DO
+  !               dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
+  !                                      myPoly % dMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
+  !             END DO
 
-            END DO
-          END DO
-        END DO
-      END DO
-    END DO
+  !           END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE TensorDivergence_3D_cpu
+  ! END SUBROUTINE TensorDivergence_3D_cpu
 
-  SUBROUTINE TensorDivergence_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
+  ! SUBROUTINE TensorDivergence_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-    CALL TensorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         f_dev,dF_dev,myPoly % N, &
-                                         nVariables,nElements)
+  !   CALL TensorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+  !                                        f_dev,dF_dev,myPoly % N, &
+  !                                        nVariables,nElements)
 
-  END SUBROUTINE TensorDivergence_3D_gpu
+  ! END SUBROUTINE TensorDivergence_3D_gpu
 
-  SUBROUTINE TensorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
-    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bF(1:3,1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
-    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,k,ii,iVar,iEl
+  ! SUBROUTINE TensorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+  !   ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)     :: nVariables,nElements
+  !   REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   REAL(prec),INTENT(in)  :: bF(1:3,1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
+  !   REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+  !   ! Local
+  !   INTEGER    :: i,j,k,ii,iVar,iEl
 
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO k = 0,myPoly % N
-          DO j = 0,myPoly % N
-            DO i = 0,myPoly % N
+  !   DO iEl = 1,nElements
+  !     DO iVar = 1,nVariables
+  !       DO k = 0,myPoly % N
+  !         DO j = 0,myPoly % N
+  !           DO i = 0,myPoly % N
 
-              dF(1,i,j,k,iVar,iEl) = 0.0_prec
-              dF(2,i,j,k,iVar,iEl) = 0.0_prec
-              dF(3,i,j,k,iVar,iEl) = 0.0_prec
-              DO ii = 0,myPoly % N
-                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
+  !             dF(1,i,j,k,iVar,iEl) = 0.0_prec
+  !             dF(2,i,j,k,iVar,iEl) = 0.0_prec
+  !             dF(3,i,j,k,iVar,iEl) = 0.0_prec
+  !             DO ii = 0,myPoly % N
+  !               dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
 
-                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
+  !               dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
 
-                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
-                                       myPoly % dgMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
-              END DO
+  !               dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
+  !                                      myPoly % dgMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
+  !             END DO
 
-              dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,1,j,k,iVar,3,iEl) + & ! east
-                                                     myPoly % bMatrix % hostData(i,0)*bF(1,1,j,k,iVar,5,iEl))/ &  ! west
-                                     myPoly % qWeights % hostData(i) + &
-                                     (myPoly % bMatrix % hostData(j,1)*bF(2,1,i,k,iVar,4,iEl) + & ! north
-                                      myPoly % bMatrix % hostData(j,0)*bF(2,1,i,k,iVar,2,iEl))/ &  ! south
-                                     myPoly % qWeights % hostData(j) + &
-                                     (myPoly % bMatrix % hostData(k,1)*bF(3,1,i,j,iVar,6,iEl) + & ! top
-                                      myPoly % bMatrix % hostData(k,0)*bF(3,1,i,j,iVar,1,iEl))/ &  ! bottom
-                                     myPoly % qWeights % hostData(k)
+  !             dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,1,j,k,iVar,3,iEl) + & ! east
+  !                                                    myPoly % bMatrix % hostData(i,0)*bF(1,1,j,k,iVar,5,iEl))/ &  ! west
+  !                                    myPoly % qWeights % hostData(i) + &
+  !                                    (myPoly % bMatrix % hostData(j,1)*bF(2,1,i,k,iVar,4,iEl) + & ! north
+  !                                     myPoly % bMatrix % hostData(j,0)*bF(2,1,i,k,iVar,2,iEl))/ &  ! south
+  !                                    myPoly % qWeights % hostData(j) + &
+  !                                    (myPoly % bMatrix % hostData(k,1)*bF(3,1,i,j,iVar,6,iEl) + & ! top
+  !                                     myPoly % bMatrix % hostData(k,0)*bF(3,1,i,j,iVar,1,iEl))/ &  ! bottom
+  !                                    myPoly % qWeights % hostData(k)
 
-              dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,2,j,k,iVar,3,iEl) + & ! east
-                                                     myPoly % bMatrix % hostData(i,0)*bF(1,2,j,k,iVar,5,iEl))/ &  ! west
-                                     myPoly % qWeights % hostData(i) + &
-                                     (myPoly % bMatrix % hostData(j,1)*bF(2,2,i,k,iVar,4,iEl) + & ! north
-                                      myPoly % bMatrix % hostData(j,0)*bF(2,2,i,k,iVar,2,iEl))/ &  ! south
-                                     myPoly % qWeights % hostData(j) + &
-                                     (myPoly % bMatrix % hostData(k,1)*bF(3,2,i,j,iVar,6,iEl) + & ! top
-                                      myPoly % bMatrix % hostData(k,0)*bF(3,2,i,j,iVar,1,iEl))/ &  ! bottom
-                                     myPoly % qWeights % hostData(k)
+  !             dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,2,j,k,iVar,3,iEl) + & ! east
+  !                                                    myPoly % bMatrix % hostData(i,0)*bF(1,2,j,k,iVar,5,iEl))/ &  ! west
+  !                                    myPoly % qWeights % hostData(i) + &
+  !                                    (myPoly % bMatrix % hostData(j,1)*bF(2,2,i,k,iVar,4,iEl) + & ! north
+  !                                     myPoly % bMatrix % hostData(j,0)*bF(2,2,i,k,iVar,2,iEl))/ &  ! south
+  !                                    myPoly % qWeights % hostData(j) + &
+  !                                    (myPoly % bMatrix % hostData(k,1)*bF(3,2,i,j,iVar,6,iEl) + & ! top
+  !                                     myPoly % bMatrix % hostData(k,0)*bF(3,2,i,j,iVar,1,iEl))/ &  ! bottom
+  !                                    myPoly % qWeights % hostData(k)
 
-              dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,3,j,k,iVar,3,iEl) + & ! east
-                                                     myPoly % bMatrix % hostData(i,0)*bF(1,3,j,k,iVar,5,iEl))/ &  ! west
-                                     myPoly % qWeights % hostData(i) + &
-                                     (myPoly % bMatrix % hostData(j,1)*bF(2,3,i,k,iVar,4,iEl) + & ! north
-                                      myPoly % bMatrix % hostData(j,0)*bF(2,3,i,k,iVar,2,iEl))/ &  ! south
-                                     myPoly % qWeights % hostData(j) + &
-                                     (myPoly % bMatrix % hostData(k,1)*bF(3,3,i,j,iVar,6,iEl) + & ! top
-                                      myPoly % bMatrix % hostData(k,0)*bF(3,3,i,j,iVar,1,iEl))/ &  ! bottom
-                                     myPoly % qWeights % hostData(k)
+  !             dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,3,j,k,iVar,3,iEl) + & ! east
+  !                                                    myPoly % bMatrix % hostData(i,0)*bF(1,3,j,k,iVar,5,iEl))/ &  ! west
+  !                                    myPoly % qWeights % hostData(i) + &
+  !                                    (myPoly % bMatrix % hostData(j,1)*bF(2,3,i,k,iVar,4,iEl) + & ! north
+  !                                     myPoly % bMatrix % hostData(j,0)*bF(2,3,i,k,iVar,2,iEl))/ &  ! south
+  !                                    myPoly % qWeights % hostData(j) + &
+  !                                    (myPoly % bMatrix % hostData(k,1)*bF(3,3,i,j,iVar,6,iEl) + & ! top
+  !                                     myPoly % bMatrix % hostData(k,0)*bF(3,3,i,j,iVar,1,iEl))/ &  ! bottom
+  !                                    myPoly % qWeights % hostData(k)
 
-            END DO
-          END DO
-        END DO
-      END DO
-    END DO
+  !           END DO
+  !         END DO
+  !       END DO
+  !     END DO
+  !   END DO
 
-  END SUBROUTINE TensorDGDivergence_3D_cpu
+  ! END SUBROUTINE TensorDGDivergence_3D_cpu
 
-  SUBROUTINE TensorDGDivergence_3D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bF_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
+  ! SUBROUTINE TensorDGDivergence_3D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+  !   IMPLICIT NONE
+  !   CLASS(Lagrange),INTENT(in) :: myPoly
+  !   INTEGER,INTENT(in)         :: nVariables,nElements
+  !   TYPE(c_ptr),INTENT(in)     :: f_dev
+  !   TYPE(c_ptr),INTENT(in)     :: bF_dev
+  !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-    CALL TensorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,bF_dev,dF_dev,myPoly % N, &
-                                           nVariables,nElements)
+  !   CALL TensorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+  !                                          myPoly % bMatrix % deviceData, &
+  !                                          myPoly % qWeights % deviceData, &
+  !                                          f_dev,bF_dev,dF_dev,myPoly % N, &
+  !                                          nVariables,nElements)
 
-  END SUBROUTINE TensorDGDivergence_3D_gpu
+  ! END SUBROUTINE TensorDGDivergence_3D_gpu
   ! /////////////////////////////// !
   ! Boundary Interpolation Routines !
 

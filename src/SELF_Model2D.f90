@@ -996,7 +996,8 @@ CONTAINS
     IF (PRESENT(filename)) THEN
       tecFile = filename
     ELSE
-      timeStampString = TimeStamp(this % t,'s')
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
+
 
       IF (this % decomp % mpiEnabled) THEN
         WRITE (rankString,'(I5.5)') this % decomp % rankId

@@ -56,8 +56,6 @@ MODULE SELF_MappedData
 
     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar2D
 
-    PROCEDURE,PUBLIC :: WriteTecplot => WriteTecplot_MappedScalar2D
-
     PROCEDURE,PUBLIC :: Integral => Integral_MappedScalar2D
 
   END TYPE MappedScalar2D
@@ -1130,83 +1128,6 @@ CONTAINS
       CALL decomp % GlobalReduce( fint, fRes )
 
   END FUNCTION Integral_MappedScalar2D
-
-  SUBROUTINE WriteTecplot_MappedScalar2D(this, geometry, decomp, filename)
-    CLASS(MappedScalar2D), INTENT(inout) :: this
-    TYPE(SEMQuad),INTENT(in) :: geometry
-    TYPE(MPILayer),INTENT(in) :: decomp
-    CHARACTER(*), INTENT(in) :: filename
-    ! Local
-    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
-    CHARACTER(LEN=self_FormatLength) :: fmat
-    CHARACTER(8) :: zoneID
-    TYPE(Scalar2D) :: mappedData
-    TYPE(Vector2D) :: x
-    TYPE(Lagrange),TARGET :: interp
-    INTEGER :: fUnit
-    INTEGER :: i, j, iVar, iEl, eid
-
-    ! Create an interpolant for the uniform grid
-    CALL interp % Init(this % interp % M,&
-            this % interp % targetNodeType,&
-            this % interp % N, &
-            this % interp % controlNodeType)
-
-    CALL mappedData % Init( interp, &
-            this % nVar, this % nElem )
-
-    CALL x % Init( interp, 1, this % nElem )
-
-    ! Map the mesh positions to the target grid
-    CALL geometry % x % GridInterp(x, gpuAccel=.FALSE.)
-
-    ! Map the scalar to the target grid
-    CALL this % GridInterp(mappedData,gpuAccel=.FALSE.)
-
-    OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(filename), &
-      FORM="formatted", &
-      STATUS="replace")
-
-    tecHeader = 'VARIABLES = "X", "Y"'
-    DO iVar = 1, this % nVar
-      tecHeader = TRIM(tecHeader)//'", "//TRIM(this % meta(iVar) % name)//"'
-    ENDDO
-
-    WRITE(fUnit,*) TRIM(tecHeader) 
-
-    ! Create format statement
-    WRITE(fmat,*) this % nvar+2
-    fmat = "("//TRIM(fmat)//"(ES16.7E3,1x))"
-
-    DO iEl = 1, this % nElem
-
-      eid = decomp % offSetElem % hostData( decomp % rankId ) + iEl
-      WRITE(zoneID,"(I8.8)") eid 
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I="',this % interp % M+1,&
-                                                 '", J="',this % interp % M+1
-
-      DO j = 0, this % interp % M
-        DO i = 0, this % interp % M
-
-          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
-                            x % interior % hostData(2,i,j,1,iEl), &
-                            mappedData % interior % hostData(i,j,1:this % nvar,iEl)
-
-        ENDDO
-      ENDDO
-
-    ENDDO
-
-    CLOSE(fUnit)
-
-    CALL x % Free()
-    CALL mappedData % Free()
-    CALL interp % Free()
-
-  END SUBROUTINE WriteTecplot_MappedScalar2D
-
-
 
   ! SideExchange_MappedScalar3D is used to populate scalar % extBoundary
   ! by finding neighboring elements that share a side and copying the neighboring
