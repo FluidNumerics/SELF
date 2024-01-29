@@ -12,7 +12,7 @@ program advection_diffusion_2d_rk3
     real(prec), parameter :: v = 0.25_prec
     real(prec), parameter :: nu = 0.001_prec ! diffusivity
     real(prec), parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-    real(prec), parameter :: endtime = 0.2_prec
+    real(prec), parameter :: endtime = 0.01_prec
     real(prec), parameter :: iointerval = 0.1_prec
     type(advection_diffusion_2d) :: modelobj
     type(Lagrange),target :: interp

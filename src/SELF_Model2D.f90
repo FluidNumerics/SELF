@@ -24,7 +24,6 @@ MODULE SELF_Model2D
     TYPE(MappedScalar2D)   :: solution
     TYPE(MappedVector2D)   :: solutionGradient
     TYPE(MappedVector2D)   :: flux
-    TYPE(MappedP2Vector2D) :: p2flux
     TYPE(MappedScalar2D)   :: source
     TYPE(MappedScalar2D)   :: fluxDivergence
     TYPE(MappedScalar2D)   :: dSdt
@@ -161,7 +160,6 @@ CONTAINS
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % p2flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % source % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nVar,this % mesh % nElem)
 
@@ -185,7 +183,6 @@ CONTAINS
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
-    CALL this % p2flux % Free()
     CALL this % source % Free()
     CALL this % fluxDivergence % Free()
 

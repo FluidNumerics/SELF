@@ -55,6 +55,7 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
 
   call f % interior % updatedevice()
 
+  call f % ContravariantProjection(geometry, .true.)
   call f % Divergence( geometry, df, selfStrongForm, .true. ) 
 
   call df % interior % updatehost()

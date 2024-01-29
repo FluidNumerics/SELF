@@ -12,8 +12,8 @@ program advection_diffusion_1d_rk2
   real(prec), parameter :: u = 1.0_prec ! velocity
   real(prec), parameter :: nu = 0.001_prec ! diffusivity
   real(prec), parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec), parameter :: endtime = 1.0_prec
-  real(prec), parameter :: iointerval = 0.1_prec
+  real(prec), parameter :: endtime = 0.01_prec
+  real(prec), parameter :: iointerval = 0.01_prec
   integer, parameter :: stepsperio = 1000
   type(advection_diffusion_1d) :: modelobj
   type(Lagrange),target :: interp
