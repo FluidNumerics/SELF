@@ -1,29 +1,36 @@
-file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 
-# Enable pre-processing for source code
-set_source_files_properties(
-  ${CMAKE_CURRENT_SOURCE_DIR}/scalargridinterp_1d_gpu_constant.f90
-  PROPERTIES Fortran_PREPROCESS ON
-)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+set(make_env SELF_HOME=${CMAKE_BINARY_DIR} SELF_COMPILER=${SELF_COMPILER})
 
 
-add_executable (blas_test ${CMAKE_CURRENT_SOURCE_DIR}/scalargridinterp_1d_gpu_constant.f90)
+function (add_fortran_examples)
 
-#target_compile_options(self PRIVATE ${HIP_Fortran_LFLAGS})
-
-target_link_libraries(blas_test 
+    foreach (TFILE ${ARGN})
+        string (REGEX REPLACE ".f90$" "" EXAMPLE_NAME ${TFILE})
+        add_executable (${EXAMPLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${TFILE})
+        target_link_libraries(${EXAMPLE_NAME}
                     ${CMAKE_BINARY_DIR}/src/libself-static.a
                     ${JSONFORTRAN_LIBRARIES}
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
-                    hip::device)
-
+                    hip::device
+                    roc::hipblas)
                            
-target_include_directories(blas_test PRIVATE 
+        target_include_directories(${EXAMPLE_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
                         ${HDF5_INCLUDE_DIRS}/shared
                         ${MPI_Fortran_INCLUDE_DIRS})
 
-install(TARGETS blas_test DESTINATION bin)
-#target_compile_options(self PRIVATE)
+        add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME})
+        install(TARGETS ${EXAMPLE_NAME} DESTINATION example)
+    endforeach ()
+
+endfunction ()
+
+add_fortran_examples (
+    "example_hipDaxpy.f90"
+)

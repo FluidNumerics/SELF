@@ -52,6 +52,7 @@ endif()
 # ------ dependencies ------ #
 # HIP
 find_package(hip REQUIRED)
+find_package(hipblas REQUIRED)
 
 # MPI
 find_package(MPI COMPONENTS Fortran REQUIRED)
@@ -73,6 +74,7 @@ find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+enable_testing()
 add_subdirectory(${CMAKE_SOURCE_DIR}/blas)
 
 # Tests

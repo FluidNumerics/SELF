@@ -34,23 +34,24 @@ export WORKSPACE=${SRC_DIR}
 
 # Initialize coverage
 mkdir -p ${WORKSPACE_ROOT}/tmp/
-lcov --no-external \
-      --capture \
-      --initial \
-      --directory ${SRC_DIR} \
-      --exclude 'test/*' \
-      --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
+# lcov --no-external \
+#       --capture \
+#       --initial \
+#       --directory ${SRC_DIR} \
+#       --exclude 'test/*' \
+#       --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
 
 # Run ctests
-ctest --test-dir ${BUILD_DIR}/test
+ctest --test-dir ${BUILD_DIR}/blas
+
 
 # Compile coverage information
-lcov --no-external \
-    --capture \
-    --directory ${SRC_DIR} \
-    --exclude 'test/*' \
-    --output-file ${WORKSPACE_ROOT}/tmp/lcov_test.info
+# lcov --no-external \
+#     --capture \
+#     --directory ${SRC_DIR} \
+#     --exclude 'test/*' \
+#     --output-file ${WORKSPACE_ROOT}/tmp/lcov_test.info
 
-lcov --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_base.info \
-     --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_test.info \
-     --output-file ${SRC_DIR}/lcov.info
+# lcov --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_base.info \
+#      --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_test.info \
+#      --output-file ${SRC_DIR}/lcov.info

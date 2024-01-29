@@ -1,3 +1,5 @@
+file(GLOB hipfort_hipblas_sources hipfort_hipblas_*.f90)
+add_library(hipfort_hipblas STATIC ${hipfort_hipblas_sources})
 
 file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
 file(GLOB SELF_HIPSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.hip")

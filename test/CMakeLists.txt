@@ -2,13 +2,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-  project(test-self)
-endif()
+# if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+#   project(test-self)
+# endif()
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set(make_env SELF_HOME=${CMAKE_BINARY_DIR} SELF_COMPILER=${SELF_COMPILER})
 
-enable_testing()
+# enable_testing()
 function (mangle_fortran_name CNAME FNAME)
     set (TMP)
     if (WIN32)
