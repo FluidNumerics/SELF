@@ -32,5 +32,6 @@ function (add_fortran_examples)
 endfunction ()
 
 add_fortran_examples (
+    "example_hipSaxpy.f90"
     "example_hipDaxpy.f90"
 )
