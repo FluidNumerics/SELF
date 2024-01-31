@@ -1607,28 +1607,28 @@ CONTAINS
 !    P = P1 + P2 + P3
 !
 !  END FUNCTION TransfiniteInterpolation
-  FUNCTION Unidirectional(valLeft,valRight,a) RESULT(P)
-    !
-    ! =============================================================================================== !
-    ! DECLARATIONS
-    IMPLICIT NONE
-    REAL(prec) :: valLeft(1:3),valRight(1:3)
-    REAL(prec) :: a
-    REAL(prec) :: P(1:3)
+  ! FUNCTION Unidirectional(valLeft,valRight,a) RESULT(P)
+  !   !
+  !   ! =============================================================================================== !
+  !   ! DECLARATIONS
+  !   IMPLICIT NONE
+  !   REAL(prec) :: valLeft(1:3),valRight(1:3)
+  !   REAL(prec) :: a
+  !   REAL(prec) :: P(1:3)
 
-    P = 0.5_prec*((1.0_prec - a)*valLeft + (1.0_prec + a)*valRight)
+  !   P = 0.5_prec*((1.0_prec - a)*valLeft + (1.0_prec + a)*valRight)
 
-  END FUNCTION Unidirectional
-  FUNCTION LinearBlend(a) RESULT(weights)
+  ! END FUNCTION Unidirectional
+  ! FUNCTION LinearBlend(a) RESULT(weights)
 
-    IMPLICIT NONE
-    REAL(prec) :: a
-    REAL(prec) :: weights(1:2)
+  !   IMPLICIT NONE
+  !   REAL(prec) :: a
+  !   REAL(prec) :: weights(1:2)
 
-    weights(1) = 0.5_prec*(1.0_prec - a)
-    weights(2) = 0.5_prec*(1.0_prec + a)
+  !   weights(1) = 0.5_prec*(1.0_prec - a)
+  !   weights(2) = 0.5_prec*(1.0_prec + a)
 
-  END FUNCTION LinearBlend
+  ! END FUNCTION LinearBlend
 
   SUBROUTINE Init_MPILayer(this,enableMPI)
 #undef __FUNC__
