@@ -57,7 +57,7 @@ The following combinations are tested on the main branch of self :
 Name | Version | Platform | Build System | Stack | Architecture
 --- | --- | --- | --- | --- | --- |
 GNU Fortran | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.0, feq-parse/2.0.3, hdf5/1.12.2 | x86_64 - gfx90a
-GNU Fortran | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.0, feq-parse/2.0.3, hdf5/1.12.2 | x86_64 - gfx908
+GNU Fortran | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.0, feq-parse/2.0.3, hdf5/1.12.2 | x86_64 - gfx906
 
 "Supported" for us means that we test `self` regularly on the platforms listed. Of course, we want to have `self` working on as many platforms as possible; [open an issue](https://github.com/FluidNumerics/SELF/issues/new/choose) if you encounter any problems installing or running `self` on your own platform.
 
