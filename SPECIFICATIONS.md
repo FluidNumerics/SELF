@@ -1,5 +1,5 @@
 # Spectral Element Library in Fortran (SELF)
-Copyright 2017-2020 Fluid Numerics LLC
+Copyright 2017-2024 Fluid Numerics LLC
 
 ## 1. Introduction
 
