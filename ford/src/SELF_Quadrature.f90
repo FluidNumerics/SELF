@@ -160,7 +160,7 @@ CONTAINS
     DO j = 0,N
 
       weights(j) = pi/(REAL(N,real64) + 1.0_real64)
-      nodes(j) = -cos(0.5_real64*(2.0_real64*REAL(j,real64) + 1.0_real64)*weights(j))
+      nodes(j) = -cos(pi*(2.0_real64*REAL(j,real64) + 1.0_real64)/(2.0_real64*REAL(N,real64)+2.0_real64))
 
     END DO
 
@@ -183,7 +183,7 @@ CONTAINS
     DO j = 0,N
 
       weights(j) = pi/REAL(N,real64)
-      nodes(j) = -cos(REAL(j,real64)*weights(j))
+      nodes(j) = -cos(pi*REAL(j,real64)/REAL(N,real64))
 
     END DO
 

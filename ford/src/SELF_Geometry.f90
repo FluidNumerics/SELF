@@ -15,9 +15,11 @@ MODULE SELF_Geometry
   IMPLICIT NONE
 
 #include "SELF_Macros.h"
+  TYPE,PUBLIC :: SEMGeometry
+  INTEGER :: nElem
+  END TYPE SEMGeometry
 
-  TYPE,PUBLIC :: Geometry1D
-    INTEGER :: nElem
+  TYPE,EXTENDS(SEMGeometry),PUBLIC :: Geometry1D
     TYPE(Scalar1D) :: x ! Physical Positions
     TYPE(Scalar1D) :: dxds ! Conversion from computational to physical space
 
@@ -31,12 +33,10 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
 
     PROCEDURE :: Write => Write_Geometry1D
-    PROCEDURE :: WriteTecplot => WriteTecplot_Geometry1D
 
   END TYPE Geometry1D
 
-  TYPE,PUBLIC :: SEMQuad
-    INTEGER :: nElem
+  TYPE,EXTENDS(SEMGeometry),PUBLIC :: SEMQuad
     TYPE(Vector2D) :: x ! Physical positions
     TYPE(Tensor2D) :: dxds ! Covariant basis vectors
     TYPE(Tensor2D) :: dsdx ! Contavariant basis vectors
@@ -54,13 +54,12 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
 
-    PROCEDURE :: Write => Write_SEMQuad
-    PROCEDURE :: WriteTecplot => WriteTecplot_SEMQuad
+    PROCEDURE,PUBLIC :: CovariantArcMin => CovariantArcMin_SEMQuad
+    !PROCEDURE :: Write => Write_SEMQuad
 
   END TYPE SEMQuad
 
-  TYPE,PUBLIC :: SEMHex
-    INTEGER :: nElem
+  TYPE,EXTENDS(SEMGeometry),PUBLIC :: SEMHex
     TYPE(Vector3D) :: x ! Physical positions
     TYPE(Tensor3D) :: dxds ! Covariant basis vectors
     TYPE(Tensor3D) :: dsdx ! Contavariant basis vectors
@@ -79,8 +78,7 @@ MODULE SELF_Geometry
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
     PROCEDURE,PRIVATE :: CheckSides => CheckSides_SEMHex
 
-    PROCEDURE :: Write => Write_SEMHex
-    PROCEDURE :: WriteTecplot => WriteTecplot_SEMHex
+    !PROCEDURE :: Write => Write_SEMHex
 
   END TYPE SEMHex
 
@@ -171,32 +169,20 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Geometry1D
 
-  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,interp,meshQuadrature)
+  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
     IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(out) :: myGeom
+    CLASS(Geometry1D),INTENT(inout) :: myGeom
     TYPE(Mesh1D),INTENT(in) :: mesh
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,i,nid
     TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Scalar1D) :: xMesh
-    INTEGER :: quadrature
 
-    IF (PRESENT(meshQuadrature)) THEN
-      quadrature = meshQuadrature
-    ELSE
-      quadrature = GAUSS_LOBATTO
-    END IF
-
-    CALL myGeom % Init(interp,mesh % nElem)
-
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
-    ! cqDegree, cqType grid
-    CALL meshToModel % Init(mesh % nGeo, quadrature,&
-            interp % N, interp % controlNodeType )
+    CALL meshToModel % Init(mesh % nGeo, mesh % quadrature,&
+            myGeom % x % interp % N, &
+            myGeom % x % interp % controlNodeType )
 
     CALL xMesh % Init(meshToModel,&
                       1,mesh % nElem)
@@ -205,7 +191,7 @@ CONTAINS
     nid = 1
     DO iel = 1,mesh % nElem
       DO i = 0,mesh % nGeo
-        xMesh % interior % hostData(i,1,iel) = mesh % hopr_nodeCoords % hostData(nid)
+        xMesh % interior % hostData(i,1,iel) = mesh % nodeCoords % hostData(nid)
         nid = nid + 1
       END DO
     END DO
@@ -284,50 +270,6 @@ CONTAINS
 
   END SUBROUTINE Write_Geometry1D
 
-  SUBROUTINE WriteTecplot_Geometry1D(myGeom, filename)
-    IMPLICIT NONE
-    CLASS(Geometry1D), INTENT(inout) :: myGeom
-    CHARACTER(*), INTENT(in), OPTIONAL :: filename
-    ! Local
-    CHARACTER(8) :: zoneID
-    INTEGER :: fUnit
-    INTEGER :: iEl, i 
-    CHARACTER(LEN=self_FileNameLength) :: tecFile
-
-    IF( PRESENT(filename) )THEN
-      tecFile = filename
-    ELSE
-      tecFile = 'mesh.tec'
-    ENDIF
-                      
-    ! Let's write some tecplot!! 
-     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(tecFile), &
-      FORM='formatted', &
-      STATUS='replace')
-
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "x","dxds"'
-
-    DO iEl = 1, myGeom % x % nElem
-
-      ! TO DO :: Get the global element ID 
-      WRITE(zoneID,'(I8.8)') iEl
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myGeom % x % interp % N+1
-
-      DO i = 0, myGeom % x % interp % N
-
-        WRITE(fUnit,'(2(E15.7,1x))') myGeom % x % interior % hostData(i,1,iEl), &
-                                     myGeom % dxds % interior % hostData(i,1,iEl)
-
-      ENDDO
-
-    ENDDO
-
-    CLOSE(UNIT=fUnit)
-
-  END SUBROUTINE WriteTecplot_Geometry1D
-
   SUBROUTINE Init_SEMQuad(myGeom,interp,nElem)
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(out) :: myGeom
@@ -401,47 +343,28 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_SEMQuad
 
-  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,interp,meshQuadrature)
-    ! Assumes that
-    !  * mesh is using Chebyshev-Gauss-Lobatto quadrature
-    !  * the degree is given by mesh % nGeo
-    !  * mesh only has quadrilateral elements
-    !
+  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh)
     IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(out) :: myGeom
+    CLASS(SEMQuad),INTENT(inout) :: myGeom
     TYPE(Mesh2D),INTENT(in) :: mesh
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel
     INTEGER :: i,j,nid
     TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Vector2D) :: xMesh
-    INTEGER :: quadrature
 
-    IF (PRESENT(meshQuadrature)) THEN
-      quadrature = meshQuadrature
-    ELSE
-      quadrature = GAUSS_LOBATTO
-    END IF
+    CALL meshToModel % Init(mesh % nGeo, &
+            mesh % quadrature, &
+            myGeom % x % interp % N, &
+            myGeom % x % interp % controlNodeType )
 
-    CALL myGeom % Init(interp,mesh % nElem)
-
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
-    ! cqDegree, cqType grid
-    CALL meshToModel % Init(mesh % nGeo, quadrature,&
-            interp % N, interp % controlNodeType )
-
-    CALL xMesh % Init(meshToModel,&
-                      1,mesh % nElem)
+    CALL xMesh % Init(meshToModel,1,mesh % nElem)
 
     ! Set the element internal mesh locations
-    nid = 1
-    DO iel = 1,mesh % nElem
-      DO j = 0,mesh % nGeo
-        DO i = 0,mesh % nGeo
-          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % hopr_nodeCoords % hostData(1:2,nid)
-          nid = nid + 1
+    DO iel = 1, mesh % nElem
+      DO j = 0, mesh % nGeo
+        DO i = 0, mesh % nGeo
+          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % nodeCoords % hostData(1:2,i,j,iel)
         END DO
       END DO
     END DO
@@ -544,9 +467,8 @@ CONTAINS
               fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
 
           ENDIF
+
           ! Set the directionality for dsdx on the boundaries
-          ! This is primarily used for DG gradient calculations,
-          ! which do not use nHat for the boundary terms.
           myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = & 
               myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)*fac
 
@@ -582,125 +504,96 @@ CONTAINS
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
 
-  SUBROUTINE Write_SEMQuad(myGeom,fileName)
+  FUNCTION CovariantArcMin_SEMQuad(myGeom) RESULT(dxMin)
     IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(in) :: myGeom
-    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+    CLASS(SEMQuad) :: myGeom
+    REAL(prec) :: dxMin
     ! Local
-    INTEGER(HID_T) :: fileId
-    ! Local
-    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+    INTEGER :: i, j, iEl, N
+    REAL(prec) :: dx, dy
+    REAL(prec) :: dxds(1:2,1:2)
+    REAL(prec) :: ds(0:myGeom % dxds % interp % N,&
+                     0:myGeom % dxds % interp % N,&
+                     1:myGeom % nElem)
 
-    IF( PRESENT(filename) )THEN
-      pickupFile = filename
-    ELSE
-      pickupFile = 'mesh.h5'
-    ENDIF
+    N = myGeom % dxds % interp % N
+    DO iEl = 1,myGeom % nElem
+      DO j = 0, N
+        DO i = 0, N
 
-    CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+          dxds =  myGeom % dxds % interior % hostData(1:2,1:2,i,j,1,iEl)
+          dx = SQRT(dxds(1,1)**2 + dxds(1,2)**2)
+          dy = SQRT(dxds(2,1)**2 + dxds(2,2)**2)
+          ds(i,j,iEl) = 2.0_prec*MIN(dx,dy)/(REAL(N,prec)**2)
 
-    CALL CreateGroup_HDF5(fileId,'/quadrature')
-
-    CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                         myGeom % x % interp % controlPoints)
-
-    CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                         myGeom % x % interp % qWeights)
-
-    CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                         myGeom % x % interp % dgMatrix)
-
-    CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                         myGeom % x % interp % dMatrix)
-
-    CALL CreateGroup_HDF5(fileId,'/mesh')
-
-    CALL CreateGroup_HDF5(fileId,'/mesh/interior')
-
-    CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
-
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom % dsdx % interior)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom % J % interior)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom % dsdx % boundary)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom % nHat % boundary)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom % nScale % boundary)
-
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom % J % boundary)
-
-    CALL Close_HDF5(fileId)
-
-  END SUBROUTINE Write_SEMQuad
-
-  SUBROUTINE WriteTecplot_SEMQuad(myGeom, filename)
-    IMPLICIT NONE
-    CLASS(SEMQuad), INTENT(inout) :: myGeom
-    CHARACTER(*), INTENT(in), OPTIONAL :: filename
-    ! Local
-    CHARACTER(8) :: zoneID
-    INTEGER :: fUnit
-    INTEGER :: iEl, i, j  
-    CHARACTER(LEN=self_FileNameLength) :: tecFile
-
-    IF( PRESENT(filename) )THEN
-      tecFile = filename
-    ELSE
-      tecFile = 'mesh.tec'
-    ENDIF
-                      
-     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(tecFile), &
-      FORM='formatted', &
-      STATUS='replace')
-
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "X","Y",'//&
-                   '"dxds1","dxds2",'//&
-                   '"dyds1","dyds2",'//&
-                   '"ds1dx","ds1dy",'//&
-                   '"ds2dx","ds2dy",'//&
-                   '"Jacobian"'
-
-    DO iEl = 1, myGeom % x % nElem
-
-      ! TO DO :: Get the global element ID 
-      WRITE(zoneID,'(I8.8)') iEl
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myGeom % x % interp % N+1,&
-                                                 ', J=',myGeom % x % interp % N+1
-
-      DO j = 0, myGeom % x % interp % N
-        DO i = 0, myGeom % x % interp % N
-
-          WRITE(fUnit,'(11(E15.7,1x))') myGeom % x % interior % hostData(1,i,j,1,iEl), &
-                                       myGeom % x % interior % hostData(2,i,j,1,iEl), &
-                                       myGeom % dxds % interior % hostData(1,1,i,j,1,iEl), &
-                                       myGeom % dxds % interior % hostData(1,2,i,j,1,iEl), &
-                                       myGeom % dxds % interior % hostData(2,1,i,j,1,iEl), &
-                                       myGeom % dxds % interior % hostData(2,2,i,j,1,iEl), &
-                                       myGeom % dsdx % interior % hostData(1,1,i,j,1,iEl), &
-                                       myGeom % dsdx % interior % hostData(2,1,i,j,1,iEl), &
-                                       myGeom % dsdx % interior % hostData(1,2,i,j,1,iEl), &
-                                       myGeom % dsdx % interior % hostData(2,2,i,j,1,iEl), &
-                                       myGeom % J % interior % hostData(i,j,1,iEl)
         ENDDO
       ENDDO
-
     ENDDO
 
-    CLOSE(UNIT=fUnit)
+    dxMin = MINVAL(ds) 
 
-  END SUBROUTINE WriteTecplot_SEMQuad
+  END FUNCTION CovariantArcMin_SEMQuad
+
+  ! SUBROUTINE Write_SEMQuad(myGeom,fileName)
+  !   IMPLICIT NONE
+  !   CLASS(SEMQuad),INTENT(in) :: myGeom
+  !   CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+  !   ! Local
+  !   INTEGER(HID_T) :: fileId
+  !   ! Local
+  !   CHARACTER(LEN=self_FileNameLength) :: pickupFile
+
+  !   IF( PRESENT(filename) )THEN
+  !     pickupFile = filename
+  !   ELSE
+  !     pickupFile = 'mesh.h5'
+  !   ENDIF
+
+  !   CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+
+  !   CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+  !                        myGeom % x % interp % controlPoints)
+
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+  !                        myGeom % x % interp % qWeights)
+
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+  !                        myGeom % x % interp % dgMatrix)
+
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+  !                        myGeom % x % interp % dMatrix)
+
+  !   CALL CreateGroup_HDF5(fileId,'/mesh')
+
+  !   CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+  !   CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom % dsdx % interior)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom % J % interior)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom % dsdx % boundary)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom % nHat % boundary)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom % nScale % boundary)
+
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom % J % boundary)
+
+  !   CALL Close_HDF5(fileId)
+
+  ! END SUBROUTINE Write_SEMQuad
 
   SUBROUTINE Init_SEMHex(myGeom,interp,nElem)
     IMPLICIT NONE
@@ -775,48 +668,29 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_SEMHex
 
-  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,interp,meshQuadrature)
-    ! Assumes that
-    !  * mesh is using Chebyshev-Gauss-Lobatto quadrature
-    !  * the degree is given by mesh % nGeo
-    !  * mesh only has quadrilateral elements
-    !
+  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh)
     IMPLICIT NONE
-    CLASS(SEMHex),INTENT(out) :: myGeom
+    CLASS(SEMHex),INTENT(inout) :: myGeom
     TYPE(Mesh3D),INTENT(in) :: mesh
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel
     INTEGER :: i,j,k,nid
     TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Vector3D) :: xMesh
-    INTEGER :: quadrature
 
-    IF (PRESENT(meshQuadrature)) THEN
-      quadrature = meshQuadrature
-    ELSE
-      quadrature = GAUSS_LOBATTO
-    END IF
-
-    CALL myGeom % Init(interp,mesh % nElem)
-
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
-    ! cqDegree, cqType grid
-    CALL meshToModel % Init(mesh % nGeo, quadrature,&
-            interp % N, interp % controlNodeType )
+    CALL meshToModel % Init(mesh % nGeo, mesh % quadrature,&
+            myGeom % x % interp % N, &
+            myGeom % x % interp % controlNodeType )
 
     CALL xMesh % Init(meshToModel,&
                       1,mesh % nElem)
 
     ! Set the element internal mesh locations
-    nid = 1
     DO iel = 1,mesh % nElem
       DO k = 0,mesh % nGeo
         DO j = 0,mesh % nGeo
           DO i = 0,mesh % nGeo
-            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % hopr_nodeCoords % hostData(1:3,nid)
-            nid = nid + 1
+            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % nodeCoords % hostData(1:3,i,j,k,iel)
           END DO
         END DO
       END DO
@@ -857,10 +731,10 @@ CONTAINS
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          e2 = mesh % sideInfo % hostData(3,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN ! Interior
 
@@ -1150,140 +1024,65 @@ CONTAINS
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 
-  SUBROUTINE Write_SEMHex(myGeom,fileName)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(in) :: myGeom
-    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
-    ! Local
-    INTEGER(HID_T) :: fileId
-    ! Local
-    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+  ! SUBROUTINE Write_SEMHex(myGeom,fileName)
+  !   IMPLICIT NONE
+  !   CLASS(SEMHex),INTENT(in) :: myGeom
+  !   CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+  !   ! Local
+  !   INTEGER(HID_T) :: fileId
+  !   ! Local
+  !   CHARACTER(LEN=self_FileNameLength) :: pickupFile
 
-    IF( PRESENT(filename) )THEN
-      pickupFile = filename
-    ELSE
-      pickupFile = 'mesh.h5'
-    ENDIF
+  !   IF( PRESENT(filename) )THEN
+  !     pickupFile = filename
+  !   ELSE
+  !     pickupFile = 'mesh.h5'
+  !   ENDIF
 
-    CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+  !   CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
-    CALL CreateGroup_HDF5(fileId,'/quadrature')
+  !   CALL CreateGroup_HDF5(fileId,'/quadrature')
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                         myGeom % x % interp % controlPoints)
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+  !                        myGeom % x % interp % controlPoints)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                         myGeom % x % interp % qWeights)
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+  !                        myGeom % x % interp % qWeights)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                         myGeom % x % interp % dgMatrix)
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+  !                        myGeom % x % interp % dgMatrix)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                         myGeom % x % interp % dMatrix)
+  !   CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+  !                        myGeom % x % interp % dMatrix)
 
-    CALL CreateGroup_HDF5(fileId,'/mesh')
+  !   CALL CreateGroup_HDF5(fileId,'/mesh')
 
-    CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+  !   CALL CreateGroup_HDF5(fileId,'/mesh/interior')
 
-    CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+  !   CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom % dsdx % interior)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom % dsdx % interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom % J % interior)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom % J % interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom % dsdx % boundary)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom % dsdx % boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom % nHat % boundary)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom % nHat % boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom % nScale % boundary)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom % nScale % boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom % J % boundary)
+  !   CALL WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom % J % boundary)
 
-    CALL Close_HDF5(fileId)
+  !   CALL Close_HDF5(fileId)
 
-  END SUBROUTINE Write_SEMHex
-
-  SUBROUTINE WriteTecplot_SEMHex(myGeom, filename)
-    IMPLICIT NONE
-    CLASS(SEMHex), INTENT(inout) :: myGeom
-    CHARACTER(*), INTENT(in), OPTIONAL :: filename
-    ! Local
-    CHARACTER(8) :: zoneID
-    INTEGER :: fUnit
-    INTEGER :: iEl, i, j, k 
-    CHARACTER(LEN=self_FileNameLength) :: tecFile
-
-    IF( PRESENT(filename) )THEN
-      tecFile = filename
-    ELSE
-      tecFile = 'mesh.tec'
-    ENDIF
-                      
-     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(tecFile), &
-      FORM='formatted', &
-      STATUS='replace')
-
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "X","Y","Z",'//&
-                   '"dxds1","dxds2","dxds3",'//&
-                   '"dyds1","dyds2","dyds3",'//&
-                   '"dzds1","dzds2","dzds3",'//&
-                   '"ds1dx","ds1dy","ds1dz",'//&
-                   '"ds2dx","ds2dy","ds2dz",'//&
-                   '"ds3dx","ds3dy","ds3dz",'//&
-                   '"Jacobian"'
-
-    DO iEl = 1, myGeom % x % nElem
-
-      ! TO DO :: Get the global element ID 
-      WRITE(zoneID,'(I8.8)') iEl
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myGeom % x % interp % N+1,&
-                                                 ', J=',myGeom % x % interp % N+1, &
-                                                 ', K=',myGeom % x % interp % N+1
-
-      DO k = 0, myGeom % x % interp % N
-        DO j = 0, myGeom % x % interp % N
-          DO i = 0, myGeom % x % interp % N
-
-            WRITE(fUnit,'(22(E15.7,1x))') myGeom % x % interior % hostData(1,i,j,k,1,iEl), &
-                                         myGeom % x % interior % hostData(2,i,j,k,1,iEl), &
-                                         myGeom % x % interior % hostData(3,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl), &
-                                         myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(1,1,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(2,1,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(3,1,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(1,2,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(2,2,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(3,2,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(1,3,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(2,3,i,j,k,1,iEl), &
-                                         myGeom % dsdx % interior % hostData(3,3,i,j,k,1,iEl), &
-                                         myGeom % J % interior % hostData(i,j,k,1,iEl)
-          ENDDO
-        ENDDO
-      ENDDO
-
-    ENDDO
-
-    CLOSE(UNIT=fUnit)
-
-  END SUBROUTINE WriteTecplot_SEMHex
+  ! END SUBROUTINE Write_SEMHex
 
 END MODULE SELF_Geometry
