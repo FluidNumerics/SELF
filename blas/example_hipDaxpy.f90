@@ -4,7 +4,6 @@ program blas_program
   integer :: exit_code
   exit_code = example_hipDaxpy()
   print*,exit_code
-
   stop exit_code
 
   contains
