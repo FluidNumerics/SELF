@@ -98,4 +98,17 @@ CONTAINS
     END IF
   END SUBROUTINE hipCheck
 
+  subroutine hipblasCheck(hipblasError_t)
+    use hipfort_hipblas_enums
+
+    implicit none
+
+    integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasError_t
+
+    if(hipblasError_t /= HIPBLAS_STATUS_SUCCESS)then
+       write(*,*) "HIPBLAS ERROR: Error code = ", hipblasError_t
+       call exit(hipblasError_t)
+    end if
+  end subroutine hipblasCheck
+
 END MODULE SELF_HIP
