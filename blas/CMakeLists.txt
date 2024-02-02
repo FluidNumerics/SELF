@@ -35,4 +35,5 @@ add_fortran_examples (
     "example_hipSaxpy.f90"
     "example_hipDaxpy.f90"
     "scalargridinterp_1d_gpu_constant.f90"
+    "scalargridinterp_2d_gpu_constant.f90"
 )
