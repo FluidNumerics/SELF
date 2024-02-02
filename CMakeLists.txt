@@ -17,7 +17,7 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
     endif()
 endif()
-find_program(CMAKE_CXX_COMPILER "hipcc" PATHS ${ROCM_PATH})
+#find_program(CMAKE_CXX_COMPILER "hipcc" PATHS ${ROCM_PATH})
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
@@ -39,7 +39,7 @@ ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 # Default Fortran compiler flags
 # Fortran compiler flags
 if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
-    set( CMAKE_Fortran_FLAGS "-cpp -ffree-line-length-512" )
+    set( CMAKE_Fortran_FLAGS "${CMAKE_FORTRAN_FLAGS} -cpp -ffree-line-length-512" )
     set( CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -C -Wall -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG} --coverage")
     set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
@@ -59,9 +59,9 @@ find_package(MPI COMPONENTS Fortran REQUIRED)
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)
 
-# JSON-Fortran
-find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
-find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+# # JSON-Fortran
+# find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
+# find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
 
 
 # FEQ-Parse
@@ -74,8 +74,10 @@ find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
-# Driver programs
-add_subdirectory(${CMAKE_SOURCE_DIR}/bin)
+enable_testing()
 
 # Tests
 add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+
+# Examples (additional tests; standalone models)
+add_subdirectory(${CMAKE_SOURCE_DIR}/example)

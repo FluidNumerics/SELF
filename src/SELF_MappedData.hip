@@ -21,100 +21,11 @@ extern "C"
   }
 }
 
-// GradientBR_MappedScalar2D_gpu
-__global__ void GradientBR_MappedScalar2D_gpu(real *scalar, real *avgBoundary, real *dsdx, real *jacobian, real* nHat, real *nScale, real *gradF, real *dgMatrix, real *bMatrix, real *qWeights, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-
-  real gfx = 0.0;
-  real gfy = 0.0;
-  real f1, f2;
-
-  for( int ii=0; ii < N+1; ii++ ){
-	  
-    f1 = scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
-	 dsdx[TE_2D_INDEX(1,1,ii,j,0,iEl,N,1)];
-    
-    f2 = scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*
-	 dsdx[TE_2D_INDEX(1,2,i,ii,0,iEl,N,1)];
-
-    gfx += dgMatrix[ii+i*(N+1)]*f1+
-           dgMatrix[ii+j*(N+1)]*f2;
-
-    f1 = scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
-	 dsdx[TE_2D_INDEX(2,1,ii,j,0,iEl,N,1)];
-    
-    f2 = scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*
-	 dsdx[TE_2D_INDEX(2,2,i,ii,0,iEl,N,1)];
-
-    gfy += dgMatrix[ii+i*(N+1)]*f1+
-           dgMatrix[ii+j*(N+1)]*f2;
-
-  }
-
-  // East
-  f1 = avgBoundary[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(1,j,0,2,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(j,0,2,iEl,N,1)];
-  // West
-  f2 = avgBoundary[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(1,j,0,4,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(j,0,4,iEl,N,1)];
-
-  gfx += (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
-
-  // North
-  f1 = avgBoundary[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(1,i,0,3,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(i,0,3,iEl,N,1)];
-  // South
-  f2 = avgBoundary[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(1,i,0,1,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(i,0,1,iEl,N,1)];
-
-  gfx += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
-
-  // East
-  f1 = avgBoundary[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(2,j,0,2,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(j,0,2,iEl,N,1)];
-  // West
-  f2 = avgBoundary[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(2,j,0,4,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(j,0,4,iEl,N,1)];
-
-  gfy += (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
-
-  // North
-  f1 = avgBoundary[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(2,i,0,3,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(i,0,3,iEl,N,1)];
-  // South
-  f2 = avgBoundary[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*
-	  nHat[VEB_2D_INDEX(2,i,0,1,iEl,N,1)]*
-	  nScale[SCB_2D_INDEX(i,0,1,iEl,N,1)];
-
-  gfy += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
-
-  gradF[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = gfx/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-  gradF[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = gfy/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-
-}
-
-extern "C"
-{
-  void GradientBR_MappedScalar2D_gpu_wrapper(real **scalar, real **avgBoundary, real **dsdx, real **jacobian, real **nHat, real **nScale, real **gradF, real **dgMatrix, real **bMatrix, real **qWeights, int N, int nVar, int nEl)
-  {
-    GradientBR_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *avgBoundary, *dsdx, *jacobian, *nHat, *nScale, *gradF, *dgMatrix, *bMatrix, *qWeights, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-// GradientSF_MappedScalar2D_gpu
-__global__ void GradientSF_MappedScalar2D_gpu(real *scalar, real *dsdx, real *jacobian, real *gradF, real *dMatrix, int N, int nVar){
+// GradientInterior_MappedScalar2D_gpu
+// Performs the interior operations for a scalar gradient calculation
+// Use a derivative matrix for strong form;
+// use a DG derivative matrix for weak form and follow up with the boundary contributions
+__global__ void GradientInterior_MappedScalar2D_gpu(real *scalar, real *dsdx, real *jacobian, real *gradF, real *dMatrix, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -144,11 +55,108 @@ __global__ void GradientSF_MappedScalar2D_gpu(real *scalar, real *dsdx, real *ja
 
 }
 
+// GradientBR_MappedScalar2D_gpu
+__global__ void DGGradientBoundary_MappedScalar2D_gpu(real *scalar, real *boundary, real *dsdx, real *jacobian, real* nHat, real *nScale, real *gradF, real *bMatrix, real *qWeights, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  real gfx = 0.0;
+  real gfy = 0.0;
+  real f1, f2;
+/*
+  for( int ii=0; ii < N+1; ii++ ){
+	  
+    f1 = scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(1,1,ii,j,0,iEl,N,1)];
+    
+    f2 = scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(1,2,i,ii,0,iEl,N,1)];
+
+    gfx += dgMatrix[ii+i*(N+1)]*f1+
+           dgMatrix[ii+j*(N+1)]*f2;
+
+    f1 = scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(2,1,ii,j,0,iEl,N,1)];
+    
+    f2 = scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(2,2,i,ii,0,iEl,N,1)];
+
+    gfy += dgMatrix[ii+i*(N+1)]*f1+
+           dgMatrix[ii+j*(N+1)]*f2;
+
+  }
+*/
+  // East
+  f1 = boundary[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,j,0,2,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,2,iEl,N,1)];
+  // West
+  f2 = boundary[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,j,0,4,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,4,iEl,N,1)];
+
+  gfx = (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = boundary[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,i,0,3,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,3,iEl,N,1)];
+  // South
+  f2 = boundary[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,i,0,1,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,1,iEl,N,1)];
+
+  gfx += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  // East
+  f1 = boundary[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,j,0,2,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,2,iEl,N,1)];
+  // West
+  f2 = boundary[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,j,0,4,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,4,iEl,N,1)];
+
+  gfy = (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = boundary[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,i,0,3,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,3,iEl,N,1)];
+  // South
+  f2 = boundary[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,i,0,1,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,1,iEl,N,1)];
+
+  gfy += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  gradF[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] += gfx/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
+  gradF[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] += gfy/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
+
+}
+
+extern "C"
+{
+  void GradientBR_MappedScalar2D_gpu_wrapper(real **scalar, real **avgBoundary, real **dsdx, real **jacobian, real **nHat, real **nScale, real **gradF, real **dgMatrix, real **bMatrix, real **qWeights, int N, int nVar, int nEl)
+  {
+
+    GradientInterior_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1)>>>(*scalar, *dsdx, *jacobian, *gradF,*dgMatrix, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
+
+    DGGradientBoundary_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *avgBoundary, *dsdx, *jacobian, *nHat, *nScale, *gradF, *bMatrix, *qWeights, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+
 extern "C"
 {
   void GradientSF_MappedScalar2D_gpu_wrapper(real **scalar, real **dsdx, real **jacobian, real **gradF, real **dMatrix, int N, int nVar, int nEl)
   {
-    GradientSF_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *dsdx, *jacobian, *gradF, *dMatrix, N, nVar);
+    GradientInterior_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *dsdx, *jacobian, *gradF, *dMatrix, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -170,6 +178,200 @@ extern "C"
   void JacobianWeight_MappedScalar2D_gpu_wrapper(real **scalar, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+// GradientInterior_MappedScalar3D_gpu
+// Performs the interior operations for a scalar gradient calculation
+// Use a derivative matrix for strong form;
+// use a DG derivative matrix for weak form and follow up with the boundary contributions
+__global__ void GradientInterior_MappedScalar3D_gpu(real *scalar, real *dsdx, real *jacobian, real *gradF, real *dMatrix, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
+
+  real gf[3] = {0.0};
+
+  for( int ii=0; ii < N+1; ii++ ){
+    gf[0] += dMatrix[ii+i*(N+1)]*
+	       scalar[SC_3D_INDEX(ii,j,k,iVar,iEl,N,nVar)]*
+	       dsdx[TE_3D_INDEX(1,1,ii,j,k,0,iEl,N,1)]+
+             dMatrix[ii+j*(N+1)]*
+               scalar[SC_3D_INDEX(i,ii,k,iVar,iEl,N,nVar)]*   	       
+               dsdx[TE_3D_INDEX(1,2,i,ii,k,0,iEl,N,1)]+
+             dMatrix[ii+k*(N+1)]*
+               scalar[SC_3D_INDEX(i,j,ii,iVar,iEl,N,nVar)]*   	       
+               dsdx[TE_3D_INDEX(1,3,i,j,ii,0,iEl,N,1)];
+
+    gf[1] += dMatrix[ii+i*(N+1)]*
+	       scalar[SC_3D_INDEX(ii,j,k,iVar,iEl,N,nVar)]*
+	       dsdx[TE_3D_INDEX(2,1,ii,j,k,0,iEl,N,1)]+
+             dMatrix[ii+j*(N+1)]*
+               scalar[SC_3D_INDEX(i,ii,k,iVar,iEl,N,nVar)]*   	       
+               dsdx[TE_3D_INDEX(2,2,i,ii,k,0,iEl,N,1)]+
+             dMatrix[ii+k*(N+1)]*
+               scalar[SC_3D_INDEX(i,j,ii,iVar,iEl,N,nVar)]*   	       
+               dsdx[TE_3D_INDEX(2,3,i,j,ii,0,iEl,N,1)];
+
+    gf[2] += dMatrix[ii+i*(N+1)]*
+	       scalar[SC_3D_INDEX(ii,j,k,iVar,iEl,N,nVar)]*
+	       dsdx[TE_3D_INDEX(3,1,ii,j,k,0,iEl,N,1)]+
+             dMatrix[ii+j*(N+1)]*
+               scalar[SC_3D_INDEX(i,ii,k,iVar,iEl,N,nVar)]*   	       
+               dsdx[TE_3D_INDEX(3,2,i,ii,k,0,iEl,N,1)]+
+             dMatrix[ii+k*(N+1)]*
+               scalar[SC_3D_INDEX(i,j,ii,iVar,iEl,N,nVar)]*   	       
+               dsdx[TE_3D_INDEX(3,3,i,j,ii,0,iEl,N,1)];
+
+  }
+  gradF[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = gf[0]/jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
+  gradF[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = gf[1]/jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
+  gradF[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = gf[2]/jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
+
+}
+
+// GradientBR_MappedScalar3D_gpu
+__global__ void DGGradientBoundary_MappedScalar3D_gpu(real *scalar, real *boundary, real *dsdx, real *jacobian, real* nHat, real *nScale, real *gradF, real *bMatrix, real *qWeights, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.y;
+
+  real gfx = 0.0;
+  real gfy = 0.0;
+  real gfz = 0.0;
+  real f1, f2;
+
+  // East
+  f1 = boundary[SCB_3D_INDEX(j,k,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(1,j,k,0,2,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(j,k,0,2,iEl,N,1)];
+  // West
+  f2 = boundary[SCB_3D_INDEX(j,k,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(1,j,k,0,4,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(j,k,0,4,iEl,N,1)];
+
+  gfx = (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = boundary[SCB_3D_INDEX(i,k,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(1,i,k,0,3,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,k,0,3,iEl,N,1)];
+  // South
+  f2 = boundary[SCB_3D_INDEX(i,k,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(1,i,k,0,1,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,k,0,1,iEl,N,1)];
+
+  gfx += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  // Top
+  f1 = boundary[SCB_3D_INDEX(i,j,iVar,6,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(1,i,j,0,6,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,j,0,6,iEl,N,1)];
+  // Bottom
+  f2 = boundary[SCB_3D_INDEX(i,j,iVar,5,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(1,i,j,0,5,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,j,0,5,iEl,N,1)];
+
+  gfx += (f1*bMatrix[k+N+1] + f2*bMatrix[k])/qWeights[k];
+
+  // East
+  f1 = boundary[SCB_3D_INDEX(j,k,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(2,j,k,0,2,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(j,k,0,2,iEl,N,1)];
+  // West
+  f2 = boundary[SCB_3D_INDEX(j,k,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(2,j,k,0,4,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(j,k,0,4,iEl,N,1)];
+
+  gfy = (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = boundary[SCB_3D_INDEX(i,k,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(2,i,k,0,3,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,k,0,3,iEl,N,1)];
+  // South
+  f2 = boundary[SCB_3D_INDEX(i,k,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(2,i,k,0,1,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,k,0,1,iEl,N,1)];
+
+  gfy += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  // Top
+  f1 = boundary[SCB_3D_INDEX(i,j,iVar,6,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(2,i,j,0,6,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,j,0,6,iEl,N,1)];
+  // Bottom
+  f2 = boundary[SCB_3D_INDEX(i,j,iVar,5,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(2,i,j,0,5,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,j,0,5,iEl,N,1)];
+
+  gfy += (f1*bMatrix[k+N+1] + f2*bMatrix[k])/qWeights[k];
+
+  // East
+  f1 = boundary[SCB_3D_INDEX(j,k,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(3,j,k,0,2,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(j,k,0,2,iEl,N,1)];
+  // West
+  f2 = boundary[SCB_3D_INDEX(j,k,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(3,j,k,0,4,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(j,k,0,4,iEl,N,1)];
+
+  gfz = (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = boundary[SCB_3D_INDEX(i,k,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(3,i,k,0,3,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,k,0,3,iEl,N,1)];
+  // South
+  f2 = boundary[SCB_3D_INDEX(i,k,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(3,i,k,0,1,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,k,0,1,iEl,N,1)];
+
+  gfz += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  // Top
+  f1 = boundary[SCB_3D_INDEX(i,j,iVar,6,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(3,i,j,0,6,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,j,0,6,iEl,N,1)];
+  // Bottom
+  f2 = boundary[SCB_3D_INDEX(i,j,iVar,5,iEl,N,nVar)]*
+	  nHat[VEB_3D_INDEX(3,i,j,0,5,iEl,N,1)]*
+	  nScale[SCB_3D_INDEX(i,j,0,5,iEl,N,1)];
+
+  gfz += (f1*bMatrix[k+N+1] + f2*bMatrix[k])/qWeights[k];
+
+  gradF[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] += gfx/jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
+  gradF[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] += gfy/jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
+  gradF[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] += gfz/jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
+
+}
+
+extern "C"
+{
+  void GradientBR_MappedScalar3D_gpu_wrapper(real **scalar, real **avgBoundary, real **dsdx, real **jacobian, real **nHat, real **nScale, real **gradF, real **dgMatrix, real **bMatrix, real **qWeights, int N, int nVar, int nEl)
+  {
+
+    GradientInterior_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1)>>>(*scalar, *dsdx, *jacobian, *gradF,*dgMatrix, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
+
+    DGGradientBoundary_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *avgBoundary, *dsdx, *jacobian, *nHat, *nScale, *gradF, *bMatrix, *qWeights, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+
+extern "C"
+{
+  void GradientSF_MappedScalar3D_gpu_wrapper(real **scalar, real **dsdx, real **jacobian, real **gradF, real **dMatrix, int N, int nVar, int nEl)
+  {
+    GradientInterior_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *dsdx, *jacobian, *gradF, *dMatrix, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -467,7 +669,7 @@ extern "C"
 }
 
 // ContravariantProjection_MappedVector3D_gpu
-__global__ void ContravariantProjection_MappedVector3D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
+__global__ void ContravariantProjection_MappedVector3D_gpu(real *vector, real *dsdx, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -475,19 +677,19 @@ __global__ void ContravariantProjection_MappedVector3D_gpu(real *physVector, rea
   size_t j = threadIdx.y;
   size_t k = threadIdx.z;
 
-  real Fx = physVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
-  real Fy = physVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)];
-  real Fz = physVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
+  real Fx = vector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
+  real Fy = vector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)];
+  real Fz = vector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
 
-  compVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*Fx+
+  vector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*Fx+
                                                      dsdx[TE_3D_INDEX(2,1,i,j,k,0,iEl,N,1)]*Fy+
                                                      dsdx[TE_3D_INDEX(3,1,i,j,k,0,iEl,N,1)]*Fz;
 
-  compVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,2,i,j,k,0,iEl,N,1)]*Fx+
+  vector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,2,i,j,k,0,iEl,N,1)]*Fx+
                                                      dsdx[TE_3D_INDEX(2,2,i,j,k,0,iEl,N,1)]*Fy+
                                                      dsdx[TE_3D_INDEX(3,2,i,j,k,0,iEl,N,1)]*Fz;
 
-  compVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,3,i,j,k,0,iEl,N,1)]*Fx+
+  vector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,3,i,j,k,0,iEl,N,1)]*Fx+
                                                      dsdx[TE_3D_INDEX(2,3,i,j,k,0,iEl,N,1)]*Fy+
                                                      dsdx[TE_3D_INDEX(3,3,i,j,k,0,iEl,N,1)]*Fz;
 
@@ -495,9 +697,9 @@ __global__ void ContravariantProjection_MappedVector3D_gpu(real *physVector, rea
 
 extern "C"
 {
-  void ContravariantProjection_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
+  void ContravariantProjection_MappedVector3D_gpu_wrapper(real **vector, real **dsdx, int N, int nVar, int nEl)
   {
-    ContravariantProjection_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjection_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*vector, *dsdx, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }
@@ -552,372 +754,6 @@ extern "C"
   void JacobianWeight_MappedVector3D_gpu_wrapper(real **vector, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*vector, *jacobian, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-// JacobianWeight_MappedTensor2D_gpu
-__global__ void JacobianWeight_MappedTensor2D_gpu(real *tensor, real *jacobian, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-
-    tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)]/
-                                                 jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-
-    tensor[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)] = tensor[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)]/
-                                                 jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-
-    tensor[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)] = tensor[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)]/
-                                                 jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-
-    tensor[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)] = tensor[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)]/
-                                                 jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-}
-
-extern "C"
-{
-  void JacobianWeight_MappedTensor2D_gpu_wrapper(real **tensor, real **jacobian, int N, int nVar, int nEl)
-  {
-    JacobianWeight_MappedTensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *jacobian, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-// JacobianWeight_MappedTensor3D_gpu
-__global__ void JacobianWeight_MappedTensor3D_gpu(real *tensor, real *jacobian, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
-
-    tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-
-    tensor[TE_3D_INDEX(3,3,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(3,3,i,j,k,iVar,iEl,N,nVar)]/
-                                                   jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
-}
-
-extern "C"
-{
-  void JacobianWeight_MappedTensor3D_gpu_wrapper(real **tensor, real **jacobian, int N, int nVar, int nEl)
-  {
-    JacobianWeight_MappedTensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *jacobian, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-// CalculateCurl_MappedTensor2D_gpu
-__global__ void CalculateCurl_MappedTensor2D_gpu(real *dfdx, real *curlf, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-
-    curlf[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfdx[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)]-
-                                              dfdx[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)];
-}
-
-extern "C"
-{
-  void CalculateCurl_MappedTensor2D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
-  {
-    JacobianWeight_MappedTensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dfdx, *curlf, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-// CalculateCurl_MappedTensor3D_gpu
-__global__ void CalculateCurl_MappedTensor3D_gpu(real *dfdx, real *curlf, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
-
-    curlf[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)]-
-                                                  dfdx[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)];
-
-    curlf[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)]-
-                                                  dfdx[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)];
-
-    curlf[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)]-
-                                                  dfdx[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)];
-}
-
-extern "C"
-{
-  void CalculateCurl_MappedTensor3D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
-  {
-    JacobianWeight_MappedTensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dfdx, *curlf, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-// MapTo support routines
-__global__ void MapToScalar_MappedVector2D_gpu(real* scalar, real* vector, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-
-    size_t jVar = 2*(iVar);
-    scalar[SC_2D_INDEX(i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
-
-    jVar += 1;
-    scalar[SC_2D_INDEX(i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
-
-}
-
-extern "C"
-{
-  void MapToScalar_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
-  {
-    MapToScalar_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToScalarBoundary_MappedVector2D_gpu(real* scalar, real* vector, int N, int nVar){
-
-  size_t iSide = blockIdx.x+1;
-  size_t iVar = blockIdx.y;
-  size_t iEl = blockIdx.z;
-  size_t j = threadIdx.x;
-
-    size_t jVar = 2*(iVar);
-    scalar[SCB_2D_INDEX(j,jVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(1,j,iVar,iSide,iEl,N,nVar)];
-
-    jVar += 1;
-    scalar[SCB_2D_INDEX(j,jVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(2,j,iVar,iSide,iEl,N,nVar)];
-
-}
-
-extern "C"
-{
-  void MapToScalarBoundary_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
-  {
-    MapToScalarBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*scalar, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToTensor_MappedVector2D_gpu(real* tensor, real* vector, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-
-    size_t jVar = 2*(iVar);
-    tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = vector[VE_2D_INDEX(1,i,j,jVar,iEl,N,nVar*2)];
-
-    tensor[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)] = vector[VE_2D_INDEX(2,i,j,jVar,iEl,N,nVar*2)];
-
-    jVar +=1 ;
-    tensor[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)] = vector[VE_2D_INDEX(1,i,j,jVar,iEl,N,nVar*2)];
-
-    tensor[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)] = vector[VE_2D_INDEX(2,i,j,jVar,iEl,N,nVar*2)];
-
-}
-
-extern "C"
-{
-  void MapToTensor_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
-  {
-    MapToTensor_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToTensorBoundary_MappedVector2D_gpu(real* tensor, real* vector, int N, int nVar){
-
-  size_t iSide = blockIdx.x+1;
-  size_t iVar = blockIdx.y;
-  size_t iEl = blockIdx.z;
-  size_t j = threadIdx.x;
-
-    size_t jVar =2*(iVar);
-    tensor[TEB_2D_INDEX(1,1,j,iVar,iSide,iEl,N,nVar)] = vector[VEB_2D_INDEX(1,j,jVar,iSide,iEl,N,nVar*2)];
-
-    tensor[TEB_2D_INDEX(1,2,j,iVar,iSide,iEl,N,nVar)] = vector[VEB_2D_INDEX(2,j,jVar,iSide,iEl,N,nVar*2)];
-
-    jVar += 1;
-    tensor[TEB_2D_INDEX(2,1,j,iVar,iSide,iEl,N,nVar)] = vector[VEB_2D_INDEX(1,j,jVar,iSide,iEl,N,nVar*2)];
-
-    tensor[TEB_2D_INDEX(2,2,j,iVar,iSide,iEl,N,nVar)] = vector[VEB_2D_INDEX(2,j,jVar,iSide,iEl,N,nVar*2)];
-
-}
-
-extern "C"
-{
-  void MapToTensorBoundary_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
-  {
-    MapToTensorBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*tensor, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToScalar_MappedVector3D_gpu(real* scalar, real* vector, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
-
-    size_t jVar = 3*(iVar);
-    scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
-
-    jVar += 1;
-    scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)];
-
-    jVar += 1;
-    scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
-
-}
-
-extern "C"
-{
-  void MapToScalar_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
-  {
-    MapToScalar_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToScalarBoundary_MappedVector3D_gpu(real* scalar, real* vector, int N, int nVar){
-
-  size_t iSide = blockIdx.x+1;
-  size_t iEl = blockIdx.y;
-  size_t j = threadIdx.x;
-  size_t k = threadIdx.y;
-  size_t iVar = threadIdx.z;
-
-    size_t jVar = 3*(iVar);
-    scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(1,j,k,iVar,iSide,iEl,N,nVar)];
-
-    jVar += 1;
-    scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(2,j,k,iVar,iSide,iEl,N,nVar)];
-
-    jVar += 1;
-    scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(3,j,k,iVar,iSide,iEl,N,nVar)];
-
-}
-
-extern "C"
-{
-  void MapToScalarBoundary_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
-  {
-    MapToScalarBoundary_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*scalar, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToTensor_MappedVector3D_gpu(real* tensor, real* vector, int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
-
-    size_t jVar = 3*(iVar);
-    tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(1,i,j,k,jVar,iEl,N,nVar*3)];
-
-    tensor[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(2,i,j,k,jVar,iEl,N,nVar*3)];
-
-    tensor[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(3,i,j,k,jVar,iEl,N,nVar*3)];
-
-    jVar += 1;
-    tensor[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(1,i,j,k,jVar,iEl,N,nVar*3)];
-
-    tensor[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(2,i,j,k,jVar,iEl,N,nVar*3)];
-
-    tensor[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(3,i,j,k,jVar,iEl,N,nVar*3)];
-
-    jVar += 1;
-    tensor[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(1,i,j,k,jVar,iEl,N,nVar*3)];
-
-    tensor[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(2,i,j,k,jVar,iEl,N,nVar*3)];
-
-    tensor[TE_3D_INDEX(3,3,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(3,i,j,k,jVar,iEl,N,nVar*3)];
-
-}
-
-extern "C"
-{
-  void MapToTensor_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
-  {
-    MapToTensor_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *vector, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-}
-
-__global__ void MapToTensorBoundary_MappedVector3D_gpu(real* tensor, real* vector, int N, int nVar){
-
-  size_t iSide = blockIdx.x+1;
-  size_t iEl = blockIdx.y;
-  size_t j = threadIdx.x;
-  size_t k = threadIdx.x;
-  size_t iVar = threadIdx.z;
-
-    size_t jVar = 3*(iVar);
-    tensor[TEB_3D_INDEX(1,1,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(1,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    tensor[TEB_3D_INDEX(1,2,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(2,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    tensor[TEB_3D_INDEX(1,3,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(3,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    jVar += 1;
-    tensor[TEB_3D_INDEX(2,1,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(1,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    tensor[TEB_3D_INDEX(2,2,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(2,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    tensor[TEB_3D_INDEX(2,3,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(3,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    jVar += 1;
-    tensor[TEB_3D_INDEX(3,1,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(1,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    tensor[TEB_3D_INDEX(3,2,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(2,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-    tensor[TEB_3D_INDEX(3,3,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(3,j,k,jVar,iSide,iEl,N,nVar*3)];
-
-}
-
-extern "C"
-{
-  void MapToTensorBoundary_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
-  {
-    MapToTensorBoundary_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*tensor, *vector, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -997,50 +833,6 @@ extern "C"
   void SideExchange_MappedVector2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     SideExchange_MappedVector2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-
-}
-
-__global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
-
-  size_t s1 = blockIdx.x+1;
-  size_t e1 = blockIdx.y;
-  size_t i1 = threadIdx.x;
-  size_t ivar = threadIdx.y;
-  
-  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
-  int e2 = e2Global - offset;
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
-  int i2 = N-i1;
-
-  if(bcid == 0){
-    int neighborRank = elemToRank[e2Global];
-    if( neighborRank == rankId ){
-      if(flip == 0){
-        extBoundary[TEB_2D_INDEX(1,1,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(1,1,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_2D_INDEX(2,1,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(2,1,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_2D_INDEX(1,2,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(1,2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_2D_INDEX(2,2,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(2,2,i1,ivar,s2,e2,N,nVar)];
-      }
-      else if(flip == 1){
-        extBoundary[TEB_2D_INDEX(1,1,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(1,1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_2D_INDEX(2,1,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(2,1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_2D_INDEX(1,2,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(1,2,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_2D_INDEX(2,2,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(2,2,i2,ivar,s2,e2,N,nVar)];
-      }
-    }
-  }
-  
-}
-
-extern "C"
-{
-  void SideExchange_MappedTensor2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
-  {
-    SideExchange_MappedTensor2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 
@@ -1166,98 +958,6 @@ extern "C"
 
 }
 
-__global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
-
-  size_t s1 = blockIdx.x+1;
-  size_t e1 = blockIdx.y;
-  size_t i1 = threadIdx.x;
-  size_t j1 = threadIdx.y;
-  size_t ivar = threadIdx.z;
-  
-  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
-  int e2 = e2Global - offset;
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
-
-  if(bcid == 0){
-    int neighborRank = elemToRank[e2Global];
-    if( neighborRank == rankId ){
-      if(flip == 0){
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s2,e2,N,nVar)];
-      }
-      else if(flip == 1){
-        int i2 = j1;
-        int j2 = N-i1;
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
-      }
-      else if(flip == 2){
-        int i2 = N-i1;
-        int j2 = N-j1;
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
-      }
-      else if(flip == 3){
-        int i2 = N-j1;
-        int j2 = i1;
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
-      }
-      else if(flip == 4){
-        int i2 = j1;
-        int j2 = i1;
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
-      }
-    }
-  }
-  
-}
-
-extern "C"
-{
-  void SideExchange_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
-  {
-    SideExchange_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-
-}
-
 __global__ void BassiRebaySides_MappedScalar2D_gpu(real* avgBoundary, real *boundary, real *extBoundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
@@ -1299,34 +999,6 @@ extern "C"
   void BassiRebaySides_MappedVector2D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedVector2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-
-}
-
-__global__ void BassiRebaySides_MappedTensor2D_gpu(real *extBoundary, real *boundary, int N, int nVar){
-
-  size_t s1 = blockIdx.x+1;
-  size_t e1 = blockIdx.y;
-  size_t i1 = threadIdx.x;
-  size_t ivar = threadIdx.y;
-  
-  boundary[TEB_2D_INDEX(1,1,i1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_2D_INDEX(1,1,i1,ivar,s1,e1,N,nVar)]+
-                                                        boundary[TEB_2D_INDEX(1,1,i1,ivar,s1,e1,N,nVar)]);
-  boundary[TEB_2D_INDEX(2,1,i1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_2D_INDEX(2,1,i1,ivar,s1,e1,N,nVar)]+
-                                                        boundary[TEB_2D_INDEX(2,1,i1,ivar,s1,e1,N,nVar)]);
-  boundary[TEB_2D_INDEX(1,2,i1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_2D_INDEX(1,2,i1,ivar,s1,e1,N,nVar)]+
-                                                        boundary[TEB_2D_INDEX(1,2,i1,ivar,s1,e1,N,nVar)]);
-  boundary[TEB_2D_INDEX(2,2,i1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_2D_INDEX(2,2,i1,ivar,s1,e1,N,nVar)]+
-                                                        boundary[TEB_2D_INDEX(2,2,i1,ivar,s1,e1,N,nVar)]);
-  
-}
-
-extern "C"
-{
-  void BassiRebaySides_MappedTensor2D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
-  {
-    BassiRebaySides_MappedTensor2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 
@@ -1377,45 +1049,6 @@ extern "C"
   void BassiRebaySides_MappedVector3D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-
-}
-
-__global__ void BassiRebaySides_MappedTensor3D_gpu(real *extBoundary, real *boundary, int N, int nVar){
-
-  size_t s1 = blockIdx.x+1;
-  size_t e1 = blockIdx.y;
-  size_t i1 = threadIdx.x;
-  size_t j1 = threadIdx.y;
-  size_t ivar = threadIdx.z;
-  
-      boundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)]);
-      boundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)]+
-                                                            boundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)]);
-  
-}
-
-extern "C"
-{
-  void BassiRebaySides_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
-  {
-    BassiRebaySides_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 
@@ -1501,48 +1134,6 @@ extern "C"
   void ApplyFlip_MappedVector2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedVector2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-
-}
-
-__global__ void ApplyFlip_MappedTensor2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
-
-  size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y+1;
-  size_t e1 = blockIdx.z;
-  size_t row = threadIdx.x;
-  size_t col = threadIdx.y;
-  size_t i1 = threadIdx.z;
-  
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
-  int i2 = N-i1;
-
-  __shared__ real extBuff[64];
-
-  extBuff[row+2*(col+2*i1)] = extBoundary[TEB_2D_INDEX(row+1,col+1,i1,ivar,s1,e1,N,nVar)];
-
-  __syncthreads();
-
-  if(bcid == 0){
-    int neighborRank = elemToRank[e2];
-    if( neighborRank /= rankId ){
-      if(flip == 1){
-        extBoundary[TEB_2D_INDEX(row+1,col+1,i1,ivar,s1,e1,N,nVar)] = extBuff[row+2*(col+2*i2)];
-      }
-    }
-  }
-  
-}
-
-extern "C"
-{
-  void ApplyFlip_MappedTensor2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
-  {
-    ApplyFlip_MappedTensor2D_gpu<<<dim3(nVar,4,nEl), dim3(2,2,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 
@@ -1657,66 +1248,6 @@ extern "C"
   void ApplyFlip_MappedVector3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedVector3D_gpu<<<dim3(nVar,6,nEl), dim3(3,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  }
-
-}
-
-__global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
-
-  size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y+1;
-  size_t e1 = blockIdx.z;
-  size_t dir = threadIdx.x;
-  size_t i1 = threadIdx.y;
-  size_t j1 = threadIdx.z;
-  size_t row = dir/3;
-  size_t col = dir - dir*row;
-  
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
-
-  __shared__ real extBuff[2304];
-
-  extBuff[row+3*(col+3*(i1+(N+1)*j1))] = extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)];
-
-  __syncthreads();
-
-  if(bcid == 0){
-    int neighborRank = elemToRank[e2];
-    if( neighborRank /= rankId ){
-      if(flip == 1){
-        int i2 = j1;
-        int j2 = N-i1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
-      }
-      else if(flip == 2){
-        int i2 = N-i1;
-        int j2 = N-j1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
-      }
-      else if(flip == 3){
-        int i2 = N-j1;
-        int j2 = i1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
-      }
-      else if(flip == 4){
-        int i2 = j1;
-        int j2 = i1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
-      }
-    }
-  }
-  
-}
-
-extern "C"
-{
-  void ApplyFlip_MappedTensor3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
-  {
-    ApplyFlip_MappedTensor3D_gpu<<<dim3(nVar,6,nEl), dim3(9,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 

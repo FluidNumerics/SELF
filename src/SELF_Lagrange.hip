@@ -211,7 +211,7 @@ extern "C"
   void VectorGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  VectorGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
+          HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -586,7 +586,7 @@ __global__ void DGDerivative_1D_gpu(real *dMatrix, real *bMatrix, real *qWeight,
     fm += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
   }
 
-  fm += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)]-
+  fm += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)]+
 	 bMatrix[i]*bf[SCB_1D_INDEX(iVar,0,iEl,N,nVar)])/qWeight[i];
 
   df[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = fm;

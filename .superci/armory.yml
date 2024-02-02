@@ -1,0 +1,66 @@
+steps:
+  - name : "Build on Noether"
+    sbatch_options: 
+      - "--partition=mi210"
+      - "--gpus=1"
+      - "--ntasks=1"
+      - "--cpus-per-task=16"
+      - "--time=20:00"
+    prerequisites:
+      - "source /etc/profile.d/z11_lmod.sh"
+    modules:
+      - gcc/13.2.0
+      - openmpi/5.0.0
+      - hdf5
+      - feq-parse
+      - jsonfortran
+    env:
+      BUILD_DIR: ${WORKSPACE}/build
+      PREFIX: ${WORKSPACE}/opt/self
+      OUTDIR: ${WORKSPACE}/local
+      GPU_TARGET: gfx90a
+      BUILD_TYPE: coverage
+    commands: 
+      - |
+        set -e
+        mkdir -p ${BUILD_DIR}
+        mkdir -p ${OUTDIR}
+        cd ${WORKSPACE}/build
+        FC=gfortran \
+        cmake -DCMAKE_PREFIX_PATH=/opt/rocm \
+              -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
+              -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/opt/self \
+              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              ../
+        make VERBOSE=1
+        make install
+
+        # Initialize coverage
+        mkdir -p ${WORKSPACE}/tmp/
+        lcov --no-external \
+              --capture \
+              --initial \
+              --exclude 'test/*' \
+              --exclude 'example/*' \
+              --directory ${WORKSPACE} \
+              --output-file ${WORKSPACE}/tmp/lcov_base.info
+
+        # Run ctests
+        ctest --test-dir ${BUILD_DIR}
+
+        # Compile coverage information
+        lcov --no-external \
+            --capture \
+            --directory ${WORKSPACE} \
+            --exclude 'test/*' \
+            --exclude 'example/*' \
+            --output-file ${WORKSPACE}/tmp/lcov_test.info
+
+        lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
+             --add-tracefile ${WORKSPACE}/tmp/lcov_test.info \
+             --output-file ${WORKSPACE}/lcov.info
+
+        ${HOME}/.local/bin/codecov-linux -t "${CODECOV_TOKEN}" \
+                            --sha "${COMMIT_SHA}" \
+                            --branch "${BRANCH_NAME}" \
+                            --pr "${PR_NUMBER}"

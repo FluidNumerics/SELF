@@ -2,13 +2,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-  project(test-self)
-endif()
+#if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+#  project(test-self)
+#endif()
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set(make_env SELF_HOME=${CMAKE_BINARY_DIR} SELF_COMPILER=${SELF_COMPILER})
 
-enable_testing()
 function (mangle_fortran_name CNAME FNAME)
     set (TMP)
     if (WIN32)
@@ -65,13 +64,56 @@ endfunction ()
 
 add_fortran_test_executable (
     testsuite
-    "scalargridinterp_1d_cpu_constant.f90"
     "scalarboundaryinterp_1d_cpu_constant.f90"
+    "scalarboundaryinterp_1d_gpu_constant.f90"
     "scalarderivative_1d_cpu_constant.f90"
-    "scalargridinterp_2d_cpu_constant.f90"
+    "scalarderivative_1d_gpu_constant.f90"
     "scalarboundaryinterp_2d_cpu_constant.f90"
-    "scalargradient_2d_cpu_constant.f90"
-    "scalargridinterp_3d_cpu_constant.f90"
+    "scalarboundaryinterp_2d_gpu_constant.f90"
     "scalarboundaryinterp_3d_cpu_constant.f90"
+    "scalarboundaryinterp_3d_gpu_constant.f90"
+    "vectorboundaryinterp_2d_cpu_constant.f90"
+    "vectorboundaryinterp_2d_gpu_constant.f90"
+    "vectorboundaryinterp_3d_cpu_constant.f90"
+    "vectorboundaryinterp_3d_gpu_constant.f90"
+    "scalargridinterp_1d_cpu_constant.f90"
+    "scalargridinterp_1d_gpu_constant.f90"
+    "scalargridinterp_2d_cpu_constant.f90"
+    "scalargridinterp_2d_gpu_constant.f90"
+    "scalargridinterp_3d_cpu_constant.f90"
+    "scalargridinterp_3d_gpu_constant.f90"
+    "vectorgridinterp_2d_cpu_constant.f90"
+    "vectorgridinterp_2d_gpu_constant.f90"
+    "vectorgridinterp_3d_cpu_constant.f90"
+    "vectorgridinterp_3d_gpu_constant.f90"
+    "scalargradient_2d_cpu_constant.f90"
+    "scalargradient_2d_gpu_constant.f90"
     "scalargradient_3d_cpu_constant.f90"
+    "scalargradient_3d_gpu_constant.f90"
+    "vectordivergence_2d_cpu_constant.f90"
+    "vectordivergence_2d_gpu_constant.f90"
+    "vectordivergence_3d_cpu_constant.f90"
+    "vectordivergence_3d_gpu_constant.f90"
+    "mesh2d_setup.f90"
+    "mesh3d_setup.f90"
+    "mappedscalarderivative_1d_cpu_constant.f90"
+    "mappedscalarderivative_1d_gpu_constant.f90"
+    "mappedscalarbrderivative_1d_cpu_constant.f90"
+    "mappedscalarbrderivative_1d_gpu_constant.f90"
+    "mappedscalardgderivative_1d_cpu_constant.f90"
+    "mappedscalardgderivative_1d_gpu_constant.f90"
+    "mappedvectordivergence_2d_cpu_constant.f90"
+    "mappedvectordivergence_2d_gpu_constant.f90"
+    "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
+    "mappedscalargradient_2d_cpu_constant.f90"
+    "mappedscalargradient_2d_gpu_constant.f90"
+    "mappedscalarbrgradient_2d_cpu_constant.f90"
+    "mappedscalarbrgradient_2d_gpu_constant.f90"
+    "mappedvectordivergence_3d_cpu_constant.f90"
+    "mappedvectordivergence_3d_gpu_constant.f90"
+    "mappedvectordivergence_3d_cpu_gausslobatto_constant.f90"
+    "mappedscalargradient_3d_cpu_constant.f90"
+    "mappedscalargradient_3d_gpu_constant.f90"
+    "mappedscalarbrgradient_3d_cpu_constant.f90"
+    "mappedscalarbrgradient_3d_gpu_constant.f90"
     )

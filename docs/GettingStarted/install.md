@@ -1,19 +1,17 @@
 # Install SELF
 The Spectral Element Library in Fortran can be built provided the following dependencies are met
 
-* Fortran 2008 compliant compiler
-* MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
-* [GNU Make](https://www.gnu.org/software/make/)
+* Fortran 2008 compliant compiler ( `gfortran` recommended )
 * [Cmake (v3.21 or greater)](https://cmake.org/resources/)
-* Fortran compiler ( `gfortran` recommended )
-* [HIP](https://rocm.docs.amd.com/en/latest/deploy/linux/quick_start.html)
-* (Optional) [CUDA Toolkit](), if you are building for Nvidia GPU hardware.
+* MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
+* [ROCm v5.7.0 or greater](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/)
 * [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 * [FluidNumerics/feq-parse](https://github.com/FluidNumerics/feq-parse)
-* [jacobwilliams/JSON-Fortran](https://github.com/jacobwilliams/json-fortran)
+* (Optional) [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit), if you are building for Nvidia GPU hardware.
+
 
 !!! note
-    Since HIP is officially supported only on CentOS, RHEL, Ubuntu, SLES, and Windows operating systems, SELF currently can only be built on these operating systems. For deployment on MacOS systems, consider using the containerized builds. For building on Windows, you will need the [AMD HIP SDK for Windows](https://www.amd.com/en/developer/rocm-hub/hip-sdk.html)
+    Since HIP is officially supported only on CentOS, RHEL, Ubuntu, SLES, and Windows operating systems, SELF currently can only be built on these operating systems. Further, testing is only being carried out on Ubuntu at this time. 
 
 You can install SELF in two possible ways
 
@@ -29,79 +27,18 @@ This documentation will walk through steps to install SELF using bare metal inst
 
 ## Bare Metal Install
 
-### Dependency installation
+### Install SELF with CMake
 
-#### Ubuntu 20.04 / 22.04 with Spack
-On your system, make sure that you have a 2008 standard compliant Fortran compiler and GNU Make installed. On Ubuntu,
+!!! warning
+    It is assumed that you have all of the necessary dependencies installed on your system before proceeding any further.
 
-```
-sudo apt-get install build-essential gcc gfortran
-```
+SELF comes with a CMake build system that defines the build and installation process. When you install SELF, you will install the following artifacts
 
-Additionally, you will need to [install ROCm (v5.7.0  or greater)](https://rocm.docs.amd.com/en/latest/deploy/linux/os-native/install.html)
-
-
-To help install the remainder of SELF's dependencies, we recommend that you use [Spack](https://spack.io). SELF comes with a Spack environment file that can be used to create a spack environment on your system.
-
-First, install Spack
-
-```
-git clone https://github.com/spack/spack ~/spack
-source ~/spack/share/spack/setup-env.sh
-```
-
-You can instruct Spack to use packages that are included with your operating system. This can help speed up the installation process, and we recommend that you leverage packages already installed on your system. You can do this by running the following command : 
-
-```
-spack external find --not-buildable
-```
-
-SELF comes with a [spack environment](https://spack.readthedocs.io/en/latest/environments.html) file (`SELF/env/spack.yaml`) that defines the packages to install (`hdf5`, `json-fortran`, and `feq-parse`). You can use this environment file to easily install and make available these packages. To get started, clone the SELF repository
-
-```
-git clone https://github.com/fluidnumerics/SELF ~/SELF
-```
-
-Edit the `~/SELF/env/spack.yaml` file to set the following parameters
-
-* `install_tree` (Default `/opt/software/self` ) - This is the path where the dependencies are installed within their own directory space
-* `view` (Default `/opt/view/self`) - This is the path where all package `bin/`, `lib/`, `lib64/`, `include/`, `etc/`, and `share/` directories are symlinked.
-
-When setting both of these locations, ensure that you have read, write, and executable access to the `install_tree` and `view` paths.
-
-Once you've configured the environment, activate the environment
-
-```
-spack env activate -d ~/SELF/env
-```
-
-Once the environment is activated, you can use `spack find` show which packages will be installed and verify the output appears like what is shown below
-
-```
-$ spack find
-==> In environment /home/joe/apps/SELF/env
-==> Root specs
-feq-parse@1.1.0  hdf5@1.12.2 +cxx+fortran+mpi  json-fortran@8.3.0
-
-==> 0 installed packages
-```
-
-Next, you can install the dependencies
-
-```
-spack install
-```
-
-Installing the dependencies can take up to 30 minutes.
-
-
-### Install SELF
-
-SELF comes with a Cmake build system that defines the build and installation process. When you install SELF, you will install the following artifacts
-
-* `${CMAKE_INSTALL_PREFIX}/bin/self` - The main program for SELF that can be used to run unit tests, integration tests, and various conservation law solvers supported by the SELF developers, including Compressible Navier Stokes (2D), viscous Burger's Equation (1D), and Shallow Water Equations (2D).
-* `${CMAKE_INSTALL_PREFIX}/lib/libself.a` - A static library for the SELF API, in case you want to build your own programs and solvers using Spectral Element Methods.
-* `${CMAKE_INSTALL_PREFIX}/include/*.mod` - Module files generated by the Fortran compiler during the build process. 
+* `${CMAKE_INSTALL_PREFIX}/lib/libself-static.a` - A static library for the SELF API, in case you want to build your own programs and solvers using Spectral Element Methods.
+* `${CMAKE_INSTALL_PREFIX}/lib/libself.so` - A static library for the SELF API, in case you want to build your own programs and solvers using Spectral Element Methods.
+* `${CMAKE_INSTALL_PREFIX}/include/*.mod` - Module files generated by the Fortran compiler during the build process.
+* `${CMAKE_INSTALL_PREFIX}/example/*` - A set of example programs that run simple linear models (advection-diffusion) in 1-D, 2-D, or 3-D
+* `${CMAKE_INSTALL_PREFIX}/test/*` - A set of unit tests that exercise specific methods beneath the `model` classes.
 
 This part of the documentation will provide you with an overview of the environment variables that control the build process, show you how to target different GPUs for GPU acceleration, and how to install SELF to a preferred directory on your system.
 
@@ -114,9 +51,9 @@ There are a number of environment variables you can use to control the behavior 
 * `CMAKE_BUILD_TYPE`          Type of build, one of `Release`, `Debug`, or `Coverage`
 
 The default values of these variables will work for you if the following conditions are met
-* You've used the spack environment installation for the dependencies, with the `view` set to `/opt/view/self`.
-* The spack environment is active
-* ROCm is installed in a default location
+* You have all of the necessary dependencies installed and visible in your `PATH` and `LD_LIBRARY_PATH` environment variables
+* ROCm is installed in `/opt/rocm` (the default location)
+* If you are targeting Nvidia GPUs, CUDA is installed in `/usr/local/cuda` (the default location)
 
 #### Building for an Nvidia GPU 
 To build SELF for running on Nvidia GPUs, you will need to have both HIP and the CUDA toolkit installed on your system.
@@ -163,7 +100,7 @@ make VERBOSE=1
 
 We recommend that you run the unit tests included with SELF,
 ```
-ctest --test-dir ~/SELF/build/test
+ctest --test-dir ~/SELF/build/
 ```
 
 If all of the tests pass, install SELF
@@ -195,38 +132,3 @@ This command will create a Docker image for running SELF on AMD MI50 GPUs and th
 By default, this will build SELF with double precision floating point arithmetic, no optimizations (debug build), and with GPU kernels offloaded to a AMD MI50 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available
 
 * `_GPU_TARGET`: GPU microarchitecture code to build for. Defaults to `gfx906` (AMD MI50)
-
-
-### Test run the Docker container
-
-Running SELF requires a JSON file and often requires mesh file; together, these are often referred to as the "input deck". Models that work in 1-D (e.g. viscous Burger's equation) do not require a mesh file. You can provide the input deck to a SELF container through a [bind mount](https://docs.docker.com/storage/bind-mounts/) that maps a directory from your host system that contains the input deck to a path inside the container. 
-
-The SELF repository comes with an `examples/` subdirectory which contains example input decks for various configurations of the available solvers. The subdirectories under `examples/` are
-
-* `brg1d/` - Examples for the viscous Burger's equation in 1-D
-* `cns2d/` - Examples for the compressible navier stokes in 2-D
-* `lsw2d/` - Examples for the linear shallow water in 2-D
-* `nlsw2d/` - Examples for the nonlinear shallow water in 2-D
-
-In this example, we will run the travelling shock example for the viscous Burger's equation in 1-D.
-
-!!!note
-    It is assumed that you have created a Docker image for SELF as described in the previous section of this documentation. Make sure that you have a Docker container image of SELF on your system before proceeding further
-
-
-First, navigate to the main directory of the SELF repository that is locally cloned on your system, e.g.
-
-```
-cd ${HOME}/SELF
-```
-
-Next, you will use `docker run` with a bind mount to the `examples/brg1d/traveling_shock` subdirectory; this directory on your system will be mounted to the `/self` directory inside the Docker container.
-
-```
-docker run --mount type=bind,source="$(pwd)/examples/brg1d/traveling_shock",target="/self" \
-           self:latest \
-           "cd /self && /opt/self/bin/self -i /self/input.json"
-```
-
-Note that the command being run inside the container is `/opt/self/bin/self` which is the full path to the main SELF program in the container image. This program takes `/self/input.json` as its main input. All of the model output for
-
