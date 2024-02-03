@@ -180,190 +180,6 @@ module SELF_Lagrange
 
   end type Lagrange
 
-  ! /////////////// !
-  ! Boundary Interpolation Routines
-
-  ! interface
-  !   subroutine ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="ScalarBoundaryInterp_1D_gpu_wrapper")
-  !     use iso_c_binding
-  !     implicit none
-  !     type(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     integer(c_int),value :: N,nVar,nEl
-  !   end subroutine ScalarBoundaryInterp_1D_gpu_wrapper
-  ! end interface
-
-  ! INTERFACE
-  !   SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
-  !     bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! /////////////// !
-
-  ! interface
-  !   subroutine Derivative_1D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="Derivative_1D_gpu_wrapper")
-  !     use iso_c_binding
-  !     implicit none
-  !     type(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     integer(c_int),value :: N,nVar,nEl
-  !   end subroutine Derivative_1D_gpu_wrapper
-  ! end interface
-
-  ! interface
-  !   subroutine DGDerivative_1D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="DGDerivative_1D_gpu_wrapper")
-  !     use iso_c_binding
-  !     implicit none
-  !     type(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-  !     integer(c_int),value :: N,nVar,nEl
-  !   end subroutine DGDerivative_1D_gpu_wrapper
-  ! end interface
-
-  ! INTERFACE
-  !   SUBROUTINE ScalarGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="ScalarGradient_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE ScalarGradient_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorGradient_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorGradient_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorDGGradient_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorDGGradient_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorDGGradient_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorDivergence_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorDivergence_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !  SUBROUTINE VectorDGDivergence_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorDGDivergence_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE ScalarGradient_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="ScalarGradient_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE ScalarGradient_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorGradient_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorGradient_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorGradient_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorDivergence_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorDivergence_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorDivergence_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !  SUBROUTINE VectorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-  !     bind(c,name="VectorDGDivergence_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE VectorDGDivergence_3D_gpu_wrapper
-  ! END INTERFACE
 
 contains
 
@@ -482,6 +298,49 @@ contains
 
   end subroutine UpdateDevice_Lagrange
 
+  subroutine self_hipblas_matrixop_1d(A,f,Af,opArows,opAcols,bcols,hipblas_handle)
+    real(prec), pointer, intent(in) :: A(:,:)
+    real(prec), pointer, intent(in) :: f(:,:,:)
+    real(prec), pointer, intent(inout) :: Af(:,:,:)
+    integer, intent(in) :: opArows, opAcols, bcols
+    type(c_ptr), intent(inout) :: hipblas_handle
+        ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    integer(c_int) :: k
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    integer(c_int) :: ldb
+    integer(c_int) :: ldc
+    real(c_prec) :: beta
+
+    m = opArows ! number of rows of A^T
+    n = bcols ! number of columns of B
+    k = opAcols! number of columns of A^T
+    alpha = 1.0_c_prec
+    lda = k ! leading dimension of A (matrix)
+    ldb = k ! leading dimension of B (f)
+    ldc = m ! leading dimension of C (Af)
+    beta = 0.0_c_prec
+#ifdef DOUBLE_PRECISION
+    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
+                                   m,n,k,alpha, &
+                                   c_loc(A),lda, &
+                                   c_loc(f),ldb, &
+                                   beta, &
+                                   c_loc(Af),ldc))
+#else
+    call hipblasCheck(hipblasSgemm(hipblas_handle,&
+        HIPBLAS_OP_T, HIPBLAS_OP_N, &
+        m, n, k, alpha, &
+        c_loc(A), lda, &
+        c_loc(f), ldb, &
+        beta, &
+        c_loc(Af), ldc))
+#endif
+  end subroutine self_hipblas_matrixop_1d
+
   subroutine ScalarGridInterp_1D_cpu(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_1D interface.
     !! In most cases, you should use the `ScalarGridInterp_1D` generic interface,
@@ -550,42 +409,8 @@ contains
     real(prec),pointer,intent(inout) :: fTarget(:,:,:)
     !! (Output) Array of function values, defined on the target grid
     type(c_ptr),intent(inout) :: hipblas_handle
-    ! Local
-    integer(c_int) :: m
-    integer(c_int) :: n
-    integer(c_int) :: k
-    real(c_prec) :: alpha
-    integer(c_int) :: lda
-    integer(c_int) :: ldb
-    integer(c_int) :: ldc
-    real(c_prec) :: beta
 
-    m = this % M + 1 ! number of rows of A^T
-    n = nvars*nelems ! number of columns of B
-    k = this % N + 1! number of columns of A^T
-    alpha = 1.0_c_prec
-    lda = k ! leading dimension of A (interoplation matrix)
-    ldb = k ! leading dimension of B (f)
-    ldc = m ! leading dimension of C (fTarget)
-    beta = 0.0_c_prec
-
-#ifdef DOUBLE_PRECISION
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
-                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
-                                   m,n,k,alpha, &
-                                   c_loc(this % iMatrix),lda, &
-                                   c_loc(f),ldb, &
-                                   beta, &
-                                   c_loc(fTarget),ldc))
-#else
-    call hipblasCheck(hipblasSgemm(hipblas_handle,&
-        HIPBLAS_OP_T, HIPBLAS_OP_N, &
-        m, n, k, alpha, &
-        c_loc(this % iMatrix), lda, &
-        c_loc(f), ldb, &
-        beta, &
-        c_loc(fTarget), ldc))
-#endif
+      call self_hipblas_matrixop_1d(this % iMatrix, f, fTarget, this % M+1, this % N+1, nvars*nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_1D_gpu
 
@@ -1010,42 +835,8 @@ contains
     real(prec),pointer,intent(in)  :: f(:,:,:)
     real(prec),pointer,intent(out) :: df(:,:,:)
     type(c_ptr),intent(inout) :: hipblas_handle
-    ! Local
-    integer(c_int) :: m
-    integer(c_int) :: n
-    integer(c_int) :: k
-    real(c_prec) :: alpha
-    integer(c_int) :: lda
-    integer(c_int) :: ldb
-    integer(c_int) :: ldc
-    real(c_prec) :: beta
-
-    m = this % N + 1 ! number of rows of A^T
-    n = nvars*nelems ! number of columns of B
-    k = this % N + 1! number of columns of A^T
-    alpha = 1.0_c_prec
-    lda = k ! leading dimension of A (interoplation matrix)
-    ldb = k ! leading dimension of B (f)
-    ldc = m ! leading dimension of C (fTarget)
-    beta = 0.0_c_prec
-
-#ifdef DOUBLE_PRECISION
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
-                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
-                                   m,n,k,alpha, &
-                                   c_loc(this % dMatrix),lda, &
-                                   c_loc(f),ldb, &
-                                   beta, &
-                                   c_loc(df),ldc))
-#else
-    call hipblasCheck(hipblasSgemm(hipblas_handle, &
-                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
-                                   m,n,k,alpha, &
-                                   c_loc(this % dMatrix),lda, &
-                                   c_loc(f),ldb, &
-                                   beta, &
-                                   c_loc(df),ldc))
-#endif
+  
+    call self_hipblas_matrixop_1d(this % dMatrix, f, df, this % N+1, this % N+1, nvars*nelems, hipblas_handle)
 
   end subroutine Derivative_1D_gpu
 
@@ -2148,42 +1939,8 @@ contains
     real(prec),pointer,intent(in)      :: f(:,:,:)
     real(prec),pointer,intent(inout)     :: fTarget(:,:,:)
     type(c_ptr),intent(inout) :: hipblas_handle
-    ! Local
-    integer(c_int) :: m
-    integer(c_int) :: n
-    integer(c_int) :: k
-    real(c_prec) :: alpha
-    integer(c_int) :: lda
-    integer(c_int) :: ldb
-    integer(c_int) :: ldc
-    real(c_prec) :: beta
 
-    m = 2 ! number of rows of A^T
-    n = nvars*nelems ! number of columns of B
-    k = this % N + 1! number of columns of A^T
-    alpha = 1.0_c_prec
-    lda = k ! leading dimension of A (interoplation matrix)
-    ldb = k ! leading dimension of B (f)
-    ldc = m ! leading dimension of C (fTarget)
-    beta = 0.0_c_prec
-
-#ifdef DOUBLE_PRECISION
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
-                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
-                                   m,n,k,alpha, &
-                                   c_loc(this % bMatrix),lda, &
-                                   c_loc(f),ldb, &
-                                   beta, &
-                                   c_loc(fTarget),ldc))
-#else
-    call hipblasCheck(hipblasSgemm(hipblas_handle,&
-        HIPBLAS_OP_T, HIPBLAS_OP_N, &
-        m, n, k, alpha, &
-        c_loc(this % bMatrix), lda, &
-        c_loc(f), ldb, &
-        beta, &
-        c_loc(fTarget), ldc))
-#endif
+    call self_hipblas_matrixop_1d(this % bMatrix, f, fTarget, 2, this % N+1, nvars*nelems, hipblas_handle)
 
   end subroutine ScalarBoundaryInterp_1D_gpu
 
