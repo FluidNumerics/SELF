@@ -1,8 +1,18 @@
+program test
+  implicit none
+  integer :: exit_code
+  
+  exit_code = scalargridinterp_2d_gpu_constant()
+  stop exit_code
+  
+  contains
+
 integer function scalargridinterp_2d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -19,6 +29,9 @@ integer function scalargridinterp_2d_gpu_constant() result(r)
   type(Scalar2D) :: fTarget
   type(Lagrange),target :: interp
   type(Lagrange),target :: interpTarget
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
@@ -36,19 +49,19 @@ integer function scalargridinterp_2d_gpu_constant() result(r)
   call fTarget % Init(interpTarget,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior = 1.0_prec
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
   ! Interpolate with gpuAccel = .true.
-  call f % GridInterp(fTarget,.true.)
+  call f % GridInterp(fTarget,handle)
 
-  call fTarget % interior % updatehost()
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
-  fTarget % interior % hostdata = abs(fTarget % interior % hostdata - 1.0_prec)
+  fTarget % interior = abs(fTarget % interior - 1.0_prec)
 
-  if (maxval(fTarget % interior % hostdata) <= tolerance) then
+  if (maxval(fTarget % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -58,5 +71,8 @@ integer function scalargridinterp_2d_gpu_constant() result(r)
   call fTarget % free()
   call interp % free()
   call interpTarget % free()
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function scalargridinterp_2d_gpu_constant
+
+end program test

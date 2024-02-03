@@ -76,12 +76,6 @@ MODULE SELF_Data
     procedure,private :: Derivative_Scalar1D_cpu
     procedure,private :: Derivative_Scalar1D_gpu
 
-    ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar1D
-    ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar1D
-
-    ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar1D
-    ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar1D
-
     ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_Scalar1D, WriteHDF5_MPI_Scalar1D
     ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar1D
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar1D
@@ -89,71 +83,59 @@ MODULE SELF_Data
 
   END TYPE Scalar1D
 
-!   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar2D
 
-!     real(prec), pointer, dimension(:,:,:,:) :: interior
-!     real(prec), pointer, dimension(:,:,:,:) :: boundary
-!     real(prec), pointer, dimension(:,:,:,:) :: extBoundary
-!     real(prec), pointer, dimension(:,:,:,:) :: avgBoundary
-!     real(prec), pointer, dimension(:,:,:,:) :: jumpBoundary
+    real(prec), pointer, dimension(:,:,:,:) :: interior
+    real(prec), pointer, dimension(:,:,:,:) :: interpWork 
+    real(prec), pointer, dimension(:,:,:,:) :: boundary
+    real(prec), pointer, dimension(:,:,:,:) :: extBoundary
+    real(prec), pointer, dimension(:,:,:,:) :: avgBoundary
+    real(prec), pointer, dimension(:,:,:,:) :: jumpBoundary
 
-!   CONTAINS
+  CONTAINS
 
-!     PROCEDURE,PUBLIC :: Init => Init_Scalar2D
-!     PROCEDURE,PUBLIC :: Free => Free_Scalar2D
-!     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Scalar2D
-!     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar2D
-!     PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar2D
-!     PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar2D
+    PROCEDURE,PUBLIC :: Init => Init_Scalar2D
+    PROCEDURE,PUBLIC :: Free => Free_Scalar2D
+    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar2D
+    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar2D
+    generic,public :: GridInterp => GridInterp_Scalar2D_cpu, GridInterp_Scalar2D_gpu
+    procedure,private :: GridInterp_Scalar2D_cpu
+    procedure,private :: GridInterp_Scalar2D_gpu
+    ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar2D
+    ! PROCEDURE,PRIVATE :: Gradient_Scalar2D
 
-!     GENERIC,PUBLIC :: Gradient => Gradient_Scalar2D
-!     PROCEDURE,PRIVATE :: Gradient_Scalar2D
+    ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
+    ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
+    ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar2D
 
-!     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar2D
-!     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar2D
+  END TYPE Scalar2D
 
-!     ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar2D
-!     ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar2D
+  ! TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
 
-!     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
-!     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
-!     PROCEDURE, PRIVATE :: WriteHDF5_Scalar2D
+  !   real(prec), pointer, dimension(:,:,:,:,:) :: interior
+  !   real(prec), pointer, dimension(:,:,:,:,:) :: boundary
+  !   real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
+  !   real(prec), pointer, dimension(:,:,:,:,:) :: avgBoundary
+  !   real(prec), pointer, dimension(:,:,:,:,:) :: jumpBoundary
 
-!   END TYPE Scalar2D
+  ! CONTAINS
 
-!   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
+  !   PROCEDURE,PUBLIC :: Init => Init_Scalar3D
+  !   PROCEDURE,PUBLIC :: Free => Free_Scalar3D
+  !   PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar3D
+  !   ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
+  !   ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar3D
 
-!     real(prec), pointer, dimension(:,:,:,:,:) :: interior
-!     real(prec), pointer, dimension(:,:,:,:,:) :: boundary
-!     real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
-!     real(prec), pointer, dimension(:,:,:,:,:) :: avgBoundary
-!     real(prec), pointer, dimension(:,:,:,:,:) :: jumpBoundary
+  !   ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar3D
+  !   ! PROCEDURE,PRIVATE :: Gradient_Scalar3D
 
-!   CONTAINS
+  !   ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
+  !   ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
+  !   ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
 
-!     PROCEDURE,PUBLIC :: Init => Init_Scalar3D
-!     PROCEDURE,PUBLIC :: Free => Free_Scalar3D
-!     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Scalar3D
-!     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar3D
-!     PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
-!     PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar3D
+  ! END TYPE Scalar3D
 
-!     GENERIC,PUBLIC :: Gradient => Gradient_Scalar3D
-!     PROCEDURE,PRIVATE :: Gradient_Scalar3D
-
-!     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar3D
-!     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar3D
-
-!     ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar3D
-!     ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar3D
-
-!     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
-!     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
-!     PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
-
-!   END TYPE Scalar3D
-
-! ! ---------------------- Vectors ---------------------- !
+! ! ! ---------------------- Vectors ---------------------- !
 
 !   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector2D
 
@@ -176,15 +158,6 @@ MODULE SELF_Data
 
 !     GENERIC,PUBLIC :: Divergence => Divergence_Vector2D
 !     PROCEDURE,PRIVATE :: Divergence_Vector2D
-
-!     ! GENERIC,PUBLIC :: Curl => Curl_Vector2D
-!     ! PROCEDURE,PRIVATE :: Curl_Vector2D
-
-!     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector2D
-!     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Vector2D
-
-!     ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Vector2D
-!     ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Vector2D
 
 !     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
 !     PROCEDURE,PRIVATE :: SetEquation_Vector2D
@@ -217,45 +190,14 @@ MODULE SELF_Data
 !     GENERIC,PUBLIC :: Divergence => Divergence_Vector3D
 !     PROCEDURE,PRIVATE :: Divergence_Vector3D
 
-!     ! GENERIC,PUBLIC :: Curl => Curl_Vector3D
-!     ! PROCEDURE,PRIVATE :: Curl_Vector3D
+!     ! GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
+!     ! PROCEDURE,PRIVATE :: SetEquation_Vector3D
 
-!     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector3D
-!     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Vector3D
-
-!     ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Vector3D
-!     ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Vector3D
-
-!     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
-!     PROCEDURE,PRIVATE :: SetEquation_Vector3D
-
-!     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector3D, WriteHDF5_Vector3D
-!     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector3D
-!     PROCEDURE, PRIVATE :: WriteHDF5_Vector3D
+!     ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector3D, WriteHDF5_Vector3D
+!     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector3D
+!     ! PROCEDURE, PRIVATE :: WriteHDF5_Vector3D
 
 !   END TYPE Vector3D
-
-! ! ! ----------------- Two-point Vectors ----------------- !
-
-! !   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: P2Vector2D
-
-! !     real(prec), pointer, dimension(:,:,:,:,:,:) :: interior
-! !     real(prec), pointer, dimension(:,:,:,:,:,:,:) :: physical
-! !     real(prec), pointer, dimension(:,:,:,:,:) :: boundary
-! !     real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
-! !     real(prec), pointer, dimension(:,:,:,:) :: boundaryNormal
-
-! !   CONTAINS
-
-! !     PROCEDURE,PUBLIC :: Init => Init_P2Vector2D
-! !     PROCEDURE,PUBLIC :: Free => Free_P2Vector2D
-! !     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_P2Vector2D
-! !     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_P2Vector2D
-
-! !     GENERIC,PUBLIC :: Divergence => Divergence_P2Vector2D
-! !     PROCEDURE,PRIVATE :: Divergence_P2Vector2D
-
-! !   END TYPE P2Vector2D
 ! ! ---------------------- Tensors ---------------------- !
 
 !   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
@@ -268,24 +210,10 @@ MODULE SELF_Data
 
 !     PROCEDURE,PUBLIC :: Init => Init_Tensor2D
 !     PROCEDURE,PUBLIC :: Free => Free_Tensor2D
-!     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Tensor2D
 !     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Tensor2D
-!     PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor2D
-!     !PROCEDURE,PUBLIC :: GridInterp => GridInterp_Tensor2D
+!     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor2D
+!     ! PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor2D
 
-!     PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor2D
-
-!     !GENERIC,PUBLIC :: Divergence => Divergence_Tensor2D
-!     !PROCEDURE,PRIVATE :: Divergence_Tensor2D
-
-!     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor2D
-!     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Tensor2D
-
-!     ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Tensor2D
-!     ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Tensor2D
-
-!     !GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor2D
-!     !PROCEDURE,PRIVATE :: SetEquation_Tensor2D
 
 !   END TYPE Tensor2D
 
@@ -299,24 +227,9 @@ MODULE SELF_Data
 
 !     PROCEDURE,PUBLIC :: Init => Init_Tensor3D
 !     PROCEDURE,PUBLIC :: Free => Free_Tensor3D
-!     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Tensor3D
 !     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Tensor3D
-!     PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor3D
-!    ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Tensor3D
-
-!     PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor3D
-
-!     !GENERIC,PUBLIC :: Divergence => Divergence_Tensor3D
-!     !PROCEDURE,PRIVATE :: Divergence_Tensor3D
-
-!     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor3D
-!     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Tensor3D
-
-!     ! GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Tensor3D
-!     ! PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Tensor3D
-
-!     !GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor3D
-!     !PROCEDURE,PRIVATE :: SetEquation_Tensor3D
+!     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor3D
+!     ! PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor3D
 
 !   END TYPE Tensor3D
 
@@ -329,30 +242,6 @@ MODULE SELF_Data
 CONTAINS
 
 ! -- DataObj -- !
-  ! SUBROUTINE Init_DataObj(this,interp,nVar,nElem)
-  !   IMPLICIT NONE
-  !   CLASS(SELF_DataObj),INTENT(out)  :: this
-  !   TYPE(Lagrange),INTENT(in),TARGET :: interp
-  !   INTEGER,INTENT(in) :: nVar
-  !   INTEGER,INTENT(in) :: nElem
-
-  !   this % nElem = nElem
-  !   this % nVar = nVar
-  !   this % interp => interp
-  !   ALLOCATE( this % meta(1:nVar) )
-  !   ALLOCATE( this % eqn(1:nVar) )
-
-  ! END SUBROUTINE Init_DataObj
-
-  ! SUBROUTINE Free_DataObj(this)
-  !   IMPLICIT NONE
-  !   CLASS(SELF_DataObj),INTENT(inout) :: this
-
-  !   this % interp => NULL()
-  !   DEALLOCATE( this % meta )
-  !   DEALLOCATE( this % eqn )
-
-  ! END SUBROUTINE Free_DataObj
 
   SUBROUTINE SetName_DataObj(this,ivar,name)
     !! Set the name of the `ivar-th` variable
@@ -412,11 +301,11 @@ CONTAINS
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior, interp % N+1, nvar, nelem, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary, nvar, nelem, 2, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary, nvar, nelem, 2, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary, nvar, nelem, 2, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary, nvar, nelem, 2, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interior, interp % N+1, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary, nelem, nvar, 2, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary, nelem, nvar, 2, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary, nelem, nvar, 2, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % jumpBoundary, nelem, nvar, 2, hipMemAttachGlobal))
 
     ALLOCATE( this % meta(1:nVar) )
     ALLOCATE( this % eqn(1:nVar) )
@@ -481,6 +370,7 @@ CONTAINS
 
 
   END SUBROUTINE GridInterp_Scalar1D_cpu
+
   SUBROUTINE GridInterp_Scalar1D_gpu(this,SELFout,hipblas_handle)
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(in) :: this
@@ -587,79 +477,59 @@ CONTAINS
 
 ! ! -- Scalar2D -- !
 
-!   SUBROUTINE Init_Scalar2D(this,interp,nVar,nElem)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(out) :: this
-!     TYPE(Lagrange),INTENT(in),TARGET :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
+  SUBROUTINE Init_Scalar2D(this,interp,nVar,nElem)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(out) :: this
+    TYPE(Lagrange),INTENT(in),TARGET :: interp
+    INTEGER,INTENT(in) :: nVar
+    INTEGER,INTENT(in) :: nElem
 
-!     this % interp => interp
-!     this % nVar = nVar
-!     this % nElem = nElem
+    this % interp => interp
+    this % nVar = nVar
+    this % nElem = nElem
 
-!     CALL this % interior % Alloc(loBound=(/0,0,1,1/), &
-!                                         upBound=(/interp % N,interp % N,nVar,nElem/))
+    call hipcheck(hipMallocManaged(this % interior, interp % N+1, interp % N+1, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interpWork, interp % M+1, interp % N+1, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % jumpBoundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
 
-!     CALL this % boundary % Alloc(loBound=(/0,1,1,1/), &
-!                                         upBound=(/interp % N,nVar,4,nElem/))
-
-!     CALL this % extBoundary % Alloc(loBound=(/0,1,1,1/), &
-!                                            upBound=(/interp % N,nVar,4,nElem/))
-
-!     CALL this % avgBoundary % Alloc(loBound=(/0,1,1,1/), &
-!                                            upBound=(/interp % N,nVar,4,nElem/))
-
-!     CALL this % jumpBoundary % Alloc(loBound=(/0,1,1,1/), &
-!                                            upBound=(/interp % N,nVar,4,nElem/))
-
-!     ALLOCATE( this % meta(1:nVar) )
-!     ALLOCATE( this % eqn(1:nVar) )
+    ALLOCATE( this % meta(1:nVar) )
+    ALLOCATE( this % eqn(1:nVar) )
  
 
-!   END SUBROUTINE Init_Scalar2D
+  END SUBROUTINE Init_Scalar2D
 
-!   SUBROUTINE Free_Scalar2D(this)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(inout) :: this
+  SUBROUTINE Free_Scalar2D(this)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(inout) :: this
 
-!     this % nVar = 0
-!     this % nElem = 0
-!     this % interp => NULL()
-!     CALL this % interior % Free()
-!     CALL this % boundary % Free()
-!     CALL this % extBoundary % Free()
-!     CALL this % avgBoundary % Free()
-!     CALL this % jumpBoundary % Free()
+    this % nVar = 0
+    this % nElem = 0
+    this % interp => NULL()
+    CALL hipcheck(hipFree(this % interior))
+    CALL hipcheck(hipFree(this % interpWork))
+    CALL hipcheck(hipFree(this % boundary))
+    CALL hipcheck(hipFree(this % extBoundary))
+    CALL hipcheck(hipFree(this % avgBoundary))
+    CALL hipcheck(hipFree(this % jumpBoundary))
+    DEALLOCATE( this % meta )
+    DEALLOCATE( this % eqn )
 
-!     DEALLOCATE( this % meta )
-!     DEALLOCATE( this % eqn )
+  END SUBROUTINE Free_Scalar2D
 
-!   END SUBROUTINE Free_Scalar2D
+  SUBROUTINE UpdateDevice_Scalar2D(this)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(inout) :: this
 
-!   SUBROUTINE UpdateHost_Scalar2D(this)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(inout) :: this
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior), sizeof(this % interior), 0, c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary), sizeof(this % boundary), 0, c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary), sizeof(this % extBoundary), 0, c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary), sizeof(this % avgBoundary), 0, c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary), sizeof(this % jumpBoundary), 0, c_null_ptr))
 
-!     CALL this % interior % UpdateHost()
-!     CALL this % boundary % UpdateHost()
-!     CALL this % extBoundary % UpdateHost()
-!     CALL this % avgBoundary % UpdateHost()
-!     CALL this % jumpBoundary % UpdateHost()
-
-!   END SUBROUTINE UpdateHost_Scalar2D
-
-!   SUBROUTINE UpdateDevice_Scalar2D(this)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(inout) :: this
-
-!     CALL this % interior % UpdateDevice()
-!     CALL this % boundary % UpdateDevice()
-!     CALL this % extBoundary % UpdateDevice()
-!     CALL this % avgBoundary % UpdateDevice()
-!     CALL this % jumpBoundary % UpdateDevice()
-
-!   END SUBROUTINE UpdateDevice_Scalar2D
+  END SUBROUTINE UpdateDevice_Scalar2D
 
 !   SUBROUTINE BoundaryInterp_Scalar2D(this,gpuAccel)
 !     IMPLICIT NONE
@@ -680,25 +550,34 @@ CONTAINS
 
 !   END SUBROUTINE BoundaryInterp_Scalar2D
 
-!   SUBROUTINE GridInterp_Scalar2D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(in) :: this
-!     TYPE(Scalar2D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
+  SUBROUTINE GridInterp_Scalar2D_cpu(this,SELFout)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(in) :: this
+    TYPE(Scalar2D),INTENT(inout) :: SELFOut
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGridInterp_2D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     ELSE
-!       CALL this % interp % ScalarGridInterp_2D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     END IF
+      CALL this % interp % ScalarGridInterp_2D(this % interior, &
+                                                SELFout % interior, &
+                                                this % nVar, &
+                                                this % nElem)
 
-!   END SUBROUTINE GridInterp_Scalar2D
+
+  END SUBROUTINE GridInterp_Scalar2D_cpu
+
+  SUBROUTINE GridInterp_Scalar2D_gpu(this,SELFout,hipblas_handle)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(inout) :: this
+    TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    type(c_ptr), intent(inout) :: hipblas_handle
+
+      CALL this % interp % ScalarGridInterp_2D(this % interior, &
+                                               this % interpWork, &
+                                                SELFout % interior, &
+                                                this % nVar, &
+                                                this % nElem,&
+                                                hipblas_handle)
+
+
+  END SUBROUTINE GridInterp_Scalar2D_gpu
 
 !   SUBROUTINE Gradient_Scalar2D(this,SELFOut,gpuAccel)
 !     IMPLICIT NONE
