@@ -1,6 +1,13 @@
+program test
+implicit none
+integer :: exit_code
+
+exit_code = scalargridinterp_1d_cpu_constant()
+stop exit_code
+
+contains
 integer function scalargridinterp_1d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
 
@@ -36,15 +43,14 @@ integer function scalargridinterp_1d_cpu_constant() result(r)
   call fTarget % Init(interpTarget,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior(:,:,:) = 1.0_prec
 
-  ! Interpolate with gpuAccel = .FALSE.
-  call f % GridInterp(fTarget,.false.)
+  call f % GridInterp(fTarget)
 
   ! Calculate diff from exact
-  fTarget % interior % hostdata = abs(fTarget % interior % hostdata - 1.0_prec)
+  fTarget % interior = abs(fTarget % interior - 1.0_prec)
 
-  if (maxval(fTarget % interior % hostdata) <= tolerance) then
+  if (maxval(fTarget % interior) <= tolerance) then
     r = 0
   else
     r = 1
@@ -56,3 +62,4 @@ integer function scalargridinterp_1d_cpu_constant() result(r)
   call interpTarget % free()
 
 end function scalargridinterp_1d_cpu_constant
+end program test

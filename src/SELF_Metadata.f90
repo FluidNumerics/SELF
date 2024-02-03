@@ -8,8 +8,8 @@
 
 MODULE SELF_Metadata
 
-  USE SELF_HDF5
-  USE HDF5
+  !USE SELF_HDF5
+  !USE HDF5
 
   INTEGER,PARAMETER,PUBLIC :: SELF_MTD_NameLength = 250
   INTEGER,PARAMETER,PUBLIC :: SELF_MTD_DescriptionLength = 1000
@@ -26,7 +26,7 @@ MODULE SELF_Metadata
     PROCEDURE,PUBLIC :: SetName => SetName_Metadata
     PROCEDURE,PUBLIC :: SetDescription => SetDescription_Metadata
     PROCEDURE,PUBLIC :: SetUnits => SetUnits_Metadata
-    PROCEDURE,PUBLIC :: WriteHDF5 => WriteHDF5_Metadata
+    !PROCEDURE,PUBLIC :: WriteHDF5 => WriteHDF5_Metadata
 
   END TYPE Metadata
 
@@ -59,36 +59,36 @@ CONTAINS
 
   END SUBROUTINE SetUnits_Metadata
 
-  SUBROUTINE WriteHDF5_Metadata(mtd,group,varid,fileId)
-  !! Writes the metadata to a HDF5 file using the 
-  !! fields :
-  !!  * `/metadata/{group}/name/{varid}`
-  !!  * `/metadata/{group}/description/{varid}`
-  !!  * `/metadata/{group}/units/{varid}`
-  !!
-  !! This method assumes that an HDF5 file is already
-  !! open for writing and is associated with the `fileId` 
-  !! input.
-    CLASS(Metadata), INTENT(in) :: mtd
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER, INTENT(in) :: varid
-    INTEGER(HID_T), INTENT(in) :: fileId
-    ! Local
-    CHARACTER(4) :: varNumber
+  ! SUBROUTINE WriteHDF5_Metadata(mtd,group,varid,fileId)
+  ! !! Writes the metadata to a HDF5 file using the 
+  ! !! fields :
+  ! !!  * `/metadata/{group}/name/{varid}`
+  ! !!  * `/metadata/{group}/description/{varid}`
+  ! !!  * `/metadata/{group}/units/{varid}`
+  ! !!
+  ! !! This method assumes that an HDF5 file is already
+  ! !! open for writing and is associated with the `fileId` 
+  ! !! input.
+  !   CLASS(Metadata), INTENT(in) :: mtd
+  !   CHARACTER(*), INTENT(in) :: group
+  !   INTEGER, INTENT(in) :: varid
+  !   INTEGER(HID_T), INTENT(in) :: fileId
+  !   ! Local
+  !   CHARACTER(4) :: varNumber
 
-    ! Add variable names to the file
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/name")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/description")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/units")
+  !   ! Add variable names to the file
+  !   CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata")
+  !   CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/name")
+  !   CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/description")
+  !   CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/units")
   
-    WRITE (varNumber,"(I0)") varid
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/name/"//TRIM(varnumber), &
-                                   TRIM(mtd % name))
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/description/"//TRIM(varnumber), &
-                                TRIM(mtd % description))
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/units/"//TRIM(varnumber), &
-                                TRIM(mtd % units))
-  END SUBROUTINE WriteHDF5_Metadata
+  !   WRITE (varNumber,"(I0)") varid
+  !   CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/name/"//TRIM(varnumber), &
+  !                                  TRIM(mtd % name))
+  !   CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/description/"//TRIM(varnumber), &
+  !                               TRIM(mtd % description))
+  !   CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/units/"//TRIM(varnumber), &
+  !                               TRIM(mtd % units))
+  ! END SUBROUTINE WriteHDF5_Metadata
 
 END MODULE SELF_Metadata
