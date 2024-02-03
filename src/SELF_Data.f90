@@ -6,20 +6,20 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE SELF_Data
+module SELF_Data
 
-  USE SELF_Constants
-  USE SELF_Lagrange
-  USE SELF_Metadata
-  USE FEQParse
+  use SELF_Constants
+  use SELF_Lagrange
+  use SELF_Metadata
+  use FEQParse
 
-  USE ISO_C_BINDING
+  use iso_c_binding
 
-  IMPLICIT NONE
+  implicit none
 
 #include "SELF_Macros.h"
 
-  TYPE,PUBLIC :: SELF_DataObj
+  type,public :: SELF_DataObj
   !! The SELF_DataObj class is a base class for all data objects in SELF.
   !! A data object in SELF is a multidimensional array of data, represented
   !! on both host and device, that is associated with an interpolant, metadata,
@@ -31,51 +31,51 @@ MODULE SELF_Data
   !! information on element interiors and element boundaries, both of which
   !! are commonly used for spectral element solvers.
 
-    INTEGER :: nVar
-    INTEGER :: nElem
-    TYPE(Lagrange),POINTER :: interp
-    TYPE(Metadata),ALLOCATABLE :: meta(:)
-    TYPE(EquationParser),ALLOCATABLE :: eqn(:)
+    integer :: nVar
+    integer :: nElem
+    type(Lagrange),pointer :: interp
+    type(Metadata),allocatable :: meta(:)
+    type(EquationParser),allocatable :: eqn(:)
 
-    CONTAINS
+  contains
 
     ! PROCEDURE,PUBLIC :: Init => Init_DataObj
     ! PROCEDURE,PUBLIC :: Free => Free_DataObj
 
-    ! Procedures for setting metadata for 
-    PROCEDURE,PUBLIC :: SetName => SetName_DataObj
-    PROCEDURE,PUBLIC :: SetDescription => SetDescription_DataObj
-    PROCEDURE,PUBLIC :: SetUnits => SetUnits_DataObj
-    GENERIC,PUBLIC :: SetEquation => SetEquation_DataObj
-    PROCEDURE,PRIVATE :: SetEquation_DataObj
+    ! Procedures for setting metadata for
+    procedure,public :: SetName => SetName_DataObj
+    procedure,public :: SetDescription => SetDescription_DataObj
+    procedure,public :: SetUnits => SetUnits_DataObj
+    generic,public :: SetEquation => SetEquation_DataObj
+    procedure,private :: SetEquation_DataObj
 
-  END TYPE SELF_DataObj
+  end type SELF_DataObj
 
 ! ---------------------- Scalars ---------------------- !
-  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar1D
+  type,extends(SELF_DataObj),public :: Scalar1D
 
-    real(prec), pointer, dimension(:,:,:) :: interior
-    real(prec), pointer, dimension(:,:,:) :: boundary
-    real(prec), pointer, dimension(:,:,:) :: extBoundary
-    real(prec), pointer, dimension(:,:,:) :: avgBoundary
-    real(prec), pointer, dimension(:,:,:) :: jumpBoundary
+    real(prec),pointer,dimension(:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:) :: avgBoundary
+    real(prec),pointer,dimension(:,:,:) :: jumpBoundary
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_Scalar1D
-    PROCEDURE,PUBLIC :: Free => Free_Scalar1D
+    procedure,public :: Init => Init_Scalar1D
+    procedure,public :: Free => Free_Scalar1D
 
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar1D
+    procedure,public :: UpdateDevice => UpdateDevice_Scalar1D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Scalar1D_cpu, BoundaryInterp_Scalar1D_gpu
+    generic,public :: BoundaryInterp => BoundaryInterp_Scalar1D_cpu,BoundaryInterp_Scalar1D_gpu
     procedure,private :: BoundaryInterp_Scalar1D_cpu
     procedure,private :: BoundaryInterp_Scalar1D_gpu
 
-    generic,public :: GridInterp => GridInterp_Scalar1D_cpu, GridInterp_Scalar1D_gpu
+    generic,public :: GridInterp => GridInterp_Scalar1D_cpu,GridInterp_Scalar1D_gpu
     procedure,private :: GridInterp_Scalar1D_cpu
     procedure,private :: GridInterp_Scalar1D_gpu
 
-    generic,public :: Derivative => Derivative_Scalar1D_cpu, Derivative_Scalar1D_gpu
+    generic,public :: Derivative => Derivative_Scalar1D_cpu,Derivative_Scalar1D_gpu
     procedure,private :: Derivative_Scalar1D_cpu
     procedure,private :: Derivative_Scalar1D_gpu
 
@@ -83,27 +83,30 @@ MODULE SELF_Data
     ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar1D
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar1D
 
+  end type Scalar1D
 
-  END TYPE Scalar1D
+  type,extends(SELF_DataObj),public :: Scalar2D
 
-  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar2D
+    real(prec),pointer,dimension(:,:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:,:) :: interpWork
+    real(prec),pointer,dimension(:,:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:) :: avgBoundary
+    real(prec),pointer,dimension(:,:,:,:) :: jumpBoundary
 
-    real(prec), pointer, dimension(:,:,:,:) :: interior
-    real(prec), pointer, dimension(:,:,:,:) :: interpWork 
-    real(prec), pointer, dimension(:,:,:,:) :: boundary
-    real(prec), pointer, dimension(:,:,:,:) :: extBoundary
-    real(prec), pointer, dimension(:,:,:,:) :: avgBoundary
-    real(prec), pointer, dimension(:,:,:,:) :: jumpBoundary
+  contains
 
-  CONTAINS
-
-    PROCEDURE,PUBLIC :: Init => Init_Scalar2D
-    PROCEDURE,PUBLIC :: Free => Free_Scalar2D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar2D
+    procedure,public :: Init => Init_Scalar2D
+    procedure,public :: Free => Free_Scalar2D
+    procedure,public :: UpdateDevice => UpdateDevice_Scalar2D
     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar2D
-    generic,public :: GridInterp => GridInterp_Scalar2D_cpu, GridInterp_Scalar2D_gpu
+    generic,public :: GridInterp => GridInterp_Scalar2D_cpu,GridInterp_Scalar2D_gpu
     procedure,private :: GridInterp_Scalar2D_cpu
     procedure,private :: GridInterp_Scalar2D_gpu
+
+    generic,public :: Gradient => Gradient_Scalar2D_cpu,Gradient_Scalar2D_gpu
+    procedure,private :: Gradient_Scalar2D_cpu
+    procedure,private :: Gradient_Scalar2D_gpu
     ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar2D
     ! PROCEDURE,PRIVATE :: Gradient_Scalar2D
 
@@ -111,7 +114,7 @@ MODULE SELF_Data
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
     ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar2D
 
-  END TYPE Scalar2D
+  end type Scalar2D
 
   ! TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
 
@@ -140,36 +143,35 @@ MODULE SELF_Data
 
 ! ! ! ---------------------- Vectors ---------------------- !
 
-!   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector2D
+  type,extends(SELF_DataObj),public :: Vector2D
 
-!     real(prec), pointer, dimension(:,:,:,:,:) :: interior
-!     real(prec), pointer, dimension(:,:,:,:,:) :: boundary
-!     real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
-!     real(prec), pointer, dimension(:,:,:,:) :: boundaryNormal
+    real(prec),pointer,dimension(:,:,:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:) :: boundaryNormal
 
-!   CONTAINS
+  contains
 
-!     PROCEDURE,PUBLIC :: Init => Init_Vector2D
-!     PROCEDURE,PUBLIC :: Free => Free_Vector2D
-!     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Vector2D
-!     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Vector2D
-!     PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Vector2D
-!     PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
+    procedure,public :: Init => Init_Vector2D
+    procedure,public :: Free => Free_Vector2D
+    procedure,public :: UpdateDevice => UpdateDevice_Vector2D
+    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Vector2D
+    ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
 
-!     GENERIC,PUBLIC :: Gradient => Gradient_Vector2D
-!     PROCEDURE,PRIVATE :: Gradient_Vector2D
+    ! GENERIC,PUBLIC :: Gradient => Gradient_Vector2D
+    ! PROCEDURE,PRIVATE :: Gradient_Vector2D
 
-!     GENERIC,PUBLIC :: Divergence => Divergence_Vector2D
-!     PROCEDURE,PRIVATE :: Divergence_Vector2D
+    ! GENERIC,PUBLIC :: Divergence => Divergence_Vector2D
+    ! PROCEDURE,PRIVATE :: Divergence_Vector2D
 
-!     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
-!     PROCEDURE,PRIVATE :: SetEquation_Vector2D
+    ! GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
+    ! PROCEDURE,PRIVATE :: SetEquation_Vector2D
 
-!     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector2D, WriteHDF5_Vector2D
-!     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector2D
-!     PROCEDURE, PRIVATE :: WriteHDF5_Vector2D
+    ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector2D, WriteHDF5_Vector2D
+    ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector2D
+    ! PROCEDURE, PRIVATE :: WriteHDF5_Vector2D
 
-!   END TYPE Vector2D
+  end type Vector2D
 
 !   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector3D
 
@@ -217,7 +219,6 @@ MODULE SELF_Data
 !     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor2D
 !     ! PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor2D
 
-
 !   END TYPE Tensor2D
 
 !   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor3D
@@ -236,192 +237,186 @@ MODULE SELF_Data
 
 !   END TYPE Tensor3D
 
-  INTEGER,PARAMETER :: selfStrongForm = 0
-  INTEGER,PARAMETER :: selfWeakDGForm = 1
-  INTEGER,PARAMETER :: selfWeakCGForm = 2
-  INTEGER,PARAMETER :: selfWeakBRForm = 3
+  integer,parameter :: selfStrongForm = 0
+  integer,parameter :: selfWeakDGForm = 1
+  integer,parameter :: selfWeakCGForm = 2
+  integer,parameter :: selfWeakBRForm = 3
 
-
-CONTAINS
+contains
 
 ! -- DataObj -- !
 
-  SUBROUTINE SetName_DataObj(this,ivar,name)
+  subroutine SetName_DataObj(this,ivar,name)
     !! Set the name of the `ivar-th` variable
-    IMPLICIT NONE
-    CLASS(SELF_DataObj),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: ivar
-    CHARACTER(*),INTENT(in) :: name
+    implicit none
+    class(SELF_DataObj),intent(inout) :: this
+    integer,intent(in) :: ivar
+    character(*),intent(in) :: name
 
-    CALL this % meta(ivar) % SetName(name) 
+    call this % meta(ivar) % SetName(name)
 
-  END SUBROUTINE SetName_DataObj
+  end subroutine SetName_DataObj
 
-  SUBROUTINE SetDescription_DataObj(this,ivar,description)
+  subroutine SetDescription_DataObj(this,ivar,description)
     !! Set the description of the `ivar-th` variable
-    IMPLICIT NONE
-    CLASS(SELF_DataObj),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: ivar
-    CHARACTER(*),INTENT(in) :: description
+    implicit none
+    class(SELF_DataObj),intent(inout) :: this
+    integer,intent(in) :: ivar
+    character(*),intent(in) :: description
 
-    CALL this % meta(ivar) % SetDescription(description) 
+    call this % meta(ivar) % SetDescription(description)
 
-  END SUBROUTINE SetDescription_DataObj
+  end subroutine SetDescription_DataObj
 
-  SUBROUTINE SetUnits_DataObj(this,ivar,units)
+  subroutine SetUnits_DataObj(this,ivar,units)
     !! Set the units of the `ivar-th` variable
-    IMPLICIT NONE
-    CLASS(SELF_DataObj),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: ivar
-    CHARACTER(*),INTENT(in) :: units
+    implicit none
+    class(SELF_DataObj),intent(inout) :: this
+    integer,intent(in) :: ivar
+    character(*),intent(in) :: units
 
-    CALL this % meta(ivar) % SetUnits(units) 
+    call this % meta(ivar) % SetUnits(units)
 
-  END SUBROUTINE SetUnits_DataObj
+  end subroutine SetUnits_DataObj
 
-  SUBROUTINE SetEquation_DataObj(this,ivar,eqnChar)
+  subroutine SetEquation_DataObj(this,ivar,eqnChar)
     !! Sets the equation parser for the `ivar-th` variable
-    IMPLICIT NONE
-    CLASS(SELF_DataObj),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: ivar
-    CHARACTER(*),INTENT(in) :: eqnChar
+    implicit none
+    class(SELF_DataObj),intent(inout) :: this
+    integer,intent(in) :: ivar
+    character(*),intent(in) :: eqnChar
 
-    this % eqn(ivar) = EquationParser( TRIM(eqnChar), &
-                                              (/'x','y','z','t'/) )
+    this % eqn(ivar) = EquationParser(trim(eqnChar), &
+                                      (/'x','y','z','t'/))
 
-  END SUBROUTINE SetEquation_DataObj
+  end subroutine SetEquation_DataObj
 
 ! -- Scalar1D -- !
 
-  SUBROUTINE Init_Scalar1D(this,interp,nVar,nElem)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(out) :: this
-    TYPE(Lagrange),INTENT(in),TARGET :: interp
-    INTEGER,INTENT(in) :: nVar
-    INTEGER,INTENT(in) :: nElem
+  subroutine Init_Scalar1D(this,interp,nVar,nElem)
+    implicit none
+    class(Scalar1D),intent(out) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
 
     this % interp => interp
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior, interp % N+1, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary, 2, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary, 2, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary, 2, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary, 2, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary,2,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary,2,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary,2,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % jumpBoundary,2,nelem,nvar,hipMemAttachGlobal))
 
-    ALLOCATE( this % meta(1:nVar) )
-    ALLOCATE( this % eqn(1:nVar) )
+    allocate (this % meta(1:nVar))
+    allocate (this % eqn(1:nVar))
 
-  END SUBROUTINE Init_Scalar1D
+  end subroutine Init_Scalar1D
 
-  SUBROUTINE Free_Scalar1D(this)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(inout) :: this
+  subroutine Free_Scalar1D(this)
+    implicit none
+    class(Scalar1D),intent(inout) :: this
 
-    this % interp => NULL()
-    CALL hipcheck(hipFree(this % interior))
-    CALL hipcheck(hipFree(this % boundary))
-    CALL hipcheck(hipFree(this % extBoundary))
-    CALL hipcheck(hipFree(this % avgBoundary))
-    CALL hipcheck(hipFree(this % jumpBoundary))
-    DEALLOCATE( this % meta )
-    DEALLOCATE( this % eqn )
+    this % interp => null()
+    call hipcheck(hipFree(this % interior))
+    call hipcheck(hipFree(this % boundary))
+    call hipcheck(hipFree(this % extBoundary))
+    call hipcheck(hipFree(this % avgBoundary))
+    call hipcheck(hipFree(this % jumpBoundary))
+    deallocate (this % meta)
+    deallocate (this % eqn)
 
-  END SUBROUTINE Free_Scalar1D
+  end subroutine Free_Scalar1D
 
-  SUBROUTINE UpdateDevice_Scalar1D(this)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(inout) :: this
+  subroutine UpdateDevice_Scalar1D(this)
+    implicit none
+    class(Scalar1D),intent(inout) :: this
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior), sizeof(this % interior), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary), sizeof(this % boundary), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary), sizeof(this % extBoundary), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary), sizeof(this % avgBoundary), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary), sizeof(this % jumpBoundary), 0, c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
 
-  END SUBROUTINE UpdateDevice_Scalar1D
+  end subroutine UpdateDevice_Scalar1D
 
-  SUBROUTINE BoundaryInterp_Scalar1D_cpu(this)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(inout) :: this
+  subroutine BoundaryInterp_Scalar1D_cpu(this)
+    implicit none
+    class(Scalar1D),intent(inout) :: this
 
-      CALL this % interp % ScalarBoundaryInterp_1D(this % interior, &
-                                                this % boundary, &
-                                                this % nVar, &
-                                                this % nElem)
+    call this % interp % ScalarBoundaryInterp_1D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
+  end subroutine BoundaryInterp_Scalar1D_cpu
 
-  END SUBROUTINE BoundaryInterp_Scalar1D_cpu
+  subroutine BoundaryInterp_Scalar1D_gpu(this,hipblas_handle)
+    implicit none
+    class(Scalar1D),intent(inout) :: this
+    type(c_ptr),intent(inout) :: hipblas_handle
 
-  SUBROUTINE BoundaryInterp_Scalar1D_gpu(this,hipblas_handle)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(inout) :: this
-    type(c_ptr), intent(inout) :: hipblas_handle
+    call this % interp % ScalarBoundaryInterp_1D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 hipblas_handle)
 
-      CALL this % interp % ScalarBoundaryInterp_1D(this % interior, &
-                                                this % boundary, &
-                                                this % nVar, &
-                                                this % nElem,&
-                                                hipblas_handle)
+  end subroutine BoundaryInterp_Scalar1D_gpu
 
+  subroutine GridInterp_Scalar1D_cpu(this,SELFout)
+    implicit none
+    class(Scalar1D),intent(in) :: this
+    type(Scalar1D),intent(inout) :: SELFOut
 
-  END SUBROUTINE BoundaryInterp_Scalar1D_gpu
+    call this % interp % ScalarGridInterp_1D(this % interior, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem)
 
-  SUBROUTINE GridInterp_Scalar1D_cpu(this,SELFout)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(in) :: this
-    TYPE(Scalar1D),INTENT(inout) :: SELFOut
+  end subroutine GridInterp_Scalar1D_cpu
 
-      CALL this % interp % ScalarGridInterp_1D(this % interior, &
-                                                SELFout % interior, &
-                                                this % nVar, &
-                                                this % nElem)
+  subroutine GridInterp_Scalar1D_gpu(this,SELFout,hipblas_handle)
+    implicit none
+    class(Scalar1D),intent(in) :: this
+    type(Scalar1D),intent(inout) :: SELFOut
+    type(c_ptr),intent(inout) :: hipblas_handle
 
+    call this % interp % ScalarGridInterp_1D(this % interior, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             hipblas_handle)
 
-  END SUBROUTINE GridInterp_Scalar1D_cpu
+  end subroutine GridInterp_Scalar1D_gpu
 
-  SUBROUTINE GridInterp_Scalar1D_gpu(this,SELFout,hipblas_handle)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(in) :: this
-    TYPE(Scalar1D),INTENT(inout) :: SELFOut
-    type(c_ptr), intent(inout) :: hipblas_handle
+  subroutine Derivative_Scalar1D_cpu(this,SELFOut)
+    implicit none
+    class(Scalar1D),intent(in) :: this
+    type(Scalar1D),intent(inout) :: SELFOut
 
-      CALL this % interp % ScalarGridInterp_1D(this % interior, &
-                                                SELFout % interior, &
-                                                this % nVar, &
-                                                this % nElem,&
-                                                hipblas_handle)
+    call this % interp % Derivative_1D(this % interior, &
+                                       SELFout % interior, &
+                                       this % nVar, &
+                                       this % nElem)
 
+  end subroutine Derivative_Scalar1D_cpu
 
-  END SUBROUTINE GridInterp_Scalar1D_gpu
+  subroutine Derivative_Scalar1D_gpu(this,SELFOut,blas_handle)
+    implicit none
+    class(Scalar1D),intent(in) :: this
+    type(Scalar1D),intent(inout) :: SELFOut
+    type(c_ptr),intent(inout) :: blas_handle
 
-  SUBROUTINE Derivative_Scalar1D_cpu(this,SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(in) :: this
-    TYPE(Scalar1D),INTENT(inout) :: SELFOut
+    call this % interp % Derivative_1D(this % interior, &
+                                       SELFout % interior, &
+                                       this % nVar, &
+                                       this % nElem, &
+                                       blas_handle)
 
-      CALL this % interp % Derivative_1D(this % interior, &
-                                                SELFout % interior, &
-                                                this % nVar, &
-                                                this % nElem)
-
-  END SUBROUTINE Derivative_Scalar1D_cpu
-
-  SUBROUTINE Derivative_Scalar1D_gpu(this,SELFOut,blas_handle)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(in) :: this
-    TYPE(Scalar1D),INTENT(inout) :: SELFOut
-    type(c_ptr), intent(inout) :: blas_handle
-
-      CALL this % interp % Derivative_1D(this % interior , &
-                                                SELFout % interior , &
-                                                this % nVar, &
-                                                this % nElem,&
-                                                blas_handle)
-
-  END SUBROUTINE Derivative_Scalar1D_gpu
-
+  end subroutine Derivative_Scalar1D_gpu
 
   ! SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
   !   IMPLICIT NONE
@@ -447,19 +442,18 @@ CONTAINS
   !     bGlobalDims(1:3) = (/this % nVar, &
   !                          2, &
   !                          nGlobalElem/)
-  
+
   !     CALL CreateGroup_HDF5(fileId,TRIM(group))
 
   !     DO ivar = 1, this % nVar
   !       CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-  !     ENDDO 
+  !     ENDDO
 
   !     CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
   !                          this % interior,offset,globalDims)
 
   !     CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
   !                          this % boundary,bOffset,bGlobalDims)
-
 
   ! END SUBROUTINE WriteHDF5_MPI_Scalar1D
 
@@ -475,7 +469,7 @@ CONTAINS
 
   !     DO ivar = 1, this % nVar
   !       CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-  !     ENDDO 
+  !     ENDDO
 
   !     CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
   !                          this % interior)
@@ -487,59 +481,58 @@ CONTAINS
 
 ! ! -- Scalar2D -- !
 
-  SUBROUTINE Init_Scalar2D(this,interp,nVar,nElem)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(out) :: this
-    TYPE(Lagrange),INTENT(in),TARGET :: interp
-    INTEGER,INTENT(in) :: nVar
-    INTEGER,INTENT(in) :: nElem
+  subroutine Init_Scalar2D(this,interp,nVar,nElem)
+    implicit none
+    class(Scalar2D),intent(out) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
 
     this % interp => interp
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior, interp % N+1, interp % N+1, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % interpWork, interp % M+1, interp % N+1, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary, interp % N+1, nelem, nvar, 4, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interpWork,interp % M + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % jumpBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
 
-    ALLOCATE( this % meta(1:nVar) )
-    ALLOCATE( this % eqn(1:nVar) )
- 
+    allocate (this % meta(1:nVar))
+    allocate (this % eqn(1:nVar))
 
-  END SUBROUTINE Init_Scalar2D
+  end subroutine Init_Scalar2D
 
-  SUBROUTINE Free_Scalar2D(this)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(inout) :: this
+  subroutine Free_Scalar2D(this)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
 
     this % nVar = 0
     this % nElem = 0
-    this % interp => NULL()
-    CALL hipcheck(hipFree(this % interior))
-    CALL hipcheck(hipFree(this % interpWork))
-    CALL hipcheck(hipFree(this % boundary))
-    CALL hipcheck(hipFree(this % extBoundary))
-    CALL hipcheck(hipFree(this % avgBoundary))
-    CALL hipcheck(hipFree(this % jumpBoundary))
-    DEALLOCATE( this % meta )
-    DEALLOCATE( this % eqn )
+    this % interp => null()
+    call hipcheck(hipFree(this % interior))
+    call hipcheck(hipFree(this % interpWork))
+    call hipcheck(hipFree(this % boundary))
+    call hipcheck(hipFree(this % extBoundary))
+    call hipcheck(hipFree(this % avgBoundary))
+    call hipcheck(hipFree(this % jumpBoundary))
+    deallocate (this % meta)
+    deallocate (this % eqn)
 
-  END SUBROUTINE Free_Scalar2D
+  end subroutine Free_Scalar2D
 
-  SUBROUTINE UpdateDevice_Scalar2D(this)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(inout) :: this
+  subroutine UpdateDevice_Scalar2D(this)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior), sizeof(this % interior), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary), sizeof(this % boundary), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary), sizeof(this % extBoundary), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary), sizeof(this % avgBoundary), 0, c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary), sizeof(this % jumpBoundary), 0, c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
 
-  END SUBROUTINE UpdateDevice_Scalar2D
+  end subroutine UpdateDevice_Scalar2D
 
 !   SUBROUTINE BoundaryInterp_Scalar2D(this,gpuAccel)
 !     IMPLICIT NONE
@@ -560,54 +553,58 @@ CONTAINS
 
 !   END SUBROUTINE BoundaryInterp_Scalar2D
 
-  SUBROUTINE GridInterp_Scalar2D_cpu(this,SELFout)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(in) :: this
-    TYPE(Scalar2D),INTENT(inout) :: SELFOut
+  subroutine GridInterp_Scalar2D_cpu(this,SELFout)
+    implicit none
+    class(Scalar2D),intent(in) :: this
+    type(Scalar2D),intent(inout) :: SELFOut
 
-      CALL this % interp % ScalarGridInterp_2D(this % interior, &
-                                                SELFout % interior, &
-                                                this % nVar, &
-                                                this % nElem)
+    call this % interp % ScalarGridInterp_2D(this % interior, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem)
 
+  end subroutine GridInterp_Scalar2D_cpu
 
-  END SUBROUTINE GridInterp_Scalar2D_cpu
+  subroutine GridInterp_Scalar2D_gpu(this,SELFout,hipblas_handle)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
+    type(Scalar2D),intent(inout) :: SELFOut
+    type(c_ptr),intent(inout) :: hipblas_handle
 
-  SUBROUTINE GridInterp_Scalar2D_gpu(this,SELFout,hipblas_handle)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(inout) :: this
-    TYPE(Scalar2D),INTENT(inout) :: SELFOut
-    type(c_ptr), intent(inout) :: hipblas_handle
+    call this % interp % ScalarGridInterp_2D(this % interior, &
+                                             this % interpWork, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             hipblas_handle)
 
-      CALL this % interp % ScalarGridInterp_2D(this % interior, &
-                                               this % interpWork, &
-                                                SELFout % interior, &
-                                                this % nVar, &
-                                                this % nElem,&
-                                                hipblas_handle)
+  end subroutine GridInterp_Scalar2D_gpu
 
+  subroutine Gradient_Scalar2D_cpu(this,df)
+    implicit none
+    class(Scalar2D),intent(in) :: this
+    type(Vector2D),intent(inout) :: df
 
-  END SUBROUTINE GridInterp_Scalar2D_gpu
+    call this % interp % ScalarGradient_2D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem)
 
-!   SUBROUTINE Gradient_Scalar2D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(in) :: this
-!     TYPE(Vector2D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
+  end subroutine Gradient_Scalar2D_cpu
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGradient_2D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     ELSE
-!       CALL this % interp % ScalarGradient_2D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     END IF
+  subroutine Gradient_Scalar2D_gpu(this,df,blas_handle)
+    implicit none
+    class(Scalar2D),intent(in) :: this
+    type(Vector2D),intent(inout) :: df
+    type(c_ptr),intent(inout) :: blas_handle
 
-!   END SUBROUTINE Gradient_Scalar2D
+    call this % interp % ScalarGradient_2D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem,&
+                                           blas_handle)
+
+  end subroutine Gradient_Scalar2D_gpu
 
 !   ! FUNCTION AbsMaxInterior_Scalar2D(scalar) RESULT(absMax)
 !   !   IMPLICIT NONE
@@ -654,8 +651,8 @@ CONTAINS
 !   !   CLASS(Scalar2D),INTENT(inout) :: SELFOut
 !   !   TYPE(Scalar2D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior  = SELFin % interior 
-!   !   SELFOut % boundary  = SELFin % boundary 
+!   !   SELFOut % interior  = SELFin % interior
+!   !   SELFOut % boundary  = SELFin % boundary
 
 !   ! END SUBROUTINE Equals_Scalar2D
 
@@ -685,12 +682,12 @@ CONTAINS
 !                            this % nVar, &
 !                            4, &
 !                            nglobalelem/)
-  
+
 !       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior,offset,globalDims)
@@ -698,14 +695,13 @@ CONTAINS
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
 !                            this % boundary,bOffset,bGlobalDims)
 
-
 !   END SUBROUTINE WriteHDF5_MPI_Scalar2D
 
 !   SUBROUTINE WriteHDF5_Scalar2D(this,fileId,group)
 !     IMPLICIT NONE
 !     CLASS(Scalar2D), INTENT(in) :: this
 !     INTEGER(HID_T), INTENT(in) :: fileId
-!     CHARACTER(*), INTENT(in) :: group   
+!     CHARACTER(*), INTENT(in) :: group
 !     ! Local
 !     INTEGER :: ivar
 
@@ -713,7 +709,7 @@ CONTAINS
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior)
@@ -865,8 +861,8 @@ CONTAINS
 !   !   CLASS(Scalar3D),INTENT(inout) :: SELFOut
 !   !   TYPE(Scalar3D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior  = SELFin % interior 
-!   !   SELFOut % boundary  = SELFin % boundary 
+!   !   SELFOut % interior  = SELFin % interior
+!   !   SELFOut % boundary  = SELFin % boundary
 
 !   ! END SUBROUTINE Equals_Scalar3D
 
@@ -942,12 +938,12 @@ CONTAINS
 !                            this % nVar, &
 !                            6, &
 !                            nglobalelem/)
-  
+
 !       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior,offset,globalDims)
@@ -955,14 +951,13 @@ CONTAINS
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
 !                            this % boundary,bOffset,bGlobalDims)
 
-
 !   END SUBROUTINE WriteHDF5_MPI_Scalar3D
 
 !   SUBROUTINE WriteHDF5_Scalar3D(this,fileId,group)
 !     IMPLICIT NONE
 !     CLASS(Scalar3D), INTENT(in) :: this
 !     INTEGER(HID_T), INTENT(in) :: fileId
-!     CHARACTER(*), INTENT(in) :: group   
+!     CHARACTER(*), INTENT(in) :: group
 !     ! Local
 !     INTEGER :: ivar
 
@@ -970,7 +965,7 @@ CONTAINS
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior)
@@ -980,56 +975,49 @@ CONTAINS
 
 !   END SUBROUTINE WriteHDF5_Scalar3D
 
-! ! -- Vector2D -- !
+! -- Vector2D -- !
 
-!   SUBROUTINE Init_Vector2D(this,interp,nVar,nElem)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(out) :: this
-!     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
-!     ! Local
-!     INTEGER :: N
+  subroutine Init_Vector2D(this,interp,nVar,nElem)
+    implicit none
+    class(Vector2D),intent(out) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: N
 
-!     this % interp => interp
-!     this % nVar = nVar
-!     this % nElem = nElem
-!     N = interp % N
+    this % interp => interp
+    this % nVar = nVar
+    this % nElem = nElem
+    N = interp % N
 
+    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,2,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
 
-!     CALL this % interior % Alloc(loBound=(/1,0,0,1,1/), &
-!                                         upBound=(/2,N,N,nVar,nElem/))
+    allocate (this % meta(1:nVar))
+    allocate (this % eqn(1:2*nVar))
 
-!     CALL this % boundary % Alloc(loBound=(/1,0,1,1,1/), &
-!                                         upBound=(/2,N,nVar,4,nElem/))
+  end subroutine Init_Vector2D
 
-!     CALL this % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
-!                                         upBound=(/N,nVar,4,nElem/))
+  subroutine Free_Vector2D(this)
+    implicit none
+    class(Vector2D),intent(inout) :: this
 
-!     CALL this % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
-!                                            upBound=(/2,N,nVar,4,nElem/))
+    this % interp => null()
+    this % nVar = 0
+    this % nElem = 0
 
-!     ALLOCATE( this % meta(1:nVar) )
-!     ALLOCATE( this % eqn(1:2*nVar) )
+    call hipcheck(hipFree(this % interior))
+    call hipcheck(hipFree(this % boundary))
+    call hipcheck(hipFree(this % boundaryNormal))
+    call hipcheck(hipFree(this % extBoundary))
 
-!   END SUBROUTINE Init_Vector2D
+    deallocate (this % meta)
+    deallocate (this % eqn)
 
-!   SUBROUTINE Free_Vector2D(this)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(inout) :: this
-
-!     this % interp => NULL()
-!     this % nVar = 0
-!     this % nElem = 0
-!     CALL this % interior % Free()
-!     CALL this % boundary % Free()
-!     CALL this % boundaryNormal % Free()
-!     CALL this % extBoundary % Free()
-
-!     DEALLOCATE( this % meta )
-!     DEALLOCATE( this % eqn )
-
-!   END SUBROUTINE Free_Vector2D
+  end subroutine Free_Vector2D
 
 !   SUBROUTINE SetEquation_Vector2D(this,idir,ivar,eqnChar)
 !     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
@@ -1043,27 +1031,16 @@ CONTAINS
 
 !   END SUBROUTINE SetEquation_Vector2D
 
-!   SUBROUTINE UpdateHost_Vector2D(this)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(inout) :: this
+  subroutine UpdateDevice_Vector2D(this)
+    implicit none
+    class(Vector2D),intent(inout) :: this
 
-!     CALL this % interior % UpdateHost()
-!     CALL this % boundary % UpdateHost()
-!     CALL this % boundaryNormal % UpdateHost()
-!     CALL this % extBoundary % UpdateHost()
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundaryNormal),sizeof(this % boundaryNormal),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
 
-!   END SUBROUTINE UpdateHost_Vector2D
-
-!   SUBROUTINE UpdateDevice_Vector2D(this)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(inout) :: this
-
-!     CALL this % interior % UpdateDevice()
-!     CALL this % boundary % UpdateDevice()
-!     CALL this % boundaryNormal % UpdateDevice()
-!     CALL this % extBoundary % UpdateDevice()
-
-!   END SUBROUTINE UpdateDevice_Vector2D
+  end subroutine UpdateDevice_Vector2D
 
 !   SUBROUTINE BoundaryInterp_Vector2D(this,gpuAccel)
 !     IMPLICIT NONE
@@ -1190,8 +1167,8 @@ CONTAINS
 !   !   CLASS(Vector2D),INTENT(inout) :: SELFOut
 !   !   TYPE(Vector2D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior  = SELFin % interior 
-!   !   SELFOut % boundary  = SELFin % boundary 
+!   !   SELFOut % interior  = SELFin % interior
+!   !   SELFOut % boundary  = SELFin % boundary
 
 !   ! END SUBROUTINE Equals_Vector2D
 
@@ -1267,19 +1244,18 @@ CONTAINS
 !                            this % nVar, &
 !                            4, &
 !                            nglobalelem/)
-  
+
 !       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior,offset,globalDims)
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
 !                            this % boundary,bOffset,bGlobalDims)
-
 
 !   END SUBROUTINE WriteHDF5_MPI_Vector2D
 
@@ -1295,7 +1271,7 @@ CONTAINS
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior)
@@ -1541,8 +1517,8 @@ CONTAINS
 !   !   CLASS(Vector3D),INTENT(inout) :: SELFOut
 !   !   TYPE(Vector3D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior  = SELFin % interior 
-!   !   SELFOut % boundary  = SELFin % boundary 
+!   !   SELFOut % interior  = SELFin % interior
+!   !   SELFOut % boundary  = SELFin % boundary
 
 !   ! END SUBROUTINE Equals_Vector3D
 
@@ -1576,19 +1552,18 @@ CONTAINS
 !                            this % nVar, &
 !                            6, &
 !                            nglobalelem/)
-  
+
 !       CALL CreateGroup_HDF5(fileId,TRIM(group))
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior,offset,globalDims)
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
 !                            this % boundary,bOffset,bGlobalDims)
-
 
 !   END SUBROUTINE WriteHDF5_MPI_Vector3D
 
@@ -1604,7 +1579,7 @@ CONTAINS
 
 !       DO ivar = 1, this % nVar
 !         CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-!       ENDDO 
+!       ENDDO
 
 !       CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
 !                            this % interior)
@@ -1629,7 +1604,6 @@ CONTAINS
 ! !     this % nVar = nVar
 ! !     this % nElem = nElem
 ! !     N = interp % N
-
 
 ! !     CALL this % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
 ! !                                         upBound=(/2,N,N,N,nVar,nElem/))
@@ -1966,8 +1940,8 @@ CONTAINS
 !   !   CLASS(Tensor2D),INTENT(inout) :: SELFOut
 !   !   TYPE(Tensor2D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior  = SELFin % interior 
-!   !   SELFOut % boundary  = SELFin % boundary 
+!   !   SELFOut % interior  = SELFin % interior
+!   !   SELFOut % boundary  = SELFin % boundary
 
 !   ! END SUBROUTINE Equals_Tensor2D
 
@@ -2011,7 +1985,7 @@ CONTAINS
 !     CALL this % interior % Free()
 !     CALL this % boundary % Free()
 !     CALL this % extBoundary % Free()
-    
+
 !     DEALLOCATE( this % meta )
 !     DEALLOCATE( this % eqn )
 
@@ -2221,9 +2195,9 @@ CONTAINS
 !   !   CLASS(Tensor3D),INTENT(inout) :: SELFOut
 !   !   TYPE(Tensor3D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior  = SELFin % interior 
-!   !   SELFOut % boundary  = SELFin % boundary 
+!   !   SELFOut % interior  = SELFin % interior
+!   !   SELFOut % boundary  = SELFin % boundary
 
 !   ! END SUBROUTINE Equals_Tensor3D
 
-END MODULE SELF_Data
+end module SELF_Data

@@ -148,8 +148,8 @@ module SELF_Lagrange
     ! generic,public :: DGDerivative_1D => DGDerivative_1D_cpu,DGDerivative_1D_gpu
     ! procedure,private :: DGDerivative_1D_cpu,DGDerivative_1D_gpu
 
-    ! GENERIC,PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
-    ! PROCEDURE,PRIVATE :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
+    GENERIC,PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
+    PROCEDURE,PRIVATE :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
 
     ! GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
     ! PROCEDURE,PRIVATE :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
@@ -341,10 +341,9 @@ contains
 #endif
   end subroutine self_hipblas_matrixop_1d
 
-  subroutine self_hipblas_matrixop_2d(A,f,fInt,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+  subroutine self_hipblas_matrixop_dim1_2d(A,f,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
     real(prec), pointer, intent(in) :: A(:,:)
     real(prec), pointer, intent(in) :: f(:,:,:,:)
-    real(prec), pointer, intent(inout) :: fInt(:,:,:,:)
     real(prec), pointer, intent(inout) :: Af(:,:,:,:)
     integer, intent(in) :: controldegree,targetdegree,nvars,nelems
     type(c_ptr), intent(inout) :: hipblas_handle
@@ -357,15 +356,6 @@ contains
     integer(c_int) :: ldb
     integer(c_int) :: ldc
     real(c_prec) :: beta
-    ! for gemvstridedbatch
-    integer :: i
-    integer(c_int64_t) :: strideA
-    integer(c_int) :: incx
-    integer(c_int64_t) :: stridex
-    integer(c_int) :: incy
-    integer(c_int64_t) :: stridey
-    integer(c_int) :: batchCount
-    integer(kind(HIPBLAS_STATUS_SUCCESS)) :: status
 
     m = targetdegree + 1 ! number of rows of A^T
     n = nvars*nelems*(controldegree + 1) ! number of columns of B
@@ -383,7 +373,7 @@ contains
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
                                    c_loc(f),ldb,beta, &
-                                   c_loc(fInt),ldc))
+                                   c_loc(Af),ldc))
 #else
     ! First pass interpolates in the first quadrature dimension
     call hipblasCheck(hipblasSgemm(hipblas_handle, &
@@ -391,8 +381,31 @@ contains
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
                                    c_loc(f),ldb,beta, &
-                                   c_loc(fInt),ldc))
+                                   c_loc(Af),ldc))
 #endif
+
+  end subroutine self_hipblas_matrixop_dim1_2d
+
+  subroutine self_hipblas_matrixop_dim2_2d(A,f,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+    real(prec), pointer, intent(in) :: A(:,:)
+    real(prec), pointer, intent(in) :: f(:,:,:,:)
+    real(prec), pointer, intent(inout) :: Af(:,:,:,:)
+    integer, intent(in) :: controldegree,targetdegree,nvars,nelems
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    real(c_prec) :: beta
+    integer :: i
+    integer(c_int64_t) :: strideA
+    integer(c_int) :: incx
+    integer(c_int64_t) :: stridex
+    integer(c_int) :: incy
+    integer(c_int64_t) :: stridey
+    integer(c_int) :: batchCount
+
 
     m = controldegree + 1 ! number of rows of A
     n = targetdegree + 1 ! number of columns of A
@@ -411,18 +424,19 @@ contains
                                                    HIPBLAS_OP_T, &
                                                    m,n,alpha, &
                                                    c_loc(A),lda,strideA, &
-                                                   c_loc(fInt(1 + i,1,1,1)),incx,stridex,beta, &
-                                                   c_loc(fTarget(1 + i,1,1,1)),incy,stridey,batchCount))
+                                                   c_loc(f(1 + i,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(Af(1 + i,1,1,1)),incy,stridey,batchCount))
 #else
       call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
                                                    HIPBLAS_OP_T, &
                                                    m,n,alpha, &
                                                    c_loc(A),lda,strideA, &
-                                                   c_loc(fInt(1 + i,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(f(1 + i,1,1,1)),incx,stridex,beta, &
                                                    c_loc(Af(1 + i,1,1,1)),incy,stridey,batchCount))
 #endif
     end do
-  end subroutine self_hipblas_matrixop_2d
+
+  end subroutine self_hipblas_matrixop_dim2_2d
 
   subroutine ScalarGridInterp_1D_cpu(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_1D interface.
@@ -576,7 +590,8 @@ contains
     !! (Output) Array of function values, defined on the target grid
     type(c_ptr),intent(inout) :: hipblas_handle
 
-    call self_hipblas_matrixop_2d(this % iMatrix,f,fInt,fTarget,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,this % N,this % M,nvars,nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_2D_gpu
 
@@ -900,92 +915,100 @@ contains
 
 !   end subroutine DGDerivative_1D_gpu
 
-! ! ================================================================================================ !
-! !
-! ! CalculateGradient_2D
-! !
-! !   Calculates the gradient of a 2-D function, represented by a 2-D array of nodal values.
-! !
-! !   Given a set of nodal values at the interpolation nodes, the gradient of a function through
-! !   the interpolation nodes can be estimated by
-! !
-! !                       (df/dx)_{a,b} = \sum_{i=0}^N f_{i,b} l'_i(\xi_a),   a,b=0,1,2,...,N
-! !                       (df/dy)_{a,b} = \sum_{j=0}^N f_{a,j} l'_j(\xi_b),   a,b=0,1,2,...,N
-! !
-! !   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-! !   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
-! !   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
-! !   kernel (if CUDA is enabled) or the CPU version.
-! !
-! !   Usage :
-! !
-! !     TYPE(Lagrange) :: interp
-! !     INTEGER        :: nvars, nelems
-! !     REAL(prec)     :: f(0:interp % N,0:interp % N,1:nelems,1:nvars)
-! !     REAL(prec)     :: gradF(1:2,0:interp % N,0:interp % N,1:nelems,1:nvars)
-! !
-! !       CALL interp % CalculateGradient_2D( f, gradF, nvars, nelems )
-! !
-! !     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-! !
-! !   Parameters :
-! !
-! !     interp (in)
-! !       A previously constructed Lagrange data-structure.
-! !
-! !     f (in)
-! !       Array of function nodal values at the native interpolation nodes.
-! !
-! !     nvars (in)
-! !
-! !     nelems (in)
-! !
-! !     gradF (out)
-! !      Array of derivative values at the target interpolation nodes.
-! !
-! ! ================================================================================================ !
-! !
-!   subroutine ScalarGradient_2D_cpu(this,f,gradF,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     ! Local
-!     integer    :: i,j,ii,iel,ivar
+! ================================================================================================ !
+!
+! CalculateGradient_2D
+!
+!   Calculates the gradient of a 2-D function, represented by a 2-D array of nodal values.
+!
+!   Given a set of nodal values at the interpolation nodes, the gradient of a function through
+!   the interpolation nodes can be estimated by
+!
+!                       (df/dx)_{a,b} = \sum_{i=0}^N f_{i,b} l'_i(\xi_a),   a,b=0,1,2,...,N
+!                       (df/dy)_{a,b} = \sum_{j=0}^N f_{a,j} l'_j(\xi_b),   a,b=0,1,2,...,N
+!
+!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
+!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
+!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
+!   kernel (if CUDA is enabled) or the CPU version.
+!
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp
+!     INTEGER        :: nvars, nelems
+!     REAL(prec)     :: f(0:interp % N,0:interp % N,1:nelems,1:nvars)
+!     REAL(prec)     :: gradF(1:2,0:interp % N,0:interp % N,1:nelems,1:nvars)
+!
+!       CALL interp % CalculateGradient_2D( f, gradF, nvars, nelems )
+!
+!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
+!
+!   Parameters :
+!
+!     interp (in)
+!       A previously constructed Lagrange data-structure.
+!
+!     f (in)
+!       Array of function nodal values at the native interpolation nodes.
+!
+!     nvars (in)
+!
+!     nelems (in)
+!
+!     gradF (out)
+!      Array of derivative values at the target interpolation nodes.
+!
+! ================================================================================================ !
+!
+  subroutine ScalarGradient_2D_cpu(this,f,gradF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+    real(prec),intent(out) :: gradF(1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:2)
+    ! Local
+    integer    :: i,j,ii,iel,ivar
+    real(prec) :: df1, df2
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do j = 1,this % N+1
+          do i = 1,this % N+1
 
-!             gradF(1,i,j,iel,ivar) = 0.0_prec
-!             gradF(2,i,j,iel,ivar) = 0.0_prec
-!             do ii = 0,this % N
-!               gradF(1,i,j,iel,ivar) = gradF(1,i,j,iel,ivar) + this % dMatrix (ii,i)*f(ii,j,iel,ivar)
-!               gradF(2,i,j,iel,ivar) = gradF(2,i,j,iel,ivar) + this % dMatrix (ii,j)*f(i,ii,iel,ivar)
-!             end do
+            df1 = 0.0_prec
+            df2 = 0.0_prec
+            do ii = 1,this % N+1
+              df1 = df1 + this % dMatrix (ii,i)*f(ii,j,iel,ivar)
+              df2 = df2 + this % dMatrix (ii,j)*f(i,ii,iel,ivar)
+            end do
+            gradf(i,j,iel,ivar,1) = df1
+            gradf(i,j,iel,ivar,2) = df2
 
-!           end do
-!         end do
-!       end do
-!     end do
+          end do
+        end do
+      end do
+    end do
 
-!   end subroutine ScalarGradient_2D_cpu
+  end subroutine ScalarGradient_2D_cpu
 
-!   subroutine ScalarGradient_2D_gpu(this,f_dev,gradF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(out)    :: gradF_dev
+  subroutine ScalarGradient_2D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec), pointer, intent(in) :: f(:,:,:,:)
+    real(prec), pointer, intent(inout) :: df(:,:,:,:,:)
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! local
+    real(prec), pointer :: dfloc(:,:,:,:)
 
-!     call ScalarGradient_2D_gpu_wrapper(this % dMatrix % deviceData, &
-!                                        f_dev,gradF_dev,this % N, &
-!                                        nvars,nelems)
+    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
+    call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
+    call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    dfloc => null()
 
-!   end subroutine ScalarGradient_2D_gpu
-! !
+  end subroutine ScalarGradient_2D_gpu
+! ! !
 ! !
 !   ! SUBROUTINE ScalarDGGradient_2D_cpu(this,f,bf,gradF,nvars,nelems)
 !   !   IMPLICIT NONE
