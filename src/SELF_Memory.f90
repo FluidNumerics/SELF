@@ -7,8 +7,8 @@
 MODULE SELF_Memory
 
   USE SELF_Constants
-  USE SELF_HIP
-  USE SELF_HIP_enums
+  USE hipfort
+  USE hipfort_check
   ! External
   USE ISO_FORTRAN_ENV
   USE ISO_C_BINDING

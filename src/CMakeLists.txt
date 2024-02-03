@@ -18,11 +18,13 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 add_library(self-static STATIC ${SELF_FSRC} ${SELF_HIPSRC})
 
 target_link_libraries(self-static PRIVATE 
+                        ${HIPFORT_LIBRARIES}
                         ${FEQPARSE_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${MPI_Fortran_LIBRARIES})
 
 target_include_directories(self-static PRIVATE 
+                        ${HIPFORT_INCLUDE_DIRS}
                         ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS})

@@ -17,12 +17,14 @@ function (add_fortran_examples)
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
+                    ${HIPFORT_LIBRARIES}
                     hip::device)
                            
         target_include_directories(${EXAMPLE_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
                         ${HDF5_INCLUDE_DIRS}/shared
-                        ${MPI_Fortran_INCLUDE_DIRS})
+                        ${MPI_Fortran_INCLUDE_DIRS}
+                        ${HIPFORT_INCLUDE_DIRS})
 
         add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME})
         install(TARGETS ${EXAMPLE_NAME} DESTINATION example)
