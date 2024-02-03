@@ -72,6 +72,9 @@ MODULE SELF_Data
     procedure,private :: GridInterp_Scalar1D_cpu
     procedure,private :: GridInterp_Scalar1D_gpu
 
+    generic,public :: Derivative => Derivative_Scalar1D_cpu, Derivative_Scalar1D_gpu
+    procedure,private :: Derivative_Scalar1D_cpu
+    procedure,private :: Derivative_Scalar1D_gpu
 
     ! PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar1D
     ! PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar1D
@@ -453,13 +456,13 @@ CONTAINS
   !   LOGICAL,INTENT(in) :: gpuAccel
 
   !   IF (gpuAccel) THEN
-  !     CALL this % interp % ScalarBoundaryInterp_1D(this % interior % deviceData, &
-  !                                                         this % boundary % deviceData, &
+  !     CALL this % interp % ScalarBoundaryInterp_1D(this % interior , &
+  !                                                         this % boundary , &
   !                                                         this % nVar, &
   !                                                         this % nElem)
   !   ELSE
-  !     CALL this % interp % ScalarBoundaryInterp_1D(this % interior % hostData, &
-  !                                                         this % boundary % hostData, &
+  !     CALL this % interp % ScalarBoundaryInterp_1D(this % interior , &
+  !                                                         this % boundary , &
   !                                                         this % nVar, &
   !                                                         this % nElem)
   !   END IF
@@ -493,25 +496,32 @@ CONTAINS
 
   END SUBROUTINE GridInterp_Scalar1D_gpu
 
-  ! SUBROUTINE Derivative_Scalar1D(this,SELFOut,gpuAccel)
-  !   IMPLICIT NONE
-  !   CLASS(Scalar1D),INTENT(in) :: this
-  !   TYPE(Scalar1D),INTENT(inout) :: SELFOut
-  !   LOGICAL,INTENT(in) :: gpuAccel
+  SUBROUTINE Derivative_Scalar1D_cpu(this,SELFOut)
+    IMPLICIT NONE
+    CLASS(Scalar1D),INTENT(in) :: this
+    TYPE(Scalar1D),INTENT(inout) :: SELFOut
 
-  !   IF (gpuAccel) THEN
-  !     CALL this % interp % Derivative_1D(this % interior % deviceData, &
-  !                                               SELFout % interior % deviceData, &
-  !                                               this % nVar, &
-  !                                               this % nElem)
-  !   ELSE
-  !     CALL this % interp % Derivative_1D(this % interior % hostData, &
-  !                                               SELFout % interior % hostData, &
-  !                                               this % nVar, &
-  !                                               this % nElem)
-  !   END IF
+      CALL this % interp % Derivative_1D(this % interior, &
+                                                SELFout % interior, &
+                                                this % nVar, &
+                                                this % nElem)
 
-  ! END SUBROUTINE Derivative_Scalar1D
+  END SUBROUTINE Derivative_Scalar1D_cpu
+
+  SUBROUTINE Derivative_Scalar1D_gpu(this,SELFOut,blas_handle)
+    IMPLICIT NONE
+    CLASS(Scalar1D),INTENT(in) :: this
+    TYPE(Scalar1D),INTENT(inout) :: SELFOut
+    type(c_ptr), intent(inout) :: blas_handle
+
+      CALL this % interp % Derivative_1D(this % interior , &
+                                                SELFout % interior , &
+                                                this % nVar, &
+                                                this % nElem,&
+                                                blas_handle)
+
+  END SUBROUTINE Derivative_Scalar1D_gpu
+
 
   ! SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
   !   IMPLICIT NONE
@@ -657,13 +667,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarBoundaryInterp_2D(this % interior % deviceData, &
-!                                                           this % boundary % deviceData, &
+!       CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     ELSE
-!       CALL this % interp % ScalarBoundaryInterp_2D(this % interior % hostData, &
-!                                                           this % boundary % hostData, &
+!       CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     END IF
@@ -677,13 +687,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGridInterp_2D(this % interior % deviceData, &
-!                                                       SELFout % interior % deviceData, &
+!       CALL this % interp % ScalarGridInterp_2D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     ELSE
-!       CALL this % interp % ScalarGridInterp_2D(this % interior % hostData, &
-!                                                       SELFout % interior % hostData, &
+!       CALL this % interp % ScalarGridInterp_2D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     END IF
@@ -697,13 +707,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGradient_2D(this % interior % deviceData, &
-!                                                     SELFout % interior % deviceData, &
+!       CALL this % interp % ScalarGradient_2D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     ELSE
-!       CALL this % interp % ScalarGradient_2D(this % interior % hostData, &
-!                                                     SELFout % interior % hostData, &
+!       CALL this % interp % ScalarGradient_2D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     END IF
@@ -722,7 +732,7 @@ CONTAINS
 !   !     DO iVar = 1,scalar % nVar
 !   !       DO j = 0,scalar % interp % N
 !   !         DO i = 0,scalar % interp % N
-!   !           absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,iVar,iEl)),absMax(iVar))
+!   !           absMax(iVar) = MAX(ABS(scalar % interior (i,j,iVar,iEl)),absMax(iVar))
 !   !         END DO
 !   !       END DO
 !   !     END DO
@@ -742,7 +752,7 @@ CONTAINS
 !   !     DO iSide = 1,4
 !   !       DO iVar = 1,scalar % nVar
 !   !         DO i = 0,scalar % interp % N
-!   !           absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(i,iVar,iSide,iEl)),absMax(iVar,iSide))
+!   !           absMax(iVar,iSide) = MAX(ABS(scalar % boundary (i,iVar,iSide,iEl)),absMax(iVar,iSide))
 !   !         END DO
 !   !       END DO
 !   !     END DO
@@ -755,8 +765,8 @@ CONTAINS
 !   !   CLASS(Scalar2D),INTENT(inout) :: SELFOut
 !   !   TYPE(Scalar2D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior % hostData = SELFin % interior % hostData
-!   !   SELFOut % boundary % hostData = SELFin % boundary % hostData
+!   !   SELFOut % interior  = SELFin % interior 
+!   !   SELFOut % boundary  = SELFin % boundary 
 
 !   ! END SUBROUTINE Equals_Scalar2D
 
@@ -908,13 +918,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarBoundaryInterp_3D(this % interior % deviceData, &
-!                                                           this % boundary % deviceData, &
+!       CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     ELSE
-!       CALL this % interp % ScalarBoundaryInterp_3D(this % interior % hostData, &
-!                                                           this % boundary % hostData, &
+!       CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     END IF
@@ -928,13 +938,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGridInterp_3D(this % interior % deviceData, &
-!                                                       SELFout % interior % deviceData, &
+!       CALL this % interp % ScalarGridInterp_3D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     ELSE
-!       CALL this % interp % ScalarGridInterp_3D(this % interior % hostData, &
-!                                                       SELFout % interior % hostData, &
+!       CALL this % interp % ScalarGridInterp_3D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     END IF
@@ -948,13 +958,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGradient_3D(this % interior % deviceData, &
-!                                                     SELFout % interior % deviceData, &
+!       CALL this % interp % ScalarGradient_3D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     ELSE
-!       CALL this % interp % ScalarGradient_3D(this % interior % hostData, &
-!                                                     SELFout % interior % hostData, &
+!       CALL this % interp % ScalarGradient_3D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     END IF
@@ -966,8 +976,8 @@ CONTAINS
 !   !   CLASS(Scalar3D),INTENT(inout) :: SELFOut
 !   !   TYPE(Scalar3D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior % hostData = SELFin % interior % hostData
-!   !   SELFOut % boundary % hostData = SELFin % boundary % hostData
+!   !   SELFOut % interior  = SELFin % interior 
+!   !   SELFOut % boundary  = SELFin % boundary 
 
 !   ! END SUBROUTINE Equals_Scalar3D
 
@@ -984,7 +994,7 @@ CONTAINS
 !   !       DO k = 0,scalar % interp % N
 !   !         DO j = 0,scalar % interp % N
 !   !           DO i = 0,scalar % interp % N
-!   !             absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,k,iVar,iEl)),absMax(iVar))
+!   !             absMax(iVar) = MAX(ABS(scalar % interior (i,j,k,iVar,iEl)),absMax(iVar))
 !   !           END DO
 !   !         END DO
 !   !       END DO
@@ -1006,7 +1016,7 @@ CONTAINS
 !   !       DO iVar = 1,scalar % nVar
 !   !         DO j = 0,scalar % interp % N
 !   !           DO i = 0,scalar % interp % N
-!   !             absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
+!   !             absMax(iVar,iSide) = MAX(ABS(scalar % boundary (i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
 !   !           END DO
 !   !         END DO
 !   !       END DO
@@ -1172,13 +1182,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorBoundaryInterp_2D(this % interior % deviceData, &
-!                                                           this % boundary % deviceData, &
+!       CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     ELSE
-!       CALL this % interp % VectorBoundaryInterp_2D(this % interior % hostData, &
-!                                                           this % boundary % hostData, &
+!       CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     END IF
@@ -1192,13 +1202,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGridInterp_2D(this % interior % deviceData, &
-!                                                       SELFout % interior % deviceData, &
+!       CALL this % interp % VectorGridInterp_2D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     ELSE
-!       CALL this % interp % VectorGridInterp_2D(this % interior % hostData, &
-!                                                       SELFout % interior % hostData, &
+!       CALL this % interp % VectorGridInterp_2D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     END IF
@@ -1212,13 +1222,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGradient_2D(this % interior % deviceData, &
-!                                                     SELFout % interior % deviceData, &
+!       CALL this % interp % VectorGradient_2D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     ELSE
-!       CALL this % interp % VectorGradient_2D(this % interior % hostData, &
-!                                                     SELFout % interior % hostData, &
+!       CALL this % interp % VectorGradient_2D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     END IF
@@ -1235,15 +1245,15 @@ CONTAINS
 !     IF (dForm == selfWeakDGForm) THEN
 
 !       IF (gpuAccel) THEN
-!         CALL this % interp % VectorDGDivergence_2D(this % interior % deviceData, &
-!                                                           this % boundaryNormal % deviceData, &
-!                                                           SELFout % interior % deviceData, &
+!         CALL this % interp % VectorDGDivergence_2D(this % interior , &
+!                                                           this % boundaryNormal , &
+!                                                           SELFout % interior , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !       ELSE
-!         CALL this % interp % VectorDGDivergence_2D(this % interior % hostData, &
-!                                                           this % boundaryNormal % hostData, &
-!                                                           SELFout % interior % hostData, &
+!         CALL this % interp % VectorDGDivergence_2D(this % interior , &
+!                                                           this % boundaryNormal , &
+!                                                           SELFout % interior , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !       END IF
@@ -1251,13 +1261,13 @@ CONTAINS
 !     ELSE IF (dForm == selfStrongForm) THEN
 
 !       IF (gpuAccel) THEN
-!         CALL this % interp % VectorDivergence_2D(this % interior % deviceData, &
-!                                                         SELFout % interior % deviceData, &
+!         CALL this % interp % VectorDivergence_2D(this % interior , &
+!                                                         SELFout % interior , &
 !                                                         this % nVar, &
 !                                                         this % nElem)
 !       ELSE
-!         CALL this % interp % VectorDivergence_2D(this % interior % hostData, &
-!                                                         SELFout % interior % hostData, &
+!         CALL this % interp % VectorDivergence_2D(this % interior , &
+!                                                         SELFout % interior , &
 !                                                         this % nVar, &
 !                                                         this % nElem)
 !       END IF
@@ -1273,13 +1283,13 @@ CONTAINS
 !   !   LOGICAL,INTENT(in) :: gpuAccel
 
 !   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % VectorCurl_2D(this % interior % deviceData, &
-!   !                                               SELFout % interior % deviceData, &
+!   !     CALL this % interp % VectorCurl_2D(this % interior , &
+!   !                                               SELFout % interior , &
 !   !                                               this % nVar, &
 !   !                                               this % nElem)
 !   !   ELSE
-!   !     CALL this % interp % VectorCurl_2D(this % interior % hostData, &
-!   !                                               SELFout % interior % hostData, &
+!   !     CALL this % interp % VectorCurl_2D(this % interior , &
+!   !                                               SELFout % interior , &
 !   !                                               this % nVar, &
 !   !                                               this % nElem)
 !   !   END IF
@@ -1291,8 +1301,8 @@ CONTAINS
 !   !   CLASS(Vector2D),INTENT(inout) :: SELFOut
 !   !   TYPE(Vector2D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior % hostData = SELFin % interior % hostData
-!   !   SELFOut % boundary % hostData = SELFin % boundary % hostData
+!   !   SELFOut % interior  = SELFin % interior 
+!   !   SELFOut % boundary  = SELFin % boundary 
 
 !   ! END SUBROUTINE Equals_Vector2D
 
@@ -1309,7 +1319,7 @@ CONTAINS
 !   !       DO j = 0,vector % interp % N
 !   !         DO i = 0,vector % interp % N
 !   !           DO iDir = 1,2
-!   !             absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,iVar,iEl)),absMax(iVar))
+!   !             absMax(iVar) = MAX(ABS(vector % interior (iDir,i,j,iVar,iEl)),absMax(iVar))
 !   !           END DO
 !   !         END DO
 !   !       END DO
@@ -1331,7 +1341,7 @@ CONTAINS
 !   !       DO iVar = 1,vector % nVar
 !   !         DO i = 0,vector % interp % N
 !   !           DO iDir = 1,2
-!   !             absMax(iVar,iSide) = MAX(ABS(vector % boundary % hostData(iDir,i,iVar,iSide,iEl)),absMax(iVar,iSide))
+!   !             absMax(iVar,iSide) = MAX(ABS(vector % boundary (iDir,i,iVar,iSide,iEl)),absMax(iVar,iSide))
 !   !           END DO
 !   !         END DO
 !   !       END DO
@@ -1496,13 +1506,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorBoundaryInterp_3D(this % interior % deviceData, &
-!                                                           this % boundary % deviceData, &
+!       CALL this % interp % VectorBoundaryInterp_3D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     ELSE
-!       CALL this % interp % VectorBoundaryInterp_3D(this % interior % hostData, &
-!                                                           this % boundary % hostData, &
+!       CALL this % interp % VectorBoundaryInterp_3D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     END IF
@@ -1516,13 +1526,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGridInterp_3D(this % interior % deviceData, &
-!                                                       SELFout % interior % deviceData, &
+!       CALL this % interp % VectorGridInterp_3D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     ELSE
-!       CALL this % interp % VectorGridInterp_3D(this % interior % hostData, &
-!                                                       SELFout % interior % hostData, &
+!       CALL this % interp % VectorGridInterp_3D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     END IF
@@ -1536,13 +1546,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGradient_3D(this % interior % deviceData, &
-!                                                     SELFout % interior % deviceData, &
+!       CALL this % interp % VectorGradient_3D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     ELSE
-!       CALL this % interp % VectorGradient_3D(this % interior % hostData, &
-!                                                     SELFout % interior % hostData, &
+!       CALL this % interp % VectorGradient_3D(this % interior , &
+!                                                     SELFout % interior , &
 !                                                     this % nVar, &
 !                                                     this % nElem)
 !     END IF
@@ -1556,13 +1566,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % VectorDivergence_3D(this % interior % deviceData, &
-!                                                       SELFout % interior % deviceData, &
+!       CALL this % interp % VectorDivergence_3D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     ELSE
-!       CALL this % interp % VectorDivergence_3D(this % interior % hostData, &
-!                                                       SELFout % interior % hostData, &
+!       CALL this % interp % VectorDivergence_3D(this % interior , &
+!                                                       SELFout % interior , &
 !                                                       this % nVar, &
 !                                                       this % nElem)
 !     END IF
@@ -1576,13 +1586,13 @@ CONTAINS
 !   !   LOGICAL,INTENT(in) :: gpuAccel
 
 !   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % VectorCurl_3D(this % interior % deviceData, &
-!   !                                               SELFout % interior % deviceData, &
+!   !     CALL this % interp % VectorCurl_3D(this % interior , &
+!   !                                               SELFout % interior , &
 !   !                                               this % nVar, &
 !   !                                               this % nElem)
 !   !   ELSE
-!   !     CALL this % interp % VectorCurl_3D(this % interior % hostData, &
-!   !                                               SELFout % interior % hostData, &
+!   !     CALL this % interp % VectorCurl_3D(this % interior , &
+!   !                                               SELFout % interior , &
 !   !                                               this % nVar, &
 !   !                                               this % nElem)
 !   !   END IF
@@ -1603,7 +1613,7 @@ CONTAINS
 !   !         DO j = 0,vector % interp % N
 !   !           DO i = 0,vector % interp % N
 !   !             DO iDir = 1,3
-!   !               absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,k,iVar,iEl)),absMax(iVar))
+!   !               absMax(iVar) = MAX(ABS(vector % interior (iDir,i,j,k,iVar,iEl)),absMax(iVar))
 !   !             END DO
 !   !           END DO
 !   !         END DO
@@ -1627,7 +1637,7 @@ CONTAINS
 !   !         DO j = 0,vector % interp % N
 !   !           DO i = 0,vector % interp % N
 !   !             DO iDir = 1,3
-!   !               absMax(iVar,iSide) = MAX(ABS(vector % boundary % hostData(iDir,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
+!   !               absMax(iVar,iSide) = MAX(ABS(vector % boundary (iDir,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
 !   !             END DO
 !   !           END DO
 !   !         END DO
@@ -1642,8 +1652,8 @@ CONTAINS
 !   !   CLASS(Vector3D),INTENT(inout) :: SELFOut
 !   !   TYPE(Vector3D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior % hostData = SELFin % interior % hostData
-!   !   SELFOut % boundary % hostData = SELFin % boundary % hostData
+!   !   SELFOut % interior  = SELFin % interior 
+!   !   SELFOut % boundary  = SELFin % boundary 
 
 !   ! END SUBROUTINE Equals_Vector3D
 
@@ -1804,15 +1814,15 @@ CONTAINS
 ! !     IF (dForm == selfWeakDGForm) THEN
 
 ! !       IF (gpuAccel) THEN
-! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior % deviceData, &
-! !                                                           this % boundaryNormal % deviceData, &
-! !                                                           SELFout % interior % deviceData, &
+! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior , &
+! !                                                           this % boundaryNormal , &
+! !                                                           SELFout % interior , &
 ! !                                                           this % nVar, &
 ! !                                                           this % nElem)
 ! !       ELSE
-! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior % hostData, &
-! !                                                           this % boundaryNormal % hostData, &
-! !                                                           SELFout % interior % hostData, &
+! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior , &
+! !                                                           this % boundaryNormal , &
+! !                                                           SELFout % interior , &
 ! !                                                           this % nVar, &
 ! !                                                           this % nElem)
 ! !       END IF
@@ -1820,13 +1830,13 @@ CONTAINS
 ! !     ELSE IF (dForm == selfStrongForm) THEN
 
 ! !       IF (gpuAccel) THEN
-! !         CALL this % interp % P2VectorDivergence_2D(this % interior % deviceData, &
-! !                                                         SELFout % interior % deviceData, &
+! !         CALL this % interp % P2VectorDivergence_2D(this % interior , &
+! !                                                         SELFout % interior , &
 ! !                                                         this % nVar, &
 ! !                                                         this % nElem)
 ! !       ELSE
-! !         CALL this % interp % P2VectorDivergence_2D(this % interior % hostData, &
-! !                                                         SELFout % interior % hostData, &
+! !         CALL this % interp % P2VectorDivergence_2D(this % interior , &
+! !                                                         SELFout % interior , &
 ! !                                                         this % nVar, &
 ! !                                                         this % nElem)
 ! !       END IF
@@ -1922,13 +1932,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % TensorBoundaryInterp_2D(this % interior % deviceData, &
-!                                                           this % boundary % deviceData, &
+!       CALL this % interp % TensorBoundaryInterp_2D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     ELSE
-!       CALL this % interp % TensorBoundaryInterp_2D(this % interior % hostData, &
-!                                                           this % boundary % hostData, &
+!       CALL this % interp % TensorBoundaryInterp_2D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     END IF
@@ -1942,13 +1952,13 @@ CONTAINS
 !   !   LOGICAL,INTENT(in) :: gpuAccel
 
 !   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorGridInterp_2D(this % interior % deviceData, &
-!   !                                                     SELFout % interior % deviceData, &
+!   !     CALL this % interp % TensorGridInterp_2D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   ELSE
-!   !     CALL this % interp % TensorGridInterp_2D(this % interior % hostData, &
-!   !                                                     SELFout % interior % hostData, &
+!   !     CALL this % interp % TensorGridInterp_2D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   END IF
@@ -1962,13 +1972,13 @@ CONTAINS
 !   !   LOGICAL,INTENT(in) :: gpuAccel
 
 !   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorDivergence_2D(this % interior % deviceData, &
-!   !                                                     SELFout % interior % deviceData, &
+!   !     CALL this % interp % TensorDivergence_2D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   ELSE
-!   !     CALL this % interp % TensorDivergence_2D(this % interior % hostData, &
-!   !                                                     SELFout % interior % hostData, &
+!   !     CALL this % interp % TensorDivergence_2D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   END IF
@@ -1987,8 +1997,8 @@ CONTAINS
 
 !     IF (gpuAccel) THEN
 
-!       CALL Determinant_Tensor2D_gpu_wrapper(this % interior % deviceData, &
-!                                             SELFOut % interior % deviceData, &
+!       CALL Determinant_Tensor2D_gpu_wrapper(this % interior , &
+!                                             SELFOut % interior , &
 !                                             this % interp % N, &
 !                                             this % nVar, &
 !                                             this % nElem)
@@ -2000,10 +2010,10 @@ CONTAINS
 !           DO j = 0,this % interp % N
 !             DO i = 0,this % interp % N
 
-!               SELFOut % interior % hostData(i,j,iVar,iEl) = this % interior % hostData(1,1,i,j,iVar,iEl)* &
-!                                                             this % interior % hostData(2,2,i,j,iVar,iEl) - &
-!                                                             this % interior % hostData(1,2,i,j,iVar,iEl)* &
-!                                                             this % interior % hostData(2,1,i,j,iVar,iEl)
+!               SELFOut % interior (i,j,iVar,iEl) = this % interior (1,1,i,j,iVar,iEl)* &
+!                                                             this % interior (2,2,i,j,iVar,iEl) - &
+!                                                             this % interior (1,2,i,j,iVar,iEl)* &
+!                                                             this % interior (2,1,i,j,iVar,iEl)
 
 !             END DO
 !           END DO
@@ -2028,7 +2038,7 @@ CONTAINS
 !   !         DO i = 0,tensor % interp % N
 !   !           DO col = 1,2
 !   !             DO row = 1,2
-!   !               absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,iVar,iEl)),absMax(iVar))
+!   !               absMax(iVar) = MAX(ABS(tensor % interior (row,col,i,j,iVar,iEl)),absMax(iVar))
 !   !             END DO
 !   !           END DO
 !   !         END DO
@@ -2052,7 +2062,7 @@ CONTAINS
 !   !         DO i = 0,tensor % interp % N
 !   !           DO col = 1,2
 !   !             DO row = 1,2
-!   !               absMax(iVar,iSide) = MAX(ABS(tensor % boundary % hostData(row,col,i,iVar,iSide,iEl)),absMax(iVar,iSide))
+!   !               absMax(iVar,iSide) = MAX(ABS(tensor % boundary (row,col,i,iVar,iSide,iEl)),absMax(iVar,iSide))
 !   !             END DO
 !   !           END DO
 !   !         END DO
@@ -2067,8 +2077,8 @@ CONTAINS
 !   !   CLASS(Tensor2D),INTENT(inout) :: SELFOut
 !   !   TYPE(Tensor2D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior % hostData = SELFin % interior % hostData
-!   !   SELFOut % boundary % hostData = SELFin % boundary % hostData
+!   !   SELFOut % interior  = SELFin % interior 
+!   !   SELFOut % boundary  = SELFin % boundary 
 
 !   ! END SUBROUTINE Equals_Tensor2D
 
@@ -2159,13 +2169,13 @@ CONTAINS
 !     LOGICAL,INTENT(in) :: gpuAccel
 
 !     IF (gpuAccel) THEN
-!       CALL this % interp % TensorBoundaryInterp_3D(this % interior % deviceData, &
-!                                                           this % boundary % deviceData, &
+!       CALL this % interp % TensorBoundaryInterp_3D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     ELSE
-!       CALL this % interp % TensorBoundaryInterp_3D(this % interior % hostData, &
-!                                                           this % boundary % hostData, &
+!       CALL this % interp % TensorBoundaryInterp_3D(this % interior , &
+!                                                           this % boundary , &
 !                                                           this % nVar, &
 !                                                           this % nElem)
 !     END IF
@@ -2179,13 +2189,13 @@ CONTAINS
 !   !   LOGICAL,INTENT(in) :: gpuAccel
 
 !   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorGridInterp_3D(this % interior % deviceData, &
-!   !                                                     SELFout % interior % deviceData, &
+!   !     CALL this % interp % TensorGridInterp_3D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   ELSE
-!   !     CALL this % interp % TensorGridInterp_3D(this % interior % hostData, &
-!   !                                                     SELFout % interior % hostData, &
+!   !     CALL this % interp % TensorGridInterp_3D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   END IF
@@ -2199,13 +2209,13 @@ CONTAINS
 !   !   LOGICAL,INTENT(in) :: gpuAccel
 
 !   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorDivergence_3D(this % interior % deviceData, &
-!   !                                                     SELFout % interior % deviceData, &
+!   !     CALL this % interp % TensorDivergence_3D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   ELSE
-!   !     CALL this % interp % TensorDivergence_3D(this % interior % hostData, &
-!   !                                                     SELFout % interior % hostData, &
+!   !     CALL this % interp % TensorDivergence_3D(this % interior , &
+!   !                                                     SELFout % interior , &
 !   !                                                     this % nVar, &
 !   !                                                     this % nElem)
 !   !   END IF
@@ -2224,8 +2234,8 @@ CONTAINS
 
 !     IF (gpuAccel) THEN
 
-!       CALL Determinant_Tensor3D_gpu_wrapper(this % interior % deviceData, &
-!                                             SELFOut % interior % deviceData, &
+!       CALL Determinant_Tensor3D_gpu_wrapper(this % interior , &
+!                                             SELFOut % interior , &
 !                                             this % interp % N, &
 !                                             this % nVar, &
 !                                             this % nElem)
@@ -2238,22 +2248,22 @@ CONTAINS
 !             DO j = 0,this % interp % N
 !               DO i = 0,this % interp % N
 
-!                 SELFOut % interior % hostData(i,j,k,iVar,iEl) = &
-!                   this % interior % hostData(1,1,i,j,k,iVar,iEl)* &
-!                   (this % interior % hostData(2,2,i,j,k,iVar,iEl)* &
-!                    this % interior % hostData(3,3,i,j,k,iVar,iEl) - &
-!                    this % interior % hostData(2,3,i,j,k,iVar,iEl)* &
-!                    this % interior % hostData(3,2,i,j,k,iVar,iEl)) - &
-!                   this % interior % hostData(2,1,i,j,k,iVar,iEl)* &
-!                   (this % interior % hostData(1,2,i,j,k,iVar,iEl)* &
-!                    this % interior % hostData(3,3,i,j,k,iVar,iEl) - &
-!                    this % interior % hostData(1,3,i,j,k,iVar,iEl)* &
-!                    this % interior % hostData(3,2,i,j,k,iVar,iEl)) + &
-!                   this % interior % hostData(3,1,i,j,k,iVar,iEl)* &
-!                   (this % interior % hostData(1,2,i,j,k,iVar,iEl)* &
-!                    this % interior % hostData(2,3,i,j,k,iVar,iEl) - &
-!                    this % interior % hostData(1,3,i,j,k,iVar,iEl)* &
-!                    this % interior % hostData(2,2,i,j,k,iVar,iEl))
+!                 SELFOut % interior (i,j,k,iVar,iEl) = &
+!                   this % interior (1,1,i,j,k,iVar,iEl)* &
+!                   (this % interior (2,2,i,j,k,iVar,iEl)* &
+!                    this % interior (3,3,i,j,k,iVar,iEl) - &
+!                    this % interior (2,3,i,j,k,iVar,iEl)* &
+!                    this % interior (3,2,i,j,k,iVar,iEl)) - &
+!                   this % interior (2,1,i,j,k,iVar,iEl)* &
+!                   (this % interior (1,2,i,j,k,iVar,iEl)* &
+!                    this % interior (3,3,i,j,k,iVar,iEl) - &
+!                    this % interior (1,3,i,j,k,iVar,iEl)* &
+!                    this % interior (3,2,i,j,k,iVar,iEl)) + &
+!                   this % interior (3,1,i,j,k,iVar,iEl)* &
+!                   (this % interior (1,2,i,j,k,iVar,iEl)* &
+!                    this % interior (2,3,i,j,k,iVar,iEl) - &
+!                    this % interior (1,3,i,j,k,iVar,iEl)* &
+!                    this % interior (2,2,i,j,k,iVar,iEl))
 
 !               END DO
 !             END DO
@@ -2280,7 +2290,7 @@ CONTAINS
 !   !           DO i = 0,tensor % interp % N
 !   !             DO col = 1,3
 !   !               DO row = 1,3
-!   !                 absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,k,iVar,iEl)),absMax(iVar))
+!   !                 absMax(iVar) = MAX(ABS(tensor % interior (row,col,i,j,k,iVar,iEl)),absMax(iVar))
 !   !               END DO
 !   !             END DO
 !   !           END DO
@@ -2306,7 +2316,7 @@ CONTAINS
 !   !           DO i = 0,tensor % interp % N
 !   !             DO col = 1,3
 !   !               DO row = 1,3
-!   !             absMax(iVar,iSide) = MAX(ABS(tensor % boundary % hostData(row,col,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
+!   !             absMax(iVar,iSide) = MAX(ABS(tensor % boundary (row,col,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
 !   !               END DO
 !   !             END DO
 !   !           END DO
@@ -2322,8 +2332,8 @@ CONTAINS
 !   !   CLASS(Tensor3D),INTENT(inout) :: SELFOut
 !   !   TYPE(Tensor3D),INTENT(in) :: SELFin
 
-!   !   SELFOut % interior % hostData = SELFin % interior % hostData
-!   !   SELFOut % boundary % hostData = SELFin % boundary % hostData
+!   !   SELFOut % interior  = SELFin % interior 
+!   !   SELFOut % boundary  = SELFin % boundary 
 
 !   ! END SUBROUTINE Equals_Tensor3D
 

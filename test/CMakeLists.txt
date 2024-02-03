@@ -37,6 +37,8 @@ endfunction ()
 add_fortran_tests (
     "scalargridinterp_1d_cpu_constant.f90"
     "scalargridinterp_1d_gpu_constant.f90"
+    "scalarderivative_1d_cpu_constant.f90"
+    "scalarderivative_1d_gpu_constant.f90"
     )
 
 
@@ -44,8 +46,7 @@ add_fortran_tests (
 #    testsuite
 #    "scalarboundaryinterp_1d_cpu_constant.f90"
 #    "scalarboundaryinterp_1d_gpu_constant.f90"
-#    "scalarderivative_1d_cpu_constant.f90"
-#    "scalarderivative_1d_gpu_constant.f90"
+
 #    "scalarboundaryinterp_2d_cpu_constant.f90"
 #    "scalarboundaryinterp_2d_gpu_constant.f90"
 #    "scalarboundaryinterp_3d_cpu_constant.f90"
@@ -54,8 +55,7 @@ add_fortran_tests (
 #    "vectorboundaryinterp_2d_gpu_constant.f90"
 #    "vectorboundaryinterp_3d_cpu_constant.f90"
 #    "vectorboundaryinterp_3d_gpu_constant.f90"
-#    "scalargridinterp_1d_cpu_constant.f90"
-#    "scalargridinterp_1d_gpu_constant.f90"
+
 #    "scalargridinterp_2d_cpu_constant.f90"
 #    "scalargridinterp_2d_gpu_constant.f90"
 #    "scalargridinterp_3d_cpu_constant.f90"

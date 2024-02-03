@@ -129,8 +129,8 @@ module SELF_Lagrange
     ! GENERIC,PUBLIC :: TensorBoundaryInterp_3D => TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
     ! PROCEDURE,PRIVATE :: TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
 
-    ! generic,public :: Derivative_1D => Derivative_1D_cpu,Derivative_1D_gpu
-    ! procedure,private :: Derivative_1D_cpu,Derivative_1D_gpu
+    generic,public :: Derivative_1D => Derivative_1D_cpu,Derivative_1D_gpu
+    procedure,private :: Derivative_1D_cpu,Derivative_1D_gpu
 
     ! generic,public :: DGDerivative_1D => DGDerivative_1D_cpu,DGDerivative_1D_gpu
     ! procedure,private :: DGDerivative_1D_cpu,DGDerivative_1D_gpu
@@ -167,68 +167,19 @@ module SELF_Lagrange
 
   end type Lagrange
 
-  interface
-    subroutine ScalarGridInterp_1D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="ScalarGridInterp_1D_gpu_wrapper")
-      use iso_c_binding
-      implicit none
-      type(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      integer(c_int),value :: N,M,nVar,nEl
-    end subroutine ScalarGridInterp_1D_gpu_wrapper
-  end interface
-
-  ! INTERFACE
-  !   SUBROUTINE ScalarGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-  !     bind(c,name="ScalarGridInterp_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-  !     INTEGER(C_INT),VALUE :: N,M,nVar,nEl
-  !   END SUBROUTINE ScalarGridInterp_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-  !     bind(c,name="VectorGridInterp_2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-  !     INTEGER(C_INT),VALUE :: N,M,nVar,nEl
-  !   END SUBROUTINE VectorGridInterp_2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE ScalarGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-  !     bind(c,name="ScalarGridInterp_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-  !     INTEGER(C_INT),VALUE :: N,M,nVar,nEl
-  !   END SUBROUTINE ScalarGridInterp_3D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE VectorGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-  !     bind(c,name="VectorGridInterp_3D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-  !     INTEGER(C_INT),VALUE :: N,M,nVar,nEl
-  !   END SUBROUTINE VectorGridInterp_3D_gpu_wrapper
-  ! END INTERFACE
 
   ! /////////////// !
   ! Boundary Interpolation Routines
 
-  interface
-    subroutine ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="ScalarBoundaryInterp_1D_gpu_wrapper")
-      use iso_c_binding
-      implicit none
-      type(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      integer(c_int),value :: N,nVar,nEl
-    end subroutine ScalarBoundaryInterp_1D_gpu_wrapper
-  end interface
+  ! interface
+  !   subroutine ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !     bind(c,name="ScalarBoundaryInterp_1D_gpu_wrapper")
+  !     use iso_c_binding
+  !     implicit none
+  !     type(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     integer(c_int),value :: N,nVar,nEl
+  !   end subroutine ScalarBoundaryInterp_1D_gpu_wrapper
+  ! end interface
 
   ! INTERFACE
   !   SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
@@ -292,25 +243,25 @@ module SELF_Lagrange
 
   ! /////////////// !
 
-  interface
-    subroutine Derivative_1D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="Derivative_1D_gpu_wrapper")
-      use iso_c_binding
-      implicit none
-      type(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      integer(c_int),value :: N,nVar,nEl
-    end subroutine Derivative_1D_gpu_wrapper
-  end interface
+  ! interface
+  !   subroutine Derivative_1D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="Derivative_1D_gpu_wrapper")
+  !     use iso_c_binding
+  !     implicit none
+  !     type(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+  !     integer(c_int),value :: N,nVar,nEl
+  !   end subroutine Derivative_1D_gpu_wrapper
+  ! end interface
 
-  interface
-    subroutine DGDerivative_1D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="DGDerivative_1D_gpu_wrapper")
-      use iso_c_binding
-      implicit none
-      type(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      integer(c_int),value :: N,nVar,nEl
-    end subroutine DGDerivative_1D_gpu_wrapper
-  end interface
+  ! interface
+  !   subroutine DGDerivative_1D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+  !     bind(c,name="DGDerivative_1D_gpu_wrapper")
+  !     use iso_c_binding
+  !     implicit none
+  !     type(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+  !     integer(c_int),value :: N,nVar,nEl
+  !   end subroutine DGDerivative_1D_gpu_wrapper
+  ! end interface
 
   ! INTERFACE
   !   SUBROUTINE ScalarGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
@@ -950,88 +901,122 @@ contains
 ! !                                          nVariables,nElements)
 
 ! !   END SUBROUTINE TensorGridInterp_3D_gpu
-! ! ================================================================================================ !
-! !
-! ! Derivative_1D
-! !
-! !   Calculates the derivative of the Lagrange interpolant given a set of nodal function values at
-! !   the native interpolation nodes
-! !
-! !   Given a set of nodal values at the interpolation nodes, the derivative of a function through
-! !   the interpolation nodes can be estimated by
-! !
-! !                       f'_a = \sum_{i=0}^N f_{i} l'_i(\xi_a),   a=0,1,2,...,N
-! !
-! !   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-! !   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
-! !   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
-! !   kernel (if CUDA is enabled) or the CPU version.
-! !
-! !   Usage :
-! !
-! !     TYPE(Lagrange) :: interp
-! !     INTEGER        :: nVariables, nElements
-! !     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements)
-! !     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements)
-! !
-! !       CALL interp % Derivative_1D( f, derF, nVariables, nElements )
-! !
-! !     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-! !
-! !   Parameters :
-! !
-! !     interp (in)
-! !       A previously constructed Lagrange data-structure.
-! !
-! !     f (in)
-! !       Array of function nodal values at the native interpolation nodes.
-! !
-! !     nVariables (in)
-! !
-! !     nElements (in)
-! !
-! !     derF (out)
-! !      Array of derivative values at the target interpolation nodes.
-! !
-! ! ================================================================================================ !
+! ================================================================================================ !
+!
+! Derivative_1D
+!
+!   Calculates the derivative of the Lagrange interpolant given a set of nodal function values at
+!   the native interpolation nodes
+!
+!   Given a set of nodal values at the interpolation nodes, the derivative of a function through
+!   the interpolation nodes can be estimated by
+!
+!                       f'_a = \sum_{i=0}^N f_{i} l'_i(\xi_a),   a=0,1,2,...,N
+!
+!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
+!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
+!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
+!   kernel (if CUDA is enabled) or the CPU version.
+!
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp
+!     INTEGER        :: nVariables, nElements
+!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements)
+!     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements)
+!
+!       CALL interp % Derivative_1D( f, derF, nVariables, nElements )
+!
+!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
+!
+!   Parameters :
+!
+!     interp (in)
+!       A previously constructed Lagrange data-structure.
+!
+!     f (in)
+!       Array of function nodal values at the native interpolation nodes.
+!
+!     nVariables (in)
+!
+!     nElements (in)
+!
+!     derF (out)
+!      Array of derivative values at the target interpolation nodes.
+!
+! ================================================================================================ !
 
-!   subroutine Derivative_1D_cpu(this,f,df,nVariables,nElements)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nVariables,nElements
-!     real(prec),intent(in)  :: f(0:this % N,1:nVariables,1:nElements)
-!     real(prec),intent(out) :: df(0:this % N,1:nVariables,1:nElements)
-!     ! Local
-!     integer :: i,ii,iVar,iEl
+  subroutine Derivative_1D_cpu(this,f,df,nVariables,nElements)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nVariables,nElements
+    real(prec),intent(in)  :: f(1:this % N+1,1:nVariables,1:nElements)
+    real(prec),intent(out) :: df(1:this % N+1,1:nVariables,1:nElements)
+    ! Local
+    integer :: i,ii,iVar,iEl
+    real(prec) :: dfloc
 
-!     do iEl = 1,nElements
-!       do iVar = 1,nVariables
-!         do i = 0,this % N
+    do iEl = 1,nElements
+      do iVar = 1,nVariables
+        do i = 1,this % N+1
 
-!           df(i,iVar,iEl) = 0.0_prec
-!           do ii = 0,this % N
-!             df(i,iVar,iEl) = df(i,iVar,iEl) + this % dMatrix (ii,i)*f(ii,iVar,iEl)
-!           end do
+          dfloc = 0.0_prec
+          do ii = 1,this % N+1
+           dfloc = dfloc + this % dMatrix (ii,i)*f(ii,iVar,iEl)
+          end do
+          df(i,iVar,iEl) = dfloc
 
-!         end do
-!       end do
-!     end do
+        end do
+      end do
+    end do
 
-!   end subroutine Derivative_1D_cpu
+  end subroutine Derivative_1D_cpu
 
-!   subroutine Derivative_1D_gpu(this,f_dev,df_dev,nVariables,nElements)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in) :: nVariables,nElements
-!     type(c_ptr),intent(in)  :: f_dev
-!     type(c_ptr),intent(out) :: df_dev
+  subroutine Derivative_1D_gpu(this,f,df,nVariables,nElements,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in) :: nVariables,nElements
+    real(prec), pointer, intent(in)  :: f(:,:,:)
+    real(prec), pointer, intent(out) :: df(:,:,:)
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    integer(c_int) :: k
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    integer(c_int) :: ldb
+    integer(c_int) :: ldc
+    real(c_prec) :: beta
+ 
+    m = this % N+1 ! number of rows of A^T
+    n = nvariables*nelements ! number of columns of B
+    k = this % N+1! number of columns of A^T
+    alpha = 1.0_c_prec
+    lda = k ! leading dimension of A (interoplation matrix)
+    ldb = k ! leading dimension of B (f)
+    ldc = m ! leading dimension of C (fTarget)
+    beta = 0.0_c_prec
+ 
+#ifdef DOUBLE_PRECISION
+    call hipblasCheck(hipblasDgemm(hipblas_handle,&
+        HIPBLAS_OP_T, HIPBLAS_OP_N, &
+        m, n, k, alpha, &
+        c_loc(this % dMatrix), lda, &
+        c_loc(f), ldb, &
+        beta, &
+        c_loc(df), ldc))
+#else
+    call hipblasCheck(hipblasSgemm(hipblas_handle,&
+        HIPBLAS_OP_T, HIPBLAS_OP_N, &
+        m, n, k, alpha, &
+        c_loc(this % dMatrix), lda, &
+        c_loc(f), ldb, &
+        beta, &
+        c_loc(df), ldc))
+#endif
 
-!     call Derivative_1D_gpu_wrapper(this % dMatrix % deviceData, &
-!                                    f_dev,df_dev, &
-!                                    this % N, &
-!                                    nVariables,nElements)
-
-!   end subroutine Derivative_1D_gpu
+  end subroutine Derivative_1D_gpu
 
 !   subroutine DGDerivative_1D_cpu(this,f,bf,df,nVariables,nElements)
 !     implicit none
