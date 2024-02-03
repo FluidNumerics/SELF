@@ -121,8 +121,8 @@ module SELF_Lagrange
     ! GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
 
-    ! generic,public :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
-    ! procedure,private :: ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
+    generic,public :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
+    procedure,private :: ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
 
     ! GENERIC,PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
     ! PROCEDURE,PRIVATE :: ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
@@ -184,71 +184,71 @@ module SELF_Lagrange
   ! Boundary Interpolation Routines
 
   ! interface
-  !   subroutine ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   subroutine ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="ScalarBoundaryInterp_1D_gpu_wrapper")
   !     use iso_c_binding
   !     implicit none
-  !     type(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     type(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     integer(c_int),value :: N,nVar,nEl
   !   end subroutine ScalarBoundaryInterp_1D_gpu_wrapper
   ! end interface
 
   ! INTERFACE
-  !   SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
   !     USE iso_c_binding
   !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
   !   END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
   ! END INTERFACE
 
   ! INTERFACE
-  !   SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
   !     USE iso_c_binding
   !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
   !   END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
   ! END INTERFACE
 
   ! INTERFACE
-  !   SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
   !     USE iso_c_binding
   !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
   !   END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
   ! END INTERFACE
 
   ! INTERFACE
-  !   SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
   !     USE iso_c_binding
   !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
   !   END SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper
   ! END INTERFACE
 
   ! INTERFACE
-  !   SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
   !     USE iso_c_binding
   !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
   !   END SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper
   ! END INTERFACE
 
   ! INTERFACE
-  !   SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+  !   SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fTarget_dev,N,nVar,nEl) &
   !     bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
   !     USE iso_c_binding
   !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
+  !     TYPE(c_ptr) :: bMatrix_dev,f_dev,fTarget_dev
   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
   !   END SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper
   ! END INTERFACE
@@ -2118,47 +2118,81 @@ contains
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !
 
-!   subroutine ScalarBoundaryInterp_1D_cpu(this,f,fBound,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     real(prec),intent(in)      :: f(0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)     :: fBound(1:nvars,1:2,1:nelems)
-!     ! Local
-!     integer :: ii,iel,ivar
-!     real(prec) :: fb(1:2)
+  subroutine ScalarBoundaryInterp_1D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),intent(in)      :: f(1:this % N+1,1:nelems,1:nvars)
+    real(prec),intent(inout)   :: fTarget(1:2,1:nelems,1:nvars)
+    ! Local
+    integer :: ii,iel,ivar
+    real(prec) :: fb(1:2)
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         fb(1:2) = 0.0_prec
-!         do ii = 0,this % N
-!           fb(1) = fb(1) + this % bMatrix (ii,0)*f(ii,iel,ivar) ! West
-!           fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,iel,ivar) ! East
-!         end do
-!         fBound(ivar,1:2,iel) = fb(1:2)
-!       end do
-!     end do
+    do iel = 1,nelems
+      do ivar = 1,nvars
+        fb(1:2) = 0.0_prec
+        do ii = 1,this % N+1
+          fb(1) = fb(1) + this % bMatrix (ii,1)*f(ii,iel,ivar) ! West
+          fb(2) = fb(2) + this % bMatrix (ii,2)*f(ii,iel,ivar) ! East
+        end do
+        fTarget(1:2,iel,ivar) = fb(1:2)
+      end do
+    end do
 
-!   end subroutine ScalarBoundaryInterp_1D_cpu
+  end subroutine ScalarBoundaryInterp_1D_cpu
 
-!   subroutine ScalarBoundaryInterp_1D_gpu(this,f,fBound,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+  subroutine ScalarBoundaryInterp_1D_gpu(this,f,fTarget,nvars,nelems,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),pointer,intent(in)      :: f(:,:,:)
+    real(prec),pointer,intent(inout)     :: fTarget(:,:,:)
+    type(c_ptr),intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    integer(c_int) :: k
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    integer(c_int) :: ldb
+    integer(c_int) :: ldc
+    real(c_prec) :: beta
 
-!     call ScalarBoundaryInterp_1D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+    m = 2 ! number of rows of A^T
+    n = nvars*nelems ! number of columns of B
+    k = this % N + 1! number of columns of A^T
+    alpha = 1.0_c_prec
+    lda = k ! leading dimension of A (interoplation matrix)
+    ldb = k ! leading dimension of B (f)
+    ldc = m ! leading dimension of C (fTarget)
+    beta = 0.0_c_prec
 
-!   end subroutine ScalarBoundaryInterp_1D_gpu
+#ifdef DOUBLE_PRECISION
+    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
+                                   m,n,k,alpha, &
+                                   c_loc(this % bMatrix),lda, &
+                                   c_loc(f),ldb, &
+                                   beta, &
+                                   c_loc(fTarget),ldc))
+#else
+    call hipblasCheck(hipblasSgemm(hipblas_handle,&
+        HIPBLAS_OP_T, HIPBLAS_OP_N, &
+        m, n, k, alpha, &
+        c_loc(this % bMatrix), lda, &
+        c_loc(f), ldb, &
+        beta, &
+        c_loc(fTarget), ldc))
+#endif
 
-!   subroutine ScalarBoundaryInterp_2D_cpu(this,f,fBound,nvars,nelems)
+  end subroutine ScalarBoundaryInterp_1D_gpu
+
+!   subroutine ScalarBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)         :: nvars,nelems
 !     real(prec),intent(in)      :: f(0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)     :: fBound(0:this % N,1:nvars,1:4,1:nelems)
+!     real(prec),intent(out)     :: fTarget(0:this % N,1:nvars,1:4,1:nelems)
 !     ! Local
 !     integer :: i,ii,iel,ivar
 !     real(prec) :: fb(1:4)
@@ -2176,7 +2210,7 @@ contains
 !             fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar) ! West
 !           end do
 
-!           fBound(i,ivar,1:4,iel) = fb(1:4)
+!           fTarget(i,ivar,1:4,iel) = fb(1:4)
 
 !         end do
 !       end do
@@ -2184,24 +2218,24 @@ contains
 
 !   end subroutine ScalarBoundaryInterp_2D_cpu
 
-!   subroutine ScalarBoundaryInterp_2D_gpu(this,f,fBound,nvars,nelems)
+!   subroutine ScalarBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+!     type(c_ptr),intent(out)  :: fTarget
 
 !     call ScalarBoundaryInterp_2D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+!                                              f,fTarget,this % N,nvars,nelems)
 
 !   end subroutine ScalarBoundaryInterp_2D_gpu
 
-!   subroutine VectorBoundaryInterp_2D_cpu(this,f,fBound,nvars,nelems)
+!   subroutine VectorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     real(prec),intent(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fBound(1:2,0:this % N,1:nvars,1:4,1:nelems)
+!     real(prec),intent(out)  :: fTarget(1:2,0:this % N,1:nvars,1:4,1:nelems)
 !     ! Local
 !     integer :: i,ii,idir,iel,ivar
 !     real(prec) :: fb(1:2,1:4)
@@ -2221,7 +2255,7 @@ contains
 !           end do
 
 !           do idir = 1,2
-!             fBound(idir,i,ivar,1:4,iel) = fb(idir,1:4)
+!             fTarget(idir,i,ivar,1:4,iel) = fb(idir,1:4)
 !           end do
 
 !         end do
@@ -2230,24 +2264,24 @@ contains
 
 !   end subroutine VectorBoundaryInterp_2D_cpu
 
-!   subroutine VectorBoundaryInterp_2D_gpu(this,f,fBound,nvars,nelems)
+!   subroutine VectorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+!     type(c_ptr),intent(out)  :: fTarget
 
 !     call VectorBoundaryInterp_2D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+!                                              f,fTarget,this % N,nvars,nelems)
 
 !   end subroutine VectorBoundaryInterp_2D_gpu
 
-!   subroutine TensorBoundaryInterp_2D_cpu(this,f,fBound,nvars,nelems)
+!   subroutine TensorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     real(prec),intent(in)  :: f(1:2,1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fBound(1:2,1:2,0:this % N,1:nvars,1:4,1:nelems)
+!     real(prec),intent(out)  :: fTarget(1:2,1:2,0:this % N,1:nvars,1:4,1:nelems)
 !     ! Local
 !     integer :: i,ii,idir,jdir,iel,ivar
 !     real(prec) :: fb(1:2,1:2,1:4)
@@ -2270,7 +2304,7 @@ contains
 
 !           do jdir = 1,2
 !             do idir = 1,2
-!               fBound(idir,jdir,i,ivar,1:4,iel) = fb(idir,jdir,1:4)
+!               fTarget(idir,jdir,i,ivar,1:4,iel) = fb(idir,jdir,1:4)
 !             end do
 !           end do
 
@@ -2280,24 +2314,24 @@ contains
 
 !   end subroutine TensorBoundaryInterp_2D_cpu
 
-!   subroutine TensorBoundaryInterp_2D_gpu(this,f,fBound,nvars,nelems)
+!   subroutine TensorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+!     type(c_ptr),intent(out)  :: fTarget
 
 !     call TensorBoundaryInterp_2D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+!                                              f,fTarget,this % N,nvars,nelems)
 
 !   end subroutine TensorBoundaryInterp_2D_gpu
 
-!   subroutine ScalarBoundaryInterp_3D_cpu(this,f,fBound,nvars,nelems)
+!   subroutine ScalarBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)         :: nvars,nelems
 !     real(prec),intent(in)      :: f(0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)     :: fBound(0:this % N,0:this % N,1:nvars,1:6,1:nelems)
+!     real(prec),intent(out)     :: fTarget(0:this % N,0:this % N,1:nvars,1:6,1:nelems)
 !     ! Local
 !     integer :: i,j,ii,iel,ivar
 !     real(prec) :: fb(1:6)
@@ -2318,7 +2352,7 @@ contains
 !               fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar) ! Top
 !             end do
 
-!             fBound(i,j,ivar,1:6,iel) = fb(1:6)
+!             fTarget(i,j,ivar,1:6,iel) = fb(1:6)
 
 !           end do
 !         end do
@@ -2327,24 +2361,24 @@ contains
 
 !   end subroutine ScalarBoundaryInterp_3D_cpu
 
-!   subroutine ScalarBoundaryInterp_3D_gpu(this,f,fBound,nvars,nelems)
+!   subroutine ScalarBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+!     type(c_ptr),intent(out)  :: fTarget
 
 !     call ScalarBoundaryInterp_3D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+!                                              f,fTarget,this % N,nvars,nelems)
 
 !   end subroutine ScalarBoundaryInterp_3D_gpu
 
-!   subroutine VectorBoundaryInterp_3D_cpu(this,f,fBound,nvars,nelems)
+!   subroutine VectorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     real(prec),intent(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fBound(1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
+!     real(prec),intent(out)  :: fTarget(1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
 !     ! Local
 !     integer :: i,j,ii,idir,iel,ivar
 !     real(prec) :: fb(1:3,1:6)
@@ -2367,7 +2401,7 @@ contains
 !             end do
 
 !             do idir = 1,3
-!               fBound(idir,i,j,ivar,1:6,iel) = fb(idir,1:6)
+!               fTarget(idir,i,j,ivar,1:6,iel) = fb(idir,1:6)
 !             end do
 
 !           end do
@@ -2377,24 +2411,24 @@ contains
 
 !   end subroutine VectorBoundaryInterp_3D_cpu
 
-!   subroutine VectorBoundaryInterp_3D_gpu(this,f,fBound,nvars,nelems)
+!   subroutine VectorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+!     type(c_ptr),intent(out)  :: fTarget
 
 !     call VectorBoundaryInterp_3D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+!                                              f,fTarget,this % N,nvars,nelems)
 
 !   end subroutine VectorBoundaryInterp_3D_gpu
 
-!   subroutine TensorBoundaryInterp_3D_cpu(this,f,fBound,nvars,nelems)
+!   subroutine TensorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     real(prec),intent(in)  :: f(1:3,1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fBound(1:3,1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
+!     real(prec),intent(out)  :: fTarget(1:3,1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
 !     ! Local
 !     integer :: i,j,ii,idir,jdir,iel,ivar
 !     real(prec) :: fb(1:3,1:3,1:6)
@@ -2420,7 +2454,7 @@ contains
 
 !             do jdir = 1,3
 !               do idir = 1,3
-!                 fBound(idir,jdir,i,j,ivar,1:6,iel) = fb(idir,jdir,1:6)
+!                 fTarget(idir,jdir,i,j,ivar,1:6,iel) = fb(idir,jdir,1:6)
 !               end do
 !             end do
 
@@ -2431,15 +2465,15 @@ contains
 
 !   end subroutine TensorBoundaryInterp_3D_cpu
 
-!   subroutine TensorBoundaryInterp_3D_gpu(this,f,fBound,nvars,nelems)
+!   subroutine TensorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)  :: nvars,nelems
 !     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fBound
+!     type(c_ptr),intent(out)  :: fTarget
 
 !     call TensorBoundaryInterp_3D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fBound,this % N,nvars,nelems)
+!                                              f,fTarget,this % N,nvars,nelems)
 
 !   end subroutine TensorBoundaryInterp_3D_gpu
 

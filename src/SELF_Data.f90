@@ -67,7 +67,10 @@ MODULE SELF_Data
 
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar1D
 
-    !PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar1D
+    generic,public :: BoundaryInterp => BoundaryInterp_Scalar1D_cpu, BoundaryInterp_Scalar1D_gpu
+    procedure,private :: BoundaryInterp_Scalar1D_cpu
+    procedure,private :: BoundaryInterp_Scalar1D_gpu
+
     generic,public :: GridInterp => GridInterp_Scalar1D_cpu, GridInterp_Scalar1D_gpu
     procedure,private :: GridInterp_Scalar1D_cpu
     procedure,private :: GridInterp_Scalar1D_gpu
@@ -302,10 +305,10 @@ CONTAINS
     this % nElem = nElem
 
     call hipcheck(hipMallocManaged(this % interior, interp % N+1, nelem, nvar, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary, nelem, nvar, 2, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary, nelem, nvar, 2, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary, nelem, nvar, 2, hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary, nelem, nvar, 2, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary, 2, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary, 2, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary, 2, nelem, nvar, hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % jumpBoundary, 2, nelem, nvar, hipMemAttachGlobal))
 
     ALLOCATE( this % meta(1:nVar) )
     ALLOCATE( this % eqn(1:nVar) )
@@ -339,24 +342,31 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Scalar1D
 
-  ! SUBROUTINE BoundaryInterp_Scalar1D(this,gpuAccel)
-  !   IMPLICIT NONE
-  !   CLASS(Scalar1D),INTENT(inout) :: this
-  !   LOGICAL,INTENT(in) :: gpuAccel
+  SUBROUTINE BoundaryInterp_Scalar1D_cpu(this)
+    IMPLICIT NONE
+    CLASS(Scalar1D),INTENT(inout) :: this
 
-  !   IF (gpuAccel) THEN
-  !     CALL this % interp % ScalarBoundaryInterp_1D(this % interior , &
-  !                                                         this % boundary , &
-  !                                                         this % nVar, &
-  !                                                         this % nElem)
-  !   ELSE
-  !     CALL this % interp % ScalarBoundaryInterp_1D(this % interior , &
-  !                                                         this % boundary , &
-  !                                                         this % nVar, &
-  !                                                         this % nElem)
-  !   END IF
+      CALL this % interp % ScalarBoundaryInterp_1D(this % interior, &
+                                                this % boundary, &
+                                                this % nVar, &
+                                                this % nElem)
 
-  ! END SUBROUTINE BoundaryInterp_Scalar1D
+
+  END SUBROUTINE BoundaryInterp_Scalar1D_cpu
+
+  SUBROUTINE BoundaryInterp_Scalar1D_gpu(this,hipblas_handle)
+    IMPLICIT NONE
+    CLASS(Scalar1D),INTENT(inout) :: this
+    type(c_ptr), intent(inout) :: hipblas_handle
+
+      CALL this % interp % ScalarBoundaryInterp_1D(this % interior, &
+                                                this % boundary, &
+                                                this % nVar, &
+                                                this % nElem,&
+                                                hipblas_handle)
+
+
+  END SUBROUTINE BoundaryInterp_Scalar1D_gpu
 
   SUBROUTINE GridInterp_Scalar1D_cpu(this,SELFout)
     IMPLICIT NONE

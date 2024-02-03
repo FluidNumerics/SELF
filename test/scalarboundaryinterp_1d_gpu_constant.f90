@@ -1,6 +1,15 @@
+program test
+  implicit none
+  integer :: exit_code
+  
+  exit_code = scalarboundaryinterp_1d_gpu_constant()
+  stop exit_code
+  
+  contains
+
+
 integer function scalarboundaryinterp_1d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
 
@@ -17,6 +26,9 @@ integer function scalarboundaryinterp_1d_gpu_constant() result(r)
 #endif
   type(Scalar1D) :: f
   type(Lagrange),target :: interp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
@@ -28,19 +40,19 @@ integer function scalarboundaryinterp_1d_gpu_constant() result(r)
   call f % Init(interp,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior  = 1.0_prec
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
   ! Interpolate with gpuAccel = .true.
-  call f % BoundaryInterp(.true.)
+  call f % BoundaryInterp(handle)
 
-  call f % boundary % updatehost()
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
-  f % boundary % hostdata = abs(f % boundary % hostdata - 1.0_prec)
+  f % boundary  = abs(f % boundary  - 1.0_prec)
 
-  if (maxval(f % boundary % hostdata) <= tolerance) then
+  if (maxval(f % boundary ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -48,5 +60,7 @@ integer function scalarboundaryinterp_1d_gpu_constant() result(r)
 
   call f % free()
   call interp % free()
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function scalarboundaryinterp_1d_gpu_constant
+end program test

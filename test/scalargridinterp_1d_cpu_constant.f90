@@ -5,7 +5,7 @@ integer :: exit_code
 exit_code = scalargridinterp_1d_cpu_constant()
 stop exit_code
 
-contains 
+contains  
 integer function scalargridinterp_1d_cpu_constant() result(r)
   use SELF_Constants
   use SELF_Lagrange
