@@ -304,7 +304,7 @@ contains
     real(prec), pointer, intent(inout) :: Af(:,:,:)
     integer, intent(in) :: opArows, opAcols, bcols
     type(c_ptr), intent(inout) :: hipblas_handle
-        ! Local
+    ! Local
     integer(c_int) :: m
     integer(c_int) :: n
     integer(c_int) :: k
@@ -340,6 +340,89 @@ contains
         c_loc(Af), ldc))
 #endif
   end subroutine self_hipblas_matrixop_1d
+
+  subroutine self_hipblas_matrixop_2d(A,f,fInt,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+    real(prec), pointer, intent(in) :: A(:,:)
+    real(prec), pointer, intent(in) :: f(:,:,:,:)
+    real(prec), pointer, intent(inout) :: fInt(:,:,:,:)
+    real(prec), pointer, intent(inout) :: Af(:,:,:,:)
+    integer, intent(in) :: controldegree,targetdegree,nvars,nelems
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    integer(c_int) :: k
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    integer(c_int) :: ldb
+    integer(c_int) :: ldc
+    real(c_prec) :: beta
+    ! for gemvstridedbatch
+    integer :: i
+    integer(c_int64_t) :: strideA
+    integer(c_int) :: incx
+    integer(c_int64_t) :: stridex
+    integer(c_int) :: incy
+    integer(c_int64_t) :: stridey
+    integer(c_int) :: batchCount
+    integer(kind(HIPBLAS_STATUS_SUCCESS)) :: status
+
+    m = targetdegree + 1 ! number of rows of A^T
+    n = nvars*nelems*(controldegree + 1) ! number of columns of B
+    k = controldegree + 1! number of columns of A^T
+    alpha = 1.0_c_prec
+    lda = k ! leading dimension of A (interoplation matrix)
+    ldb = k ! leading dimension of B (f)
+    ldc = m ! leading dimension of C (fTarget)
+    beta = 0.0_c_prec
+
+#ifdef DOUBLE_PRECISION
+    ! First pass interpolates in the first quadrature dimension
+    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
+                                   m,n,k,alpha, &
+                                   c_loc(A),lda, &
+                                   c_loc(f),ldb,beta, &
+                                   c_loc(fInt),ldc))
+#else
+    ! First pass interpolates in the first quadrature dimension
+    call hipblasCheck(hipblasSgemm(hipblas_handle, &
+                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
+                                   m,n,k,alpha, &
+                                   c_loc(A),lda, &
+                                   c_loc(f),ldb,beta, &
+                                   c_loc(fInt),ldc))
+#endif
+
+    m = controldegree + 1 ! number of rows of A
+    n = targetdegree + 1 ! number of columns of A
+    alpha = 1.0_c_prec
+    lda = m ! leading dimension of A
+    strideA = 0 ! stride for the batches of A (no stride)
+    incx = targetdegree + 1 !
+    stridex = (controldegree + 1)*(targetdegree + 1)
+    beta = 0.0_c_prec
+    incy = targetdegree + 1
+    stridey = (targetdegree + 1)*(targetdegree + 1)
+    batchCount = nvars*nelems
+    do i = 0,targetdegree
+#ifdef DOUBLE_PRECISION
+      call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
+                                                   HIPBLAS_OP_T, &
+                                                   m,n,alpha, &
+                                                   c_loc(A),lda,strideA, &
+                                                   c_loc(fInt(1 + i,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(fTarget(1 + i,1,1,1)),incy,stridey,batchCount))
+#else
+      call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
+                                                   HIPBLAS_OP_T, &
+                                                   m,n,alpha, &
+                                                   c_loc(A),lda,strideA, &
+                                                   c_loc(fInt(1 + i,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(Af(1 + i,1,1,1)),incy,stridey,batchCount))
+#endif
+    end do
+  end subroutine self_hipblas_matrixop_2d
 
   subroutine ScalarGridInterp_1D_cpu(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_1D interface.
@@ -492,80 +575,8 @@ contains
     real(prec),pointer,intent(inout) :: fTarget(:,:,:,:)
     !! (Output) Array of function values, defined on the target grid
     type(c_ptr),intent(inout) :: hipblas_handle
-    ! Local
-    integer(c_int) :: m
-    integer(c_int) :: n
-    integer(c_int) :: k
-    real(c_prec) :: alpha
-    integer(c_int) :: lda
-    integer(c_int) :: ldb
-    integer(c_int) :: ldc
-    real(c_prec) :: beta
-    ! for gemvstridedbatch
-    integer :: i
-    integer(c_int64_t) :: strideA
-    integer(c_int) :: incx
-    integer(c_int64_t) :: stridex
-    integer(c_int) :: incy
-    integer(c_int64_t) :: stridey
-    integer(c_int) :: batchCount
-    integer(kind(HIPBLAS_STATUS_SUCCESS)) :: status
 
-    m = this % M + 1 ! number of rows of A^T
-    n = nvars*nelems*(this % N + 1) ! number of columns of B
-    k = this % N + 1! number of columns of A^T
-    alpha = 1.0_c_prec
-    lda = k ! leading dimension of A (interoplation matrix)
-    ldb = k ! leading dimension of B (f)
-    ldc = m ! leading dimension of C (fTarget)
-    beta = 0.0_c_prec
-
-#ifdef DOUBLE_PRECISION
-    ! First pass interpolates in the first quadrature dimension
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
-                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
-                                   m,n,k,alpha, &
-                                   c_loc(this % iMatrix),lda, &
-                                   c_loc(f),ldb,beta, &
-                                   c_loc(fInt),ldc))
-#else
-    ! First pass interpolates in the first quadrature dimension
-    call hipblasCheck(hipblasSgemm(hipblas_handle, &
-                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
-                                   m,n,k,alpha, &
-                                   c_loc(this % iMatrix),lda, &
-                                   c_loc(f),ldb,beta, &
-                                   c_loc(fInt),ldc))
-#endif
-
-    m = this % N + 1 ! number of rows of A
-    n = this % M + 1 ! number of columns of A
-    alpha = 1.0_c_prec
-    lda = m ! leading dimension of A
-    strideA = 0 ! stride for the batches of A (no stride)
-    incx = this % M + 1 !
-    stridex = (this % N + 1)*(this % M + 1)
-    beta = 0.0_c_prec
-    incy = this % M + 1
-    stridey = (this % M + 1)*(this % M + 1)
-    batchCount = nvars*nelems
-    do i = 0,this % M
-#ifdef DOUBLE_PRECISION
-      call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
-                                                   HIPBLAS_OP_T, &
-                                                   m,n,alpha, &
-                                                   c_loc(this % iMatrix),lda,strideA, &
-                                                   c_loc(fInt(1 + i,1,1,1)),incx,stridex,beta, &
-                                                   c_loc(fTarget(1 + i,1,1,1)),incy,stridey,batchCount))
-#else
-      call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
-                                                   HIPBLAS_OP_T, &
-                                                   m,n,alpha, &
-                                                   c_loc(this % iMatrix),lda,strideA, &
-                                                   c_loc(fInt(1 + i,1,1,1)),incx,stridex,beta, &
-                                                   c_loc(fTarget(1 + i,1,1,1)),incy,stridey,batchCount))
-#endif
-    end do
+    call self_hipblas_matrixop_2d(this % iMatrix,f,fInt,fTarget,this % N,this % M,nvars,nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_2D_gpu
 
@@ -1711,201 +1722,6 @@ contains
 
 !   end subroutine VectorDGDivergence_3D_gpu
 
-!   ! SUBROUTINE VectorCurl_3D_cpu(this,f,dF,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(out) :: dF(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   ! Local
-!   !   INTEGER    :: i,j,k,ii,iel,ivar
-
-!   !   DO iel = 1,nelems
-!   !     DO ivar = 1,nvars
-!   !       DO k = 0,this % N
-!   !         DO j = 0,this % N
-!   !           DO i = 0,this % N
-
-!   !             dF(1,i,j,k,iel,ivar) = 0.0_prec
-!   !             dF(2,i,j,k,iel,ivar) = 0.0_prec
-!   !             dF(3,i,j,k,iel,ivar) = 0.0_prec
-!   !             DO ii = 0,this % N
-!   !               dF(1,i,j,k,iel,ivar) = dF(1,i,j,k,iel,ivar) + this % dMatrix (ii,j)*f(3,i,ii,k,iel,ivar) - &
-!   !                                      this % dMatrix (ii,k)*f(2,i,j,ii,iel,ivar)
-!   !               dF(2,i,j,k,iel,ivar) = dF(2,i,j,k,iel,ivar) + this % dMatrix (ii,k)*f(1,i,j,ii,iel,ivar) - &
-!   !                                      this % dMatrix (ii,i)*f(3,ii,j,k,iel,ivar)
-!   !               dF(3,i,j,k,iel,ivar) = dF(3,i,j,k,iel,ivar) + this % dMatrix (ii,i)*f(2,ii,j,k,iel,ivar) - &
-!   !                                      this % dMatrix (ii,j)*f(1,i,ii,k,iel,ivar)
-!   !             END DO
-
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END SUBROUTINE VectorCurl_3D_cpu
-
-!   ! SUBROUTINE VectorCurl_3D_gpu(this,f_dev,dF_dev,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)         :: nvars,nelems
-!   !   TYPE(c_ptr),INTENT(in)     :: f_dev
-!   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
-
-!   !   CALL VectorCurl_3D_gpu_wrapper(this % dMatrix % deviceData, &
-!   !                                  f_dev,dF_dev,this % N, &
-!   !                                  nvars,nelems)
-
-!   ! END SUBROUTINE VectorCurl_3D_gpu
-
-!   ! SUBROUTINE TensorDivergence_3D_cpu(this,f,dF,nvars,nelems)
-!   !   ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:3,1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(out) :: dF(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   ! Local
-!   !   INTEGER    :: i,j,k,ii,iel,ivar
-
-!   !   DO iel = 1,nelems
-!   !     DO ivar = 1,nvars
-!   !       DO k = 0,this % N
-!   !         DO j = 0,this % N
-!   !           DO i = 0,this % N
-
-!   !             dF(1,i,j,k,iel,ivar) = 0.0_prec
-!   !             dF(2,i,j,k,iel,ivar) = 0.0_prec
-!   !             dF(3,i,j,k,iel,ivar) = 0.0_prec
-!   !             DO ii = 0,this % N
-!   !               dF(1,i,j,k,iel,ivar) = dF(1,i,j,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,i)*f(1,1,ii,j,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,j)*f(2,1,i,ii,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,k)*f(3,1,i,j,ii,iel,ivar)
-
-!   !               dF(2,i,j,k,iel,ivar) = dF(2,i,j,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,i)*f(1,2,ii,j,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,j)*f(2,2,i,ii,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,k)*f(3,2,i,j,ii,iel,ivar)
-
-!   !               dF(3,i,j,k,iel,ivar) = dF(3,i,j,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,i)*f(1,3,ii,j,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,j)*f(2,3,i,ii,k,iel,ivar) + &
-!   !                                      this % dMatrix (ii,k)*f(3,3,i,j,ii,iel,ivar)
-!   !             END DO
-
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END SUBROUTINE TensorDivergence_3D_cpu
-
-!   ! SUBROUTINE TensorDivergence_3D_gpu(this,f_dev,dF_dev,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)         :: nvars,nelems
-!   !   TYPE(c_ptr),INTENT(in)     :: f_dev
-!   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
-
-!   !   CALL TensorDivergence_3D_gpu_wrapper(this % dMatrix % deviceData, &
-!   !                                        f_dev,dF_dev,this % N, &
-!   !                                        nvars,nelems)
-
-!   ! END SUBROUTINE TensorDivergence_3D_gpu
-
-!   ! SUBROUTINE TensorDGDivergence_3D_cpu(this,f,bF,dF,nvars,nelems)
-!   !   ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:3,1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bF(1:3,1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
-!   !   REAL(prec),INTENT(out) :: dF(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   ! Local
-!   !   INTEGER    :: i,j,k,ii,iel,ivar
-
-!   !   DO iel = 1,nelems
-!   !     DO ivar = 1,nvars
-!   !       DO k = 0,this % N
-!   !         DO j = 0,this % N
-!   !           DO i = 0,this % N
-
-!   !             dF(1,i,j,k,iel,ivar) = 0.0_prec
-!   !             dF(2,i,j,k,iel,ivar) = 0.0_prec
-!   !             dF(3,i,j,k,iel,ivar) = 0.0_prec
-!   !             DO ii = 0,this % N
-!   !               dF(1,i,j,k,iel,ivar) = dF(1,i,j,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,i)*f(1,1,ii,j,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,j)*f(2,1,i,ii,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,k)*f(3,1,i,j,ii,iel,ivar)
-
-!   !               dF(2,i,j,k,iel,ivar) = dF(2,i,j,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,i)*f(1,2,ii,j,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,j)*f(2,2,i,ii,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,k)*f(3,2,i,j,ii,iel,ivar)
-
-!   !               dF(3,i,j,k,iel,ivar) = dF(3,i,j,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,i)*f(1,3,ii,j,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,j)*f(2,3,i,ii,k,iel,ivar) + &
-!   !                                      this % dgMatrix (ii,k)*f(3,3,i,j,ii,iel,ivar)
-!   !             END DO
-
-!   !             dF(1,i,j,k,iel,ivar) = dF(1,i,j,k,iel,ivar) + (this % bMatrix (i,1)*bF(1,1,j,k,ivar,3,iel) + & ! east
-!   !                                                    this % bMatrix (i,0)*bF(1,1,j,k,ivar,5,iel))/ &  ! west
-!   !                                    this % qWeights (i) + &
-!   !                                    (this % bMatrix (j,1)*bF(2,1,i,k,ivar,4,iel) + & ! north
-!   !                                     this % bMatrix (j,0)*bF(2,1,i,k,ivar,2,iel))/ &  ! south
-!   !                                    this % qWeights (j) + &
-!   !                                    (this % bMatrix (k,1)*bF(3,1,i,j,ivar,6,iel) + & ! top
-!   !                                     this % bMatrix (k,0)*bF(3,1,i,j,ivar,1,iel))/ &  ! bottom
-!   !                                    this % qWeights (k)
-
-!   !             dF(2,i,j,k,iel,ivar) = dF(2,i,j,k,iel,ivar) + (this % bMatrix (i,1)*bF(1,2,j,k,ivar,3,iel) + & ! east
-!   !                                                    this % bMatrix (i,0)*bF(1,2,j,k,ivar,5,iel))/ &  ! west
-!   !                                    this % qWeights (i) + &
-!   !                                    (this % bMatrix (j,1)*bF(2,2,i,k,ivar,4,iel) + & ! north
-!   !                                     this % bMatrix (j,0)*bF(2,2,i,k,ivar,2,iel))/ &  ! south
-!   !                                    this % qWeights (j) + &
-!   !                                    (this % bMatrix (k,1)*bF(3,2,i,j,ivar,6,iel) + & ! top
-!   !                                     this % bMatrix (k,0)*bF(3,2,i,j,ivar,1,iel))/ &  ! bottom
-!   !                                    this % qWeights (k)
-
-!   !             dF(3,i,j,k,iel,ivar) = dF(3,i,j,k,iel,ivar) + (this % bMatrix (i,1)*bF(1,3,j,k,ivar,3,iel) + & ! east
-!   !                                                    this % bMatrix (i,0)*bF(1,3,j,k,ivar,5,iel))/ &  ! west
-!   !                                    this % qWeights (i) + &
-!   !                                    (this % bMatrix (j,1)*bF(2,3,i,k,ivar,4,iel) + & ! north
-!   !                                     this % bMatrix (j,0)*bF(2,3,i,k,ivar,2,iel))/ &  ! south
-!   !                                    this % qWeights (j) + &
-!   !                                    (this % bMatrix (k,1)*bF(3,3,i,j,ivar,6,iel) + & ! top
-!   !                                     this % bMatrix (k,0)*bF(3,3,i,j,ivar,1,iel))/ &  ! bottom
-!   !                                    this % qWeights (k)
-
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END SUBROUTINE TensorDGDivergence_3D_cpu
-
-!   ! SUBROUTINE TensorDGDivergence_3D_gpu(this,f_dev,bF_dev,dF_dev,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)         :: nvars,nelems
-!   !   TYPE(c_ptr),INTENT(in)     :: f_dev
-!   !   TYPE(c_ptr),INTENT(in)     :: bF_dev
-!   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
-
-!   !   CALL TensorDGDivergence_3D_gpu_wrapper(this % dgMatrix % deviceData, &
-!   !                                          this % bMatrix % deviceData, &
-!   !                                          this % qWeights % deviceData, &
-!   !                                          f_dev,bF_dev,dF_dev,this % N, &
-!   !                                          nvars,nelems)
-
-!   ! END SUBROUTINE TensorDGDivergence_3D_gpu
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !
 
