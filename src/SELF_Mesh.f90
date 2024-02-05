@@ -7,7 +7,7 @@
 MODULE SELF_Mesh
 
   USE SELF_Constants
-  USE SELF_HIP
+  use hipfort
   USE SELF_Lagrange
   USE SELF_Data
   USE SELF_SupportRoutines

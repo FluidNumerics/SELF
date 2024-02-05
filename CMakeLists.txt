@@ -51,7 +51,7 @@ endif()
 
 # ------ dependencies ------ #
 # HIP
-find_package(hip REQUIRED)
+find_package(hipfort REQUIRED COMPONENTS hip hipblas)
 
 # MPI
 find_package(MPI COMPONENTS Fortran REQUIRED)
