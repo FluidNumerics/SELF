@@ -10,8 +10,8 @@ program blas_program
   contains
   integer function example_hipDaxpy() result(r)
     use hipfort_hipblas
-    use self_hip
-    use self_hip_enums
+    use hipfort
+    use hipfort_check
     use self_constants
     use iso_c_binding
     use iso_fortran_env

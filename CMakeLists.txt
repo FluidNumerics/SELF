@@ -39,20 +39,19 @@ ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 # Default Fortran compiler flags
 # Fortran compiler flags
 if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
-
-    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -ffree-line-length-512" )
+    set( CMAKE_Fortran_FLAGS "${CMAKE_FORTRAN_FLAGS} -cpp -ffree-line-length-512" )
     set( CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -C -Wall -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG} --coverage")
     set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
     set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
+
     set( CMAKE_C_FLAGS_COVERAGE "-g -O0 --coverage")
 
 endif()
 
 # ------ dependencies ------ #
 # HIP
-find_package(hip REQUIRED)
-find_package(hipblas REQUIRED)
+find_package(hipfort REQUIRED COMPONENTS hip hipblas)
 
 # MPI
 find_package(MPI COMPONENTS Fortran REQUIRED)
@@ -74,8 +73,6 @@ find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
-enable_testing()
-add_subdirectory(${CMAKE_SOURCE_DIR}/blas)
 
 enable_testing()
 
@@ -84,3 +81,4 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 
 # Examples (additional tests; standalone models)
 add_subdirectory(${CMAKE_SOURCE_DIR}/example)
+add_subdirectory(${CMAKE_SOURCE_DIR}/blas)

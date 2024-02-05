@@ -17,6 +17,7 @@ MODULE SELF_Lagrange
   USE SELF_Quadrature
   USE SELF_HDF5
   USE HDF5
+  !use hipfort_hipblas
 
   USE ISO_C_BINDING
   IMPLICIT NONE

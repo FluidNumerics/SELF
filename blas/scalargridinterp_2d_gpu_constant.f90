@@ -78,8 +78,8 @@ integer function blas_scalargridinterp_2d_gpu_constant() result(r)
   use SELF_Lagrange
   use SELF_Data
   use hipfort_hipblas
-  use self_hip
-  use self_hip_enums
+  use hipfort
+  use hipfort_check
 
   implicit none
 

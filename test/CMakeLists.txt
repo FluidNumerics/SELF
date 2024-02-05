@@ -42,9 +42,11 @@ function (add_fortran_test_executable TARGET)
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
-                    hip::device)          
+                    hipfort::hip
+                        hipfort::hipblas
+                        hip::device)         
     target_include_directories(${TARGET} PUBLIC 
-                        ${HDF5_INCLUDE_DIRS}/shared
+                        ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS})
 
     set (INDEX 0)
