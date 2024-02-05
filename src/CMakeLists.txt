@@ -20,7 +20,8 @@ add_library(self-static STATIC ${SELF_FSRC} ${SELF_HIPSRC})
 target_link_libraries(self-static PRIVATE 
                         ${FEQPARSE_LIBRARIES}
                         ${HDF5_LIBRARIES}
-                        ${MPI_Fortran_LIBRARIES})
+                        ${MPI_Fortran_LIBRARIES}
+                        hipfort::hip)
 
 target_include_directories(self-static PRIVATE 
                         ${FEQPARSE_INCLUDE_DIRS}
