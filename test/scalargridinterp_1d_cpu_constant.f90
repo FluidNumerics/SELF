@@ -43,14 +43,14 @@ integer function scalargridinterp_1d_cpu_constant() result(r)
   call fTarget % Init(interpTarget,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior(:,:,:) = 1.0_prec
+  f % interior % hostdata(:,:,:) = 1.0_prec
 
   call f % GridInterp(fTarget)
 
   ! Calculate diff from exact
-  fTarget % interior = abs(fTarget % interior - 1.0_prec)
+  fTarget % interior % hostdata = abs(fTarget % interior % hostdata - 1.0_prec)
 
-  if (maxval(fTarget % interior) <= tolerance) then
+  if (maxval(fTarget % interior % hostdata) <= tolerance) then
     r = 0
   else
     r = 1

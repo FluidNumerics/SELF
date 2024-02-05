@@ -36,14 +36,14 @@ integer function scalarboundaryinterp_1d_cpu_constant() result(r)
   call f % Init(interp,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior  = 1.0_prec
+  f % interior % hostdata  = 1.0_prec
 
   call f % BoundaryInterp()
 
   ! Calculate diff from exact
-  f % boundary  = abs(f % boundary  - 1.0_prec)
+  f % boundary % hostdata  = abs(f % boundary % hostdata  - 1.0_prec)
 
-  if (maxval(f % boundary ) <= tolerance) then
+  if (maxval(f % boundary % hostdata ) <= tolerance) then
     r = 0
   else
     r = 1

@@ -20,6 +20,7 @@ module SELF_Lagrange
   use SELF_Constants
   use SELF_SupportRoutines
   use SELF_Quadrature
+  use SELF_Memory
   !use SELF_HDF5
   !use HDF5
 
@@ -60,7 +61,7 @@ module SELF_Lagrange
 
     integer :: targetNodeType
 
-    real(prec),pointer,dimension(:) :: controlPoints
+    type(hfreal_r1) :: controlPoints
       !! The set of nodes in one dimension where data is known.
       !! To create higher dimension interpolation and differentiation operators, structured grids in two and three
       !! dimensions are created by tensor products of the controlPoints. This design decision implies that all
@@ -70,33 +71,33 @@ module SELF_Lagrange
       !! the domain [-1,1] (computational space). The Init routine for this class restricts controlPoints to one of
       !! these quadrature types or uniform points on [-1,1].
 
-    real(prec),pointer,dimension(:) :: targetPoints
+    type(hfreal_r1) :: targetPoints
       !! The set of nodes in one dimension where data is to be interpolated to. To create higher dimension interpolation
       !! and differentiation operators, structured grids in two and three dimensions are created by tensor products of
       !! the targetPoints. In practice, the targetPoints are set to a uniformly distributed set of points between [-1,1]
       !! (computational space) to allow for interpolation from unevenly spaced quadrature points to a plotting grid.
 
-    real(prec),pointer,dimension(:) :: bWeights
+    type(hfreal_r1) :: bWeights
       !! The barycentric weights that are calculated from the controlPoints and used for interpolation.
 
-    real(prec),pointer,dimension(:) :: qWeights
+    type(hfreal_r1) :: qWeights
       !! The quadrature weights for discrete integration. The quadradture weights depend on the type of controlPoints
       !! provided; one of Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss,
       !! Chebyshev-Gauss-Lobatto, Chebyshev-Gauss Radau, or Uniform. If Uniform, the quadrature weights are constant
       !! $$dx = \frac{2.0}{N+1}$$.
 
-    real(prec),pointer,dimension(:,:) :: iMatrix
+    type(hfreal_r2) :: iMatrix
       !! The interpolation matrix (transpose) for mapping data from the control grid to the target grid.
 
-    real(prec),pointer,dimension(:,:) :: dMatrix
+    type(hfreal_r2) :: dMatrix
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The
       !! dMatrix is based on a strong form of the derivative.
 
-    real(prec),pointer,dimension(:,:) :: dgMatrix
+    type(hfreal_r2) :: dgMatrix
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The dgMatrix is based
       !! on a weak form of the derivative. It must be used with bMatrix to account for boundary contributions in the weak form.
 
-    real(prec),pointer,dimension(:,:) :: bMatrix
+    type(hfreal_r2) :: bMatrix
       !! The boundary interpolation matrix that is used to map a grid of nodal values at the control points to the element boundaries.
 
   contains
@@ -104,6 +105,7 @@ module SELF_Lagrange
     procedure,public :: Init => Init_Lagrange
     procedure,public :: Free => Free_Lagrange
 
+    procedure,public :: UpdateHost => UpdateHost_Lagrange
     procedure,public :: UpdateDevice => UpdateDevice_Lagrange
 
     generic,public :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu
@@ -270,33 +272,48 @@ contains
     this % controlNodeType = controlNodeType
     this % targetNodeType = targetNodeType
 
-    call hipcheck(hipMallocManaged(this % controlPoints,N + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % targetPoints,M + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % bWeights,N + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % qWeights,N + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % iMatrix,N + 1,M + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % dMatrix,N + 1,N + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % dgMatrix,N + 1,N + 1,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % bMatrix,N + 1,2,hipMemAttachGlobal))
+    CALL this % controlPoints % Alloc(loBound=1, &
+                                        upBound=N+1)
+
+    CALL this % targetPoints % Alloc(loBound=1, &
+                                       upBound=M+1)
+
+    CALL this % bWeights % Alloc(loBound=1, &
+                                   upBound=N+1)
+
+    CALL this % qWeights % Alloc(loBound=1, &
+                                   upBound=N+1)
+
+    CALL this % iMatrix % Alloc(loBound=(/1,1/), &
+                                  upBound=(/N+1,M+1/))
+
+    CALL this % dMatrix % Alloc(loBound=(/1,1/), &
+                                  upBound=(/N+1,N+1/))
+
+    CALL this % dgMatrix % Alloc(loBound=(/1,1/), &
+                                   upBound=(/N+1,N+1/))
+
+    CALL this % bMatrix % Alloc(loBound=(/1,1/), &
+                                  upBound=(/N+1,2/))
 
     if (controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
       call LegendreQuadrature(N, &
-                              this % controlPoints, &
-                              this % qWeights, &
+                              this % controlPoints % hostdata, &
+                              this % qWeights % hostdata, &
                               controlNodeType)
 
     elseif (controlNodeType == CHEBYSHEV_GAUSS .or. controlNodeType == CHEBYSHEV_GAUSS_LOBATTO) then
 
       call ChebyshevQuadrature(N, &
-                               this % controlPoints, &
-                               this % qWeights, &
+                               this % controlPoints % hostdata, &
+                               this % qWeights % hostdata, &
                                controlNodeType)
 
     elseif (controlNodeType == UNIFORM) then
 
-      this % controlPoints = UniformPoints(-1.0_prec,1.0_prec,0,N)
-      this % qWeights = 2.0_prec/real(N,prec)
+      this % controlPoints % hostdata = UniformPoints(-1.0_prec,1.0_prec,0,N)
+      this % qWeights % hostdata = 2.0_prec/real(N,prec)
 
     end if
 
@@ -304,21 +321,21 @@ contains
     if (targetNodeType == GAUSS .or. targetNodeType == GAUSS_LOBATTO) then
 
       call LegendreQuadrature(M, &
-                              this % targetPoints, &
+                              this % targetPoints % hostdata, &
                               q, &
                               targetNodeType)
 
     elseif (targetNodeType == UNIFORM) then
 
-      this % targetPoints = UniformPoints(-1.0_prec,1.0_prec,0,M)
+      this % targetPoints % hostdata = UniformPoints(-1.0_prec,1.0_prec,0,M)
 
     end if
 
     call this % CalculateBarycentricWeights()
     call this % CalculateInterpolationMatrix()
     call this % CalculateDerivativeMatrix()
-    this % bMatrix(1:N + 1,1) = this % CalculateLagrangePolynomials(-1.0_prec)
-    this % bMatrix(1:N + 1,2) = this % CalculateLagrangePolynomials(1.0_prec)
+    this % bMatrix % hostdata(1:N + 1,1) = this % CalculateLagrangePolynomials(-1.0_prec)
+    this % bMatrix % hostdata(1:N + 1,2) = this % CalculateLagrangePolynomials(1.0_prec)
 
     call this % UpdateDevice()
 
@@ -330,16 +347,33 @@ contains
     class(Lagrange),intent(inout) :: this
     !! Lagrange class instance
 
-    call hipcheck(hipFree(this % controlPoints))
-    call hipcheck(hipFree(this % targetPoints))
-    call hipcheck(hipFree(this % bWeights))
-    call hipcheck(hipFree(this % qWeights))
-    call hipcheck(hipFree(this % iMatrix))
-    call hipcheck(hipFree(this % dMatrix))
-    call hipcheck(hipFree(this % dgMatrix))
-    call hipcheck(hipFree(this % bMatrix))
+    CALL this % controlPoints % Free()
+    CALL this % targetPoints % Free()
+    CALL this % bWeights % Free()
+    CALL this % qWeights % Free()
+    CALL this % iMatrix % Free()
+    CALL this % dMatrix % Free()
+    CALL this % dgMatrix % Free()
+    CALL this % bMatrix % Free()
 
   end subroutine Free_Lagrange
+
+  subroutine UpdateHost_Lagrange(this)
+    !! Copy the Lagrange attributes from the device (GPU) to the Host (CPU)
+    implicit none
+    class(Lagrange),intent(inout) :: this
+    !! Lagrange class instance
+
+    CALL this % controlPoints % UpdateHost()
+    CALL this % targetPoints % UpdateHost()
+    CALL this % bWeights % UpdateHost()
+    CALL this % qWeights % UpdateHost()
+    CALL this % iMatrix % UpdateHost()
+    CALL this % dMatrix % UpdateHost()
+    CALL this % dgMatrix % UpdateHost()
+    CALL this % bMatrix % UpdateHost()
+
+  end subroutine UpdateHost_Lagrange
 
   subroutine UpdateDevice_Lagrange(this)
     !! Copy the Lagrange attributes from the host (CPU) to the device (GPU)
@@ -347,14 +381,14 @@ contains
     class(Lagrange),intent(inout) :: this
     !! Lagrange class instance
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % controlPoints),sizeof(this % controlPoints),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % targetPoints),sizeof(this % targetPoints),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % bWeights),sizeof(this % bWeights),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % qWeights),sizeof(this % qWeights),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % iMatrix),sizeof(this % iMatrix),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % dMatrix),sizeof(this % dMatrix),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % dgMatrix),sizeof(this % dgMatrix),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % bMatrix),sizeof(this % bMatrix),0,c_null_ptr))
+    CALL this % controlPoints % UpdateDevice()
+    CALL this % targetPoints % UpdateDevice()
+    CALL this % bWeights % UpdateDevice()
+    CALL this % qWeights % UpdateDevice()
+    CALL this % iMatrix % UpdateDevice()
+    CALL this % dMatrix % UpdateDevice()
+    CALL this % dgMatrix % UpdateDevice()
+    CALL this % bMatrix % UpdateDevice()
 
   end subroutine UpdateDevice_Lagrange
 
@@ -531,7 +565,7 @@ contains
         do i = 1,this % M + 1
           floc = 0.0_prec
           do ii = 1,this % N + 1
-            floc = floc + this % iMatrix(ii,i)*f(ii,iel,ivar)
+            floc = floc + this % iMatrix % hostdata(ii,i)*f(ii,iel,ivar)
           end do
           fTarget(i,iel,ivar) = floc
         end do
@@ -567,7 +601,7 @@ contains
     !! (Output) Array of function values, defined on the target grid
     type(c_ptr),intent(inout) :: hipblas_handle
 
-      call self_hipblas_matrixop_1d(this % iMatrix, f, fTarget, this % M+1, this % N+1, nvars*nelems,hipblas_handle)
+      call self_hipblas_matrixop_1d(this % iMatrix % devicedata, f, fTarget, this % M+1, this % N+1, nvars*nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_1D_gpu
 
@@ -608,9 +642,9 @@ contains
             do jj = 1,this % N+1
               fi = 0.0_prec
               do ii = 1,this % N+1
-                fi = fi + f(ii,jj,iel,ivar)*this % iMatrix(ii,i)
+                fi = fi + f(ii,jj,iel,ivar)*this % iMatrix % hostdata(ii,i)
               end do
-              fij = fij + fi*this % iMatrix(jj,j)
+              fij = fij + fi*this % iMatrix % hostdata(jj,j)
             end do
             fTarget(i,j,iel,ivar) = fij
 
@@ -650,8 +684,8 @@ contains
     !! (Output) Array of function values, defined on the target grid
     type(c_ptr),intent(inout) :: hipblas_handle
 
-    call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,hipblas_handle)
-    call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_2d(this % iMatrix % devicedata,f,fInt,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_2d(this % iMatrix % devicedata,fInt,fTarget,this % N,this % M,nvars,nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_2D_gpu
 
@@ -904,7 +938,7 @@ contains
 
           dfloc = 0.0_prec
           do ii = 1,this % N + 1
-            dfloc = dfloc + this % dMatrix(ii,i)*f(ii,iel,ivar)
+            dfloc = dfloc + this % dMatrix % hostdata(ii,i)*f(ii,iel,ivar)
           end do
           df(i,iel,ivar) = dfloc
 
@@ -922,7 +956,7 @@ contains
     real(prec),pointer,intent(out) :: df(:,:,:)
     type(c_ptr),intent(inout) :: hipblas_handle
   
-    call self_hipblas_matrixop_1d(this % dMatrix, f, df, this % N+1, this % N+1, nvars*nelems, hipblas_handle)
+    call self_hipblas_matrixop_1d(this % dMatrix % devicedata, f, df, this % N+1, this % N+1, nvars*nelems, hipblas_handle)
 
   end subroutine Derivative_1D_gpu
 
@@ -1038,8 +1072,8 @@ contains
             df1 = 0.0_prec
             df2 = 0.0_prec
             do ii = 1,this % N+1
-              df1 = df1 + this % dMatrix (ii,i)*f(ii,j,iel,ivar)
-              df2 = df2 + this % dMatrix (ii,j)*f(i,ii,iel,ivar)
+              df1 = df1 + this % dMatrix  % hostdata(ii,i)*f(ii,j,iel,ivar)
+              df2 = df2 + this % dMatrix  % hostdata(ii,j)*f(i,ii,iel,ivar)
             end do
             gradf(i,j,iel,ivar,1) = df1
             gradf(i,j,iel,ivar,2) = df2
@@ -1062,9 +1096,9 @@ contains
     real(prec), pointer :: dfloc(:,:,:,:)
 
     dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
-    call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_2d(this % dMatrix % devicedata,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
     dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
-    call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_2d(this % dMatrix % devicedata,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
     dfloc => null()
 
   end subroutine ScalarGradient_2D_gpu
@@ -1822,8 +1856,8 @@ contains
       do ivar = 1,nvars
         fb(1:2) = 0.0_prec
         do ii = 1,this % N+1
-          fb(1) = fb(1) + this % bMatrix (ii,1)*f(ii,iel,ivar) ! West
-          fb(2) = fb(2) + this % bMatrix (ii,2)*f(ii,iel,ivar) ! East
+          fb(1) = fb(1) + this % bMatrix  % hostdata(ii,1)*f(ii,iel,ivar) ! West
+          fb(2) = fb(2) + this % bMatrix  % hostdata(ii,2)*f(ii,iel,ivar) ! East
         end do
         fTarget(1:2,iel,ivar) = fb(1:2)
       end do
@@ -1839,7 +1873,7 @@ contains
     real(prec),pointer,intent(inout)     :: fTarget(:,:,:)
     type(c_ptr),intent(inout) :: hipblas_handle
 
-    call self_hipblas_matrixop_1d(this % bMatrix, f, fTarget, 2, this % N+1, nvars*nelems, hipblas_handle)
+    call self_hipblas_matrixop_1d(this % bMatrix % devicedata, f, fTarget, 2, this % N+1, nvars*nelems, hipblas_handle)
 
   end subroutine ScalarBoundaryInterp_1D_gpu
 
@@ -1860,10 +1894,10 @@ contains
           fb(1:4) = 0.0_prec
 
           do ii = 1,this % N+1
-            fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar) ! South
-            fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar) ! East
-            fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar) ! North
-            fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar) ! West
+            fb(1) = fb(1) + this % bMatrix  % hostdata(ii,0)*f(i,ii,iel,ivar) ! South
+            fb(2) = fb(2) + this % bMatrix  % hostdata(ii,1)*f(ii,i,iel,ivar) ! East
+            fb(3) = fb(3) + this % bMatrix  % hostdata(ii,1)*f(i,ii,iel,ivar) ! North
+            fb(4) = fb(4) + this % bMatrix  % hostdata(ii,0)*f(ii,i,iel,ivar) ! West
           end do
 
           fTarget(i,ivar,1:4,iel) = fb(1:4)
@@ -1881,7 +1915,7 @@ contains
     real(prec), pointer, intent(in)  :: f(:,:,:,:)
     real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:)
 
-    call ScalarBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+    call ScalarBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix % devicedata), &
                                              c_loc(f),c_loc(fTarget),&
                                              this % N,nvars,nelems)
 
@@ -1904,10 +1938,10 @@ contains
 
             fb(1:4) = 0.0_prec
             do ii = 1,this % N+1
-                fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar,idir) ! South
-                fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar,idir) ! East
-                fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar,idir) ! North
-                fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar,idir) ! West
+                fb(1) = fb(1) + this % bMatrix  % hostdata(ii,0)*f(i,ii,iel,ivar,idir) ! South
+                fb(2) = fb(2) + this % bMatrix  % hostdata(ii,1)*f(ii,i,iel,ivar,idir) ! East
+                fb(3) = fb(3) + this % bMatrix  % hostdata(ii,1)*f(i,ii,iel,ivar,idir) ! North
+                fb(4) = fb(4) + this % bMatrix  % hostdata(ii,0)*f(ii,i,iel,ivar,idir) ! West
             end do
 
             fTarget(i,1:4,iel,ivar,idir) = fb(1:4)
@@ -1926,7 +1960,7 @@ contains
     real(prec), pointer, intent(in)  :: f(:,:,:,:,:)
     real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:)
 
-    call VectorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+    call VectorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix % devicedata), &
                                              c_loc(f),c_loc(fTarget),&
                                              this % N,nvars,nelems)
 
@@ -1950,10 +1984,10 @@ contains
               fb(1:4) = 0.0_prec
               do ii = 1,this % N+1
 
-                fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar,idir,jdir) ! South
-                fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar,idir,jdir) ! East
-                fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar,idir,jdir) ! North
-                fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar,idir,jdir) ! West
+                fb(1) = fb(1) + this % bMatrix  % hostdata(ii,0)*f(i,ii,iel,ivar,idir,jdir) ! South
+                fb(2) = fb(2) + this % bMatrix  % hostdata(ii,1)*f(ii,i,iel,ivar,idir,jdir) ! East
+                fb(3) = fb(3) + this % bMatrix  % hostdata(ii,1)*f(i,ii,iel,ivar,idir,jdir) ! North
+                fb(4) = fb(4) + this % bMatrix  % hostdata(ii,0)*f(ii,i,iel,ivar,idir,jdir) ! West
 
               end do
 
@@ -1973,7 +2007,7 @@ contains
     real(prec), pointer, intent(in)  :: f(:,:,:,:,:,:)
     real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:,:)
 
-    call TensorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+    call TensorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix % devicedata), &
                                              c_loc(f),c_loc(fTarget),&
                                              this % N,nvars,nelems)
 
@@ -1997,12 +2031,12 @@ contains
             fb(1:6) = 0.0_prec
 
             do ii = 1,this % N+1
-              fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar) ! Bottom
-              fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar) ! South
-              fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar) ! East
-              fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar) ! North
-              fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar) ! West
-              fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar) ! Top
+              fb(1) = fb(1) + this % bMatrix  % hostdata(ii,0)*f(i,j,ii,iel,ivar) ! Bottom
+              fb(2) = fb(2) + this % bMatrix  % hostdata(ii,0)*f(i,ii,j,iel,ivar) ! South
+              fb(3) = fb(3) + this % bMatrix  % hostdata(ii,1)*f(ii,i,j,iel,ivar) ! East
+              fb(4) = fb(4) + this % bMatrix  % hostdata(ii,1)*f(i,ii,j,iel,ivar) ! North
+              fb(5) = fb(5) + this % bMatrix  % hostdata(ii,0)*f(ii,i,j,iel,ivar) ! West
+              fb(6) = fb(6) + this % bMatrix  % hostdata(ii,1)*f(i,j,ii,iel,ivar) ! Top
             end do
 
             fTarget(i,j,1:6,iel,ivar) = fb(1:6)
@@ -2021,7 +2055,7 @@ contains
     real(prec), pointer, intent(in)  :: f(:,:,:,:,:)
     real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:)
 
-    call ScalarBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+    call ScalarBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix % devicedata), &
                                              c_loc(f),c_loc(fTarget), &
                                             this % N,nvars,nelems)
 
@@ -2045,12 +2079,12 @@ contains
 
               fb(1:6) = 0.0_prec
               do ii = 1,this % N+1
-                fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar,idir) ! Bottom
-                fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar,idir) ! South
-                fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar,idir) ! East
-                fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar,idir) ! North
-                fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar,idir) ! West
-                fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar,idir) ! Top
+                fb(1) = fb(1) + this % bMatrix  % hostdata(ii,0)*f(i,j,ii,iel,ivar,idir) ! Bottom
+                fb(2) = fb(2) + this % bMatrix  % hostdata(ii,0)*f(i,ii,j,iel,ivar,idir) ! South
+                fb(3) = fb(3) + this % bMatrix  % hostdata(ii,1)*f(ii,i,j,iel,ivar,idir) ! East
+                fb(4) = fb(4) + this % bMatrix  % hostdata(ii,1)*f(i,ii,j,iel,ivar,idir) ! North
+                fb(5) = fb(5) + this % bMatrix  % hostdata(ii,0)*f(ii,i,j,iel,ivar,idir) ! West
+                fb(6) = fb(6) + this % bMatrix  % hostdata(ii,1)*f(i,j,ii,iel,ivar,idir) ! Top
               end do
               fTarget(i,j,1:6,iel,ivar,idir) = fb(1:6)
 
@@ -2069,7 +2103,7 @@ contains
     real(prec), pointer, intent(in)  :: f(:,:,:,:,:,:)
     real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:,:)
 
-    call VectorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+    call VectorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix % devicedata), &
                                              c_loc(f),c_loc(fTarget),&
                                              this % N,nvars,nelems)
 
@@ -2095,12 +2129,12 @@ contains
             fb(1:6) = 0.0_prec
             do ii = 1,this % N+1
 
-                  fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
-                  fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar,idir,jdir) ! South
-                  fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar,idir,jdir) ! East
-                  fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar,idir,jdir) ! North
-                  fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar,idir,jdir) ! West
-                  fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar,idir,jdir) ! Top
+                  fb(1) = fb(1) + this % bMatrix % hostdata (ii,0)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fb(2) = fb(2) + this % bMatrix  % hostdata(ii,0)*f(i,ii,j,iel,ivar,idir,jdir) ! South
+                  fb(3) = fb(3) + this % bMatrix  % hostdata(ii,1)*f(ii,i,j,iel,ivar,idir,jdir) ! East
+                  fb(4) = fb(4) + this % bMatrix  % hostdata(ii,1)*f(i,ii,j,iel,ivar,idir,jdir) ! North
+                  fb(5) = fb(5) + this % bMatrix % hostdata (ii,0)*f(ii,i,j,iel,ivar,idir,jdir) ! West
+                  fb(6) = fb(6) + this % bMatrix  % hostdata(ii,1)*f(i,j,ii,iel,ivar,idir,jdir) ! Top
 
             end do
 
@@ -2123,7 +2157,7 @@ contains
     real(prec), pointer, intent(in)  :: f(:,:,:,:,:,:,:)
     real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:,:,:)
 
-    call TensorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+    call TensorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix % deviceData), &
                                              c_loc(f),c_loc(fTarget), &
                                              this % N,nvars,nelems)
 
@@ -2150,7 +2184,7 @@ contains
 
     do i = 0,this % N
       bWeights(i) = 1.0_real64
-      controlPoints(i) = real(this % controlPoints(i + 1),real64)
+      controlPoints(i) = real(this % controlPoints % hostdata(i + 1),real64)
     end do
 
     ! Computes the product w_k = w_k*(s_k - s_j), k /= j
@@ -2165,7 +2199,7 @@ contains
 
     do j = 0,this % N
       bWeights(j) = 1.0_prec/bWeights(j)
-      this % bWeights(j + 1) = real(bWeights(j),prec)
+      this % bWeights % hostdata(j + 1) = real(bWeights(j),prec)
     end do
 
   end subroutine CalculateBarycentricWeights
@@ -2193,11 +2227,11 @@ contains
     real(real64) :: targetPoints(0:this % M)
 
     do col = 0,this % N
-      controlPoints(col) = real(this % controlPoints(col + 1),real64)
-      bWeights(col) = real(this % bWeights(col + 1),real64)
+      controlPoints(col) = real(this % controlPoints % hostdata(col + 1),real64)
+      bWeights(col) = real(this % bWeights % hostdata(col + 1),real64)
     end do
     do row = 0,this % M
-      targetPoints(row) = real(this % targetPoints(row + 1),real64)
+      targetPoints(row) = real(this % targetPoints % hostdata(row + 1),real64)
     end do
 
     do row = 0,this % M
@@ -2237,7 +2271,7 @@ contains
 
     do row = 0,this % M
       do col = 0,this % N
-        this % iMatrix(col + 1,row + 1) = real(iMatrix(row,col),prec)
+        this % iMatrix % hostdata(col + 1,row + 1) = real(iMatrix(row,col),prec)
       end do
     end do
 
@@ -2266,9 +2300,9 @@ contains
     real(real64) :: controlPoints(0:this % N)
 
     do row = 0, this % N
-      bWeights(row) = real(this % bWeights(row + 1),real64)
-      qWeights(row) = real(this % qWeights(row + 1),real64)
-      controlPoints(row) = real(this % controlPoints(row + 1),real64)
+      bWeights(row) = real(this % bWeights % hostdata(row + 1),real64)
+      qWeights(row) = real(this % qWeights % hostdata(row + 1),real64)
+      controlPoints(row) = real(this % controlPoints % hostdata(row + 1),real64)
     end do
 
     do row = 0, this % N
@@ -2302,8 +2336,8 @@ contains
 
     do row = 0, this % N
       do col = 0, this % N
-        this % dMatrix(row + 1,col + 1) = real(dmat(col,row),prec)
-        this % dgMatrix(row + 1,col + 1) = real(dgmat(col,row),prec)
+        this % dMatrix % hostdata(row + 1,col + 1) = real(dmat(col,row),prec)
+        this % dgMatrix % hostdata(row + 1,col + 1) = real(dgmat(col,row),prec)
       end do
     end do
 
@@ -2335,8 +2369,8 @@ contains
 
     sELocal = real(sE,real64)
     do j = 0, this % N
-      controlPoints(j) = real(this % controlPoints(j + 1),real64)
-      bWeights(j) = real(this % bWeights(j + 1),real64)
+      controlPoints(j) = real(this % controlPoints % hostdata(j + 1),real64)
+      bWeights(j) = real(this % bWeights % hostdata(j + 1),real64)
     end do
 
     xMatchesNode = .false.

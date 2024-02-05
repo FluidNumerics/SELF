@@ -54,17 +54,18 @@ module SELF_Data
 ! ---------------------- Scalars ---------------------- !
   type,extends(SELF_DataObj),public :: Scalar1D
 
-    real(prec),pointer,dimension(:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:) :: jumpBoundary
+    type(hfreal_r3) :: interior
+    type(hfreal_r3) :: boundary
+    type(hfreal_r3) :: extBoundary
+    type(hfreal_r3) :: avgBoundary
+    type(hfreal_r3) :: jumpBoundary
 
   contains
 
     procedure,public :: Init => Init_Scalar1D
     procedure,public :: Free => Free_Scalar1D
 
+    procedure,public :: UpdateHost => UpdateHost_Scalar1D
     procedure,public :: UpdateDevice => UpdateDevice_Scalar1D
 
     generic,public :: BoundaryInterp => BoundaryInterp_Scalar1D_cpu,BoundaryInterp_Scalar1D_gpu
@@ -87,12 +88,12 @@ module SELF_Data
 
   type,extends(SELF_DataObj),public :: Scalar2D
 
-    real(prec),pointer,dimension(:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:) :: interpWork
-    real(prec),pointer,dimension(:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:,:) :: jumpBoundary
+    type(hfreal_r4) :: interior
+    type(hfreal_r4) :: interpWork
+    type(hfreal_r4) :: boundary
+    type(hfreal_r4) :: extBoundary
+    type(hfreal_r4) :: avgBoundary
+    type(hfreal_r4) :: jumpBoundary
 
   contains
 
@@ -145,15 +146,16 @@ module SELF_Data
 
   type,extends(SELF_DataObj),public :: Vector2D
 
-    real(prec),pointer,dimension(:,:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:,:) :: boundaryNormal
+    type(hfreal_r5) :: interior
+    type(hfreal_r5) :: boundary
+    type(hfreal_r5) :: extBoundary
+    type(hfreal_r4) :: boundaryNormal
 
   contains
 
     procedure,public :: Init => Init_Vector2D
     procedure,public :: Free => Free_Vector2D
+    procedure,public :: UpdateHost => UpdateHost_Vector2D
     procedure,public :: UpdateDevice => UpdateDevice_Vector2D
     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Vector2D
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
@@ -304,11 +306,11 @@ contains
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,2,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,2,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,2,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary,2,nelem,nvar,hipMemAttachGlobal))
+    call this % interior % Alloc( lobound=(/1,1,1/), upbound=(/interp % N + 1,nelem,nvar/) )
+    call this % boundary % Alloc( lobound=(/1,1,1/), upbound=(/2,nelem,nvar/) )
+    call this % extBoundary % Alloc( lobound=(/1,1,1/), upbound=(/2,nelem,nvar/) )
+    call this % avgBoundary % Alloc( lobound=(/1,1,1/), upbound=(/2,nelem,nvar/) )
+    call this % jumpBoundary % Alloc( lobound=(/1,1,1/), upbound=(/2,nelem,nvar/) )
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:nVar))
@@ -320,25 +322,37 @@ contains
     class(Scalar1D),intent(inout) :: this
 
     this % interp => null()
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
-    call hipcheck(hipFree(this % jumpBoundary))
+    call this % interior % Free()
+    call this % boundary % Free()
+    call this % extBoundary % Free()
+    call this % avgBoundary % Free()
+    call this % jumpBoundary % Free()
     deallocate (this % meta)
     deallocate (this % eqn)
 
   end subroutine Free_Scalar1D
 
+  subroutine UpdateHost_Scalar1D(this)
+    implicit none
+    class(Scalar1D),intent(inout) :: this
+
+    call this % interior % UpdateHost()
+    call this % boundary % UpdateHost()
+    call this % extBoundary % UpdateHost()
+    call this % avgBoundary % UpdateHost()
+    call this % jumpBoundary % UpdateHost()
+
+  end subroutine UpdateHost_Scalar1D
+
   subroutine UpdateDevice_Scalar1D(this)
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
+    call this % interior % UpdateDevice()
+    call this % boundary % UpdateDevice()
+    call this % extBoundary % UpdateDevice()
+    call this % avgBoundary % UpdateDevice()
+    call this % jumpBoundary % UpdateDevice()
 
   end subroutine UpdateDevice_Scalar1D
 
@@ -346,8 +360,8 @@ contains
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call this % interp % ScalarBoundaryInterp_1D(this % interior, &
-                                                 this % boundary, &
+    call this % interp % ScalarBoundaryInterp_1D(this % interior % hostdata, &
+                                                 this % boundary % hostdata, &
                                                  this % nVar, &
                                                  this % nElem)
 
@@ -358,8 +372,8 @@ contains
     class(Scalar1D),intent(inout) :: this
     type(c_ptr),intent(inout) :: hipblas_handle
 
-    call this % interp % ScalarBoundaryInterp_1D(this % interior, &
-                                                 this % boundary, &
+    call this % interp % ScalarBoundaryInterp_1D(this % interior % devicedata, &
+                                                 this % boundary % devicedata, &
                                                  this % nVar, &
                                                  this % nElem, &
                                                  hipblas_handle)
@@ -371,8 +385,8 @@ contains
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: SELFOut
 
-    call this % interp % ScalarGridInterp_1D(this % interior, &
-                                             SELFout % interior, &
+    call this % interp % ScalarGridInterp_1D(this % interior % hostdata, &
+                                             SELFout % interior % hostdata, &
                                              this % nVar, &
                                              this % nElem)
 
@@ -384,8 +398,8 @@ contains
     type(Scalar1D),intent(inout) :: SELFOut
     type(c_ptr),intent(inout) :: hipblas_handle
 
-    call this % interp % ScalarGridInterp_1D(this % interior, &
-                                             SELFout % interior, &
+    call this % interp % ScalarGridInterp_1D(this % interior % devicedata, &
+                                             SELFout % interior % devicedata, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
@@ -397,8 +411,8 @@ contains
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: SELFOut
 
-    call this % interp % Derivative_1D(this % interior, &
-                                       SELFout % interior, &
+    call this % interp % Derivative_1D(this % interior % hostdata, &
+                                       SELFout % interior % hostdata, &
                                        this % nVar, &
                                        this % nElem)
 
@@ -410,8 +424,8 @@ contains
     type(Scalar1D),intent(inout) :: SELFOut
     type(c_ptr),intent(inout) :: blas_handle
 
-    call this % interp % Derivative_1D(this % interior, &
-                                       SELFout % interior, &
+    call this % interp % Derivative_1D(this % interior % devicedata, &
+                                       SELFout % interior % devicedata, &
                                        this % nVar, &
                                        this % nElem, &
                                        blas_handle)
@@ -492,12 +506,12 @@ contains
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % interpWork,interp % M + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
+    call this % interior % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % N + 1,interp % N + 1,nelem,nvar/) )
+    call this % interpWork % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % M + 1,interp % N + 1,nelem,nvar/) )
+    call this % boundary % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar/) )
+    call this % extBoundary % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar/) )
+    call this % avgBoundary % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar/) )
+    call this % jumpBoundary % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar/) )
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:nVar))
@@ -511,26 +525,38 @@ contains
     this % nVar = 0
     this % nElem = 0
     this % interp => null()
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % interpWork))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
-    call hipcheck(hipFree(this % jumpBoundary))
+    call this % interior % Free()
+    call this % interpWork % Free()
+    call this % boundary % Free()
+    call this % extBoundary % Free()
+    call this % avgBoundary % Free()
+    call this % jumpBoundary % Free()
     deallocate (this % meta)
     deallocate (this % eqn)
 
   end subroutine Free_Scalar2D
 
+  subroutine UpdateHost_Scalar2D(this)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
+
+    call this % interior % UpdateHost()
+    call this % boundary % UpdateHost()
+    call this % extBoundary % UpdateHost()
+    call this % avgBoundary % UpdateHost()
+    call this % jumpBoundary % UpdateHost()
+
+  end subroutine UpdateHost_Scalar2D
+
   subroutine UpdateDevice_Scalar2D(this)
     implicit none
     class(Scalar2D),intent(inout) :: this
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
+    call this % interior % UpdateDevice()
+    call this % boundary % UpdateDevice()
+    call this % extBoundary % UpdateDevice()
+    call this % avgBoundary % UpdateDevice()
+    call this % jumpBoundary % UpdateDevice()
 
   end subroutine UpdateDevice_Scalar2D
 
@@ -558,8 +584,8 @@ contains
     class(Scalar2D),intent(in) :: this
     type(Scalar2D),intent(inout) :: SELFOut
 
-    call this % interp % ScalarGridInterp_2D(this % interior, &
-                                             SELFout % interior, &
+    call this % interp % ScalarGridInterp_2D(this % interior % hostdata, &
+                                             SELFout % interior % hostdata, &
                                              this % nVar, &
                                              this % nElem)
 
@@ -571,9 +597,9 @@ contains
     type(Scalar2D),intent(inout) :: SELFOut
     type(c_ptr),intent(inout) :: hipblas_handle
 
-    call this % interp % ScalarGridInterp_2D(this % interior, &
-                                             this % interpWork, &
-                                             SELFout % interior, &
+    call this % interp % ScalarGridInterp_2D(this % interior % devicedata, &
+                                             this % interpWork % devicedata, &
+                                             SELFout % interior % devicedata, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
@@ -585,8 +611,8 @@ contains
     class(Scalar2D),intent(in) :: this
     type(Vector2D),intent(inout) :: df
 
-    call this % interp % ScalarGradient_2D(this % interior, &
-                                           df % interior, &
+    call this % interp % ScalarGradient_2D(this % interior % hostdata, &
+                                           df % interior % hostdata, &
                                            this % nVar, &
                                            this % nElem)
 
@@ -598,8 +624,8 @@ contains
     type(Vector2D),intent(inout) :: df
     type(c_ptr),intent(inout) :: blas_handle
 
-    call this % interp % ScalarGradient_2D(this % interior, &
-                                           df % interior, &
+    call this % interp % ScalarGradient_2D(this % interior % devicedata, &
+                                           df % interior % devicedata, &
                                            this % nVar, &
                                            this % nElem,&
                                            blas_handle)
@@ -991,10 +1017,10 @@ contains
     this % nElem = nElem
     N = interp % N
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
+    call this % interior % Alloc( lobound=(/1,1,1,1,1/), upbound=(/interp % N + 1,interp % N + 1,nelem,nvar,2/) )
+    call this % boundary % Alloc( lobound=(/1,1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar,2/) )
+    call this % extBoundary % Alloc( lobound=(/1,1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar,2/) )
+    call this % boundaryNormal % Alloc( lobound=(/1,1,1,1/), upbound=(/interp % N + 1,4,nelem,nvar/) )
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:2*nVar))
@@ -1009,10 +1035,10 @@ contains
     this % nVar = 0
     this % nElem = 0
 
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % boundaryNormal))
-    call hipcheck(hipFree(this % extBoundary))
+    call this % interior % Free()
+    call this % boundary % Free()
+    call this % boundaryNormal % Free()
+    call this % extBoundary % Free()
 
     deallocate (this % meta)
     deallocate (this % eqn)
@@ -1031,16 +1057,27 @@ contains
 
 !   END SUBROUTINE SetEquation_Vector2D
 
-  subroutine UpdateDevice_Vector2D(this)
-    implicit none
-    class(Vector2D),intent(inout) :: this
+  SUBROUTINE UpdateHost_Vector2D(this)
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: this
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundaryNormal),sizeof(this % boundaryNormal),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
+    CALL this % interior % UpdateHost()
+    CALL this % boundary % UpdateHost()
+    CALL this % boundaryNormal % UpdateHost()
+    CALL this % extBoundary % UpdateHost()
 
-  end subroutine UpdateDevice_Vector2D
+  END SUBROUTINE UpdateHost_Vector2D
+
+  SUBROUTINE UpdateDevice_Vector2D(this)
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: this
+
+    CALL this % interior % UpdateDevice()
+    CALL this % boundary % UpdateDevice()
+    CALL this % boundaryNormal % UpdateDevice()
+    CALL this % extBoundary % UpdateDevice()
+
+  END SUBROUTINE UpdateDevice_Vector2D
 
 !   SUBROUTINE BoundaryInterp_Vector2D(this,gpuAccel)
 !     IMPLICIT NONE

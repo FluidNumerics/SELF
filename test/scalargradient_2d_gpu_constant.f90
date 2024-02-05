@@ -44,17 +44,19 @@ integer function scalargradient_2d_gpu_constant() result(r)
   call df % Init(interp,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior  = 1.0_prec
+  f % interior % hostdata  = 1.0_prec
 
   call f % updatedevice()
 
   ! Interpolate with gpuAccel = .true.
   call f % Gradient(df, handle)
 
-  ! Calculate diff from exact
-  df % interior  = abs(df % interior  - 0.0_prec)
+  call df % interior % updatehost()
 
-  if (maxval(df % interior ) <= tolerance) then
+  ! Calculate diff from exact
+  df % interior % hostdata  = abs(df % interior % hostdata  - 0.0_prec)
+
+  if (maxval(df % interior % hostdata ) <= tolerance) then
     r = 0
   else
     r = 1

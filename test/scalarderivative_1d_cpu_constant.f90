@@ -38,14 +38,14 @@ integer function scalarderivative_1d_cpu_constant() result(r)
   call df % Init(interp,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior(:,:,:) = 1.0_prec
+  f % interior % hostdata(:,:,:) = 1.0_prec
 
   call f % Derivative(df)
 
   ! Calculate diff from exact
-  df % interior = abs(df % interior  - 0.0_prec)
+  df % interior % hostdata = abs(df % interior % hostdata  - 0.0_prec)
 
-  if (maxval(df % interior ) <= tolerance) then
+  if (maxval(df % interior % hostdata ) <= tolerance) then
     r = 0
   else
     r = 1
