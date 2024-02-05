@@ -19,7 +19,7 @@ The SELF API is designed based on the assumption that SEM developers and researc
 
 * CMake (3.21-3.27)
 * 2008 standard compliant Fortran Compiler
-* ROCm 5.7.0 or greater
+* ROCm 6.0.0 or greater (HIP, HIPFort, HIPBLAS)
 * CUDA 11 or greater (if building for Nvidia GPU)
 * HDF5
 * [FEQParse](https://github.com/fluidnumerics/feq-parse)

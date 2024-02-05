@@ -17,6 +17,7 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
     endif()
 endif()
+set( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIE")
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
@@ -43,17 +44,17 @@ if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG} --coverage")
     set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
     set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
-
     set( CMAKE_C_FLAGS_COVERAGE "-g -O0 --coverage")
 
 endif()
 
 # ------ dependencies ------ #
 # HIP
-find_package(hip REQUIRED)
-find_package(hipblas REQUIRED)
-find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
-find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
+find_package(hipfort REQUIRED COMPONENTS hip hipblas)
+#find_package(hip REQUIRED)
+#find_package(hipblas REQUIRED)
+#find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
+#find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
 
 
 # MPI
@@ -70,12 +71,6 @@ find_package(HDF5 REQUIRED Fortran)
 # FEQ-Parse
 find_library(FEQPARSE_LIBRARIES NAMES feqparse REQUIRED)
 find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
-
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()
 
 
 # ----- end dependencies ----- #

@@ -18,11 +18,13 @@ function (add_fortran_examples)
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
                     ${HIPFORT_LIBRARIES}
+                    hipfort::hip
+                    hipfort::hipblas
                     hip::device)
                            
         target_include_directories(${EXAMPLE_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
-                        ${HDF5_INCLUDE_DIRS}/shared
+                        ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS}
                         ${HIPFORT_INCLUDE_DIRS})
 

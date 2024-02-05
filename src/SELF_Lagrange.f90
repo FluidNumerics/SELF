@@ -180,6 +180,66 @@ module SELF_Lagrange
 
   end type Lagrange
 
+  INTERFACE
+  SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
+END INTERFACE
+
+INTERFACE
+  SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
+END INTERFACE
+
+INTERFACE
+  SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
+END INTERFACE
+
+INTERFACE
+  SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper
+END INTERFACE
+
+INTERFACE
+  SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper
+END INTERFACE
+
+INTERFACE
+  SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper
+END INTERFACE
+
 
 contains
 
@@ -615,7 +675,7 @@ contains
 !     !! The number of variables/functions that are interpolated
 !     integer,intent(in)     :: nelems
 !     !! The number of spectral elements in the SEM grid
-!     real(prec),intent(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     !! (Input) Array of function values, defined on the control grid
 !     real(prec),intent(out) :: fTarget(1:2,0:this % M,0:this % M,1:nelems,1:nvars)
 !     !! (Output) Array of function values, defined on the target grid
@@ -631,10 +691,10 @@ contains
 !             fTarget(1,i,j,iel,ivar) = 0.0_prec
 !             fTarget(2,i,j,iel,ivar) = 0.0_prec
 
-!             do jj = 0,this % N
+!             do jj = 1,this % N+1
 
 !               fi(1:2) = 0.0_prec
-!               do ii = 0,this % N
+!               do ii = 1,this % N+1
 !                 fi(1:2) = fi(1:2) + f(1:2,ii,jj,iel,ivar)*this % iMatrix (ii,i)
 !               end do
 
@@ -675,7 +735,7 @@ contains
 !     type(c_ptr),intent(out) :: fTarget_dev
 !     !! (Output) Array of function values, defined on the target grid
 
-!     call VectorGridInterp_2D_gpu_wrapper(this % iMatrix % deviceData, &
+!     call VectorGridInterp_2D_gpu_wrapper(this % iMatrix, &
 !                                          f_dev,fTarget_dev, &
 !                                          this % N,this % M, &
 !                                          nvars,nelems)
@@ -686,7 +746,7 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     real(prec),intent(out) :: fTarget(0:this % M,0:this % M,0:this % M,1:nelems,1:nvars)
 !     ! Local
 !     integer :: iel,ivar,i,j,k,ii,jj,kk
@@ -699,11 +759,11 @@ contains
 !             do i = 0,this % M
 
 !               fijk = 0.0_prec
-!               do kk = 0,this % N
+!               do kk = 1,this % N+1
 !                 fij = 0.0_prec
-!                 do jj = 0,this % N
+!                 do jj = 1,this % N+1
 !                   fi = 0.0_prec
-!                   do ii = 0,this % N
+!                   do ii = 1,this % N+1
 !                     fi = fi + f(ii,jj,kk,iel,ivar)*this % iMatrix (ii,i)
 !                   end do
 !                   fij = fij + fi*this % iMatrix (jj,j)
@@ -727,7 +787,7 @@ contains
 !     type(c_ptr),intent(in)  :: f_dev
 !     type(c_ptr),intent(out) :: fTarget_dev
 
-!     call ScalarGridInterp_3D_gpu_wrapper(this % iMatrix % deviceData, &
+!     call ScalarGridInterp_3D_gpu_wrapper(this % iMatrix, &
 !                                          f_dev,fTarget_dev, &
 !                                          this % N,this % M, &
 !                                          nvars,nelems)
@@ -738,7 +798,7 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     real(prec),intent(out) :: fTarget(1:3,0:this % M,0:this % M,0:this % M,1:nelems,1:nvars)
 !     ! Local
 !     integer :: iel,ivar,i,j,k,ii,jj,kk
@@ -751,11 +811,11 @@ contains
 !             do i = 0,this % M
 
 !               fTarget(1:3,i,j,k,iel,ivar) = 0.0_prec
-!               do kk = 0,this % N
+!               do kk = 1,this % N+1
 !                 fij(1:3) = 0.0_prec
-!                 do jj = 0,this % N
+!                 do jj = 1,this % N+1
 !                   fi(1:3) = 0.0_prec
-!                   do ii = 0,this % N
+!                   do ii = 1,this % N+1
 !                     fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iel,ivar)*this % iMatrix (ii,i)
 !                   end do
 !                   fij(1:3) = fij(1:3) + fi(1:3)*this % iMatrix (jj,j)
@@ -778,7 +838,7 @@ contains
 !     type(c_ptr),intent(in)  :: f_dev
 !     type(c_ptr),intent(out) :: fTarget_dev
 
-!     call VectorGridInterp_3D_gpu_wrapper(this % iMatrix % deviceData, &
+!     call VectorGridInterp_3D_gpu_wrapper(this % iMatrix, &
 !                                          f_dev,fTarget_dev, &
 !                                          this % N,this % M, &
 !                                          nvars,nelems)
@@ -870,19 +930,19 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:this % N+1,1:nelems,1:nvars)
 !     real(prec),intent(in)  :: bf(1:nvars,1:2,1:nelems)
-!     real(prec),intent(out) :: df(0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(out) :: df(1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer :: i,ii,iel,ivar
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do i = 0,this % N
+!         do i = 1,this % N+1
 
 !           ! Interior Derivative Matrix Application
 !           df(i,iel,ivar) = 0.0_prec
-!           do ii = 0,this % N
+!           do ii = 1,this % N+1
 !             df(i,iel,ivar) = df(i,iel,ivar) + this % dgMatrix (ii,i)*f(ii,iel,ivar)
 !           end do
 
@@ -906,9 +966,9 @@ contains
 !     type(c_ptr),intent(in)  :: bf_dev
 !     type(c_ptr),intent(out) :: df_dev
 
-!     call DGDerivative_1D_gpu_wrapper(this % dgMatrix % deviceData, &
-!                                      this % bMatrix % deviceData, &
-!                                      this % qWeights % deviceData, &
+!     call DGDerivative_1D_gpu_wrapper(this % dgMatrix, &
+!                                      this % bMatrix, &
+!                                      this % qWeights, &
 !                                      f_dev,bf_dev,df_dev, &
 !                                      this % N, &
 !                                      nvars,nelems)
@@ -1014,20 +1074,20 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bf(0:this % N,1:nvars,1:4,1:nelems)
-!   !   REAL(prec),INTENT(out) :: gradF(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: bf(1:this % N+1,1:nvars,1:4,1:nelems)
+!   !   REAL(prec),INTENT(out) :: gradF(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   INTEGER    :: i,j,ii,iel,ivar
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           gradF(1,i,j,iel,ivar) = 0.0_prec
 !   !           gradF(2,i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 0,this % N
+!   !           DO ii = 1,this % N+1
 !   !             gradF(1,i,j,iel,ivar) = gradF(1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(ii,j,iel,ivar)
 !   !             gradF(2,i,j,iel,ivar) = gradF(2,i,j,iel,ivar) + this % dgMatrix (ii,j)*f(i,ii,iel,ivar)
 !   !           END DO
@@ -1056,9 +1116,9 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: bf_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: gradF_dev
 
-!   !   CALL ScalarDGGradient_2D_gpu_wrapper(this % dgMatrix % deviceData, &
-!   !                                        this % bMatrix % deviceData, &
-!   !                                        this % qWeights % deviceData, &
+!   !   CALL ScalarDGGradient_2D_gpu_wrapper(this % dgMatrix, &
+!   !                                        this % bMatrix, &
+!   !                                        this % qWeights, &
 !   !                                        f_dev,bf_dev,gradF_dev,this % N, &
 !   !                                        nvars,nelems)
 
@@ -1075,22 +1135,22 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:2,1:2,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(out) :: gradF(1:2,1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer    :: i,j,ii,iel,ivar
 !     real(prec) :: gf(1:2,1:2)
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+!         do j = 1,this % N+1
+!           do i = 1,this % N+1
 
 !             gf(1,1) = 0.0_prec
 !             gf(2,1) = 0.0_prec
 !             gf(1,2) = 0.0_prec
 !             gf(2,2) = 0.0_prec
-!             do ii = 0,this % N
+!             do ii = 1,this % N+1
 !               gf(1,1) = gf(1,1) + this % dMatrix (ii,i)*f(1,ii,j,iel,ivar)
 !               gf(2,1) = gf(2,1) + this % dMatrix (ii,i)*f(2,ii,j,iel,ivar)
 !               gf(1,2) = gf(1,2) + this % dMatrix (ii,j)*f(1,i,ii,iel,ivar)
@@ -1112,7 +1172,7 @@ contains
 !     type(c_ptr),intent(in)     :: f_dev
 !     type(c_ptr),intent(out)    :: gradF_dev
 
-!     call VectorGradient_2D_gpu_wrapper(this % dMatrix % deviceData, &
+!     call VectorGradient_2D_gpu_wrapper(this % dMatrix, &
 !                                        f_dev,gradF_dev,this % N, &
 !                                        nvars,nelems)
 
@@ -1129,22 +1189,22 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bf(1:2,0:this % N,1:nvars,1:4,1:nelems)
-!   !   REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: bf(1:2,1:this % N+1,1:nvars,1:4,1:nelems)
+!   !   REAL(prec),INTENT(out) :: gradF(1:2,1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   INTEGER    :: i,j,ii,iel,ivar
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           gradF(1,1,i,j,iel,ivar) = 0.0_prec
 !   !           gradF(2,1,i,j,iel,ivar) = 0.0_prec
 !   !           gradF(1,2,i,j,iel,ivar) = 0.0_prec
 !   !           gradF(2,2,i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 0,this % N
+!   !           DO ii = 1,this % N+1
 !   !             gradF(1,1,i,j,iel,ivar) = gradF(1,1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(1,ii,j,iel,ivar)
 !   !             gradF(2,1,i,j,iel,ivar) = gradF(2,1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(2,ii,j,iel,ivar)
 !   !             gradF(1,2,i,j,iel,ivar) = gradF(1,2,i,j,iel,ivar) + this % dgMatrix (ii,j)*f(1,i,ii,iel,ivar)
@@ -1181,9 +1241,9 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: bf_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: gradF_dev
 
-!   !   CALL VectorDGGradient_2D_gpu_wrapper(this % dMatrix % deviceData, &
-!   !                                        this % bMatrix % deviceData, &
-!   !                                        this % qWeights % deviceData, &
+!   !   CALL VectorDGGradient_2D_gpu_wrapper(this % dMatrix, &
+!   !                                        this % bMatrix, &
+!   !                                        this % qWeights, &
 !   !                                        f_dev,bf_dev,gradF_dev,this % N, &
 !   !                                        nvars,nelems)
 
@@ -1193,18 +1253,18 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out) :: dF(0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer    :: i,j,ii,iel,ivar
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+!         do j = 1,this % N+1
+!           do i = 1,this % N+1
 
 !             dF(i,j,iel,ivar) = 0.0_prec
-!             do ii = 0,this % N
+!             do ii = 1,this % N+1
 !               dF(i,j,iel,ivar) = dF(i,j,iel,ivar) + this % dMatrix (ii,i)*f(1,ii,j,iel,ivar) + &
 !                                  this % dMatrix (ii,j)*f(2,i,ii,iel,ivar)
 !             end do
@@ -1223,7 +1283,7 @@ contains
 !     type(c_ptr),intent(in)     :: f_dev
 !     type(c_ptr),intent(out)    :: dF_dev
 
-!     call VectorDivergence_2D_gpu_wrapper(this % dMatrix % deviceData, &
+!     call VectorDivergence_2D_gpu_wrapper(this % dMatrix, &
 !                                          f_dev,dF_dev,this % N, &
 !                                          nvars,nelems)
 
@@ -1234,20 +1294,20 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(in)  :: bF(0:this % N,1:nvars,1:4,1:nelems)
-!     real(prec),intent(out) :: dF(0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: bF(1:this % N+1,1:nvars,1:4,1:nelems)
+!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     real(prec) :: dfLoc
 !     integer    :: i,j,ii,iel,ivar
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+!         do j = 1,this % N+1
+!           do i = 1,this % N+1
 
 !             dfLoc = 0.0_prec
-!             do ii = 0,this % N
+!             do ii = 1,this % N+1
 !               dfLoc = dfLoc + this % dgMatrix (ii,i)*f(1,ii,j,iel,ivar) + &
 !                       this % dgMatrix (ii,j)*f(2,i,ii,iel,ivar)
 !             end do
@@ -1275,9 +1335,9 @@ contains
 !     type(c_ptr),intent(in)     :: bF_dev
 !     type(c_ptr),intent(out)    :: dF_dev
 
-!     call VectorDGDivergence_2D_gpu_wrapper(this % dgMatrix % deviceData, &
-!                                            this % bMatrix % deviceData, &
-!                                            this % qWeights % deviceData, &
+!     call VectorDGDivergence_2D_gpu_wrapper(this % dgMatrix, &
+!                                            this % bMatrix, &
+!                                            this % qWeights, &
 !                                            f_dev,bF_dev,dF_dev,this % N, &
 !                                            nvars,nelems)
 
@@ -1287,18 +1347,18 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(out) :: dF(0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(out) :: dF(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   INTEGER    :: i,j,ii,iel,ivar
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           dF(i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 0,this % N
+!   !           DO ii = 1,this % N+1
 !   !             dF(i,j,iel,ivar) = dF(i,j,iel,ivar) + this % dMatrix (ii,j)*f(1,i,ii,iel,ivar) - &
 !   !                                this % dMatrix (ii,i)*f(2,ii,j,iel,ivar)
 !   !           END DO
@@ -1317,7 +1377,7 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: f_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-!   !   CALL VectorCurl_2D_gpu_wrapper(this % dMatrix % deviceData, &
+!   !   CALL VectorCurl_2D_gpu_wrapper(this % dMatrix, &
 !   !                                  f_dev,dF_dev,this % N, &
 !   !                                  nvars,nelems)
 
@@ -1327,19 +1387,19 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(out) :: dF(0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(out) :: dF(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   INTEGER    :: i,j,n,iel,ivar
 !   !   REAL(prec) :: dfloc
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           dfloc = 0.0_prec
-!   !           DO n = 0,this % N
+!   !           DO n = 1,this % N+1
 !   !             dfloc = dfloc + this % dMatrix (n,i)*f(1,n,i,j,iel,ivar) + &
 !   !                             this % dMatrix (n,j)*f(2,n,i,j,iel,ivar)
 !   !           END DO
@@ -1360,7 +1420,7 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: f_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-!   !   CALL P2VectorDivergence_2D_gpu_wrapper(this % dMatrix % deviceData, &
+!   !   CALL P2VectorDivergence_2D_gpu_wrapper(this % dMatrix, &
 !   !                                        f_dev,dF_dev,this % N, &
 !   !                                        nvars,nelems)
 
@@ -1371,20 +1431,20 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bF(0:this % N,1:nvars,1:4,1:nelems)
-!   !   REAL(prec),INTENT(out) :: dF(0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: bF(1:this % N+1,1:nvars,1:4,1:nelems)
+!   !   REAL(prec),INTENT(out) :: dF(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   REAL(prec) :: dfLoc
 !   !   INTEGER    :: i,j,n,iel,ivar
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           dfLoc = 0.0_prec
-!   !           DO n = 0,this % N
+!   !           DO n = 1,this % N+1
 !   !             dfLoc = dfLoc + this % dgMatrix (n,i)*f(1,n,i,j,iel,ivar) + &
 !   !                             this % dgMatrix (n,j)*f(2,n,i,j,iel,ivar)
 !   !           END DO
@@ -1412,9 +1472,9 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: bF_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-!   !   CALL P2VectorDGDivergence_2D_gpu_wrapper(this % dgMatrix % deviceData, &
-!   !                                          this % bMatrix % deviceData, &
-!   !                                          this % qWeights % deviceData, &
+!   !   CALL P2VectorDGDivergence_2D_gpu_wrapper(this % dgMatrix, &
+!   !                                          this % bMatrix, &
+!   !                                          this % qWeights, &
 !   !                                          f_dev,bF_dev,dF_dev,this % N, &
 !   !                                          nvars,nelems)
 
@@ -1425,19 +1485,19 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(out) :: dF(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:2,1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(out) :: dF(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   INTEGER    :: i,j,ii,iel,ivar
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           dF(1,i,j,iel,ivar) = 0.0_prec
 !   !           dF(2,i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 0,this % N
+!   !           DO ii = 1,this % N+1
 !   !             dF(1,i,j,iel,ivar) = dF(1,i,j,iel,ivar) + this % dMatrix (ii,i)*f(1,1,ii,j,iel,ivar) + &
 !   !                                  this % dMatrix (ii,j)*f(2,1,i,ii,iel,ivar)
 !   !             dF(2,i,j,iel,ivar) = dF(2,i,j,iel,ivar) + this % dMatrix (ii,i)*f(1,2,ii,j,iel,ivar) + &
@@ -1458,7 +1518,7 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: f_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-!   !   CALL TensorDivergence_2D_gpu_wrapper(this % dMatrix % deviceData, &
+!   !   CALL TensorDivergence_2D_gpu_wrapper(this % dMatrix, &
 !   !                                        f_dev,dF_dev,this % N, &
 !   !                                        nvars,nelems)
 
@@ -1469,20 +1529,20 @@ contains
 !   !   IMPLICIT NONE
 !   !   CLASS(Lagrange),INTENT(in) :: this
 !   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bf(1:2,1:2,0:this % N,1:nvars,1:4,1:nelems)
-!   !   REAL(prec),INTENT(out) :: dF(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: f(1:2,1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!   !   REAL(prec),INTENT(in)  :: bf(1:2,1:2,1:this % N+1,1:nvars,1:4,1:nelems)
+!   !   REAL(prec),INTENT(out) :: dF(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !   !   ! Local
 !   !   INTEGER    :: i,j,ii,iel,ivar
 
 !   !   DO iel = 1,nelems
 !   !     DO ivar = 1,nvars
-!   !       DO j = 0,this % N
-!   !         DO i = 0,this % N
+!   !       DO j = 1,this % N+1
+!   !         DO i = 1,this % N+1
 
 !   !           dF(1,i,j,iel,ivar) = 0.0_prec
 !   !           dF(2,i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 0,this % N
+!   !           DO ii = 1,this % N+1
 !   !             dF(1,i,j,iel,ivar) = dF(1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(1,1,ii,j,iel,ivar) + &
 !   !                                  this % dgMatrix (ii,j)*f(2,1,i,ii,iel,ivar)
 !   !             dF(2,i,j,iel,ivar) = dF(2,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(1,2,ii,j,iel,ivar) + &
@@ -1517,9 +1577,9 @@ contains
 !   !   TYPE(c_ptr),INTENT(in)     :: bf_dev
 !   !   TYPE(c_ptr),INTENT(out)    :: dF_dev
 
-!   !   CALL TensorDGDivergence_2D_gpu_wrapper(this % dgMatrix % deviceData, &
-!   !                                          this % bMatrix % deviceData, &
-!   !                                          this % qWeights % deviceData, &
+!   !   CALL TensorDGDivergence_2D_gpu_wrapper(this % dgMatrix, &
+!   !                                          this % bMatrix, &
+!   !                                          this % qWeights, &
 !   !                                          f_dev,bF_dev,dF_dev,this % N, &
 !   !                                          nvars,nelems)
 
@@ -1529,22 +1589,22 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(out) :: gradF(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer    :: i,j,k,ii,iel,ivar
 !     real(prec) :: gf(1:3)
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do k = 0,this % N
-!           do j = 0,this % N
-!             do i = 0,this % N
+!         do k = 1,this % N+1
+!           do j = 1,this % N+1
+!             do i = 1,this % N+1
 
 !               gF(1) = 0.0_prec
 !               gF(2) = 0.0_prec
 !               gF(3) = 0.0_prec
-!               do ii = 0,this % N
+!               do ii = 1,this % N+1
 !                 gF(1) = gF(1) + this % dMatrix (ii,i)*f(ii,j,k,iel,ivar)
 !                 gF(2) = gF(2) + this % dMatrix (ii,j)*f(i,ii,k,iel,ivar)
 !                 gF(3) = gF(3) + this % dMatrix (ii,k)*f(i,j,ii,iel,ivar)
@@ -1569,7 +1629,7 @@ contains
 !     type(c_ptr),intent(in)     :: f_dev
 !     type(c_ptr),intent(out)    :: gradF_dev
 
-!     call ScalarGradient_3D_gpu_wrapper(this % dMatrix % deviceData, &
+!     call ScalarGradient_3D_gpu_wrapper(this % dMatrix, &
 !                                        f_dev,gradF_dev,this % N, &
 !                                        nvars,nelems)
 
@@ -1588,20 +1648,20 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:3,1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(out) :: gradF(1:3,1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer    :: i,j,k,ii,iel,ivar
 !     real(prec) :: gF(1:3,1:3)
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do k = 0,this % N
-!           do j = 0,this % N
-!             do i = 0,this % N
+!         do k = 1,this % N+1
+!           do j = 1,this % N+1
+!             do i = 1,this % N+1
 
 !               gF = 0.0_prec
-!               do ii = 0,this % N
+!               do ii = 1,this % N+1
 !                 gF(1,1) = gF(1,1) + this % dMatrix (ii,i)*f(1,ii,j,k,iel,ivar)
 !                 gF(2,1) = gF(2,1) + this % dMatrix (ii,i)*f(2,ii,j,k,iel,ivar)
 !                 gF(3,1) = gF(3,1) + this % dMatrix (ii,i)*f(3,ii,j,k,iel,ivar)
@@ -1638,7 +1698,7 @@ contains
 !     type(c_ptr),intent(in)     :: f_dev
 !     type(c_ptr),intent(out)    :: gradF_dev
 
-!     call VectorGradient_3D_gpu_wrapper(this % dMatrix % deviceData, &
+!     call VectorGradient_3D_gpu_wrapper(this % dMatrix, &
 !                                        f_dev,gradF_dev,this % N, &
 !                                        nvars,nelems)
 
@@ -1648,19 +1708,19 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out) :: dF(0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer    :: i,j,k,ii,iel,ivar
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do k = 0,this % N
-!           do j = 0,this % N
-!             do i = 0,this % N
+!         do k = 1,this % N+1
+!           do j = 1,this % N+1
+!             do i = 1,this % N+1
 
 !               dF(i,j,k,iel,ivar) = 0.0_prec
-!               do ii = 0,this % N
+!               do ii = 1,this % N+1
 !                 dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + this % dMatrix (ii,i)*f(1,ii,j,k,iel,ivar) + &
 !                                      this % dMatrix (ii,j)*f(2,i,ii,k,iel,ivar) + &
 !                                      this % dMatrix (ii,k)*f(3,i,j,ii,iel,ivar)
@@ -1681,7 +1741,7 @@ contains
 !     type(c_ptr),intent(in)     :: f_dev
 !     type(c_ptr),intent(out)    :: dF_dev
 
-!     call VectorDivergence_3D_gpu_wrapper(this % dMatrix % deviceData, &
+!     call VectorDivergence_3D_gpu_wrapper(this % dMatrix, &
 !                                          f_dev,dF_dev,this % N, &
 !                                          nvars,nelems)
 
@@ -1692,20 +1752,20 @@ contains
 !     implicit none
 !     class(Lagrange),intent(in) :: this
 !     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(in)  :: bf(0:this % N,0:this % N,1:nvars,1:6,1:nelems)
-!     real(prec),intent(out) :: dF(0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+!     real(prec),intent(in)  :: bf(1:this % N+1,1:this % N+1,1:nvars,1:6,1:nelems)
+!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
 !     ! Local
 !     integer    :: i,j,k,ii,iel,ivar
 
 !     do iel = 1,nelems
 !       do ivar = 1,nvars
-!         do k = 0,this % N
-!           do j = 0,this % N
-!             do i = 0,this % N
+!         do k = 1,this % N+1
+!           do j = 1,this % N+1
+!             do i = 1,this % N+1
 
 !               dF(i,j,k,iel,ivar) = 0.0_prec
-!               do ii = 0,this % N
+!               do ii = 1,this % N+1
 !                 dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + this % dgMatrix (ii,i)*f(1,ii,j,k,iel,ivar) + &
 !                                      this % dgMatrix (ii,j)*f(2,i,ii,k,iel,ivar) + &
 !                                      this % dgMatrix (ii,k)*f(3,i,j,ii,iel,ivar)
@@ -1737,9 +1797,9 @@ contains
 !     type(c_ptr),intent(in)     :: bF_dev
 !     type(c_ptr),intent(out)    :: dF_dev
 
-!     call VectorDGDivergence_3D_gpu_wrapper(this % dgMatrix % deviceData, &
-!                                            this % bMatrix % deviceData, &
-!                                            this % qWeights % deviceData, &
+!     call VectorDGDivergence_3D_gpu_wrapper(this % dgMatrix, &
+!                                            this % bMatrix, &
+!                                            this % qWeights, &
 !                                            f_dev,bF_dev,dF_dev,this % N, &
 !                                            nvars,nelems)
 
@@ -1783,295 +1843,291 @@ contains
 
   end subroutine ScalarBoundaryInterp_1D_gpu
 
-!   subroutine ScalarBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     real(prec),intent(in)      :: f(0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)     :: fTarget(0:this % N,1:nvars,1:4,1:nelems)
-!     ! Local
-!     integer :: i,ii,iel,ivar
-!     real(prec) :: fb(1:4)
+  subroutine ScalarBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),intent(in)      :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+    real(prec),intent(out)     :: fTarget(1:this % N+1,1:nvars,1:4,1:nelems)
+    ! Local
+    integer :: i,ii,iel,ivar
+    real(prec) :: fb(1:4)
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do i = 0,this % N
+    do iel = 1,nelems
+      do ivar = 1,nvars
+        do i = 1,this % N+1
 
-!           fb(1:4) = 0.0_prec
+          fb(1:4) = 0.0_prec
 
-!           do ii = 0,this % N
-!             fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar) ! South
-!             fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar) ! East
-!             fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar) ! North
-!             fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar) ! West
-!           end do
+          do ii = 1,this % N+1
+            fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar) ! South
+            fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar) ! East
+            fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar) ! North
+            fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar) ! West
+          end do
 
-!           fTarget(i,ivar,1:4,iel) = fb(1:4)
+          fTarget(i,ivar,1:4,iel) = fb(1:4)
 
-!         end do
-!       end do
-!     end do
+        end do
+      end do
+    end do
 
-!   end subroutine ScalarBoundaryInterp_2D_cpu
+  end subroutine ScalarBoundaryInterp_2D_cpu
 
-!   subroutine ScalarBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fTarget
+  subroutine ScalarBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:)
 
-!     call ScalarBoundaryInterp_2D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fTarget,this % N,nvars,nelems)
+    call ScalarBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget),&
+                                             this % N,nvars,nelems)
 
-!   end subroutine ScalarBoundaryInterp_2D_gpu
+  end subroutine ScalarBoundaryInterp_2D_gpu
 
-!   subroutine VectorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fTarget(1:2,0:this % N,1:nvars,1:4,1:nelems)
-!     ! Local
-!     integer :: i,ii,idir,iel,ivar
-!     real(prec) :: fb(1:2,1:4)
+  subroutine VectorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out)  :: fTarget(1:this % N+1,1:4,1:nelems,1:nvars,1:2)
+    ! Local
+    integer :: i,ii,idir,iel,ivar
+    real(prec) :: fb(1:4)
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do i = 0,this % N
+    do idir = 1,2
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do i = 1,this % N+1
 
-!           fb(1:2,1:4) = 0.0_prec
-!           do ii = 0,this % N
-!             do idir = 1,2
-!               fb(idir,1) = fb(idir,1) + this % bMatrix (ii,0)*f(idir,i,ii,iel,ivar) ! South
-!               fb(idir,2) = fb(idir,2) + this % bMatrix (ii,1)*f(idir,ii,i,iel,ivar) ! East
-!               fb(idir,3) = fb(idir,3) + this % bMatrix (ii,1)*f(idir,i,ii,iel,ivar) ! North
-!               fb(idir,4) = fb(idir,4) + this % bMatrix (ii,0)*f(idir,ii,i,iel,ivar) ! West
-!             end do
-!           end do
+            fb(1:4) = 0.0_prec
+            do ii = 1,this % N+1
+                fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar,idir) ! South
+                fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar,idir) ! East
+                fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar,idir) ! North
+                fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar,idir) ! West
+            end do
 
-!           do idir = 1,2
-!             fTarget(idir,i,ivar,1:4,iel) = fb(idir,1:4)
-!           end do
+            fTarget(i,1:4,iel,ivar,idir) = fb(1:4)
 
-!         end do
-!       end do
-!     end do
+          end do
+        end do
+      end do
+    end do
 
-!   end subroutine VectorBoundaryInterp_2D_cpu
+  end subroutine VectorBoundaryInterp_2D_cpu
 
-!   subroutine VectorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fTarget
+  subroutine VectorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:)
 
-!     call VectorBoundaryInterp_2D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fTarget,this % N,nvars,nelems)
+    call VectorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget),&
+                                             this % N,nvars,nelems)
 
-!   end subroutine VectorBoundaryInterp_2D_gpu
+  end subroutine VectorBoundaryInterp_2D_gpu
 
-!   subroutine TensorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,1:2,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fTarget(1:2,1:2,0:this % N,1:nvars,1:4,1:nelems)
-!     ! Local
-!     integer :: i,ii,idir,jdir,iel,ivar
-!     real(prec) :: fb(1:2,1:2,1:4)
+  subroutine TensorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out)  :: fTarget(1:this % N+1,1:4,1:nelems,1:nvars,1:2,1:2)
+    ! Local
+    integer :: i,ii,idir,jdir,iel,ivar
+    real(prec) :: fb(1:4)
+    do jdir = 1,2
+      do idir = 1,2
+        do ivar = 1,nvars
+          do iel = 1,nelems
+            do i = 1,this % N+1
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do i = 0,this % N
+              fb(1:4) = 0.0_prec
+              do ii = 1,this % N+1
 
-!           fb(1:2,1:2,1:4) = 0.0_prec
-!           do ii = 0,this % N
-!             do jdir = 1,2
-!               do idir = 1,2
-!                 fb(idir,jdir,1) = fb(idir,jdir,1) + this % bMatrix (ii,0)*f(idir,jdir,i,ii,iel,ivar) ! South
-!                 fb(idir,jdir,2) = fb(idir,jdir,2) + this % bMatrix (ii,1)*f(idir,jdir,ii,i,iel,ivar) ! East
-!                 fb(idir,jdir,3) = fb(idir,jdir,3) + this % bMatrix (ii,1)*f(idir,jdir,i,ii,iel,ivar) ! North
-!                 fb(idir,jdir,4) = fb(idir,jdir,4) + this % bMatrix (ii,0)*f(idir,jdir,ii,i,iel,ivar) ! West
-!               end do
-!             end do
-!           end do
+                fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar,idir,jdir) ! South
+                fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar,idir,jdir) ! East
+                fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar,idir,jdir) ! North
+                fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar,idir,jdir) ! West
 
-!           do jdir = 1,2
-!             do idir = 1,2
-!               fTarget(idir,jdir,i,ivar,1:4,iel) = fb(idir,jdir,1:4)
-!             end do
-!           end do
+              end do
 
-!         end do
-!       end do
-!     end do
+              fTarget(i,1:4,iel,ivar,idir,jdir) = fb(1:4)
+            end do
+          end do
+        end do
+      end do
+    end do
 
-!   end subroutine TensorBoundaryInterp_2D_cpu
+  end subroutine TensorBoundaryInterp_2D_cpu
 
-!   subroutine TensorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fTarget
+  subroutine TensorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:,:)
 
-!     call TensorBoundaryInterp_2D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fTarget,this % N,nvars,nelems)
+    call TensorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget),&
+                                             this % N,nvars,nelems)
 
-!   end subroutine TensorBoundaryInterp_2D_gpu
+  end subroutine TensorBoundaryInterp_2D_gpu
 
-!   subroutine ScalarBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     real(prec),intent(in)      :: f(0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)     :: fTarget(0:this % N,0:this % N,1:nvars,1:6,1:nelems)
-!     ! Local
-!     integer :: i,j,ii,iel,ivar
-!     real(prec) :: fb(1:6)
+  subroutine ScalarBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),intent(in)      :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+    real(prec),intent(out)     :: fTarget(1:this % N+1,1:this % N+1,1:6,1:nelems,1:nvars)
+    ! Local
+    integer :: i,j,ii,iel,ivar
+    real(prec) :: fb(1:6)
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do j = 1,this % N+1
+          do i = 1,this % N+1
 
-!             fb(1:6) = 0.0_prec
+            fb(1:6) = 0.0_prec
 
-!             do ii = 0,this % N
-!               fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar) ! Bottom
-!               fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar) ! South
-!               fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar) ! East
-!               fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar) ! North
-!               fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar) ! West
-!               fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar) ! Top
-!             end do
+            do ii = 1,this % N+1
+              fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar) ! Bottom
+              fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar) ! South
+              fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar) ! East
+              fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar) ! North
+              fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar) ! West
+              fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar) ! Top
+            end do
 
-!             fTarget(i,j,ivar,1:6,iel) = fb(1:6)
+            fTarget(i,j,1:6,iel,ivar) = fb(1:6)
 
-!           end do
-!         end do
-!       end do
-!     end do
+          end do
+        end do
+      end do
+    end do
 
-!   end subroutine ScalarBoundaryInterp_3D_cpu
+  end subroutine ScalarBoundaryInterp_3D_cpu
 
-!   subroutine ScalarBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fTarget
+  subroutine ScalarBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:)
 
-!     call ScalarBoundaryInterp_3D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fTarget,this % N,nvars,nelems)
+    call ScalarBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget), &
+                                            this % N,nvars,nelems)
 
-!   end subroutine ScalarBoundaryInterp_3D_gpu
+  end subroutine ScalarBoundaryInterp_3D_gpu
 
-!   subroutine VectorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fTarget(1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
-!     ! Local
-!     integer :: i,j,ii,idir,iel,ivar
-!     real(prec) :: fb(1:3,1:6)
+  subroutine VectorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out)  :: fTarget(1:this % N+1,1:this % N+1,1:6,1:nelems,1:nvars,1:3)
+    ! Local
+    integer :: i,j,ii,idir,iel,ivar
+    real(prec) :: fb(1:6)
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+    do idir = 1,3
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % N+1
+            do i = 1,this % N+1
 
-!             fb(1:3,1:6) = 0.0_prec
-!             do ii = 0,this % N
-!               do idir = 1,3
-!                 fb(idir,1) = fb(idir,1) + this % bMatrix (ii,0)*f(idir,i,j,ii,iel,ivar) ! Bottom
-!                 fb(idir,2) = fb(idir,2) + this % bMatrix (ii,0)*f(idir,i,ii,j,iel,ivar) ! South
-!                 fb(idir,3) = fb(idir,3) + this % bMatrix (ii,1)*f(idir,ii,i,j,iel,ivar) ! East
-!                 fb(idir,4) = fb(idir,4) + this % bMatrix (ii,1)*f(idir,i,ii,j,iel,ivar) ! North
-!                 fb(idir,5) = fb(idir,5) + this % bMatrix (ii,0)*f(idir,ii,i,j,iel,ivar) ! West
-!                 fb(idir,6) = fb(idir,6) + this % bMatrix (ii,1)*f(idir,i,j,ii,iel,ivar) ! Top
-!               end do
-!             end do
+              fb(1:6) = 0.0_prec
+              do ii = 1,this % N+1
+                fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar,idir) ! Bottom
+                fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar,idir) ! South
+                fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar,idir) ! East
+                fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar,idir) ! North
+                fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar,idir) ! West
+                fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar,idir) ! Top
+              end do
+              fTarget(i,j,1:6,iel,ivar,idir) = fb(1:6)
 
-!             do idir = 1,3
-!               fTarget(idir,i,j,ivar,1:6,iel) = fb(idir,1:6)
-!             end do
+            end do
+          end do
+        end do
+      end do
+    end do
 
-!           end do
-!         end do
-!       end do
-!     end do
+  end subroutine VectorBoundaryInterp_3D_cpu
 
-!   end subroutine VectorBoundaryInterp_3D_cpu
+  subroutine VectorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:,:)
 
-!   subroutine VectorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fTarget
+    call VectorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget),&
+                                             this % N,nvars,nelems)
 
-!     call VectorBoundaryInterp_3D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fTarget,this % N,nvars,nelems)
+  end subroutine VectorBoundaryInterp_3D_gpu
 
-!   end subroutine VectorBoundaryInterp_3D_gpu
+  subroutine TensorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out)  :: fTarget(1:this % N+1,1:this % N+1,1:6,1:nelems,1:nvars,1:3,1:3)
+    ! Local
+    integer :: i,j,ii,idir,jdir,iel,ivar
+    real(prec) :: fb(1:6)
 
-!   subroutine TensorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,1:3,0:this % N,0:this % N,0:this % N,1:nelems,1:nvars)
-!     real(prec),intent(out)  :: fTarget(1:3,1:3,0:this % N,0:this % N,1:nvars,1:6,1:nelems)
-!     ! Local
-!     integer :: i,j,ii,idir,jdir,iel,ivar
-!     real(prec) :: fb(1:3,1:3,1:6)
+    do jdir = 1,3
+      do idir = 1,3
+    do iel = 1,nelems
+      do ivar = 1,nvars
+        do j = 1,this % N+1
+          do i = 1,this % N+1
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 0,this % N
-!           do i = 0,this % N
+            fb(1:6) = 0.0_prec
+            do ii = 1,this % N+1
 
-!             fb(1:3,1:3,1:6) = 0.0_prec
-!             do ii = 0,this % N
-!               do jdir = 1,3
-!                 do idir = 1,3
-!                   fb(idir,jdir,1) = fb(idir,jdir,1) + this % bMatrix (ii,0)*f(idir,jdir,i,j,ii,iel,ivar) ! Bottom
-!                   fb(idir,jdir,2) = fb(idir,jdir,2) + this % bMatrix (ii,0)*f(idir,jdir,i,ii,j,iel,ivar) ! South
-!                   fb(idir,jdir,3) = fb(idir,jdir,3) + this % bMatrix (ii,1)*f(idir,jdir,ii,i,j,iel,ivar) ! East
-!                   fb(idir,jdir,4) = fb(idir,jdir,4) + this % bMatrix (ii,1)*f(idir,jdir,i,ii,j,iel,ivar) ! North
-!                   fb(idir,jdir,5) = fb(idir,jdir,5) + this % bMatrix (ii,0)*f(idir,jdir,ii,i,j,iel,ivar) ! West
-!                   fb(idir,jdir,6) = fb(idir,jdir,6) + this % bMatrix (ii,1)*f(idir,jdir,i,j,ii,iel,ivar) ! Top
-!                 end do
-!               end do
-!             end do
+                  fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fb(2) = fb(2) + this % bMatrix (ii,0)*f(i,ii,j,iel,ivar,idir,jdir) ! South
+                  fb(3) = fb(3) + this % bMatrix (ii,1)*f(ii,i,j,iel,ivar,idir,jdir) ! East
+                  fb(4) = fb(4) + this % bMatrix (ii,1)*f(i,ii,j,iel,ivar,idir,jdir) ! North
+                  fb(5) = fb(5) + this % bMatrix (ii,0)*f(ii,i,j,iel,ivar,idir,jdir) ! West
+                  fb(6) = fb(6) + this % bMatrix (ii,1)*f(i,j,ii,iel,ivar,idir,jdir) ! Top
 
-!             do jdir = 1,3
-!               do idir = 1,3
-!                 fTarget(idir,jdir,i,j,ivar,1:6,iel) = fb(idir,jdir,1:6)
-!               end do
-!             end do
+            end do
 
-!           end do
-!         end do
-!       end do
-!     end do
 
-!   end subroutine TensorBoundaryInterp_3D_cpu
+            fTarget(i,j,1:6,iel,ivar,idir,jdir) = fb(1:6)
+              end do
+            end do
 
-!   subroutine TensorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)  :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f
-!     type(c_ptr),intent(out)  :: fTarget
+          end do
+        end do
+      end do
+    end do
 
-!     call TensorBoundaryInterp_3D_gpu_wrapper(this % bMatrix % deviceData, &
-!                                              f,fTarget,this % N,nvars,nelems)
+  end subroutine TensorBoundaryInterp_3D_cpu
 
-!   end subroutine TensorBoundaryInterp_3D_gpu
+  subroutine TensorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:,:,:)
+
+    call TensorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget), &
+                                             this % N,nvars,nelems)
+
+  end subroutine TensorBoundaryInterp_3D_gpu
 
 ! ================================================================================================ !
 !
@@ -2209,17 +2265,17 @@ contains
     real(real64) :: qWeights(0:this % N)
     real(real64) :: controlPoints(0:this % N)
 
-    do row = 0,this % N
+    do row = 0, this % N
       bWeights(row) = real(this % bWeights(row + 1),real64)
       qWeights(row) = real(this % qWeights(row + 1),real64)
       controlPoints(row) = real(this % controlPoints(row + 1),real64)
     end do
 
-    do row = 0,this % N
+    do row = 0, this % N
 
       dmat(row,row) = 0.0_prec
 
-      do col = 0,this % N
+      do col = 0, this % N
 
         if (.not. (col == row)) then
 
@@ -2236,16 +2292,16 @@ contains
 
     end do
 
-    do row = 0,this % N
-      do col = 0,this % N
+    do row = 0, this % N
+      do col = 0, this % N
         dgmat(row,col) = -dmat(col,row)* &
                          qWeights(col)/ &
                          qWeights(row)
       end do
     end do
 
-    do row = 0,this % N
-      do col = 0,this % N
+    do row = 0, this % N
+      do col = 0, this % N
         this % dMatrix(row + 1,col + 1) = real(dmat(col,row),prec)
         this % dgMatrix(row + 1,col + 1) = real(dgmat(col,row),prec)
       end do
@@ -2278,14 +2334,14 @@ contains
     real(real64) :: lS(0:this % N)
 
     sELocal = real(sE,real64)
-    do j = 0,this % N
+    do j = 0, this % N
       controlPoints(j) = real(this % controlPoints(j + 1),real64)
       bWeights(j) = real(this % bWeights(j + 1),real64)
     end do
 
     xMatchesNode = .false.
 
-    do j = 0,this % N
+    do j = 0, this % N
 
       lS(j) = 0.0_real64
       if (AlmostEqual(sELocal,controlPoints(j))) then
@@ -2296,7 +2352,7 @@ contains
     end do
 
     if (xMatchesNode) then
-      do j = 0,this % N
+      do j = 0, this % N
         lAtS(j) = real(lS(j),prec)
       end do
       return
@@ -2304,7 +2360,7 @@ contains
 
     temp1 = 0.0_real64
 
-    do j = 0,this % N
+    do j = 0, this % N
       temp2 = bWeights(j)/(sE - controlPoints(j))
       lS(j) = temp2
       temp1 = temp1 + temp2
@@ -2312,7 +2368,7 @@ contains
 
     lS = lS/temp1
 
-    do j = 0,this % N
+    do j = 0, this % N
       lAtS(j) = real(lS(j),prec)
     end do
 

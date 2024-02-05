@@ -6,8 +6,8 @@ BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
 BUILD_DIR=${SRC_DIR}/build
 
-module load gcc/13.2.0
-module load hipfort/5.7.1 openmpi hdf5 feq-parse
+#module load gcc/13.2.0
+module load hip/6.0.2 hipfort/6.0.2 openmpi hdf5 feq-parse
 
 # Clean out any old builds
 rm -rf ${BUILD_DIR}
@@ -16,7 +16,7 @@ rm -rf ${WORKSPACE_ROOT}/*
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
-FC=gfortran \
+FC=gfortran-12 \
 cmake -DCMAKE_FORTRAN_FLAGS="-DDOUBLE_PRECISION" \
       -DCMAKE_PREFIX_PATH=/opt/rocm \
       -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
