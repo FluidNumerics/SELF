@@ -31,7 +31,7 @@
 !   | |- swap       | |- spr        | |- dgmm
 !                   | |- spr2
 !                   | |- symv
-!                   | |- syr
+!                   | |- syr  
 !                   | |- syr2
 !                   | |- tbmv
 !                   | |- tbsv
@@ -50,10 +50,16 @@ module self_blas
 
     implicit none
 
+    ! instantiate handle
+
     interface axpy
         module procedure saxpy
         module procedure daxpy
     end interface axpy
+    interface gemv
+        ! module procedure sgemv
+        module procedure dgemv
+    end interface gemv
 
     contains
 
@@ -120,7 +126,6 @@ module self_blas
 
         type(c_ptr) :: handle
         integer :: n
-        ! real(real64) :: alpha = alpha
         real(kind=real64), pointer, dimension(:) :: x
         integer :: incx = 1
         real(kind=real64), pointer, dimension(:) :: y
@@ -166,6 +171,70 @@ module self_blas
     !!!!!!!!!!!
     ! LEVEL 2 !
     !!!!!!!!!!!
+
+    ! gemv
+    ! function sgemv(alpha, matrix1, vector1, beta, vector2) result(z)
+
+    ! end function sgemv
+
+    function dgemv(alpha, matrix1, vector1, beta, vector2) result(z)
+        implicit none
+
+        real(kind=real64), intent(in) :: alpha, beta
+        real(kind=real64), intent(in) :: vector1(:), vector2(:)
+        real(kind=real64), intent(in) :: matrix1(:,:)
+
+        type(c_ptr) :: handle
+        ! operation
+        integer :: m
+        integer :: n
+        real(kind=real64), pointer, dimension(:,:) :: A
+        integer :: lda
+        real(kind=real64), pointer, dimension(:) :: x
+        integer :: incx = 1
+        real(kind=real64), pointer, dimension(:) :: y
+        integer :: incy = 1
+        type(c_ptr) :: A_gpu
+        type(c_ptr) :: x_gpu
+        type(c_ptr) :: y_gpu
+        integer :: status
+        real(kind=real64), pointer, dimension(:) :: z
+
+        ! check if all dimensions are fine
+        m = size(vector2)
+        n = size(vector1)
+        lda = m
+
+        allocate(A(n,m), x(n), y(m), z(m))
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(x_gpu, sizeof(x)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(y)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        A = matrix1
+        x = vector1
+        y = vector2
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(x_gpu, c_loc(x), sizeof(x), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(y), sizeof(y), hipmemcpyhosttodevice))
+
+        ! HIPBLAS_OP_N = no transpose
+        ! HIPBLAS_OP_T = transpose
+        ! come back to this
+        status = hipblasdgemv(handle, HIPBLAS_OP_T, n, m, alpha, A_gpu, n, x_gpu, incx, beta, y_gpu, incy)
+
+        call hipcheck(hipmemcpy(c_loc(y), y_gpu, sizeof(y), hipmemcpydevicetohost))
+
+        z = y
+
+        deallocate(A, x, y)
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end function dgemv
 
     !!!!!!!!!!!
     ! LEVEL 3 !
