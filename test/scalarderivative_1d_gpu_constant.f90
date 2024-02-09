@@ -19,7 +19,7 @@ integer function scalarderivative_1d_gpu_constant() result(r)
   type(Scalar1D) :: df
   type(Lagrange),target :: interp
 
-  ! Create an interpolant
+  ! Create an interpolant 
   call interp % Init(N=controlDegree, &
                      controlNodeType=GAUSS, &
                      M=targetDegree, &

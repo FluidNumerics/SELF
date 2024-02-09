@@ -32,7 +32,13 @@ function (add_fortran_examples)
 endfunction ()
 
 add_fortran_examples (
-    "axpy_test.f90"
-    "example_hipSaxpy.f90"
-    "example_hipDaxpy.f90"
+    # Level 1
+    # "axpy_test.f90"
+    # Level 2
+    "test_gemv.f90"
+    # Level 3
+    "test_gemm.f90"
+    # misc
+    # "example_hipSaxpy.f90"
+    # "example_hipDaxpy.f90"
 )

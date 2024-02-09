@@ -37,12 +37,6 @@ program test_program
         ! allocate(A_input_64(m_64,n_64), x_input_64(n_64), y_input_64(m_64), z_output_64(m_64), expected_output_64(m_64))
         allocate(A_input_64(n_64,m_64), x_input_64(n_64), y_input_64(m_64), z_output_64(m_64), expected_output_64(m_64))
 
-        ! do i=1,m_64
-        !     do j=1,n_64
-        !         A_input_64(i,j) = j + (i - 1)*n_64
-        !     end do
-        ! end do
-
         A_input_64 = (reshape((/1.0_real64, 2.0_real64, 3.0_real64, 4.0_real64, 5.0_real64, 6.0_real64/), (/n_64, m_64/)))
         print*,A_input_64
         print*,shape(A_input_64)
