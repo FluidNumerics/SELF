@@ -26,34 +26,34 @@ make VERBOSE=1 || exit 1
 make install
 
 
-# # Set WORKSPACE for tests that require input mesh
-# # We use WORKSPACE so that we are consistent with 
-# # what we do for the superci tests
-# export WORKSPACE=${SRC_DIR}
+# Set WORKSPACE for tests that require input mesh
+# We use WORKSPACE so that we are consistent with 
+# what we do for the superci tests
+export WORKSPACE=${SRC_DIR}
 
-# # Initialize coverage
-# mkdir -p ${WORKSPACE_ROOT}/tmp/
-# lcov --no-external \
-#       --capture \
-#       --initial \
-#       --directory ${SRC_DIR} \
-#       --exclude '*/test/*' \
-#       --exclude '*/example/*' \
-#       --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
+# Initialize coverage
+mkdir -p ${WORKSPACE_ROOT}/tmp/
+lcov --no-external \
+      --capture \
+      --initial \
+      --directory ${SRC_DIR} \
+      --exclude '*/test/*' \
+      --exclude '*/example/*' \
+      --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
 
-# # Run ctests
-# ctest --test-dir ${BUILD_DIR}
+# Run ctests
+ctest --test-dir ${BUILD_DIR}
 
-# # Compile coverage information
-# lcov --no-external \
-#     --capture \
-#     --directory ${SRC_DIR} \
-#     --exclude '*/test/*' \
-#     --exclude '*/example/*' \
-#     --output-file ${WORKSPACE_ROOT}/tmp/lcov_test.info
+# Compile coverage information
+lcov --no-external \
+    --capture \
+    --directory ${SRC_DIR} \
+    --exclude '*/test/*' \
+    --exclude '*/example/*' \
+    --output-file ${WORKSPACE_ROOT}/tmp/lcov_test.info
 
-# lcov --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_base.info \
-#      --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_test.info \
-#      --exclude '*/test/*' \
-#      --exclude '*/example/*' \
-#      --output-file ${SRC_DIR}/lcov.info
+lcov --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_base.info \
+     --add-tracefile ${WORKSPACE_ROOT}/tmp/lcov_test.info \
+     --exclude '*/test/*' \
+     --exclude '*/example/*' \
+     --output-file ${SRC_DIR}/lcov.info
