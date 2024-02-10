@@ -17,9 +17,9 @@ function (add_fortran_tests)
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
-                    hipfort::hip
-                    hipfort::hipblas
-                    hip::device)
+                    ${HIPFORT_LIBRARIES}
+                    hip::device
+                    roc::hipblas)
                            
         target_include_directories(${TEST_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include

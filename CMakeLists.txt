@@ -50,11 +50,11 @@ endif()
 
 # ------ dependencies ------ #
 # HIP
-find_package(hipfort REQUIRED COMPONENTS hip hipblas)
-#find_package(hip REQUIRED)
-#find_package(hipblas REQUIRED)
-#find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
-#find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
+#find_package(hipfort REQUIRED COMPONENTS hip hipblas)
+find_package(hip REQUIRED)
+find_package(hipblas REQUIRED)
+find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
+find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
 
 
 # MPI

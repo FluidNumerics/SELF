@@ -22,14 +22,15 @@ target_link_libraries(self-static PRIVATE
                         ${FEQPARSE_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${MPI_Fortran_LIBRARIES}
-                        hipfort::hip
-                        hipfort::hipblas
-                        hip::device)
+                        ${HIPFORT_LIBRARIES}
+                        hip::device
+                        roc::hipblas)
 
 target_include_directories(self-static PRIVATE 
                         ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
-                        ${MPI_Fortran_INCLUDE_DIRS})
+                        ${MPI_Fortran_INCLUDE_DIRS}
+                        ${HIPFORT_INCLUDE_DIRS})
                         
 #target_compile_options(self-static PRIVATE -fPIC)
 
