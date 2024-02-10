@@ -7,7 +7,7 @@ SRC_DIR=$(pwd)
 BUILD_DIR=${SRC_DIR}/build
 
 module load gcc/13.2.0
-module load hip/6.0.2 hipfort/6.0.2 openmpi hdf5 feq-parse
+module load hip/5.7.3 hipfort/5.7.3 openmpi hdf5 feq-parse
 
 # Clean out any old builds
 rm -rf ${BUILD_DIR}
