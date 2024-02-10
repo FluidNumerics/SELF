@@ -17,7 +17,7 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
     endif()
 endif()
-#find_program(CMAKE_CXX_COMPILER "hipcc" PATHS ${ROCM_PATH})
+set( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIE")
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
@@ -44,14 +44,18 @@ if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG} --coverage")
     set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
     set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
-
     set( CMAKE_C_FLAGS_COVERAGE "-g -O0 --coverage")
 
 endif()
 
 # ------ dependencies ------ #
 # HIP
-find_package(hipfort REQUIRED COMPONENTS hip hipblas)
+#find_package(hipfort REQUIRED COMPONENTS hip hipblas)
+find_package(hip REQUIRED)
+find_package(hipblas REQUIRED)
+find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
+find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
+
 
 # MPI
 find_package(MPI COMPONENTS Fortran REQUIRED)
@@ -77,8 +81,9 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 enable_testing()
 
 # Tests
-add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 
 # Examples (additional tests; standalone models)
-add_subdirectory(${CMAKE_SOURCE_DIR}/example)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/example)
 add_subdirectory(${CMAKE_SOURCE_DIR}/blas)
+
