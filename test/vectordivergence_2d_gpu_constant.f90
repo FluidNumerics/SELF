@@ -1,8 +1,18 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = vectordivergence_2d_gpu_constant()
+  stop exit_code
+
+contains
 integer function vectordivergence_2d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -18,6 +28,9 @@ integer function vectordivergence_2d_gpu_constant() result(r)
   type(Vector2D) :: f
   type(Scalar2D) :: df
   type(Lagrange),target :: interp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
@@ -31,19 +44,19 @@ integer function vectordivergence_2d_gpu_constant() result(r)
   call df % Init(interp,nvar,nelem)
 
   ! Set the source vector (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior  = 1.0_prec
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
   ! Interpolate with gpuAccel = .true.
-  call f % Divergence(df, selfStrongForm, .true.)
+  call f % Divergence(df, handle)
 
-  call df % interior % updatehost()
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -52,5 +65,8 @@ integer function vectordivergence_2d_gpu_constant() result(r)
   call f % free()
   call df % free()
   call interp % free()
+  call hipblasCheck(hipblasDestroy(handle))
+
 
 end function vectordivergence_2d_gpu_constant
+end program test

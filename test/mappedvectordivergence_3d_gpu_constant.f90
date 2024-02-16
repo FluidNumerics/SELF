@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = mappedvectordivergence_3d_gpu_constant()
+  stop exit_code
+
+contains
 integer function mappedvectordivergence_3d_gpu_constant() result(r)
 
   use SELF_Constants
@@ -52,7 +61,7 @@ integer function mappedvectordivergence_3d_gpu_constant() result(r)
   call f % SetEquation( 3, 1, 'f = 1.0') ! z-component
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
-  print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
+  print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
   call f % interior % updatedevice()
 
@@ -62,9 +71,9 @@ integer function mappedvectordivergence_3d_gpu_constant() result(r)
   call df % interior % updatehost()
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -81,3 +90,4 @@ integer function mappedvectordivergence_3d_gpu_constant() result(r)
   r = 0
 
 end function mappedvectordivergence_3d_gpu_constant
+end program test

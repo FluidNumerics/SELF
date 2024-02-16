@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = vectorboundaryinterp_2d_gpu_constant()
+  stop exit_code
+
+contains
 integer function vectorboundaryinterp_2d_gpu_constant() result(r)
   use SELF_Constants
   use SELF_Memory
@@ -28,7 +37,7 @@ integer function vectorboundaryinterp_2d_gpu_constant() result(r)
   call f % Init(interp,nvar,nelem)
 
   ! Set the source vector (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior  = 1.0_prec
 
   ! copy data from host to device
   call f % interior % updatedevice()
@@ -40,9 +49,9 @@ integer function vectorboundaryinterp_2d_gpu_constant() result(r)
   call f % boundary % updatehost()
 
   ! Calculate diff from exact
-  f % boundary % hostdata = abs(f % boundary % hostdata - 1.0_prec)
+  f % boundary  = abs(f % boundary  - 1.0_prec)
 
-  if (maxval(f % boundary % hostdata) <= tolerance) then
+  if (maxval(f % boundary ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -52,3 +61,4 @@ integer function vectorboundaryinterp_2d_gpu_constant() result(r)
   call interp % free()
 
 end function vectorboundaryinterp_2d_gpu_constant
+end program test

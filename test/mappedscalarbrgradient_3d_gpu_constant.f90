@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = mappedscalarbrgradient_3d_gpu_constant()
+  stop exit_code
+
+contains
 integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
 
   use SELF_Constants
@@ -55,12 +64,12 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
   call f % SetEquation( 1, 'f = 1.0')
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
-  print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
+  print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
   call f % interior % updatedevice()
 
   call f % BoundaryInterp(.true.)
-  print*, "min, max (boundary)", minval(f % boundary % hostdata), maxval(f % boundary % hostdata)
+  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
   call f % SideExchange( mesh, decomp, .true.)
 
@@ -74,7 +83,7 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
       if (e2 == 0)then
         do j = 0,f % interp % N
           do i = 0,f % interp % N
-            f % extBoundary % hostData(i,j,1,iside,iel) = f % boundary % hostdata(i,j,1,iside,iel) 
+            f % extBoundary % hostData(i,j,1,iside,iel) = f % boundary (i,j,1,iside,iel) 
           end do
         end do
       end if
@@ -83,16 +92,16 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
 
   call f % extboundary % updatedevice()
 
-  print*, "min, max (extboundary)", minval(f % extBoundary % hostdata), maxval(f % extBoundary % hostdata)
+  print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
   call f % Gradient( geometry, df, selfWeakBRForm, .true. ) 
 
   call df % interior % updatehost()
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -109,3 +118,4 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
   r = 0
 
 end function mappedscalarbrgradient_3d_gpu_constant
+end program test

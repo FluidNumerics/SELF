@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = mappedscalardgderivative_1d_gpu_constant()
+  stop exit_code
+
+contains
 integer function mappedscalardgderivative_1d_gpu_constant() result(r)
   use SELF_Constants
   use SELF_Memory
@@ -50,7 +59,7 @@ integer function mappedscalardgderivative_1d_gpu_constant() result(r)
 
   call f % SetEquation( 1, 'f = 1.0')
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
-  print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
+  print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
   call f % interior % updatedevice()
 
@@ -67,19 +76,19 @@ integer function mappedscalardgderivative_1d_gpu_constant() result(r)
 
   call f % boundary % UpdateDevice()
 
-  print*, "min, max (boundary)", minval(f % boundary % hostdata), maxval(f % boundary % hostdata)
+  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
   call f % Derivative(geometry, df, selfWeakDGForm, .true.)
 
   call df % updatehost()
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
-    print*, "AbsMax error: ", maxval(df % interior % hostdata)
+    print*, "AbsMax error: ", maxval(df % interior )
     r = 1
   end if
 
@@ -92,3 +101,4 @@ integer function mappedscalardgderivative_1d_gpu_constant() result(r)
   call df % free()
 
 end function mappedscalardgderivative_1d_gpu_constant
+end program test

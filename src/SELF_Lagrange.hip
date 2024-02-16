@@ -4,41 +4,42 @@
 
 
 // ScalarBoundaryInterp_2D //
-__global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
+__global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nEl){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
+  uint32_t iVar = blockIdx.y;
+  uint32_t iEl = blockIdx.x;
+  uint32_t i = threadIdx.x;
 
   real fb[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
-    fb[0] += f[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
-    fb[1] += f[SC_2D_INDEX(ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
-    fb[2] += f[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
-    fb[3] += f[SC_2D_INDEX(ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+    fb[0] += f[SC_2D_INDEX(i,ii,iEl,iVar,N,nEl)]*bMatrix[ii]; // South
+    fb[1] += f[SC_2D_INDEX(ii,i,iEl,iVar,N,nEl)]*bMatrix[ii+(N+1)]; // East
+    fb[2] += f[SC_2D_INDEX(i,ii,iEl,iVar,N,nEl)]*bMatrix[ii+(N+1)]; // North
+    fb[3] += f[SC_2D_INDEX(ii,i,iEl,iVar,N,nEl)]*bMatrix[ii]; // West
   }
-  fBound[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)] = fb[0];
-  fBound[SCB_2D_INDEX(i,iVar,2,iEl,N,nVar)] = fb[1];
-  fBound[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)] = fb[2];
-  fBound[SCB_2D_INDEX(i,iVar,4,iEl,N,nVar)] = fb[3];
+  fBound[SCB_2D_INDEX(i,0,iEl,iVar,N,nEl)] = fb[0];
+  fBound[SCB_2D_INDEX(i,1,iEl,iVar,N,nEl)] = fb[1];
+  fBound[SCB_2D_INDEX(i,2,iEl,iVar,N,nEl)] = fb[2];
+  fBound[SCB_2D_INDEX(i,3,iEl,iVar,N,nEl)] = fb[3];
 }
 
 extern "C"
 {
   void ScalarBoundaryInterp_2D_gpu_wrapper(real *bMatrix, real *f, real *fBound, int N, int nVar, int nEl)
   {
-	  ScalarBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(bMatrix, f, fBound, N, nVar);
+	  ScalarBoundaryInterp_2D_gpu<<<dim3(nEl,nVar,1), dim3(N+1,1,1), 0, 0>>>(bMatrix, f, fBound, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
+/*
 // VectorBoundaryInterp_2D //
 __global__ void VectorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t idir = threadIdx.x+1;
-  size_t i = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t idir = threadIdx.x+1;
+  uint32_t i = threadIdx.y;
 
   real fb[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -65,9 +66,9 @@ extern "C"
 // TensorBoundaryInterp_2D //
 __global__ void TensorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
 
   real fb[16] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -124,10 +125,10 @@ extern "C"
 // ScalarBoundaryInterp_3D //
 __global__ void ScalarBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real fb[6] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -158,11 +159,11 @@ extern "C"
 // VectorBoundaryInterp_3D //
 __global__ void VectorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t idir = threadIdx.x+1;
-  size_t i = threadIdx.y;
-  size_t j = threadIdx.z;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t idir = threadIdx.x+1;
+  uint32_t i = threadIdx.y;
+  uint32_t j = threadIdx.z;
 
   real fb[6] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -193,10 +194,10 @@ extern "C"
 // TensorBoundaryInterp_3D //
 __global__ void TensorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   for (int col=1; col<=3; col++){
     for (int row=1; row<=3; row++){
@@ -236,9 +237,9 @@ extern "C"
 // DGDerivative_1D //
 __global__ void DGDerivative_1D_gpu(real *dMatrix, real *bMatrix, real *qWeight, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
 
   df[SC_1D_INDEX(i,iVar,iEl,N,nVar)] += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)]+
 	 bMatrix[i]*bf[SCB_1D_INDEX(iVar,0,iEl,N,nVar)])/qWeight[i];
@@ -257,10 +258,10 @@ extern "C"
 
 __global__ void ScalarDGGradient_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real fs = 0.0;
   real fp = 0.0;
@@ -292,10 +293,10 @@ extern "C"
 // VectorGradient_2D //
 __global__ void VectorGradient_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real dfloc[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -323,10 +324,10 @@ extern "C"
 // VectorDGGradient_2D //
 __global__ void VectorDGGradient_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real dfloc[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -364,10 +365,10 @@ extern "C"
 // VectorDivergence_2D //
 __global__ void VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real dfloc = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -390,10 +391,10 @@ extern "C"
 // VectorDGDivergence_2D //
 __global__ void VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -423,10 +424,10 @@ extern "C"
 // P2VectorDivergence_2D //
 __global__ void P2VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real dfloc = 0.0;
   for (int n=0; n<N+1; n++) {
@@ -449,10 +450,10 @@ extern "C"
 // VectorDGDivergence_2D //
 __global__ void P2VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
 
   real dfloc = 0.0;
   for (int n =0; n<N+1; n++) {
@@ -483,11 +484,11 @@ extern "C"
 // ScalarGradient_3D //
 __global__ void ScalarGradient_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+  uint32_t k = threadIdx.z;
 
   real dfloc[3] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -512,11 +513,11 @@ extern "C"
 // VectorGradient_3D //
 __global__ void VectorGradient_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+  uint32_t k = threadIdx.z;
 
   real dfloc[9] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -553,11 +554,11 @@ extern "C"
 // VectorDivergence_3D //
 __global__ void VectorDivergence_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+  uint32_t k = threadIdx.z;
 
   df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = 0.0; 
   for (int ii=0; ii<N+1; ii++) {
@@ -580,11 +581,11 @@ extern "C"
 // VectorDGDivergence_3D //
 __global__ void VectorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
+  uint32_t iVar = blockIdx.x;
+  uint32_t iEl = blockIdx.y;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+  uint32_t k = threadIdx.z;
 
   df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = 0.0; 
   for (int ii=0; ii<N+1; ii++) {
@@ -613,3 +614,4 @@ extern "C"
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }
+*/

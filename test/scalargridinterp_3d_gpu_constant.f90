@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = scalargridinterp_3d_gpu_constant()
+  stop exit_code
+
+contains
 integer function scalargridinterp_3d_gpu_constant() result(r)
   use SELF_Constants
   use SELF_Memory
@@ -36,7 +45,7 @@ integer function scalargridinterp_3d_gpu_constant() result(r)
   call fTarget % Init(interpTarget,nvar,nelem)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior  = 1.0_prec
 
   call f % interior % updatedevice()
 
@@ -46,12 +55,12 @@ integer function scalargridinterp_3d_gpu_constant() result(r)
   call fTarget % interior % updatehost()
 
   ! Calculate diff from exact
-  fTarget % interior % hostdata = abs(fTarget % interior % hostdata - 1.0_prec)
+  fTarget % interior  = abs(fTarget % interior  - 1.0_prec)
 
-  if (maxval(fTarget % interior % hostdata) <= tolerance) then
+  if (maxval(fTarget % interior ) <= tolerance) then
     r = 0
   else
-    print*, maxval(fTarget % interior % hostdata)
+    print*, maxval(fTarget % interior )
     r = 1
   end if
 
@@ -61,3 +70,4 @@ integer function scalargridinterp_3d_gpu_constant() result(r)
   call interpTarget % free()
 
 end function scalargridinterp_3d_gpu_constant
+end program test

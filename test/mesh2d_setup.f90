@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = mesh2d_setup()
+  stop exit_code
+
+contains
 integer function mesh2d_setup() result(r)
 
   use SELF_Constants
@@ -49,3 +58,4 @@ integer function mesh2d_setup() result(r)
   r = 0
 
 end function mesh2d_setup
+end program test

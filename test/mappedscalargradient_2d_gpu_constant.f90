@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = mappedscalargradient_2d_gpu_constant()
+  stop exit_code
+
+contains
 integer function mappedscalargradient_2d_gpu_constant() result(r)
 
   use SELF_Constants
@@ -50,19 +59,19 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   call f % SetEquation( 1, 'f = 1.0')
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
-  print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
+  print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
 !  call f % BoundaryInterp(.false.)
-!  print*, "min, max (boundary)", minval(f % boundary % hostdata), maxval(f % boundary % hostdata)
+!  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
 !  call f % SideExchange( mesh, decomp, .false.)
   ! Set boundary conditions
 !  f % extBoundary % hostData(1,1,1) = 1.0_prec ! Left most
 !  f % extBoundary % hostData(1,2,nelem) = 1.0_prec ! Right most
-!  print*, "min, max (extboundary)", minval(f % extBoundary % hostdata), maxval(f % extBoundary % hostdata)
+!  print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
 !  call f % BassiRebaySides(.false.)
-!  print*, "min, max (avgboundary)", minval(f % avgBoundary % hostdata), maxval(f % avgBoundary % hostdata)
+!  print*, "min, max (avgboundary)", minval(f % avgBoundary ), maxval(f % avgBoundary )
 
   call f % interior % updatedevice()
 
@@ -71,9 +80,9 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   call df % interior % updatehost()
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -90,3 +99,4 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   r = 0
 
 end function mappedscalargradient_2d_gpu_constant
+end program test

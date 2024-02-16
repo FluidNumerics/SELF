@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = mappedscalarderivative_1d_cpu_constant()
+  stop exit_code
+
+contains
 integer function mappedscalarderivative_1d_cpu_constant() result(r)
   use SELF_Constants
   use SELF_Memory
@@ -50,9 +59,9 @@ integer function mappedscalarderivative_1d_cpu_constant() result(r)
   call f % Derivative(geometry, df, selfStrongForm, .false.)
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -66,3 +75,4 @@ integer function mappedscalarderivative_1d_cpu_constant() result(r)
   call df % free()
 
 end function mappedscalarderivative_1d_cpu_constant
+end program test

@@ -39,9 +39,6 @@ module SELF_Data
 
   contains
 
-    ! PROCEDURE,PUBLIC :: Init => Init_DataObj
-    ! PROCEDURE,PUBLIC :: Free => Free_DataObj
-
     ! Procedures for setting metadata for
     procedure,public :: SetName => SetName_DataObj
     procedure,public :: SetDescription => SetDescription_DataObj
@@ -99,7 +96,11 @@ module SELF_Data
     procedure,public :: Init => Init_Scalar2D
     procedure,public :: Free => Free_Scalar2D
     procedure,public :: UpdateDevice => UpdateDevice_Scalar2D
-    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar2D
+
+    generic,public :: BoundaryInterp => BoundaryInterp_Scalar2D_cpu,BoundaryInterp_Scalar2D_gpu
+    procedure,private :: BoundaryInterp_Scalar2D_cpu
+    procedure,private :: BoundaryInterp_Scalar2D_gpu
+
     generic,public :: GridInterp => GridInterp_Scalar2D_cpu,GridInterp_Scalar2D_gpu
     procedure,private :: GridInterp_Scalar2D_cpu
     procedure,private :: GridInterp_Scalar2D_gpu
@@ -161,8 +162,9 @@ module SELF_Data
     ! GENERIC,PUBLIC :: Gradient => Gradient_Vector2D
     ! PROCEDURE,PRIVATE :: Gradient_Vector2D
 
-    ! GENERIC,PUBLIC :: Divergence => Divergence_Vector2D
-    ! PROCEDURE,PRIVATE :: Divergence_Vector2D
+    generic,public :: Divergence => Divergence_Vector2D_gpu,Divergence_Vector2D_cpu
+    procedure,private :: Divergence_Vector2D_gpu
+    procedure,private :: Divergence_Vector2D_cpu
 
     ! GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
     ! PROCEDURE,PRIVATE :: SetEquation_Vector2D
@@ -404,17 +406,17 @@ contains
 
   end subroutine Derivative_Scalar1D_cpu
 
-  subroutine Derivative_Scalar1D_gpu(this,SELFOut,blas_handle)
+  subroutine Derivative_Scalar1D_gpu(this,SELFOut,hipblas_handle)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: SELFOut
-    type(c_ptr),intent(inout) :: blas_handle
+    type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % Derivative_1D(this % interior, &
                                        SELFout % interior, &
                                        this % nVar, &
                                        this % nElem, &
-                                       blas_handle)
+                                       hipblas_handle)
 
   end subroutine Derivative_Scalar1D_gpu
 
@@ -534,24 +536,31 @@ contains
 
   end subroutine UpdateDevice_Scalar2D
 
-!   SUBROUTINE BoundaryInterp_Scalar2D(this,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Scalar2D),INTENT(inout) :: this
-!     LOGICAL,INTENT(in) :: gpuAccel
+  SUBROUTINE BoundaryInterp_Scalar2D_cpu(this)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(inout) :: this
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     ELSE
-!       CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     END IF
 
-!   END SUBROUTINE BoundaryInterp_Scalar2D
+      CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
+                                                          this % boundary , &
+                                                          this % nVar, &
+                                                          this % nElem)
+
+  END SUBROUTINE BoundaryInterp_Scalar2D_cpu
+
+  SUBROUTINE BoundaryInterp_Scalar2D_gpu(this,handle)
+    IMPLICIT NONE
+    CLASS(Scalar2D),INTENT(inout) :: this
+    type(c_ptr), intent(in) :: handle
+
+
+      CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
+                                                          this % boundary , &
+                                                          this % nVar, &
+                                                          this % nElem,&
+                                                          handle)
+
+  END SUBROUTINE BoundaryInterp_Scalar2D_gpu
 
   subroutine GridInterp_Scalar2D_cpu(this,SELFout)
     implicit none
@@ -592,17 +601,17 @@ contains
 
   end subroutine Gradient_Scalar2D_cpu
 
-  subroutine Gradient_Scalar2D_gpu(this,df,blas_handle)
+  subroutine Gradient_Scalar2D_gpu(this,df,hipblas_handle)
     implicit none
     class(Scalar2D),intent(in) :: this
     type(Vector2D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: blas_handle
+    type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % ScalarGradient_2D(this % interior, &
                                            df % interior, &
                                            this % nVar, &
-                                           this % nElem,&
-                                           blas_handle)
+                                           this % nElem, &
+                                           hipblas_handle)
 
   end subroutine Gradient_Scalar2D_gpu
 
@@ -1101,46 +1110,31 @@ contains
 
 !   END SUBROUTINE Gradient_Vector2D
 
-!   SUBROUTINE Divergence_Vector2D(this,SELFOut,dForm,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(in) :: this
-!     TYPE(Scalar2D),INTENT(inout) :: SELFOut
-!     INTEGER,INTENT(in) :: dForm
-!     LOGICAL,INTENT(in) :: gpuAccel
+  subroutine Divergence_Vector2D_cpu(this,SELFOut)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    type(Scalar2D),intent(inout) :: SELFOut
 
-!     IF (dForm == selfWeakDGForm) THEN
+    call this % interp % VectorDivergence_2D(this % interior, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem)
 
-!       IF (gpuAccel) THEN
-!         CALL this % interp % VectorDGDivergence_2D(this % interior , &
-!                                                           this % boundaryNormal , &
-!                                                           SELFout % interior , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!       ELSE
-!         CALL this % interp % VectorDGDivergence_2D(this % interior , &
-!                                                           this % boundaryNormal , &
-!                                                           SELFout % interior , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!       END IF
+  end subroutine Divergence_Vector2D_cpu
 
-!     ELSE IF (dForm == selfStrongForm) THEN
+  subroutine Divergence_Vector2D_gpu(this,SELFOut,hipblas_handle)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    type(Scalar2D),intent(inout) :: SELFOut
+    type(c_ptr),intent(inout) :: hipblas_handle
 
-!       IF (gpuAccel) THEN
-!         CALL this % interp % VectorDivergence_2D(this % interior , &
-!                                                         SELFout % interior , &
-!                                                         this % nVar, &
-!                                                         this % nElem)
-!       ELSE
-!         CALL this % interp % VectorDivergence_2D(this % interior , &
-!                                                         SELFout % interior , &
-!                                                         this % nVar, &
-!                                                         this % nElem)
-!       END IF
+    call this % interp % VectorDivergence_2D(this % interior, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                            hipblas_handle)
 
-!     END IF
-
-!   END SUBROUTINE Divergence_Vector2D
+  end subroutine Divergence_Vector2D_gpu
 
 !   ! SUBROUTINE Curl_Vector2D(this,SELFOut,gpuAccel)
 !   !   IMPLICIT NONE

@@ -1,3 +1,12 @@
+program test
+
+  implicit none
+  integer :: exit_code
+  
+  exit_code = vectordivergence_3d_cpu_constant()
+  stop exit_code
+
+contains
 integer function vectordivergence_3d_cpu_constant() result(r)
   use SELF_Constants
   use SELF_Memory
@@ -31,15 +40,15 @@ integer function vectordivergence_3d_cpu_constant() result(r)
   call df % Init(interp,nvar,nelem)
 
   ! Set the source vector (on the control grid) to a non-zero constant
-  f % interior % hostdata = 1.0_prec
+  f % interior  = 1.0_prec
 
   ! Interpolate with gpuAccel = .FALSE.
   call f % Divergence(df, .false.)
 
   ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+  df % interior  = abs(df % interior  - 0.0_prec)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
+  if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
     r = 1
@@ -50,3 +59,4 @@ integer function vectordivergence_3d_cpu_constant() result(r)
   call interp % free()
 
 end function vectordivergence_3d_cpu_constant
+end program test
