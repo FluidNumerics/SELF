@@ -9,7 +9,6 @@ program test
 contains
 integer function scalargridinterp_3d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
 
@@ -48,7 +47,7 @@ integer function scalargridinterp_3d_cpu_constant() result(r)
   f % interior  = 1.0_prec
 
   ! Interpolate with gpuAccel = .FALSE.
-  call f % GridInterp(fTarget,.false.)
+  call f % GridInterp(fTarget)
 
   ! Calculate diff from exact
   fTarget % interior  = abs(fTarget % interior  - 1.0_prec)
@@ -57,6 +56,7 @@ integer function scalargridinterp_3d_cpu_constant() result(r)
     r = 0
   else
     r = 1
+    print*, maxval(fTarget % interior )
   end if
 
   call f % free()
@@ -64,4 +64,5 @@ integer function scalargridinterp_3d_cpu_constant() result(r)
   call interp % free()
   call interpTarget % free()
 
-end function scalargridinterp_3d_cpu_constantend program test
+end function scalargridinterp_3d_cpu_constant
+end program test

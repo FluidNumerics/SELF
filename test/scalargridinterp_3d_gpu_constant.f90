@@ -9,9 +9,11 @@ program test
 contains
 integer function scalargridinterp_3d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
+  use iso_c_binding
+  use hipfort_hipblas
+
 
   implicit none
 
@@ -28,6 +30,9 @@ integer function scalargridinterp_3d_gpu_constant() result(r)
   type(Scalar3D) :: fTarget
   type(Lagrange),target :: interp
   type(Lagrange),target :: interpTarget
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
@@ -47,12 +52,12 @@ integer function scalargridinterp_3d_gpu_constant() result(r)
   ! Set the source scalar (on the control grid) to a non-zero constant
   f % interior  = 1.0_prec
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
-  ! Interpolate with gpuAccel = .true.
-  call f % GridInterp(fTarget,.true.)
+  ! Interpolate 
+  call f % GridInterp(fTarget,handle)
 
-  call fTarget % interior % updatehost()
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
   fTarget % interior  = abs(fTarget % interior  - 1.0_prec)
@@ -68,6 +73,7 @@ integer function scalargridinterp_3d_gpu_constant() result(r)
   call fTarget % free()
   call interp % free()
   call interpTarget % free()
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function scalargridinterp_3d_gpu_constant
 end program test

@@ -117,30 +117,38 @@ module SELF_Data
 
   end type Scalar2D
 
-  ! TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
 
-  !   real(prec), pointer, dimension(:,:,:,:,:) :: interior
-  !   real(prec), pointer, dimension(:,:,:,:,:) :: boundary
-  !   real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
-  !   real(prec), pointer, dimension(:,:,:,:,:) :: avgBoundary
-  !   real(prec), pointer, dimension(:,:,:,:,:) :: jumpBoundary
+    real(prec), pointer, dimension(:,:,:,:,:) :: interior
+    real(prec), pointer, dimension(:,:,:,:,:) :: boundary
+    real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
+    real(prec), pointer, dimension(:,:,:,:,:) :: avgBoundary
+    real(prec), pointer, dimension(:,:,:,:,:) :: jumpBoundary
 
-  ! CONTAINS
+    real(prec), pointer, private, dimension(:,:,:,:,:) :: interpWork1
+    real(prec), pointer, private, dimension(:,:,:,:,:) :: interpWork2
 
-  !   PROCEDURE,PUBLIC :: Init => Init_Scalar3D
-  !   PROCEDURE,PUBLIC :: Free => Free_Scalar3D
-  !   PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar3D
-  !   ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
-  !   ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar3D
+  CONTAINS
 
-  !   ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar3D
-  !   ! PROCEDURE,PRIVATE :: Gradient_Scalar3D
+    PROCEDURE,PUBLIC :: Init => Init_Scalar3D
+    PROCEDURE,PUBLIC :: Free => Free_Scalar3D
+    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar3D
 
-  !   ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
-  !   ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
-  !   ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
+    generic,public :: GridInterp => GridInterp_Scalar3D_cpu,GridInterp_Scalar3D_gpu
+    procedure,private :: GridInterp_Scalar3D_cpu
+    procedure,private :: GridInterp_Scalar3D_gpu
 
-  ! END TYPE Scalar3D
+    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
+    ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar3D
+
+    ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar3D
+    ! PROCEDURE,PRIVATE :: Gradient_Scalar3D
+
+    ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
+    ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
+    ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
+
+  END TYPE Scalar3D
 
 ! ! ! ---------------------- Vectors ---------------------- !
 
@@ -620,56 +628,6 @@ contains
 
   end subroutine Gradient_Scalar2D_gpu
 
-!   ! FUNCTION AbsMaxInterior_Scalar2D(scalar) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Scalar2D) :: scalar
-!   !   REAL(prec) :: absMax(1:scalar % nVar)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,scalar % nElem
-!   !     DO iVar = 1,scalar % nVar
-!   !       DO j = 0,scalar % interp % N
-!   !         DO i = 0,scalar % interp % N
-!   !           absMax(iVar) = MAX(ABS(scalar % interior (i,j,iVar,iEl)),absMax(iVar))
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxInterior_Scalar2D
-
-!   ! FUNCTION AbsMaxBoundary_Scalar2D(scalar) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Scalar2D) :: scalar
-!   !   REAL(prec) :: absMax(1:scalar % nVar,1:4)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,iSide
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,scalar % nElem
-!   !     DO iSide = 1,4
-!   !       DO iVar = 1,scalar % nVar
-!   !         DO i = 0,scalar % interp % N
-!   !           absMax(iVar,iSide) = MAX(ABS(scalar % boundary (i,iVar,iSide,iEl)),absMax(iVar,iSide))
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxBoundary_Scalar2D
-
-!   ! SUBROUTINE Equals_Scalar2D(SELFOut,SELFin)
-!   !   IMPLICIT NONE
-!   !   CLASS(Scalar2D),INTENT(inout) :: SELFOut
-!   !   TYPE(Scalar2D),INTENT(in) :: SELFin
-
-!   !   SELFOut % interior  = SELFin % interior
-!   !   SELFOut % boundary  = SELFin % boundary
-
-!   ! END SUBROUTINE Equals_Scalar2D
-
 !   SUBROUTINE WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
 !     IMPLICIT NONE
 !     CLASS(Scalar2D), INTENT(in) :: this
@@ -735,194 +693,140 @@ contains
 
 ! ! -- Scalar3D -- !
 
-!   SUBROUTINE Init_Scalar3D(this,interp,nVar,nElem)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(out) :: this
-!     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
-!     ! Local
-!     INTEGER :: N
+  subroutine Init_Scalar3D(this,interp,nVar,nElem)
+    implicit none
+    class(Scalar3D),intent(out) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
 
-!     this % interp => interp
-!     this % nVar = nVar
-!     this % nElem = nElem
-!     N = interp % N
+    this % interp => interp
+    this % nVar = nVar
+    this % nElem = nElem
 
-!     CALL this % interior % Alloc(loBound=(/0,0,0,1,1/), &
-!                                         upBound=(/N,N,N,nVar,nElem/))
+    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interpWork1,interp % M + 1,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % interpWork2,interp % M + 1,interp % M + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % jumpBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
 
-!     CALL this % boundary % Alloc(loBound=(/0,0,1,1,1/), &
-!                                         upBound=(/N,N,nVar,6,nElem/))
+    allocate (this % meta(1:nVar))
+    allocate (this % eqn(1:nVar))
 
-!     CALL this % extBoundary % Alloc(loBound=(/0,0,1,1,1/), &
-!                                            upBound=(/N,N,nVar,6,nElem/))
+  end subroutine Init_Scalar3D
 
-!     CALL this % avgBoundary % Alloc(loBound=(/0,0,1,1,1/), &
-!                                            upBound=(/N,N,nVar,6,nElem/))
+  subroutine Free_Scalar3D(this)
+    implicit none
+    class(Scalar3D),intent(inout) :: this
 
-!     CALL this % jumpBoundary % Alloc(loBound=(/0,0,1,1,1/), &
-!                                            upBound=(/N,N,nVar,6,nElem/))
+    this % nVar = 0
+    this % nElem = 0
+    this % interp => null()
+    call hipcheck(hipFree(this % interior))
+    call hipcheck(hipFree(this % interpWork1))
+    call hipcheck(hipFree(this % interpWork2))
+    call hipcheck(hipFree(this % boundary))
+    call hipcheck(hipFree(this % extBoundary))
+    call hipcheck(hipFree(this % avgBoundary))
+    call hipcheck(hipFree(this % jumpBoundary))
+    deallocate (this % meta)
+    deallocate (this % eqn)
 
-!     ALLOCATE( this % meta(1:nVar) )
-!     ALLOCATE( this % eqn(1:nVar) )
+  end subroutine Free_Scalar3D
 
-!   END SUBROUTINE Init_Scalar3D
+  subroutine UpdateDevice_Scalar3D(this)
+    implicit none
+    class(Scalar3D),intent(inout) :: this
 
-!   SUBROUTINE Free_Scalar3D(this)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(inout) :: this
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
 
-!     this % nVar = 0
-!     this % nElem = 0
-!     this % interp => NULL()
-!     CALL this % interior % Free()
-!     CALL this % boundary % Free()
-!     CALL this % extBoundary % Free()
-!     CALL this % avgBoundary % Free()
-!     CALL this % jumpBoundary % Free()
+  end subroutine UpdateDevice_Scalar3D
 
-!     DEALLOCATE( this % meta )
-!     DEALLOCATE( this % eqn )
+  ! SUBROUTINE BoundaryInterp_Scalar3D_cpu(this)
+  !   IMPLICIT NONE
+  !   CLASS(Scalar3D),INTENT(inout) :: this
 
-!   END SUBROUTINE Free_Scalar3D
 
-!   SUBROUTINE UpdateHost_Scalar3D(this)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(inout) :: this
+  !     CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
+  !                                                         this % boundary , &
+  !                                                         this % nVar, &
+  !                                                         this % nElem)
 
-!     CALL this % interior % UpdateHost()
-!     CALL this % boundary % UpdateHost()
-!     CALL this % extBoundary % UpdateHost()
-!     CALL this % avgBoundary % UpdateHost()
-!     CALL this % jumpBoundary % UpdateHost()
+  ! END SUBROUTINE BoundaryInterp_Scalar3D_cpu
 
-!   END SUBROUTINE UpdateHost_Scalar3D
+  ! SUBROUTINE BoundaryInterp_Scalar3D_gpu(this,handle)
+  !   IMPLICIT NONE
+  !   CLASS(Scalar3D),INTENT(inout) :: this
+  !   type(c_ptr), intent(in) :: handle
 
-!   SUBROUTINE UpdateDevice_Scalar3D(this)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(inout) :: this
 
-!     CALL this % interior % UpdateDevice()
-!     CALL this % boundary % UpdateDevice()
-!     CALL this % extBoundary % UpdateDevice()
-!     CALL this % avgBoundary % UpdateDevice()
-!     CALL this % jumpBoundary % UpdateDevice()
+  !     CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
+  !                                                         this % boundary , &
+  !                                                         this % nVar, &
+  !                                                         this % nElem,&
+  !                                                         handle)
 
-!   END SUBROUTINE UpdateDevice_Scalar3D
+  ! END SUBROUTINE BoundaryInterp_Scalar3D_gpu
 
-!   SUBROUTINE BoundaryInterp_Scalar3D(this,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(inout) :: this
-!     LOGICAL,INTENT(in) :: gpuAccel
+  subroutine GridInterp_Scalar3D_cpu(this,SELFout)
+    implicit none
+    class(Scalar3D),intent(in) :: this
+    type(Scalar3D),intent(inout) :: SELFOut
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     ELSE
-!       CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     END IF
+    call this % interp % ScalarGridInterp_3D(this % interior, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem)
 
-!   END SUBROUTINE BoundaryInterp_Scalar3D
+  end subroutine GridInterp_Scalar3D_cpu
 
-!   SUBROUTINE GridInterp_Scalar3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(in) :: this
-!     TYPE(Scalar3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
+  subroutine GridInterp_Scalar3D_gpu(this,SELFout,hipblas_handle)
+    implicit none
+    class(Scalar3D),intent(inout) :: this
+    type(Scalar3D),intent(inout) :: SELFOut
+    type(c_ptr),intent(inout) :: hipblas_handle
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGridInterp_3D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     ELSE
-!       CALL this % interp % ScalarGridInterp_3D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     END IF
+    call this % interp % ScalarGridInterp_3D(this % interior, &
+                                             this % interpWork1, &
+                                             this % interpWork2, &
+                                             SELFout % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             hipblas_handle)
 
-!   END SUBROUTINE GridInterp_Scalar3D
+  end subroutine GridInterp_Scalar3D_gpu
 
-!   SUBROUTINE Gradient_Scalar3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Scalar3D),INTENT(in) :: this
-!     TYPE(Vector3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
+  ! subroutine Gradient_Scalar3D_cpu(this,df)
+  !   implicit none
+  !   class(Scalar3D),intent(in) :: this
+  !   type(Vector3D),intent(inout) :: df
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % ScalarGradient_3D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     ELSE
-!       CALL this % interp % ScalarGradient_3D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     END IF
+  !   call this % interp % ScalarGradient_3D(this % interior, &
+  !                                          df % interior, &
+  !                                          this % nVar, &
+  !                                          this % nElem)
 
-!   END SUBROUTINE Gradient_Scalar3D
+  ! end subroutine Gradient_Scalar3D_cpu
 
-!   ! SUBROUTINE Equals_Scalar3D(SELFOut,SELFin)
-!   !   IMPLICIT NONE
-!   !   CLASS(Scalar3D),INTENT(inout) :: SELFOut
-!   !   TYPE(Scalar3D),INTENT(in) :: SELFin
+  ! subroutine Gradient_Scalar3D_gpu(this,df,hipblas_handle)
+  !   implicit none
+  !   class(Scalar3D),intent(in) :: this
+  !   type(Vector3D),intent(inout) :: df
+  !   type(c_ptr),intent(inout) :: hipblas_handle
 
-!   !   SELFOut % interior  = SELFin % interior
-!   !   SELFOut % boundary  = SELFin % boundary
+  !   call this % interp % ScalarGradient_3D(this % interior, &
+  !                                          df % interior, &
+  !                                          this % nVar, &
+  !                                          this % nElem, &
+  !                                          hipblas_handle)
 
-!   ! END SUBROUTINE Equals_Scalar3D
-
-!   ! FUNCTION AbsMaxInterior_Scalar3D(scalar) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Scalar3D) :: scalar
-!   !   REAL(prec) :: absMax(1:scalar % nVar)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,k
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,scalar % nElem
-!   !     DO iVar = 1,scalar % nVar
-!   !       DO k = 0,scalar % interp % N
-!   !         DO j = 0,scalar % interp % N
-!   !           DO i = 0,scalar % interp % N
-!   !             absMax(iVar) = MAX(ABS(scalar % interior (i,j,k,iVar,iEl)),absMax(iVar))
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxInterior_Scalar3D
-
-!   ! FUNCTION AbsMaxBoundary_Scalar3D(scalar) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Scalar3D) :: scalar
-!   !   REAL(prec) :: absMax(1:scalar % nVar,1:6)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,iSide
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,scalar % nElem
-!   !     DO iSide = 1,6
-!   !       DO iVar = 1,scalar % nVar
-!   !         DO j = 0,scalar % interp % N
-!   !           DO i = 0,scalar % interp % N
-!   !             absMax(iVar,iSide) = MAX(ABS(scalar % boundary (i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxBoundary_Scalar3D
+  ! end subroutine Gradient_Scalar3D_gpu
 
 !   SUBROUTINE WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
 !     IMPLICIT NONE

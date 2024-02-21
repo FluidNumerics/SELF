@@ -29,18 +29,6 @@ module SELF_Lagrange
 
   implicit none
 
-! #ifdef DOUBLE_PRECISION
-
-! #define hipblasXgemm(handle,opA,opB,m,n,k,alpha,A,lda,B,ldb,beta,C,ldc) hipblasDgemm(handle,opA,opB,m,n,k,alpha,A,lda,B,ldb,beta,C,ldc)
-! #define hipblasXgemvStridedBatched(handle,opA,m,n,alpha,A,lda,stridA,x,incx,stridex,beta,y,incy,stridey,batchCount) hipblasDgemvStridedBatched(handle,opA,m,n,alpha,A,lda,stridA,x,incx,stridex,beta,y,incy,stridey,batchCount)
-
-! #else
-
-! #define hipblasXgemm(handle,opA,opB,m,n,k,alpha,A,lda,B,ldb,beta,C,ldc) hipblasSgemm(handle,opA,opB,m,n,k,alpha,A,lda,B,ldb,beta,C,ldc)
-! #define hipblasXgemvStridedBatched(handle,opA,m,n,alpha,A,lda,stridA,x,incx,stridex,beta,y,incy,stridey,batchCount) hipblasSgemvStridedBatched(handle,opA,m,n,alpha,A,lda,stridA,x,incx,stridex,beta,y,incy,stridey,batchCount)
-
-! #endif
-
   type,public :: Lagrange
     !! A data structure for working with Lagrange Interpolating Polynomials in one, two, and three dimensions.
     !! The Lagrange data-structure stores the information necessary to interpolate between two
@@ -115,8 +103,8 @@ module SELF_Lagrange
     ! GENERIC,PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
     ! PROCEDURE,PRIVATE :: VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
 
-    ! GENERIC,PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
-    ! PROCEDURE,PRIVATE :: ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
+    GENERIC,PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
+    PROCEDURE,PRIVATE :: ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
 
     ! GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
@@ -499,6 +487,158 @@ contains
 
   end subroutine self_hipblas_matrixop_dim2_2d
 
+  subroutine self_hipblas_matrixop_dim1_3d(A,f,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+    real(prec), pointer, intent(in) :: A(:,:)
+    real(prec), pointer, intent(in) :: f(:,:,:,:,:)
+    real(prec), pointer, intent(inout) :: Af(:,:,:,:,:)
+    integer, intent(in) :: controldegree,targetdegree,nvars,nelems
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    integer(c_int) :: k
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    integer(c_int) :: ldb
+    integer(c_int) :: ldc
+    real(c_prec) :: beta
+
+    m = targetdegree + 1 ! number of rows of A^T
+    n = nvars*nelems*(controldegree + 1)*(controldegree + 1) ! number of columns of B
+    k = controldegree + 1! number of columns of A^T
+    alpha = 1.0_c_prec
+    lda = k ! leading dimension of A (interoplation matrix)
+    ldb = k ! leading dimension of B (f)
+    ldc = m ! leading dimension of C (fTarget)
+    beta = 0.0_c_prec
+
+#ifdef DOUBLE_PRECISION
+    ! First pass interpolates in the first quadrature dimension
+    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
+                                   m,n,k,alpha, &
+                                   c_loc(A),lda, &
+                                   c_loc(f),ldb,beta, &
+                                   c_loc(Af),ldc))
+#else
+    ! First pass interpolates in the first quadrature dimension
+    call hipblasCheck(hipblasSgemm(hipblas_handle, &
+                                   HIPBLAS_OP_T,HIPBLAS_OP_N, &
+                                   m,n,k,alpha, &
+                                   c_loc(A),lda, &
+                                   c_loc(f),ldb,beta, &
+                                   c_loc(Af),ldc))
+#endif
+
+  end subroutine self_hipblas_matrixop_dim1_3d
+
+  subroutine self_hipblas_matrixop_dim2_3d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+    real(prec), pointer, intent(in) :: A(:,:)
+    real(prec), pointer, intent(in) :: f(:,:,:,:,:)
+    real(prec), pointer, intent(inout) :: Af(:,:,:,:,:)
+    real(c_prec), intent(in) :: beta
+    integer, intent(in) :: controldegree,targetdegree,nvars,nelems
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    
+    integer :: i
+    integer(c_int64_t) :: strideA
+    integer(c_int) :: incx
+    integer(c_int64_t) :: stridex
+    integer(c_int) :: incy
+    integer(c_int64_t) :: stridey
+    integer(c_int) :: batchCount
+
+
+    m = controldegree + 1 ! number of rows of A
+    n = targetdegree + 1 ! number of columns of A
+    alpha = 1.0_c_prec
+    lda = m ! leading dimension of A
+    strideA = 0 ! stride for the batches of A (no stride)
+    incx = targetdegree + 1 !
+    stridex = (controldegree + 1)*(targetdegree + 1)
+    !beta = 0.0_c_prec
+    incy = targetdegree + 1
+    stridey = (targetdegree + 1)*(targetdegree + 1)
+    batchCount = (controldegree +1)*nvars*nelems
+    do i = 0,targetdegree
+#ifdef DOUBLE_PRECISION
+      call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
+                                                   HIPBLAS_OP_T, &
+                                                   m,n,alpha, &
+                                                   c_loc(A),lda,strideA, &
+                                                   c_loc(f(1 + i,1,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(Af(1 + i,1,1,1,1)),incy,stridey,batchCount))
+#else
+      call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
+                                                   HIPBLAS_OP_T, &
+                                                   m,n,alpha, &
+                                                   c_loc(A),lda,strideA, &
+                                                   c_loc(f(1 + i,1,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(Af(1 + i,1,1,1,1)),incy,stridey,batchCount))
+#endif
+    end do
+
+  end subroutine self_hipblas_matrixop_dim2_3d
+
+  subroutine self_hipblas_matrixop_dim3_3d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+    real(prec), pointer, intent(in) :: A(:,:)
+    real(prec), pointer, intent(in) :: f(:,:,:,:,:)
+    real(prec), pointer, intent(inout) :: Af(:,:,:,:,:)
+    real(c_prec), intent(in) :: beta
+    integer, intent(in) :: controldegree,targetdegree,nvars,nelems
+    type(c_ptr), intent(inout) :: hipblas_handle
+    ! Local
+    integer(c_int) :: m
+    integer(c_int) :: n
+    real(c_prec) :: alpha
+    integer(c_int) :: lda
+    
+    integer :: i, j
+    integer(c_int64_t) :: strideA
+    integer(c_int) :: incx
+    integer(c_int64_t) :: stridex
+    integer(c_int) :: incy
+    integer(c_int64_t) :: stridey
+    integer(c_int) :: batchCount
+
+    m = controldegree + 1 ! number of rows of A
+    n = targetdegree + 1 ! number of columns of A
+    alpha = 1.0_c_prec
+    lda = m ! leading dimension of A
+    strideA = 0 ! stride for the batches of A (no stride)
+    incx = (targetdegree + 1)*(targetdegree + 1) !
+    stridex = (controldegree + 1)*(targetdegree + 1)*(targetdegree + 1)
+    !beta = 0.0_c_prec
+    incy = (targetdegree + 1)*(targetdegree + 1)
+    stridey = (targetdegree + 1)*(targetdegree + 1)*(targetdegree + 1)
+    batchCount = nvars*nelems
+    do j = 0,targetdegree
+      do i = 0,targetdegree
+#ifdef DOUBLE_PRECISION
+      call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
+                                                   HIPBLAS_OP_T, &
+                                                   m,n,alpha, &
+                                                   c_loc(A),lda,strideA, &
+                                                   c_loc(f(1 + i,1 + j,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(Af(1 + i,1 + j,1,1,1)),incy,stridey,batchCount))
+#else
+      call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
+                                                   HIPBLAS_OP_T, &
+                                                   m,n,alpha, &
+                                                   c_loc(A),lda,strideA, &
+                                                   c_loc(f(1 + i,1 + j,1,1,1)),incx,stridex,beta, &
+                                                   c_loc(Af(1 + i,1 + j,1,1,1)),incy,stridey,batchCount))
+#endif
+      enddo
+    end do
+
+  end subroutine self_hipblas_matrixop_dim3_3d
+
   subroutine ScalarGridInterp_1D_cpu(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_1D interface.
     !! In most cases, you should use the `ScalarGridInterp_1D` generic interface,
@@ -655,6 +795,99 @@ contains
     call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_2D_gpu
+
+  subroutine ScalarGridInterp_3D_cpu(this,f,fTarget,nvars,nelems)
+    !! Host (CPU) implementation of the ScalarGridInterp_3D interface.
+    !! In most cases, you should use the `ScalarGridInterp_3D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a scalar-3D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iel,ivar} I_{i,m} I_{j,n} $$
+    !!
+    implicit none
+    class(Lagrange),intent(in) :: this
+    !! Lagrange class instance
+    integer,intent(in)     :: nvars
+    !! The number of variables/functions that are interpolated
+    integer,intent(in)     :: nelems
+    !! The number of spectral elements in the SEM grid
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
+    !! (Input) Array of function values, defined on the control grid
+    real(prec),intent(inout) :: fTarget(1:this % M+1,1:this % M+1,1:this % M+1,1:nelems,1:nvars)
+    !! (Output) Array of function values, defined on the target grid
+    ! Local
+    integer :: i,j,k,ii,jj,kk,iel,ivar
+    real(prec) :: fi,fij,fijk
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k = 1,this % M+1
+          do j = 1,this % M+1
+            do i = 1,this % M+1
+
+              fijk = 0.0_prec
+              do kk = 1,this % N+1
+                fij = 0.0_prec
+                do jj = 1,this % N+1
+                  fi = 0.0_prec
+                  do ii = 1,this % N+1
+                    fi = fi + f(ii,jj,kk,iel,ivar)*this % iMatrix(ii,i)
+                  end do
+                  fij = fij + fi*this % iMatrix(jj,j)
+                end do
+                fijk = fijk + fij*this % iMatrix(kk,k)
+              enddo
+              fTarget(i,j,k,iel,ivar) = fijk
+
+            end do
+          end do
+        enddo
+      end do
+    end do
+
+  end subroutine ScalarGridInterp_3D_cpu
+
+  subroutine ScalarGridInterp_3D_gpu(this,f,fInt1,fInt2,fTarget,nvars,nelems,hipblas_handle)
+    !! Device (GPU) implementation of the ScalarGridInterp_3D interface.
+    !! In most cases, you should use the `ScalarGridInterp_3D` generic interface,
+    !! rather than calling this routine directly.
+    !! This routine uses hipblas calls to execute the grid interoplation
+    !! Interpolate a scalar-3D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iel,ivar} I_{i,m} I_{j,n} $$
+    !!
+    implicit none
+    class(Lagrange),intent(in) :: this
+    !! Lagrange class instance
+    integer,intent(in) :: nvars
+    !! The number of variables/functions that are interpolated
+    integer,intent(in) :: nelems
+    !! The number of spectral elements in the SEM grid
+    real(prec),pointer,intent(in)  :: f(:,:,:,:,:)
+    !! (Input) Array of function values, defined on the control grid
+    real(prec),pointer,intent(inout) :: fInt1(:,:,:,:,:)
+    ! (Input) Array of function values, defined on the control grid
+    real(prec),pointer,intent(inout) :: fInt2(:,:,:,:,:)
+    !! (Inout) workspace array for handling intermediate values interpolated in one direction
+    real(prec),pointer,intent(inout) :: fTarget(:,:,:,:,:)
+    !! (Output) Array of function values, defined on the target grid
+    type(c_ptr),intent(inout) :: hipblas_handle
+
+    call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
+
+  end subroutine ScalarGridInterp_3D_gpu
 
 !   subroutine VectorGridInterp_2D_cpu(this,f,fTarget,nvars,nelems)
 !     !! Host (CPU) implementation of the VectorGridInterp_2D interface.
