@@ -117,22 +117,22 @@ module SELF_Data
 
   end type Scalar2D
 
-  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
+  type,extends(SELF_DataObj),public :: Scalar3D
 
-    real(prec), pointer, dimension(:,:,:,:,:) :: interior
-    real(prec), pointer, dimension(:,:,:,:,:) :: boundary
-    real(prec), pointer, dimension(:,:,:,:,:) :: extBoundary
-    real(prec), pointer, dimension(:,:,:,:,:) :: avgBoundary
-    real(prec), pointer, dimension(:,:,:,:,:) :: jumpBoundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: avgBoundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: jumpBoundary
 
-    real(prec), pointer, private, dimension(:,:,:,:,:) :: interpWork1
-    real(prec), pointer, private, dimension(:,:,:,:,:) :: interpWork2
+    real(prec),pointer,private,dimension(:,:,:,:,:) :: interpWork1
+    real(prec),pointer,private,dimension(:,:,:,:,:) :: interpWork2
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_Scalar3D
-    PROCEDURE,PUBLIC :: Free => Free_Scalar3D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Scalar3D
+    procedure,public :: Init => Init_Scalar3D
+    procedure,public :: Free => Free_Scalar3D
+    procedure,public :: UpdateDevice => UpdateDevice_Scalar3D
 
     generic,public :: GridInterp => GridInterp_Scalar3D_cpu,GridInterp_Scalar3D_gpu
     procedure,private :: GridInterp_Scalar3D_cpu
@@ -148,7 +148,7 @@ module SELF_Data
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
     ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
 
-  END TYPE Scalar3D
+  end type Scalar3D
 
 ! ! ! ---------------------- Vectors ---------------------- !
 
@@ -168,7 +168,6 @@ module SELF_Data
     generic,public :: BoundaryInterp => BoundaryInterp_Vector2D_cpu,BoundaryInterp_Vector2D_gpu
     procedure,private :: BoundaryInterp_Vector2D_cpu
     procedure,private :: BoundaryInterp_Vector2D_gpu
-
 
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
 
@@ -549,31 +548,29 @@ contains
 
   end subroutine UpdateDevice_Scalar2D
 
-  SUBROUTINE BoundaryInterp_Scalar2D_cpu(this)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(inout) :: this
+  subroutine BoundaryInterp_Scalar2D_cpu(this)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
 
+    call this % interp % ScalarBoundaryInterp_2D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
-      CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
-                                                          this % boundary , &
-                                                          this % nVar, &
-                                                          this % nElem)
+  end subroutine BoundaryInterp_Scalar2D_cpu
 
-  END SUBROUTINE BoundaryInterp_Scalar2D_cpu
+  subroutine BoundaryInterp_Scalar2D_gpu(this,handle)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
+    type(c_ptr),intent(in) :: handle
 
-  SUBROUTINE BoundaryInterp_Scalar2D_gpu(this,handle)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(inout) :: this
-    type(c_ptr), intent(in) :: handle
+    call this % interp % ScalarBoundaryInterp_2D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 handle)
 
-
-      CALL this % interp % ScalarBoundaryInterp_2D(this % interior , &
-                                                          this % boundary , &
-                                                          this % nVar, &
-                                                          this % nElem,&
-                                                          handle)
-
-  END SUBROUTINE BoundaryInterp_Scalar2D_gpu
+  end subroutine BoundaryInterp_Scalar2D_gpu
 
   subroutine GridInterp_Scalar2D_cpu(this,SELFout)
     implicit none
@@ -752,7 +749,6 @@ contains
   !   IMPLICIT NONE
   !   CLASS(Scalar3D),INTENT(inout) :: this
 
-
   !     CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
   !                                                         this % boundary , &
   !                                                         this % nVar, &
@@ -764,7 +760,6 @@ contains
   !   IMPLICIT NONE
   !   CLASS(Scalar3D),INTENT(inout) :: this
   !   type(c_ptr), intent(in) :: handle
-
 
   !     CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
   !                                                         this % boundary , &
@@ -960,32 +955,29 @@ contains
 
   end subroutine UpdateDevice_Vector2D
 
-  SUBROUTINE BoundaryInterp_Vector2D_cpu(this)
-    IMPLICIT NONE
-    CLASS(Vector2D),INTENT(inout) :: this
+  subroutine BoundaryInterp_Vector2D_cpu(this)
+    implicit none
+    class(Vector2D),intent(inout) :: this
 
+    call this % interp % VectorBoundaryInterp_2D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
-      CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
-                                                          this % boundary , &
-                                                          this % nVar, &
-                                                          this % nElem)
+  end subroutine BoundaryInterp_Vector2D_cpu
 
-  END SUBROUTINE BoundaryInterp_Vector2D_cpu
+  subroutine BoundaryInterp_Vector2D_gpu(this,handle)
+    implicit none
+    class(Vector2D),intent(inout) :: this
+    type(c_ptr),intent(in) :: handle
 
-  SUBROUTINE BoundaryInterp_Vector2D_gpu(this,handle)
-    IMPLICIT NONE
-    CLASS(Vector2D),INTENT(inout) :: this
-    type(c_ptr), intent(in) :: handle
+    call this % interp % VectorBoundaryInterp_2D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 handle)
 
-
-      CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
-                                                   this % boundary , &
-                                                   this % nVar, &
-                                                   this % nElem,&
-                                                   handle)
-
-  END SUBROUTINE BoundaryInterp_Vector2D_gpu
-
+  end subroutine BoundaryInterp_Vector2D_gpu
 
 !   SUBROUTINE GridInterp_Vector2D(this,SELFOut,gpuAccel)
 !     IMPLICIT NONE
@@ -1049,7 +1041,7 @@ contains
                                              SELFout % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                            hipblas_handle)
+                                             hipblas_handle)
 
   end subroutine Divergence_Vector2D_gpu
 
