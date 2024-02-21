@@ -35,13 +35,14 @@
 #define SC_2D_INDEX(i,j,iel,iVar,N,nEl) i+(N+1)*(j + (N+1)*(iel + nEl*iVar)) 
 #define SCB_2D_INDEX(i,iSide,iel,iVar,N,nEl) i+(N+1)*(iSide + 4*(iel + nEl*iVar))
 
+#define VE_2D_INDEX(i,j,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(j + (N+1)*(iel + nEl*(iVar + nVar*idir)))
+#define VEB_2D_INDEX(i,iSide,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(iSide + 4*(iel + nEl*(iVar + nVar*idir)))
 
-#define VE_2D_INDEX(dir,i,j,iel,iVar,N,nVar) dir-1 + 2*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar)))
+
 #define P2VE_2D_INDEX(dir,n,i,j,iel,iVar,N,nVar) dir-1 + 2*(n + (N+1)*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar))))
 #define P2PVE_2D_INDEX(row,col,n,i,j,iel,iVar,N,nVar) row-1 + 2*(col-1 + 2*(n + (N+1)*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar)))))
 #define TE_2D_INDEX(row,col,i,j,iel,iVar,N,nVar) row-1 + 2*(col-1 + 2*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar))))
 
-#define VEB_2D_INDEX(dir,i,iVar,iSide,iel,N,nVar) dir-1 + 2*(i + (N+1)*(iVar + nVar*(iSide-1 + 4*iel)))
 #define TEB_2D_INDEX(row,col,i,iVar,iSide,iel,N,nVar) row-1 + 2*(col-1 + 2*(i + (N+1)*(iVar + nVar*(iSide-1 + 4*iel))))
 
 

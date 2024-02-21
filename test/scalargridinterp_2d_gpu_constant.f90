@@ -30,7 +30,6 @@ integer function scalargridinterp_2d_gpu_constant() result(r)
   type(Lagrange),target :: interp
   type(Lagrange),target :: interpTarget
   type(c_ptr) :: handle
-  integer :: i
 
   call hipblasCheck(hipblasCreate(handle))
 
@@ -55,9 +54,7 @@ integer function scalargridinterp_2d_gpu_constant() result(r)
   call f % updatedevice()
 
   ! Interpolate with gpuAccel = .true.
-  do i = 1, 1000
   call f % GridInterp(fTarget,handle)
-  enddo
   call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact

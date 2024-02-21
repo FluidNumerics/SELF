@@ -9,7 +9,6 @@ program test
 contains
 integer function vectorboundaryinterp_2d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
 
@@ -40,7 +39,7 @@ integer function vectorboundaryinterp_2d_cpu_constant() result(r)
   f % interior  = 1.0_prec
 
   ! Interpolate with gpuAccel = .FALSE.
-  call f % BoundaryInterp(.false.)
+  call f % BoundaryInterp()
 
   ! Calculate diff from exact
   f % boundary  = abs(f % boundary  - 1.0_prec)

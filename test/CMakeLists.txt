@@ -49,6 +49,8 @@ add_fortran_tests (
     "scalarboundaryinterp_2d_gpu_constant.f90"
     "vectordivergence_2d_cpu_constant.f90"
     "vectordivergence_2d_gpu_constant.f90"
+    "vectorboundaryinterp_2d_cpu_constant.f90"
+    "vectorboundaryinterp_2d_gpu_constant.f90"
     )
 
 
@@ -59,8 +61,7 @@ add_fortran_tests (
 
 #    "scalarboundaryinterp_3d_cpu_constant.f90"
 #    "scalarboundaryinterp_3d_gpu_constant.f90"
-#    "vectorboundaryinterp_2d_cpu_constant.f90"
-#    "vectorboundaryinterp_2d_gpu_constant.f90"
+
 #    "vectorboundaryinterp_3d_cpu_constant.f90"
 #    "vectorboundaryinterp_3d_gpu_constant.f90"
 

@@ -127,8 +127,8 @@ module SELF_Lagrange
     GENERIC,PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
     PROCEDURE,PRIVATE :: ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
 
-    ! GENERIC,PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
-    ! PROCEDURE,PRIVATE :: VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
+    GENERIC,PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
+    PROCEDURE,PRIVATE :: VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
 
     ! GENERIC,PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
     ! PROCEDURE,PRIVATE :: TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
@@ -190,15 +190,15 @@ module SELF_Lagrange
   END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
 END INTERFACE
 
-! INTERFACE
-!   SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-!     bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
-!     USE iso_c_binding
-!     IMPLICIT NONE
-!     TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
-!     INTEGER(C_INT),VALUE :: N,nVar,nEl
-!   END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
-! END INTERFACE
+INTERFACE
+  SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
+    USE iso_c_binding
+    IMPLICIT NONE
+    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
+END INTERFACE
 
 ! INTERFACE
 !   SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
@@ -1669,50 +1669,51 @@ contains
     
   end subroutine ScalarBoundaryInterp_2D_gpu
 
-  ! subroutine VectorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
-  !   implicit none
-  !   class(Lagrange),intent(in) :: this
-  !   integer,intent(in)  :: nvars,nelems
-  !   real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:2)
-  !   real(prec),intent(out)  :: fTarget(1:this % N+1,1:4,1:nelems,1:nvars,1:2)
-  !   ! Local
-  !   integer :: i,ii,idir,iel,ivar
-  !   real(prec) :: fb(1:4)
+  subroutine VectorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out)  :: fTarget(1:this % N+1,1:4,1:nelems,1:nvars,1:2)
+    ! Local
+    integer :: i,ii,idir,iel,ivar
+    real(prec) :: fb(1:4)
 
-  !   do idir = 1,2
-  !     do ivar = 1,nvars
-  !       do iel = 1,nelems
-  !         do i = 1,this % N+1
+    do idir = 1,2
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do i = 1,this % N+1
 
-  !           fb(1:4) = 0.0_prec
-  !           do ii = 1,this % N+1
-  !               fb(1) = fb(1) + this % bMatrix (ii,0)*f(i,ii,iel,ivar,idir) ! South
-  !               fb(2) = fb(2) + this % bMatrix (ii,1)*f(ii,i,iel,ivar,idir) ! East
-  !               fb(3) = fb(3) + this % bMatrix (ii,1)*f(i,ii,iel,ivar,idir) ! North
-  !               fb(4) = fb(4) + this % bMatrix (ii,0)*f(ii,i,iel,ivar,idir) ! West
-  !           end do
+            fb(1:4) = 0.0_prec
+            do ii = 1,this % N+1
+                fb(1) = fb(1) + this % bMatrix (ii,1)*f(i,ii,iel,ivar,idir) ! South
+                fb(2) = fb(2) + this % bMatrix (ii,2)*f(ii,i,iel,ivar,idir) ! East
+                fb(3) = fb(3) + this % bMatrix (ii,2)*f(i,ii,iel,ivar,idir) ! North
+                fb(4) = fb(4) + this % bMatrix (ii,1)*f(ii,i,iel,ivar,idir) ! West
+            end do
 
-  !           fTarget(i,1:4,iel,ivar,idir) = fb(1:4)
+            fTarget(i,1:4,iel,ivar,idir) = fb(1:4)
 
-  !         end do
-  !       end do
-  !     end do
-  !   end do
+          end do
+        end do
+      end do
+    end do
 
-  ! end subroutine VectorBoundaryInterp_2D_cpu
+  end subroutine VectorBoundaryInterp_2D_cpu
 
-  ! subroutine VectorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems)
-  !   implicit none
-  !   class(Lagrange),intent(in) :: this
-  !   integer,intent(in)  :: nvars,nelems
-  !   real(prec), pointer, intent(in)  :: f(:,:,:,:,:)
-  !   real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:)
+  subroutine VectorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec), pointer, intent(in)  :: f(:,:,:,:,:)
+    real(prec), pointer, intent(inout)  :: fTarget(:,:,:,:,:)
+    type(c_ptr), intent(in) :: handle
 
-  !   call VectorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
-  !                                            c_loc(f),c_loc(fTarget),&
-  !                                            this % N,nvars,nelems)
+    call VectorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget),&
+                                             this % N,nvars,nelems)
 
-  ! end subroutine VectorBoundaryInterp_2D_gpu
+  end subroutine VectorBoundaryInterp_2D_gpu
 
   ! subroutine TensorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
   !   implicit none

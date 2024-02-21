@@ -156,7 +156,12 @@ module SELF_Data
     procedure,public :: Init => Init_Vector2D
     procedure,public :: Free => Free_Vector2D
     procedure,public :: UpdateDevice => UpdateDevice_Vector2D
-    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Vector2D
+
+    generic,public :: BoundaryInterp => BoundaryInterp_Vector2D_cpu,BoundaryInterp_Vector2D_gpu
+    procedure,private :: BoundaryInterp_Vector2D_cpu
+    procedure,private :: BoundaryInterp_Vector2D_gpu
+
+
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
 
     ! GENERIC,PUBLIC :: Gradient => Gradient_Vector2D
@@ -1051,24 +1056,32 @@ contains
 
   end subroutine UpdateDevice_Vector2D
 
-!   SUBROUTINE BoundaryInterp_Vector2D(this,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(inout) :: this
-!     LOGICAL,INTENT(in) :: gpuAccel
+  SUBROUTINE BoundaryInterp_Vector2D_cpu(this)
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: this
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     ELSE
-!       CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     END IF
 
-!   END SUBROUTINE BoundaryInterp_Vector2D
+      CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
+                                                          this % boundary , &
+                                                          this % nVar, &
+                                                          this % nElem)
+
+  END SUBROUTINE BoundaryInterp_Vector2D_cpu
+
+  SUBROUTINE BoundaryInterp_Vector2D_gpu(this,handle)
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: this
+    type(c_ptr), intent(in) :: handle
+
+
+      CALL this % interp % VectorBoundaryInterp_2D(this % interior , &
+                                                   this % boundary , &
+                                                   this % nVar, &
+                                                   this % nElem,&
+                                                   handle)
+
+  END SUBROUTINE BoundaryInterp_Vector2D_gpu
+
 
 !   SUBROUTINE GridInterp_Vector2D(this,SELFOut,gpuAccel)
 !     IMPLICIT NONE

@@ -4,10 +4,11 @@
 
 
 // ScalarBoundaryInterp_2D //
-__global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nEl){
+__global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N){
 
   uint32_t iVar = blockIdx.y;
   uint32_t iEl = blockIdx.x;
+  uint32_t nEl = gridDim.x;
   uint32_t i = threadIdx.x;
 
   real fb[4] = {0.0};
@@ -27,41 +28,45 @@ extern "C"
 {
   void ScalarBoundaryInterp_2D_gpu_wrapper(real *bMatrix, real *f, real *fBound, int N, int nVar, int nEl)
   {
-	  ScalarBoundaryInterp_2D_gpu<<<dim3(nEl,nVar,1), dim3(N+1,1,1), 0, 0>>>(bMatrix, f, fBound, N, nVar);
+	  ScalarBoundaryInterp_2D_gpu<<<dim3(nEl,nVar,1), dim3(N+1,1,1), 0, 0>>>(bMatrix, f, fBound, N);
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
-/*
-// VectorBoundaryInterp_2D //
-__global__ void VectorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  uint32_t iVar = blockIdx.x;
-  uint32_t iEl = blockIdx.y;
-  uint32_t idir = threadIdx.x+1;
-  uint32_t i = threadIdx.y;
+// VectorBoundaryInterp_2D //
+__global__ void VectorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N){
+
+  uint32_t iVar = blockIdx.y;
+  uint32_t nVar = gridDim.y;
+  uint32_t iEl = blockIdx.x;
+  uint32_t nEl = gridDim.x;
+  uint32_t idir = blockIdx.z;
+  uint32_t i = threadIdx.x;
 
   real fb[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
-      fb[0] += f[VE_2D_INDEX(idir,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
-      fb[1] += f[VE_2D_INDEX(idir,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
-      fb[2] += f[VE_2D_INDEX(idir,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
-      fb[3] += f[VE_2D_INDEX(idir,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+      fb[0] += f[VE_2D_INDEX(i,ii,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii]; // South
+      fb[1] += f[VE_2D_INDEX(ii,i,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii+(N+1)]; // East
+      fb[2] += f[VE_2D_INDEX(i,ii,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii+(N+1)]; // North
+      fb[3] += f[VE_2D_INDEX(ii,i,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii]; // West
   }
-  fBound[VEB_2D_INDEX(idir,i,iVar,1,iEl,N,nVar)] = fb[0];
-  fBound[VEB_2D_INDEX(idir,i,iVar,2,iEl,N,nVar)] = fb[1];
-  fBound[VEB_2D_INDEX(idir,i,iVar,3,iEl,N,nVar)] = fb[2];
-  fBound[VEB_2D_INDEX(idir,i,iVar,4,iEl,N,nVar)] = fb[3];
+  fBound[VEB_2D_INDEX(i,0,iEl,iVar,idir,N,nEl,nVar)] = fb[0];
+  fBound[VEB_2D_INDEX(i,1,iEl,iVar,idir,N,nEl,nVar)] = fb[1];
+  fBound[VEB_2D_INDEX(i,2,iEl,iVar,idir,N,nEl,nVar)] = fb[2];
+  fBound[VEB_2D_INDEX(i,3,iEl,iVar,idir,N,nEl,nVar)] = fb[3];
 }
 
 extern "C"
 {
   void VectorBoundaryInterp_2D_gpu_wrapper(real *bMatrix, real *f, real *fBound, int N, int nVar, int nEl)
   {
-	  VectorBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(2,N+1,1), 0, 0>>>(bMatrix, f, fBound, N, nVar);
+	  VectorBoundaryInterp_2D_gpu<<<dim3(nEl,nVar,2), dim3(N+1,1,1), 0, 0>>>(bMatrix, f, fBound, N);
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }
+
+/*
 
 // TensorBoundaryInterp_2D //
 __global__ void TensorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
