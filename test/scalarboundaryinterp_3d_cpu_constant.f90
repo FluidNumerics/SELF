@@ -9,7 +9,6 @@ program test
 contains
 integer function scalarboundaryinterp_3d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
 
@@ -39,8 +38,7 @@ integer function scalarboundaryinterp_3d_cpu_constant() result(r)
   ! Set the source scalar (on the control grid) to a non-zero constant
   f % interior  = 1.0_prec
 
-  ! Interpolate with gpuAccel = .FALSE.
-  call f % BoundaryInterp(.false.)
+  call f % BoundaryInterp()
 
   ! Calculate diff from exact
   f % boundary  = abs(f % boundary  - 1.0_prec)
@@ -54,4 +52,5 @@ integer function scalarboundaryinterp_3d_cpu_constant() result(r)
   call f % free()
   call interp % free()
 
-end function scalarboundaryinterp_3d_cpu_constantend program test
+end function scalarboundaryinterp_3d_cpu_constant
+end program test

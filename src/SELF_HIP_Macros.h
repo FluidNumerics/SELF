@@ -35,6 +35,9 @@
 #define SC_2D_INDEX(i,j,iel,iVar,N,nEl) i+(N+1)*(j + (N+1)*(iel + nEl*iVar)) 
 #define SCB_2D_INDEX(i,iSide,iel,iVar,N,nEl) i+(N+1)*(iSide + 4*(iel + nEl*iVar))
 
+#define SC_3D_INDEX(i,j,k,iel,iVar,N,nEl) i+(N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*iVar)))
+#define SCB_3D_INDEX(i,j,iSide,iel,iVar,N,nEl) i+(N+1)*(j + (N+1)*(iSide + 6*(iel + nEl*iVar)))
+
 #define VE_2D_INDEX(i,j,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(j + (N+1)*(iel + nEl*(iVar + nVar*idir)))
 #define VEB_2D_INDEX(i,iSide,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(iSide + 4*(iel + nEl*(iVar + nVar*idir)))
 
@@ -46,10 +49,8 @@
 #define TEB_2D_INDEX(row,col,i,iVar,iSide,iel,N,nVar) row-1 + 2*(col-1 + 2*(i + (N+1)*(iVar + nVar*(iSide-1 + 4*iel))))
 
 
-#define SC_3D_INDEX(i,j,k,iel,iVar,N,nVar) i+(N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*iVar)))
 #define VE_3D_INDEX(dir,i,j,k,iel,iVar,N,nVar) dir-1 + 3*(i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*iVar))))
 #define TE_3D_INDEX(row,col,i,j,k,iel,iVar,N,nVar) row-1 + 3*(col-1 + 3*(i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*iVar)))))
-#define SCB_3D_INDEX(i,j,iVar,iSide,iel,N,nVar) i+(N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel)))
 #define VEB_3D_INDEX(dir,i,j,iVar,iSide,iel,N,nVar) dir-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel))))
 #define TEB_3D_INDEX(row,col,i,j,iVar,iSide,iel,N,nVar) row-1 + 3*(col-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel)))))
 

@@ -134,6 +134,10 @@ module SELF_Data
     procedure,public :: Free => Free_Scalar3D
     procedure,public :: UpdateDevice => UpdateDevice_Scalar3D
 
+    generic,public :: BoundaryInterp => BoundaryInterp_Scalar3D_cpu,BoundaryInterp_Scalar3D_gpu
+    procedure,private :: BoundaryInterp_Scalar3D_cpu
+    procedure,private :: BoundaryInterp_Scalar3D_gpu
+
     generic,public :: GridInterp => GridInterp_Scalar3D_cpu,GridInterp_Scalar3D_gpu
     procedure,private :: GridInterp_Scalar3D_cpu
     procedure,private :: GridInterp_Scalar3D_gpu
@@ -749,29 +753,29 @@ contains
 
   end subroutine UpdateDevice_Scalar3D
 
-  ! SUBROUTINE BoundaryInterp_Scalar3D_cpu(this)
-  !   IMPLICIT NONE
-  !   CLASS(Scalar3D),INTENT(inout) :: this
+  SUBROUTINE BoundaryInterp_Scalar3D_cpu(this)
+    IMPLICIT NONE
+    CLASS(Scalar3D),INTENT(inout) :: this
 
-  !     CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
-  !                                                         this % boundary , &
-  !                                                         this % nVar, &
-  !                                                         this % nElem)
+      CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
+                                                          this % boundary , &
+                                                          this % nVar, &
+                                                          this % nElem)
 
-  ! END SUBROUTINE BoundaryInterp_Scalar3D_cpu
+  END SUBROUTINE BoundaryInterp_Scalar3D_cpu
 
-  ! SUBROUTINE BoundaryInterp_Scalar3D_gpu(this,handle)
-  !   IMPLICIT NONE
-  !   CLASS(Scalar3D),INTENT(inout) :: this
-  !   type(c_ptr), intent(in) :: handle
+  SUBROUTINE BoundaryInterp_Scalar3D_gpu(this,handle)
+    IMPLICIT NONE
+    CLASS(Scalar3D),INTENT(inout) :: this
+    type(c_ptr), intent(in) :: handle
 
-  !     CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
-  !                                                         this % boundary , &
-  !                                                         this % nVar, &
-  !                                                         this % nElem,&
-  !                                                         handle)
+      CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
+                                                          this % boundary , &
+                                                          this % nVar, &
+                                                          this % nElem,&
+                                                          handle)
 
-  ! END SUBROUTINE BoundaryInterp_Scalar3D_gpu
+  END SUBROUTINE BoundaryInterp_Scalar3D_gpu
 
   subroutine GridInterp_Scalar3D_cpu(this,SELFout)
     implicit none
