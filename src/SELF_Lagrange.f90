@@ -154,8 +154,8 @@ module SELF_Lagrange
     ! GENERIC,PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu,VectorGradient_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorGradient_3D_cpu,VectorGradient_3D_gpu
 
-    ! GENERIC,PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
-    ! PROCEDURE,PRIVATE :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
+    GENERIC,PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
+    PROCEDURE,PRIVATE :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
 
     ! GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
@@ -1490,8 +1490,8 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
     integer    :: i,j,ii,iel,ivar
     real(prec) :: dfLoc
 
-    do iel = 1,nelems
-      do ivar = 1,nvars
+    do ivar = 1,nvars
+      do iel = 1,nelems
         do j = 1,this % N + 1
           do i = 1,this % N + 1
 
@@ -1506,8 +1506,8 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
       end do
     end do
 
-    do iel = 1,nelems
-      do ivar = 1,nvars
+    do ivar = 1,nvars
+      do iel = 1,nelems
         do j = 1,this % N + 1
           do i = 1,this % N + 1
 
@@ -1595,6 +1595,92 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
 !                                            nvars,nelems)
 
 !   end subroutine VectorDGDivergence_2D_gpu
+
+  subroutine VectorDivergence_3D_cpu(this,f,dF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar
+    real(prec) :: dfLoc
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k = 1,this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar,1)
+              end do
+              dF(i,j,k,iel,ivar) = dfLoc
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k  = 1, this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar,2)
+              end do
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k  = 1, this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
+              end do
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine VectorDivergence_3D_cpu
+
+  subroutine VectorDivergence_3D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
+    type(c_ptr),intent(inout) :: hipblas_handle
+    ! local
+    real(prec),pointer :: floc(:,:,:,:,:)
+
+    floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,1)
+    call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,hipblas_handle)
+    floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,2)
+    call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,3)
+    call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    floc => null()
+
+  end subroutine VectorDivergence_3D_gpu
 
 !   subroutine ScalarGradient_3D_cpu(this,f,gradF,nvars,nelems)
 !     implicit none

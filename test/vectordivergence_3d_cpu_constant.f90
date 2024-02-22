@@ -9,7 +9,6 @@ program test
 contains
 integer function vectordivergence_3d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
 
@@ -42,8 +41,7 @@ integer function vectordivergence_3d_cpu_constant() result(r)
   ! Set the source vector (on the control grid) to a non-zero constant
   f % interior  = 1.0_prec
 
-  ! Interpolate with gpuAccel = .FALSE.
-  call f % Divergence(df, .false.)
+  call f % Divergence(df)
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
