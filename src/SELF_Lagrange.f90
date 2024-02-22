@@ -139,6 +139,9 @@ module SELF_Lagrange
     generic,public :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
     procedure,private :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
 
+    generic,public :: ScalarGradient_3D => ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
+    procedure,private :: ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
+
     ! GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
     ! PROCEDURE,PRIVATE :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
 
@@ -147,9 +150,6 @@ module SELF_Lagrange
 
     ! GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
     ! PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
-
-    ! GENERIC,PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
-    ! PROCEDURE,PRIVATE :: ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
 
     ! GENERIC,PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu,VectorGradient_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorGradient_3D_cpu,VectorGradient_3D_gpu
@@ -1299,6 +1299,61 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
     dfloc => null()
 
   end subroutine ScalarGradient_2D_gpu
+
+  subroutine ScalarGradient_3D_cpu(this,f,gradF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(out) :: gradF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar
+    real(prec) :: df1,df2,df3
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k = 1,this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              df1 = 0.0_prec
+              df2 = 0.0_prec
+              df3 =  0.0_prec
+              do ii = 1,this % N + 1
+                df1 = df1 + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar)
+                df2 = df2 + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar)
+                df3 = df3 + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar)
+              end do
+              gradf(i,j,k,iel,ivar,1) = df1
+              gradf(i,j,k,iel,ivar,2) = df2
+              gradf(i,j,k,iel,ivar,3) = df3
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine ScalarGradient_3D_cpu
+
+  subroutine ScalarGradient_3D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
+    type(c_ptr),intent(inout) :: hipblas_handle
+    ! local
+    real(prec),pointer :: dfloc(:,:,:,:,:)
+
+    dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,1)
+    call self_hipblas_matrixop_dim1_3d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,2)
+    call self_hipblas_matrixop_dim2_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,3)
+    call self_hipblas_matrixop_dim3_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    dfloc => null()
+
+  end subroutine ScalarGradient_3D_gpu
 ! ! !
 ! !
 !   ! SUBROUTINE ScalarDGGradient_2D_cpu(this,f,bf,gradF,nvars,nelems)

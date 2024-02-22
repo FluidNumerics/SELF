@@ -9,9 +9,10 @@ program test
 contains
 integer function scalargradient_3d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -27,6 +28,9 @@ integer function scalargradient_3d_gpu_constant() result(r)
   type(Scalar3D) :: f
   type(Vector3D) :: df
   type(Lagrange),target :: interp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
@@ -42,12 +46,10 @@ integer function scalargradient_3d_gpu_constant() result(r)
   ! Set the source scalar (on the control grid) to a non-zero constant
   f % interior  = 1.0_prec
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
-  ! Interpolate with gpuAccel = .true.
-  call f % Gradient(df, .true.)
-
-  call df % interior % updatehost()
+  call f % Gradient(df, handle)
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
@@ -61,6 +63,7 @@ integer function scalargradient_3d_gpu_constant() result(r)
   call f % free()
   call df % free()
   call interp % free()
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function scalargradient_3d_gpu_constant
 end program test

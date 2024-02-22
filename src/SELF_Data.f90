@@ -138,6 +138,10 @@ module SELF_Data
     procedure,private :: GridInterp_Scalar3D_cpu
     procedure,private :: GridInterp_Scalar3D_gpu
 
+    generic,public :: Gradient => Gradient_Scalar3D_cpu,Gradient_Scalar3D_gpu
+    procedure,private :: Gradient_Scalar3D_cpu
+    procedure,private :: Gradient_Scalar3D_gpu
+
     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar3D
 
@@ -797,31 +801,31 @@ contains
 
   end subroutine GridInterp_Scalar3D_gpu
 
-  ! subroutine Gradient_Scalar3D_cpu(this,df)
-  !   implicit none
-  !   class(Scalar3D),intent(in) :: this
-  !   type(Vector3D),intent(inout) :: df
+  subroutine Gradient_Scalar3D_cpu(this,df)
+    implicit none
+    class(Scalar3D),intent(in) :: this
+    type(Vector3D),intent(inout) :: df
 
-  !   call this % interp % ScalarGradient_3D(this % interior, &
-  !                                          df % interior, &
-  !                                          this % nVar, &
-  !                                          this % nElem)
+    call this % interp % ScalarGradient_3D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem)
 
-  ! end subroutine Gradient_Scalar3D_cpu
+  end subroutine Gradient_Scalar3D_cpu
 
-  ! subroutine Gradient_Scalar3D_gpu(this,df,hipblas_handle)
-  !   implicit none
-  !   class(Scalar3D),intent(in) :: this
-  !   type(Vector3D),intent(inout) :: df
-  !   type(c_ptr),intent(inout) :: hipblas_handle
+  subroutine Gradient_Scalar3D_gpu(this,df,hipblas_handle)
+    implicit none
+    class(Scalar3D),intent(in) :: this
+    type(Vector3D),intent(inout) :: df
+    type(c_ptr),intent(inout) :: hipblas_handle
 
-  !   call this % interp % ScalarGradient_3D(this % interior, &
-  !                                          df % interior, &
-  !                                          this % nVar, &
-  !                                          this % nElem, &
-  !                                          hipblas_handle)
+    call this % interp % ScalarGradient_3D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem, &
+                                           hipblas_handle)
 
-  ! end subroutine Gradient_Scalar3D_gpu
+  end subroutine Gradient_Scalar3D_gpu
 
 !   SUBROUTINE WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
 !     IMPLICIT NONE
