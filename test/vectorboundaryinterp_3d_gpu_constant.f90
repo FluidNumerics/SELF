@@ -9,9 +9,10 @@ program test
 contains
 integer function vectorboundaryinterp_3d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_Data
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -26,6 +27,9 @@ integer function vectorboundaryinterp_3d_gpu_constant() result(r)
 #endif
   type(Vector3D) :: f
   type(Lagrange),target :: interp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   ! Create an interpolant
   call interp % Init(N=controlDegree, &
@@ -40,13 +44,12 @@ integer function vectorboundaryinterp_3d_gpu_constant() result(r)
   f % interior  = 1.0_prec
 
   ! copy data from host to device
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
-  ! Interpolate with gpuAccel = .true.
-  call f % BoundaryInterp(.true.)
+  call f % BoundaryInterp(handle)
 
-  ! copy data from device to host
-  call f % boundary % updatehost()
+  call hipcheck(hipdevicesynchronize())
+
 
   ! Calculate diff from exact
   f % boundary  = abs(f % boundary  - 1.0_prec)
@@ -59,6 +62,8 @@ integer function vectorboundaryinterp_3d_gpu_constant() result(r)
 
   call f % free()
   call interp % free()
+  call hipblasCheck(hipblasDestroy(handle))
+
 
 end function vectorboundaryinterp_3d_gpu_constant
 end program test

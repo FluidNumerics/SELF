@@ -59,18 +59,14 @@ add_fortran_tests (
     "scalarboundaryinterp_3d_gpu_constant.f90"
     "vectordivergence_3d_cpu_constant.f90"
     "vectordivergence_3d_gpu_constant.f90"
+   "vectorboundaryinterp_3d_cpu_constant.f90"
+   "vectorboundaryinterp_3d_gpu_constant.f90"
+
     )
 
 
 #add_fortran_test_executable (
 #    testsuite
-
-
-
-
-
-#    "vectorboundaryinterp_3d_cpu_constant.f90"
-#    "vectorboundaryinterp_3d_gpu_constant.f90"
 
 
 

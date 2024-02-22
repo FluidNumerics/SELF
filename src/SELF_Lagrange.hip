@@ -101,6 +101,44 @@ extern "C"
   } 
 }
 
+
+// VectorBoundaryInterp_3D //
+__global__ void VectorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N){
+
+  uint32_t iVar = blockIdx.y;
+  uint32_t nVar = gridDim.y;
+  uint32_t iEl = blockIdx.x;
+  uint32_t nEl = gridDim.x;
+  uint32_t idir = blockIdx.z;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+
+  real fb[6] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+      fb[0] += f[VE_3D_INDEX(i,j,ii,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii]; // Bottom
+      fb[1] += f[VE_3D_INDEX(i,ii,j,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii]; // South
+      fb[2] += f[VE_3D_INDEX(ii,i,j,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii+(N+1)]; // East
+      fb[3] += f[VE_3D_INDEX(i,ii,j,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii+(N+1)]; // North
+      fb[4] += f[VE_3D_INDEX(ii,i,j,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii]; // West
+      fb[5] += f[VE_3D_INDEX(i,j,ii,iEl,iVar,idir,N,nEl,nVar)]*bMatrix[ii+(N+1)]; // Top
+  }
+  fBound[VEB_3D_INDEX(i,j,0,iEl,iVar,idir,N,nEl,nVar)] = fb[0];
+  fBound[VEB_3D_INDEX(i,j,1,iEl,iVar,idir,N,nEl,nVar)] = fb[1];
+  fBound[VEB_3D_INDEX(i,j,2,iEl,iVar,idir,N,nEl,nVar)] = fb[2];
+  fBound[VEB_3D_INDEX(i,j,3,iEl,iVar,idir,N,nEl,nVar)] = fb[3];
+  fBound[VEB_3D_INDEX(i,j,4,iEl,iVar,idir,N,nEl,nVar)] = fb[4];
+  fBound[VEB_3D_INDEX(i,j,5,iEl,iVar,idir,N,nEl,nVar)] = fb[5];
+}
+
+extern "C"
+{
+  void VectorBoundaryInterp_3D_gpu_wrapper(real *bMatrix, real *f, real *fBound, int N, int nVar, int nEl)
+  {
+	  VectorBoundaryInterp_3D_gpu<<<dim3(nEl,nVar,3), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, f, fBound, N);
+    HIP_SAFE_CALL(hipGetLastError());
+  } 
+}
+
 /*
 
 // TensorBoundaryInterp_2D //

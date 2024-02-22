@@ -41,17 +41,16 @@
 #define VE_2D_INDEX(i,j,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(j + (N+1)*(iel + nEl*(iVar + nVar*idir)))
 #define VEB_2D_INDEX(i,iSide,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(iSide + 4*(iel + nEl*(iVar + nVar*idir)))
 
+#define VE_3D_INDEX(i,j,k,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*(iVar + nVar*idir))))
+#define VEB_3D_INDEX(i,j,iSide,iel,iVar,idir,N,nEl,nVar) i + (N+1)*(j + (N+1)*(iSide + 6*(iel + nEl*(iVar + nVar*idir))))
 
+
+// Old macros below : remove this comment when we finish porting //
 #define P2VE_2D_INDEX(dir,n,i,j,iel,iVar,N,nVar) dir-1 + 2*(n + (N+1)*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar))))
 #define P2PVE_2D_INDEX(row,col,n,i,j,iel,iVar,N,nVar) row-1 + 2*(col-1 + 2*(n + (N+1)*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar)))))
 #define TE_2D_INDEX(row,col,i,j,iel,iVar,N,nVar) row-1 + 2*(col-1 + 2*(i + (N+1)*(j + (N+1)*(iel + nEl*iVar))))
-
 #define TEB_2D_INDEX(row,col,i,iVar,iSide,iel,N,nVar) row-1 + 2*(col-1 + 2*(i + (N+1)*(iVar + nVar*(iSide-1 + 4*iel))))
-
-
-#define VE_3D_INDEX(dir,i,j,k,iel,iVar,N,nVar) dir-1 + 3*(i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*iVar))))
 #define TE_3D_INDEX(row,col,i,j,k,iel,iVar,N,nVar) row-1 + 3*(col-1 + 3*(i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*iVar)))))
-#define VEB_3D_INDEX(dir,i,j,iVar,iSide,iel,N,nVar) dir-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel))))
 #define TEB_3D_INDEX(row,col,i,j,iVar,iSide,iel,N,nVar) row-1 + 3*(col-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel)))))
 
 // Boundary condition flags //

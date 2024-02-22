@@ -45,7 +45,6 @@ integer function scalarboundaryinterp_3d_gpu_constant() result(r)
 
   call f % updatedevice()
 
-  ! Interpolate with gpuAccel = .true.
   call f % BoundaryInterp(handle)
 
   call hipcheck(hipdevicesynchronize())

@@ -146,12 +146,6 @@ module SELF_Data
     procedure,private :: Gradient_Scalar3D_cpu
     procedure,private :: Gradient_Scalar3D_gpu
 
-    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
-    ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar3D
-
-    ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar3D
-    ! PROCEDURE,PRIVATE :: Gradient_Scalar3D
-
     ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
     ! PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
@@ -207,7 +201,11 @@ module SELF_Data
     PROCEDURE,PUBLIC :: Init => Init_Vector3D
     PROCEDURE,PUBLIC :: Free => Free_Vector3D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Vector3D
-    ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Vector3D
+
+    generic,public :: BoundaryInterp => BoundaryInterp_Vector3D_cpu,BoundaryInterp_Vector3D_gpu
+    procedure,private :: BoundaryInterp_Vector3D_cpu
+    procedure,private :: BoundaryInterp_Vector3D_gpu
+    
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector3D
 
     ! GENERIC,PUBLIC :: Gradient => Gradient_Vector3D
@@ -1184,29 +1182,29 @@ contains
 
   end subroutine UpdateDevice_Vector3D
 
-  ! subroutine BoundaryInterp_Vector3D_cpu(this)
-  !   implicit none
-  !   class(Vector3D),intent(inout) :: this
+  subroutine BoundaryInterp_Vector3D_cpu(this)
+    implicit none
+    class(Vector3D),intent(inout) :: this
 
-  !   call this % interp % VectorBoundaryInterp_3D(this % interior, &
-  !                                                this % boundary, &
-  !                                                this % nVar, &
-  !                                                this % nElem)
+    call this % interp % VectorBoundaryInterp_3D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
-  ! end subroutine BoundaryInterp_Vector3D_cpu
+  end subroutine BoundaryInterp_Vector3D_cpu
 
-  ! subroutine BoundaryInterp_Vector3D_gpu(this,handle)
-  !   implicit none
-  !   class(Vector3D),intent(inout) :: this
-  !   type(c_ptr),intent(in) :: handle
+  subroutine BoundaryInterp_Vector3D_gpu(this,handle)
+    implicit none
+    class(Vector3D),intent(inout) :: this
+    type(c_ptr),intent(in) :: handle
 
-  !   call this % interp % VectorBoundaryInterp_3D(this % interior, &
-  !                                                this % boundary, &
-  !                                                this % nVar, &
-  !                                                this % nElem, &
-  !                                                handle)
+    call this % interp % VectorBoundaryInterp_3D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 handle)
 
-  ! end subroutine BoundaryInterp_Vector3D_gpu
+  end subroutine BoundaryInterp_Vector3D_gpu
 
 !   SUBROUTINE GridInterp_Vector3D(this,SELFOut,gpuAccel)
 !     IMPLICIT NONE
@@ -1273,247 +1271,6 @@ contains
                                              hipblas_handle)
 
   end subroutine Divergence_Vector3D_gpu
-
-
-
-!   SUBROUTINE Init_Vector3D(this,interp,nVar,nElem)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(out) :: this
-!     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
-!     ! Local
-!     INTEGER :: N
-
-!     this % interp => interp
-!     this % nVar = nVar
-!     this % nElem = nElem
-!     N = interp % N
-
-!     CALL this % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
-!                                         upBound=(/3,N,N,N,nVar,nElem/))
-
-!     CALL this % boundary % Alloc(loBound=(/1,0,0,1,1,1/), &
-!                                         upBound=(/3,N,N,nVar,6,nElem/))
-
-!     CALL this % boundaryNormal % Alloc(loBound=(/0,0,1,1,1/), &
-!                                         upBound=(/N,N,nVar,6,nElem/))
-
-!     CALL this % extBoundary % Alloc(loBound=(/1,0,0,1,1,1/), &
-!                                            upBound=(/3,N,N,nVar,6,nElem/))
-
-!     ALLOCATE( this % meta(1:nVar) )
-!     ALLOCATE( this % eqn(1:3*nVar) )
-
-!   END SUBROUTINE Init_Vector3D
-
-!   SUBROUTINE Free_Vector3D(this)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(inout) :: this
-
-!     this % interp => NULL()
-!     this % nVar = 0
-!     this % nElem = 0
-!     CALL this % interior % Free()
-!     CALL this % boundary % Free()
-!     CALL this % boundaryNormal % Free()
-!     CALL this % extBoundary % Free()
-
-!     DEALLOCATE( this % meta )
-!     DEALLOCATE( this % eqn )
-
-!   END SUBROUTINE Free_Vector3D
-
-!   SUBROUTINE SetEquation_Vector3D(this,idir,ivar,eqnChar)
-!     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(inout) :: this
-!     INTEGER,INTENT(in) :: idir,ivar
-!     CHARACTER(*),INTENT(in) :: eqnChar
-
-!     this % eqn(idir+3*(ivar-1)) = EquationParser( TRIM(eqnChar), &
-!                                               (/'x','y','z','t'/) )
-
-!   END SUBROUTINE SetEquation_Vector3D
-
-!   SUBROUTINE UpdateHost_Vector3D(this)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(inout) :: this
-
-!     CALL this % interior % UpdateHost()
-!     CALL this % boundary % UpdateHost()
-!     CALL this % boundaryNormal % UpdateHost()
-!     CALL this % extBoundary % UpdateHost()
-
-!   END SUBROUTINE UpdateHost_Vector3D
-
-!   SUBROUTINE UpdateDevice_Vector3D(this)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(inout) :: this
-
-!     CALL this % interior % UpdateDevice()
-!     CALL this % boundary % UpdateDevice()
-!     CALL this % boundaryNormal % UpdateDevice()
-!     CALL this % extBoundary % UpdateDevice()
-
-!   END SUBROUTINE UpdateDevice_Vector3D
-
-!   SUBROUTINE BoundaryInterp_Vector3D(this,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(inout) :: this
-!     LOGICAL,INTENT(in) :: gpuAccel
-
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorBoundaryInterp_3D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     ELSE
-!       CALL this % interp % VectorBoundaryInterp_3D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     END IF
-
-!   END SUBROUTINE BoundaryInterp_Vector3D
-
-!   SUBROUTINE GridInterp_Vector3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(in) :: this
-!     TYPE(Vector3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGridInterp_3D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     ELSE
-!       CALL this % interp % VectorGridInterp_3D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     END IF
-
-!   END SUBROUTINE GridInterp_Vector3D
-
-!   SUBROUTINE Gradient_Vector3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(in) :: this
-!     TYPE(Tensor3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGradient_3D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     ELSE
-!       CALL this % interp % VectorGradient_3D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     END IF
-
-!   END SUBROUTINE Gradient_Vector3D
-
-!   SUBROUTINE Divergence_Vector3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(in) :: this
-!     TYPE(Scalar3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorDivergence_3D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     ELSE
-!       CALL this % interp % VectorDivergence_3D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     END IF
-
-!   END SUBROUTINE Divergence_Vector3D
-
-!   ! SUBROUTINE Curl_Vector3D(this,SELFOut,gpuAccel)
-!   !   IMPLICIT NONE
-!   !   CLASS(Vector3D),INTENT(in) :: this
-!   !   TYPE(Vector3D),INTENT(inout) :: SELFOut
-!   !   LOGICAL,INTENT(in) :: gpuAccel
-
-!   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % VectorCurl_3D(this % interior , &
-!   !                                               SELFout % interior , &
-!   !                                               this % nVar, &
-!   !                                               this % nElem)
-!   !   ELSE
-!   !     CALL this % interp % VectorCurl_3D(this % interior , &
-!   !                                               SELFout % interior , &
-!   !                                               this % nVar, &
-!   !                                               this % nElem)
-!   !   END IF
-
-!   ! END SUBROUTINE Curl_Vector3D
-
-!   ! FUNCTION AbsMaxInterior_Vector3D(vector) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Vector3D) :: vector
-!   !   REAL(prec) :: absMax(1:vector % nVar)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,k,iDir
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,vector % nElem
-!   !     DO iVar = 1,vector % nVar
-!   !       DO k = 0,vector % interp % N
-!   !         DO j = 0,vector % interp % N
-!   !           DO i = 0,vector % interp % N
-!   !             DO iDir = 1,3
-!   !               absMax(iVar) = MAX(ABS(vector % interior (iDir,i,j,k,iVar,iEl)),absMax(iVar))
-!   !             END DO
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxInterior_Vector3D
-
-!   ! FUNCTION AbsMaxBoundary_Vector3D(vector) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Vector3D) :: vector
-!   !   REAL(prec) :: absMax(1:vector % nVar,1:6)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,iSide,iDir
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,vector % nElem
-!   !     DO iSide = 1,6
-!   !       DO iVar = 1,vector % nVar
-!   !         DO j = 0,vector % interp % N
-!   !           DO i = 0,vector % interp % N
-!   !             DO iDir = 1,3
-!   !               absMax(iVar,iSide) = MAX(ABS(vector % boundary (iDir,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
-!   !             END DO
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxBoundary_Vector3D
-
-!   ! SUBROUTINE Equals_Vector3D(SELFOut,SELFin)
-!   !   IMPLICIT NONE
-!   !   CLASS(Vector3D),INTENT(inout) :: SELFOut
-!   !   TYPE(Vector3D),INTENT(in) :: SELFin
-
-!   !   SELFOut % interior  = SELFin % interior
-!   !   SELFOut % boundary  = SELFin % boundary
-
-!   ! END SUBROUTINE Equals_Vector3D
 
 !   SUBROUTINE WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
 !     IMPLICIT NONE
