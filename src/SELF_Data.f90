@@ -108,8 +108,6 @@ module SELF_Data
     generic,public :: Gradient => Gradient_Scalar2D_cpu,Gradient_Scalar2D_gpu
     procedure,private :: Gradient_Scalar2D_cpu
     procedure,private :: Gradient_Scalar2D_gpu
-    ! GENERIC,PUBLIC :: Gradient => Gradient_Scalar2D
-    ! PROCEDURE,PRIVATE :: Gradient_Scalar2D
 
     ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
@@ -172,9 +170,9 @@ module SELF_Data
     procedure,private :: BoundaryInterp_Vector2D_gpu
 
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
-
-    ! GENERIC,PUBLIC :: Gradient => Gradient_Vector2D
-    ! PROCEDURE,PRIVATE :: Gradient_Vector2D
+    generic,public :: Gradient => Gradient_Vector2D_gpu,Gradient_Vector2D_cpu
+    procedure,private :: Gradient_Vector2D_gpu
+    procedure,private :: Gradient_Vector2D_cpu
 
     generic,public :: Divergence => Divergence_Vector2D_gpu,Divergence_Vector2D_cpu
     procedure,private :: Divergence_Vector2D_gpu
@@ -189,27 +187,28 @@ module SELF_Data
 
   end type Vector2D
 
-  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector3D
+  type,extends(SELF_DataObj),public :: Vector3D
 
-    real(prec), pointer, dimension(:,:,:,:,:,:) :: interior
-    real(prec), pointer, dimension(:,:,:,:,:,:) :: boundary
-    real(prec), pointer, dimension(:,:,:,:,:,:) :: extBoundary
-    real(prec), pointer, dimension(:,:,:,:,:) :: boundaryNormal
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: boundaryNormal
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_Vector3D
-    PROCEDURE,PUBLIC :: Free => Free_Vector3D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Vector3D
+    procedure,public :: Init => Init_Vector3D
+    procedure,public :: Free => Free_Vector3D
+    procedure,public :: UpdateDevice => UpdateDevice_Vector3D
 
     generic,public :: BoundaryInterp => BoundaryInterp_Vector3D_cpu,BoundaryInterp_Vector3D_gpu
     procedure,private :: BoundaryInterp_Vector3D_cpu
     procedure,private :: BoundaryInterp_Vector3D_gpu
-    
+
     ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector3D
 
-    ! GENERIC,PUBLIC :: Gradient => Gradient_Vector3D
-    ! PROCEDURE,PRIVATE :: Gradient_Vector3D
+    generic,public :: Gradient => Gradient_Vector3D_gpu,Gradient_Vector3D_cpu
+    procedure,private :: Gradient_Vector3D_gpu
+    procedure,private :: Gradient_Vector3D_cpu
 
     generic,public :: Divergence => Divergence_Vector3D_gpu,Divergence_Vector3D_cpu
     procedure,private :: Divergence_Vector3D_gpu
@@ -222,40 +221,48 @@ module SELF_Data
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector3D
     ! PROCEDURE, PRIVATE :: WriteHDF5_Vector3D
 
-  END TYPE Vector3D
+  end type Vector3D
 ! ! ---------------------- Tensors ---------------------- !
 
-!   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
+  type,extends(SELF_DataObj),public :: Tensor2D
 
-!     real(prec), pointer, dimension(:,:,:,:,:,:) :: interior
-!     real(prec), pointer, dimension(:,:,:,:,:,:) :: boundary
-!     real(prec), pointer, dimension(:,:,:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: extBoundary
 
-!   CONTAINS
+  contains
 
-!     PROCEDURE,PUBLIC :: Init => Init_Tensor2D
-!     PROCEDURE,PUBLIC :: Free => Free_Tensor2D
-!     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Tensor2D
-!     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor2D
-!     ! PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor2D
+    procedure,public :: Init => Init_Tensor2D
+    procedure,public :: Free => Free_Tensor2D
+    procedure,public :: UpdateDevice => UpdateDevice_Tensor2D
 
-!   END TYPE Tensor2D
+    generic,public :: BoundaryInterp => BoundaryInterp_Tensor2D_cpu,BoundaryInterp_Tensor2D_gpu
+    procedure,private :: BoundaryInterp_Tensor2D_cpu
+    procedure,private :: BoundaryInterp_Tensor2D_gpu
 
-!   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor3D
+    procedure,public :: Determinant => Determinant_Tensor2D
 
-!     real(prec), pointer, dimension(:,:,:,:,:,:,:) :: interior
-!     real(prec), pointer, dimension(:,:,:,:,:,:,:) :: boundary
-!     real(prec), pointer, dimension(:,:,:,:,:,:,:) :: extBoundary
+  end type Tensor2D
 
-!   CONTAINS
+  type,extends(SELF_DataObj),public :: Tensor3D
 
-!     PROCEDURE,PUBLIC :: Init => Init_Tensor3D
-!     PROCEDURE,PUBLIC :: Free => Free_Tensor3D
-!     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Tensor3D
-!     ! PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor3D
-!     ! PROCEDURE,PUBLIC :: Determinant => Determinant_Tensor3D
+    real(prec),pointer,dimension(:,:,:,:,:,:,:) :: interior
+    real(prec),pointer,dimension(:,:,:,:,:,:,:) :: boundary
+    real(prec),pointer,dimension(:,:,:,:,:,:,:) :: extBoundary
 
-!   END TYPE Tensor3D
+  contains
+
+    procedure,public :: Init => Init_Tensor3D
+    procedure,public :: Free => Free_Tensor3D
+    procedure,public :: UpdateDevice => UpdateDevice_Tensor3D
+
+    generic,public :: BoundaryInterp => BoundaryInterp_Tensor3D_cpu,BoundaryInterp_Tensor3D_gpu
+    procedure,private :: BoundaryInterp_Tensor3D_cpu
+    procedure,private :: BoundaryInterp_Tensor3D_gpu
+
+    procedure,public :: Determinant => Determinant_Tensor3D
+
+  end type Tensor3D
 
   integer,parameter :: selfStrongForm = 0
   integer,parameter :: selfWeakDGForm = 1
@@ -751,29 +758,29 @@ contains
 
   end subroutine UpdateDevice_Scalar3D
 
-  SUBROUTINE BoundaryInterp_Scalar3D_cpu(this)
-    IMPLICIT NONE
-    CLASS(Scalar3D),INTENT(inout) :: this
+  subroutine BoundaryInterp_Scalar3D_cpu(this)
+    implicit none
+    class(Scalar3D),intent(inout) :: this
 
-      CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
-                                                          this % boundary , &
-                                                          this % nVar, &
-                                                          this % nElem)
+    call this % interp % ScalarBoundaryInterp_3D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
-  END SUBROUTINE BoundaryInterp_Scalar3D_cpu
+  end subroutine BoundaryInterp_Scalar3D_cpu
 
-  SUBROUTINE BoundaryInterp_Scalar3D_gpu(this,handle)
-    IMPLICIT NONE
-    CLASS(Scalar3D),INTENT(inout) :: this
-    type(c_ptr), intent(in) :: handle
+  subroutine BoundaryInterp_Scalar3D_gpu(this,handle)
+    implicit none
+    class(Scalar3D),intent(inout) :: this
+    type(c_ptr),intent(in) :: handle
 
-      CALL this % interp % ScalarBoundaryInterp_3D(this % interior , &
-                                                          this % boundary , &
-                                                          this % nVar, &
-                                                          this % nElem,&
-                                                          handle)
+    call this % interp % ScalarBoundaryInterp_3D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 handle)
 
-  END SUBROUTINE BoundaryInterp_Scalar3D_gpu
+  end subroutine BoundaryInterp_Scalar3D_gpu
 
   subroutine GridInterp_Scalar3D_cpu(this,SELFout)
     implicit none
@@ -1004,26 +1011,31 @@ contains
 !     END IF
 
 !   END SUBROUTINE GridInterp_Vector2D
+  subroutine Gradient_Vector2D_cpu(this,df)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    type(Tensor2D),intent(inout) :: df
 
-!   SUBROUTINE Gradient_Vector2D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(in) :: this
-!     TYPE(Tensor2D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
+    call this % interp % VectorGradient_2D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem)
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGradient_2D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     ELSE
-!       CALL this % interp % VectorGradient_2D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     END IF
+  end subroutine Gradient_Vector2D_cpu
 
-!   END SUBROUTINE Gradient_Vector2D
+  subroutine Gradient_Vector2D_gpu(this,df,hipblas_handle)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    type(Tensor2D),intent(inout) :: df
+    type(c_ptr),intent(inout) :: hipblas_handle
+
+    call this % interp % VectorGradient_2D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem, &
+                                           hipblas_handle)
+
+  end subroutine Gradient_Vector2D_gpu
 
   subroutine Divergence_Vector2D_cpu(this,SELFOut)
     implicit none
@@ -1226,25 +1238,31 @@ contains
 
 !   END SUBROUTINE GridInterp_Vector3D
 
-!   SUBROUTINE Gradient_Vector3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(in) :: this
-!     TYPE(Tensor2D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
+  subroutine Gradient_Vector3D_cpu(this,df)
+    implicit none
+    class(Vector3D),intent(in) :: this
+    type(Tensor3D),intent(inout) :: df
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGradient_2D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     ELSE
-!       CALL this % interp % VectorGradient_2D(this % interior , &
-!                                                     SELFout % interior , &
-!                                                     this % nVar, &
-!                                                     this % nElem)
-!     END IF
+    call this % interp % VectorGradient_3D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem)
 
-!   END SUBROUTINE Gradient_Vector3D
+  end subroutine Gradient_Vector3D_cpu
+
+  subroutine Gradient_Vector3D_gpu(this,df,hipblas_handle)
+    implicit none
+    class(Vector3D),intent(in) :: this
+    type(Tensor3D),intent(inout) :: df
+    type(c_ptr),intent(inout) :: hipblas_handle
+
+    call this % interp % VectorGradient_3D(this % interior, &
+                                           df % interior, &
+                                           this % nVar, &
+                                           this % nElem, &
+                                           hipblas_handle)
+
+  end subroutine Gradient_Vector3D_gpu
 
   subroutine Divergence_Vector3D_cpu(this,SELFOut)
     implicit none
@@ -1339,554 +1357,220 @@ contains
 
 !   END SUBROUTINE WriteHDF5_Vector3D
 
-! ! ! -- P2Vector2D -- !
-
-! !   SUBROUTINE Init_P2Vector2D(this,interp,nVar,nElem)
-! !     IMPLICIT NONE
-! !     CLASS(P2Vector2D),INTENT(out) :: this
-! !     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-! !     INTEGER,INTENT(in) :: nVar
-! !     INTEGER,INTENT(in) :: nElem
-! !     ! Local
-! !     INTEGER :: N
-
-! !     this % interp => interp
-! !     this % nVar = nVar
-! !     this % nElem = nElem
-! !     N = interp % N
-
-! !     CALL this % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
-! !                                         upBound=(/2,N,N,N,nVar,nElem/))
-
-! !     CALL this % physical % Alloc(loBound=(/1,1,0,0,0,1,1/), &
-! !                                         upBound=(/2,2,N,N,N,nVar,nElem/))
-
-! !     CALL this % boundary % Alloc(loBound=(/1,0,1,1,1/), &
-! !                                         upBound=(/2,N,nVar,4,nElem/))
-
-! !     CALL this % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
-! !                                         upBound=(/N,nVar,4,nElem/))
-
-! !     CALL this % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
-! !                                            upBound=(/2,N,nVar,4,nElem/))
-
-! !     ALLOCATE( this % meta(1:nVar) )
-! !     ALLOCATE( this % eqn(1:2*nVar) )
-
-! !   END SUBROUTINE Init_P2Vector2D
-
-! !   SUBROUTINE Free_P2Vector2D(this)
-! !     IMPLICIT NONE
-! !     CLASS(P2Vector2D),INTENT(inout) :: this
-
-! !     this % interp => NULL()
-! !     this % nVar = 0
-! !     this % nElem = 0
-! !     CALL this % interior % Free()
-! !     CALL this % physical % Free()
-! !     CALL this % boundary % Free()
-! !     CALL this % boundaryNormal % Free()
-! !     CALL this % extBoundary % Free()
-
-! !     DEALLOCATE( this % meta )
-! !     DEALLOCATE( this % eqn )
-
-! !   END SUBROUTINE Free_P2Vector2D
-
-! !   SUBROUTINE UpdateHost_P2Vector2D(this)
-! !     IMPLICIT NONE
-! !     CLASS(P2Vector2D),INTENT(inout) :: this
-
-! !     CALL this % interior % UpdateHost()
-! !     CALL this % physical % UpdateHost()
-! !     CALL this % boundary % UpdateHost()
-! !     CALL this % boundaryNormal % UpdateHost()
-! !     CALL this % extBoundary % UpdateHost()
-
-! !   END SUBROUTINE UpdateHost_P2Vector2D
-
-! !   SUBROUTINE UpdateDevice_P2Vector2D(this)
-! !     IMPLICIT NONE
-! !     CLASS(P2Vector2D),INTENT(inout) :: this
-
-! !     CALL this % interior % UpdateDevice()
-! !     CALL this % physical % UpdateDevice()
-! !     CALL this % boundary % UpdateDevice()
-! !     CALL this % boundaryNormal % UpdateDevice()
-! !     CALL this % extBoundary % UpdateDevice()
-
-! !   END SUBROUTINE UpdateDevice_P2Vector2D
-
-! !   SUBROUTINE Divergence_P2Vector2D(this,SELFOut,dForm,gpuAccel)
-! !     IMPLICIT NONE
-! !     CLASS(P2Vector2D),INTENT(in) :: this
-! !     TYPE(Scalar2D),INTENT(inout) :: SELFOut
-! !     INTEGER,INTENT(in) :: dForm
-! !     LOGICAL,INTENT(in) :: gpuAccel
-
-! !     IF (dForm == selfWeakDGForm) THEN
-
-! !       IF (gpuAccel) THEN
-! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior , &
-! !                                                           this % boundaryNormal , &
-! !                                                           SELFout % interior , &
-! !                                                           this % nVar, &
-! !                                                           this % nElem)
-! !       ELSE
-! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior , &
-! !                                                           this % boundaryNormal , &
-! !                                                           SELFout % interior , &
-! !                                                           this % nVar, &
-! !                                                           this % nElem)
-! !       END IF
-
-! !     ELSE IF (dForm == selfStrongForm) THEN
-
-! !       IF (gpuAccel) THEN
-! !         CALL this % interp % P2VectorDivergence_2D(this % interior , &
-! !                                                         SELFout % interior , &
-! !                                                         this % nVar, &
-! !                                                         this % nElem)
-! !       ELSE
-! !         CALL this % interp % P2VectorDivergence_2D(this % interior , &
-! !                                                         SELFout % interior , &
-! !                                                         this % nVar, &
-! !                                                         this % nElem)
-! !       END IF
-
-! !     END IF
-
-! !   END SUBROUTINE Divergence_P2Vector2D
-
 ! ! -- Tensor2D -- !
 
-!   SUBROUTINE Init_Tensor2D(this,interp,nVar,nElem)
-!     IMPLICIT NONE
-!     CLASS(Tensor2D),INTENT(out) :: this
-!     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
-!     ! Local
-!     INTEGER :: N
+  subroutine Init_Tensor2D(this,interp,nVar,nElem)
+    implicit none
+    class(Tensor2D),intent(out) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: N
 
-!     this % interp => interp
-!     this % nVar = nVar
-!     this % nElem = nElem
-!     N = interp % N
+    this % interp => interp
+    this % nVar = nVar
+    this % nElem = nElem
+    N = interp % N
 
-!     CALL this % interior % Alloc(loBound=(/1,1,0,0,1,1/), &
-!                                         upBound=(/2,2,N,N,nVar,nElem/))
+    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,2,2,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,2,2,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,2,2,hipMemAttachGlobal))
 
-!     CALL this % boundary % Alloc(loBound=(/1,1,0,1,1,1/), &
-!                                         upBound=(/2,2,N,nVar,4,nElem/))
+    allocate (this % meta(1:nVar))
+    allocate (this % eqn(1:4*nVar))
 
-!     CALL this % extBoundary % Alloc(loBound=(/1,1,0,1,1,1/), &
-!                                            upBound=(/2,2,N,nVar,4,nElem/))
+  end subroutine Init_Tensor2D
 
-!     ALLOCATE( this % meta(1:nVar) )
-!     ALLOCATE( this % eqn(1:4*nVar) )
+  subroutine Free_Tensor2D(this)
+    implicit none
+    class(Tensor2D),intent(inout) :: this
 
-!   END SUBROUTINE Init_Tensor2D
+    this % interp => null()
+    this % nVar = 0
+    this % nElem = 0
 
-!   SUBROUTINE Free_Tensor2D(this)
-!     IMPLICIT NONE
-!     CLASS(Tensor2D),INTENT(inout) :: this
+    call hipcheck(hipFree(this % interior))
+    call hipcheck(hipFree(this % boundary))
+    call hipcheck(hipFree(this % extBoundary))
 
-!     this % interp => NULL()
-!     this % nVar = 0
-!     this % nElem = 0
-!     CALL this % interior % Free()
-!     CALL this % boundary % Free()
-!     CALL this % extBoundary % Free()
+    deallocate (this % meta)
+    deallocate (this % eqn)
 
-!     DEALLOCATE( this % meta )
-!     DEALLOCATE( this % eqn )
+  end subroutine Free_Tensor2D
 
-!   END SUBROUTINE Free_Tensor2D
+  subroutine UpdateDevice_Tensor2D(this)
+    implicit none
+    class(Tensor2D),intent(inout) :: this
 
-!   ! SUBROUTINE SetEquation_Tensor2D(this,row,col,ivar,eqnChar)
-!   !   !! Sets the equation parser for row, col  of the ivar-th tensor
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor2D),INTENT(inout) :: this
-!   !   INTEGER,INTENT(in) :: row,col,ivar
-!   !   CHARACTER(*),INTENT(in) :: eqnChar
-!   !   ! Local
-!   !   INTEGER :: ind
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
 
-!   !   ind = row+2*(col-1+2*(ivar-1))
-!   !   this % eqn(ind) = EquationParser( TRIM(eqnChar), &
-!   !                                             (/'x','y','z','t'/) )
+  end subroutine UpdateDevice_Tensor2D
 
-!   ! END SUBROUTINE SetEquation_Tensor2D
+  subroutine BoundaryInterp_Tensor2D_cpu(this)
+    implicit none
+    class(Tensor2D),intent(inout) :: this
 
-!   SUBROUTINE UpdateHost_Tensor2D(this)
-!     IMPLICIT NONE
-!     CLASS(Tensor2D),INTENT(inout) :: this
+    call this % interp % TensorBoundaryInterp_2D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
-!     CALL this % interior % UpdateHost()
-!     CALL this % boundary % UpdateHost()
-!     CALL this % extBoundary % UpdateHost()
+  end subroutine BoundaryInterp_Tensor2D_cpu
 
-!   END SUBROUTINE UpdateHost_Tensor2D
+  subroutine BoundaryInterp_Tensor2D_gpu(this,handle)
+    implicit none
+    class(Tensor2D),intent(inout) :: this
+    type(c_ptr),intent(in) :: handle
 
-!   SUBROUTINE UpdateDevice_Tensor2D(this)
-!     IMPLICIT NONE
-!     CLASS(Tensor2D),INTENT(inout) :: this
+    call this % interp % TensorBoundaryInterp_2D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 handle)
 
-!     CALL this % interior % UpdateDevice()
-!     CALL this % boundary % UpdateDevice()
-!     CALL this % extBoundary % UpdateDevice()
+  end subroutine BoundaryInterp_Tensor2D_gpu
 
-!   END SUBROUTINE UpdateDevice_Tensor2D
+  subroutine Determinant_Tensor2D(this,SELFout)
+    implicit none
+    class(Tensor2D),intent(in) :: this
+    type(Scalar2D),intent(inout) :: SELFOut
+    ! Local
+    integer :: iEl,iVar,i,j
 
-!   SUBROUTINE BoundaryInterp_Tensor2D(this,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Tensor2D),INTENT(inout) :: this
-!     LOGICAL,INTENT(in) :: gpuAccel
+    do iEl = 1,this % nElem
+      do iVar = 1,this % nVar
+        do j = 1,this % interp % N + 1
+          do i = 1,this % interp % N + 1
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % TensorBoundaryInterp_2D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     ELSE
-!       CALL this % interp % TensorBoundaryInterp_2D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     END IF
+            SELFOut % interior(i,j,iVar,iEl) = this % interior(i,j,iVar,iEl,1,1)* &
+                                               this % interior(i,j,iVar,iEl,2,2) - &
+                                               this % interior(i,j,iVar,iEl,1,2)* &
+                                               this % interior(i,j,iVar,iEl,2,1)
 
-!   END SUBROUTINE BoundaryInterp_Tensor2D
+          end do
+        end do
+      end do
+    end do
 
-!   ! SUBROUTINE GridInterp_Tensor2D(this,SELFOut,gpuAccel)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor2D),INTENT(in) :: this
-!   !   TYPE(Tensor2D),INTENT(inout) :: SELFOut
-!   !   LOGICAL,INTENT(in) :: gpuAccel
-
-!   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorGridInterp_2D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   ELSE
-!   !     CALL this % interp % TensorGridInterp_2D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   END IF
-
-!   ! END SUBROUTINE GridInterp_Tensor2D
-
-!   ! SUBROUTINE Divergence_Tensor2D(this,SELFOut,gpuAccel)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor2D),INTENT(in) :: this
-!   !   TYPE(Vector2D),INTENT(inout) :: SELFOut
-!   !   LOGICAL,INTENT(in) :: gpuAccel
-
-!   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorDivergence_2D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   ELSE
-!   !     CALL this % interp % TensorDivergence_2D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   END IF
-
-!   ! END SUBROUTINE Divergence_Tensor2D
-
-!   SUBROUTINE Determinant_Tensor2D(this,SELFout,gpuAccel)
-! #undef __FUNC__
-! #define __FUNC__ "Determinant_Tensor2D"
-!     IMPLICIT NONE
-!     CLASS(Tensor2D),INTENT(in) :: this
-!     TYPE(Scalar2D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-!     ! Local
-!     INTEGER :: iEl,iVar,i,j
-
-!     IF (gpuAccel) THEN
-
-!       CALL Determinant_Tensor2D_gpu_wrapper(this % interior , &
-!                                             SELFOut % interior , &
-!                                             this % interp % N, &
-!                                             this % nVar, &
-!                                             this % nElem)
-
-!     ELSE
-
-!       DO iEl = 1,this % nElem
-!         DO iVar = 1,this % nVar
-!           DO j = 0,this % interp % N
-!             DO i = 0,this % interp % N
-
-!               SELFOut % interior (i,j,iVar,iEl) = this % interior (1,1,i,j,iVar,iEl)* &
-!                                                             this % interior (2,2,i,j,iVar,iEl) - &
-!                                                             this % interior (1,2,i,j,iVar,iEl)* &
-!                                                             this % interior (2,1,i,j,iVar,iEl)
-
-!             END DO
-!           END DO
-!         END DO
-!       END DO
-
-!     END IF
-
-!   END SUBROUTINE Determinant_Tensor2D
-
-!   ! FUNCTION AbsMaxInterior_Tensor2D(tensor) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor2D) :: tensor
-!   !   REAL(prec) :: absMax(1:tensor % nVar)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,row,col
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,tensor % nElem
-!   !     DO iVar = 1,tensor % nVar
-!   !       DO j = 0,tensor % interp % N
-!   !         DO i = 0,tensor % interp % N
-!   !           DO col = 1,2
-!   !             DO row = 1,2
-!   !               absMax(iVar) = MAX(ABS(tensor % interior (row,col,i,j,iVar,iEl)),absMax(iVar))
-!   !             END DO
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxInterior_Tensor2D
-
-!   ! FUNCTION AbsMaxBoundary_Tensor2D(tensor) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor2D) :: tensor
-!   !   REAL(prec) :: absMax(1:tensor % nVar,1:4)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,iSide,row,col
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,tensor % nElem
-!   !     DO iSide = 1,4
-!   !       DO iVar = 1,tensor % nVar
-!   !         DO i = 0,tensor % interp % N
-!   !           DO col = 1,2
-!   !             DO row = 1,2
-!   !               absMax(iVar,iSide) = MAX(ABS(tensor % boundary (row,col,i,iVar,iSide,iEl)),absMax(iVar,iSide))
-!   !             END DO
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxBoundary_Tensor2D
-
-!   ! SUBROUTINE Equals_Tensor2D(SELFOut,SELFin)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor2D),INTENT(inout) :: SELFOut
-!   !   TYPE(Tensor2D),INTENT(in) :: SELFin
-
-!   !   SELFOut % interior  = SELFin % interior
-!   !   SELFOut % boundary  = SELFin % boundary
-
-!   ! END SUBROUTINE Equals_Tensor2D
+  end subroutine Determinant_Tensor2D
 
 ! ! -- Tensor3D -- !
 
-!   SUBROUTINE Init_Tensor3D(this,interp,nVar,nElem)
-!     IMPLICIT NONE
-!     CLASS(Tensor3D),INTENT(out) :: this
-!     TYPE(Lagrange),TARGET,INTENT(in) :: interp
-!     INTEGER,INTENT(in) :: nVar
-!     INTEGER,INTENT(in) :: nElem
-!     ! Local
-!     INTEGER :: N
+  subroutine Init_Tensor3D(this,interp,nVar,nElem)
+    implicit none
+    class(Tensor3D),intent(out) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: N
 
-!     this % interp => interp
-!     this % nVar = nVar
-!     this % nElem = nElem
-!     N = interp % N
+    this % interp => interp
+    this % nVar = nVar
+    this % nElem = nElem
+    N = interp % N
 
-!     CALL this % interior % Alloc(loBound=(/1,1,0,0,0,1,1/), &
-!                                         upBound=(/3,3,N,N,N,nVar,nElem/))
+    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,interp % N +1,nelem,nvar,3,3,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,3,hipMemAttachGlobal))
+   call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,3,hipMemAttachGlobal))
 
-!     CALL this % boundary % Alloc(loBound=(/1,1,0,0,1,1,1/), &
-!                                         upBound=(/3,3,N,N,nVar,6,nElem/))
+    allocate (this % meta(1:nVar))
+    allocate (this % eqn(1:9*nVar))
 
-!     CALL this % extBoundary % Alloc(loBound=(/1,1,0,0,1,1,1/), &
-!                                            upBound=(/3,3,N,N,nVar,6,nElem/))
+  end subroutine Init_Tensor3D
 
-!     ALLOCATE( this % meta(1:nVar) )
-!     ALLOCATE( this % eqn(1:9*nVar) )
+  subroutine Free_Tensor3D(this)
+    implicit none
+    class(Tensor3D),intent(inout) :: this
 
-!   END SUBROUTINE Init_Tensor3D
+    this % interp => null()
+    this % nVar = 0
+    this % nElem = 0
 
-!   SUBROUTINE Free_Tensor3D(this)
-!     IMPLICIT NONE
-!     CLASS(Tensor3D),INTENT(inout) :: this
+    call hipcheck(hipFree(this % interior))
+    call hipcheck(hipFree(this % boundary))
+    call hipcheck(hipFree(this % extBoundary))
 
-!     this % interp => NULL()
-!     this % nVar = 0
-!     this % nElem = 0
-!     CALL this % interior % Free()
-!     CALL this % boundary % Free()
-!     CALL this % extBoundary % Free()
+    deallocate (this % meta)
+    deallocate (this % eqn)
 
-!     DEALLOCATE( this % meta )
-!     DEALLOCATE( this % eqn )
+  end subroutine Free_Tensor3D
 
-!   END SUBROUTINE Free_Tensor3D
+  subroutine UpdateDevice_Tensor3D(this)
+    implicit none
+    class(Tensor3D),intent(inout) :: this
 
-!   ! SUBROUTINE SetEquation_Tensor3D(this,row,col,ivar,eqnChar)
-!   !   !! Sets the equation parser for row, col  of the ivar-th tensor
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor3D),INTENT(inout) :: this
-!   !   INTEGER,INTENT(in) :: row,col,ivar
-!   !   CHARACTER(*),INTENT(in) :: eqnChar
-!   !   ! Local
-!   !   INTEGER :: ind
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
 
-!   !   ind = row+3*(col-1+3*(ivar-1))
-!   !   this % eqn(ind) = EquationParser( TRIM(eqnChar), &
-!   !                                             (/'x','y','z','t'/) )
+  end subroutine UpdateDevice_Tensor3D
 
-!   ! END SUBROUTINE SetEquation_Tensor3D
+  subroutine BoundaryInterp_Tensor3D_cpu(this)
+    implicit none
+    class(Tensor3D),intent(inout) :: this
 
-!   SUBROUTINE UpdateHost_Tensor3D(this)
-!     IMPLICIT NONE
-!     CLASS(Tensor3D),INTENT(inout) :: this
+    call this % interp % TensorBoundaryInterp_3D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem)
 
-!     CALL this % interior % UpdateHost()
-!     CALL this % boundary % UpdateHost()
-!     CALL this % extBoundary % UpdateHost()
+  end subroutine BoundaryInterp_Tensor3D_cpu
 
-!   END SUBROUTINE UpdateHost_Tensor3D
+  subroutine BoundaryInterp_Tensor3D_gpu(this,handle)
+    implicit none
+    class(Tensor3D),intent(inout) :: this
+    type(c_ptr),intent(in) :: handle
 
-!   SUBROUTINE UpdateDevice_Tensor3D(this)
-!     IMPLICIT NONE
-!     CLASS(Tensor3D),INTENT(inout) :: this
+    call this % interp % TensorBoundaryInterp_3D(this % interior, &
+                                                 this % boundary, &
+                                                 this % nVar, &
+                                                 this % nElem, &
+                                                 handle)
 
-!     CALL this % interior % UpdateDevice()
-!     CALL this % boundary % UpdateDevice()
-!     CALL this % extBoundary % UpdateHost()
+  end subroutine BoundaryInterp_Tensor3D_gpu
 
-!   END SUBROUTINE UpdateDevice_Tensor3D
+  subroutine Determinant_Tensor3D(this,SELFOut,gpuAccel)
+    implicit none
+    class(Tensor3D),intent(in) :: this
+    type(Scalar3D),intent(inout) :: SELFOut
+    logical,intent(in) :: gpuAccel
+    ! Local
+    integer :: iEl,iVar,i,j,k
 
-!   SUBROUTINE BoundaryInterp_Tensor3D(this,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Tensor3D),INTENT(inout) :: this
-!     LOGICAL,INTENT(in) :: gpuAccel
+    do iEl = 1,this % nElem
+      do iVar = 1,this % nVar
+        do k = 0,this % interp % N
+          do j = 0,this % interp % N
+            do i = 0,this % interp % N
 
-!     IF (gpuAccel) THEN
-!       CALL this % interp % TensorBoundaryInterp_3D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     ELSE
-!       CALL this % interp % TensorBoundaryInterp_3D(this % interior , &
-!                                                           this % boundary , &
-!                                                           this % nVar, &
-!                                                           this % nElem)
-!     END IF
+              SELFOut % interior(i,j,k,iVar,iEl) = &
+                this % interior(i,j,k,iVar,iEl,1,1)* &
+                (this % interior(i,j,k,iVar,iEl,2,2)* &
+                 this % interior(i,j,k,iVar,iEl,3,3) - &
+                 this % interior(i,j,k,iVar,iEl,2,3)* &
+                 this % interior(i,j,k,iVar,iEl,3,2)) - &
+                this % interior(i,j,k,iVar,iEl,2,1)* &
+                (this % interior(i,j,k,iVar,iEl,1,2)* &
+                 this % interior(i,j,k,iVar,iEl,3,3) - &
+                 this % interior(i,j,k,iVar,iEl,1,3)* &
+                 this % interior(i,j,k,iVar,iEl,3,2)) + &
+                this % interior(i,j,k,iVar,iEl,3,1)* &
+                (this % interior(i,j,k,iVar,iEl,1,2)* &
+                 this % interior(i,j,k,iVar,iEl,2,3) - &
+                 this % interior(i,j,k,iVar,iEl,1,3)* &
+                 this % interior(i,j,k,iVar,iEl,2,2))
 
-!   END SUBROUTINE BoundaryInterp_Tensor3D
+            end do
+          end do
+        end do
+      end do
+    end do
 
-!   ! SUBROUTINE GridInterp_Tensor3D(this,SELFOut,gpuAccel)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor3D),INTENT(in) :: this
-!   !   TYPE(Tensor3D),INTENT(inout) :: SELFOut
-!   !   LOGICAL,INTENT(in) :: gpuAccel
-
-!   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorGridInterp_3D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   ELSE
-!   !     CALL this % interp % TensorGridInterp_3D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   END IF
-
-!   ! END SUBROUTINE GridInterp_Tensor3D
-
-!   ! SUBROUTINE Divergence_Tensor3D(this,SELFOut,gpuAccel)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor3D),INTENT(in) :: this
-!   !   TYPE(Vector3D),INTENT(inout) :: SELFOut
-!   !   LOGICAL,INTENT(in) :: gpuAccel
-
-!   !   IF (gpuAccel) THEN
-!   !     CALL this % interp % TensorDivergence_3D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   ELSE
-!   !     CALL this % interp % TensorDivergence_3D(this % interior , &
-!   !                                                     SELFout % interior , &
-!   !                                                     this % nVar, &
-!   !                                                     this % nElem)
-!   !   END IF
-
-!   ! END SUBROUTINE Divergence_Tensor3D
-
-!   SUBROUTINE Determinant_Tensor3D(this,SELFOut,gpuAccel)
-! #undef __FUNC__
-! #define __FUNC__ "Determinant_Tensor3D"
-!     IMPLICIT NONE
-!     CLASS(Tensor3D),INTENT(in) :: this
-!     TYPE(Scalar3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-!     ! Local
-!     INTEGER :: iEl,iVar,i,j,k
-
-!     IF (gpuAccel) THEN
-
-!       CALL Determinant_Tensor3D_gpu_wrapper(this % interior , &
-!                                             SELFOut % interior , &
-!                                             this % interp % N, &
-!                                             this % nVar, &
-!                                             this % nElem)
-
-!     ELSE
-
-!       DO iEl = 1,this % nElem
-!         DO iVar = 1,this % nVar
-!           DO k = 0,this % interp % N
-!             DO j = 0,this % interp % N
-!               DO i = 0,this % interp % N
-
-!                 SELFOut % interior (i,j,k,iVar,iEl) = &
-!                   this % interior (1,1,i,j,k,iVar,iEl)* &
-!                   (this % interior (2,2,i,j,k,iVar,iEl)* &
-!                    this % interior (3,3,i,j,k,iVar,iEl) - &
-!                    this % interior (2,3,i,j,k,iVar,iEl)* &
-!                    this % interior (3,2,i,j,k,iVar,iEl)) - &
-!                   this % interior (2,1,i,j,k,iVar,iEl)* &
-!                   (this % interior (1,2,i,j,k,iVar,iEl)* &
-!                    this % interior (3,3,i,j,k,iVar,iEl) - &
-!                    this % interior (1,3,i,j,k,iVar,iEl)* &
-!                    this % interior (3,2,i,j,k,iVar,iEl)) + &
-!                   this % interior (3,1,i,j,k,iVar,iEl)* &
-!                   (this % interior (1,2,i,j,k,iVar,iEl)* &
-!                    this % interior (2,3,i,j,k,iVar,iEl) - &
-!                    this % interior (1,3,i,j,k,iVar,iEl)* &
-!                    this % interior (2,2,i,j,k,iVar,iEl))
-
-!               END DO
-!             END DO
-!           END DO
-!         END DO
-!       END DO
-
-!     END IF
-
-!   END SUBROUTINE Determinant_Tensor3D
+  end subroutine Determinant_Tensor3D
 
 !   ! FUNCTION AbsMaxInterior_Tensor3D(tensor) RESULT(absMax)
 !   !   IMPLICIT NONE

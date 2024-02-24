@@ -163,8 +163,8 @@ MODULE SELF_Mesh
     INTEGER :: nElem
     INTEGER :: maxMsg
     INTEGER :: msgCount
-    TYPE(hfInt32_r1) :: elemToRank
-    TYPE(hfInt32_r1) :: offSetElem
+    integer, pointer, dimension(:) :: elemToRank
+    integer, pointer, dimension(:) :: offSetElem
     INTEGER, ALLOCATABLE :: requests(:)
     INTEGER, ALLOCATABLE :: stats(:,:)
 
@@ -200,16 +200,15 @@ MODULE SELF_Mesh
   END TYPE SEMMesh
 
   TYPE,EXTENDS(SEMMesh) :: Mesh1D
-    TYPE(hfInt32_r2) :: elemInfo
-    TYPE(hfReal_r1) :: nodeCoords
-    TYPE(hfInt32_r1) :: globalNodeIDs
-    TYPE(hfInt32_r2) :: BCType
+    integer, pointer, dimension(:,:) :: elemInfo
+    real(prec), pointer, dimension(:) :: nodeCoords
+    integer, pointer, dimension(:) :: globalNodeIDs
+    integer, pointer, dimension(:,:) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh1D
     PROCEDURE,PUBLIC :: Free => Free_Mesh1D
-    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh1D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
@@ -221,19 +220,18 @@ MODULE SELF_Mesh
   ! See https://hopr-project.org/externals/MeshFormat.pdf
 
   TYPE,EXTENDS(SEMMesh) :: Mesh2D
-    TYPE(hfInt32_r3) :: sideInfo
-    TYPE(hfReal_r4) :: nodeCoords
-    TYPE(hfInt32_r2) :: elemInfo
-    TYPE(hfInt32_r3) :: globalNodeIDs
-    TYPE(hfInt32_r2) :: CGNSCornerMap
-    TYPE(hfInt32_r2) :: CGNSSideMap
-    TYPE(hfInt32_r2) :: BCType
+    integer, pointer, dimension(:,:,:) :: sideInfo
+    real(prec), pointer, dimension(:,:,:,:) :: nodeCoords
+    integer, pointer, dimension(:,:) :: elemInfo
+    integer, pointer, dimension(:,:,:) :: globalNodeIDs
+    integer, pointer, dimension(:,:) :: CGNSCornerMap
+    integer, pointer, dimension(:,:) :: CGNSSideMap
+    integer, pointer, dimension(:,:) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh2D
     PROCEDURE,PUBLIC :: Free => Free_Mesh2D
-    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
 
     PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D
@@ -247,21 +245,20 @@ MODULE SELF_Mesh
   END TYPE Mesh2D
 
   TYPE,EXTENDS(SEMMesh) :: Mesh3D
-    TYPE(hfInt32_r3) :: sideInfo
-    TYPE(hfReal_r5) :: nodeCoords
-    TYPE(hfInt32_r2) :: elemInfo
-    TYPE(hfInt32_r4) :: globalNodeIDs
-    TYPE(hfInt32_r2) :: CGNSCornerMap
-    TYPE(hfInt32_r2) :: CGNSSideMap
-    TYPE(hfInt32_r2) :: sideMap
-    TYPE(hfInt32_r2) :: BCType
+    integer, pointer, dimension(:,:,:) :: sideInfo
+    real(prec), pointer, dimension(:,:,:,:,:) :: nodeCoords
+    integer, pointer, dimension(:,:) :: elemInfo
+    integer, pointer, dimension(:,:,:,:) :: globalNodeIDs
+    integer, pointer, dimension(:,:) :: CGNSCornerMap
+    integer, pointer, dimension(:,:) :: sideMap
+    integer, pointer, dimension(:,:) :: CGNSSideMap
+    integer, pointer, dimension(:,:) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
   CONTAINS
 
     PROCEDURE,PUBLIC :: Init => Init_Mesh3D
     PROCEDURE,PUBLIC :: Free => Free_Mesh3D
-    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh3D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
 
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
@@ -276,82 +273,62 @@ MODULE SELF_Mesh
 
 CONTAINS
 
-  SUBROUTINE Init_Mesh1D(myMesh,nGeo,nElem,nNodes,nBCs)
+  SUBROUTINE Init_Mesh1D(this,nGeo,nElem,nNodes,nBCs)
     IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(out) :: myMesh
+    CLASS(Mesh1D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nGeo
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nNodes
     INTEGER,INTENT(in) :: nBCs
 
-    myMesh % nGeo = nGeo
-    myMesh % nElem = nElem
-    myMesh % nGlobalElem = nElem
-    myMesh % nNodes = nNodes
-    myMesh % nCornerNodes = nElem*2
-    myMesh % nUniqueNodes = 0
-    myMesh % nBCs = nBCs
+    this % nGeo = nGeo
+    this % nElem = nElem
+    this % nGlobalElem = nElem
+    this % nNodes = nNodes
+    this % nCornerNodes = nElem*2
+    this % nUniqueNodes = 0
+    this % nBCs = nBCs
 
-    CALL myMesh % elemInfo % Alloc(loBound=(/1,1/), &
-                                        upBound=(/4,nElem/))
+    call hipcheck(hipMallocManaged(this % elemInfo,4,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % nodeCoords,nNodes,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % globalNodeIDs,nNodes,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % BCType,4,nBCs,hipMemAttachGlobal))
 
-    CALL myMesh % nodeCoords % Alloc(loBound=1, &
-                                          upBound=nNodes)
-
-    CALL myMesh % globalNodeIDs % Alloc(loBound=1, &
-                                             upBound=nNodes)
-
-    CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
-                                 upBound=(/4,nBCs/))
-
-    ALLOCATE (myMesh % BCNames(1:nBCs))
+    ALLOCATE (this % BCNames(1:nBCs))
 
   END SUBROUTINE Init_Mesh1D
 
-  SUBROUTINE Free_Mesh1D(myMesh)
+  SUBROUTINE Free_Mesh1D(this)
     IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: myMesh
+    CLASS(Mesh1D),INTENT(inout) :: this
 
-    myMesh % nElem = 0
-    myMesh % nNodes = 0
-    myMesh % nCornerNodes = 0
-    myMesh % nUniqueNodes = 0
-    myMesh % nBCs = 0
-
-    CALL myMesh % elemInfo % Free()
-    CALL myMesh % nodeCoords % Free()
-    CALL myMesh % globalNodeIDs % Free()
-    CALL myMesh % BCType % Free()
-
-    DEALLOCATE (myMesh % BCNames)
+    this % nElem = 0
+    this % nNodes = 0
+    this % nCornerNodes = 0
+    this % nUniqueNodes = 0
+    this % nBCs = 0
+    call hipcheck(hipFree(this % elemInfo))
+    call hipcheck(hipFree(this % nodeCoords))
+    call hipcheck(hipFree(this % globalNodeIDs))
+    call hipcheck(hipFree(this % BCType))
+    DEALLOCATE (this % BCNames)
 
   END SUBROUTINE Free_Mesh1D
 
-  SUBROUTINE UpdateHost_Mesh1D(myMesh)
+  SUBROUTINE UpdateDevice_Mesh1D(this)
     IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: myMesh
+    CLASS(Mesh1D),INTENT(inout) :: this
 
-    CALL myMesh % elemInfo % UpdateHost()
-    CALL myMesh % nodeCoords % UpdateHost()
-    CALL myMesh % globalNodeIDs % UpdateHost()
-    CALL myMesh % BCType % UpdateHost()
-
-  END SUBROUTINE UpdateHost_Mesh1D
-
-  SUBROUTINE UpdateDevice_Mesh1D(myMesh)
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: myMesh
-
-    CALL myMesh % elemInfo % UpdateDevice()
-    CALL myMesh % nodeCoords % UpdateDevice()
-    CALL myMesh % globalNodeIDs % UpdateDevice()
-    CALL myMesh % BCType % UpdateDevice()
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemInfo),sizeof(this % elemInfo),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % nodeCoords),sizeof(this % nodeCoords),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % globalNodeIDs),sizeof(this % globalNodeIDs),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % BCType),sizeof(this % BCType),0,c_null_ptr))
 
   END SUBROUTINE UpdateDevice_Mesh1D
 
-  SUBROUTINE UniformBlockMesh_Mesh1D(myMesh,nGeo,nElem,x)
+  SUBROUTINE UniformBlockMesh_Mesh1D(this,nGeo,nElem,x)
     IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(out) :: myMesh
+    CLASS(Mesh1D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nGeo
     INTEGER,INTENT(in) :: nElem
     REAL(prec),INTENT(in) :: x(1:2)
@@ -366,8 +343,8 @@ CONTAINS
     TYPE(Scalar1D) :: xGeo
 
     nNodes = nElem*(nGeo + 1)
-    CALL myMesh % Init(nGeo,nElem,nNodes,2)
-    myMesh % quadrature = GAUSS_LOBATTO
+    CALL this % Init(nGeo,nElem,nNodes,2)
+    this % quadrature = GAUSS_LOBATTO
 
     ! Set the hopr_nodeCoords
     xU = UniformPoints(x(1),x(2),1,nElem + 1)
@@ -383,7 +360,7 @@ CONTAINS
     CALL xGeo % Init(nGeoInterp,1,nElem)
 
     DO iel = 1,nElem
-      xLinear % interior % hostData(0:1,1,iel) = xU(iel:iel + 1)
+      xLinear % interior(1:2,1,iel) = xU(iel:iel + 1)
     END DO
 
     CALL xLinear % GridInterp(xGeo,.FALSE.)
@@ -391,18 +368,18 @@ CONTAINS
     ! Set the element information
     nid = 1
     DO iel = 1,nElem
-      myMesh % elemInfo % hostData(1,iel) = selfLineLinear ! Element Type
-      myMesh % elemInfo % hostData(2,iel) = 1 ! Element Zone
-      myMesh % elemInfo % hostData(3,iel) = nid ! Node Index Start
-      DO i = 0,nGeo
-        myMesh % nodeCoords % hostData(nid) = xGeo % interior % hostData(i,1,iel)
+      this % elemInfo(1,iel) = selfLineLinear ! Element Type
+      this % elemInfo(2,iel) = 1 ! Element Zone
+      this % elemInfo(3,iel) = nid ! Node Index Start
+      DO i = 1,nGeo+1
+        this % nodeCoords(nid) = xGeo % interior(i,1,iel)
         nid = nid + 1
       END DO
-      myMesh % elemInfo % hostData(4,iel) = nid - 1 ! Node Index End
+      this % elemInfo(4,iel) = nid - 1 ! Node Index End
     END DO
 
 
-    CALL myMesh % UpdateDevice()
+    CALL this % UpdateDevice()
 
     CALL xLinear % Free()
     CALL xGeo % Free()
@@ -411,36 +388,36 @@ CONTAINS
 
   END SUBROUTINE UniformBlockMesh_Mesh1D
 
-  SUBROUTINE Write_Mesh1D(myMesh,meshFile)
+  SUBROUTINE Write_Mesh1D(this,meshFile)
     ! Writes mesh output in HOPR format (serial IO only)
     IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: myMesh
+    CLASS(Mesh1D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
 
     CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL WriteAttribute_HDF5(fileId,'nElems',myMesh % nElem)
-    CALL WriteAttribute_HDF5(fileId,'Ngeo',myMesh % nGeo)
-    CALL WriteAttribute_HDF5(fileId,'nBCs',myMesh % nBCs)
+    CALL WriteAttribute_HDF5(fileId,'nElems',this % nElem)
+    CALL WriteAttribute_HDF5(fileId,'Ngeo',this % nGeo)
+    CALL WriteAttribute_HDF5(fileId,'nBCs',this % nBCs)
 
-    CALL WriteArray_HDF5(fileId,'BCType',myMesh % bcType)
+    CALL WriteArray_HDF5(fileId,'BCType',this % bcType)
 
     ! Read local subarray of ElemInfo
-    CALL WriteArray_HDF5(fileId,'ElemInfo',myMesh % elemInfo)
+    CALL WriteArray_HDF5(fileId,'ElemInfo',this % elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId,'NodeCoords',myMesh % nodeCoords)
-    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',myMesh % globalNodeIDs)
+    CALL WriteArray_HDF5(fileId,'NodeCoords',this % nodeCoords)
+    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',this % globalNodeIDs)
 
     CALL Close_HDF5(fileID)
 
   END SUBROUTINE Write_Mesh1D
 
-  SUBROUTINE Init_Mesh2D(myMesh,nGeo,nElem,nSides,nNodes,nBCs)
+  SUBROUTINE Init_Mesh2D(this,nGeo,nElem,nSides,nNodes,nBCs)
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(out) :: myMesh
+    CLASS(Mesh2D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nGeo
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nSides
@@ -449,119 +426,94 @@ CONTAINS
     ! Local
     INTEGER :: i,j,l
 
-    myMesh % nGeo = nGeo
-    myMesh % nElem = nElem
-    myMesh % nGlobalElem = nElem
-    myMesh % nNodes = nNodes
-    myMesh % nSides = nSides
-    myMesh % nCornerNodes = 0
-    myMesh % nUniqueNodes = 0
-    myMesh % nUniqueSides = 0
-    myMesh % nBCs = nBCs
+    this % nGeo = nGeo
+    this % nElem = nElem
+    this % nGlobalElem = nElem
+    this % nNodes = nNodes
+    this % nSides = nSides
+    this % nCornerNodes = 0
+    this % nUniqueNodes = 0
+    this % nUniqueSides = 0
+    this % nBCs = nBCs
 
-    CALL myMesh % elemInfo % Alloc(loBound=(/1,1/), &
-                                        upBound=(/6,nElem/))
+    call hipcheck(hipMallocManaged(this % elemInfo,6,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % sideInfo,5,4,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % nodeCoords,2,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % globalNodeIDs,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % CGNSCornerMap,2,4,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % CGNSSideMap,2,4,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % BCType,4,nBCs,hipMemAttachGlobal))
 
-    CALL myMesh % sideInfo % Alloc(loBound=(/1,1,1/), &
-                                        upBound=(/5,4,nElem/))
-
-    CALL myMesh % nodeCoords % Alloc(loBound=(/1,0,0,1/), &
-                                          upBound=(/2,nGeo,nGeo,nElem/))
-
-    CALL myMesh % globalNodeIDs % Alloc(loBound=(/0,0,1/), &
-                                        upBound=(/nGeo,nGeo,nElem/))
-
-    CALL myMesh % CGNSCornerMap % Alloc(loBound=(/1,1/), &
-                                        upBound=(/2,4/))
-
-    CALL myMesh % CGNSSideMap % Alloc(loBound=(/1,1/), &
-                                      upBound=(/2,4/))
-
-    CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
-                                 upBound=(/4,nBCs/))
-
-    ALLOCATE (myMesh % BCNames(1:nBCs))
+    ALLOCATE (this % BCNames(1:nBCs))
 
     ! Create lookup tables to assist with connectivity generation
-    myMesh % CGNSCornerMap % hostData(1:2,1) = (/0, 0/)
-    myMesh % CGNSCornerMap % hostData(1:2,2) = (/nGeo, 0/)
-    myMesh % CGNSCornerMap % hostData(1:2,3) = (/nGeo, nGeo/)
-    myMesh % CGNSCornerMap % hostData(1:2,4) = (/0, nGeo/)
+    this % CGNSCornerMap(1:2,1) = (/1, 1/)
+    this % CGNSCornerMap(1:2,2) = (/nGeo+1, 1/)
+    this % CGNSCornerMap(1:2,3) = (/nGeo+1, nGeo+1/)
+    this % CGNSCornerMap(1:2,4) = (/1, nGeo+1/)
 
     ! Maps from local corner node id to CGNS side
-    myMesh % CGNSSideMap % hostData(1:2,1) = (/1,2/)
-    myMesh % CGNSSideMap % hostData(1:2,2) = (/2,3/)
-    myMesh % CGNSSideMap % hostData(1:2,3) = (/4,3/)
-    myMesh % CGNSSideMap % hostData(1:2,4) = (/1,4/)
+    this % CGNSSideMap(1:2,1) = (/1,2/)
+    this % CGNSSideMap(1:2,2) = (/2,3/)
+    this % CGNSSideMap(1:2,3) = (/4,3/)
+    this % CGNSSideMap(1:2,4) = (/1,4/)
 
   END SUBROUTINE Init_Mesh2D
 
-  SUBROUTINE Free_Mesh2D(myMesh)
+  SUBROUTINE Free_Mesh2D(this)
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    CLASS(Mesh2D),INTENT(inout) :: this
 
-    myMesh % nElem = 0
-    myMesh % nNodes = 0
-    myMesh % nSides = 0
-    myMesh % nCornerNodes = 0
-    myMesh % nUniqueSides = 0
-    myMesh % nUniqueNodes = 0
-    myMesh % nBCs = 0
+    this % nElem = 0
+    this % nNodes = 0
+    this % nSides = 0
+    this % nCornerNodes = 0
+    this % nUniqueSides = 0
+    this % nUniqueNodes = 0
+    this % nBCs = 0
 
-    CALL myMesh % elemInfo % Free()
-    CALL myMesh % sideInfo % Free()
-    CALL myMesh % nodeCoords % Free()
-    CALL myMesh % CGNSCornerMap % Free()
-    CALL myMesh % globalNodeIDs % Free()
-    CALL myMesh % BCType % Free()
-
-    DEALLOCATE (myMesh % BCNames)
+    call hipcheck(hipFree(this % elemInfo))
+    call hipcheck(hipFree(this % sideInfo))
+    call hipcheck(hipFree(this % nodeCoords))
+    call hipcheck(hipFree(this % globalNodeIDs))
+    call hipcheck(hipFree(this % CGNSCornerMap))
+    call hipcheck(hipFree(this % CGNSSideMap))
+    call hipcheck(hipFree(this % BCType))
+    DEALLOCATE (this % BCNames)
 
   END SUBROUTINE Free_Mesh2D
 
-  SUBROUTINE UpdateHost_Mesh2D(myMesh)
+  SUBROUTINE UpdateDevice_Mesh2D(this)
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    CLASS(Mesh2D),INTENT(inout) :: this
 
-    CALL myMesh % elemInfo % UpdateHost()
-    CALL myMesh % sideInfo % UpdateHost()
-    CALL myMesh % nodeCoords % UpdateHost()
-    CALL myMesh % globalNodeIDs % UpdateHost()
-    CALL myMesh % BCType % UpdateHost()
-
-  END SUBROUTINE UpdateHost_Mesh2D
-
-  SUBROUTINE UpdateDevice_Mesh2D(myMesh)
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: myMesh
-
-    CALL myMesh % elemInfo % UpdateDevice()
-    CALL myMesh % sideInfo % UpdateDevice()
-    CALL myMesh % nodeCoords % UpdateDevice()
-    CALL myMesh % globalNodeIDs % UpdateDevice()
-    CALL myMesh % BCType % UpdateDevice()
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemInfo),sizeof(this % elemInfo),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % sideInfo),sizeof(this % sideInfo),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % nodeCoords),sizeof(this % nodeCoords),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % globalNodeIDs),sizeof(this % globalNodeIDs),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % BCType),sizeof(this % BCType),0,c_null_ptr))
 
   END SUBROUTINE UpdateDevice_Mesh2D
 
-  SUBROUTINE ResetBoundaryConditionType_Mesh2D(myMesh,bcid)
+  SUBROUTINE ResetBoundaryConditionType_Mesh2D(this,bcid)
     !! This method can be used to reset all of the boundary elements
     !! boundary condition type to the desired value.
     !!
     !! Note that ALL physical boundaries will be set to have this boundary 
     !! condition
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    CLASS(Mesh2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: bcid
     ! Local
     INTEGER :: iSide,iEl,e2      
 
-    DO iEl = 1, myMesh % nElem
+    DO iEl = 1, this % nElem
       DO iSide = 1, 4
 
-        e2 = myMesh % sideInfo % hostData(3,iSide,iEl)
+        e2 = this % sideInfo(3,iSide,iEl)
 
         IF( e2 == 0 )THEN
-          myMesh % sideInfo % hostData(5,iSide,iEl) = bcid
+          this % sideInfo(5,iSide,iEl) = bcid
         ENDIF
 
       ENDDO
@@ -569,11 +521,11 @@ CONTAINS
 
   END SUBROUTINE ResetBoundaryConditionType_Mesh2D 
 
-  SUBROUTINE Read_HOPr_Mesh2D(myMesh,meshFile,decomp)
+  SUBROUTINE Read_HOPr_Mesh2D(this,meshFile,decomp)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(out) :: myMesh
+    CLASS(Mesh2D),INTENT(out) :: this
     CHARACTER(*),INTENT(in) :: meshFile
     TYPE(MPILayer),INTENT(inout) :: decomp
     ! Local
@@ -593,11 +545,11 @@ CONTAINS
     INTEGER :: nGeo,nBCs
     INTEGER :: eid, lsid, iSide
     INTEGER :: i, j, nid
-    TYPE(hfInt32_r2) :: hopr_elemInfo
-    TYPE(hfInt32_r2) :: hopr_sideInfo
-    TYPE(hfReal_r2) :: hopr_nodeCoords
-    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
-    TYPE(hfInt32_r2) :: bcType
+    integer, dimension(:,:), allocatable :: hopr_elemInfo
+    integer, dimension(:,:), allocatable :: hopr_sideInfo
+    real(prec), dimension(:,:), allocatable :: hopr_nodeCoords
+    integer, dimension(:), allocatable :: hopr_globalNodeIDs
+    integer, dimension(:,:), allocatable :: bcType
 
 
     IF ( decomp % mpiEnabled )THEN
@@ -612,8 +564,8 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
 
     ! Read BCType
-    CALL bcType % Alloc(loBound=(/1,1/), &
-                        upBound=(/4,nBCs/))
+    allocate(bcTypes(1:4,1:nBCS))
+
     IF ( decomp % mpiEnabled )THEN
       offset(:) = 0
       CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
@@ -624,13 +576,12 @@ CONTAINS
     ! Read local subarray of ElemInfo
     CALL decomp % GenerateDecomposition(nGlobalElem,nUniqueSides3D)
 
-    firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
-                  decomp % offsetElem % hostData(decomp % rankId)
+    firstElem = decomp % offsetElem(decomp % rankId) + 1
+    nLocalElems = decomp % offsetElem(decomp % rankId + 1) - &
+                  decomp % offsetElem(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
-    CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                               upBound=(/6,nLocalElems/))
+    allocate(hopr_elemInfo(1:6,1:nLocalElems))
 
     IF ( decomp % mpiEnabled )THEN
       offset = (/0,firstElem - 1/)
@@ -640,15 +591,11 @@ CONTAINS
     ENDIF
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode = hopr_elemInfo % hostData(5,1) + 1
-    nLocalNodes3D = hopr_elemInfo % hostData(6,nLocalElems) - hopr_elemInfo % hostData(5,1)
+    firstNode = hopr_elemInfo(5,1) + 1
+    nLocalNodes3D = hopr_elemInfo(6,nLocalElems) - hopr_elemInfo(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
-    CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                                 upBound=(/3,nLocalNodes3D/))
-
-    CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                                    upBound=nLocalNodes3D)
+    allocate( hopr_nodeCoords(1:3,nLocalNodes3D), hopr_globalNodeIDs(1:nLocalNodes3D))
 
     IF ( decomp % mpiEnabled )THEN
       offset = (/0,firstNode - 1/)
@@ -661,12 +608,11 @@ CONTAINS
     ENDIF
 
     ! Read local subarray of SideInfo
-    firstSide = hopr_elemInfo % hostData(3,1) + 1
-    nLocalSides3D = hopr_elemInfo % hostData(4,nLocalElems) - hopr_elemInfo % hostData(3,1)
+    firstSide = hopr_elemInfo(3,1) + 1
+    nLocalSides3D = hopr_elemInfo(4,nLocalElems) - hopr_elemInfo(3,1)
 
     ! Allocate space for hopr_sideInfo
-    CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
-                               upBound=(/5,nLocalSides3D/))
+    allocate( hopr_sideInfo(1:5,1:nLocalSides3D) )
     IF ( decomp % mpiEnabled )THEN
       offset = (/0,firstSide - 1/)
       CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
@@ -682,9 +628,9 @@ CONTAINS
     nUniqueSides2D = nUniqueSides3D - 2*nGlobalElem ! Remove the "top" and "bottom" faces
     nLocalNodes2D = nLocalNodes2D - nGlobalElem*nGeo*(nGeo+1)**2 ! Remove the third dimension
 
-    CALL myMesh % Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
+    CALL this % Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
 
-    ! Copy data from local arrays into myMesh
+    ! Copy data from local arrays into this
     !  elemInfo(1:6,iEl)
     !    1 - Element Type
     !    2 - Zone
@@ -692,16 +638,16 @@ CONTAINS
     !    4 - last index for side array (not needed when all quads are assumed)
     !    5 - offset index for node array (not needed when all quads are assumed)
     !    6 - last index for node array (not needed when all quads are assumed)
-    myMesh % elemInfo % hostData = hopr_elemInfo % hostData
-    myMesh % quadrature = UNIFORM  ! HOPr uses uniformly spaced points
+    this % elemInfo = hopr_elemInfo
+    this % quadrature = UNIFORM  ! HOPr uses uniformly spaced points
 
     ! Grab the node coordinates (x and y only) from the "bottom" layer of the extruded mesh
-    DO eid = 1, myMesh % nElem
-      DO j = 0, nGeo
-        DO i = 0, nGeo
+    DO eid = 1, this % nElem
+      DO j = 1,nGeo+1
+        DO i = 1,nGeo+1
           nid = i+1 + (nGeo+1)*(j + (nGeo+1)*((nGeo+1)*(eid-1)))
-          myMesh % nodeCoords % hostData(1:2,i,j,eid) = hopr_nodeCoords % hostData(1:2,nid)
-          myMesh % globalNodeIDs % hostData(i,j,eid) = hopr_globalNodeIDs % hostData(nid)
+          this % nodeCoords(1:2,i,j,eid) = hopr_nodeCoords(1:2,nid)
+          this % globalNodeIDs(i,j,eid) = hopr_globalNodeIDs(nid)
         ENDDO
       ENDDO
     ENDDO
@@ -714,30 +660,27 @@ CONTAINS
     !    3 - Neighbor Element ID (Can stay the same)
     !    4 - 10*( neighbor local side )  + flip (Need to recalculate flip)
     !    5 - Boundary Condition ID (Can stay the same)
-    DO eid = 1,myMesh % nElem
+    DO eid = 1,this % nElem
       DO lsid = 1,4
         ! Calculate the 3-D side ID from the 2-D local side id and element ID
         iSide = lsid + 1 + 6*(eid-1)
-        myMesh % sideInfo % hostData(1:5,lsid,eid) = hopr_sideInfo % hostData(1:5,iSide)
+        this % sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
         ! Adjust the secondary side index for 2-D
-        myMesh % sideInfo % hostData(4,lsid,eid) = myMesh % sideInfo % hostData(4,lsid,eid)-10
+        this % sideInfo(4,lsid,eid) = this % sideInfo(4,lsid,eid)-10
       ENDDO
     ENDDO
 
-    CALL myMesh % RecalculateFlip()
+    CALL this % RecalculateFlip()
 
-    CALL myMesh % UpdateDevice()
+    CALL this % UpdateDevice()
 
-    CALL hopr_elemInfo % Free()
-    CALL hopr_nodeCoords % Free()
-    CALL hopr_globalNodeIDs % Free()
-    CALL hopr_sideInfo % Free()
+    deallocate( hopr_elemInfo, hopr_nodeCoords, hopr_globalNodeIDs, hopr_sideInfo)
 
   END SUBROUTINE Read_HOPr_Mesh2D
 
-  SUBROUTINE RecalculateFlip_Mesh2D(myMesh,decomp)  
+  SUBROUTINE RecalculateFlip_Mesh2D(this,decomp)  
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    CLASS(Mesh2D),INTENT(inout) :: this
     TYPE(MPILayer),INTENT(inout),OPTIONAL :: decomp
     ! Local
     INTEGER :: e1
@@ -749,8 +692,8 @@ CONTAINS
     INTEGER :: bcid
     INTEGER :: lnid1(1:2)
     INTEGER :: lnid2(1:2)
-    INTEGER :: nid1(1:2,1:4,1:myMesh % nElem)
-    INTEGER :: nid2(1:2,1:4,1:myMesh % nElem)
+    INTEGER :: nid1(1:2,1:4,1:this % nElem)
+    INTEGER :: nid2(1:2,1:4,1:this % nElem)
     INTEGER :: nloc1(1:2)
     INTEGER :: nloc2(1:2)
     INTEGER :: n1
@@ -772,64 +715,63 @@ CONTAINS
     INTEGER :: iError
     LOGICAL :: theyMatch
 
-
-    ALLOCATE(requests(1:myMesh % nSides*2))
-    ALLOCATE(stats(MPI_STATUS_SIZE,1:myMesh % nSides*2))
+    ALLOCATE(requests(1:this % nSides*2))
+    ALLOCATE(stats(MPI_STATUS_SIZE,1:this % nSides*2))
 
     IF (PRESENT(decomp)) THEN
       rankId = decomp % rankId
-      offset = decomp % offsetElem % hostData(rankId)
+      offset = decomp % offsetElem(rankId)
     ELSE
       rankId = 0
       offset = 0
     ENDIF
 
     msgCount = 0
-    DO e1 = 1,myMesh % nElem
+    DO e1 = 1,this % nElem
       DO s1 = 1,4
 
-        e2Global = myMesh % sideInfo % hostData(3,s1,e1)
+        e2Global = this % sideInfo(3,s1,e1)
         e2 = e2Global - offset
-        s2 = myMesh % sideInfo % hostData(4,s1,e1)/10
-        flip = myMesh % sideInfo % hostData(4,s1,e1) - s2*10
-        bcid = myMesh % sideInfo % hostData(5,s1,e1)
+        s2 = this % sideInfo(4,s1,e1)/10
+        flip = this % sideInfo(4,s1,e1) - s2*10
+        bcid = this % sideInfo(5,s1,e1)
 
         IF (bcid == 0) THEN
 
           IF (PRESENT(decomp)) THEN
-            neighborRank = decomp % elemToRank % hostData(e2Global)
+            neighborRank = decomp % elemToRank(e2Global)
           ELSE
             neighborRank = 0
           ENDIF
 
           IF (neighborRank == rankId) THEN
 
-            lnid1 = myMesh % CGNSSideMap % hostData(1:2,s1) ! local CGNS corner node ids for element 1 side
-            lnid2 = myMesh % CGNSSideMap % hostData(1:2,s2) ! local CGNS corner node ids for element 2 side
+            lnid1 = this % CGNSSideMap(1:2,s1) ! local CGNS corner node ids for element 1 side
+            lnid2 = this % CGNSSideMap(1:2,s2) ! local CGNS corner node ids for element 2 side
 
             DO l = 1, 2
 
-              i = myMesh % CGNSCornerMap % hostData(1,lnid1(l))
-              j = myMesh % CGNSCornerMap % hostData(2,lnid1(l))
-              nid1(l,s1,e1) = myMesh % globalNodeIDs % hostData(i,j,e1)
+              i = this % CGNSCornerMap(1,lnid1(l))
+              j = this % CGNSCornerMap(2,lnid1(l))
+              nid1(l,s1,e1) = this % globalNodeIDs(i,j,e1)
 
-              i = myMesh % CGNSCornerMap % hostData(1,lnid2(l))
-              j = myMesh % CGNSCornerMap % hostData(2,lnid2(l))
-              nid2(l,s1,e1) = myMesh % globalNodeIDs % hostData(i,j,e2)
+              i = this % CGNSCornerMap(1,lnid2(l))
+              j = this % CGNSCornerMap(2,lnid2(l))
+              nid2(l,s1,e1) = this % globalNodeIDs(i,j,e2)
 
             ENDDO
 
           ELSE ! In this case, we need to exchange
 
-            globalSideId = ABS(myMesh % sideInfo % hostdata(2,s1,e1))
+            globalSideId = ABS(this % sideInfo(2,s1,e1))
 
-            lnid1 = myMesh % CGNSSideMap % hostData(1:2,s1) ! local CGNS corner node ids for element 1 side
+            lnid1 = this % CGNSSideMap(1:2,s1) ! local CGNS corner node ids for element 1 side
 
             DO l = 1, 2
 
-              i = myMesh % CGNSCornerMap % hostData(1,lnid1(l))
-              j = myMesh % CGNSCornerMap % hostData(2,lnid1(l))
-              nid1(l,s1,e1) = myMesh % globalNodeIDs % hostData(i,j,e1)
+              i = this % CGNSCornerMap(1,lnid1(l))
+              j = this % CGNSCornerMap(2,lnid1(l))
+              nid1(l,s1,e1) = this % globalNodeIDs(i,j,e1)
 
               msgCount = msgCount + 1
               CALL MPI_IRECV(nid2(l,s1,e1), &
@@ -865,11 +807,11 @@ CONTAINS
                        iError)
     ENDIF
 
-    DO e1 = 1,myMesh % nElem
+    DO e1 = 1,this % nElem
       DO s1 = 1,4
 
-        s2 = myMesh % sideInfo % hostData(4,s1,e1)/10
-        bcid = myMesh % sideInfo % hostData(5,s1,e1)
+        s2 = this % sideInfo(4,s1,e1)/10
+        bcid = this % sideInfo(5,s1,e1)
         nloc1(1:2) = nid1(1:2,s1,e1)
         nloc2(1:2) = nid2(1:2,s1,e1)
 
@@ -877,9 +819,9 @@ CONTAINS
           theyMatch = CompareArray( nloc1, nloc2, 2 )
 
           IF( theyMatch )THEN
-            myMesh % sideInfo % hostData(4,s1,e1) = 10*s2
+            this % sideInfo(4,s1,e1) = 10*s2
           ELSE
-            myMesh % sideInfo % hostData(4,s1,e1) = 10*s2+1
+            this % sideInfo(4,s1,e1) = 10*s2+1
           ENDIF
 
 
@@ -893,38 +835,38 @@ CONTAINS
 
   END SUBROUTINE RecalculateFlip_Mesh2D
 
-  SUBROUTINE Write_Mesh2D(myMesh,meshFile)
+  SUBROUTINE Write_Mesh2D(this,meshFile)
     ! Writes mesh output in HOPR format (serial only)
     IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    CLASS(Mesh2D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
 
     CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
-    CALL WriteAttribute_HDF5(fileId,'nElems',myMesh % nElem)
-    CALL WriteAttribute_HDF5(fileId,'Ngeo',myMesh % nGeo)
-    CALL WriteAttribute_HDF5(fileId,'nBCs',myMesh % nBCs)
+    CALL WriteAttribute_HDF5(fileId,'nElems',this % nElem)
+    CALL WriteAttribute_HDF5(fileId,'Ngeo',this % nGeo)
+    CALL WriteAttribute_HDF5(fileId,'nBCs',this % nBCs)
 
-    CALL WriteArray_HDF5(fileId,'BCType',myMesh % bcType)
+    CALL WriteArray_HDF5(fileId,'BCType',this % bcType)
 
     ! Write local subarray of ElemInfo
-    CALL WriteArray_HDF5(fileId,'ElemInfo',myMesh % elemInfo)
+    CALL WriteArray_HDF5(fileId,'ElemInfo',this % elemInfo)
 
     ! Write local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId,'NodeCoords',myMesh % nodeCoords)
-    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',myMesh % globalNodeIDs)
+    CALL WriteArray_HDF5(fileId,'NodeCoords',this % nodeCoords)
+    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',this % globalNodeIDs)
 
     ! Write local subarray of SideInfo
-    CALL WriteArray_HDF5(fileId,'SideInfo',myMesh % sideInfo)
+    CALL WriteArray_HDF5(fileId,'SideInfo',this % sideInfo)
 
     CALL Close_HDF5(fileID)
 
   END SUBROUTINE Write_Mesh2D
 
-  SUBROUTINE Init_Mesh3D(myMesh,nGeo,nElem,nSides,nNodes,nBCs)
+  SUBROUTINE Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(out) :: myMesh
+    CLASS(Mesh3D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nGeo
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nSides
@@ -933,135 +875,110 @@ CONTAINS
     ! Local
     INTEGER :: i,j,k,l
 
-    myMesh % nElem = nElem
-    myMesh % nGlobalElem = nElem
-    myMesh % nGeo = nGeo
-    myMesh % nSides = nSides
-    myMesh % nNodes = nNodes
-    myMesh % nCornerNodes = 0
-    myMesh % nUniqueSides = 0
-    myMesh % nUniqueNodes = 0
-    myMesh % nBCs = nBCs
+    this % nElem = nElem
+    this % nGlobalElem = nElem
+    this % nGeo = nGeo
+    this % nSides = nSides
+    this % nNodes = nNodes
+    this % nCornerNodes = 0
+    this % nUniqueSides = 0
+    this % nUniqueNodes = 0
+    this % nBCs = nBCs
 
-    CALL myMesh % elemInfo % Alloc(loBound=(/1,1/), &
-                                   upBound=(/6,nElem/))
+    call hipcheck(hipMallocManaged(this % elemInfo,6,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % sideInfo,5,6,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % nodeCoords,3,nGeo+1,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % globalNodeIDs,nGeo+1,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % CGNSCornerMap,3,8,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % CGNSSideMap,4,6,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % sideMap,4,6,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % BCType,4,nBCs,hipMemAttachGlobal))
 
-    CALL myMesh % sideInfo % Alloc(loBound=(/1,1,1/), &
-                                   upBound=(/5,6,nElem/))
-
-    CALL myMesh % nodeCoords % Alloc(loBound=(/1,0,0,0,1/), &
-                                     upBound=(/3,nGeo,nGeo,nGeo,nElem/))
-
-    CALL myMesh % globalNodeIDs % Alloc(loBound=(/0,0,0,1/), &
-                                        upBound=(/nGeo,nGeo,nGeo,nElem/))
-
-    CALL myMesh % CGNSCornerMap % Alloc(loBound=(/1,1/), &
-                                        upBound=(/3,8/))
-
-    CALL myMesh % sideMap % Alloc(loBound=(/1,1/), &
-                                  upBound=(/4,6/))
-
-    CALL myMesh % CGNSSideMap % Alloc(loBound=(/1,1/), &
-                                      upBound=(/4,6/))
-
-    CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
-                                 upBound=(/4,nBCs/))
-
-    ALLOCATE (myMesh % BCNames(1:nBCs))
+    ALLOCATE (this % BCNames(1:nBCs))
 
     ! Create lookup tables to assist with connectivity generation
-    myMesh % CGNSCornerMap % hostData(1:3,1) = (/0,0,0/) ! Bottom-South-West
-    myMesh % CGNSCornerMap % hostData(1:3,2) = (/nGeo,0,0/) ! Bottom-South-East
-    myMesh % CGNSCornerMap % hostData(1:3,3) = (/nGeo,nGeo,0/)! Bottom-North-East
-    myMesh % CGNSCornerMap % hostData(1:3,4) = (/0,nGeo,0/)! Bottom-North-West
-    myMesh % CGNSCornerMap % hostData(1:3,5) = (/0,0,nGeo/) ! Top-South-West
-    myMesh % CGNSCornerMap % hostData(1:3,6) = (/nGeo,0,nGeo/) ! Top-South-East
-    myMesh % CGNSCornerMap % hostData(1:3,7) = (/nGeo,nGeo,nGeo/)! Top-North-East
-    myMesh % CGNSCornerMap % hostData(1:3,8) = (/0,nGeo,nGeo/)! Top-North-West
+    this % CGNSCornerMap(1:3,1) = (/1,1,1/) ! Bottom-South-West
+    this % CGNSCornerMap(1:3,2) = (/nGeo+1,1,1/) ! Bottom-South-East
+    this % CGNSCornerMap(1:3,3) = (/nGeo+1,nGeo+1,1/)! Bottom-North-East
+    this % CGNSCornerMap(1:3,4) = (/1,nGeo+1,1/)! Bottom-North-West
+    this % CGNSCornerMap(1:3,5) = (/1,1,nGeo+1/) ! Top-South-West
+    this % CGNSCornerMap(1:3,6) = (/nGeo+1,1,nGeo+1/) ! Top-South-East
+    this % CGNSCornerMap(1:3,7) = (/nGeo+1,nGeo+1,nGeo+1/)! Top-North-East
+    this % CGNSCornerMap(1:3,8) = (/1,nGeo+1,nGeo+1/)! Top-North-West
 
     ! Maps from local corner node id to CGNS side
-    myMesh % CGNSSideMap % hostData(1:4,1) = (/1,4,3,2/)
-    myMesh % CGNSSideMap % hostData(1:4,2) = (/1,2,6,5/)
-    myMesh % CGNSSideMap % hostData(1:4,3) = (/2,3,7,6/)
-    myMesh % CGNSSideMap % hostData(1:4,4) = (/3,4,8,7/)
-    myMesh % CGNSSideMap % hostData(1:4,5) = (/1,5,8,4/)
-    myMesh % CGNSSideMap % hostData(1:4,6) = (/5,6,7,8/)
+    this % CGNSSideMap(1:4,1) = (/1,4,3,2/)
+    this % CGNSSideMap(1:4,2) = (/1,2,6,5/)
+    this % CGNSSideMap(1:4,3) = (/2,3,7,6/)
+    this % CGNSSideMap(1:4,4) = (/3,4,8,7/)
+    this % CGNSSideMap(1:4,5) = (/1,5,8,4/)
+    this % CGNSSideMap(1:4,6) = (/5,6,7,8/)
 
-    myMesh % sideMap % hostData(1:4,1) = (/1,2,3,4/) ! Bottom
-    myMesh % sideMap % hostData(1:4,2) = (/1,2,6,5/) ! South
-    myMesh % sideMap % hostData(1:4,3) = (/2,3,7,6/) ! East
-    myMesh % sideMap % hostData(1:4,4) = (/4,3,7,8/) ! North
-    myMesh % sideMap % hostData(1:4,5) = (/1,4,8,5/) ! West
-    myMesh % sideMap % hostData(1:4,6) = (/5,6,7,8/) ! Top
+    this % sideMap(1:4,1) = (/1,2,3,4/) ! Bottom
+    this % sideMap(1:4,2) = (/1,2,6,5/) ! South
+    this % sideMap(1:4,3) = (/2,3,7,6/) ! East
+    this % sideMap(1:4,4) = (/4,3,7,8/) ! North
+    this % sideMap(1:4,5) = (/1,4,8,5/) ! West
+    this % sideMap(1:4,6) = (/5,6,7,8/) ! Top
 
   END SUBROUTINE Init_Mesh3D
 
-  SUBROUTINE Free_Mesh3D(myMesh)
+  SUBROUTINE Free_Mesh3D(this)
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    CLASS(Mesh3D),INTENT(inout) :: this
 
-    myMesh % nElem = 0
-    myMesh % nSides = 0
-    myMesh % nNodes = 0
-    myMesh % nCornerNodes = 0
-    myMesh % nUniqueSides = 0
-    myMesh % nUniqueNodes = 0
-    myMesh % nBCs = 0
+    this % nElem = 0
+    this % nSides = 0
+    this % nNodes = 0
+    this % nCornerNodes = 0
+    this % nUniqueSides = 0
+    this % nUniqueNodes = 0
+    this % nBCs = 0
 
-    CALL myMesh % elemInfo % Free()
-    CALL myMesh % sideInfo % Free()
-    CALL myMesh % nodeCoords % Free()
-    CALL myMesh % CGNSCornerMap % Free()
-    CALL myMesh % globalNodeIDs % Free()
-    CALL myMesh % sideMap % Free()
-    CALL myMesh % BCType % Free()
+    call hipcheck(hipFree(this % elemInfo))
+    call hipcheck(hipFree(this % sideInfo))
+    call hipcheck(hipFree(this % nodeCoords))
+    call hipcheck(hipFree(this % globalNodeIDs))
+    call hipcheck(hipFree(this % CGNSCornerMap))
+    call hipcheck(hipFree(this % sideMap))
+    call hipcheck(hipFree(this % CGNSSideMap))
+    call hipcheck(hipFree(this % BCType))
 
-    DEALLOCATE (myMesh % BCNames)
+    DEALLOCATE (this % BCNames)
 
   END SUBROUTINE Free_Mesh3D
-  SUBROUTINE UpdateHost_Mesh3D(myMesh)
+
+  SUBROUTINE UpdateDevice_Mesh3D(this)
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    CLASS(Mesh3D),INTENT(inout) :: this
 
-    CALL myMesh % elemInfo % UpdateHost()
-    CALL myMesh % sideInfo % UpdateHost()
-    CALL myMesh % nodeCoords % UpdateHost()
-    CALL myMesh % globalNodeIDs % UpdateHost()
-    CALL myMesh % BCType % UpdateHost()
-
-  END SUBROUTINE UpdateHost_Mesh3D
-
-  SUBROUTINE UpdateDevice_Mesh3D(myMesh)
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: myMesh
-
-    CALL myMesh % elemInfo % UpdateDevice()
-    CALL myMesh % sideInfo % UpdateDevice()
-    CALL myMesh % nodeCoords % UpdateDevice()
-    CALL myMesh % globalNodeIDs % UpdateDevice()
-    CALL myMesh % BCType % UpdateDevice()
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemInfo),sizeof(this % elemInfo),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % sideInfo),sizeof(this % sideInfo),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % nodeCoords),sizeof(this % nodeCoords),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % globalNodeIDs),sizeof(this % globalNodeIDs),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % BCType),sizeof(this % BCType),0,c_null_ptr))
 
   END SUBROUTINE UpdateDevice_Mesh3D
 
-  SUBROUTINE ResetBoundaryConditionType_Mesh3D(myMesh,bcid)
+  SUBROUTINE ResetBoundaryConditionType_Mesh3D(this,bcid)
     !! This method can be used to reset all of the boundary elements
     !! boundary condition type to the desired value.
     !!
     !! Note that ALL physical boundaries will be set to have this boundary 
     !! condition
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    CLASS(Mesh3D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: bcid
     ! Local
     INTEGER :: iSide,iEl,e2      
 
-    DO iEl = 1, myMesh % nElem
+    DO iEl = 1, this % nElem
       DO iSide = 1, 6
 
-        e2 = myMesh % sideInfo % hostData(3,iSide,iEl)
+        e2 = this % sideInfo(3,iSide,iEl)
 
         IF( e2 == 0 )THEN
-          myMesh % sideInfo % hostData(5,iSide,iEl) = bcid
+          this % sideInfo(5,iSide,iEl) = bcid
         ENDIF
 
       ENDDO
@@ -1069,9 +986,9 @@ CONTAINS
 
   END SUBROUTINE ResetBoundaryConditionType_Mesh3D 
 
-  SUBROUTINE RecalculateFlip_Mesh3D(myMesh,decomp)  
+  SUBROUTINE RecalculateFlip_Mesh3D(this,decomp)  
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    CLASS(Mesh3D),INTENT(inout) :: this
     TYPE(MPILayer),INTENT(inout),OPTIONAL :: decomp
     ! Local
     INTEGER :: e1
@@ -1083,8 +1000,8 @@ CONTAINS
     INTEGER :: bcid
     INTEGER :: lnid1(1:4)
     INTEGER :: lnid2(1:4)
-    INTEGER :: nid1(1:4,1:6,1:myMesh % nElem)
-    INTEGER :: nid2(1:4,1:6,1:myMesh % nElem)
+    INTEGER :: nid1(1:4,1:6,1:this % nElem)
+    INTEGER :: nid2(1:4,1:6,1:this % nElem)
     INTEGER :: nloc1(1:4)
     INTEGER :: nloc2(1:4)
     INTEGER :: n1
@@ -1107,66 +1024,66 @@ CONTAINS
     LOGICAL :: theyMatch
 
 
-    ALLOCATE(requests(1:myMesh % nSides*2))
-    ALLOCATE(stats(MPI_STATUS_SIZE,1:myMesh % nSides*2))
+    ALLOCATE(requests(1:this % nSides*2))
+    ALLOCATE(stats(MPI_STATUS_SIZE,1:this % nSides*2))
 
     IF (PRESENT(decomp)) THEN
       rankId = decomp % rankId
-      offset = decomp % offsetElem % hostData(rankId)
+      offset = decomp % offsetElem(rankId)
     ELSE
       rankId = 0
       offset = 0
     ENDIF
 
     msgCount = 0
-    DO e1 = 1,myMesh % nElem
+    DO e1 = 1,this % nElem
       DO s1 = 1,6
 
-        e2Global = myMesh % sideInfo % hostData(3,s1,e1)
+        e2Global = this % sideInfo(3,s1,e1)
         e2 = e2Global - offset
-        s2 = myMesh % sideInfo % hostData(4,s1,e1)/10
-        flip = myMesh % sideInfo % hostData(4,s1,e1) - s2*10
-        bcid = myMesh % sideInfo % hostData(5,s1,e1)
+        s2 = this % sideInfo(4,s1,e1)/10
+        flip = this % sideInfo(4,s1,e1) - s2*10
+        bcid = this % sideInfo(5,s1,e1)
 
         IF (bcid == 0) THEN
 
           IF (PRESENT(decomp)) THEN
-            neighborRank = decomp % elemToRank % hostData(e2Global)
+            neighborRank = decomp % elemToRank(e2Global)
           ELSE
             neighborRank = 0
           ENDIF
 
           IF (neighborRank == rankId) THEN
 
-            lnid1 = myMesh % sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
-            lnid2 = myMesh % sideMap % hostData(1:4,s2) ! local CGNS corner node ids for element 2 side
+            lnid1 = this % sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
+            lnid2 = this % sideMap(1:4,s2) ! local CGNS corner node ids for element 2 side
 
             DO l = 1, 4
               
-              i = myMesh % CGNSCornerMap % hostData(1,lnid1(l))
-              j = myMesh % CGNSCornerMap % hostData(2,lnid1(l))
-              k = myMesh % CGNSCornerMap % hostData(3,lnid1(l))
-              nid1(l,s1,e1) = myMesh % globalNodeIDs % hostData(i,j,k,e1)
+              i = this % CGNSCornerMap(1,lnid1(l))
+              j = this % CGNSCornerMap(2,lnid1(l))
+              k = this % CGNSCornerMap(3,lnid1(l))
+              nid1(l,s1,e1) = this % globalNodeIDs(i,j,k,e1)
 
-              i = myMesh % CGNSCornerMap % hostData(1,lnid2(l))
-              j = myMesh % CGNSCornerMap % hostData(2,lnid2(l))
-              k = myMesh % CGNSCornerMap % hostData(3,lnid2(l))
-              nid2(l,s1,e1) = myMesh % globalNodeIDs % hostData(i,j,k,e1)
+              i = this % CGNSCornerMap(1,lnid2(l))
+              j = this % CGNSCornerMap(2,lnid2(l))
+              k = this % CGNSCornerMap(3,lnid2(l))
+              nid2(l,s1,e1) = this % globalNodeIDs(i,j,k,e1)
 
             ENDDO
 
           ELSE ! In this case, we need to exchange
 
-            globalSideId = ABS(myMesh % sideInfo % hostdata(2,s1,e1))
+            globalSideId = ABS(this % sideInfo(2,s1,e1))
 
-            lnid1 = myMesh % sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
+            lnid1 = this % sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
 
             DO l = 1, 4
               
-              i = myMesh % CGNSCornerMap % hostData(1,lnid1(l))
-              j = myMesh % CGNSCornerMap % hostData(2,lnid1(l))
-              k = myMesh % CGNSCornerMap % hostData(3,lnid1(l))
-              nid1(l,s1,e1) = myMesh % globalNodeIDs % hostData(i,j,k,e1)
+              i = this % CGNSCornerMap(1,lnid1(l))
+              j = this % CGNSCornerMap(2,lnid1(l))
+              k = this % CGNSCornerMap(3,lnid1(l))
+              nid1(l,s1,e1) = this % globalNodeIDs(i,j,k,e1)
 
               ! Receive nid2(l) on this rank from  nid1(l) on the other rank
               msgCount = msgCount + 1
@@ -1202,11 +1119,11 @@ CONTAINS
                        iError)
     ENDIF
 
-    DO e1 = 1,myMesh % nElem
+    DO e1 = 1,this % nElem
       DO s1 = 1,6
 
-        s2 = myMesh % sideInfo % hostData(4,s1,e1)/10
-        bcid = myMesh % sideInfo % hostData(5,s1,e1)
+        s2 = this % sideInfo(4,s1,e1)/10
+        bcid = this % sideInfo(5,s1,e1)
         nloc1(1:4) = nid1(1:4,s1,e1)
         nloc2(1:4) = nid2(1:4,s1,e1)
 
@@ -1227,7 +1144,7 @@ CONTAINS
 
           ENDDO
 
-          myMesh % sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
+          this % sideInfo(4,s1,e1) = 10*s2+nShifts
 
         ENDIF
 
@@ -1239,10 +1156,10 @@ CONTAINS
 
   END SUBROUTINE RecalculateFlip_Mesh3D
 
-  SUBROUTINE Read_HOPr_Mesh3D(myMesh,meshFile,decomp)
+  SUBROUTINE Read_HOPr_Mesh3D(this,meshFile,decomp)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(out) :: myMesh
+    CLASS(Mesh3D),INTENT(out) :: this
     CHARACTER(*),INTENT(in) :: meshFile
     TYPE(MPILayer),INTENT(inout) :: decomp
     ! Local
@@ -1259,11 +1176,11 @@ CONTAINS
     INTEGER :: nGeo,nBCs
     INTEGER :: eid, lsid, iSide
     INTEGER :: i, j, k, nid
-    TYPE(hfInt32_r2) :: hopr_elemInfo
-    TYPE(hfInt32_r2) :: hopr_sideInfo
-    TYPE(hfReal_r2) :: hopr_nodeCoords
-    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
-    TYPE(hfInt32_r2) :: bcType
+    integer, dimension(:,:), allocatable :: hopr_elemInfo
+    integer, dimension(:,:), allocatable :: hopr_sideInfo
+    real(prec), dimension(:,:), allocatable :: hopr_nodeCoords
+    integer, dimension(:), allocatable :: hopr_globalNodeIDs
+    integer, dimension(:,:), allocatable :: bcType
 
 
     IF ( decomp % mpiEnabled )THEN
@@ -1290,9 +1207,9 @@ CONTAINS
     ! Read local subarray of ElemInfo
     CALL decomp % GenerateDecomposition(nGlobalElem,nUniqueSides)
 
-    firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
-                  decomp % offsetElem % hostData(decomp % rankId)
+    firstElem = decomp % offsetElem(decomp % rankId) + 1
+    nLocalElems = decomp % offsetElem(decomp % rankId + 1) - &
+                  decomp % offsetElem(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1306,8 +1223,8 @@ CONTAINS
     ENDIF
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode = hopr_elemInfo % hostData(5,1) + 1
-    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems) - hopr_elemInfo % hostData(5,1)
+    firstNode = hopr_elemInfo(5,1) + 1
+    nLocalNodes = hopr_elemInfo(6,nLocalElems) - hopr_elemInfo(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
@@ -1327,8 +1244,8 @@ CONTAINS
     ENDIF
 
     ! Read local subarray of SideInfo
-    firstSide = hopr_elemInfo % hostData(3,1) + 1
-    nLocalSides = hopr_elemInfo % hostData(4,nLocalElems) - hopr_elemInfo % hostData(3,1)
+    firstSide = hopr_elemInfo(3,1) + 1
+    nLocalSides = hopr_elemInfo(4,nLocalElems) - hopr_elemInfo(3,1)
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
@@ -1344,37 +1261,37 @@ CONTAINS
     ! ---- Done reading 3-D Mesh information ---- !
     ! Load hopr data into mesh data structure
 
-    CALL myMesh % Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
+    CALL this % Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
 
-    ! Copy data from local arrays into myMesh
-    myMesh % elemInfo % hostData = hopr_elemInfo % hostData
-    myMesh % nUniqueSides = nUniqueSides
-    myMesh % quadrature = UNIFORM
+    ! Copy data from local arrays into this
+    this % elemInfo = hopr_elemInfo
+    this % nUniqueSides = nUniqueSides
+    this % quadrature = UNIFORM
 
     ! Grab the node coordinates
-    DO eid = 1, myMesh % nElem
-      DO k = 0, nGeo
-        DO j = 0, nGeo
-          DO i = 0, nGeo
+    DO eid = 1, this % nElem
+      DO k = 1,nGeo+1
+        DO j = 1,nGeo+1
+          DO i = 1,nGeo+1
             nid = i+1 + (nGeo+1)*(j + (nGeo+1)*(k + (nGeo+1)*(eid-1)))
-            myMesh % nodeCoords % hostData(1:3,i,j,k,eid) = hopr_nodeCoords % hostData(1:3,nid)
-            myMesh % globalNodeIDs % hostData(i,j,k,eid) = hopr_globalNodeIDs % hostData(nid)
+            this % nodeCoords(1:3,i,j,k,eid) = hopr_nodeCoords(1:3,nid)
+            this % globalNodeIDs(i,j,k,eid) = hopr_globalNodeIDs(nid)
           ENDDO
         ENDDO
       ENDDO
     ENDDO
 
     iSide = 0 
-    DO eid = 1,myMesh % nElem
+    DO eid = 1,this % nElem
       DO lsid = 1,6
         iSide = iSide + 1
-        myMesh % sideInfo % hostData(1:5,lsid,eid) = hopr_sideInfo % hostData(1:5,iSide)
+        this % sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
       ENDDO
     ENDDO
 
-    CALL myMesh % RecalculateFlip()
+    CALL this % RecalculateFlip()
 
-    CALL myMesh % UpdateDevice()
+    CALL this % UpdateDevice()
 
     CALL hopr_elemInfo % Free()
     CALL hopr_nodeCoords % Free()
@@ -1383,252 +1300,33 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh3D
 
-  SUBROUTINE Write_Mesh3D(myMesh,meshFile)
+  SUBROUTINE Write_Mesh3D(this,meshFile)
     ! Writes mesh output in HOPR format (serial only)
     IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    CLASS(Mesh3D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
 
     CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL WriteAttribute_HDF5(fileId,'nElems',myMesh % nElem)
-    CALL WriteAttribute_HDF5(fileId,'Ngeo',myMesh % nGeo)
-    CALL WriteAttribute_HDF5(fileId,'nBCs',myMesh % nBCs)
+    CALL WriteAttribute_HDF5(fileId,'nElems',this % nElem)
+    CALL WriteAttribute_HDF5(fileId,'Ngeo',this % nGeo)
+    CALL WriteAttribute_HDF5(fileId,'nBCs',this % nBCs)
 
-    CALL WriteArray_HDF5(fileId,'BCType',myMesh % bcType)
-    CALL WriteArray_HDF5(fileId,'ElemInfo',myMesh % elemInfo)
+    CALL WriteArray_HDF5(fileId,'BCType',this % bcType)
+    CALL WriteArray_HDF5(fileId,'ElemInfo',this % elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId,'NodeCoords',myMesh % nodeCoords)
-    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',myMesh % globalNodeIDs)
+    CALL WriteArray_HDF5(fileId,'NodeCoords',this % nodeCoords)
+    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',this % globalNodeIDs)
 
     ! Read local subarray of SideInfo
-    CALL WriteArray_HDF5(fileId,'SideInfo',myMesh % sideInfo)
+    CALL WriteArray_HDF5(fileId,'SideInfo',this % sideInfo)
 
     CALL Close_HDF5(fileID)
 
   END SUBROUTINE Write_Mesh3D
-
-!  FUNCTION TransfiniteInterpolation_2D( interp, bCurves, iEl, a, b ) RESULT( P )
-!    ! TransfiniteInterpolation
-!    !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the
-!    !  bidirectional mapping at xi^1 = a, xi^2 = b, xi^3 = c. The boundary of the computational
-!    !  coordinate system is assumed to be at +/- 1 in each direction.
-!    !
-!    ! =============================================================================================== !
-!    ! DECLARATIONS
-!    IMPLICIT NONE
-!    REAL(prec) :: bCurves(1:2,1:4)
-!    INTEGER :: i,j
-!    REAL(prec) :: P(1:2)
-!    ! LOCAL
-!    REAL(prec)  :: P1(1:2), P2(1:2), P2(1:2)
-!    REAL(prec)  :: sSurf(1:2), nSurf(1:2), eSurf(1:2), wSurf(1:2)
-!    REAL(prec)  :: l1(1:2), l2(1:2), l2(1:2)
-!    REAL(prec)  :: ref(1:2)
-!    INTEGER     :: i, j, iSurf
-!
-!    ref = (/ -1.0_prec, 1.0_prec /)
-!
-!    ! Transfinite interpolation with linear blending USEs linear lagrange interpolating polynomials
-!    ! to blend the bounding surfaces.
-!    ! The linear blending weights in the first computational direction are calculated.
-!
-!    l1 = LinearBlend(a)
-!    l2 = LinearBlend(b)
-!    l3 = LinearBlend(c)
-!
-!    ! The bounding surfaces need to be evaluated at the provided computational coordinates
-!
-!    wSurf = bCurves(1:2,4)
-!    eSurf = bCurves(1:2,2)
-!    sSurf = bCurves(1:2,1)
-!    nSurf = bCurves(1:2,3)
-!
-!    ! P1 CONTAINS the interpolation in the first computational coordinate
-!    ! The first computational coordinate is assumed to vary between the (computational) east and
-!    ! west boundaries.
-!
-!    P1 = l1(1)*wSurf + l1(2)*eSurf
-!
-!    ! P2 CONTAINS the interpolation in the second computational coordinate
-!    ! The second computational coordinate is assumed to vary between the (computational) south and
-!    ! north boundaries.
-!
-!    P2 = l2(1)*sSurf + l2(2)*nSurf
-!
-!    ! P3 CONTAINS the interpolation in the first computational coordinate
-!    ! The first computational coordinate is assumed to vary between the (computational) bottom and
-!    ! top boundaries.
-!
-!    P3 = l3(1)*bSurf + l3(2)*tSurf
-!
-!    DO i = 1, 2
-!
-!      ! Now we need to compute the tensor product of the first and second computational direction
-!      ! interpolants and subtract from P1.
-!
-!      wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west + (iEl-1)*6 )
-!      eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east + (iEl-1)*6 )
-!      P1 = P1 - l2(i)*( wSurf*l1(1) + eSurf*l1(2) )
-!
-!      ! Now we need to compute the tensor product of the first and third computational direction
-!      ! interpolants and subtract from P1.
-!
-!      wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west + (iEl-1)*6 )
-!      eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east + (iEl-1)*6 )
-!
-!      P1 = P1 - l3(i)*( wSurf*l1(1) + eSurf*l1(2) )
-!
-!      ! Now we need to compute the tensor product of the second and third computational direction
-!      ! interpolants and subtract from P2.
-!
-!      sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south + (iEl-1)*6 )
-!      nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north + (iEl-1)*6 )
-!
-!      P2 = P2 - l3(i)*( sSurf*l2(1) + nSurf*l2(2) )
-!
-!    ENDDO
-!
-!    ! Next, the compounded tensor product is computed and added to P3.
-!    DO j = 1,2
-!      DO i = 1,2
-!
-!        wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west + (iEl-1)*6 )
-!        eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east + (iEl-1)*6 )
-!        P3 = P3 + l2(i)*l3(j)*( wSurf*l1(1) + eSurf*l1(2) )
-!
-!      ENDDO
-!    ENDDO
-!
-!    !Finally, the sum the interpolants is computed to yield the computational coordinate
-!    P = P1 + P2 + P3
-!
-!  END FUNCTION TransfiniteInterpolation_2D
-
-!  FUNCTION TransfiniteInterpolation( boundingSurfaces, iEl, a, b, c ) RESULT( P )
-!    ! TransfiniteInterpolation
-!    !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the
-!    !  bidirectional mapping at xi^1 = a, xi^2 = b, xi^3 = c. The boundary of the computational
-!    !  coordinate system is assumed to be at +/- 1 in each direction.
-!    !
-!    ! =============================================================================================== !
-!    ! DECLARATIONS
-!    IMPLICIT NONE
-!    TYPE( Surfaces )  :: boundingSurfaces
-!    INTEGER           :: iEl
-!    REAL(prec)       :: a, b, c
-!    REAL(prec)       :: P(1:3)
-!    ! LOCAL
-!    REAL(prec)  :: P1(1:3), P2(1:3), P3(1:3)
-!    REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
-!    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
-!    REAL(prec)  :: ref(1:2)
-!    INTEGER     :: i, j, iSurf
-!
-!    ref = (/ -1.0_prec, 1.0_prec /)
-!
-!    ! Transfinite interpolation with linear blending USEs linear lagrange interpolating polynomials
-!    ! to blend the bounding surfaces.
-!    ! The linear blending weights in the first computational direction are calculated.
-!
-!    l1 = LinearBlend( a )
-!    l2 = LinearBlend( b )
-!    l3 = LinearBlend( c )
-!
-!    ! The bounding surfaces need to be evaluated at the provided computational coordinates
-!
-!    wSurf = boundingSurfaces % Evaluate( (/b, c/), west + (iEl-1)*6 )   ! west
-!    eSurf = boundingSurfaces % Evaluate( (/b, c/), east + (iEl-1)*6 )   ! east
-!    sSurf = boundingSurfaces % Evaluate( (/a, c/), south + (iEl-1)*6 )  ! south
-!    nSurf = boundingSurfaces % Evaluate( (/a, c/), north + (iEl-1)*6 )  ! north
-!    bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
-!    tSurf = boundingSurfaces % Evaluate( (/a, b/), top + (iEl-1)*6 )    ! top
-!
-!    ! P1 CONTAINS the interpolation in the first computational coordinate
-!    ! The first computational coordinate is assumed to vary between the (computational) east and
-!    ! west boundaries.
-!
-!    P1 = l1(1)*wSurf + l1(2)*eSurf
-!
-!    ! P2 CONTAINS the interpolation in the second computational coordinate
-!    ! The second computational coordinate is assumed to vary between the (computational) south and
-!    ! north boundaries.
-!
-!    P2 = l2(1)*sSurf + l2(2)*nSurf
-!
-!    ! P3 CONTAINS the interpolation in the first computational coordinate
-!    ! The first computational coordinate is assumed to vary between the (computational) bottom and
-!    ! top boundaries.
-!
-!    P3 = l3(1)*bSurf + l3(2)*tSurf
-!
-!    DO i = 1, 2
-!
-!      ! Now we need to compute the tensor product of the first and second computational direction
-!      ! interpolants and subtract from P1.
-!
-!      wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west + (iEl-1)*6 )
-!      eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east + (iEl-1)*6 )
-!      P1 = P1 - l2(i)*( wSurf*l1(1) + eSurf*l1(2) )
-!
-!      ! Now we need to compute the tensor product of the first and third computational direction
-!      ! interpolants and subtract from P1.
-!
-!      wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west + (iEl-1)*6 )
-!      eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east + (iEl-1)*6 )
-!
-!      P1 = P1 - l3(i)*( wSurf*l1(1) + eSurf*l1(2) )
-!
-!      ! Now we need to compute the tensor product of the second and third computational direction
-!      ! interpolants and subtract from P2.
-!
-!      sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south + (iEl-1)*6 )
-!      nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north + (iEl-1)*6 )
-!
-!      P2 = P2 - l3(i)*( sSurf*l2(1) + nSurf*l2(2) )
-!
-!    ENDDO
-!
-!    ! Next, the compounded tensor product is computed and added to P3.
-!    DO j = 1,2
-!      DO i = 1,2
-!
-!        wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west + (iEl-1)*6 )
-!        eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east + (iEl-1)*6 )
-!        P3 = P3 + l2(i)*l3(j)*( wSurf*l1(1) + eSurf*l1(2) )
-!
-!      ENDDO
-!    ENDDO
-!
-!    !Finally, the sum the interpolants is computed to yield the computational coordinate
-!    P = P1 + P2 + P3
-!
-!  END FUNCTION TransfiniteInterpolation
-  ! FUNCTION Unidirectional(valLeft,valRight,a) RESULT(P)
-  !   !
-  !   ! =============================================================================================== !
-  !   ! DECLARATIONS
-  !   IMPLICIT NONE
-  !   REAL(prec) :: valLeft(1:3),valRight(1:3)
-  !   REAL(prec) :: a
-  !   REAL(prec) :: P(1:3)
-
-  !   P = 0.5_prec*((1.0_prec - a)*valLeft + (1.0_prec + a)*valRight)
-
-  ! END FUNCTION Unidirectional
-  ! FUNCTION LinearBlend(a) RESULT(weights)
-
-  !   IMPLICIT NONE
-  !   REAL(prec) :: a
-  !   REAL(prec) :: weights(1:2)
-
-  !   weights(1) = 0.5_prec*(1.0_prec - a)
-  !   weights(2) = 0.5_prec*(1.0_prec + a)
-
-  ! END FUNCTION LinearBlend
 
   SUBROUTINE Init_MPILayer(this,enableMPI)
 #undef __FUNC__
@@ -1691,10 +1389,10 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MPILayer),INTENT(inout) :: this
 
-    IF (ASSOCIATED(this % offSetElem % hostData)) THEN
+    IF (ASSOCIATED(this % offSetElem)) THEN
       CALL this % offSetElem % Free()
     ENDIF
-    IF (ASSOCIATED(this % elemToRank % hostData)) THEN
+    IF (ASSOCIATED(this % elemToRank)) THEN
       CALL this % elemToRank % Free()
     ENDIF
 
@@ -1737,8 +1435,8 @@ CONTAINS
     CALL this % SetMaxMsg(maxMsg)
 
     WRITE (msg,'(I5)') this % rankId
-    WRITE (msg2,'(I5)') this % offSetElem % hostData(this % rankId + 1)-&
-                        this % offSetElem % hostData(this % rankId)
+    WRITE (msg2,'(I5)') this % offSetElem(this % rankId + 1)-&
+                        this % offSetElem(this % rankId)
     msg = "Rank "//TRIM(msg)//": nElem = "//TRIM(msg2)
     INFO(TRIM(msg))
 
@@ -1771,13 +1469,13 @@ CONTAINS
 
     CALL DomainDecomp(nElem, &
                       this % nRanks, &
-                      this % offSetElem % hostData)
+                      this % offSetElem)
 
     DO iel = 1,nElem
       CALL ElemToRank(this % nRanks, &
-                      this % offSetElem % hostData, &
+                      this % offSetElem, &
                       iel, &
-                      this % elemToRank % hostData(iel))
+                      this % elemToRank(iel))
     END DO
 
     CALL this % offSetElem % UpdateDevice()

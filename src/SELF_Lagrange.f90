@@ -115,24 +115,20 @@ module SELF_Lagrange
     generic,public :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
     procedure,private :: ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
 
-    GENERIC,PUBLIC :: ScalarBoundaryInterp_3D => ScalarBoundaryInterp_3D_cpu,ScalarBoundaryInterp_3D_gpu
-    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_3D_cpu,ScalarBoundaryInterp_3D_gpu
+    generic,public :: ScalarBoundaryInterp_3D => ScalarBoundaryInterp_3D_cpu,ScalarBoundaryInterp_3D_gpu
+    procedure,private :: ScalarBoundaryInterp_3D_cpu,ScalarBoundaryInterp_3D_gpu
 
     generic,public :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
     procedure,private :: VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
 
-    GENERIC,PUBLIC :: VectorBoundaryInterp_3D => VectorBoundaryInterp_3D_cpu,VectorBoundaryInterp_3D_gpu
-    PROCEDURE,PRIVATE :: VectorBoundaryInterp_3D_cpu,VectorBoundaryInterp_3D_gpu
+    generic,public :: VectorBoundaryInterp_3D => VectorBoundaryInterp_3D_cpu,VectorBoundaryInterp_3D_gpu
+    procedure,private :: VectorBoundaryInterp_3D_cpu,VectorBoundaryInterp_3D_gpu
 
-    ! GENERIC,PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
-    ! PROCEDURE,PRIVATE :: TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
+    generic,public :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
+    procedure,private :: TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
 
-
-
-
-
-    ! GENERIC,PUBLIC :: TensorBoundaryInterp_3D => TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
-    ! PROCEDURE,PRIVATE :: TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
+    generic,public :: TensorBoundaryInterp_3D => TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
+    procedure,private :: TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
 
     generic,public :: Derivative_1D => Derivative_1D_cpu,Derivative_1D_gpu
     procedure,private :: Derivative_1D_cpu,Derivative_1D_gpu
@@ -146,8 +142,8 @@ module SELF_Lagrange
     generic,public :: ScalarGradient_3D => ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
     procedure,private :: ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
 
-    ! GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
-    ! PROCEDURE,PRIVATE :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
+    generic,public :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
+    procedure,private :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
 
     generic,public :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     procedure,private :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
@@ -155,11 +151,11 @@ module SELF_Lagrange
     ! GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
     ! PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
 
-    ! GENERIC,PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu,VectorGradient_3D_gpu
-    ! PROCEDURE,PRIVATE :: VectorGradient_3D_cpu,VectorGradient_3D_gpu
+    generic,public :: VectorGradient_3D => VectorGradient_3D_cpu,VectorGradient_3D_gpu
+    procedure,private :: VectorGradient_3D_cpu,VectorGradient_3D_gpu
 
-    GENERIC,PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
+    generic,public :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
+    procedure,private :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
 
     ! GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
@@ -192,47 +188,45 @@ module SELF_Lagrange
     end subroutine VectorBoundaryInterp_2D_gpu_wrapper
   end interface
 
-INTERFACE
-  SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-    bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
-    USE iso_c_binding
-    IMPLICIT NONE
-    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
-    INTEGER(C_INT),VALUE :: N,nVar,nEl
-  END SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper
-END INTERFACE
+  interface
+    subroutine VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+      bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine VectorBoundaryInterp_3D_gpu_wrapper
+  end interface
 
-! INTERFACE
-!   SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-!     bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
-!     USE iso_c_binding
-!     IMPLICIT NONE
-!     TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
-!     INTEGER(C_INT),VALUE :: N,nVar,nEl
-!   END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
-! END INTERFACE
+  interface
+    subroutine TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+      bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine TensorBoundaryInterp_2D_gpu_wrapper
+  end interface
 
- INTERFACE
-  SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-    bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
-    USE iso_c_binding
-    IMPLICIT NONE
-    TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
-    INTEGER(C_INT),VALUE :: N,nVar,nEl
-  END SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper
-END INTERFACE
+  interface
+    subroutine ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+      bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine ScalarBoundaryInterp_3D_gpu_wrapper
+  end interface
 
-
-
-! INTERFACE
-!   SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-!     bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
-!     USE iso_c_binding
-!     IMPLICIT NONE
-!     TYPE(c_ptr), value :: bMatrix_dev,f_dev,fBound_dev
-!     INTEGER(C_INT),VALUE :: N,nVar,nEl
-!   END SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper
-! END INTERFACE
+  interface
+    subroutine TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+      bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine TensorBoundaryInterp_3D_gpu_wrapper
+  end interface
 
 contains
 
@@ -1324,7 +1318,7 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
 
               df1 = 0.0_prec
               df2 = 0.0_prec
-              df3 =  0.0_prec
+              df3 = 0.0_prec
               do ii = 1,this % N + 1
                 df1 = df1 + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar)
                 df2 = df2 + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar)
@@ -1360,6 +1354,146 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
     dfloc => null()
 
   end subroutine ScalarGradient_3D_gpu
+
+  subroutine VectorGradient_2D_cpu(this,f,gradF,nvars,nelems)
+    ! Input : Vector(1:2,...)
+    ! Output : Tensor(1:2,1:2,....)
+    !          > Tensor(1,1) = d/ds1( Vector(1,...) )
+    !          > Tensor(2,1) = d/ds1( Vector(2,...) )
+    !          > Tensor(1,2) = d/ds2( Vector(1,...) )
+    !          > Tensor(2,2) = d/ds2( Vector(2,...) )
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out) :: gradF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
+    ! Local
+    integer    :: i,j,ii,idir,iel,ivar
+    real(prec) :: dfds1,dfds2
+
+    do idir = 1,2
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfds1 = 0.0_prec
+              dfds2 = 0.0_prec
+              do ii = 1,this % N + 1
+                dfds1 = dfds1 + this % dMatrix(ii,i)*f(ii,j,iel,ivar,idir)
+                dfds2 = dfds2 + this % dMatrix(ii,j)*f(i,ii,iel,ivar,idir)
+              end do
+              gradf(i,j,iel,ivar,idir,1) = dfds1
+              gradf(i,j,iel,ivar,idir,2) = dfds2
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine VectorGradient_2D_cpu
+
+  subroutine VectorGradient_2D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
+    type(c_ptr),intent(inout) :: hipblas_handle
+    ! local
+    real(prec),pointer :: dfloc(:,:,:,:)
+    real(prec),pointer :: floc(:,:,:,:)
+    integer :: idir
+
+    do idir = 1,2
+      floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir)
+
+      dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,1)
+      call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+
+      dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,2)
+  call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+
+    end do
+
+    dfloc => null()
+
+  end subroutine VectorGradient_2D_gpu
+
+  subroutine VectorGradient_3D_cpu(this,f,gradF,nvars,nelems)
+    ! Input : Vector(1:3,...)
+    ! Output : Tensor(1:3,1:3,....)
+    !          > Tensor(1,1) = d/ds1( Vector(1,...) )
+    !          > Tensor(2,1) = d/ds1( Vector(2,...) )
+    !          > Tensor(1,2) = d/ds2( Vector(1,...) )
+    !          > Tensor(2,2) = d/ds2( Vector(2,...) )
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out) :: gradF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
+    ! Local
+    integer    :: i,j,k,ii,idir,iel,ivar
+    real(prec) :: dfds1,dfds2,dfds3
+
+    do idir = 1,3
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
+
+                dfds1 = 0.0_prec
+                dfds2 = 0.0_prec
+                dfds3 = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfds1 = dfds1 + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar,idir)
+                  dfds2 = dfds2 + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar,idir)
+                  dfds3 = dfds3 + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar,idir)
+                end do
+                gradf(i,j,k,iel,ivar,idir,1) = dfds1
+                gradf(i,j,k,iel,ivar,idir,2) = dfds2
+                gradf(i,j,k,iel,ivar,idir,3) = dfds3
+
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine VectorGradient_3D_cpu
+
+  subroutine VectorGradient_3D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:,:)
+    type(c_ptr),intent(inout) :: hipblas_handle
+    ! local
+    real(prec),pointer :: dfloc(:,:,:,:,:)
+    real(prec),pointer :: floc(:,:,:,:,:)
+    integer :: idir
+
+    do idir = 1,3
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir)
+
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,1)
+      call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,2)
+  call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,3)
+  call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+
+    end do
+
+    dfloc => null()
+
+  end subroutine VectorGradient_3D_gpu
 ! ! !
 ! !
 !   ! SUBROUTINE ScalarDGGradient_2D_cpu(this,f,bf,gradF,nvars,nelems)
@@ -1687,7 +1821,7 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
 
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k  = 1, this % N + 1
+        do k = 1,this % N + 1
           do j = 1,this % N + 1
             do i = 1,this % N + 1
 
@@ -1705,7 +1839,7 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
 
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k  = 1, this % N + 1
+        do k = 1,this % N + 1
           do j = 1,this % N + 1
             do i = 1,this % N + 1
 
@@ -2051,7 +2185,7 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),intent(in)      :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
-    real(prec),intent(out)     :: fTarget(1:this % N + 1,1:this % N +1 ,1:6,1:nelems,1:nvars)
+    real(prec),intent(out)     :: fTarget(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars)
     ! Local
     integer :: i,j,ii,iel,ivar
     real(prec) :: fb(1:6)
@@ -2190,6 +2324,106 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
                                              this % N,nvars,nelems)
 
   end subroutine VectorBoundaryInterp_3D_gpu
+
+  subroutine TensorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out)  :: fTarget(1:this % N + 1,1:4,1:nelems,1:nvars,1:2,1:2)
+    ! Local
+    integer :: i,ii,idir,jdir,iel,ivar
+    real(prec) :: fb(1:4)
+
+    do jdir = 1,2
+      do idir = 1,2
+        do ivar = 1,nvars
+          do iel = 1,nelems
+            do i = 1,this % N + 1
+
+              fb(1:4) = 0.0_prec
+              do ii = 1,this % N + 1
+                fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,ii,iel,ivar,idir,jdir) ! South
+                fb(2) = fb(2) + this % bMatrix(ii,2)*f(ii,i,iel,ivar,idir,jdir) ! East
+                fb(3) = fb(3) + this % bMatrix(ii,2)*f(i,ii,iel,ivar,idir,jdir) ! North
+                fb(4) = fb(4) + this % bMatrix(ii,1)*f(ii,i,iel,ivar,idir,jdir) ! West
+              end do
+
+              fTarget(i,1:4,iel,ivar,idir,jdir) = fb(1:4)
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine TensorBoundaryInterp_2D_cpu
+
+  subroutine TensorBoundaryInterp_2D_gpu(this,f,fTarget,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),pointer,intent(in)  :: f(:,:,:,:,:,:)
+    real(prec),pointer,intent(inout)  :: fTarget(:,:,:,:,:,:)
+    type(c_ptr),intent(in) :: handle
+
+    call TensorBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget), &
+                                             this % N,nvars,nelems)
+
+  end subroutine TensorBoundaryInterp_2D_gpu
+
+  subroutine TensorBoundaryInterp_3D_cpu(this,f,fTarget,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out)  :: fTarget(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars,1:3,1:3)
+    ! Local
+    integer :: i,j,ii,idir,jdir,iel,ivar
+    real(prec) :: fb(1:6)
+
+    do jdir = 1,3
+      do idir = 1,3
+        do ivar = 1,nvars
+          do iel = 1,nelems
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
+
+                fb(1:6) = 0.0_prec
+                do ii = 1,this % N + 1
+                  fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fb(2) = fb(2) + this % bMatrix(ii,1)*f(i,ii,j,iel,ivar,idir,jdir) ! South
+                  fb(3) = fb(3) + this % bMatrix(ii,2)*f(ii,i,j,iel,ivar,idir,jdir) ! East
+                  fb(4) = fb(4) + this % bMatrix(ii,2)*f(i,ii,j,iel,ivar,idir,jdir) ! North
+                  fb(5) = fb(5) + this % bMatrix(ii,1)*f(ii,i,j,iel,ivar,idir,jdir) ! West
+                  fb(6) = fb(6) + this % bMatrix(ii,2)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                end do
+
+                fTarget(i,j,1:6,iel,ivar,idir,jdir) = fb(1:6)
+
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine TensorBoundaryInterp_3D_cpu
+
+  subroutine TensorBoundaryInterp_3D_gpu(this,f,fTarget,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)  :: nvars,nelems
+    real(prec),pointer,intent(in)  :: f(:,:,:,:,:,:,:)
+    real(prec),pointer,intent(inout)  :: fTarget(:,:,:,:,:,:,:)
+    type(c_ptr),intent(in) :: handle
+
+    call TensorBoundaryInterp_3D_gpu_wrapper(c_loc(this % bMatrix), &
+                                             c_loc(f),c_loc(fTarget), &
+                                             this % N,nvars,nelems)
+
+  end subroutine TensorBoundaryInterp_3D_gpu
 
   ! subroutine TensorBoundaryInterp_2D_cpu(this,f,fTarget,nvars,nelems)
   !   implicit none

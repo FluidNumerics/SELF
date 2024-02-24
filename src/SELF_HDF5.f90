@@ -7,7 +7,6 @@
 MODULE SELF_HDF5
 
   USE SELF_Constants
-  USE SELF_Memory
   USE ISO_FORTRAN_ENV
   USE HDF5
 
@@ -131,7 +130,7 @@ CONTAINS
 
     IF (error == -1) THEN
       PRINT *, 'Failed to open '//TRIM(fileName)//'.'
-      STOP - 1
+      STOP -1
     END IF
 
   END SUBROUTINE Open_HDF5_serial
@@ -160,7 +159,7 @@ CONTAINS
 
     IF (error == -1) THEN
       PRINT *, 'Failed to open '//TRIM(fileName)//'.'
-      STOP - 1
+      STOP -1
     END IF
 
   END SUBROUTINE Open_HDF5_parallel
@@ -346,7 +345,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r1),INTENT(in) :: hfArray
+    real(prec), dimension(:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -354,16 +353,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -374,7 +373,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r2),INTENT(in) :: hfArray
+    real(prec), dimension(:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -382,16 +381,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -402,7 +401,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r3),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -410,16 +409,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -430,7 +429,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r4),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -438,8 +437,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
@@ -447,7 +446,7 @@ CONTAINS
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -458,7 +457,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r5),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:,:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -466,15 +465,15 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,memspace,dsetId,error)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -485,7 +484,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r6),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:,:,:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -493,15 +492,15 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,memspace,dsetId,error)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -512,7 +511,7 @@ CONTAINS
   !   IMPLICIT NONE
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
-  !   TYPE(hfReal_r7),INTENT(in) :: hfArray
+  !   real(prec), dimension(:,:,:,:,:,:,:),INTENT(in) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: dsetId
   !   INTEGER(HID_T) :: memspace
@@ -520,16 +519,16 @@ CONTAINS
   !   INTEGER :: error
   !   INTEGER :: aRank
 
-  !   aRank = RANK(hfArray % hostData)
+  !   aRank = RANK(hfArray)
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
   !   CALL h5screate_simple_f(aRank,dims,memspace,error)
 
   !   CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,memspace, &
   !                    dsetId,error)
 
   !   CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
-  !                   hfArray % hostData,dims,error)
+  !                   hfArray,dims,error)
 
   !   CALL h5dclose_f(dSetId,error)
   !   CALL h5sclose_f(memspace,error)
@@ -540,7 +539,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfint32_r1),INTENT(in) :: hfArray
+    integer(int32), dimension(:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -548,16 +547,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -568,7 +567,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfint32_r2),INTENT(in) :: hfArray
+    integer(int32), dimension(:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -576,16 +575,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -596,7 +595,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfint32_r3),INTENT(in) :: hfArray
+    integer(int32), dimension(:,:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -604,16 +603,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -624,7 +623,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfint32_r4),INTENT(in) :: hfArray
+    integer(int32), dimension(:,:,:,:),INTENT(in) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: memspace
@@ -632,16 +631,16 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
 
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,memspace, &
                      dsetId,error)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
-                    hfArray % hostData,dims,error)
+                    hfArray,dims,error)
 
     CALL h5dclose_f(dSetId,error)
     CALL h5sclose_f(memspace,error)
@@ -653,7 +652,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1)
-    TYPE(hfReal_r1),INTENT(in) :: hfArray
+    real(prec), dimension(:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -664,8 +663,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -680,7 +679,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -699,7 +698,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:2)
-    TYPE(hfReal_r2),INTENT(in) :: hfArray
+    real(prec), dimension(:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:2)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -710,8 +709,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -726,7 +725,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -745,7 +744,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:3)
-    TYPE(hfReal_r3),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:3)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -756,8 +755,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -772,7 +771,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -791,7 +790,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:4)
-    TYPE(hfReal_r4),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:4)
 
     ! Local
@@ -803,8 +802,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -819,7 +818,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -838,7 +837,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:5)
-    TYPE(hfReal_r5),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:,:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:5)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -849,8 +848,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -865,7 +864,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -884,7 +883,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:6)
-    TYPE(hfReal_r6),INTENT(in) :: hfArray
+    real(prec), dimension(:,:,:,:,:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:6)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -895,8 +894,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -911,7 +910,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -930,7 +929,7 @@ CONTAINS
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
   !   INTEGER(HID_T),INTENT(in) :: offset(1:7)
-  !   TYPE(hfReal_r7),INTENT(in) :: hfArray
+  !   real(prec), dimension(:,:,:,:,:,:,:),INTENT(in) :: hfArray
   !   INTEGER(HID_T),INTENT(in) :: globalDims(1:7)
   !   ! Local
   !   INTEGER(HID_T) :: plistId
@@ -941,8 +940,8 @@ CONTAINS
   !   INTEGER :: error
   !   INTEGER :: aRank
 
-  !   aRank = RANK(hfArray % hostData)
-  !   dims = SHAPE(hfArray % hostData)
+  !   aRank = RANK(hfArray)
+  !   dims = SHAPE(hfArray)
 
   !   CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
   !   CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -957,7 +956,7 @@ CONTAINS
   !                              offset,&
   !                              dims,&
   !                              error)
-  !   CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+  !   CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
   !   IF( error /= 0 )THEN
   !     PRINT*, 'Failure to write dataset'
@@ -976,7 +975,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1)
-    TYPE(hfint32_r1),INTENT(in) :: hfArray
+    integer(int32), dimension(:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -987,8 +986,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -1003,7 +1002,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -1022,7 +1021,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:2)
-    TYPE(hfint32_r2),INTENT(in) :: hfArray
+    integer(int32), dimension(:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:2)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -1033,8 +1032,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -1049,7 +1048,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -1068,7 +1067,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:3)
-    TYPE(hfint32_r3),INTENT(in) :: hfArray
+    integer(int32), dimension(:,:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:3)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -1079,8 +1078,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -1095,7 +1094,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -1114,7 +1113,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:4)
-    TYPE(hfint32_r4),INTENT(in) :: hfArray
+    integer(int32), dimension(:,:,:,:),INTENT(in) :: hfArray
     INTEGER(HID_T),INTENT(in) :: globalDims(1:4)
     ! Local
     INTEGER(HID_T) :: plistId
@@ -1125,8 +1124,8 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
-    dims = SHAPE(hfArray % hostData)
+    aRank = RANK(hfArray)
+    dims = SHAPE(hfArray)
 
     CALL h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_INDEPENDENT_F,error)
@@ -1141,7 +1140,7 @@ CONTAINS
                                offset,&
                                dims,&
                                error)
-    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray % hostData,dims,error,memspace,filespace,plistId)
+    CALL h5dwrite_f(dsetId,HDF5_IO_PREC,hfArray,dims,error,memspace,filespace,plistId)
 
     IF( error /= 0 )THEN
       PRINT*, 'Failure to write dataset'
@@ -1190,17 +1189,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r1),INTENT(inout) :: hfArray
+    real(prec), dimension(:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1210,17 +1209,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r2),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1:2)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1230,17 +1229,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r3),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1:3)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1250,17 +1249,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r4),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1:4)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1270,17 +1269,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r5),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1:5)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1290,17 +1289,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfReal_r6),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:,:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1:6)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1310,17 +1309,17 @@ CONTAINS
   !   IMPLICIT NONE
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
-  !   TYPE(hfReal_r7),INTENT(inout) :: hfArray
+  !   real(prec), dimension(:,:,:,:,:,:,:),INTENT(inout) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: dsetId
   !   INTEGER(HID_T) :: dims(1:7)
   !   INTEGER :: error
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
 
   !   CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-  !   CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
+  !   CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
   !   CALL h5dclose_f(dsetId,error)
 
@@ -1330,18 +1329,18 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfInt32_r1),INTENT(inout) :: hfArray
+    integer(int32), dimension(:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1351,17 +1350,17 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
-    TYPE(hfInt32_r2),INTENT(inout) :: hfArray
+    integer(int32), dimension(:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
     INTEGER(HID_T) :: dims(1:2)
     INTEGER :: error
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray,dims,error)
 
     CALL h5dclose_f(dsetId,error)
 
@@ -1371,17 +1370,17 @@ CONTAINS
   !   IMPLICIT NONE
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
-  !   TYPE(hfInt32_r3),INTENT(inout) :: hfArray
+  !   integer(int32), dimension(:,:,:),INTENT(inout) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: dsetId
   !   INTEGER(HID_T) :: dims(1:3)
   !   INTEGER :: error
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
 
   !   CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-  !   CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
+  !   CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray,dims,error)
 
   !   CALL h5dclose_f(dsetId,error)
 
@@ -1391,17 +1390,17 @@ CONTAINS
   !   IMPLICIT NONE
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
-  !   TYPE(hfInt32_r4),INTENT(inout) :: hfArray
+  !   integer(int32), dimension(:,:,:,:),INTENT(inout) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: dsetId
   !   INTEGER(HID_T) :: dims(1:4)
   !   INTEGER :: error
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
 
   !   CALL h5dopen_f(fileId,arrayName,dsetId,error)
 
-  !   CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
+  !   CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray,dims,error)
 
   !   CALL h5dclose_f(dsetId,error)
 
@@ -1412,7 +1411,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1)
-    TYPE(hfReal_r1),INTENT(inout) :: hfArray
+    real(prec), dimension(:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1423,9 +1422,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1434,7 +1433,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1450,7 +1449,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:2)
-    TYPE(hfReal_r2),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1461,9 +1460,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1472,7 +1471,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1488,7 +1487,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:3)
-    TYPE(hfReal_r3),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1499,9 +1498,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1510,7 +1509,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1526,7 +1525,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:4)
-    TYPE(hfReal_r4),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1537,9 +1536,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1548,7 +1547,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1564,7 +1563,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:5)
-    TYPE(hfReal_r5),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1575,9 +1574,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1586,7 +1585,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1602,7 +1601,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:6)
-    TYPE(hfReal_r6),INTENT(inout) :: hfArray
+    real(prec), dimension(:,:,:,:,:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1613,9 +1612,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1624,7 +1623,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1640,7 +1639,7 @@ CONTAINS
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
   !   INTEGER(HID_T),INTENT(in) :: offset(1:7)
-  !   TYPE(hfReal_r7),INTENT(inout) :: hfArray
+  !   real(prec), dimension(:,:,:,:,:,:,:),INTENT(inout) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: plistId
   !   INTEGER(HID_T) :: dsetId
@@ -1651,9 +1650,9 @@ CONTAINS
   !   INTEGER :: error
   !   INTEGER :: aRank
 
-  !   aRank = RANK(hfArray % hostData)
+  !   aRank = RANK(hfArray)
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
   !   CALL h5screate_simple_f(aRank,dims,memspace,error)
   !   CALL h5dopen_f(fileId,arrayName,dsetId,error)
   !   CALL h5dget_space_f(dsetId,filespace,error)
@@ -1662,7 +1661,7 @@ CONTAINS
   !   CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
   !   CALL h5dget_type_f(dsetId,dtypeId,error)
 
-  !   CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+  !   CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
   !                  error,memspace,filespace,plistId)
 
   !   CALL h5tclose_f(dtypeId,error)
@@ -1678,7 +1677,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1)
-    TYPE(hfInt32_r1),INTENT(inout) :: hfArray
+    integer(int32), dimension(:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1689,9 +1688,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(1,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1700,7 +1699,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1716,7 +1715,7 @@ CONTAINS
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: arrayName
     INTEGER(HID_T),INTENT(in) :: offset(1:2)
-    TYPE(hfInt32_r2),INTENT(inout) :: hfArray
+    integer(int32), dimension(:,:),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: plistId
     INTEGER(HID_T) :: dsetId
@@ -1727,9 +1726,9 @@ CONTAINS
     INTEGER :: error
     INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    aRank = RANK(hfArray)
 
-    dims = SHAPE(hfArray % hostData)
+    dims = SHAPE(hfArray)
     CALL h5screate_simple_f(aRank,dims,memspace,error)
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
     CALL h5dget_space_f(dsetId,filespace,error)
@@ -1738,7 +1737,7 @@ CONTAINS
     CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
     CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+    CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
                    error,memspace,filespace,plistId)
 
     CALL h5tclose_f(dtypeId,error)
@@ -1754,7 +1753,7 @@ CONTAINS
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
   !   INTEGER(HID_T),INTENT(in) :: offset(1:3)
-  !   TYPE(hfInt32_r3),INTENT(inout) :: hfArray
+  !   integer(int32), dimension(:,:,:),INTENT(inout) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: plistId
   !   INTEGER(HID_T) :: dsetId
@@ -1765,9 +1764,9 @@ CONTAINS
   !   INTEGER :: error
   !   INTEGER :: aRank
 
-  !   aRank = RANK(hfArray % hostData)
+  !   aRank = RANK(hfArray)
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
   !   CALL h5screate_simple_f(aRank,dims,memspace,error)
   !   CALL h5dopen_f(fileId,arrayName,dsetId,error)
   !   CALL h5dget_space_f(dsetId,filespace,error)
@@ -1776,7 +1775,7 @@ CONTAINS
   !   CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
   !   CALL h5dget_type_f(dsetId,dtypeId,error)
 
-  !   CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+  !   CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
   !                  error,memspace,filespace,plistId)
 
   !   CALL h5tclose_f(dtypeId,error)
@@ -1792,7 +1791,7 @@ CONTAINS
   !   INTEGER(HID_T),INTENT(in) :: fileId
   !   CHARACTER(*),INTENT(in) :: arrayName
   !   INTEGER(HID_T),INTENT(in) :: offset(1:4)
-  !   TYPE(hfInt32_r4),INTENT(inout) :: hfArray
+  !   integer(int32), dimension(:,:,:,:),INTENT(inout) :: hfArray
   !   ! Local
   !   INTEGER(HID_T) :: plistId
   !   INTEGER(HID_T) :: dsetId
@@ -1803,9 +1802,9 @@ CONTAINS
   !   INTEGER :: error
   !   INTEGER :: aRank
 
-  !   aRank = RANK(hfArray % hostData)
+  !   aRank = RANK(hfArray)
 
-  !   dims = SHAPE(hfArray % hostData)
+  !   dims = SHAPE(hfArray)
   !   CALL h5screate_simple_f(aRank,dims,memspace,error)
   !   CALL h5dopen_f(fileId,arrayName,dsetId,error)
   !   CALL h5dget_space_f(dsetId,filespace,error)
@@ -1814,7 +1813,7 @@ CONTAINS
   !   CALL h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
   !   CALL h5dget_type_f(dsetId,dtypeId,error)
 
-  !   CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims, &
+  !   CALL h5dread_f(dsetId,dtypeId,hfArray,dims, &
   !                  error,memspace,filespace,plistId)
 
   !   CALL h5tclose_f(dtypeId,error)
