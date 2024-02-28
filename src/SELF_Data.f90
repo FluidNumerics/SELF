@@ -169,7 +169,10 @@ module SELF_Data
     procedure,private :: BoundaryInterp_Vector2D_cpu
     procedure,private :: BoundaryInterp_Vector2D_gpu
 
-    ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector2D
+    generic,public :: GridInterp => GridInterp_Vector2D_cpu!,GridInterp_Vector2D_gpu
+    procedure,private :: GridInterp_Vector2D_cpu
+    !procedure,private :: GridInterp_Vector2D_gpu
+
     generic,public :: Gradient => Gradient_Vector2D_gpu,Gradient_Vector2D_cpu
     procedure,private :: Gradient_Vector2D_gpu
     procedure,private :: Gradient_Vector2D_cpu
@@ -204,7 +207,9 @@ module SELF_Data
     procedure,private :: BoundaryInterp_Vector3D_cpu
     procedure,private :: BoundaryInterp_Vector3D_gpu
 
-    ! PROCEDURE,PUBLIC :: GridInterp => GridInterp_Vector3D
+    generic,public :: GridInterp => GridInterp_Vector3D_cpu!,GridInterp_Vector3D_gpu
+    procedure,private :: GridInterp_Vector3D_cpu
+    !procedure,private :: GridInterp_Vector3D_gpu
 
     generic,public :: Gradient => Gradient_Vector3D_gpu,Gradient_Vector3D_cpu
     procedure,private :: Gradient_Vector3D_gpu
@@ -393,52 +398,52 @@ contains
 
   end subroutine BoundaryInterp_Scalar1D_gpu
 
-  subroutine GridInterp_Scalar1D_cpu(this,SELFout)
+  subroutine GridInterp_Scalar1D_cpu(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: SELFOut
+    type(Scalar1D),intent(inout) :: that
 
     call this % interp % ScalarGridInterp_1D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem)
 
   end subroutine GridInterp_Scalar1D_cpu
 
-  subroutine GridInterp_Scalar1D_gpu(this,SELFout,hipblas_handle)
+  subroutine GridInterp_Scalar1D_gpu(this,that,hipblas_handle)
     implicit none
     class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: SELFOut
+    type(Scalar1D),intent(inout) :: that
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % ScalarGridInterp_1D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
 
   end subroutine GridInterp_Scalar1D_gpu
 
-  subroutine Derivative_Scalar1D_cpu(this,SELFOut)
+  subroutine Derivative_Scalar1D_cpu(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: SELFOut
+    type(Scalar1D),intent(inout) :: that
 
     call this % interp % Derivative_1D(this % interior, &
-                                       SELFout % interior, &
+                                       that % interior, &
                                        this % nVar, &
                                        this % nElem)
 
   end subroutine Derivative_Scalar1D_cpu
 
-  subroutine Derivative_Scalar1D_gpu(this,SELFOut,hipblas_handle)
+  subroutine Derivative_Scalar1D_gpu(this,that,hipblas_handle)
     implicit none
     class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: SELFOut
+    type(Scalar1D),intent(inout) :: that
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % Derivative_1D(this % interior, &
-                                       SELFout % interior, &
+                                       that % interior, &
                                        this % nVar, &
                                        this % nElem, &
                                        hipblas_handle)
@@ -585,27 +590,27 @@ contains
 
   end subroutine BoundaryInterp_Scalar2D_gpu
 
-  subroutine GridInterp_Scalar2D_cpu(this,SELFout)
+  subroutine GridInterp_Scalar2D_cpu(this,that)
     implicit none
     class(Scalar2D),intent(in) :: this
-    type(Scalar2D),intent(inout) :: SELFOut
+    type(Scalar2D),intent(inout) :: that
 
     call this % interp % ScalarGridInterp_2D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem)
 
   end subroutine GridInterp_Scalar2D_cpu
 
-  subroutine GridInterp_Scalar2D_gpu(this,SELFout,hipblas_handle)
+  subroutine GridInterp_Scalar2D_gpu(this,that,hipblas_handle)
     implicit none
     class(Scalar2D),intent(inout) :: this
-    type(Scalar2D),intent(inout) :: SELFOut
+    type(Scalar2D),intent(inout) :: that
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % ScalarGridInterp_2D(this % interior, &
                                              this % interpWork, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
@@ -782,28 +787,28 @@ contains
 
   end subroutine BoundaryInterp_Scalar3D_gpu
 
-  subroutine GridInterp_Scalar3D_cpu(this,SELFout)
+  subroutine GridInterp_Scalar3D_cpu(this,that)
     implicit none
     class(Scalar3D),intent(in) :: this
-    type(Scalar3D),intent(inout) :: SELFOut
+    type(Scalar3D),intent(inout) :: that
 
     call this % interp % ScalarGridInterp_3D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem)
 
   end subroutine GridInterp_Scalar3D_cpu
 
-  subroutine GridInterp_Scalar3D_gpu(this,SELFout,hipblas_handle)
+  subroutine GridInterp_Scalar3D_gpu(this,that,hipblas_handle)
     implicit none
     class(Scalar3D),intent(inout) :: this
-    type(Scalar3D),intent(inout) :: SELFOut
+    type(Scalar3D),intent(inout) :: that
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % ScalarGridInterp_3D(this % interior, &
                                              this % interpWork1, &
                                              this % interpWork2, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
@@ -968,6 +973,18 @@ contains
 
   end subroutine UpdateDevice_Vector2D
 
+  subroutine GridInterp_Vector2D_cpu(this,that)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    type(Vector2D),intent(inout) :: that
+
+    call this % interp % VectorGridInterp_2D(this % interior, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem)
+
+  end subroutine GridInterp_Vector2D_cpu
+
   subroutine BoundaryInterp_Vector2D_cpu(this)
     implicit none
     class(Vector2D),intent(inout) :: this
@@ -992,25 +1009,6 @@ contains
 
   end subroutine BoundaryInterp_Vector2D_gpu
 
-!   SUBROUTINE GridInterp_Vector2D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(in) :: this
-!     TYPE(Vector2D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGridInterp_2D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     ELSE
-!       CALL this % interp % VectorGridInterp_2D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     END IF
-
-!   END SUBROUTINE GridInterp_Vector2D
   subroutine Gradient_Vector2D_cpu(this,df)
     implicit none
     class(Vector2D),intent(in) :: this
@@ -1037,26 +1035,26 @@ contains
 
   end subroutine Gradient_Vector2D_gpu
 
-  subroutine Divergence_Vector2D_cpu(this,SELFOut)
+  subroutine Divergence_Vector2D_cpu(this,that)
     implicit none
     class(Vector2D),intent(in) :: this
-    type(Scalar2D),intent(inout) :: SELFOut
+    type(Scalar2D),intent(inout) :: that
 
     call this % interp % VectorDivergence_2D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem)
 
   end subroutine Divergence_Vector2D_cpu
 
-  subroutine Divergence_Vector2D_gpu(this,SELFOut,hipblas_handle)
+  subroutine Divergence_Vector2D_gpu(this,that,hipblas_handle)
     implicit none
     class(Vector2D),intent(in) :: this
-    type(Scalar2D),intent(inout) :: SELFOut
+    type(Scalar2D),intent(inout) :: that
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % VectorDivergence_2D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
@@ -1194,6 +1192,18 @@ contains
 
   end subroutine UpdateDevice_Vector3D
 
+  subroutine GridInterp_Vector3D_cpu(this,that)
+    implicit none
+    class(Vector3D),intent(in) :: this
+    type(Vector3D),intent(inout) :: that
+
+    call this % interp % VectorGridInterp_3D(this % interior, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem)
+
+  end subroutine GridInterp_Vector3D_cpu
+
   subroutine BoundaryInterp_Vector3D_cpu(this)
     implicit none
     class(Vector3D),intent(inout) :: this
@@ -1217,26 +1227,6 @@ contains
                                                  handle)
 
   end subroutine BoundaryInterp_Vector3D_gpu
-
-!   SUBROUTINE GridInterp_Vector3D(this,SELFOut,gpuAccel)
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(in) :: this
-!     TYPE(Vector3D),INTENT(inout) :: SELFOut
-!     LOGICAL,INTENT(in) :: gpuAccel
-
-!     IF (gpuAccel) THEN
-!       CALL this % interp % VectorGridInterp_2D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     ELSE
-!       CALL this % interp % VectorGridInterp_2D(this % interior , &
-!                                                       SELFout % interior , &
-!                                                       this % nVar, &
-!                                                       this % nElem)
-!     END IF
-
-!   END SUBROUTINE GridInterp_Vector3D
 
   subroutine Gradient_Vector3D_cpu(this,df)
     implicit none
@@ -1264,26 +1254,26 @@ contains
 
   end subroutine Gradient_Vector3D_gpu
 
-  subroutine Divergence_Vector3D_cpu(this,SELFOut)
+  subroutine Divergence_Vector3D_cpu(this,that)
     implicit none
     class(Vector3D),intent(in) :: this
-    type(Scalar3D),intent(inout) :: SELFOut
+    type(Scalar3D),intent(inout) :: that
 
     call this % interp % VectorDivergence_3D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem)
 
   end subroutine Divergence_Vector3D_cpu
 
-  subroutine Divergence_Vector3D_gpu(this,SELFOut,hipblas_handle)
+  subroutine Divergence_Vector3D_gpu(this,that,hipblas_handle)
     implicit none
     class(Vector3D),intent(in) :: this
-    type(Scalar3D),intent(inout) :: SELFOut
+    type(Scalar3D),intent(inout) :: that
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call this % interp % VectorDivergence_3D(this % interior, &
-                                             SELFout % interior, &
+                                             that % interior, &
                                              this % nVar, &
                                              this % nElem, &
                                              hipblas_handle)
@@ -1433,22 +1423,21 @@ contains
 
   end subroutine BoundaryInterp_Tensor2D_gpu
 
-  subroutine Determinant_Tensor2D(this,SELFout)
+  subroutine Determinant_Tensor2D(this,that)
     implicit none
     class(Tensor2D),intent(in) :: this
-    type(Scalar2D),intent(inout) :: SELFOut
+    type(Scalar2D),intent(inout) :: that
     ! Local
     integer :: iEl,iVar,i,j
-
-    do iEl = 1,this % nElem
-      do iVar = 1,this % nVar
+    do iVar = 1,this % nVar
+      do iEl = 1,this % nElem
         do j = 1,this % interp % N + 1
           do i = 1,this % interp % N + 1
 
-            SELFOut % interior(i,j,iVar,iEl) = this % interior(i,j,iVar,iEl,1,1)* &
-                                               this % interior(i,j,iVar,iEl,2,2) - &
-                                               this % interior(i,j,iVar,iEl,1,2)* &
-                                               this % interior(i,j,iVar,iEl,2,1)
+            that % interior(i,j,iEl,iVar) = this % interior(i,j,iEl,iVar,1,1)* &
+                                               this % interior(i,j,iEl,iVar,2,2) - &
+                                               this % interior(i,j,iEl,iVar,1,2)* &
+                                               this % interior(i,j,iEl,iVar,2,1)
 
           end do
         end do
@@ -1533,36 +1522,35 @@ contains
 
   end subroutine BoundaryInterp_Tensor3D_gpu
 
-  subroutine Determinant_Tensor3D(this,SELFOut,gpuAccel)
+  subroutine Determinant_Tensor3D(this,that)
     implicit none
     class(Tensor3D),intent(in) :: this
-    type(Scalar3D),intent(inout) :: SELFOut
-    logical,intent(in) :: gpuAccel
+    type(Scalar3D),intent(inout) :: that
     ! Local
     integer :: iEl,iVar,i,j,k
 
     do iEl = 1,this % nElem
       do iVar = 1,this % nVar
-        do k = 0,this % interp % N
-          do j = 0,this % interp % N
-            do i = 0,this % interp % N
+        do k = 1,this % interp % N+1
+          do j = 1,this % interp % N+1
+            do i = 1,this % interp % N+1
 
-              SELFOut % interior(i,j,k,iVar,iEl) = &
-                this % interior(i,j,k,iVar,iEl,1,1)* &
-                (this % interior(i,j,k,iVar,iEl,2,2)* &
-                 this % interior(i,j,k,iVar,iEl,3,3) - &
-                 this % interior(i,j,k,iVar,iEl,2,3)* &
-                 this % interior(i,j,k,iVar,iEl,3,2)) - &
-                this % interior(i,j,k,iVar,iEl,2,1)* &
-                (this % interior(i,j,k,iVar,iEl,1,2)* &
-                 this % interior(i,j,k,iVar,iEl,3,3) - &
-                 this % interior(i,j,k,iVar,iEl,1,3)* &
-                 this % interior(i,j,k,iVar,iEl,3,2)) + &
-                this % interior(i,j,k,iVar,iEl,3,1)* &
-                (this % interior(i,j,k,iVar,iEl,1,2)* &
-                 this % interior(i,j,k,iVar,iEl,2,3) - &
-                 this % interior(i,j,k,iVar,iEl,1,3)* &
-                 this % interior(i,j,k,iVar,iEl,2,2))
+              that % interior(i,j,k,iEl,iVar) = &
+                this % interior(i,j,k,iEl,iVar,1,1)* &
+                (this % interior(i,j,k,iEl,iVar,2,2)* &
+                 this % interior(i,j,k,iEl,iVar,3,3) - &
+                 this % interior(i,j,k,iEl,iVar,2,3)* &
+                 this % interior(i,j,k,iEl,iVar,3,2)) - &
+                this % interior(i,j,k,iEl,iVar,2,1)* &
+                (this % interior(i,j,k,iEl,iVar,1,2)* &
+                 this % interior(i,j,k,iEl,iVar,3,3) - &
+                 this % interior(i,j,k,iEl,iVar,1,3)* &
+                 this % interior(i,j,k,iEl,iVar,3,2)) + &
+                this % interior(i,j,k,iEl,iVar,3,1)* &
+                (this % interior(i,j,k,iEl,iVar,1,2)* &
+                 this % interior(i,j,k,iEl,iVar,2,3) - &
+                 this % interior(i,j,k,iEl,iVar,1,3)* &
+                 this % interior(i,j,k,iEl,iVar,2,2))
 
             end do
           end do
@@ -1571,67 +1559,5 @@ contains
     end do
 
   end subroutine Determinant_Tensor3D
-
-!   ! FUNCTION AbsMaxInterior_Tensor3D(tensor) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor3D) :: tensor
-!   !   REAL(prec) :: absMax(1:tensor % nVar)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,k,row,col
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,tensor % nElem
-!   !     DO iVar = 1,tensor % nVar
-!   !       DO k = 0,tensor % interp % N
-!   !         DO j = 0,tensor % interp % N
-!   !           DO i = 0,tensor % interp % N
-!   !             DO col = 1,3
-!   !               DO row = 1,3
-!   !                 absMax(iVar) = MAX(ABS(tensor % interior (row,col,i,j,k,iVar,iEl)),absMax(iVar))
-!   !               END DO
-!   !             END DO
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxInterior_Tensor3D
-
-!   ! FUNCTION AbsMaxBoundary_Tensor3D(tensor) RESULT(absMax)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor3D) :: tensor
-!   !   REAL(prec) :: absMax(1:tensor % nVar,1:6)
-!   !   ! Local
-!   !   INTEGER :: iEl,iVar,i,j,iSide,row,col
-
-!   !   absMax = 0.0_prec
-!   !   DO iEl = 1,tensor % nElem
-!   !     DO iSide = 1,6
-!   !       DO iVar = 1,tensor % nVar
-!   !         DO j = 0,tensor % interp % N
-!   !           DO i = 0,tensor % interp % N
-!   !             DO col = 1,3
-!   !               DO row = 1,3
-!   !             absMax(iVar,iSide) = MAX(ABS(tensor % boundary (row,col,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
-!   !               END DO
-!   !             END DO
-!   !           END DO
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END FUNCTION AbsMaxBoundary_Tensor3D
-
-!   ! SUBROUTINE Equals_Tensor3D(SELFOut,SELFin)
-!   !   IMPLICIT NONE
-!   !   CLASS(Tensor3D),INTENT(inout) :: SELFOut
-!   !   TYPE(Tensor3D),INTENT(in) :: SELFin
-
-!   !   SELFOut % interior  = SELFin % interior
-!   !   SELFOut % boundary  = SELFin % boundary
-
-!   ! END SUBROUTINE Equals_Tensor3D
 
 end module SELF_Data

@@ -100,14 +100,14 @@ module SELF_Lagrange
     generic,public :: ScalarGridInterp_2D => ScalarGridInterp_2D_cpu,ScalarGridInterp_2D_gpu
     procedure,private :: ScalarGridInterp_2D_cpu,ScalarGridInterp_2D_gpu
 
-    ! GENERIC,PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
-    ! PROCEDURE,PRIVATE :: VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
+    GENERIC,PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu
+    PROCEDURE,PRIVATE :: VectorGridInterp_2D_cpu
 
     generic,public :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
     procedure,private :: ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
 
-    ! GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
-    ! PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
+    GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu
+    PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu
 
     generic,public :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
     procedure,private :: ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
@@ -789,7 +789,7 @@ contains
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,hipblas_handle)
-call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_2D_gpu
 
@@ -881,200 +881,120 @@ call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this %
     type(c_ptr),intent(inout) :: hipblas_handle
 
     call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,hipblas_handle)
- call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
     call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
 
   end subroutine ScalarGridInterp_3D_gpu
 
-!   subroutine VectorGridInterp_2D_cpu(this,f,fTarget,nvars,nelems)
-!     !! Host (CPU) implementation of the VectorGridInterp_2D interface.
-!     !! In most cases, you should use the `VectorGridInterp_2D` generic interface,
-!     !! rather than calling this routine directly.
-!     !! Interpolate a vector-2D (real) array from the control grid to the target grid.
-!     !! The control and target grids are the ones associated with an initialized
-!     !! Lagrange instance.
-!     !!
-!     !! Interpolation is applied using a series of matrix-vector multiplications, using
-!     !! the Lagrange class's interpolation matrix
-!     !!
-!     !! $$ \tilde{f}_{dir,m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,iel,ivar} I_{i,m} I_{j,n} $$
-!     !!
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     !! Lagrange class instance
-!     integer,intent(in)     :: nvars
-!     !! The number of variables/functions that are interpolated
-!     integer,intent(in)     :: nelems
-!     !! The number of spectral elements in the SEM grid
-!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     !! (Input) Array of function values, defined on the control grid
-!     real(prec),intent(out) :: fTarget(1:2,0:this % M,0:this % M,1:nelems,1:nvars)
-!     !! (Output) Array of function values, defined on the target grid
-!     ! Local
-!     integer :: i,j,ii,jj,iel,ivar
-!     real(prec) :: fi(1:2)
+  subroutine VectorGridInterp_2D_cpu(this,f,fTarget,nvars,nelems)
+    !! Host (CPU) implementation of the ScalarGridInterp_2D interface.
+    !! In most cases, you should use the `ScalarGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a scalar-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iel,ivar} I_{i,m} I_{j,n} $$
+    !!
+    implicit none
+    class(Lagrange),intent(in) :: this
+    !! Lagrange class instance
+    integer,intent(in)     :: nvars
+    !! The number of variables/functions that are interpolated
+    integer,intent(in)     :: nelems
+    !! The number of spectral elements in the SEM grid
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    !! (Input) Array of function values, defined on the control grid
+    real(prec),intent(inout) :: fTarget(1:this % M + 1,1:this % M + 1,1:nelems,1:nvars,1:2)
+    !! (Output) Array of function values, defined on the target grid
+    ! Local
+    integer :: i,j,ii,jj,iel,ivar,idir
+    real(prec) :: fi,fij
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 0,this % M
-!           do i = 0,this % M
+    do idir = 1,2
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % M + 1
+            do i = 1,this % M + 1
 
-!             fTarget(1,i,j,iel,ivar) = 0.0_prec
-!             fTarget(2,i,j,iel,ivar) = 0.0_prec
+              fij = 0.0_prec
+              do jj = 1,this % N + 1
+                fi = 0.0_prec
+                do ii = 1,this % N + 1
+                  fi = fi + f(ii,jj,iel,ivar,idir)*this % iMatrix(ii,i)
+                end do
+                fij = fij + fi*this % iMatrix(jj,j)
+              end do
+              fTarget(i,j,iel,ivar,idir) = fij
 
-!             do jj = 1,this % N+1
+            end do
+          end do
+        end do
+      end do
+    end do
 
-!               fi(1:2) = 0.0_prec
-!               do ii = 1,this % N+1
-!                 fi(1:2) = fi(1:2) + f(1:2,ii,jj,iel,ivar)*this % iMatrix (ii,i)
-!               end do
+  end subroutine VectorGridInterp_2D_cpu
 
-!               fTarget(1:2,i,j,iel,ivar) = fTarget(1:2,i,j,iel,ivar) + fi(1:2)*this % iMatrix (jj,j)
+  subroutine VectorGridInterp_3D_cpu(this,f,fTarget,nvars,nelems)
+    !! Host (CPU) implementation of the ScalarGridInterp_3D interface.
+    !! In most cases, you should use the `ScalarGridInterp_3D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a scalar-3D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iel,ivar} I_{i,m} I_{j,n} $$
+    !!
+    implicit none
+    class(Lagrange),intent(in) :: this
+    !! Lagrange class instance
+    integer,intent(in)     :: nvars
+    !! The number of variables/functions that are interpolated
+    integer,intent(in)     :: nelems
+    !! The number of spectral elements in the SEM grid
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    !! (Input) Array of function values, defined on the control grid
+    real(prec),intent(inout) :: fTarget(1:this % M + 1,1:this % M + 1,1:this % M + 1,1:nelems,1:nvars,1:3)
+    !! (Output) Array of function values, defined on the target grid
+    ! Local
+    integer :: i,j,k,ii,jj,kk,iel,ivar,idir
+    real(prec) :: fi,fij,fijk
 
-!             end do
+    do idir = 1,3
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % M + 1
+            do j = 1,this % M + 1
+              do i = 1,this % M + 1
 
-!           end do
-!         end do
-!       end do
-!     end do
+                fijk = 0.0_prec
+                do kk = 1,this % N + 1
+                  fij = 0.0_prec
+                  do jj = 1,this % N + 1
+                    fi = 0.0_prec
+                    do ii = 1,this % N + 1
+                      fi = fi + f(ii,jj,kk,iel,ivar,idir)*this % iMatrix(ii,i)
+                    end do
+                    fij = fij + fi*this % iMatrix(jj,j)
+                  end do
+                  fijk = fijk + fij*this % iMatrix(kk,k)
+                end do
+                fTarget(i,j,k,iel,ivar,idir) = fijk
 
-!   end subroutine VectorGridInterp_2D_cpu
-! !
-!   subroutine VectorGridInterp_2D_gpu(this,f_dev,fTarget_dev,nvars,nelems)
-!     !! Device (GPU) implementation of the VectorGridInterp_2D interface.
-!     !! In most cases, you should use the `VectorGridInterp_2D` generic interface,
-!     !! rather than calling this routine directly.
-!     !! This routine calls hip/SELF_Lagrange.cpp:VectorGridInterp_2D_gpu_wrapper
-!     !! Interpolate a vector-2D (real) array from the control grid to the target grid.
-!     !! The control and target grids are the ones associated with an initialized
-!     !! Lagrange instance.
-!     !!
-!     !! Interpolation is applied using a series of matrix-vector multiplications, using
-!     !! the Lagrange class's interpolation matrix
-!     !!
-!     !! $$ \tilde{f}_{dir,m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,iel,ivar} I_{i,m} I_{j,n} $$
-!     !!
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     !! Lagrange class instance
-!     integer,intent(in) :: nvars
-!     !! The number of variables/functions that are interpolated
-!     integer,intent(in) :: nelems
-!     !! The number of spectral elements in the SEM grid
-!     type(c_ptr),intent(in)  :: f_dev
-!     !! (Input) Array of function values, defined on the control grid
-!     type(c_ptr),intent(out) :: fTarget_dev
-!     !! (Output) Array of function values, defined on the target grid
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
 
-!     call VectorGridInterp_2D_gpu_wrapper(this % iMatrix, &
-!                                          f_dev,fTarget_dev, &
-!                                          this % N,this % M, &
-!                                          nvars,nelems)
-
-!   end subroutine VectorGridInterp_2D_gpu
-
-!   subroutine ScalarGridInterp_3D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(out) :: fTarget(0:this % M,0:this % M,0:this % M,1:nelems,1:nvars)
-!     ! Local
-!     integer :: iel,ivar,i,j,k,ii,jj,kk
-!     real(prec) :: fi,fij,fijk
-
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do k = 0,this % M
-!           do j = 0,this % M
-!             do i = 0,this % M
-
-!               fijk = 0.0_prec
-!               do kk = 1,this % N+1
-!                 fij = 0.0_prec
-!                 do jj = 1,this % N+1
-!                   fi = 0.0_prec
-!                   do ii = 1,this % N+1
-!                     fi = fi + f(ii,jj,kk,iel,ivar)*this % iMatrix (ii,i)
-!                   end do
-!                   fij = fij + fi*this % iMatrix (jj,j)
-!                 end do
-!                 fijk = fijk + fij*this % iMatrix (kk,k)
-!               end do
-!               fTarget(i,j,k,iel,ivar) = fijk
-
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
-
-!   end subroutine ScalarGridInterp_3D_cpu
-! !
-!   subroutine ScalarGridInterp_3D_gpu(this,f_dev,fTarget_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in) :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f_dev
-!     type(c_ptr),intent(out) :: fTarget_dev
-
-!     call ScalarGridInterp_3D_gpu_wrapper(this % iMatrix, &
-!                                          f_dev,fTarget_dev, &
-!                                          this % N,this % M, &
-!                                          nvars,nelems)
-
-!   end subroutine ScalarGridInterp_3D_gpu
-
-!   subroutine VectorGridInterp_3D_cpu(this,f,fTarget,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(out) :: fTarget(1:3,0:this % M,0:this % M,0:this % M,1:nelems,1:nvars)
-!     ! Local
-!     integer :: iel,ivar,i,j,k,ii,jj,kk
-!     real(prec) :: fi(1:3),fij(1:3)
-
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do k = 0,this % M
-!           do j = 0,this % M
-!             do i = 0,this % M
-
-!               fTarget(1:3,i,j,k,iel,ivar) = 0.0_prec
-!               do kk = 1,this % N+1
-!                 fij(1:3) = 0.0_prec
-!                 do jj = 1,this % N+1
-!                   fi(1:3) = 0.0_prec
-!                   do ii = 1,this % N+1
-!                     fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iel,ivar)*this % iMatrix (ii,i)
-!                   end do
-!                   fij(1:3) = fij(1:3) + fi(1:3)*this % iMatrix (jj,j)
-!                 end do
-!                 fTarget(1:3,i,j,k,iel,ivar) = fTarget(1:3,i,j,k,iel,ivar) + fij(1:3)*this % iMatrix (kk,k)
-!               end do
-
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
-
-!   end subroutine VectorGridInterp_3D_cpu
-! !
-!   subroutine VectorGridInterp_3D_gpu(this,f_dev,fTarget_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in) :: nvars,nelems
-!     type(c_ptr),intent(in)  :: f_dev
-!     type(c_ptr),intent(out) :: fTarget_dev
-
-!     call VectorGridInterp_3D_gpu_wrapper(this % iMatrix, &
-!                                          f_dev,fTarget_dev, &
-!                                          this % N,this % M, &
-!                                          nvars,nelems)
-
-!   end subroutine VectorGridInterp_3D_gpu
+  end subroutine VectorGridInterp_3D_cpu
 
 ! Derivative_1D
 !

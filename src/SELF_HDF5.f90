@@ -123,7 +123,7 @@ CONTAINS
     CALL h5open_f(error)
 
     IF (accessFlag == H5F_ACC_TRUNC_F) THEN
-      CALL h5fcreate_f(TRIM(fileName),accessFlag,fileId,error)
+       CALL h5fcreate_f(TRIM(fileName),accessFlag,fileId,error)
     ELSE
       CALL h5fopen_f(TRIM(fileName),accessFlag,fileId,error)
     END IF

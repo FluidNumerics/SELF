@@ -363,7 +363,7 @@ CONTAINS
       xLinear % interior(1:2,1,iel) = xU(iel:iel + 1)
     END DO
 
-    CALL xLinear % GridInterp(xGeo,.FALSE.)
+    CALL xLinear % GridInterp(xGeo)
 
     ! Set the element information
     nid = 1
@@ -564,7 +564,7 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
 
     ! Read BCType
-    allocate(bcTypes(1:4,1:nBCS))
+    allocate(bcType(1:4,1:nBCS))
 
     IF ( decomp % mpiEnabled )THEN
       offset(:) = 0
@@ -576,9 +576,9 @@ CONTAINS
     ! Read local subarray of ElemInfo
     CALL decomp % GenerateDecomposition(nGlobalElem,nUniqueSides3D)
 
-    firstElem = decomp % offsetElem(decomp % rankId) + 1
-    nLocalElems = decomp % offsetElem(decomp % rankId + 1) - &
-                  decomp % offsetElem(decomp % rankId)
+    firstElem = decomp % offsetElem(decomp % rankId+1) + 1
+    nLocalElems = decomp % offsetElem(decomp % rankId + 2) - &
+                  decomp % offsetElem(decomp % rankId+1)
 
     ! Allocate Space for hopr_elemInfo!
     allocate(hopr_elemInfo(1:6,1:nLocalElems))
@@ -645,7 +645,7 @@ CONTAINS
     DO eid = 1, this % nElem
       DO j = 1,nGeo+1
         DO i = 1,nGeo+1
-          nid = i+1 + (nGeo+1)*(j + (nGeo+1)*((nGeo+1)*(eid-1)))
+          nid = i + (nGeo+1)*(j-1 + (nGeo+1)*((nGeo+1)*(eid-1)))
           this % nodeCoords(1:2,i,j,eid) = hopr_nodeCoords(1:2,nid)
           this % globalNodeIDs(i,j,eid) = hopr_globalNodeIDs(nid)
         ENDDO
@@ -720,7 +720,7 @@ CONTAINS
 
     IF (PRESENT(decomp)) THEN
       rankId = decomp % rankId
-      offset = decomp % offsetElem(rankId)
+      offset = decomp % offsetElem(rankId+1)
     ELSE
       rankId = 0
       offset = 0
@@ -1029,7 +1029,7 @@ CONTAINS
 
     IF (PRESENT(decomp)) THEN
       rankId = decomp % rankId
-      offset = decomp % offsetElem(rankId)
+      offset = decomp % offsetElem(rankId+1)
     ELSE
       rankId = 0
       offset = 0
@@ -1195,8 +1195,7 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
 
     ! Read BCType
-    CALL bcType % Alloc(loBound=(/1,1/), &
-                        upBound=(/4,nBCs/))
+    allocate( bcType(1:4,1:nBCs) )
     IF ( decomp % mpiEnabled )THEN
       offset(:) = 0
       CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
@@ -1207,14 +1206,12 @@ CONTAINS
     ! Read local subarray of ElemInfo
     CALL decomp % GenerateDecomposition(nGlobalElem,nUniqueSides)
 
-    firstElem = decomp % offsetElem(decomp % rankId) + 1
-    nLocalElems = decomp % offsetElem(decomp % rankId + 1) - &
-                  decomp % offsetElem(decomp % rankId)
+    firstElem = decomp % offsetElem(decomp % rankId+1) + 1
+    nLocalElems = decomp % offsetElem(decomp % rankId + 2) - &
+                  decomp % offsetElem(decomp % rankId+1)
 
     ! Allocate Space for hopr_elemInfo!
-    CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                               upBound=(/6,nLocalElems/))
-
+    allocate( hopr_elemInfo(1:6,1:nLocalElems) )
     IF ( decomp % mpiEnabled )THEN
       offset = (/0,firstElem - 1/)
       CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
@@ -1227,11 +1224,7 @@ CONTAINS
     nLocalNodes = hopr_elemInfo(6,nLocalElems) - hopr_elemInfo(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
-    CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                                 upBound=(/3,nLocalNodes/))
-
-    CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                                    upBound=nLocalNodes)
+    allocate( hopr_nodeCoords(1:3,1:nLocalNodes), hopr_globalNodeIDs(1:nLocalNodes) )
 
     IF ( decomp % mpiEnabled )THEN
       offset = (/0,firstNode - 1/)
@@ -1248,8 +1241,8 @@ CONTAINS
     nLocalSides = hopr_elemInfo(4,nLocalElems) - hopr_elemInfo(3,1)
 
     ! Allocate space for hopr_sideInfo
-    CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
-                               upBound=(/5,nLocalSides/))
+    allocate( hopr_sideInfo(1:5,1:nLocalSides) )
+
     IF ( decomp % mpiEnabled )THEN
       offset = (/0,firstSide - 1/)
       CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
@@ -1273,7 +1266,7 @@ CONTAINS
       DO k = 1,nGeo+1
         DO j = 1,nGeo+1
           DO i = 1,nGeo+1
-            nid = i+1 + (nGeo+1)*(j + (nGeo+1)*(k + (nGeo+1)*(eid-1)))
+            nid = i + (nGeo+1)*(j-1 + (nGeo+1)*(k-1 + (nGeo+1)*(eid-1)))
             this % nodeCoords(1:3,i,j,k,eid) = hopr_nodeCoords(1:3,nid)
             this % globalNodeIDs(i,j,k,eid) = hopr_globalNodeIDs(nid)
           ENDDO
@@ -1293,10 +1286,7 @@ CONTAINS
 
     CALL this % UpdateDevice()
 
-    CALL hopr_elemInfo % Free()
-    CALL hopr_nodeCoords % Free()
-    CALL hopr_globalNodeIDs % Free()
-    CALL hopr_sideInfo % Free()
+    deallocate( hopr_elemInfo, hopr_nodeCoords, hopr_globalNodeIDs, hopr_sideInfo )
 
   END SUBROUTINE Read_HOPr_Mesh3D
 
@@ -1360,13 +1350,11 @@ CONTAINS
       this % mpiPrec = MPI_DOUBLE
     END IF
 
-    CALL this % offSetElem % Alloc(0,this % nRanks)
-
+    call hipcheck(hipMallocManaged(this % offsetElem,this % nRanks+1,hipMemAttachGlobal))
     WRITE (msg,'(I5)') this % rankId
     msg = "Greetings from rank "//TRIM(msg)//"."
     INFO(TRIM(msg))
 
-    IF( GPUAvailable() )THEN
       ! Get the number of GPUs per node
       CALL hipCheck(hipGetDeviceCount(nGPU))
 
@@ -1381,8 +1369,6 @@ CONTAINS
       msg = "Rank "//TRIM(msg)//": Setting device to GPU"//TRIM(msg2)
       INFO(TRIM(msg))
 
-    ENDIF
-
   END SUBROUTINE Init_MPILayer
 
   SUBROUTINE Free_MPILayer(this)
@@ -1390,10 +1376,10 @@ CONTAINS
     CLASS(MPILayer),INTENT(inout) :: this
 
     IF (ASSOCIATED(this % offSetElem)) THEN
-      CALL this % offSetElem % Free()
+      call hipcheck(hipfree(this % offSetElem))
     ENDIF
     IF (ASSOCIATED(this % elemToRank)) THEN
-      CALL this % elemToRank % Free()
+      call hipcheck(hipfree(this % elemToRank))
     ENDIF
 
     DEALLOCATE( this % requests )
@@ -1435,8 +1421,8 @@ CONTAINS
     CALL this % SetMaxMsg(maxMsg)
 
     WRITE (msg,'(I5)') this % rankId
-    WRITE (msg2,'(I5)') this % offSetElem(this % rankId + 1)-&
-                        this % offSetElem(this % rankId)
+    WRITE (msg2,'(I5)') this % offSetElem(this % rankId+2)-&
+                        this % offSetElem(this % rankId+1)
     msg = "Rank "//TRIM(msg)//": nElem = "//TRIM(msg2)
     INFO(TRIM(msg))
 
@@ -1465,7 +1451,7 @@ CONTAINS
 
     this % nElem = nElem
 
-    CALL this % elemToRank % Alloc(1,nElem)
+    call hipcheck(hipMallocManaged(this % elemToRank,nelem,hipMemAttachGlobal))
 
     CALL DomainDecomp(nElem, &
                       this % nRanks, &
@@ -1478,8 +1464,8 @@ CONTAINS
                       this % elemToRank(iel))
     END DO
 
-    CALL this % offSetElem % UpdateDevice()
-    CALL this % elemToRank % UpdateDevice()
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % offsetElem),sizeof(this % offsetElem),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemToRank),sizeof(this % elemToRank),0,c_null_ptr))
 
   END SUBROUTINE SetElemToRank
 
@@ -1520,7 +1506,7 @@ CONTAINS
     domain = 0
     maxSteps = INT(LOG10(REAL(nDomains))/LOG10(2.0)) + 1
     low = 0
-    up = nDomains - 1
+    up = nDomains-1
 
     IF (offsetElem(low) < elemID .AND. elemID <= offsetElem(low + 1)) THEN
       domain = low

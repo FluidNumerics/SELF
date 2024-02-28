@@ -28,7 +28,6 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_Geometry1D
     PROCEDURE,PUBLIC :: Free => Free_Geometry1D
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_Geometry1D
-    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Geometry1D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Geometry1D
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
 
@@ -53,7 +52,7 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
 
-    PROCEDURE,PUBLIC :: CovariantArcMin => CovariantArcMin_SEMQuad
+    !PROCEDURE,PUBLIC :: CovariantArcMin => CovariantArcMin_SEMQuad
     !PROCEDURE :: Write => Write_SEMQuad
 
   END TYPE SEMQuad
@@ -71,7 +70,6 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_SEMHex
     PROCEDURE,PUBLIC :: Free => Free_SEMHex
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMHex
-    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_SEMHex
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMHex
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
@@ -110,14 +108,14 @@ CONTAINS
 
   END SUBROUTINE Free_Geometry1D
 
-  SUBROUTINE UpdateHost_Geometry1D(myGeom)
+  SUBROUTINE UpdateDevice_Geometry1D(myGeom)
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
-    CALL myGeom % x % UpdateHost()
-    CALL myGeom % dxds % UpdateHost()
+    CALL myGeom % x % UpdateDevice()
+    CALL myGeom % dxds % UpdateDevice()
 
-  END SUBROUTINE UpdateHost_Geometry1D
+  END SUBROUTINE UpdateDevice_Geometry1D
 
   SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
@@ -299,8 +297,8 @@ CONTAINS
 
     ! Set the element internal mesh locations
     DO iel = 1, mesh % nElem
-      DO j = 0, mesh % nGeo
-        DO i = 0, mesh % nGeo
+      DO j = 1, mesh % nGeo+1
+        DO i = 1, mesh % nGeo+1
           xMesh % interior(i,j,iel,1,1:2) = mesh % nodeCoords(1:2,i,j,iel)
         END DO
       END DO
@@ -328,8 +326,8 @@ CONTAINS
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
     DO iEl = 1,myGeom % nElem
-      DO j = 0,1,myGeom % dxds % interp % N+1
-        DO i = 0,1,myGeom % dxds % interp % N+1
+      DO j = 1,myGeom % dxds % interp % N+1
+        DO i = 1,myGeom % dxds % interp % N+1
 
           myGeom % dsdx % interior(i,j,iel,1,1,1) =  myGeom % dxds % interior(i,j,iel,1,2,2)
           myGeom % dsdx % interior(i,j,iel,1,2,1) = -myGeom % dxds % interior(i,j,iel,1,1,2)
@@ -356,8 +354,8 @@ CONTAINS
 
           IF( k == 1 )THEN ! South
 
-            mag = SQRT( myGeom % dsdx % boundary(i,k,iEl,1,1,1,2)**2 +&
-                        myGeom % dsdx % boundary(i,k,iEl,1,1,2,2)**2 )
+            mag = SQRT( myGeom % dsdx % boundary(i,k,iEl,1,1,2)**2 +&
+                        myGeom % dsdx % boundary(i,k,iEl,1,2,2)**2 )
  
             myGeom % nScale % boundary(i,k,iEl,1) = mag
 
@@ -373,7 +371,7 @@ CONTAINS
             myGeom % nScale % boundary(i,k,iEl,1) = mag
 
             myGeom % nHat % boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2)/mag
+              fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2,1)/mag
 
           ELSEIF( k == 3 )THEN ! North
 
@@ -392,7 +390,7 @@ CONTAINS
  
             myGeom % nScale % boundary(i,k,iEl,1) = mag
 
-            myGeom % nHat % boundary(i,k,iEl,1:2) = &
+            myGeom % nHat % boundary(i,k,iEl,1,1:2) = &
               fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2,1)/mag
 
           ENDIF
@@ -418,11 +416,9 @@ CONTAINS
 
     CALL myGeom % CalculateContravariantBasis()
 
-    IF (GPUAvailable()) THEN
-      CALL myGeom % dsdx % UpdateDevice()
-      CALL myGeom % nHat % UpdateDevice()
-      CALL myGeom % nScale % UpdateDevice()
-    ENDIF
+    CALL myGeom % dsdx % UpdateDevice()
+    CALL myGeom % nHat % UpdateDevice()
+    CALL myGeom % nScale % UpdateDevice()
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
 
@@ -596,9 +592,9 @@ CONTAINS
 
     ! Set the element internal mesh locations
     DO iel = 1,mesh % nElem
-      DO k = 0,mesh % nGeo
-        DO j = 0,mesh % nGeo
-          DO i = 0,mesh % nGeo
+      DO k = 1,mesh % nGeo+1
+        DO j = 1,mesh % nGeo+1
+          DO i = 1,mesh % nGeo+1
             xMesh % interior(i,j,k,iel,1,1:3) = mesh % nodeCoords(1:3,i,j,k,iel)
           END DO
         END DO
@@ -806,7 +802,7 @@ CONTAINS
     END DO
 
     ! Interpolate the contravariant tensor to the boundaries
-    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % dsdx % BoundaryInterp()
 
     ! Now, calculate nHat (outward pointing normal)
     DO iEl = 1,myGeom % nElem
@@ -910,9 +906,7 @@ CONTAINS
     CALL myGeom % J % BoundaryInterp()
 
     CALL myGeom % CalculateContravariantBasis()
-    IF (GPUAvailable()) THEN
-      CALL myGeom % UpdateDevice()
-    ENDIF
+    CALL myGeom % UpdateDevice()
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 
