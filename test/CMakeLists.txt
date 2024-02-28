@@ -63,6 +63,8 @@ add_fortran_tests (
     "vectorboundaryinterp_3d_gpu_constant.f90"
     "mesh2d_setup.f90"
     "mesh3d_setup.f90"
+    "mappedscalarderivative_1d_cpu_constant.f90"
+    "mappedscalarderivative_1d_gpu_constant.f90"
     )
 
 

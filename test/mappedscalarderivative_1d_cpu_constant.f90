@@ -9,7 +9,6 @@ program test
 contains
 integer function mappedscalarderivative_1d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_MappedData
   use SELF_Mesh
@@ -47,7 +46,6 @@ integer function mappedscalarderivative_1d_cpu_constant() result(r)
   call geometry % Init(interp,mesh % nElem)
   call geometry % GenerateFromMesh(mesh)
 
-
   ! Initialize scalars
   call f % Init(interp,nvar,nelem)
   call df % Init(interp,nvar,nelem)
@@ -56,7 +54,7 @@ integer function mappedscalarderivative_1d_cpu_constant() result(r)
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
 
-  call f % Derivative(geometry, df, selfStrongForm, .false.)
+  call f % Derivative(geometry, df)
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

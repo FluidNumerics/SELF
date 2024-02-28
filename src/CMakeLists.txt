@@ -11,16 +11,16 @@ set_source_files_properties(
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
 # add_library(self SHARED ${SELF_FSRC} ${SELF_HIPSRC})
-# target_link_libraries(self PRIVATE ${libfeqparse} ${HDF5_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+# target_link_libraries(self PRIVATE ${libfeqparse} HDF5::HDF5 ${MPI_Fortran_LIBRARIES})
 # target_include_directories(self PRIVATE ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
 # target_compile_options(self PRIVATE -fPIC)
 
-add_library(self-static STATIC SELF_Constants.f90 SELF_SupportRoutines.f90 SELF_Quadrature.f90 SELF_HDF5.f90 SELF_Lagrange.f90 SELF_Metadata.f90 SELF_Data.f90 SELF_Lagrange.hip SELF_Geometry.f90 SELF_Mesh.f90) 
+add_library(self-static STATIC SELF_Constants.f90 SELF_SupportRoutines.f90 SELF_Quadrature.f90 SELF_HDF5.f90 SELF_Lagrange.f90 SELF_Metadata.f90 SELF_Data.f90 SELF_Lagrange.hip SELF_Geometry.f90 SELF_Mesh.f90 SELF_MappedData.f90 SELF_MappedData.hip) 
 ##${SELF_FSRC} ${SELF_HIPSRC})
 
 target_link_libraries(self-static PRIVATE 
                         ${FEQPARSE_LIBRARIES}
-                        ${HDF5_LIBRARIES}
+                        HDF5::HDF5
                         ${MPI_Fortran_LIBRARIES}
                         ${HIPFORT_LIBRARIES}
                         hip::device

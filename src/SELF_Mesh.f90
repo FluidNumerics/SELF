@@ -360,7 +360,7 @@ CONTAINS
     CALL xGeo % Init(nGeoInterp,1,nElem)
 
     DO iel = 1,nElem
-      xLinear % interior(1:2,1,iel) = xU(iel:iel + 1)
+      xLinear % interior(1:2,iel,1) = xU(iel:iel + 1)
     END DO
 
     CALL xLinear % GridInterp(xGeo)
@@ -372,7 +372,7 @@ CONTAINS
       this % elemInfo(2,iel) = 1 ! Element Zone
       this % elemInfo(3,iel) = nid ! Node Index Start
       DO i = 1,nGeo+1
-        this % nodeCoords(nid) = xGeo % interior(i,1,iel)
+        this % nodeCoords(nid) = xGeo % interior(i,iel,1)
         nid = nid + 1
       END DO
       this % elemInfo(4,iel) = nid - 1 ! Node Index End

@@ -9,11 +9,12 @@ program test
 contains
 integer function mappedscalarderivative_1d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
-  use SELF_MappedData
   use SELF_Mesh
   use SELF_Geometry
+  use SELF_MappedData
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -31,7 +32,9 @@ integer function mappedscalarderivative_1d_gpu_constant() result(r)
   type(Lagrange),target :: interp
   type(Mesh1D),TARGET :: mesh
   type(Geometry1D),TARGET :: geometry
-  type(MPILayer),TARGET :: decomp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   call mesh % UniformBlockMesh(nGeo=1,&
                                nElem=nelem,&
@@ -59,9 +62,8 @@ integer function mappedscalarderivative_1d_gpu_constant() result(r)
 
   call f % updatedevice()
 
-  call f % Derivative(geometry, df, selfStrongForm, .true.)
-
-  call df % updatehost()
+  call f % Derivative(geometry, df, handle)
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
@@ -78,6 +80,8 @@ integer function mappedscalarderivative_1d_gpu_constant() result(r)
   call interp % free()
   call f % free()
   call df % free()
+  call hipblasCheck(hipblasDestroy(handle))
+
 
 end function mappedscalarderivative_1d_gpu_constant
 end program test

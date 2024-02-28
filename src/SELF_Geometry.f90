@@ -138,7 +138,7 @@ CONTAINS
     ! Set the element internal mesh locations
     nid = 1
     DO iel = 1,mesh % nElem
-      DO i = 0,mesh % nGeo
+      DO i = 1,mesh % nGeo+1
         xMesh % interior(i,iel,1) = mesh % nodeCoords(nid)
         nid = nid + 1
       END DO

@@ -148,6 +148,9 @@ module SELF_Lagrange
     generic,public :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     procedure,private :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
 
+    generic,public :: TensorDivergence_2D => TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
+    procedure,private :: TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
+
     ! GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
     ! PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
 
@@ -156,6 +159,9 @@ module SELF_Lagrange
 
     generic,public :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
     procedure,private :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
+
+    generic,public :: TensorDivergence_3D => TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
+    procedure,private :: TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
 
     ! GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
     ! PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
@@ -345,12 +351,12 @@ contains
 
   end subroutine UpdateDevice_Lagrange
 
-  subroutine self_hipblas_matrixop_1d(A,f,Af,opArows,opAcols,bcols,hipblas_handle)
+  subroutine self_hipblas_matrixop_1d(A,f,Af,opArows,opAcols,bcols,handle)
     real(prec),pointer,intent(in) :: A(:,:)
     real(prec),pointer,intent(in) :: f(:,:,:)
     real(prec),pointer,intent(inout) :: Af(:,:,:)
     integer,intent(in) :: opArows,opAcols,bcols
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! Local
     integer(c_int) :: m
     integer(c_int) :: n
@@ -370,7 +376,7 @@ contains
     ldc = m ! leading dimension of C (Af)
     beta = 0.0_c_prec
 #ifdef DOUBLE_PRECISION
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+    call hipblasCheck(hipblasDgemm(handle, &
                                    HIPBLAS_OP_T,HIPBLAS_OP_N, &
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
@@ -378,7 +384,7 @@ contains
                                    beta, &
                                    c_loc(Af),ldc))
 #else
-    call hipblasCheck(hipblasSgemm(hipblas_handle, &
+    call hipblasCheck(hipblasSgemm(handle, &
                                    HIPBLAS_OP_T,HIPBLAS_OP_N, &
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
@@ -388,12 +394,12 @@ contains
 #endif
   end subroutine self_hipblas_matrixop_1d
 
-  subroutine self_hipblas_matrixop_dim1_2d(A,f,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+  subroutine self_hipblas_matrixop_dim1_2d(A,f,Af,controldegree,targetdegree,nvars,nelems,handle)
     real(prec),pointer,intent(in) :: A(:,:)
     real(prec),pointer,intent(in) :: f(:,:,:,:)
     real(prec),pointer,intent(inout) :: Af(:,:,:,:)
     integer,intent(in) :: controldegree,targetdegree,nvars,nelems
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! Local
     integer(c_int) :: m
     integer(c_int) :: n
@@ -415,7 +421,7 @@ contains
 
 #ifdef DOUBLE_PRECISION
     ! First pass interpolates in the first quadrature dimension
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+    call hipblasCheck(hipblasDgemm(handle, &
                                    HIPBLAS_OP_T,HIPBLAS_OP_N, &
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
@@ -423,7 +429,7 @@ contains
                                    c_loc(Af),ldc))
 #else
     ! First pass interpolates in the first quadrature dimension
-    call hipblasCheck(hipblasSgemm(hipblas_handle, &
+    call hipblasCheck(hipblasSgemm(handle, &
                                    HIPBLAS_OP_T,HIPBLAS_OP_N, &
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
@@ -433,13 +439,13 @@ contains
 
   end subroutine self_hipblas_matrixop_dim1_2d
 
-  subroutine self_hipblas_matrixop_dim2_2d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+  subroutine self_hipblas_matrixop_dim2_2d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,handle)
     real(prec),pointer,intent(in) :: A(:,:)
     real(prec),pointer,intent(in) :: f(:,:,:,:)
     real(prec),pointer,intent(inout) :: Af(:,:,:,:)
     real(c_prec),intent(in) :: beta
     integer,intent(in) :: controldegree,targetdegree,nvars,nelems
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! Local
     integer(c_int) :: m
     integer(c_int) :: n
@@ -467,14 +473,14 @@ contains
     batchCount = nvars*nelems
     do i = 0,targetdegree
 #ifdef DOUBLE_PRECISION
-      call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
+      call hipblasCheck(hipblasDgemvStridedBatched(handle, &
                                                    HIPBLAS_OP_T, &
                                                    m,n,alpha, &
                                                    c_loc(A),lda,strideA, &
                                                    c_loc(f(1 + i,1,1,1)),incx,stridex,beta, &
                                                    c_loc(Af(1 + i,1,1,1)),incy,stridey,batchCount))
 #else
-      call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
+      call hipblasCheck(hipblasSgemvStridedBatched(handle, &
                                                    HIPBLAS_OP_T, &
                                                    m,n,alpha, &
                                                    c_loc(A),lda,strideA, &
@@ -485,12 +491,12 @@ contains
 
   end subroutine self_hipblas_matrixop_dim2_2d
 
-  subroutine self_hipblas_matrixop_dim1_3d(A,f,Af,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+  subroutine self_hipblas_matrixop_dim1_3d(A,f,Af,controldegree,targetdegree,nvars,nelems,handle)
     real(prec),pointer,intent(in) :: A(:,:)
     real(prec),pointer,intent(in) :: f(:,:,:,:,:)
     real(prec),pointer,intent(inout) :: Af(:,:,:,:,:)
     integer,intent(in) :: controldegree,targetdegree,nvars,nelems
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! Local
     integer(c_int) :: m
     integer(c_int) :: n
@@ -512,7 +518,7 @@ contains
 
 #ifdef DOUBLE_PRECISION
     ! First pass interpolates in the first quadrature dimension
-    call hipblasCheck(hipblasDgemm(hipblas_handle, &
+    call hipblasCheck(hipblasDgemm(handle, &
                                    HIPBLAS_OP_T,HIPBLAS_OP_N, &
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
@@ -520,7 +526,7 @@ contains
                                    c_loc(Af),ldc))
 #else
     ! First pass interpolates in the first quadrature dimension
-    call hipblasCheck(hipblasSgemm(hipblas_handle, &
+    call hipblasCheck(hipblasSgemm(handle, &
                                    HIPBLAS_OP_T,HIPBLAS_OP_N, &
                                    m,n,k,alpha, &
                                    c_loc(A),lda, &
@@ -530,13 +536,13 @@ contains
 
   end subroutine self_hipblas_matrixop_dim1_3d
 
-  subroutine self_hipblas_matrixop_dim2_3d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+  subroutine self_hipblas_matrixop_dim2_3d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,handle)
     real(prec),pointer,intent(in) :: A(:,:)
     real(prec),pointer,intent(in) :: f(:,:,:,:,:)
     real(prec),pointer,intent(inout) :: Af(:,:,:,:,:)
     real(c_prec),intent(in) :: beta
     integer,intent(in) :: controldegree,targetdegree,nvars,nelems
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! Local
     integer(c_int) :: m
     integer(c_int) :: n
@@ -564,14 +570,14 @@ contains
     batchCount = (controldegree + 1)*nvars*nelems
     do i = 0,targetdegree
 #ifdef DOUBLE_PRECISION
-      call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
+      call hipblasCheck(hipblasDgemvStridedBatched(handle, &
                                                    HIPBLAS_OP_T, &
                                                    m,n,alpha, &
                                                    c_loc(A),lda,strideA, &
                                                    c_loc(f(1 + i,1,1,1,1)),incx,stridex,beta, &
                                                    c_loc(Af(1 + i,1,1,1,1)),incy,stridey,batchCount))
 #else
-      call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
+      call hipblasCheck(hipblasSgemvStridedBatched(handle, &
                                                    HIPBLAS_OP_T, &
                                                    m,n,alpha, &
                                                    c_loc(A),lda,strideA, &
@@ -582,13 +588,13 @@ contains
 
   end subroutine self_hipblas_matrixop_dim2_3d
 
-  subroutine self_hipblas_matrixop_dim3_3d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,hipblas_handle)
+  subroutine self_hipblas_matrixop_dim3_3d(A,f,Af,beta,controldegree,targetdegree,nvars,nelems,handle)
     real(prec),pointer,intent(in) :: A(:,:)
     real(prec),pointer,intent(in) :: f(:,:,:,:,:)
     real(prec),pointer,intent(inout) :: Af(:,:,:,:,:)
     real(c_prec),intent(in) :: beta
     integer,intent(in) :: controldegree,targetdegree,nvars,nelems
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! Local
     integer(c_int) :: m
     integer(c_int) :: n
@@ -617,14 +623,14 @@ contains
     do j = 0,targetdegree
       do i = 0,targetdegree
 #ifdef DOUBLE_PRECISION
-        call hipblasCheck(hipblasDgemvStridedBatched(hipblas_handle, &
+        call hipblasCheck(hipblasDgemvStridedBatched(handle, &
                                                      HIPBLAS_OP_T, &
                                                      m,n,alpha, &
                                                      c_loc(A),lda,strideA, &
                                                      c_loc(f(1 + i,1 + j,1,1,1)),incx,stridex,beta, &
                                                      c_loc(Af(1 + i,1 + j,1,1,1)),incy,stridey,batchCount))
 #else
-        call hipblasCheck(hipblasSgemvStridedBatched(hipblas_handle, &
+        call hipblasCheck(hipblasSgemvStridedBatched(handle, &
                                                      HIPBLAS_OP_T, &
                                                      m,n,alpha, &
                                                      c_loc(A),lda,strideA, &
@@ -678,7 +684,7 @@ contains
 
   end subroutine ScalarGridInterp_1D_cpu
 
-  subroutine ScalarGridInterp_1D_gpu(this,f,fTarget,nvars,nelems,hipblas_handle)
+  subroutine ScalarGridInterp_1D_gpu(this,f,fTarget,nvars,nelems,handle)
     !! Device (GPU) implementation of the ScalarGridInterp_1D interface.
     !! In most cases, you should use the `ScalarGridInterp_1D` generic interface,
     !! rather than calling this routine directly.
@@ -703,9 +709,9 @@ contains
     !! (Input) Array of function values, defined on the control grid
     real(prec),pointer,intent(inout) :: fTarget(:,:,:)
     !! (Output) Array of function values, defined on the target grid
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
-    call self_hipblas_matrixop_1d(this % iMatrix,f,fTarget,this % M + 1,this % N + 1,nvars*nelems,hipblas_handle)
+    call self_hipblas_matrixop_1d(this % iMatrix,f,fTarget,this % M + 1,this % N + 1,nvars*nelems,handle)
 
   end subroutine ScalarGridInterp_1D_gpu
 
@@ -759,7 +765,7 @@ contains
 
   end subroutine ScalarGridInterp_2D_cpu
 
-  subroutine ScalarGridInterp_2D_gpu(this,f,fInt,fTarget,nvars,nelems,hipblas_handle)
+  subroutine ScalarGridInterp_2D_gpu(this,f,fInt,fTarget,nvars,nelems,handle)
     !! Device (GPU) implementation of the ScalarGridInterp_2D interface.
     !! In most cases, you should use the `ScalarGridInterp_2D` generic interface,
     !! rather than calling this routine directly.
@@ -786,10 +792,10 @@ contains
     !! (Inout) workspace array for handling intermediate values interpolated in one direction
     real(prec),pointer,intent(inout) :: fTarget(:,:,:,:)
     !! (Output) Array of function values, defined on the target grid
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
-    call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,hipblas_handle)
-    call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
+    call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
 
   end subroutine ScalarGridInterp_2D_gpu
 
@@ -849,7 +855,7 @@ contains
 
   end subroutine ScalarGridInterp_3D_cpu
 
-  subroutine ScalarGridInterp_3D_gpu(this,f,fInt1,fInt2,fTarget,nvars,nelems,hipblas_handle)
+  subroutine ScalarGridInterp_3D_gpu(this,f,fInt1,fInt2,fTarget,nvars,nelems,handle)
     !! Device (GPU) implementation of the ScalarGridInterp_3D interface.
     !! In most cases, you should use the `ScalarGridInterp_3D` generic interface,
     !! rather than calling this routine directly.
@@ -878,11 +884,11 @@ contains
     !! (Inout) workspace array for handling intermediate values interpolated in one direction
     real(prec),pointer,intent(inout) :: fTarget(:,:,:,:,:)
     !! (Output) Array of function values, defined on the target grid
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
-    call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,hipblas_handle)
-    call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
-    call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,handle)
+    call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
+    call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
 
   end subroutine ScalarGridInterp_3D_gpu
 
@@ -1065,15 +1071,15 @@ contains
 
   end subroutine Derivative_1D_cpu
 
-  subroutine Derivative_1D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine Derivative_1D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in) :: nvars,nelems
     real(prec),pointer,intent(in)  :: f(:,:,:)
     real(prec),pointer,intent(out) :: df(:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
-    call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,hipblas_handle)
+    call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
 
   end subroutine Derivative_1D_gpu
 
@@ -1202,20 +1208,20 @@ contains
 
   end subroutine ScalarGradient_2D_cpu
 
-  subroutine ScalarGradient_2D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine ScalarGradient_2D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),pointer,intent(in) :: f(:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! local
     real(prec),pointer :: dfloc(:,:,:,:)
 
     dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
-    call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
     dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
-    call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
     dfloc => null()
 
   end subroutine ScalarGradient_2D_gpu
@@ -1255,22 +1261,22 @@ contains
 
   end subroutine ScalarGradient_3D_cpu
 
-  subroutine ScalarGradient_3D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine ScalarGradient_3D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),pointer,intent(in) :: f(:,:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! local
     real(prec),pointer :: dfloc(:,:,:,:,:)
 
     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,1)
-    call self_hipblas_matrixop_dim1_3d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_3d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,2)
-    call self_hipblas_matrixop_dim2_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,3)
-    call self_hipblas_matrixop_dim3_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim3_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
     dfloc => null()
 
   end subroutine ScalarGradient_3D_gpu
@@ -1314,13 +1320,13 @@ contains
 
   end subroutine VectorGradient_2D_cpu
 
-  subroutine VectorGradient_2D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine VectorGradient_2D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),pointer,intent(in) :: f(:,:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! local
     real(prec),pointer :: dfloc(:,:,:,:)
     real(prec),pointer :: floc(:,:,:,:)
@@ -1330,10 +1336,10 @@ contains
       floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir)
 
       dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,1)
-      call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+      call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
 
       dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,2)
-  call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+  call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
 
     end do
 
@@ -1385,13 +1391,13 @@ contains
 
   end subroutine VectorGradient_3D_cpu
 
-  subroutine VectorGradient_3D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine VectorGradient_3D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! local
     real(prec),pointer :: dfloc(:,:,:,:,:)
     real(prec),pointer :: floc(:,:,:,:,:)
@@ -1401,199 +1407,19 @@ contains
       floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir)
 
       dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,1)
-      call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,hipblas_handle)
+      call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
 
       dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,2)
-  call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+  call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
 
       dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,3)
-  call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+  call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
 
     end do
 
     dfloc => null()
 
   end subroutine VectorGradient_3D_gpu
-! ! !
-! !
-!   ! SUBROUTINE ScalarDGGradient_2D_cpu(this,f,bf,gradF,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bf(1:this % N+1,1:nvars,1:4,1:nelems)
-!   !   REAL(prec),INTENT(out) :: gradF(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!   !   ! Local
-!   !   INTEGER    :: i,j,ii,iel,ivar
-
-!   !   DO iel = 1,nelems
-!   !     DO ivar = 1,nvars
-!   !       DO j = 1,this % N+1
-!   !         DO i = 1,this % N+1
-
-!   !           gradF(1,i,j,iel,ivar) = 0.0_prec
-!   !           gradF(2,i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 1,this % N+1
-!   !             gradF(1,i,j,iel,ivar) = gradF(1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(ii,j,iel,ivar)
-!   !             gradF(2,i,j,iel,ivar) = gradF(2,i,j,iel,ivar) + this % dgMatrix (ii,j)*f(i,ii,iel,ivar)
-!   !           END DO
-
-!   !           ! Boundary Contribution
-!   !           gradF(1,i,j,iel,ivar) = gradF(1,i,j,iel,ivar) + (bf(j,ivar,2,iel)*this % bMatrix (i,1) + &
-!   !                                                            bf(j,ivar,4,iel)*this % bMatrix (i,0))/ &
-!   !                                   this % qWeights (i)
-
-!   !           gradF(2,i,j,iel,ivar) = gradF(2,i,j,iel,ivar) + (bf(i,ivar,3,iel)*this % bMatrix (j,1) + &
-!   !                                                            bf(i,ivar,1,iel)*this % bMatrix (j,0))/ &
-!   !                                   this % qWeights (j)
-
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END SUBROUTINE ScalarDGGradient_2D_cpu
-
-!   ! SUBROUTINE ScalarDGGradient_2D_gpu(this,f_dev,bf_dev,gradF_dev,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)         :: nvars,nelems
-!   !   TYPE(c_ptr),INTENT(in)     :: f_dev
-!   !   TYPE(c_ptr),INTENT(in)     :: bf_dev
-!   !   TYPE(c_ptr),INTENT(out)    :: gradF_dev
-
-!   !   CALL ScalarDGGradient_2D_gpu_wrapper(this % dgMatrix, &
-!   !                                        this % bMatrix, &
-!   !                                        this % qWeights, &
-!   !                                        f_dev,bf_dev,gradF_dev,this % N, &
-!   !                                        nvars,nelems)
-
-!   ! END SUBROUTINE ScalarDGGradient_2D_gpu
-
-!   subroutine VectorGradient_2D_cpu(this,f,gradF,nvars,nelems)
-!     !
-!     ! Input : Vector(1:2,...)
-!     ! Output : Tensor(1:2,1:2,....)
-!     !          > Tensor(1,1) = d/ds1( Vector(1,...) )
-!     !          > Tensor(2,1) = d/ds1( Vector(2,...) )
-!     !          > Tensor(1,2) = d/ds2( Vector(1,...) )
-!     !          > Tensor(2,2) = d/ds2( Vector(2,...) )
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:2,1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     ! Local
-!     integer    :: i,j,ii,iel,ivar
-!     real(prec) :: gf(1:2,1:2)
-
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 1,this % N+1
-!           do i = 1,this % N+1
-
-!             gf(1,1) = 0.0_prec
-!             gf(2,1) = 0.0_prec
-!             gf(1,2) = 0.0_prec
-!             gf(2,2) = 0.0_prec
-!             do ii = 1,this % N+1
-!               gf(1,1) = gf(1,1) + this % dMatrix (ii,i)*f(1,ii,j,iel,ivar)
-!               gf(2,1) = gf(2,1) + this % dMatrix (ii,i)*f(2,ii,j,iel,ivar)
-!               gf(1,2) = gf(1,2) + this % dMatrix (ii,j)*f(1,i,ii,iel,ivar)
-!               gf(2,2) = gf(2,2) + this % dMatrix (ii,j)*f(2,i,ii,iel,ivar)
-!             end do
-!             gradF(1:2,1:2,i,j,iel,ivar) = gf(1:2,1:2)
-
-!           end do
-!         end do
-!       end do
-!     end do
-
-!   end subroutine VectorGradient_2D_cpu
-
-!   subroutine VectorGradient_2D_gpu(this,f_dev,gradF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(out)    :: gradF_dev
-
-!     call VectorGradient_2D_gpu_wrapper(this % dMatrix, &
-!                                        f_dev,gradF_dev,this % N, &
-!                                        nvars,nelems)
-
-!   end subroutine VectorGradient_2D_gpu
-
-!   ! SUBROUTINE VectorDGGradient_2D_cpu(this,f,bf,gradF,nvars,nelems)
-!   !   !
-!   !   ! Input : Vector(1:2,...)
-!   !   ! Output : Tensor(1:2,1:2,....)
-!   !   !          > Tensor(1,1) = d/ds1( Vector(1,...) )
-!   !   !          > Tensor(2,1) = d/ds1( Vector(2,...) )
-!   !   !          > Tensor(1,2) = d/ds2( Vector(1,...) )
-!   !   !          > Tensor(2,2) = d/ds2( Vector(2,...) )
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)     :: nvars,nelems
-!   !   REAL(prec),INTENT(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!   !   REAL(prec),INTENT(in)  :: bf(1:2,1:this % N+1,1:nvars,1:4,1:nelems)
-!   !   REAL(prec),INTENT(out) :: gradF(1:2,1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!   !   ! Local
-!   !   INTEGER    :: i,j,ii,iel,ivar
-
-!   !   DO iel = 1,nelems
-!   !     DO ivar = 1,nvars
-!   !       DO j = 1,this % N+1
-!   !         DO i = 1,this % N+1
-
-!   !           gradF(1,1,i,j,iel,ivar) = 0.0_prec
-!   !           gradF(2,1,i,j,iel,ivar) = 0.0_prec
-!   !           gradF(1,2,i,j,iel,ivar) = 0.0_prec
-!   !           gradF(2,2,i,j,iel,ivar) = 0.0_prec
-!   !           DO ii = 1,this % N+1
-!   !             gradF(1,1,i,j,iel,ivar) = gradF(1,1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(1,ii,j,iel,ivar)
-!   !             gradF(2,1,i,j,iel,ivar) = gradF(2,1,i,j,iel,ivar) + this % dgMatrix (ii,i)*f(2,ii,j,iel,ivar)
-!   !             gradF(1,2,i,j,iel,ivar) = gradF(1,2,i,j,iel,ivar) + this % dgMatrix (ii,j)*f(1,i,ii,iel,ivar)
-!   !             gradF(2,2,i,j,iel,ivar) = gradF(2,2,i,j,iel,ivar) + this % dgMatrix (ii,j)*f(2,i,ii,iel,ivar)
-!   !           END DO
-!   !           gradF(1,1,i,j,iel,ivar) = gradF(1,1,i,j,iel,ivar) + (this % bMatrix (i,1)*bf(1,j,ivar,2,iel) + &
-!   !                                                                this % bMatrix (i,0)*bf(1,j,ivar,4,iel))/ &
-!   !                                     this % qWeights (i)
-
-!   !           gradF(2,1,i,j,iel,ivar) = gradF(2,1,i,j,iel,ivar) + (this % bMatrix (i,1)*bf(2,j,ivar,2,iel) + &
-!   !                                                                this % bMatrix (i,0)*bf(2,j,ivar,4,iel))/ &
-!   !                                     this % qWeights (i)
-
-!   !           gradF(1,2,i,j,iel,ivar) = gradF(1,2,i,j,iel,ivar) + (this % bMatrix (j,1)*bf(1,i,ivar,3,iel) + &
-!   !                                                                this % bMatrix (j,0)*bf(1,i,ivar,1,iel))/ &
-!   !                                     this % qWeights (j)
-
-!   !           gradF(2,2,i,j,iel,ivar) = gradF(2,2,i,j,iel,ivar) + (this % bMatrix (j,1)*bf(2,i,ivar,3,iel) + &
-!   !                                                                this % bMatrix (j,0)*bf(2,i,ivar,1,iel))/ &
-!   !                                     this % qWeights (j)
-
-!   !         END DO
-!   !       END DO
-!   !     END DO
-!   !   END DO
-
-!   ! END SUBROUTINE VectorDGGradient_2D_cpu
-
-!   ! SUBROUTINE VectorDGGradient_2D_gpu(this,f_dev,bf_dev,gradF_dev,nvars,nelems)
-!   !   IMPLICIT NONE
-!   !   CLASS(Lagrange),INTENT(in) :: this
-!   !   INTEGER,INTENT(in)         :: nvars,nelems
-!   !   TYPE(c_ptr),INTENT(in)     :: f_dev
-!   !   TYPE(c_ptr),INTENT(in)     :: bf_dev
-!   !   TYPE(c_ptr),INTENT(out)    :: gradF_dev
-
-!   !   CALL VectorDGGradient_2D_gpu_wrapper(this % dMatrix, &
-!   !                                        this % bMatrix, &
-!   !                                        this % qWeights, &
-!   !                                        f_dev,bf_dev,gradF_dev,this % N, &
-!   !                                        nvars,nelems)
-
-!   ! END SUBROUTINE VectorDGGradient_2D_gpu
 
   subroutine VectorDivergence_2D_cpu(this,f,dF,nvars,nelems)
     implicit none
@@ -1639,77 +1465,95 @@ contains
 
   end subroutine VectorDivergence_2D_cpu
 
-  subroutine VectorDivergence_2D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine VectorDivergence_2D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),pointer,intent(in) :: f(:,:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! local
     real(prec),pointer :: floc(:,:,:,:)
 
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1)
-    call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2)
-    call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     floc => null()
 
   end subroutine VectorDivergence_2D_gpu
 
-!   subroutine VectorDGDivergence_2D_cpu(this,f,bF,dF,nvars,nelems)
-!     ! Assumes bF is the vector component in the direction normal to the boundary
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:2,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(in)  :: bF(1:this % N+1,1:nvars,1:4,1:nelems)
-!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     ! Local
-!     real(prec) :: dfLoc
-!     integer    :: i,j,ii,iel,ivar
+  subroutine TensorDivergence_2D_cpu(this,f,dF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    ! Local
+    integer    :: i,j,ii,iel,ivar,idir
+    real(prec) :: dfLoc
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do j = 1,this % N+1
-!           do i = 1,this % N+1
+    do idir = 1, 2
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
 
-!             dfLoc = 0.0_prec
-!             do ii = 1,this % N+1
-!               dfLoc = dfLoc + this % dgMatrix (ii,i)*f(1,ii,j,iel,ivar) + &
-!                       this % dgMatrix (ii,j)*f(2,i,ii,iel,ivar)
-!             end do
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
+              end do
+              dF(i,j,iel,ivar,idir) = dfLoc
 
-!             dfLoc = dfLoc + (this % bMatrix (i,1)*bF(j,ivar,2,iel) + &
-!                              this % bMatrix (i,0)*bF(j,ivar,4,iel))/ &
-!                     this % qWeights (i) + &
-!                     (this % bMatrix (j,1)*bF(i,ivar,3,iel) + &
-!                      this % bMatrix (j,0)*bF(i,ivar,1,iel))/ &
-!                     this % qWeights (j)
-!             dF(i,j,iel,ivar) = dFLoc
+            end do
+          end do
+        end do
+      end do
 
-!           end do
-!         end do
-!       end do
-!     end do
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
 
-!   end subroutine VectorDGDivergence_2D_cpu
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
+              end do
+              dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir) + dfLoc
 
-!   subroutine VectorDGDivergence_2D_gpu(this,f_dev,bF_dev,dF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(in)     :: bF_dev
-!     type(c_ptr),intent(out)    :: dF_dev
+            end do
+          end do
+        end do
+      end do
+    enddo
 
-!     call VectorDGDivergence_2D_gpu_wrapper(this % dgMatrix, &
-!                                            this % bMatrix, &
-!                                            this % qWeights, &
-!                                            f_dev,bF_dev,dF_dev,this % N, &
-!                                            nvars,nelems)
+  end subroutine TensorDivergence_2D_cpu
 
-!   end subroutine VectorDGDivergence_2D_gpu
+  subroutine TensorDivergence_2D_gpu(this,f,df,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
+    type(c_ptr),intent(inout) :: handle
+    ! local
+    real(prec),pointer :: dfloc(:,:,:,:)
+    real(prec),pointer :: floc(:,:,:,:)
+
+    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1,1)
+    call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1,2)
+    call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+
+    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,1)
+    call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
+    call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    floc => null()
+
+  end subroutine TensorDivergence_2D_gpu
 
   subroutine VectorDivergence_3D_cpu(this,f,dF,nvars,nelems)
     implicit none
@@ -1777,245 +1621,119 @@ contains
 
   end subroutine VectorDivergence_3D_cpu
 
-  subroutine VectorDivergence_3D_gpu(this,f,df,nvars,nelems,hipblas_handle)
+  subroutine VectorDivergence_3D_gpu(this,f,df,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
     real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
     ! local
     real(prec),pointer :: floc(:,:,:,:,:)
 
     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,1)
-    call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,2)
-    call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,3)
-    call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,hipblas_handle)
+    call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     floc => null()
 
   end subroutine VectorDivergence_3D_gpu
 
-!   subroutine ScalarGradient_3D_cpu(this,f,gradF,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     ! Local
-!     integer    :: i,j,k,ii,iel,ivar
-!     real(prec) :: gf(1:3)
+  subroutine TensorDivergence_3D_cpu(this,f,dF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar,idir
+    real(prec) :: dfLoc
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do k = 1,this % N+1
-!           do j = 1,this % N+1
-!             do i = 1,this % N+1
+    do idir = 1,3
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
 
-!               gF(1) = 0.0_prec
-!               gF(2) = 0.0_prec
-!               gF(3) = 0.0_prec
-!               do ii = 1,this % N+1
-!                 gF(1) = gF(1) + this % dMatrix (ii,i)*f(ii,j,k,iel,ivar)
-!                 gF(2) = gF(2) + this % dMatrix (ii,j)*f(i,ii,k,iel,ivar)
-!                 gF(3) = gF(3) + this % dMatrix (ii,k)*f(i,j,ii,iel,ivar)
-!               end do
+                dfLoc = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
+                end do
+                dF(i,j,k,iel,ivar,idir) = dfLoc
 
-!               gradF(1,i,j,k,iel,ivar) = gF(1)
-!               gradF(2,i,j,k,iel,ivar) = gF(2)
-!               gradF(3,i,j,k,iel,ivar) = gF(3)
+              end do
+            end do
+          end do
+        end do
+      end do
 
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
 
-!   end subroutine ScalarGradient_3D_cpu
+                dfLoc = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
+                end do
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc
 
-!   subroutine ScalarGradient_3D_gpu(this,f_dev,gradF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(out)    :: gradF_dev
+              end do
+            end do
+          end do
+        end do
+      end do
 
-!     call ScalarGradient_3D_gpu_wrapper(this % dMatrix, &
-!                                        f_dev,gradF_dev,this % N, &
-!                                        nvars,nelems)
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
 
-!   end subroutine ScalarGradient_3D_gpu
-! !
-!   subroutine VectorGradient_3D_cpu(this,f,gradF,nvars,nelems)
-!     !
-!     ! Input : Vector(1:3,...)
-!     ! Output : Tensor(1:3,1:3,....)
-!     !          > Tensor(1,1) = d/ds1( Vector(1,...) )
-!     !          > Tensor(2,1) = d/ds1( Vector(2,...) )
-!     !          > Tensor(3,1) = d/ds1( Vector(3,...) )
-!     !          > Tensor(1,2) = d/ds2( Vector(1,...) )
-!     !          > Tensor(2,2) = d/ds2( Vector(2,...) )
-!     !          > Tensor(3,2) = d/ds2( Vector(3,...) )
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(out) :: gradF(1:3,1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     ! Local
-!     integer    :: i,j,k,ii,iel,ivar
-!     real(prec) :: gF(1:3,1:3)
+                dfLoc = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfLoc = dfLoc + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar,idir,3)
+                end do
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc
 
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do k = 1,this % N+1
-!           do j = 1,this % N+1
-!             do i = 1,this % N+1
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
 
-!               gF = 0.0_prec
-!               do ii = 1,this % N+1
-!                 gF(1,1) = gF(1,1) + this % dMatrix (ii,i)*f(1,ii,j,k,iel,ivar)
-!                 gF(2,1) = gF(2,1) + this % dMatrix (ii,i)*f(2,ii,j,k,iel,ivar)
-!                 gF(3,1) = gF(3,1) + this % dMatrix (ii,i)*f(3,ii,j,k,iel,ivar)
-!                 gF(1,2) = gF(1,2) + this % dMatrix (ii,j)*f(1,i,ii,k,iel,ivar)
-!                 gF(2,2) = gF(2,2) + this % dMatrix (ii,j)*f(2,i,ii,k,iel,ivar)
-!                 gF(3,2) = gF(3,2) + this % dMatrix (ii,j)*f(3,i,ii,k,iel,ivar)
-!                 gF(1,3) = gF(1,3) + this % dMatrix (ii,k)*f(1,i,j,ii,iel,ivar)
-!                 gF(2,3) = gF(2,3) + this % dMatrix (ii,k)*f(2,i,j,ii,iel,ivar)
-!                 gF(3,3) = gF(3,3) + this % dMatrix (ii,k)*f(3,i,j,ii,iel,ivar)
-!               end do
+  end subroutine TensorDivergence_3D_cpu
 
-!               gradF(1,1,i,j,k,iel,ivar) = gF(1,1)
-!               gradF(2,1,i,j,k,iel,ivar) = gF(2,1)
-!               gradF(3,1,i,j,k,iel,ivar) = gF(3,1)
-!               gradF(1,2,i,j,k,iel,ivar) = gF(1,2)
-!               gradF(2,2,i,j,k,iel,ivar) = gF(2,2)
-!               gradF(3,2,i,j,k,iel,ivar) = gF(3,2)
-!               gradF(1,3,i,j,k,iel,ivar) = gF(1,3)
-!               gradF(2,3,i,j,k,iel,ivar) = gF(2,3)
-!               gradF(3,3,i,j,k,iel,ivar) = gF(3,3)
+  subroutine TensorDivergence_3D_gpu(this,f,df,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
+    type(c_ptr),intent(inout) :: handle
+    ! local
+    real(prec),pointer :: floc(:,:,:,:,:)
+    real(prec),pointer :: dfloc(:,:,:,:,:)
+    integer :: idir
 
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
+    do idir = 1,3
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)
+      call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,2)
+      call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,3)
+      call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    enddo
 
-!   end subroutine VectorGradient_3D_cpu
+    floc => null()
 
-!   subroutine VectorGradient_3D_gpu(this,f_dev,gradF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(out)    :: gradF_dev
-
-!     call VectorGradient_3D_gpu_wrapper(this % dMatrix, &
-!                                        f_dev,gradF_dev,this % N, &
-!                                        nvars,nelems)
-
-!   end subroutine VectorGradient_3D_gpu
-
-!   subroutine VectorDivergence_3D_cpu(this,f,dF,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     ! Local
-!     integer    :: i,j,k,ii,iel,ivar
-
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do k = 1,this % N+1
-!           do j = 1,this % N+1
-!             do i = 1,this % N+1
-
-!               dF(i,j,k,iel,ivar) = 0.0_prec
-!               do ii = 1,this % N+1
-!                 dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + this % dMatrix (ii,i)*f(1,ii,j,k,iel,ivar) + &
-!                                      this % dMatrix (ii,j)*f(2,i,ii,k,iel,ivar) + &
-!                                      this % dMatrix (ii,k)*f(3,i,j,ii,iel,ivar)
-!               end do
-
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
-
-!   end subroutine VectorDivergence_3D_cpu
-
-!   subroutine VectorDivergence_3D_gpu(this,f_dev,dF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(out)    :: dF_dev
-
-!     call VectorDivergence_3D_gpu_wrapper(this % dMatrix, &
-!                                          f_dev,dF_dev,this % N, &
-!                                          nvars,nelems)
-
-!   end subroutine VectorDivergence_3D_gpu
-
-!   subroutine VectorDGDivergence_3D_cpu(this,f,bF,dF,nvars,nelems)
-!     ! Assumes bF is the vector component in the direction normal to the element boundaries
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)     :: nvars,nelems
-!     real(prec),intent(in)  :: f(1:3,1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     real(prec),intent(in)  :: bf(1:this % N+1,1:this % N+1,1:nvars,1:6,1:nelems)
-!     real(prec),intent(out) :: dF(1:this % N+1,1:this % N+1,1:this % N+1,1:nelems,1:nvars)
-!     ! Local
-!     integer    :: i,j,k,ii,iel,ivar
-
-!     do iel = 1,nelems
-!       do ivar = 1,nvars
-!         do k = 1,this % N+1
-!           do j = 1,this % N+1
-!             do i = 1,this % N+1
-
-!               dF(i,j,k,iel,ivar) = 0.0_prec
-!               do ii = 1,this % N+1
-!                 dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + this % dgMatrix (ii,i)*f(1,ii,j,k,iel,ivar) + &
-!                                      this % dgMatrix (ii,j)*f(2,i,ii,k,iel,ivar) + &
-!                                      this % dgMatrix (ii,k)*f(3,i,j,ii,iel,ivar)
-!               end do
-
-!               dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + (this % bMatrix (i,1)*bF(j,k,ivar,3,iel) + & ! east
-!                                                          this % bMatrix (i,0)*bF(j,k,ivar,5,iel))/ &  ! west
-!                                    this % qWeights (i) + &
-!                                    (this % bMatrix (j,1)*bF(i,k,ivar,4,iel) + & ! north
-!                                     this % bMatrix (j,0)*bF(i,k,ivar,2,iel))/ &  ! south
-!                                    this % qWeights (j) + &
-!                                    (this % bMatrix (k,1)*bF(i,j,ivar,6,iel) + & ! top
-!                                     this % bMatrix (k,0)*bF(i,j,ivar,1,iel))/ &  ! bottom
-!                                    this % qWeights (k)
-
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
-
-!   end subroutine VectorDGDivergence_3D_cpu
-
-!   subroutine VectorDGDivergence_3D_gpu(this,f_dev,bF_dev,dF_dev,nvars,nelems)
-!     implicit none
-!     class(Lagrange),intent(in) :: this
-!     integer,intent(in)         :: nvars,nelems
-!     type(c_ptr),intent(in)     :: f_dev
-!     type(c_ptr),intent(in)     :: bF_dev
-!     type(c_ptr),intent(out)    :: dF_dev
-
-!     call VectorDGDivergence_3D_gpu_wrapper(this % dgMatrix, &
-!                                            this % bMatrix, &
-!                                            this % qWeights, &
-!                                            f_dev,bF_dev,dF_dev,this % N, &
-!                                            nvars,nelems)
-
-!   end subroutine VectorDGDivergence_3D_gpu
+  end subroutine TensorDivergence_3D_gpu
 
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !
@@ -2043,15 +1761,15 @@ contains
 
   end subroutine ScalarBoundaryInterp_1D_cpu
 
-  subroutine ScalarBoundaryInterp_1D_gpu(this,f,fTarget,nvars,nelems,hipblas_handle)
+  subroutine ScalarBoundaryInterp_1D_gpu(this,f,fTarget,nvars,nelems,handle)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)  :: nvars,nelems
     real(prec),pointer,intent(in)      :: f(:,:,:)
     real(prec),pointer,intent(inout)     :: fTarget(:,:,:)
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
-    call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,hipblas_handle)
+    call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,handle)
 
   end subroutine ScalarBoundaryInterp_1D_gpu
 
