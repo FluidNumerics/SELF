@@ -9,11 +9,13 @@ program test
 contains
 integer function mappedscalardgderivative_1d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_MappedData
   use SELF_Mesh
   use SELF_Geometry
+  use iso_c_binding
+  use hipfort_hipblas
+
 
   implicit none
 
@@ -32,6 +34,9 @@ integer function mappedscalardgderivative_1d_gpu_constant() result(r)
   type(Mesh1D),TARGET :: mesh
   type(Geometry1D),TARGET :: geometry
   type(MPILayer),TARGET :: decomp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   call decomp % Init(enableMPI=.false.)
   call mesh % UniformBlockMesh(nGeo=1,&
@@ -61,26 +66,22 @@ integer function mappedscalardgderivative_1d_gpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
-  call f % BoundaryInterp(.true.)
+  call f % BoundaryInterp(handle)
 
   ! Set boundary conditions
-  call f % boundary % UpdateHost()
 
-  f % boundary % hostData(1,1,1) = 1.0_prec ! Left most
-  f % boundary % hostData(1,2,nelem) = 1.0_prec ! Right most
+  f % boundary(1,1,1) = 1.0_prec ! Left most
+  f % boundary(2,nelem,1) = 1.0_prec ! Right most
   
   ! Adjust for -\hat{x} direction on left element boundaries
-  f % boundary % hostData(1,1,:) = -f % boundary % hostData(1,1,:)
-
-  call f % boundary % UpdateDevice()
+  f % boundary(1,:,1) = -f % boundary(1,:,1)
 
   print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
-  call f % Derivative(geometry, df, selfWeakDGForm, .true.)
-
-  call df % updatehost()
+  call f % DGDerivative(geometry, df, handle)
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
@@ -99,6 +100,8 @@ integer function mappedscalardgderivative_1d_gpu_constant() result(r)
   call interp % free()
   call f % free()
   call df % free()
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function mappedscalardgderivative_1d_gpu_constant
+
 end program test

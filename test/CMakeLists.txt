@@ -65,12 +65,14 @@ add_fortran_tests (
     "mesh3d_setup.f90"
     "mappedscalarderivative_1d_cpu_constant.f90"
     "mappedscalarderivative_1d_gpu_constant.f90"
+    "mappedscalarbrderivative_1d_cpu_constant.f90"
+    "mappedscalarbrderivative_1d_gpu_constant.f90"
+    "mappedscalardgderivative_1d_cpu_constant.f90"
+    "mappedscalardgderivative_1d_gpu_constant.f90"
     )
 
 
 #add_fortran_test_executable (
-#    testsuite
-
 
 
 #    "vectorgridinterp_2d_cpu_constant.f90"
@@ -80,16 +82,6 @@ add_fortran_tests (
 
 
 
-
-
-#    "mesh2d_setup.f90"
-#    "mesh3d_setup.f90"
-#    "mappedscalarderivative_1d_cpu_constant.f90"
-#    "mappedscalarderivative_1d_gpu_constant.f90"
-#    "mappedscalarbrderivative_1d_cpu_constant.f90"
-#    "mappedscalarbrderivative_1d_gpu_constant.f90"
-#    "mappedscalardgderivative_1d_cpu_constant.f90"
-#    "mappedscalardgderivative_1d_gpu_constant.f90"
 #    "mappedvectordivergence_2d_cpu_constant.f90"
 #    "mappedvectordivergence_2d_gpu_constant.f90"
 #    "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
@@ -104,5 +96,6 @@ add_fortran_tests (
 #    "mappedscalargradient_3d_gpu_constant.f90"
 #    "mappedscalarbrgradient_3d_cpu_constant.f90"
 #    "mappedscalarbrgradient_3d_gpu_constant.f90"
+
 #    )
 #

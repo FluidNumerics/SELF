@@ -161,6 +161,34 @@ extern "C"
   } 
 }
 
+__global__ void DGDerivative_BoundaryContribution_1D(real *bMatrix, real *qWeight, real *bf, real *df, int N, int nEl){
+
+  
+  uint32_t ivar = blockIdx.y;
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+
+  uint32_t ndof=(N+1)*nEl;
+  if( idof < ndof ){
+    uint32_t iel = idof/(N+1); // Calculate the element ID
+    uint32_t i = idof - iel*(N+1); // Calculate the quadrature point node id
+    df[idof + ndof*ivar] += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(1,iel,ivar,N,nEl)]+
+	                           bMatrix[i]*bf[SCB_1D_INDEX(0,iel,ivar,N,nEl)])/qWeight[i];
+  }
+
+}
+
+extern "C"
+{
+  void DGDerivative_BoundaryContribution_1D_gpu(real *bMatrix, real *qWeight,real *bf, real *df, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*nEl;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block +1;
+	  DGDerivative_BoundaryContribution_1D<<<dim3(nblocks_x,nVar,1), dim3(threads_per_block,1,1), 0, 0>>>(bMatrix, qWeight, bf, df, N, nEl);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
 
 /*
 

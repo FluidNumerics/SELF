@@ -9,11 +9,12 @@ program test
 contains
 integer function mappedscalarbrderivative_1d_gpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_MappedData
   use SELF_Mesh
   use SELF_Geometry
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -32,6 +33,9 @@ integer function mappedscalarbrderivative_1d_gpu_constant() result(r)
   type(Mesh1D),TARGET :: mesh
   type(Geometry1D),TARGET :: geometry
   type(MPILayer),TARGET :: decomp
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
   call decomp % Init(enableMPI=.false.)
   call mesh % UniformBlockMesh(nGeo=1,&
@@ -61,26 +65,24 @@ integer function mappedscalarbrderivative_1d_gpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
-  call f % BoundaryInterp(.true.)
+  call f % BoundaryInterp(handle)
 
-  call f % SideExchange( mesh, decomp, .true.)
+  call f % SideExchange(mesh, decomp)
 
   ! Set boundary conditions
-  call f % extBoundary % UpdateHost()
-  f % extBoundary % hostData(1,1,1) = 1.0_prec ! Left most
-  f % extBoundary % hostData(1,2,nelem) = 1.0_prec ! Right most
-  call f % extBoundary % UpdateDevice()
+  f % extBoundary(1,1,1) = 1.0_prec ! Left most
+  f % extBoundary(2,nelem,1) = 1.0_prec ! Right most
+  
   print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
   print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
-  call f % BassiRebaySides(.true.)
+  call f % BassiRebaySides()
   print*, "min, max (avgboundary)", minval(f % avgBoundary ), maxval(f % avgBoundary )
 
-  call f % Derivative(geometry, df, selfWeakBRForm, .true.)
-
-  call df % updatehost()
+  call f % BRDerivative(geometry, df, handle)
+  call hipcheck(hipdevicesynchronize())
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
@@ -99,6 +101,7 @@ integer function mappedscalarbrderivative_1d_gpu_constant() result(r)
   call interp % free()
   call f % free()
   call df % free()
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function mappedscalarbrderivative_1d_gpu_constant
 end program test

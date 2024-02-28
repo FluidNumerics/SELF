@@ -9,7 +9,6 @@ program test
 contains
 integer function mappedscalardgderivative_1d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_MappedData
   use SELF_Mesh
@@ -60,18 +59,18 @@ integer function mappedscalardgderivative_1d_cpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % BoundaryInterp(.false.)
+  call f % BoundaryInterp()
 
   ! Set boundary conditions
-  f % boundary % hostData(1,1,1) = 1.0_prec ! Left most
-  f % boundary % hostData(1,2,nelem) = 1.0_prec ! Right most
+  f % boundary(1,1,1) = 1.0_prec ! Left most
+  f % boundary(2,nelem,1) = 1.0_prec ! Right most
 
   ! Adjust for -\hat{x} direction on left element boundaries
-  f % boundary % hostData(1,1,:) = -f % boundary % hostData(1,1,:)
+  f % boundary(1,:,1) = -f % boundary(1,:,1)
 
   print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
-  call f % Derivative(geometry, df, selfWeakDGForm, .false.)
+  call f % DGDerivative(geometry, df)
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

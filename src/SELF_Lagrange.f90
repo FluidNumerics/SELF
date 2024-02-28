@@ -133,8 +133,8 @@ module SELF_Lagrange
     generic,public :: Derivative_1D => Derivative_1D_cpu,Derivative_1D_gpu
     procedure,private :: Derivative_1D_cpu,Derivative_1D_gpu
 
-    ! generic,public :: DGDerivative_1D => DGDerivative_1D_cpu,DGDerivative_1D_gpu
-    ! procedure,private :: DGDerivative_1D_cpu,DGDerivative_1D_gpu
+    generic,public :: DGDerivative_1D => DGDerivative_1D_cpu,DGDerivative_1D_gpu
+    procedure,private :: DGDerivative_1D_cpu,DGDerivative_1D_gpu
 
     generic,public :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
     procedure,private :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
@@ -232,6 +232,16 @@ module SELF_Lagrange
       type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine TensorBoundaryInterp_3D_gpu_wrapper
+  end interface
+
+  interface
+    subroutine DGDerivative_BoundaryContribution_1D_gpu(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+      bind(c,name="DGDerivative_BoundaryContribution_1D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine DGDerivative_BoundaryContribution_1D_gpu
   end interface
 
 contains
@@ -1082,6 +1092,52 @@ contains
     call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
 
   end subroutine Derivative_1D_gpu
+
+  subroutine DGDerivative_1D_cpu(this,f,bf,df,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: bf(1:2,1:nelems,1:nvars)
+    real(prec),intent(out) :: df(1:this % N + 1,1:nelems,1:nvars)
+    ! Local
+    integer :: i,ii,iel,ivar
+    real(prec) :: dfloc
+
+    do iel = 1,nelems
+      do ivar = 1,nvars
+        do i = 1,this % N + 1
+
+          dfloc = 0.0_prec
+          do ii = 1,this % N + 1
+            dfloc = dfloc + this % dgMatrix(ii,i)*f(ii,iel,ivar)
+          end do
+      
+          df(i,iel,ivar) = dfloc + (bf(2,iel,ivar)*this % bMatrix (i,2) + &
+                                    bf(1,iel,ivar)*this % bMatrix (i,1))/ &
+                            this % qWeights (i)
+
+        end do
+      end do
+    end do
+
+  end subroutine DGDerivative_1D_cpu
+
+  subroutine DGDerivative_1D_gpu(this,f,bf,df,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in) :: nvars,nelems
+    real(prec),pointer,intent(in)  :: f(:,:,:)
+    real(prec),pointer,intent(in)  :: bf(:,:,:)
+    real(prec),pointer,intent(out) :: df(:,:,:)
+    type(c_ptr),intent(inout) :: handle
+
+    call self_hipblas_matrixop_1d(this % dgMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
+
+    call DGDerivative_BoundaryContribution_1D_gpu(c_loc(this % bMatrix),c_loc(this % qWeights), &
+                        c_loc(bf), c_loc(df), this % N, nvars, nelems)
+
+  end subroutine DGDerivative_1D_gpu
 
   ! subroutine DGDerivative_1D_cpu(this,f,bf,df,nvars,nelems)
   !   implicit none

@@ -32,10 +32,10 @@ MODULE SELF_MappedData
 
     generic,PUBLIC :: Derivative => Derivative_MappedScalar1D
     procedure,private :: Derivative_MappedScalar1D
-    !generic,PUBLIC :: DGDerivative => DGDerivative_MappedScalar1D
-    !procedure,private :: DGDerivative_MappedScalar1D
-    !generic,PUBLIC :: BRDerivative => BRDerivative_MappedScalar1D
-    !procedure,private :: BRDerivative_MappedScalar1D
+    generic,PUBLIC :: DGDerivative => DGDerivative_MappedScalar1D
+    procedure,private :: DGDerivative_MappedScalar1D
+    generic,PUBLIC :: BRDerivative => BRDerivative_MappedScalar1D
+    procedure,private :: BRDerivative_MappedScalar1D
 
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar1D
 
@@ -468,7 +468,7 @@ CONTAINS
     INTEGER :: rankId, offset
 
       rankId = decomp % rankId
-      offset = decomp % offsetElem(rankId)
+      offset = decomp % offsetElem(rankId+1)
 
       DO e1 = 1,mesh % nElem
         
@@ -529,9 +529,9 @@ CONTAINS
           DO ivar = 1,scalar % nVar
 
               ! Left side - we account for the -\hat{x} normal
-              scalar % avgBoundary(iEl,1,ivar) = -0.5_prec*( &
-                                                               scalar % boundary(iEl,1,ivar) + &
-                                                               scalar % extBoundary(iEl,1,ivar))
+              scalar % avgBoundary(1,iel,ivar) = -0.5_prec*( &
+                                                               scalar % boundary(1,iel,ivar) + &
+                                                               scalar % extBoundary(1,iel,ivar))
 
               ! Right side - we account for the +\hat{x} normal
               scalar % avgBoundary(2,iel,ivar) = 0.5_prec*( &
@@ -570,71 +570,71 @@ CONTAINS
 
   END SUBROUTINE Derivative_MappedScalar1D
 
-  ! SUBROUTINE DGDerivative_MappedScalar1D(scalar,geometry,dF,handle)
-  !   IMPLICIT NONE
-  !   CLASS(MappedScalar1D),INTENT(in) :: scalar
-  !   TYPE(Geometry1D),INTENT(in) :: geometry
-  !   TYPE(MappedScalar1D),INTENT(inout) :: dF
-  !   type(c_ptr), intent(inout), optional :: handle
+  SUBROUTINE DGDerivative_MappedScalar1D(scalar,geometry,dF,handle)
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(in) :: scalar
+    TYPE(Geometry1D),INTENT(in) :: geometry
+    TYPE(MappedScalar1D),INTENT(inout) :: dF
+    type(c_ptr), intent(inout), optional :: handle
 
 
-  !   if( present(handle) )then
+    if( present(handle) )then
 
-  !       CALL scalar % interp % DGDerivative_1D(scalar % interior, &
-  !                                              scalar % boundary, &
-  !                                              df % interior, &
-  !                                              scalar % nVar, &
-  !                                              scalar % nElem, &
-  !                                              handle )
+        CALL scalar % interp % DGDerivative_1D(scalar % interior, &
+                                               scalar % boundary, &
+                                               df % interior, &
+                                               scalar % nVar, &
+                                               scalar % nElem, &
+                                               handle )
 
-  !       CALL df % JacobianWeight(geometry, handle)
+        CALL df % JacobianWeight(geometry, handle)
 
-  !   else
+    else
 
-  !       CALL scalar % interp % DGDerivative_1D(scalar % interior, &
-  !                                              scalar % boundary, &
-  !                                              df % interior, &
-  !                                              scalar % nVar, &
-  !                                              scalar % nElem)
-  !       CALL df % JacobianWeight(geometry)
+        CALL scalar % interp % DGDerivative_1D(scalar % interior, &
+                                               scalar % boundary, &
+                                               df % interior, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
+        CALL df % JacobianWeight(geometry)
 
-  !   endif
-
-
-  ! END SUBROUTINE DGDerivative_MappedScalar1D
-
-  ! SUBROUTINE BRDerivative_MappedScalar1D(scalar,geometry,dF,handle)
-  !   IMPLICIT NONE
-  !   CLASS(MappedScalar1D),INTENT(in) :: scalar
-  !   TYPE(Geometry1D),INTENT(in) :: geometry
-  !   TYPE(MappedScalar1D),INTENT(inout) :: dF
-  !   type(c_ptr), intent(inout), optional :: handle
+    endif
 
 
-  !   if( present(handle) )then
+  END SUBROUTINE DGDerivative_MappedScalar1D
 
-  !       CALL scalar % interp % DGDerivative_1D(scalar % interior, &
-  !                                              scalar % avgboundary, &
-  !                                              df % interior, &
-  !                                              scalar % nVar, &
-  !                                              scalar % nElem, &
-  !                                              handle )
-
-  !       CALL df % JacobianWeight(geometry, handle)
-
-  !   else
-
-  !       CALL scalar % interp % DGDerivative_1D(scalar % interior, &
-  !                                              scalar % avgboundary, &
-  !                                              df % interior, &
-  !                                              scalar % nVar, &
-  !                                              scalar % nElem)
-  !       CALL df % JacobianWeight(geometry)
-
-  !   endif
+  SUBROUTINE BRDerivative_MappedScalar1D(scalar,geometry,dF,handle)
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(in) :: scalar
+    TYPE(Geometry1D),INTENT(in) :: geometry
+    TYPE(MappedScalar1D),INTENT(inout) :: dF
+    type(c_ptr), intent(inout), optional :: handle
 
 
-  ! END SUBROUTINE BRDerivative_MappedScalar1D
+    if( present(handle) )then
+
+        CALL scalar % interp % DGDerivative_1D(scalar % interior, &
+                                               scalar % avgboundary, &
+                                               df % interior, &
+                                               scalar % nVar, &
+                                               scalar % nElem, &
+                                               handle )
+
+        CALL df % JacobianWeight(geometry, handle)
+
+    else
+
+        CALL scalar % interp % DGDerivative_1D(scalar % interior, &
+                                               scalar % avgboundary, &
+                                               df % interior, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
+        CALL df % JacobianWeight(geometry)
+
+    endif
+
+
+  END SUBROUTINE BRDerivative_MappedScalar1D
 
   SUBROUTINE JacobianWeight_MappedScalar1D(scalar,geometry,handle)
 #undef __FUNC__

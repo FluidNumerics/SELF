@@ -9,7 +9,6 @@ program test
 contains
 integer function mappedscalarbrderivative_1d_cpu_constant() result(r)
   use SELF_Constants
-  use SELF_Memory
   use SELF_Lagrange
   use SELF_MappedData
   use SELF_Mesh
@@ -50,7 +49,6 @@ integer function mappedscalarbrderivative_1d_cpu_constant() result(r)
   call geometry % Init(interp,mesh % nElem)
   call geometry % GenerateFromMesh(mesh)
 
-
   ! Initialize scalars
   call f % Init(interp,nvar,nelem)
   call df % Init(interp,nvar,nelem)
@@ -60,19 +58,19 @@ integer function mappedscalarbrderivative_1d_cpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % BoundaryInterp(.false.)
+  call f % BoundaryInterp()
   print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
-  call f % SideExchange( mesh, decomp, .false.)
+  call f % SideExchange( mesh, decomp)
   ! Set boundary conditions
-  f % extBoundary % hostData(1,1,1) = 1.0_prec ! Left most
-  f % extBoundary % hostData(1,2,nelem) = 1.0_prec ! Right most
+  f % extBoundary(1,1,1) = 1.0_prec ! Left most
+  f % extBoundary(2,nelem,1) = 1.0_prec ! Right most
   print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
-  call f % BassiRebaySides(.false.)
+  call f % BassiRebaySides()
   print*, "min, max (avgboundary)", minval(f % avgBoundary ), maxval(f % avgBoundary )
 
-  call f % Derivative(geometry, df, selfWeakBRForm, .false.)
+  call f % BRDerivative(geometry, df)
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

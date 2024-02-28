@@ -19,7 +19,7 @@ extern "C"
   {
     int ndof = (N+1)*(nEl);
     int threads_per_block = 256;
-    int nblocksx = ndof/threads_per_block; 
+    int nblocksx = ndof/threads_per_block+1; 
     JacobianWeight_MappedScalar1D_gpu<<<dim3(nblocksx,nVar,1), dim3(threads_per_block,1,1), 0, 0>>>(scalar, dxds, N, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
