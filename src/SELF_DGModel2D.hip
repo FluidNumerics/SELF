@@ -1,7 +1,7 @@
 #include <hip/hip_runtime.h>
 #include "SELF_HIP_Macros.h"
 
-__global__ void UpdateGAB2_Model2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
+__global__ void UpdateGAB2_DGModel2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -33,14 +33,14 @@ __global__ void UpdateGAB2_Model2D_gpu(real *prevsol, real *solution, int m, int
 
 extern "C"
 {
-  void UpdateGAB2_Model2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
+  void UpdateGAB2_DGModel2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
-    UpdateGAB2_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+    UpdateGAB2_DGModel2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void UpdateGAB3_Model2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
+__global__ void UpdateGAB3_DGModel2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -78,14 +78,14 @@ __global__ void UpdateGAB3_Model2D_gpu(real *prevsol, real *solution, int m, int
 
 extern "C"
 {
-  void UpdateGAB3_Model2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
+  void UpdateGAB3_DGModel2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
-    UpdateGAB3_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+    UpdateGAB3_DGModel2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void UpdateGAB4_Model2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
+__global__ void UpdateGAB4_DGModel2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -132,14 +132,14 @@ __global__ void UpdateGAB4_Model2D_gpu(real *prevsol, real *solution, int m, int
 
 extern "C"
 {
-  void UpdateGAB4_Model2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
+  void UpdateGAB4_DGModel2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
-    UpdateGAB4_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+    UpdateGAB4_DGModel2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void UpdateGRK_Model2D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar){
+__global__ void UpdateGRK_DGModel2D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -153,14 +153,14 @@ __global__ void UpdateGRK_Model2D_gpu(real *grk, real *solution, real *dSdt, rea
 
 extern "C"
 {
-  void UpdateGRK_Model2D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar, int nEl)
+  void UpdateGRK_DGModel2D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar, int nEl)
   {
-    UpdateGRK_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, nWork, N, nVar);
+    UpdateGRK_DGModel2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, nWork, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void UpdateSolution_Model2D_gpu(real *solution, real *dSdt, real dt, int N, int nVar){
+__global__ void UpdateSolution_DGModel2D_gpu(real *solution, real *dSdt, real dt, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -173,14 +173,14 @@ __global__ void UpdateSolution_Model2D_gpu(real *solution, real *dSdt, real dt, 
 
 extern "C"
 {
-  void UpdateSolution_Model2D_gpu_wrapper(real **solution, real **dSdt, real dt, int N, int nVar, int nEl)
+  void UpdateSolution_DGModel2D_gpu_wrapper(real **solution, real **dSdt, real dt, int N, int nVar, int nEl)
   {
-    UpdateSolution_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*solution, *dSdt, dt, N, nVar);
+    UpdateSolution_DGModel2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*solution, *dSdt, dt, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void CalculateDSDt_Model2D_gpu(real *fluxDivergence, real *source, real *dSdt, int N, int nVar){
+__global__ void CalculateDSDt_DGModel2D_gpu(real *fluxDivergence, real *source, real *dSdt, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -194,9 +194,9 @@ __global__ void CalculateDSDt_Model2D_gpu(real *fluxDivergence, real *source, re
 
 extern "C"
 {
-  void CalculateDSDt_Model2D_gpu_wrapper(real **fluxDivergence, real **source, real **dSdt, int N, int nVar, int nEl)
+  void CalculateDSDt_DGModel2D_gpu_wrapper(real **fluxDivergence, real **source, real **dSdt, int N, int nVar, int nEl)
   {
-    CalculateDSDt_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*fluxDivergence, *source, *dSdt, N, nVar);
+    CalculateDSDt_DGModel2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*fluxDivergence, *source, *dSdt, N, nVar);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }

@@ -14,6 +14,8 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   use SELF_Mesh
   use SELF_Geometry
   use SELF_MappedData
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -32,6 +34,9 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   type(MappedVector2D) :: df
   type(MPILayer),TARGET :: decomp
   CHARACTER(LEN=255) :: WORKSPACE
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
 
   ! Initialize a domain decomposition
@@ -61,23 +66,11 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-!  call f % BoundaryInterp(.false.)
-!  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
+  call f % updatedevice()
 
-!  call f % SideExchange( mesh, decomp, .false.)
-  ! Set boundary conditions
-!  f % extBoundary % hostData(1,1,1) = 1.0_prec ! Left most
-!  f % extBoundary % hostData(1,2,nelem) = 1.0_prec ! Right most
-!  print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
+  call f % Gradient( geometry, df, handle ) 
+  call hipcheck(hipdevicesynchronize())
 
-!  call f % BassiRebaySides(.false.)
-!  print*, "min, max (avgboundary)", minval(f % avgBoundary ), maxval(f % avgBoundary )
-
-  call f % interior % updatedevice()
-
-  call f % Gradient( geometry, df, selfStrongForm, .true. ) 
-
-  call df % interior % updatehost()
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
@@ -95,8 +88,7 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   call interp % Free()
   call f % free()
   call df % free()
-    
-  r = 0
+  call hipblasCheck(hipblasDestroy(handle))
 
 end function mappedscalargradient_2d_gpu_constant
 end program test

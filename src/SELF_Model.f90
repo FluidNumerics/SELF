@@ -130,8 +130,6 @@ MODULE SELF_Model
     PROCEDURE :: LowStorageRK4_timeIntegrator
     PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK4
 
-!    PROCEDURE :: CrankNicholson_timeIntegrator
-
     PROCEDURE :: PreTendency => PreTendency_Model
     PROCEDURE :: PreFlux => PreFlux_Model
     PROCEDURE :: SourceMethod => Source_Model

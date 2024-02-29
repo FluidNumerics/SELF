@@ -245,6 +245,10 @@ module SELF_Data
     procedure,private :: BoundaryInterp_Tensor2D_cpu
     procedure,private :: BoundaryInterp_Tensor2D_gpu
 
+    generic,public :: Divergence => Divergence_Tensor2D_gpu,Divergence_Tensor2D_cpu
+    procedure,private :: Divergence_Tensor2D_gpu
+    procedure,private :: Divergence_Tensor2D_cpu
+
     procedure,public :: Determinant => Determinant_Tensor2D
 
   end type Tensor2D
@@ -1422,6 +1426,32 @@ contains
                                                  handle)
 
   end subroutine BoundaryInterp_Tensor2D_gpu
+
+  subroutine Divergence_Tensor2D_cpu(this,that)
+    implicit none
+    class(Tensor2D),intent(in) :: this
+    class(Vector2D),intent(inout) :: that
+
+    call this % interp % TensorDivergence_2D(this % interior, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem)
+
+  end subroutine Divergence_Tensor2D_cpu
+
+  subroutine Divergence_Tensor2D_gpu(this,that,hipblas_handle)
+    implicit none
+    class(Tensor2D),intent(in) :: this
+    class(Vector2D),intent(inout) :: that
+    type(c_ptr),intent(inout) :: hipblas_handle
+
+    call this % interp % TensorDivergence_2D(this % interior, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             hipblas_handle)
+
+  end subroutine Divergence_Tensor2D_gpu
 
   subroutine Determinant_Tensor2D(this,that)
     implicit none

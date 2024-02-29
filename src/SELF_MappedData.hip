@@ -25,6 +25,149 @@ extern "C"
   }
 }
 
+
+__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nEl){
+
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t ndof = (N+1)*nEl*4;
+  uint32_t e1 = idof/((N+1)*4);
+  uint32_t s1 = (idof - e1*(N+1)*4)/(N+1);
+  uint32_t i1 = idof - e1*(N+1)*4 - (N+1)*s1;
+  size_t ivar = blockIdx.y;
+  
+  int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
+  int e2 = e2Global - offset;
+  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+
+  if(idof < ndof){
+    if(bcid == 0){
+      int neighborRank = elemToRank[e2Global];
+      if( neighborRank == rankId ){
+        if(flip == 0){
+          extBoundary[idof + ndof*ivar] = boundary[SCB_2D_INDEX(i1,s2,e2,ivar,N,nEl)];
+        }
+        else if(flip == 1){
+          int i2 = N-i1;
+          extBoundary[idof + ndof*ivar] = boundary[SCB_2D_INDEX(i2,s2,e2,ivar,N,nEl)];
+        }
+      }
+    }
+  }
+  
+}
+
+extern "C"
+{
+  void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*4*nEl;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,nVar,1);
+    dim3 nthreads(threads_per_block,1,1);
+    SideExchange_MappedScalar2D_gpu<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nEl);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+__global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nEl){
+
+  size_t s1 = blockIdx.x;
+  size_t e1 = blockIdx.y;
+  size_t ivar = blockIdx.z;
+  size_t i1 = threadIdx.x;
+  
+  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int i2 = N-i1;
+  int neighborRank = elemToRank[e2];
+
+  if(bcid == 0){ // Interior Element
+    if( neighborRank /= rankId ){ // Side shared with another rank
+      if(flip == 1){ // Neighboring elements have different orientation
+
+        __shared__ real extBuff[16];
+        extBuff[i1] = extBoundary[SCB_2D_INDEX(i2,s1,e1,ivar,N,nEl)];
+        __syncthreads();
+
+        extBoundary[SCB_2D_INDEX(i1,s1,e1,ivar,N,nEl)] = extBuff[i1];
+      }
+    }
+  }
+  
+}
+
+extern "C"
+{
+  void ApplyFlip_MappedScalar2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  {
+    ApplyFlip_MappedScalar2D_gpu<<<dim3(4,nEl,nVar), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nEl);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+
+}
+
+__global__ void BassiRebaySides_MappedScalar2D_gpu(real* avgBoundary, real *boundary, real *extBoundary, int ndof){
+
+  uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if( i < ndof ){
+    avgBoundary[i] =0.5*(extBoundary[i]+boundary[i]);
+  }
+}
+
+extern "C"
+{
+  void BassiRebaySides_MappedScalar2D_gpu_wrapper(real *avgBoundary, real *boundary, real *extBoundary, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*4*nEl*nVar;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,1,1);
+    dim3 nthreads(threads_per_block,1,1);
+
+    BassiRebaySides_MappedScalar2D_gpu<<<nblocks, nthreads, 0, 0>>>(avgBoundary, boundary, extBoundary, ndof);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+__global__ void ContravariantWeight_MappedScalar2D_gpu(real *scalar, real *dsdx, real *tensor, int ndof){
+
+  uint32_t ivar = blockIdx.y; // variable dimension
+  uint32_t nvar = gridDim.y; // number of variables
+  uint32_t tdim = blockIdx.z; // tensor dimension (row + 2*col)
+  uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if( i < ndof ){
+    tensor[i+ndof*(ivar + nvar*tdim)] = dsdx[i+ndof*tdim]*scalar[i+ndof*ivar];
+  }
+}
+
+extern "C"
+{
+  void ContravariantWeight_MappedScalar2D_gpu_wrapper(real *scalar, real *dsdx, real *tensor, int isize, int jsize, int nvar, int nel)
+  {
+    int ndof = isize*jsize*nel;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,nvar,4);
+    dim3 nthreads(threads_per_block,1,1);
+
+    ContravariantWeight_MappedScalar2D_gpu<<<nblocks, nthreads, 0, 0>>>(scalar, dsdx, tensor, ndof);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+
+}
+
+
+
 // // GradientInterior_MappedScalar2D_gpu
 // // Performs the interior operations for a scalar gradient calculation
 // // Use a derivative matrix for strong form;
@@ -762,43 +905,7 @@ extern "C"
 //   }
 // }
 
-// __global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
-//   size_t s1 = blockIdx.x+1;
-//   size_t e1 = blockIdx.y;
-//   size_t i1 = threadIdx.x;
-//   size_t ivar = threadIdx.y;
-  
-//   int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
-//   int e2 = e2Global - offset;
-//   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-//   int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-//   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
-
-//   if(bcid == 0){
-//     int neighborRank = elemToRank[e2Global];
-//     if( neighborRank == rankId ){
-//       if(flip == 0){
-//         extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = boundary[SCB_2D_INDEX(i1,ivar,s2,e2,N,nVar)];
-//       }
-//       else if(flip == 1){
-//         int i2 = N-i1;
-//         extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = boundary[SCB_2D_INDEX(i2,ivar,s2,e2,N,nVar)];
-//       }
-//     }
-//   }
-  
-// }
-
-// extern "C"
-// {
-//   void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
-//   {
-//     dim3 nblocks(4,nEl,1);
-//     dim3 nthreads(N+1,nVar,1);
-//     SideExchange_MappedScalar2D_gpu<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
-//     HIP_SAFE_CALL(hipGetLastError());
-//   }
 
 // }
 
@@ -962,27 +1069,7 @@ extern "C"
 
 // }
 
-// __global__ void BassiRebaySides_MappedScalar2D_gpu(real* avgBoundary, real *boundary, real *extBoundary, int N, int nVar){
 
-//   size_t s1 = blockIdx.x+1;
-//   size_t e1 = blockIdx.y;
-//   size_t i1 = threadIdx.x;
-//   size_t ivar = threadIdx.y;
-  
-//   avgBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] =0.5*(extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)]+
-// 		                                     boundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)]);
-  
-// }
-
-// extern "C"
-// {
-//   void BassiRebaySides_MappedScalar2D_gpu_wrapper(real **avgBoundary, real **boundary, real **extBoundary, int N, int nVar, int nEl)
-//   {
-//     BassiRebaySides_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*avgBoundary, *boundary, *extBoundary, N, nVar);
-//     HIP_SAFE_CALL(hipGetLastError());
-//   }
-
-// }
 
 // __global__ void BassiRebaySides_MappedVector2D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
@@ -1058,44 +1145,6 @@ extern "C"
 
 // }
 
-// __global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
-
-//   size_t ivar = blockIdx.x;
-//   size_t s1 = blockIdx.y+1;
-//   size_t e1 = blockIdx.z;
-//   size_t i1 = threadIdx.x;
-  
-//   int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
-//   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-//   int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-//   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
-//   int i2 = N-i1;
-//   int neighborRank = elemToRank[e2];
-
-//   if(bcid == 0){ // Interior Element
-//     if( neighborRank /= rankId ){ // Side shared with another rank
-//       if(flip == 1){ // Neighboring elements have different orientation
-
-//         __shared__ real extBuff[16];
-//         extBuff[i1] = extBoundary[SCB_2D_INDEX(i2,ivar,s1,e1,N,nVar)];
-//         __syncthreads();
-
-//         extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = extBuff[i1];
-//       }
-//     }
-//   }
-  
-// }
-
-// extern "C"
-// {
-//   void ApplyFlip_MappedScalar2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
-//   {
-//     ApplyFlip_MappedScalar2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
-//     HIP_SAFE_CALL(hipGetLastError());
-//   }
-
-// }
 
 // __global__ void ApplyFlip_MappedVector2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 

@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Model1D
+MODULE SELF_DGModel1D
 
   USE SELF_SupportRoutines
   USE SELF_Metadata
@@ -34,107 +34,107 @@ MODULE SELF_Model1D
 
   CONTAINS
 
-    PROCEDURE :: Init => Init_Model1D
-    PROCEDURE :: Free => Free_Model1D
+    PROCEDURE :: Init => Init_DGModel1D
+    PROCEDURE :: Free => Free_DGModel1D
 
-    PROCEDURE :: UpdateHost => UpdateHost_Model1D
-    PROCEDURE :: UpdateDevice => UpdateDevice_Model1D
+    PROCEDURE :: UpdateHost => UpdateHost_DGModel1D
+    PROCEDURE :: UpdateDevice => UpdateDevice_DGModel1D
 
-    PROCEDURE :: UpdateSolution => UpdateSolution_Model1D
+    PROCEDURE :: UpdateSolution => UpdateSolution_DGModel1D
 
-    PROCEDURE :: ResizePrevSol => ResizePrevSol_Model1D
+    PROCEDURE :: ResizePrevSol => ResizePrevSol_DGModel1D
 
-    PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model1D
-    PROCEDURE :: UpdateGAB3 => UpdateGAB3_Model1D
-    PROCEDURE :: UpdateGAB4 => UpdateGAB4_Model1D
+    PROCEDURE :: UpdateGAB2 => UpdateGAB2_DGModel1D
+    PROCEDURE :: UpdateGAB3 => UpdateGAB3_DGModel1D
+    PROCEDURE :: UpdateGAB4 => UpdateGAB4_DGModel1D
 
-    PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model1D
-    PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model1D
-    PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model1D
-    PROCEDURE :: CalculateTendency => CalculateTendency_Model1D
-    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model1D
+    PROCEDURE :: UpdateGRK2 => UpdateGRK2_DGModel1D
+    PROCEDURE :: UpdateGRK3 => UpdateGRK3_DGModel1D
+    PROCEDURE :: UpdateGRK4 => UpdateGRK4_DGModel1D
+    PROCEDURE :: CalculateTendency => CalculateTendency_DGModel1D
+    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_DGModel1D
 
-    GENERIC :: SetSolution => SetSolutionFromChar_Model1D, &
-      SetSolutionFromEqn_Model1D
-    PROCEDURE,PRIVATE :: SetSolutionFromChar_Model1D
-    PROCEDURE,PRIVATE :: SetSolutionFromEqn_Model1D
+    GENERIC :: SetSolution => SetSolutionFromChar_DGModel1D, &
+      SetSolutionFromEqn_DGModel1D
+    PROCEDURE,PRIVATE :: SetSolutionFromChar_DGModel1D
+    PROCEDURE,PRIVATE :: SetSolutionFromEqn_DGModel1D
 
-    PROCEDURE :: ReadModel => Read_Model1D
-    PROCEDURE :: WriteModel => Write_Model1D
-    PROCEDURE :: WriteTecplot => WriteTecplot_Model1D
+    PROCEDURE :: ReadModel => Read_DGModel1D
+    PROCEDURE :: WriteModel => Write_DGModel1D
+    PROCEDURE :: WriteTecplot => WriteTecplot_DGModel1D
 
   END TYPE Model1D
 
   INTERFACE
-    SUBROUTINE UpdateSolution_Model1D_gpu_wrapper(solution,dSdt,dt,N,nVar,nEl) &
-      BIND(c,name="UpdateSolution_Model1D_gpu_wrapper")
+    SUBROUTINE UpdateSolution_DGModel1D_gpu_wrapper(solution,dSdt,dt,N,nVar,nEl) &
+      BIND(c,name="UpdateSolution_DGModel1D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: solution,dSdt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
       REAL(c_prec),VALUE :: dt
-    END SUBROUTINE UpdateSolution_Model1D_gpu_wrapper
+    END SUBROUTINE UpdateSolution_DGModel1D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGAB2_Model1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB2_Model1D_gpu_wrapper")
+    SUBROUTINE UpdateGAB2_DGModel1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
+      BIND(c,name="UpdateGAB2_DGModel1D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: prevsol,solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB2_Model1D_gpu_wrapper
+    END SUBROUTINE UpdateGAB2_DGModel1D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGAB3_Model1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB3_Model1D_gpu_wrapper")
+    SUBROUTINE UpdateGAB3_DGModel1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
+      BIND(c,name="UpdateGAB3_DGModel1D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: prevsol,solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB3_Model1D_gpu_wrapper
+    END SUBROUTINE UpdateGAB3_DGModel1D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGAB4_Model1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB4_Model1D_gpu_wrapper")
+    SUBROUTINE UpdateGAB4_DGModel1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
+      BIND(c,name="UpdateGAB4_DGModel1D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: prevsol,solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB4_Model1D_gpu_wrapper
+    END SUBROUTINE UpdateGAB4_DGModel1D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK_Model1D_gpu_wrapper(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
-      BIND(c,name="UpdateGRK_Model1D_gpu_wrapper")
+    SUBROUTINE UpdateGRK_DGModel1D_gpu_wrapper(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
+      BIND(c,name="UpdateGRK_DGModel1D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: grk,solution,dSdt
       INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
       REAL(c_prec),VALUE :: rk_a,rk_g,dt
-    END SUBROUTINE UpdateGRK_Model1D_gpu_wrapper
+    END SUBROUTINE UpdateGRK_DGModel1D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE CalculateDSDt_Model1D_gpu_wrapper(fluxDivergence,source,dSdt,N,nVar,nEl) &
-      BIND(c,name="CalculateDSDt_Model1D_gpu_wrapper")
+    SUBROUTINE CalculateDSDt_DGModel1D_gpu_wrapper(fluxDivergence,source,dSdt,N,nVar,nEl) &
+      BIND(c,name="CalculateDSDt_DGModel1D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(C_PTR) :: fluxDivergence,source,dSdt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE CalculateDSDt_Model1D_gpu_wrapper
+    END SUBROUTINE CalculateDSDt_DGModel1D_gpu_wrapper
   END INTERFACE
 
 CONTAINS
 
-  SUBROUTINE Init_Model1D(this,nvar,mesh,geometry,decomp)
+  SUBROUTINE Init_DGModel1D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
@@ -157,9 +157,9 @@ CONTAINS
     CALL this % source % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nVar,this % mesh % nElem)
 
-  END SUBROUTINE Init_Model1D
+  END SUBROUTINE Init_DGModel1D
 
-  SUBROUTINE Free_Model1D(this)
+  SUBROUTINE Free_DGModel1D(this)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
 
@@ -173,9 +173,9 @@ CONTAINS
     CALL this % source % Free()
     CALL this % fluxDivergence % Free()
 
-  END SUBROUTINE Free_Model1D
+  END SUBROUTINE Free_DGModel1D
 
-  SUBROUTINE ResizePrevSol_Model1D(this,m)
+  SUBROUTINE ResizePrevSol_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -190,9 +190,9 @@ CONTAINS
     nVar = this % solution % nVar
     CALL this % prevSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
 
-  END SUBROUTINE ResizePrevSol_Model1D
+  END SUBROUTINE ResizePrevSol_DGModel1D
 
-  SUBROUTINE UpdateHost_Model1D(this)
+  SUBROUTINE UpdateHost_DGModel1D(this)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
 
@@ -206,9 +206,9 @@ CONTAINS
     CALL this % source % UpdateHost()
     CALL this % fluxDivergence % UpdateHost()
 
-  END SUBROUTINE UpdateHost_Model1D
+  END SUBROUTINE UpdateHost_DGModel1D
 
-  SUBROUTINE UpdateDevice_Model1D(this)
+  SUBROUTINE UpdateDevice_DGModel1D(this)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
 
@@ -222,9 +222,9 @@ CONTAINS
     CALL this % source % UpdateDevice()
     CALL this % fluxDivergence % UpdateDevice()
 
-  END SUBROUTINE UpdateDevice_Model1D
+  END SUBROUTINE UpdateDevice_DGModel1D
 
-  SUBROUTINE SetSolutionFromEqn_Model1D(this,eqn)
+  SUBROUTINE SetSolutionFromEqn_DGModel1D(this,eqn)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
@@ -243,9 +243,9 @@ CONTAINS
       CALL this % solution % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetSolutionFromEqn_Model1D
+  END SUBROUTINE SetSolutionFromEqn_DGModel1D
 
-  SUBROUTINE SetSolutionFromChar_Model1D(this,eqnChar)
+  SUBROUTINE SetSolutionFromChar_DGModel1D(this,eqnChar)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % solution % nVar)
@@ -264,9 +264,9 @@ CONTAINS
       CALL this % solution % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetSolutionFromChar_Model1D
+  END SUBROUTINE SetSolutionFromChar_DGModel1D
 
-  SUBROUTINE UpdateSolution_Model1D(this,dt)
+  SUBROUTINE UpdateSolution_DGModel1D(this,dt)
     !! Computes a solution update as , where dt is either provided through the interface
     !! or taken as the Model's stored time step size (model % dt)
     IMPLICIT NONE
@@ -284,7 +284,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateSolution_Model1D_gpu_wrapper(this % solution % interior % deviceData, &
+      CALL UpdateSolution_DGModel1D_gpu_wrapper(this % solution % interior % deviceData, &
                                               this % dSdt % interior % deviceData, &
                                               dtLoc, &
                                               this % solution % interp % N, &
@@ -307,9 +307,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateSolution_Model1D
+  END SUBROUTINE UpdateSolution_DGModel1D
 
-  SUBROUTINE UpdateGAB2_Model1D(this,m)
+  SUBROUTINE UpdateGAB2_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -318,7 +318,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGAB2_Model1D_gpu_wrapper(this % prevSol % interior % deviceData, &
+      CALL UpdateGAB2_DGModel1D_gpu_wrapper(this % prevSol % interior % deviceData, &
                                           this % solution % interior % deviceData, &
                                           m, &
                                           this % prevsol % nVar, &
@@ -377,9 +377,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateGAB2_Model1D
+  END SUBROUTINE UpdateGAB2_DGModel1D
 
-  SUBROUTINE UpdateGAB3_Model1D(this,m)
+  SUBROUTINE UpdateGAB3_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -388,7 +388,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGAB3_Model1D_gpu_wrapper(this % prevSol % interior % deviceData, &
+      CALL UpdateGAB3_DGModel1D_gpu_wrapper(this % prevSol % interior % deviceData, &
                                           this % solution % interior % deviceData, &
                                           m, &
                                           this % prevsol % nVar, &
@@ -463,9 +463,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateGAB3_Model1D
+  END SUBROUTINE UpdateGAB3_DGModel1D
 
-  SUBROUTINE UpdateGAB4_Model1D(this,m)
+  SUBROUTINE UpdateGAB4_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -474,7 +474,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGAB4_Model1D_gpu_wrapper(this % prevSol % interior % deviceData, &
+      CALL UpdateGAB4_DGModel1D_gpu_wrapper(this % prevSol % interior % deviceData, &
                                           this % solution % interior % deviceData, &
                                           m, &
                                           this % prevsol % nVar, &
@@ -564,9 +564,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateGAB4_Model1D
+  END SUBROUTINE UpdateGAB4_DGModel1D
 
-  SUBROUTINE UpdateGRK2_Model1D(this,m)
+  SUBROUTINE UpdateGRK2_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -575,7 +575,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGRK_Model1D_gpu_wrapper(this % workSol % interior % deviceData, &
+      CALL UpdateGRK_DGModel1D_gpu_wrapper(this % workSol % interior % deviceData, &
                                          this % solution % interior % deviceData, &
                                          this % dSdt % interior % deviceData, &
                                          rk2_a(m),rk2_g(m),this % dt, &
@@ -604,9 +604,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateGRK2_Model1D
+  END SUBROUTINE UpdateGRK2_DGModel1D
 
-  SUBROUTINE UpdateGRK3_Model1D(this,m)
+  SUBROUTINE UpdateGRK3_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -615,7 +615,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGRK_Model1D_gpu_wrapper(this % workSol % interior % deviceData, &
+      CALL UpdateGRK_DGModel1D_gpu_wrapper(this % workSol % interior % deviceData, &
                                          this % solution % interior % deviceData, &
                                          this % dSdt % interior % deviceData, &
                                          rk3_a(m),rk3_g(m),this % dt, &
@@ -644,9 +644,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateGRK3_Model1D
+  END SUBROUTINE UpdateGRK3_DGModel1D
 
-  SUBROUTINE UpdateGRK4_Model1D(this,m)
+  SUBROUTINE UpdateGRK4_DGModel1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
@@ -655,7 +655,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGRK_Model1D_gpu_wrapper(this % workSol % interior % deviceData, &
+      CALL UpdateGRK_DGModel1D_gpu_wrapper(this % workSol % interior % deviceData, &
                                          this % solution % interior % deviceData, &
                                          this % dSdt % interior % deviceData, &
                                          rk4_a(m),rk4_g(m),this % dt, &
@@ -684,9 +684,9 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE UpdateGRK4_Model1D
+  END SUBROUTINE UpdateGRK4_DGModel1D
 
-  SUBROUTINE CalculateFluxDivergence_Model1D(this)
+  SUBROUTINE CalculateFluxDivergence_DGModel1D(this)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
 
@@ -695,9 +695,9 @@ CONTAINS
                                   selfWeakDGForm, &
                                   this % gpuAccel)
 
-  END SUBROUTINE CalculateFluxDivergence_Model1D
+  END SUBROUTINE CalculateFluxDivergence_DGModel1D
 
-  SUBROUTINE CalculateTendency_Model1D(this)
+  SUBROUTINE CalculateTendency_DGModel1D(this)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     ! Local
@@ -714,7 +714,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL CalculateDSDt_Model1D_gpu_wrapper(this % fluxDivergence % interior % deviceData, &
+      CALL CalculateDSDt_DGModel1D_gpu_wrapper(this % fluxDivergence % interior % deviceData, &
                                              this % source % interior % deviceData, &
                                              this % dSdt % interior % deviceData, &
                                              this % solution % interp % N, &
@@ -737,11 +737,11 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE CalculateTendency_Model1D
+  END SUBROUTINE CalculateTendency_DGModel1D
 
-  SUBROUTINE Write_Model1D(this,fileName)
+  SUBROUTINE Write_DGModel1D(this,fileName)
 #undef __FUNC__
-#define __FUNC__ "Write_Model1D"
+#define __FUNC__ "Write_DGModel1D"
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
@@ -879,9 +879,9 @@ CONTAINS
     CALL solution % Free()
     CALL interp % Free()
 
-  END SUBROUTINE Write_Model1D
+  END SUBROUTINE Write_DGModel1D
 
-  SUBROUTINE Read_Model1D(this,fileName)
+  SUBROUTINE Read_DGModel1D(this,fileName)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: fileName
@@ -918,9 +918,9 @@ CONTAINS
       CALL this % solution % interior % UpdateDevice()
     END IF
 
-  END SUBROUTINE Read_Model1D
+  END SUBROUTINE Read_DGModel1D
 
-  SUBROUTINE WriteTecplot_Model1D(this,filename)
+  SUBROUTINE WriteTecplot_DGModel1D(this,filename)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in),OPTIONAL :: filename
@@ -1000,6 +1000,6 @@ CONTAINS
     CALL solution % Free()
     CALL interp % Free()
 
-  END SUBROUTINE WriteTecplot_Model1D
+  END SUBROUTINE WriteTecplot_DGModel1D
 
-END MODULE SELF_Model1D
+END MODULE SELF_DGModel1D

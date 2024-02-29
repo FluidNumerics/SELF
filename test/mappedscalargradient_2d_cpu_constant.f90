@@ -61,19 +61,7 @@ integer function mappedscalargradient_2d_cpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-!  call f % BoundaryInterp(.false.)
-!  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
-
-!  call f % SideExchange( mesh, decomp, .false.)
-  ! Set boundary conditions
-!  f % extBoundary % hostData(1,1,1) = 1.0_prec ! Left most
-!  f % extBoundary % hostData(1,2,nelem) = 1.0_prec ! Right most
-!  print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
-
-!  call f % BassiRebaySides(.false.)
-!  print*, "min, max (avgboundary)", minval(f % avgBoundary ), maxval(f % avgBoundary )
-
-  call f % Gradient( geometry, df, selfStrongForm, .false. ) 
+  call f % Gradient( geometry, df ) 
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

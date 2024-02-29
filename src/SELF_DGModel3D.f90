@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Model3D
+MODULE SELF_DGModel3D
 
     USE SELF_SupportRoutines
     USE SELF_Metadata
@@ -34,110 +34,110 @@ MODULE SELF_Model3D
   
     CONTAINS
   
-      PROCEDURE :: Init => Init_Model3D
-      PROCEDURE :: Free => Free_Model3D
+      PROCEDURE :: Init => Init_DGModel3D
+      PROCEDURE :: Free => Free_DGModel3D
   
-      PROCEDURE :: UpdateHost => UpdateHost_Model3D
-      PROCEDURE :: UpdateDevice => UpdateDevice_Model3D
+      PROCEDURE :: UpdateHost => UpdateHost_DGModel3D
+      PROCEDURE :: UpdateDevice => UpdateDevice_DGModel3D
   
-      PROCEDURE :: UpdateSolution => UpdateSolution_Model3D
+      PROCEDURE :: UpdateSolution => UpdateSolution_DGModel3D
   
-      PROCEDURE :: ResizePrevSol => ResizePrevSol_Model3D
+      PROCEDURE :: ResizePrevSol => ResizePrevSol_DGModel3D
   
-      PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model3D
-      PROCEDURE :: UpdateGAB3 => UpdateGAB3_Model3D
-      PROCEDURE :: UpdateGAB4 => UpdateGAB4_Model3D
+      PROCEDURE :: UpdateGAB2 => UpdateGAB2_DGModel3D
+      PROCEDURE :: UpdateGAB3 => UpdateGAB3_DGModel3D
+      PROCEDURE :: UpdateGAB4 => UpdateGAB4_DGModel3D
   
-      PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model3D
-      PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model3D
-      PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model3D
+      PROCEDURE :: UpdateGRK2 => UpdateGRK2_DGModel3D
+      PROCEDURE :: UpdateGRK3 => UpdateGRK3_DGModel3D
+      PROCEDURE :: UpdateGRK4 => UpdateGRK4_DGModel3D
   
-      PROCEDURE :: CalculateTendency => CalculateTendency_Model3D
-      PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model3D
+      PROCEDURE :: CalculateTendency => CalculateTendency_DGModel3D
+      PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_DGModel3D
   
-      GENERIC :: SetSolution => SetSolutionFromChar_Model3D, &
-        SetSolutionFromEqn_Model3D
-      PROCEDURE,PRIVATE :: SetSolutionFromChar_Model3D
-      PROCEDURE,PRIVATE :: SetSolutionFromEqn_Model3D
+      GENERIC :: SetSolution => SetSolutionFromChar_DGModel3D, &
+        SetSolutionFromEqn_DGModel3D
+      PROCEDURE,PRIVATE :: SetSolutionFromChar_DGModel3D
+      PROCEDURE,PRIVATE :: SetSolutionFromEqn_DGModel3D
   
-      PROCEDURE :: ReprojectFlux => ReprojectFlux_Model3D
+      PROCEDURE :: ReprojectFlux => ReprojectFlux_DGModel3D
   
-      PROCEDURE :: ReadModel => Read_Model3D
-      PROCEDURE :: WriteModel => Write_Model3D
-      PROCEDURE :: WriteTecplot => WriteTecplot_Model3D
+      PROCEDURE :: ReadModel => Read_DGModel3D
+      PROCEDURE :: WriteModel => Write_DGModel3D
+      PROCEDURE :: WriteTecplot => WriteTecplot_DGModel3D
   
     END TYPE Model3D
   
     INTERFACE
-      SUBROUTINE UpdateSolution_Model3D_gpu_wrapper(solution,dSdt,dt,N,nVar,nEl) &
-        BIND(c,name="UpdateSolution_Model3D_gpu_wrapper")
+      SUBROUTINE UpdateSolution_DGModel3D_gpu_wrapper(solution,dSdt,dt,N,nVar,nEl) &
+        BIND(c,name="UpdateSolution_DGModel3D_gpu_wrapper")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
         TYPE(C_PTR) :: solution,dSdt
         INTEGER(C_INT),VALUE :: N,nVar,nEl
         REAL(c_prec),VALUE :: dt
-      END SUBROUTINE UpdateSolution_Model3D_gpu_wrapper
+      END SUBROUTINE UpdateSolution_DGModel3D_gpu_wrapper
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGAB2_Model3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-        BIND(c,name="UpdateGAB2_Model3D_gpu_wrapper")
+      SUBROUTINE UpdateGAB2_DGModel3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
+        BIND(c,name="UpdateGAB2_DGModel3D_gpu_wrapper")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
         TYPE(C_PTR) :: prevsol,solution
         INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-      END SUBROUTINE UpdateGAB2_Model3D_gpu_wrapper
+      END SUBROUTINE UpdateGAB2_DGModel3D_gpu_wrapper
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGAB3_Model3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-        BIND(c,name="UpdateGAB3_Model3D_gpu_wrapper")
+      SUBROUTINE UpdateGAB3_DGModel3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
+        BIND(c,name="UpdateGAB3_DGModel3D_gpu_wrapper")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
         TYPE(C_PTR) :: prevsol,solution
         INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-      END SUBROUTINE UpdateGAB3_Model3D_gpu_wrapper
+      END SUBROUTINE UpdateGAB3_DGModel3D_gpu_wrapper
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGAB4_Model3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-        BIND(c,name="UpdateGAB4_Model3D_gpu_wrapper")
+      SUBROUTINE UpdateGAB4_DGModel3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
+        BIND(c,name="UpdateGAB4_DGModel3D_gpu_wrapper")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
         TYPE(C_PTR) :: prevsol,solution
         INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-      END SUBROUTINE UpdateGAB4_Model3D_gpu_wrapper
+      END SUBROUTINE UpdateGAB4_DGModel3D_gpu_wrapper
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGRK_Model3D_gpu_wrapper(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
-        BIND(c,name="UpdateGRK_Model3D_gpu_wrapper")
+      SUBROUTINE UpdateGRK_DGModel3D_gpu_wrapper(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
+        BIND(c,name="UpdateGRK_DGModel3D_gpu_wrapper")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
         TYPE(C_PTR) :: grk,solution,dSdt
         INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
         REAL(c_prec),VALUE :: rk_a,rk_g,dt
-      END SUBROUTINE UpdateGRK_Model3D_gpu_wrapper
+      END SUBROUTINE UpdateGRK_DGModel3D_gpu_wrapper
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE CalculateDSDt_Model3D_gpu_wrapper(fluxDivergence,source,dSdt,N,nVar,nEl) &
-        BIND(c,name="CalculateDSDt_Model3D_gpu_wrapper")
+      SUBROUTINE CalculateDSDt_DGModel3D_gpu_wrapper(fluxDivergence,source,dSdt,N,nVar,nEl) &
+        BIND(c,name="CalculateDSDt_DGModel3D_gpu_wrapper")
         USE ISO_C_BINDING
         IMPLICIT NONE
         TYPE(C_PTR) :: fluxDivergence,source,dSdt
         INTEGER(C_INT),VALUE :: N,nVar,nEl
-      END SUBROUTINE CalculateDSDt_Model3D_gpu_wrapper
+      END SUBROUTINE CalculateDSDt_DGModel3D_gpu_wrapper
     END INTERFACE
   
   CONTAINS
   
-    SUBROUTINE Init_Model3D(this,nvar,mesh,geometry,decomp)
+    SUBROUTINE Init_DGModel3D(this,nvar,mesh,geometry,decomp)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(out) :: this
       INTEGER,INTENT(in) :: nvar
@@ -171,9 +171,9 @@ MODULE SELF_Model3D
         CALL this % solution % SetUnits(ivar,"[null]")
       END DO
   
-    END SUBROUTINE Init_Model3D
+    END SUBROUTINE Init_DGModel3D
   
-    SUBROUTINE Free_Model3D(this)
+    SUBROUTINE Free_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
   
@@ -186,9 +186,9 @@ MODULE SELF_Model3D
       CALL this % source % Free()
       CALL this % fluxDivergence % Free()
   
-    END SUBROUTINE Free_Model3D
+    END SUBROUTINE Free_DGModel3D
   
-    SUBROUTINE ResizePrevSol_Model3D(this,m)
+    SUBROUTINE ResizePrevSol_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -203,9 +203,9 @@ MODULE SELF_Model3D
       nVar = this % solution % nVar
       CALL this % prevSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
   
-    END SUBROUTINE ResizePrevSol_Model3D
+    END SUBROUTINE ResizePrevSol_DGModel3D
   
-    SUBROUTINE UpdateHost_Model3D(this)
+    SUBROUTINE UpdateHost_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
   
@@ -219,9 +219,9 @@ MODULE SELF_Model3D
       CALL this % source % UpdateHost()
       CALL this % fluxDivergence % UpdateHost()
   
-    END SUBROUTINE UpdateHost_Model3D
+    END SUBROUTINE UpdateHost_DGModel3D
   
-    SUBROUTINE UpdateDevice_Model3D(this)
+    SUBROUTINE UpdateDevice_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
   
@@ -234,9 +234,9 @@ MODULE SELF_Model3D
       CALL this % source % UpdateDevice()
       CALL this % fluxDivergence % UpdateDevice()
   
-    END SUBROUTINE UpdateDevice_Model3D
+    END SUBROUTINE UpdateDevice_DGModel3D
   
-    SUBROUTINE SetSolutionFromEqn_Model3D(this,eqn)
+    SUBROUTINE SetSolutionFromEqn_DGModel3D(this,eqn)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
@@ -255,9 +255,9 @@ MODULE SELF_Model3D
         CALL this % solution % UpdateDevice()
       END IF
   
-    END SUBROUTINE SetSolutionFromEqn_Model3D
+    END SUBROUTINE SetSolutionFromEqn_DGModel3D
   
-    SUBROUTINE SetSolutionFromChar_Model3D(this,eqnChar)
+    SUBROUTINE SetSolutionFromChar_DGModel3D(this,eqnChar)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       CHARACTER(*),INTENT(in) :: eqnChar(1:this % solution % nVar)
@@ -275,9 +275,9 @@ MODULE SELF_Model3D
         CALL this % solution % UpdateDevice()
       END IF
   
-    END SUBROUTINE SetSolutionFromChar_Model3D
+    END SUBROUTINE SetSolutionFromChar_DGModel3D
   
-    SUBROUTINE UpdateSolution_Model3D(this,dt)
+    SUBROUTINE UpdateSolution_DGModel3D(this,dt)
       !! Computes a solution update as , where dt is either provided through the interface
       !! or taken as the Model's stored time step size (model % dt)
       IMPLICIT NONE
@@ -295,7 +295,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateSolution_Model3D_gpu_wrapper(this % solution % interior % deviceData, &
+        CALL UpdateSolution_DGModel3D_gpu_wrapper(this % solution % interior % deviceData, &
                                                 this % dSdt % interior % deviceData, &
                                                 dtLoc, &
                                                 this % solution % interp % N, &
@@ -323,9 +323,9 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateSolution_Model3D
+    END SUBROUTINE UpdateSolution_DGModel3D
   
-    SUBROUTINE UpdateGAB2_Model3D(this,m)
+    SUBROUTINE UpdateGAB2_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -334,7 +334,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateGAB2_Model3D_gpu_wrapper(this % prevSol % interior % deviceData, &
+        CALL UpdateGAB2_DGModel3D_gpu_wrapper(this % prevSol % interior % deviceData, &
                                             this % solution % interior % deviceData, &
                                             m, &
                                             this % prevsol % nVar, &
@@ -409,9 +409,9 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateGAB2_Model3D
+    END SUBROUTINE UpdateGAB2_DGModel3D
   
-    SUBROUTINE UpdateGAB3_Model3D(this,m)
+    SUBROUTINE UpdateGAB3_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -420,7 +420,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateGAB3_Model3D_gpu_wrapper(this % prevSol % interior % deviceData, &
+        CALL UpdateGAB3_DGModel3D_gpu_wrapper(this % prevSol % interior % deviceData, &
                                             this % solution % interior % deviceData, &
                                             m, &
                                             this % prevsol % nVar, &
@@ -514,9 +514,9 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateGAB3_Model3D
+    END SUBROUTINE UpdateGAB3_DGModel3D
   
-    SUBROUTINE UpdateGAB4_Model3D(this,m)
+    SUBROUTINE UpdateGAB4_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -525,7 +525,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateGAB4_Model3D_gpu_wrapper(this % prevSol % interior % deviceData, &
+        CALL UpdateGAB4_DGModel3D_gpu_wrapper(this % prevSol % interior % deviceData, &
                                             this % solution % interior % deviceData, &
                                             m, &
                                             this % prevsol % nVar, &
@@ -640,9 +640,9 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateGAB4_Model3D
+    END SUBROUTINE UpdateGAB4_DGModel3D
   
-    SUBROUTINE UpdateGRK2_Model3D(this,m)
+    SUBROUTINE UpdateGRK2_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -651,7 +651,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateGRK_Model3D_gpu_wrapper(this % workSol % interior % deviceData, &
+        CALL UpdateGRK_DGModel3D_gpu_wrapper(this % workSol % interior % deviceData, &
                                            this % solution % interior % deviceData, &
                                            this % dSdt % interior % deviceData, &
                                            rk2_a(m),rk2_g(m),this % dt, &
@@ -685,9 +685,9 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateGRK2_Model3D
+    END SUBROUTINE UpdateGRK2_DGModel3D
   
-    SUBROUTINE UpdateGRK3_Model3D(this,m)
+    SUBROUTINE UpdateGRK3_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -696,7 +696,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateGRK_Model3D_gpu_wrapper(this % workSol % interior % deviceData, &
+        CALL UpdateGRK_DGModel3D_gpu_wrapper(this % workSol % interior % deviceData, &
                                            this % solution % interior % deviceData, &
                                            this % dSdt % interior % deviceData, &
                                            rk3_a(m),rk3_g(m),this % dt, &
@@ -730,9 +730,9 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateGRK3_Model3D
+    END SUBROUTINE UpdateGRK3_DGModel3D
   
-    SUBROUTINE UpdateGRK4_Model3D(this,m)
+    SUBROUTINE UpdateGRK4_DGModel3D(this,m)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
@@ -741,7 +741,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL UpdateGRK_Model3D_gpu_wrapper(this % workSol % interior % deviceData, &
+        CALL UpdateGRK_DGModel3D_gpu_wrapper(this % workSol % interior % deviceData, &
                                            this % solution % interior % deviceData, &
                                            this % dSdt % interior % deviceData, &
                                            rk4_a(m),rk4_g(m),this % dt, &
@@ -775,17 +775,17 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE UpdateGRK4_Model3D
+    END SUBROUTINE UpdateGRK4_DGModel3D
   
-    SUBROUTINE ReprojectFlux_Model3D(this)
+    SUBROUTINE ReprojectFlux_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
   
       CALL this % flux % ContravariantProjection(this % geometry,this % gpuAccel)
   
-    END SUBROUTINE ReprojectFlux_Model3D
+    END SUBROUTINE ReprojectFlux_DGModel3D
   
-    SUBROUTINE CalculateFluxDivergence_Model3D(this)
+    SUBROUTINE CalculateFluxDivergence_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
   
@@ -794,9 +794,9 @@ MODULE SELF_Model3D
                                     selfWeakDGForm, &
                                     this % gpuAccel)
   
-    END SUBROUTINE CalculateFluxDivergence_Model3D
+    END SUBROUTINE CalculateFluxDivergence_DGModel3D
   
-    SUBROUTINE CalculateTendency_Model3D(this)
+    SUBROUTINE CalculateTendency_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       ! Local
@@ -814,7 +814,7 @@ MODULE SELF_Model3D
   
       IF (this % gpuAccel) THEN
   
-        CALL CalculateDSDt_Model3D_gpu_wrapper(this % fluxDivergence % interior % deviceData, &
+        CALL CalculateDSDt_DGModel3D_gpu_wrapper(this % fluxDivergence % interior % deviceData, &
                                                this % source % interior % deviceData, &
                                                this % dSdt % interior % deviceData, &
                                                this % solution % interp % N, &
@@ -842,11 +842,11 @@ MODULE SELF_Model3D
   
       END IF
   
-    END SUBROUTINE CalculateTendency_Model3D
+    END SUBROUTINE CalculateTendency_DGModel3D
   
-    SUBROUTINE Write_Model3D(this,fileName)
+    SUBROUTINE Write_DGModel3D(this,fileName)
 #undef __FUNC__
-#define __FUNC__ "Write_Model3D"
+#define __FUNC__ "Write_DGModel3D"
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
@@ -984,9 +984,9 @@ MODULE SELF_Model3D
       CALL solution % Free()
       CALL interp % Free()
   
-    END SUBROUTINE Write_Model3D
+    END SUBROUTINE Write_DGModel3D
   
-    SUBROUTINE Read_Model3D(this,fileName)
+    SUBROUTINE Read_DGModel3D(this,fileName)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       CHARACTER(*),INTENT(in) :: fileName
@@ -1024,9 +1024,9 @@ MODULE SELF_Model3D
         CALL this % solution % interior % UpdateDevice()
       END IF
   
-    END SUBROUTINE Read_Model3D
+    END SUBROUTINE Read_DGModel3D
   
-    SUBROUTINE WriteTecplot_Model3D(this,filename)
+    SUBROUTINE WriteTecplot_DGModel3D(this,filename)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
       CHARACTER(*),INTENT(in),OPTIONAL :: filename
@@ -1136,7 +1136,7 @@ MODULE SELF_Model3D
       CALL solution % Free()
       CALL interp % Free()
   
-    END SUBROUTINE WriteTecplot_Model3D
+    END SUBROUTINE WriteTecplot_DGModel3D
   
-  END MODULE SELF_Model3D
+  END MODULE SELF_DGModel3D
   
