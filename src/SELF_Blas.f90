@@ -9,12 +9,6 @@
 ! This module seeks to provider generic implementations for the real32 (single, S) and 
 ! real64 (double, D) floating point operations in the BLAS library.
 !
-! Below is an outline of all operations provided by BLAS (specifically hipBLAS). Each operation
-! is an interface that maps to specific functions that accept singles and doubles. E.g., `axpy` maps 
-! to `Saxpy` and `Daxpy`, and applies the appropriate function. Any complex-specific operations are
-! NOT implemented and are marked with an asterisk (*). Eventually, all 
-! batch/strided/stridedbatched versions of each function will also be implemented.
-!
 !   |- Level 1      |- Level 2      |- Level 3
 !   | |- amax       | |- gbmv       | |- gemm
 !   | |- amin       | |- gemv       | |- herk*
@@ -64,6 +58,12 @@ module self_blas
         module procedure sgemm
         module procedure dgemm
     end interface gemm
+    interface gemvstridedbatched
+        module procedure sgemvstridedbatched
+        module procedure sgemvstridedbatched_op
+        module procedure dgemvstridedbatched
+        module procedure dgemvstridedbatched_op
+    end interface gemvstridedbatched
 
     contains
 
@@ -177,11 +177,11 @@ module self_blas
     !!!!!!!!!!!
 
     ! gemv
-    subroutine sgemv(alpha, matrix1, vector1, beta, vector2)
+    subroutine sgemv(alpha, A, vector1, beta, vector2)
         implicit none
 
         real(kind=real32), intent(in) :: alpha
-        real(kind=real32), pointer, intent(in) :: matrix1(:,:)  ! A^T
+        real(kind=real32), pointer, intent(in) :: A(:,:)  ! A^T
         real(kind=real32), pointer, intent(in) :: vector1(:)
         real(kind=real32), intent(in) :: beta
         real(kind=real32), pointer, intent(inout) :: vector2(:)
@@ -204,12 +204,12 @@ module self_blas
         n = size(vector1)
         lda = n
 
-        call hipcheck(hipmalloc(A_gpu, sizeof(matrix1)))
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
         call hipcheck(hipmalloc(x_gpu, sizeof(vector1)))
         call hipcheck(hipmalloc(y_gpu, sizeof(vector2)))
         call hipblasCheck(hipblasCreate(handle))
 
-        call hipcheck(hipmemcpy(A_gpu, c_loc(matrix1), sizeof(matrix1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(x_gpu, c_loc(vector1), sizeof(vector1), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(y_gpu, c_loc(vector2), sizeof(vector2), hipmemcpyhosttodevice))
 
@@ -227,11 +227,11 @@ module self_blas
 
     end subroutine sgemv
 
-    subroutine dgemv(alpha, matrix1, vector1, beta, vector2)
+    subroutine dgemv(alpha, A, vector1, beta, vector2)
         implicit none
 
         real(kind=real64), intent(in) :: alpha
-        real(kind=real64), pointer, intent(in) :: matrix1(:,:)
+        real(kind=real64), pointer, intent(in) :: A(:,:)
         real(kind=real64), pointer, intent(in) :: vector1(:)
         real(kind=real64), intent(in) :: beta
         real(kind=real64), pointer, intent(inout) :: vector2(:)
@@ -253,12 +253,14 @@ module self_blas
         n = size(vector1)
         lda = n
 
-        call hipcheck(hipmalloc(A_gpu, sizeof(matrix1)))
+        ! fortran pointers vs c pointers for c_loc, sizeof() argument
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
         call hipcheck(hipmalloc(x_gpu, sizeof(vector1)))
         call hipcheck(hipmalloc(y_gpu, sizeof(vector2)))
         call hipblasCheck(hipblasCreate(handle))
 
-        call hipcheck(hipmemcpy(A_gpu, c_loc(matrix1), sizeof(matrix1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(x_gpu, c_loc(vector1), sizeof(vector1), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(y_gpu, c_loc(vector2), sizeof(vector2), hipmemcpyhosttodevice))
 
@@ -276,17 +278,230 @@ module self_blas
 
     end subroutine dgemv
 
+    ! gemvstridedbatched
+    subroutine sgemvstridedbatched(alpha, A, strideA, vector1, stridex, beta, vector2, stridey, batchCount)
+        implicit none
+
+        real(kind=real32), intent(in) :: alpha
+        real(kind=real32), pointer, intent(in) :: A(:,:)
+        real(kind=real32), pointer, intent(in) :: vector1(:)
+        real(kind=real32), intent(in) :: beta
+        real(kind=real32), pointer, intent(inout) :: vector2(:)
+        integer(c_int64_t), intent(in) :: strideA, stridex, stridey
+        integer(c_int), intent(in) :: batchCount
+
+        type(c_ptr) :: handle
+        integer :: operation = HIPBLAS_OP_T
+        integer :: m
+        integer :: n
+        integer :: lda
+        integer :: incx = 1
+        integer :: incy = 1
+        type(c_ptr) :: A_gpu
+        type(c_ptr) :: x_gpu
+        type(c_ptr) :: y_gpu
+        integer :: status
+
+        ! check if all dimensions are fine
+        m = size(vector2)
+        n = size(vector1)
+        lda = n
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(x_gpu, sizeof(vector1)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(vector2)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(x_gpu, c_loc(vector1), sizeof(vector1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(vector2), sizeof(vector2), hipmemcpyhosttodevice))
+
+        ! HIPBLAS_OP_N = no transpose
+        ! HIPBLAS_OP_T = transpose
+        ! come back to this
+        status = hipblassgemvstridedbatched(handle, operation, n, m, alpha, A_gpu, lda, strideA, x_gpu, incx, stridex, beta, y_gpu, incy, stridey, batchcount)
+
+        call hipcheck(hipmemcpy(c_loc(vector2), y_gpu, sizeof(vector2), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine sgemvstridedbatched
+    subroutine sgemvstridedbatched_op(alpha, A, strideA, vector1, stridex, beta, vector2, stridey, batchCount, operation)
+        implicit none
+
+        real(kind=real32), intent(in) :: alpha
+        real(kind=real32), pointer, intent(in) :: A(:,:)
+        real(kind=real32), pointer, intent(in) :: vector1(:)
+        real(kind=real32), intent(in) :: beta
+        real(kind=real32), pointer, intent(inout) :: vector2(:)
+        integer(c_int64_t), intent(in) :: strideA, stridex, stridey
+        integer(c_int), intent(in) :: batchCount
+        integer(kind(HIPBLAS_OP_N)), intent(in) :: operation
+
+        type(c_ptr) :: handle
+        integer :: m
+        integer :: n
+        integer :: lda
+        integer :: incx = 1
+        integer :: incy = 1
+        type(c_ptr) :: A_gpu
+        type(c_ptr) :: x_gpu
+        type(c_ptr) :: y_gpu
+        integer :: status
+
+        ! check if all dimensions are fine
+        m = stridey
+        n = stridex
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(x_gpu, sizeof(vector1)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(vector2)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(x_gpu, c_loc(vector1), sizeof(vector1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(vector2), sizeof(vector2), hipmemcpyhosttodevice))
+
+        ! HIPBLAS_OP_N = no transpose
+        ! HIPBLAS_OP_T = transpose
+        ! come back to this
+        if( operation == HIPBLAS_OP_N) then
+            status = hipblasSgemvStridedBatched(handle, operation, m, n, alpha, A_gpu, m, strideA, x_gpu, incx, stridex, beta, y_gpu, incy, stridey, batchcount)
+        else if( operation == HIPBLAS_OP_T) then 
+            status = hipblasSgemvStridedBatched(handle, operation, n, m, alpha, A_gpu, n, strideA, x_gpu, incx, stridex, beta, y_gpu, incy, stridey, batchcount)
+        ! else
+        !     throw an error
+        end if
+
+        call hipcheck(hipmemcpy(c_loc(vector2), y_gpu, sizeof(vector2), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine sgemvstridedbatched_op
+
+    subroutine dgemvstridedbatched(alpha, A, strideA, vector1, stridex, beta, vector2, stridey, batchCount)
+        implicit none
+
+        real(kind=real64), intent(in) :: alpha
+        real(kind=real64), pointer, intent(in) :: A(:,:)
+        real(kind=real64), pointer, intent(in) :: vector1(:)
+        real(kind=real64), intent(in) :: beta
+        real(kind=real64), pointer, intent(inout) :: vector2(:)
+        integer(c_int64_t), intent(in) :: strideA, stridex, stridey
+        integer(c_int), intent(in) :: batchCount
+
+        type(c_ptr) :: handle
+        integer :: operation = HIPBLAS_OP_T
+        integer :: m
+        integer :: n
+        integer :: lda
+        integer :: incx = 1
+        integer :: incy = 1
+        type(c_ptr) :: A_gpu
+        type(c_ptr) :: x_gpu
+        type(c_ptr) :: y_gpu
+        integer :: status
+
+        ! check if all dimensions are fine
+        m = size(vector2)
+        n = size(vector1)
+        lda = n
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(x_gpu, sizeof(vector1)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(vector2)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(x_gpu, c_loc(vector1), sizeof(vector1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(vector2), sizeof(vector2), hipmemcpyhosttodevice))
+
+        ! HIPBLAS_OP_N = no transpose
+        ! HIPBLAS_OP_T = transpose
+        ! come back to this
+        status = hipblasdgemvstridedbatched(handle, operation, n, m, alpha, A_gpu, lda, strideA, x_gpu, incx, stridex, beta, y_gpu, incy, stridey, batchcount)
+
+        call hipcheck(hipmemcpy(c_loc(vector2), y_gpu, sizeof(vector2), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine dgemvstridedbatched
+    subroutine dgemvstridedbatched_op(alpha, A, strideA, vector1, stridex, beta, vector2, stridey, batchCount, operation)
+        implicit none
+
+        real(kind=real64), intent(in) :: alpha
+        real(kind=real64), pointer, intent(in) :: A(:,:)
+        real(kind=real64), pointer, intent(in) :: vector1(:)
+        real(kind=real64), intent(in) :: beta
+        real(kind=real64), pointer, intent(inout) :: vector2(:)
+        integer(c_int64_t), intent(in) :: strideA, stridex, stridey
+        integer(c_int), intent(in) :: batchCount
+        integer, intent(in) :: operation
+
+        type(c_ptr) :: handle
+        integer :: m
+        integer :: n
+        integer :: lda
+        integer :: incx = 1
+        integer :: incy = 1
+        type(c_ptr) :: A_gpu
+        type(c_ptr) :: x_gpu
+        type(c_ptr) :: y_gpu
+        integer :: status
+
+        ! check if all dimensions are fine
+        m = stridey
+        n = stridex
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(x_gpu, sizeof(vector1)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(vector2)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(x_gpu, c_loc(vector1), sizeof(vector1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(vector2), sizeof(vector2), hipmemcpyhosttodevice))
+
+        ! HIPBLAS_OP_N = no transpose
+        ! HIPBLAS_OP_T = transpose
+        ! come back to this
+        if( operation == HIPBLAS_OP_N) then
+            status = hipblasDgemvStridedBatched(handle, operation, m, n, alpha, A_gpu, m, strideA, x_gpu, incx, stridex, beta, y_gpu, incy, stridey, batchcount)
+        else if( operation == HIPBLAS_OP_T) then 
+            status = hipblasDgemvStridedBatched(handle, operation, n, m, alpha, A_gpu, n, strideA, x_gpu, incx, stridex, beta, y_gpu, incy, stridey, batchcount)
+        ! else
+        !     throw an error
+        end if
+
+        call hipcheck(hipmemcpy(c_loc(vector2), y_gpu, sizeof(vector2), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine dgemvstridedbatched_op
+
     !!!!!!!!!!!
     ! LEVEL 3 !
     !!!!!!!!!!!
 
     ! gemm
-    subroutine sgemm(scalar1, matrix1, matrix2, scalar2, matrix3)
+    subroutine sgemm(scalar1, A, matrix2, scalar2, matrix3)
         ! prefer scalarX, matrixX, etc, or alpha, beta, A, B, C?
         implicit none
 
         real(kind=real32), intent(in) :: scalar1
-        real(kind=real32), pointer, intent(in) :: matrix1(:,:)
+        real(kind=real32), pointer, intent(in) :: A(:,:)
         real(kind=real32), pointer, intent(in) :: matrix2(:,:)
         real(kind=real32), intent(in) :: scalar2
         real(kind=real32), pointer, intent(inout) :: matrix3(:,:)
@@ -310,17 +525,17 @@ module self_blas
 
         m = size(matrix3, 1)
         n = size(matrix3, 2)
-        k = size(matrix1, 1) ! this changes for non-transposed matrix A
+        k = size(A, 1) ! this changes for non-transposed matrix A
         lda = k
         ldb = n
         ldc = m
 
-        call hipcheck(hipmalloc(A_gpu, sizeof(matrix1)))
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
         call hipcheck(hipmalloc(B_gpu, sizeof(matrix2)))
         call hipcheck(hipmalloc(C_gpu, sizeof(matrix3)))        
         call hipblasCheck(hipblasCreate(handle))
 
-        call hipcheck(hipmemcpy(A_gpu, c_loc(matrix1), sizeof(matrix1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(B_gpu, c_loc(matrix2), sizeof(matrix2), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(C_gpu, c_loc(matrix3), sizeof(matrix3), hipmemcpyhosttodevice))
 
@@ -334,12 +549,12 @@ module self_blas
         call hipblasCheck(hipblasDestroy(handle))
 
     end subroutine sgemm
-    subroutine dgemm(scalar1, matrix1, matrix2, scalar2, matrix3)
+    subroutine dgemm(scalar1, A, matrix2, scalar2, matrix3)
         ! prefer scalarX, matrixX, etc, or alpha, beta, A, B, C?
         implicit none
 
         real(kind=real64), intent(in) :: scalar1
-        real(kind=real64), pointer, intent(in) :: matrix1(:,:)
+        real(kind=real64), pointer, intent(in) :: A(:,:)
         real(kind=real64), pointer, intent(in) :: matrix2(:,:)
         real(kind=real64), intent(in) :: scalar2
         real(kind=real64), pointer, intent(inout) :: matrix3(:,:)
@@ -354,6 +569,7 @@ module self_blas
         integer :: lda
         integer :: ldb
         integer :: ldc
+        integer :: batchCount
         type(c_ptr) :: A_gpu
         type(c_ptr) :: B_gpu
         type(c_ptr) :: C_gpu
@@ -363,17 +579,17 @@ module self_blas
 
         m = size(matrix3, 1)
         n = size(matrix3, 2)
-        k = size(matrix1, 1) ! this changes for non-transposed matrix A
+        k = size(A, 1) ! this changes for non-transposed matrix A
         lda = k
         ldb = n
         ldc = m
 
-        call hipcheck(hipmalloc(A_gpu, sizeof(matrix1)))
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
         call hipcheck(hipmalloc(B_gpu, sizeof(matrix2)))
         call hipcheck(hipmalloc(C_gpu, sizeof(matrix3)))        
         call hipblasCheck(hipblasCreate(handle))
 
-        call hipcheck(hipmemcpy(A_gpu, c_loc(matrix1), sizeof(matrix1), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(B_gpu, c_loc(matrix2), sizeof(matrix2), hipmemcpyhosttodevice))
         call hipcheck(hipmemcpy(C_gpu, c_loc(matrix3), sizeof(matrix3), hipmemcpyhosttodevice))
 

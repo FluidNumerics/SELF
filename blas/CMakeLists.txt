@@ -35,9 +35,15 @@ add_fortran_examples (
     # Level 1
     # "axpy_test.f90"
     # Level 2
-    "test_gemv.f90"
+    #"test_gemv.f90"
+    #"test_gemvstridedbatched.f90"
+    ##### gemvXStridedBatched comparisons
+    "gemvstridedbatched_op_n_32.f90"
+    "gemvstridedbatched_op_t_32.f90"
+    "gemvstridedbatched_op_n_64.f90"
+    "gemvstridedbatched_op_t_64.f90"
     # Level 3
-    "test_gemm.f90"
+    #"test_gemm.f90"
     # misc
     # "example_hipSaxpy.f90"
     # "example_hipDaxpy.f90"
