@@ -157,6 +157,7 @@ module SELF_Data
     real(prec),pointer,dimension(:,:,:,:,:) :: interior
     real(prec),pointer,dimension(:,:,:,:,:) :: boundary
     real(prec),pointer,dimension(:,:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:,:) :: avgBoundary
     real(prec),pointer,dimension(:,:,:,:) :: boundaryNormal
 
   contains
@@ -195,6 +196,7 @@ module SELF_Data
     real(prec),pointer,dimension(:,:,:,:,:,:) :: interior
     real(prec),pointer,dimension(:,:,:,:,:,:) :: boundary
     real(prec),pointer,dimension(:,:,:,:,:,:) :: extBoundary
+    real(prec),pointer,dimension(:,:,:,:,:,:) :: avgBoundary
     real(prec),pointer,dimension(:,:,:,:,:) :: boundaryNormal
 
   contains
@@ -389,16 +391,16 @@ contains
 
   end subroutine BoundaryInterp_Scalar1D_cpu
 
-  subroutine BoundaryInterp_Scalar1D_gpu(this,hipblas_handle)
+  subroutine BoundaryInterp_Scalar1D_gpu(this,handle)
     implicit none
     class(Scalar1D),intent(inout) :: this
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % ScalarBoundaryInterp_1D(this % interior, &
                                                  this % boundary, &
                                                  this % nVar, &
                                                  this % nElem, &
-                                                 hipblas_handle)
+                                                 handle)
 
   end subroutine BoundaryInterp_Scalar1D_gpu
 
@@ -414,17 +416,17 @@ contains
 
   end subroutine GridInterp_Scalar1D_cpu
 
-  subroutine GridInterp_Scalar1D_gpu(this,that,hipblas_handle)
+  subroutine GridInterp_Scalar1D_gpu(this,that,handle)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % ScalarGridInterp_1D(this % interior, &
                                              that % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                             hipblas_handle)
+                                             handle)
 
   end subroutine GridInterp_Scalar1D_gpu
 
@@ -440,17 +442,17 @@ contains
 
   end subroutine Derivative_Scalar1D_cpu
 
-  subroutine Derivative_Scalar1D_gpu(this,that,hipblas_handle)
+  subroutine Derivative_Scalar1D_gpu(this,that,handle)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % Derivative_1D(this % interior, &
                                        that % interior, &
                                        this % nVar, &
                                        this % nElem, &
-                                       hipblas_handle)
+                                       handle)
 
   end subroutine Derivative_Scalar1D_gpu
 
@@ -606,18 +608,18 @@ contains
 
   end subroutine GridInterp_Scalar2D_cpu
 
-  subroutine GridInterp_Scalar2D_gpu(this,that,hipblas_handle)
+  subroutine GridInterp_Scalar2D_gpu(this,that,handle)
     implicit none
     class(Scalar2D),intent(inout) :: this
     type(Scalar2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % ScalarGridInterp_2D(this % interior, &
                                              this % interpWork, &
                                              that % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                             hipblas_handle)
+                                             handle)
 
   end subroutine GridInterp_Scalar2D_gpu
 
@@ -633,17 +635,17 @@ contains
 
   end subroutine Gradient_Scalar2D_cpu
 
-  subroutine Gradient_Scalar2D_gpu(this,df,hipblas_handle)
+  subroutine Gradient_Scalar2D_gpu(this,df,handle)
     implicit none
     class(Scalar2D),intent(in) :: this
     type(Vector2D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % ScalarGradient_2D(this % interior, &
                                            df % interior, &
                                            this % nVar, &
                                            this % nElem, &
-                                           hipblas_handle)
+                                           handle)
 
   end subroutine Gradient_Scalar2D_gpu
 
@@ -803,11 +805,11 @@ contains
 
   end subroutine GridInterp_Scalar3D_cpu
 
-  subroutine GridInterp_Scalar3D_gpu(this,that,hipblas_handle)
+  subroutine GridInterp_Scalar3D_gpu(this,that,handle)
     implicit none
     class(Scalar3D),intent(inout) :: this
     type(Scalar3D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % ScalarGridInterp_3D(this % interior, &
                                              this % interpWork1, &
@@ -815,7 +817,7 @@ contains
                                              that % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                             hipblas_handle)
+                                             handle)
 
   end subroutine GridInterp_Scalar3D_gpu
 
@@ -831,17 +833,17 @@ contains
 
   end subroutine Gradient_Scalar3D_cpu
 
-  subroutine Gradient_Scalar3D_gpu(this,df,hipblas_handle)
+  subroutine Gradient_Scalar3D_gpu(this,df,handle)
     implicit none
     class(Scalar3D),intent(in) :: this
     type(Vector3D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % ScalarGradient_3D(this % interior, &
                                            df % interior, &
                                            this % nVar, &
                                            this % nElem, &
-                                           hipblas_handle)
+                                           handle)
 
   end subroutine Gradient_Scalar3D_gpu
 
@@ -929,6 +931,7 @@ contains
     call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,2,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
 
     allocate (this % meta(1:nVar))
@@ -948,6 +951,7 @@ contains
     call hipcheck(hipFree(this % boundary))
     call hipcheck(hipFree(this % boundaryNormal))
     call hipcheck(hipFree(this % extBoundary))
+    call hipcheck(hipFree(this % avgBoundary))
 
     deallocate (this % meta)
     deallocate (this % eqn)
@@ -974,6 +978,7 @@ contains
     call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
     call hipcheck(hipMemPrefetchAsync(c_loc(this % boundaryNormal),sizeof(this % boundaryNormal),0,c_null_ptr))
     call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
 
   end subroutine UpdateDevice_Vector2D
 
@@ -1025,17 +1030,17 @@ contains
 
   end subroutine Gradient_Vector2D_cpu
 
-  subroutine Gradient_Vector2D_gpu(this,df,hipblas_handle)
+  subroutine Gradient_Vector2D_gpu(this,df,handle)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Tensor2D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % VectorGradient_2D(this % interior, &
                                            df % interior, &
                                            this % nVar, &
                                            this % nElem, &
-                                           hipblas_handle)
+                                           handle)
 
   end subroutine Gradient_Vector2D_gpu
 
@@ -1051,17 +1056,17 @@ contains
 
   end subroutine Divergence_Vector2D_cpu
 
-  subroutine Divergence_Vector2D_gpu(this,that,hipblas_handle)
+  subroutine Divergence_Vector2D_gpu(this,that,handle)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Scalar2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % VectorDivergence_2D(this % interior, &
                                              that % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                             hipblas_handle)
+                                             handle)
 
   end subroutine Divergence_Vector2D_gpu
 
@@ -1148,6 +1153,7 @@ contains
     call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,interp % N + 1,nelem,nvar,3,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,hipMemAttachGlobal))
+    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
 
     allocate (this % meta(1:nVar))
@@ -1167,6 +1173,7 @@ contains
     call hipcheck(hipFree(this % boundary))
     call hipcheck(hipFree(this % boundaryNormal))
     call hipcheck(hipFree(this % extBoundary))
+    call hipcheck(hipFree(this % avgBoundary))
 
     deallocate (this % meta)
     deallocate (this % eqn)
@@ -1193,6 +1200,8 @@ contains
     call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
     call hipcheck(hipMemPrefetchAsync(c_loc(this % boundaryNormal),sizeof(this % boundaryNormal),0,c_null_ptr))
     call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
+    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
+    
 
   end subroutine UpdateDevice_Vector3D
 
@@ -1244,17 +1253,17 @@ contains
 
   end subroutine Gradient_Vector3D_cpu
 
-  subroutine Gradient_Vector3D_gpu(this,df,hipblas_handle)
+  subroutine Gradient_Vector3D_gpu(this,df,handle)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Tensor3D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % VectorGradient_3D(this % interior, &
                                            df % interior, &
                                            this % nVar, &
                                            this % nElem, &
-                                           hipblas_handle)
+                                           handle)
 
   end subroutine Gradient_Vector3D_gpu
 
@@ -1270,17 +1279,17 @@ contains
 
   end subroutine Divergence_Vector3D_cpu
 
-  subroutine Divergence_Vector3D_gpu(this,that,hipblas_handle)
+  subroutine Divergence_Vector3D_gpu(this,that,handle)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Scalar3D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % VectorDivergence_3D(this % interior, &
                                              that % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                             hipblas_handle)
+                                             handle)
 
   end subroutine Divergence_Vector3D_gpu
 
@@ -1439,17 +1448,17 @@ contains
 
   end subroutine Divergence_Tensor2D_cpu
 
-  subroutine Divergence_Tensor2D_gpu(this,that,hipblas_handle)
+  subroutine Divergence_Tensor2D_gpu(this,that,handle)
     implicit none
     class(Tensor2D),intent(in) :: this
     class(Vector2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: hipblas_handle
+    type(c_ptr),intent(inout) :: handle
 
     call this % interp % TensorDivergence_2D(this % interior, &
                                              that % interior, &
                                              this % nVar, &
                                              this % nElem, &
-                                             hipblas_handle)
+                                             handle)
 
   end subroutine Divergence_Tensor2D_gpu
 

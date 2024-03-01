@@ -189,6 +189,34 @@ extern "C"
   }
 }
 
+// VectorDGDivergence_2D //
+__global__ void VectorDGDivergence_BoundaryContribution_2D(real *bMatrix, real *qWeights, real *bf, real *df, int N){
+
+  uint32_t nel = blockDim.x;
+  uint32_t ivar = blockIdx.y;
+  uint32_t iel = blockIdx.x;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+
+  df[SC_2D_INDEX(i,j,iel,ivar,N,nel)] += (bf[SCB_2D_INDEX(j,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] +
+                                          bf[SCB_2D_INDEX(j,4,iel,ivar,N,nel)]*bMatrix[i])/
+                                         qWeights[i] +
+                                         (bf[SCB_2D_INDEX(i,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] +
+                                          bf[SCB_2D_INDEX(i,1,iel,ivar,N,nel)]*bMatrix[j])/
+                                         qWeights[j];
+
+
+}
+
+extern "C"
+{
+  void VectorDGDivergence_BoundaryContribution_2D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
+  {
+	  VectorDGDivergence_BoundaryContribution_2D<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
+    HIP_SAFE_CALL(hipGetLastError());
+  } 
+}
+
 
 /*
 
@@ -349,38 +377,7 @@ extern "C"
   } 
 }
 
-// VectorDGDivergence_2D //
-__global__ void VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  uint32_t iVar = blockIdx.x;
-  uint32_t iEl = blockIdx.y;
-  uint32_t i = threadIdx.x;
-  uint32_t j = threadIdx.y;
-
-  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 0.0;
-  for (int ii=0; ii<N+1; ii++) {
-    df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
-             f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
-  }
-
-  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += (bf[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
-            bf[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
-           qWeights[i] +
-           (bf[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
-            bf[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
-           qWeights[j];
-
-
-}
-
-extern "C"
-{
-  void VectorDGDivergence_2D_gpu_wrapper(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar, int nEl)
-  {
-	  VectorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(dgMatrix, bMatrix, qWeights, f, bf, df, N, nVar);
-    HIP_SAFE_CALL(hipGetLastError());
-  } 
-}
 
 // P2VectorDivergence_2D //
 __global__ void P2VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){

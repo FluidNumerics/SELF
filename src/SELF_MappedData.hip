@@ -1,32 +1,48 @@
 #include <hip/hip_runtime.h>
 #include "SELF_HIP_Macros.h"
 
-// JacobianWeight_MappedScalar1D_gpu
-__global__ void JacobianWeight_MappedScalar1D_gpu(real *scalar, real *dxds, int N, int ndof){
+// JacobianWeight functions
+// The functions take in an array of data and divide by the jacobian.
+__global__ void JacobianWeight(real *f, real *jacobian, int ndof){
 
-  uint32_t nvar = gridDim.y;
   size_t ivar = blockIdx.y;
   size_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
-    scalar[idof + ndof*ivar] = scalar[idof + ndof*ivar]/dxds[idof];
+    f[idof + ndof*ivar] = f[idof + ndof*ivar]/jacobian[idof];
   }
 }
 
 extern "C"
 {
-  void JacobianWeight_MappedScalar1D_gpu_wrapper(real *scalar, real *dxds, int N, int nVar, int nEl)
+  void JacobianWeight_1D_gpu(real *f, real *dxds, int N, int nVar, int nEl)
   {
     int ndof = (N+1)*(nEl);
     int threads_per_block = 256;
     int nblocksx = ndof/threads_per_block+1; 
-    JacobianWeight_MappedScalar1D_gpu<<<dim3(nblocksx,nVar,1), dim3(threads_per_block,1,1), 0, 0>>>(scalar, dxds, N, ndof);
+    JacobianWeight<<<dim3(nblocksx,nVar,1), dim3(threads_per_block,1,1), 0, 0>>>(f, dxds, ndof);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+extern "C"
+{
+  void JacobianWeight_2D_gpu(real **scalar, real **jacobian, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*(N+1)*(nEl);
+    int threads_per_block = 256;
+    int nblocksx = ndof/threads_per_block+1; 
+
+    dim3 nblocks(nblocksx,nVar,1);
+    dim3 nthreads(threads_per_block,1,1);
+
+    JacobianWeight<<<nblocks, nblocks, 0, 0>>>(*scalar, *jacobian, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
 
-__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nEl){
+__global__ void SideExchange_2D(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nEl){
 
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
   uint32_t ndof = (N+1)*nEl*4;
@@ -60,7 +76,7 @@ __global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
+  void SideExchange_2D_gpu(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     int ndof = (N+1)*4*nEl;
     int threads_per_block = 256;
@@ -68,12 +84,12 @@ extern "C"
 
     dim3 nblocks(nblocks_x,nVar,1);
     dim3 nthreads(threads_per_block,1,1);
-    SideExchange_MappedScalar2D_gpu<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nEl);
+    SideExchange_2D<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nEl);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nEl){
+__global__ void ApplyFlip_2D(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nEl){
 
   size_t s1 = blockIdx.x;
   size_t e1 = blockIdx.y;
@@ -104,15 +120,15 @@ __global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, int *sideInfo, i
 
 extern "C"
 {
-  void ApplyFlip_MappedScalar2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void ApplyFlip_2D_gpu(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedScalar2D_gpu<<<dim3(4,nEl,nVar), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nEl);
+    ApplyFlip_2D<<<dim3(4,nEl,nVar), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nEl);
     HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
 
-__global__ void BassiRebaySides_MappedScalar2D_gpu(real* avgBoundary, real *boundary, real *extBoundary, int ndof){
+__global__ void BassiRebaySides_gpu(real* avgBoundary, real *boundary, real *extBoundary, int ndof){
 
   uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
 
@@ -123,7 +139,7 @@ __global__ void BassiRebaySides_MappedScalar2D_gpu(real* avgBoundary, real *boun
 
 extern "C"
 {
-  void BassiRebaySides_MappedScalar2D_gpu_wrapper(real *avgBoundary, real *boundary, real *extBoundary, int N, int nVar, int nEl)
+  void BassiRebaySides_2D_gpu(real *avgBoundary, real *boundary, real *extBoundary, int N, int nVar, int nEl)
   {
     int ndof = (N+1)*4*nEl*nVar;
     int threads_per_block = 256;
@@ -132,7 +148,23 @@ extern "C"
     dim3 nblocks(nblocks_x,1,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    BassiRebaySides_MappedScalar2D_gpu<<<nblocks, nthreads, 0, 0>>>(avgBoundary, boundary, extBoundary, ndof);
+    BassiRebaySides_gpu<<<nblocks, nthreads, 0, 0>>>(avgBoundary, boundary, extBoundary, ndof);
+    HIP_SAFE_CALL(hipGetLastError());
+  }
+}
+
+extern "C"
+{
+  void BassiRebaySides_3D_gpu(real *avgBoundary, real *boundary, real *extBoundary, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*(N+1)*6*nEl*nVar;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,1,1);
+    dim3 nthreads(threads_per_block,1,1);
+
+    BassiRebaySides_gpu<<<nblocks, nthreads, 0, 0>>>(avgBoundary, boundary, extBoundary, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -163,8 +195,9 @@ extern "C"
     ContravariantWeight_MappedScalar2D_gpu<<<nblocks, nthreads, 0, 0>>>(scalar, dsdx, tensor, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
-
 }
+
+
 
 
 
@@ -308,26 +341,7 @@ extern "C"
 //   }
 // }
 
-// // JacobianWeight_MappedScalar2D_gpu
-// __global__ void JacobianWeight_MappedScalar2D_gpu(real *scalar, real *jacobian, int N, int nVar){
 
-//   size_t iVar = blockIdx.x;
-//   size_t iEl = blockIdx.y;
-//   size_t i = threadIdx.x;
-//   size_t j = threadIdx.y;
-
-//     scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]/
-//                                                jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
-// }
-
-// extern "C"
-// {
-//   void JacobianWeight_MappedScalar2D_gpu_wrapper(real **scalar, real **jacobian, int N, int nVar, int nEl)
-//   {
-//     JacobianWeight_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *jacobian, N, nVar);
-//     HIP_SAFE_CALL(hipGetLastError());
-//   }
-// }
 
 // // GradientInterior_MappedScalar3D_gpu
 // // Performs the interior operations for a scalar gradient calculation

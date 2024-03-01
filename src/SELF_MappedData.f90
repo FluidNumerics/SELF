@@ -64,7 +64,7 @@ module SELF_MappedData
     !PROCEDURE,PRIVATE :: GradientSF_MappedScalar2D ! Strong-Form Gradient
     !PROCEDURE,PRIVATE :: GradientBR_MappedScalar2D ! Bassi-Rebay Gradient
 
-    !procedure,public :: JacobianWeight => JacobianWeight_MappedScalar2D
+    procedure,public :: JacobianWeight => JacobianWeight_MappedScalar2D
 
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D
     procedure,private :: ApplyFlip => ApplyFlip_MappedScalar2D
@@ -98,10 +98,21 @@ module SELF_MappedData
 
   type,extends(Vector2D),public :: MappedVector2D
 
-!   CONTAINS
+  contains
 
-!     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector2D
-!     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedVector2D
+    procedure,public :: SideExchange => SideExchange_MappedVector2D
+    procedure,public :: BassiRebaySides => BassiRebaySides_MappedVector2D
+
+    ! generic,public :: Divergence => Divergence_MappedVector2D
+    ! procedure,private :: Divergence_MappedVector2D
+
+    ! generic,public :: DGDivergence => DGDivergence_MappedVector2D
+    ! procedure,private :: DGDivergence_MappedVector2D
+
+    procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
+    procedure,private :: ApplyFlip => ApplyFlip_MappedVector2D
+
+!   CONTAINS
 
 !     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
 
@@ -109,8 +120,7 @@ module SELF_MappedData
 !     PROCEDURE,PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector2D
 !     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector2D
 
-!     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
-!     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedVector2D
+
 
 !     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
@@ -136,77 +146,26 @@ module SELF_MappedData
 
 !   END TYPE MappedVector3D
 
-!   INTERFACE
-!     SUBROUTINE GradientBR_MappedScalar2D_gpu_wrapper(scalar,avgBoundary,dsdx,jacobian,nHat,nScale,&
-!                     gradF,dgMatrix,bMatrix,qWeights,N,nVar,nEl) &
-!       bind(c,name="GradientBR_MappedScalar2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: scalar,avgBoundary,dsdx,jacobian,nHat,nScale,gradF,dgMatrix,bMatrix,qWeights
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE GradientBR_MappedScalar2D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE GradientSF_MappedScalar2D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
-!       bind(c,name="GradientSF_MappedScalar2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: scalar,dsdx,jacobian,gradF,dMatrix
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE GradientSF_MappedScalar2D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE GradientBR_MappedScalar3D_gpu_wrapper(scalar,avgBoundary,dsdx,jacobian,nHat,nScale,&
-!                     gradF,dgMatrix,bMatrix,qWeights,N,nVar,nEl) &
-!       bind(c,name="GradientBR_MappedScalar3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: scalar,avgBoundary,dsdx,jacobian,nHat,nScale,gradF,dgMatrix,bMatrix,qWeights
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE GradientBR_MappedScalar3D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE GradientSF_MappedScalar3D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
-!       bind(c,name="GradientSF_MappedScalar3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: scalar,dsdx,jacobian,gradF,dMatrix
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE GradientSF_MappedScalar3D_gpu_wrapper
-!   END INTERFACE
 
   interface
-    subroutine JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
-      bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
+    subroutine JacobianWeight_1D_gpu(scalar,dxds,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_1D_gpu")
       use iso_c_binding
       implicit none
       type(c_ptr),value :: scalar,dxds
       integer(c_int),value :: N,nVar,nEl
-    end subroutine JacobianWeight_MappedScalar1D_gpu_wrapper
+    end subroutine JacobianWeight_1D_gpu
   end interface
 
-!   INTERFACE
-!     SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper(scalar,jacobian,N,nVar,nEl) &
-!       bind(c,name="JacobianWeight_MappedScalar2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: scalar,jacobian
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper(scalar,jacobian,N,nVar,nEl) &
-!       bind(c,name="JacobianWeight_MappedScalar3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: scalar,jacobian
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper
-!   END INTERFACE
+  INTERFACE
+    SUBROUTINE JacobianWeight_2D_gpu(scalar,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_2D_gpu")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,jacobian
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_2D_gpu
+  END INTERFACE
 
   interface
     subroutine ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar,dsdx,tensor,isize,jsize,nvar,nel) &
@@ -218,198 +177,45 @@ module SELF_MappedData
     end subroutine ContravariantWeight_MappedScalar2D_gpu_wrapper
   end interface
 
-! !  INTERFACE
-! !    SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-! !      bind(c,name="ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper")
-! !      USE ISO_C_BINDING
-! !      IMPLICIT NONE
-! !      TYPE(c_ptr) :: scalar,workTensor,dsdx
-! !      INTEGER(C_INT),VALUE :: N,nVar,nEl
-! !    END SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper
-! !  END INTERFACE
-! !
-! !  INTERFACE
-! !    SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-! !      bind(c,name="ContravariantWeight_MappedScalar3D_gpu_wrapper")
-! !      USE ISO_C_BINDING
-! !      IMPLICIT NONE
-! !      TYPE(c_ptr) :: scalar,workTensor,dsdx
-! !      INTEGER(C_INT),VALUE :: N,nVar,nEl
-! !    END SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper
-! !  END INTERFACE
-! !
-! !  INTERFACE
-! !    SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
-! !      bind(c,name="ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper")
-! !      USE ISO_C_BINDING
-! !      IMPLICIT NONE
-! !      TYPE(c_ptr) :: scalar,workTensor,dsdx
-! !      INTEGER(C_INT),VALUE :: N,nVar,nEl
-! !    END SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper
-! !  END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(vector,dsdx,N,nVar,nEl) &
-!       bind(c,name="ContravariantProjection_MappedVector2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: vector,dsdx
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper
-!   END INTERFACE
-
-!   ! INTERFACE
-!   !   SUBROUTINE ContravariantProjection_MappedP2Vector2D_gpu_wrapper(vector,physical,dsdx,N,nVar,nEl) &
-!   !     bind(c,name="ContravariantProjection_MappedP2Vector2D_gpu_wrapper")
-!   !     USE ISO_C_BINDING
-!   !     IMPLICIT NONE
-!   !     TYPE(c_ptr) :: vector,physical,dsdx
-!   !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-!   !   END SUBROUTINE ContravariantProjection_MappedP2Vector2D_gpu_wrapper
-!   ! END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
-!       bind(c,name="ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: physVector,compVector,dsdx
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
-!       bind(c,name="JacobianWeight_MappedVector2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: vector,jacobian
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper(vector,dsdx,N,nVar,nEl) &
-!       bind(c,name="ContravariantProjection_MappedVector3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: vector,dsdx
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
-!       bind(c,name="ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: physVector,compVector,dsdx
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
-!       bind(c,name="JacobianWeight_MappedVector3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: vector,jacobian
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper
-!   END INTERFACE
-
   interface
-    subroutine SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary, &
+    subroutine SideExchange_2D_gpu(extBoundary,boundary, &
                                                        sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
+      bind(c,name="SideExchange_2D_gpu")
       use iso_c_binding
       implicit none
       type(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       integer(c_int),value :: rankId,offset,N,nVar,nEl
-    end subroutine SideExchange_MappedScalar2D_gpu_wrapper
+    end subroutine SideExchange_2D_gpu
   end interface
 
   interface
-    subroutine SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary, &
-                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="SideExchange_MappedVector2D_gpu_wrapper")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: extBoundary,boundary,sideInfo,elemToRank
-      integer(c_int),value :: rankId,offset,N,nVar,nEl
-    end subroutine SideExchange_MappedVector2D_gpu_wrapper
-  end interface
-
-!   INTERFACE
-!     SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary, &
-!                                                        sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-!       bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
-!       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
-!     END SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary, &
-!                                                        sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-!       bind(c,name="SideExchange_MappedVector3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
-!       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
-!     END SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper
-!   END INTERFACE
-
-  interface
-    subroutine BassiRebaySides_MappedScalar2D_gpu_wrapper(avgBoundary,boundary,extBoundary,N,nVar,nEl) &
-      bind(c,name="BassiRebaySides_MappedScalar2D_gpu_wrapper")
+    subroutine BassiRebaySides_2D_gpu(avgBoundary,boundary,extBoundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_2D_gpu")
       use iso_c_binding
       implicit none
       type(c_ptr) :: extBoundary,boundary,avgBoundary
       integer(c_int),value :: N,nVar,nEl
-    end subroutine BassiRebaySides_MappedScalar2D_gpu_wrapper
+    end subroutine BassiRebaySides_2D_gpu
   end interface
 
-!   INTERFACE
-!     SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
-!       bind(c,name="BassiRebaySides_MappedVector2D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: extBoundary,boundary
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper(avgBoundary,boundary,extBoundary,N,nVar,nEl) &
-!       bind(c,name="BassiRebaySides_MappedScalar3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: avgBoundary,extBoundary,boundary
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper
-!   END INTERFACE
-
-!   INTERFACE
-!     SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
-!       bind(c,name="BassiRebaySides_MappedVector3D_gpu_wrapper")
-!       USE ISO_C_BINDING
-!       IMPLICIT NONE
-!       TYPE(c_ptr) :: extBoundary,boundary
-!       INTEGER(C_INT),VALUE :: N,nVar,nEl
-!     END SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper
-!   END INTERFACE
+  interface
+    subroutine BassiRebaySides_3D_gpu(avgBoundary,boundary,extBoundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr) :: extBoundary,boundary,avgBoundary
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine BassiRebaySides_3D_gpu
+  end interface
 
   interface
-    subroutine ApplyFlip_MappedScalar2D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
-      bind(c,name="ApplyFlip_MappedScalar2D_gpu_wrapper")
+    subroutine ApplyFlip_2D_gpu(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_2D_gpu")
       use iso_c_binding
       implicit none
       type(c_ptr),value :: selfSideInfo,elemToRank,extBoundary
       integer(c_int),value :: rankId,N,nVar,nEl
-    end subroutine ApplyFlip_MappedScalar2D_gpu_wrapper
+    end subroutine ApplyFlip_2D_gpu
   end interface
 
 !   INTERFACE
@@ -651,7 +457,7 @@ contains
 
     if (present(handle)) then
 
-      call JacobianWeight_MappedScalar1D_gpu_wrapper(c_loc(scalar % interior), &
+      call JacobianWeight_1D_gpu(c_loc(scalar % interior), &
                                                      c_loc(geometry % dxds % interior), &
                                                      scalar % interp % N, &
                                                      scalar % nVar, &
@@ -776,6 +582,7 @@ contains
               if (r2 /= mpiHandler % rankId) then
 
                 ! to do : create unique tag for each side and each variable
+                ! tag = globalsideid + nglobalsides*ivar
                 s2 = mesh % sideInfo(4,s1,e1)/10
                 globalSideId = abs(mesh % sideInfo(2,s1,e1))
 
@@ -824,13 +631,13 @@ contains
     if (mpiHandler % mpiEnabled) then
       if (present(handle)) then
 
-        call ApplyFlip_MappedScalar2D_gpu_wrapper(c_loc(scalar % extBoundary), &
-                                                  c_loc(mesh % sideInfo), &
-                                                  c_loc(mpiHandler % elemToRank), &
-                                                  mpiHandler % rankId, &
-                                                  scalar % interp % N, &
-                                                  scalar % nVar, &
-                                                  scalar % nElem)
+        call ApplyFlip_2D_gpu(c_loc(scalar % extBoundary), &
+                                    c_loc(mesh % sideInfo), &
+                                    c_loc(mpiHandler % elemToRank), &
+                                    mpiHandler % rankId, &
+                                    scalar % interp % N, &
+                                    scalar % nVar, &
+                                    scalar % nElem)
       else
 
         do ivar = 1,scalar % nvar
@@ -892,7 +699,7 @@ contains
 
     if (present(handle)) then
 
-      call SideExchange_MappedScalar2D_gpu_wrapper(c_loc(scalar % extBoundary), &
+      call SideExchange_2D_gpu(c_loc(scalar % extBoundary), &
                                                    c_loc(scalar % boundary), &
                                                    c_loc(mesh % sideInfo), &
                                                    c_loc(decomp % elemToRank), &
@@ -1046,7 +853,7 @@ contains
 
     if (present(handle)) then
 
-      call BassiRebaySides_MappedScalar2D_gpu_wrapper(c_loc(scalar % avgBoundary), &
+      call BassiRebaySides_2D_gpu(c_loc(scalar % avgBoundary), &
                                                       c_loc(scalar % boundary), &
                                                       c_loc(scalar % extBoundary), &
                                                       scalar % interp % N, &
@@ -1071,6 +878,40 @@ contains
 
   end subroutine BassiRebaySides_MappedScalar2D
 
+  SUBROUTINE JacobianWeight_MappedScalar2D(scalar,geometry,handle)
+
+    ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    type(c_ptr),intent(in), optional :: handle
+    ! Local
+    INTEGER :: iEl,iVar,i,j
+
+    IF (present(handle)) THEN
+
+      CALL JacobianWeight_2D_gpu(c_loc(scalar % interior), &
+                             c_loc(geometry % J % interior), &
+                             scalar % interp % N, &
+                             scalar % nVar, &
+                             scalar % nElem)
+    ELSE
+
+      DO iEl = 1,scalar % nElem
+        DO iVar = 1,scalar % nVar
+          DO j = 1,scalar % interp % N+1
+            DO i = 1,scalar % interp % N+1
+              scalar % interior(i,j,iEl,iVar) = scalar % interior(i,j,iEl,iVar)/ &
+                                                           geometry % J % interior(i,j,iEl,1)
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
+  END SUBROUTINE JacobianWeight_MappedScalar2D
+
   subroutine Gradient_MappedScalar2D(scalar,geometry,df,handle)
   !! Calculates the gradient of a function using the strong form of the gradient
   !! in mapped coordinates.
@@ -1083,12 +924,272 @@ contains
     if (present(handle)) then
       call scalar % ContravariantWeightInterior(geometry,handle)
       call scalar % JaScalar % Divergence(df,handle)
+      call scalar % JacobianWeight(geometry,handle)
     else
       call scalar % ContravariantWeightInterior(geometry)
       call scalar % JaScalar % Divergence(df)
+      call scalar % JacobianWeight(geometry)
     end if
 
   end subroutine Gradient_MappedScalar2D
+
+  subroutine MPIExchangeAsync_MappedVector2D(this,mpiHandler,mesh,resetCount)
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(MPILayer),intent(inout) :: mpiHandler
+    type(Mesh2D),intent(in) :: mesh
+    logical,intent(in) :: resetCount
+    ! Local
+    integer :: e1,s1,e2,s2,ivar,idir
+    integer :: globalSideId,r2
+    integer :: iError
+    integer :: msgCount
+
+    if (mpiHandler % mpiEnabled) then
+      if (resetCount) then
+        msgCount = 0
+      else
+        msgCount = mpiHandler % msgCount
+      end if
+
+      do idir = 1,2
+        do ivar = 1,this % nvar
+          do e1 = 1,this % nElem
+            do s1 = 1,4
+
+              e2 = mesh % sideInfo(3,s1,e1) ! Neighbor Element
+              if (e2 > 0) then
+                r2 = mpiHandler % elemToRank(e2) ! Neighbor Rank
+
+                if (r2 /= mpiHandler % rankId) then
+
+                  ! to do : create unique tag for each side and each variable
+                  ! tag = globalsideid + nglobalsides*(ivar + nvar*idir)
+                  s2 = mesh % sideInfo(4,s1,e1)/10
+                  globalSideId = abs(mesh % sideInfo(2,s1,e1))
+
+                  msgCount = msgCount + 1
+                  call MPI_IRECV(this % extBoundary(:,s1,e1,ivar,idir), &
+                                (this % interp % N + 1), &
+                                mpiHandler % mpiPrec, &
+                                r2,globalSideId, &
+                                mpiHandler % mpiComm, &
+                                mpiHandler % requests(msgCount),iError)
+
+                  msgCount = msgCount + 1
+                  call MPI_ISEND(this % boundary(:,s1,e1,ivar,idir), &
+                                (this % interp % N + 1), &
+                                mpiHandler % mpiPrec, &
+                                r2,globalSideId, &
+                                mpiHandler % mpiComm, &
+                                mpiHandler % requests(msgCount),iError)
+                end if
+              end if
+
+            end do
+          end do
+        end do
+      end do
+
+      mpiHandler % msgCount = msgCount
+    end if
+
+  end subroutine MPIExchangeAsync_MappedVector2D
+
+  subroutine ApplyFlip_MappedVector2D(this,mpiHandler,mesh,handle)
+    ! Apply side flips to sides where MPI exchanges took place.
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(MPILayer),intent(inout) :: mpiHandler
+    type(Mesh2D),intent(in) :: mesh
+    type(c_ptr),intent(inout),optional :: handle
+    ! Local
+    integer :: e1,s1,e2,s2
+    integer :: i,i2
+    integer :: r2,flip,ivar,idir
+    integer :: globalSideId
+    integer :: bcid
+    real(prec) :: extBuff(1:this % interp % N + 1)
+
+    if (mpiHandler % mpiEnabled) then
+      if (present(handle)) then
+
+        call ApplyFlip_2D_gpu(c_loc(this % extBoundary), &
+                              c_loc(mesh % sideInfo), &
+                              c_loc(mpiHandler % elemToRank), &
+                              mpiHandler % rankId, &
+                              this % interp % N, &
+                              2*this % nVar, &
+                              this % nElem)
+      else
+
+        do idir = 1,2
+          do ivar = 1,this % nvar
+            do e1 = 1,this % nElem
+              do s1 = 1,4
+
+                e2 = mesh % sideInfo(3,s1,e1) ! Neighbor Element
+                bcid = mesh % sideInfo(5,s1,e1)
+                if (bcid == 0) then ! Interior Element
+                  r2 = mpiHandler % elemToRank(e2) ! Neighbor Rank
+
+                  if (r2 /= mpiHandler % rankId) then
+
+                    s2 = mesh % sideInfo(4,s1,e1)/10
+                    flip = mesh % sideInfo(4,s1,e1) - s2*10
+                    globalSideId = mesh % sideInfo(2,s1,e1)
+
+                    ! Need to update extBoundary with flip applied
+                    if (flip == 1) then
+
+                      do i = 1,this % interp % N + 1
+                        i2 = this % interp % N + 2 - i
+                        extBuff(i) = this % extBoundary(i2,s1,e1,ivar,idir)
+                      end do
+                      do i = 1,this % interp % N + 1
+                        this % extBoundary(i,s1,e1,ivar,idir) = extBuff(i)
+                      end do
+
+                    end if
+                  end if
+
+                end if
+
+              end do
+            end do
+          end do
+        end do
+      end if
+    end if
+
+  end subroutine ApplyFlip_MappedVector2D
+
+  subroutine SideExchange_MappedVector2D(this,mesh,decomp,handle)
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Mesh2D),intent(in) :: mesh
+    type(MPILayer),intent(inout) :: decomp
+    type(c_ptr),intent(inout),optional :: handle
+    ! Local
+    integer :: e1,e2,s1,s2,e2Global
+    integer :: flip,bcid
+    integer :: i1,i2,ivar,idir
+    integer :: neighborRank
+    integer :: rankId,offset
+
+    rankId = decomp % rankId
+    offset = decomp % offsetElem(rankId + 1)
+
+    call this % MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+
+    if (present(handle)) then
+
+      call SideExchange_2D_gpu(c_loc(this % extBoundary), &
+                               c_loc(this % boundary), &
+                               c_loc(mesh % sideInfo), &
+                               c_loc(decomp % elemToRank), &
+                               decomp % rankId, &
+                               offset, &
+                               this % interp % N, &
+                               2*this % nvar, &
+                               this % nElem)
+
+    else
+
+      do idir = 1,2
+        do ivar = 1,this % nvar
+          do e1 = 1,mesh % nElem
+            do s1 = 1,4
+              e2Global = mesh % sideInfo(3,s1,e1)
+              e2 = e2Global - offset
+              s2 = mesh % sideInfo(4,s1,e1)/10
+              flip = mesh % sideInfo(4,s1,e1) - s2*10
+              bcid = mesh % sideInfo(5,s1,e1)
+
+              if (bcid == 0) then
+
+                neighborRank = decomp % elemToRank(e2Global)
+
+                if (neighborRank == decomp % rankId) then
+
+                  if (flip == 0) then
+
+                    do i1 = 1,this % interp % N + 1
+                      this % extBoundary(i1,s1,e1,ivar,idir) = &
+                        this % boundary(i1,s2,e2,ivar,idir)
+                    end do
+
+                  elseif (flip == 1) then
+
+                    do i1 = 1,this % interp % N + 1
+                      i2 = this % interp % N + 2 - i1
+                      this % extBoundary(i1,s1,e1,ivar,idir) = &
+                        this % boundary(i2,s2,e2,ivar,idir)
+                    end do
+
+                  end if
+
+                end if
+
+              end if
+
+            end do
+          end do
+        end do
+      enddo
+
+    end if
+
+    call decomp % FinalizeMPIExchangeAsync()
+
+    ! Apply side flips for data exchanged with MPI
+    if (present(handle)) then
+      call this % ApplyFlip(decomp,mesh,handle)
+    else
+      call this % ApplyFlip(decomp,mesh)
+    end if
+
+  end subroutine SideExchange_MappedVector2D
+
+  subroutine BassiRebaySides_MappedVector2D(this,handle)
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(c_ptr),intent(inout),optional :: handle
+    ! Local
+    integer :: iel
+    integer :: iside
+    integer :: ivar
+    integer :: i
+    integer :: idir
+
+    if (present(handle)) then
+
+      call BassiRebaySides_2D_gpu(c_loc(this % avgBoundary), &
+                                          c_loc(this % boundary), &
+                                          c_loc(this % extBoundary), &
+                                          this % interp % N, &
+                                          2*this % nvar, &
+                                          this % nElem)
+
+    else
+
+      do idir = 1,2
+        do ivar = 1,this % nVar
+          do iel = 1,this % nElem
+            do iside = 1,4
+              do i = 1,this % interp % N + 1
+                this % avgBoundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
+                                                        this % boundary(i,iside,iel,ivar,idir) + &
+                                                        this % extBoundary(i,iside,iel,ivar,idir))
+              end do
+            end do
+          end do
+        end do
+      enddo
+
+    end if
+
+  end subroutine BassiRebaySides_MappedVector2D
 
 !   SUBROUTINE GradientBR_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
 !     !! Calculates the gradient of a scalar 2D function using a bassi-rebay method
@@ -1285,40 +1386,7 @@ contains
 
 !   END SUBROUTINE GradientSF_MappedScalar2D
 
-!   SUBROUTINE JacobianWeight_MappedScalar2D(scalar,geometry,gpuAccel)
-! #undef __FUNC__
-! #define __FUNC__ "JacobianWeight_MappedScalar2D"
-!     ! Applies the inverse jacobian
-!     IMPLICIT NONE
-!     CLASS(MappedScalar2D),INTENT(inout) :: scalar
-!     TYPE(SEMQuad),INTENT(in) :: geometry
-!     LOGICAL,INTENT(in) :: gpuAccel
-!     ! Local
-!     INTEGER :: iEl,iVar,i,j
 
-!     IF (gpuAccel) THEN
-
-!       CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior, &
-!                                                      geometry % J % interior, &
-!                                                      scalar % interp % N, &
-!                                                      scalar % nVar, &
-!                                                      scalar % nElem)
-!     ELSE
-
-!       DO iEl = 1,scalar % nElem
-!         DO iVar = 1,scalar % nVar
-!           DO j = 0,scalar % interp % N
-!             DO i = 0,scalar % interp % N
-!               scalar % interior(i,j,iEl,iVar) = scalar % interior(i,j,iEl,iVar)/ &
-!                                                            geometry % J % interior(i,j,iEl,1)
-!             END DO
-!           END DO
-!         END DO
-!       END DO
-
-!     END IF
-
-!   END SUBROUTINE JacobianWeight_MappedScalar2D
 
 !   FUNCTION Integral_MappedScalar2D(this, geometry, decomp, gpuAccel) RESULT( fRes )
 !     !! Calculates the area integral the scalar over all of the geometry.
