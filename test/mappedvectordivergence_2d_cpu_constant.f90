@@ -62,8 +62,7 @@ integer function mappedvectordivergence_2d_cpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % ContravariantProjection(geometry, .false.)
-  call f % Divergence( geometry, df, selfStrongForm, .false. ) 
+  call f % Divergence( geometry, df) 
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

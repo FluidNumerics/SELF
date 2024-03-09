@@ -14,6 +14,8 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   use SELF_Mesh
   use SELF_Geometry
   use SELF_MappedData
+  use iso_c_binding
+  use hipfort_hipblas
 
   implicit none
 
@@ -32,6 +34,9 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   type(MappedScalar2D) :: df
   type(MPILayer),TARGET :: decomp
   CHARACTER(LEN=255) :: WORKSPACE
+  type(c_ptr) :: handle
+
+  call hipblasCheck(hipblasCreate(handle))
 
 
   ! Initialize a domain decomposition
@@ -62,12 +67,12 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % interior % updatedevice()
+  call f % updatedevice()
 
-  call f % ContravariantProjection(geometry, .true.)
-  call f % Divergence( geometry, df, selfStrongForm, .true. ) 
+  call f % Divergence( geometry, df, handle ) 
 
-  call df % interior % updatehost()
+  call hipcheck(hipdevicesynchronize())
+
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
@@ -85,6 +90,8 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   call interp % Free()
   call f % free()
   call df % free()
+  call hipblasCheck(hipblasDestroy(handle))
+
     
   r = 0
 

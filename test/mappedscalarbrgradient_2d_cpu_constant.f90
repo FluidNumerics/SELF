@@ -65,18 +65,18 @@ integer function mappedscalarbrgradient_2d_cpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % BoundaryInterp(.false.)
+  call f % BoundaryInterp()
   print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
-  call f % SideExchange( mesh, decomp, .false.)
+  call f % SideExchange( mesh, decomp)
 
   ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
   do iel = 1,f % nElem
     do iside = 1,4
-      e2 = mesh % sideInfo % hostData(3,iside,iel) ! Neighboring Element ID
+      e2 = mesh % sideInfo(3,iside,iel) ! Neighboring Element ID
       if (e2 == 0)then
-        do i = 0,f % interp % N
-          f % extBoundary % hostData(i,1,iside,iel) = f % boundary (i,1,iside,iel) 
+        do i = 1,f % interp % N+1
+          f % extBoundary(i,iside,iel,1) = f % boundary(i,iside,iel,1) 
         end do
       end if
     end do
@@ -84,7 +84,7 @@ integer function mappedscalarbrgradient_2d_cpu_constant() result(r)
 
   print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
-  call f % Gradient( geometry, df, selfWeakBRForm, .false. ) 
+  call f % BRGradient( geometry, df ) 
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

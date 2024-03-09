@@ -59,6 +59,9 @@ module SELF_MappedData
     generic,public :: Gradient => Gradient_MappedScalar2D
     procedure,private :: Gradient_MappedScalar2D
 
+    generic,public :: BRGradient => BRGradient_MappedScalar2D
+    procedure,private :: BRGradient_MappedScalar2D
+
     !GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
     !PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
     !PROCEDURE,PRIVATE :: GradientSF_MappedScalar2D ! Strong-Form Gradient
@@ -103,8 +106,10 @@ module SELF_MappedData
     procedure,public :: SideExchange => SideExchange_MappedVector2D
     procedure,public :: BassiRebaySides => BassiRebaySides_MappedVector2D
 
-    ! generic,public :: Divergence => Divergence_MappedVector2D
-    ! procedure,private :: Divergence_MappedVector2D
+    procedure,public :: ContravariantProjection => ContravariantProjection_MappedVector2D
+
+    generic,public :: Divergence => Divergence_MappedVector2D
+    procedure,private :: Divergence_MappedVector2D
 
     ! generic,public :: DGDivergence => DGDivergence_MappedVector2D
     ! procedure,private :: DGDivergence_MappedVector2D
@@ -122,7 +127,7 @@ module SELF_MappedData
 
 
 
-!     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
+     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
   end type MappedVector2D
 
@@ -162,7 +167,7 @@ module SELF_MappedData
       bind(c,name="JacobianWeight_2D_gpu")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: scalar,jacobian
+      TYPE(c_ptr), value :: scalar,jacobian
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_2D_gpu
   END INTERFACE
@@ -178,12 +183,21 @@ module SELF_MappedData
   end interface
 
   interface
-    subroutine SideExchange_2D_gpu(extBoundary,boundary, &
-                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+    subroutine ContravariantProjection_MappedVector2D_gpu_wrapper(vector,dsdx,N,nvar,nel) &
+      bind(c,name="ContravariantProjection_MappedVector2D_gpu_wrapper")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: vector,dsdx
+      integer(c_int),value :: N,nvar,nel
+    end subroutine ContravariantProjection_MappedVector2D_gpu_wrapper
+  end interface
+
+  interface
+    subroutine SideExchange_2D_gpu(extBoundary,boundary,sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
+      type(c_ptr),value :: extBoundary,boundary,sideInfo,elemToRank
       integer(c_int),value :: rankId,offset,N,nVar,nEl
     end subroutine SideExchange_2D_gpu
   end interface
@@ -193,7 +207,7 @@ module SELF_MappedData
       bind(c,name="BassiRebaySides_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr) :: extBoundary,boundary,avgBoundary
+      type(c_ptr),value :: extBoundary,boundary,avgBoundary
       integer(c_int),value :: N,nVar,nEl
     end subroutine BassiRebaySides_2D_gpu
   end interface
@@ -203,7 +217,7 @@ module SELF_MappedData
       bind(c,name="BassiRebaySides_3D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr) :: extBoundary,boundary,avgBoundary
+      type(c_ptr),value :: extBoundary,boundary,avgBoundary
       integer(c_int),value :: N,nVar,nEl
     end subroutine BassiRebaySides_3D_gpu
   end interface
@@ -933,6 +947,67 @@ contains
 
   end subroutine Gradient_MappedScalar2D
 
+  subroutine BRGradient_MappedScalar2D(scalar,geometry,df,handle)
+    !! Calculates the gradient of a function using the weak form of the gradient
+    !! and the average boundary state.
+    !! This method will compute the average boundary state from the `extBoundary`
+    !! and `boundary` attributes of `scalar`
+      implicit none
+      class(MappedScalar2D),intent(inout) :: scalar
+      type(SEMQuad),intent(in) :: geometry
+      type(MappedVector2D),intent(inout) :: df
+      type(c_ptr),intent(inout),optional :: handle
+  
+      if (present(handle)) then
+        call scalar % BassiRebaySides(handle)
+        call scalar % ContravariantWeightInterior(geometry,handle)
+        call scalar % ContravariantWeightAvgBoundary(geometry,handle)
+        call scalar % JaScalar % DGDivergence(df,handle)
+        call scalar % JacobianWeight(geometry,handle)
+      else
+        call scalar % BassiRebaySides()
+        call scalar % ContravariantWeightInterior(geometry)
+        call scalar % ContravariantWeightAvgBoundary(geometry)
+        call scalar % JaScalar % DGDivergence(df)
+        call scalar % JacobianWeight(geometry)
+      end if
+  
+    end subroutine BRGradient_MappedScalar2D
+
+  SUBROUTINE SetInteriorFromEquation_MappedVector2D( vector, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time.
+    IMPLICIT NONE
+    CLASS(MappedVector2D), INTENT(inout) :: vector
+    TYPE(SEMQuad), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+
+    DO iVar = 1, vector % nVar
+      DO iEl = 1,vector % nElem
+        DO j = 1, vector % interp % N+1
+          DO i = 1, vector % interp % N+1
+
+            ! Get the mesh positions
+            x = geometry % x % interior(i,j,iEl,1,1)
+            y = geometry % x % interior(i,j,iEl,1,2)
+
+            vector % interior(i,j,iEl,iVar,1) = &
+              vector % eqn(1+2*(iVar-1)) % Evaluate((/x, y, 0.0_prec, time/))
+
+            vector % interior(i,j,iEl,iVar,2) = &
+              vector % eqn(2+2*(iVar-1)) % Evaluate((/x, y, 0.0_prec, time/))
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedVector2D
+
   subroutine MPIExchangeAsync_MappedVector2D(this,mpiHandler,mesh,resetCount)
     implicit none
     class(MappedVector2D),intent(inout) :: this
@@ -1190,6 +1265,98 @@ contains
     end if
 
   end subroutine BassiRebaySides_MappedVector2D
+
+  SUBROUTINE ContravariantProjection_MappedVector2D(vector,geometry,handle)
+    ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
+    ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
+    ! vectors are really the Jacobian weighted contravariant basis vectors
+    IMPLICIT NONE
+    CLASS(MappedVector2D),INTENT(inout) :: vector
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    type(c_ptr),intent(in),optional :: handle
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: Fx, Fy
+
+    IF (present(handle)) THEN
+
+      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(c_loc(vector % interior), &
+                                                              c_loc(geometry % dsdx % interior), &
+                                                              vector % interp % N, &
+                                                              vector % nVar, &
+                                                              vector % nElem)
+
+    ELSE
+      ! Assume that tensor(j,i) is vector i, component j
+      ! => dot product is done along first dimension
+      ! to project onto computational space
+      DO iel = 1,vector % nElem
+        DO ivar = 1,vector % nVar
+          DO j = 1,vector % interp % N+1
+            DO i = 1,vector % interp % N+1
+
+              Fx = vector % interior(i,j,iEl,iVar,1)
+              Fy = vector % interior(i,j,iEl,iVar,2)
+
+              vector % interior(i,j,iEl,iVar,1) = &
+                geometry % dsdx % interior(i,j,iEl,1,1,1)*Fx + &
+                geometry % dsdx % interior(i,j,iEl,1,2,1)*Fy
+
+              vector % interior(i,j,iEl,iVar,2) = &
+                geometry % dsdx % interior(i,j,iEl,1,1,2)*Fx + &
+                geometry % dsdx % interior(i,j,iEl,1,2,2)*Fy
+
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
+  END SUBROUTINE ContravariantProjection_MappedVector2D
+
+  SUBROUTINE Divergence_MappedVector2D(this,geometry,divVector,handle)
+    ! Strong Form Operator
+    !    !
+    IMPLICIT NONE
+    CLASS(MappedVector2D),INTENT(inout) :: this
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    TYPE(MappedScalar2D),INTENT(inout) :: divVector
+    type(c_ptr), intent(inout), optional :: handle
+
+
+    if( present(handle) )then
+
+      ! Convert from physical to computational space
+      call this % ContravariantProjection(geometry,handle)
+
+      ! Compute the divergence
+      call this % interp % VectorDivergence_2D(this % interior, &
+                                               divVector % interior, &
+                                               this % nvar, &
+                                               this % nelem,&
+                                               handle)
+
+      ! Divide by the jacobian
+      call divVector % JacobianWeight(geometry,handle)
+
+    else
+
+      ! Convert from physical to computational space
+      call this % ContravariantProjection(geometry)
+
+      ! Compute the divergence
+      call this % interp % VectorDivergence_2D(this % interior, &
+                                               divVector % interior, &
+                                               this % nvar, &
+                                               this % nelem)
+      ! Divide by the jacobian
+      call divVector % JacobianWeight(geometry)
+
+    endif
+
+
+  END SUBROUTINE Divergence_MappedVector2D
 
 !   SUBROUTINE GradientBR_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
 !     !! Calculates the gradient of a scalar 2D function using a bassi-rebay method
@@ -2003,39 +2170,7 @@ contains
 
 !   ! ---------------------- Vectors ---------------------- !
 
-!   SUBROUTINE SetInteriorFromEquation_MappedVector2D( vector, geometry, time )
-!   !!  Sets the scalar % interior attribute using the eqn attribute,
-!   !!  geometry (for physical positions), and provided simulation time.
-!     IMPLICIT NONE
-!     CLASS(MappedVector2D), INTENT(inout) :: vector
-!     TYPE(SEMQuad), INTENT(in) :: geometry
-!     REAL(prec), INTENT(in) :: time
-!     ! Local
-!     INTEGER :: i, j, iEl, iVar
-!     REAL(prec) :: x
-!     REAL(prec) :: y
 
-!     DO iEl = 1,vector % nElem
-!       DO iVar = 1, vector % nVar
-!         DO j = 0, vector % interp % N
-!           DO i = 0, vector % interp % N
-
-!             ! Get the mesh positions
-!             x = geometry % x % interior(1,i,j,iEl,1)
-!             y = geometry % x % interior(2,i,j,iEl,1)
-
-!             vector % interior(1,i,j,iEl,iVar) = &
-!               vector % eqn(1+2*(iVar-1)) % Evaluate((/x, y, 0.0_prec, time/))
-
-!             vector % interior(2,i,j,iEl,iVar) = &
-!               vector % eqn(2+2*(iVar-1)) % Evaluate((/x, y, 0.0_prec, time/))
-
-!           ENDDO
-!         ENDDO
-!       ENDDO
-!     ENDDO
-
-!   END SUBROUTINE SetInteriorFromEquation_MappedVector2D
 
 !   SUBROUTINE SideExchange_MappedVector2D(vector,mesh,decomp,gpuAccel)
 !   !! SideExchange_MappedVectorvector2D is used to populate vector % extBoundary
@@ -2163,106 +2298,9 @@ contains
 
 !   END SUBROUTINE BassiRebaySides_MappedVector2D
 
-!   SUBROUTINE Divergence_MappedVector2D(compVector,geometry,divVector,dForm,gpuAccel)
-!     ! Strong Form Operator
-!     !
-!     ! DG Weak Form Operator
-!     !
-!     ! Assumes vector has been projected to computational coordinates
-!     !
-!     IMPLICIT NONE
-!     CLASS(MappedVector2D),INTENT(in) :: compVector
-!     TYPE(SEMQuad),INTENT(in) :: geometry
-!     TYPE(MappedScalar2D),INTENT(inout) :: divVector
-!     INTEGER,INTENT(in) :: dForm
-!     LOGICAL,INTENT(in) :: gpuAccel
 
-!     IF (dForm == selfWeakDGForm) THEN
 
-!       IF (gpuAccel) THEN
-!         CALL compVector % interp % VectorDGDivergence_2D(compVector % interior, &
-!                                                          compVector % boundaryNormal, &
-!                                                          divVector % interior, &
-!                                                          compVector % nvar, &
-!                                                          compVector % nelem)
-!       ELSE
-!         CALL compVector % interp % VectorDGDivergence_2D(compVector % interior, &
-!                                                          compVector % boundaryNormal, &
-!                                                          divVector % interior, &
-!                                                          compVector % nvar, &
-!                                                          compVector % nelem)
-!       END IF
 
-!     ELSE IF (dForm == selfStrongForm) THEN
-
-!       IF (gpuAccel) THEN
-!         CALL compVector % interp % VectorDivergence_2D(compVector % interior, &
-!                                                        divVector % interior, &
-!                                                        compVector % nvar, &
-!                                                        compVector % nelem)
-!       ELSE
-!         CALL compVector % interp % VectorDivergence_2D(compVector % interior, &
-!                                                        divVector % interior, &
-!                                                        compVector % nvar, &
-!                                                        compVector % nelem)
-!       END IF
-
-!     END IF
-
-!     CALL divVector % JacobianWeight(geometry,gpuAccel)
-
-!   END SUBROUTINE Divergence_MappedVector2D
-
-!   SUBROUTINE ContravariantProjection_MappedVector2D(vector,geometry,gpuAccel)
-! #undef __FUNC__
-! #define __FUNC__ "ContravariantProjection_MappedVector2D"
-!     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
-!     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
-!     ! vectors are really the Jacobian weighted contravariant basis vectors
-!     IMPLICIT NONE
-!     CLASS(MappedVector2D),INTENT(inout) :: vector
-!     TYPE(SEMQuad),INTENT(in) :: geometry
-!     LOGICAL,INTENT(in) :: gpuAccel
-!     ! Local
-!     INTEGER :: i,j,iEl,iVar
-!     REAL(prec) :: Fx, Fy
-
-!     IF (gpuAccel) THEN
-
-!       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(vector % interior, &
-!                                                               geometry % dsdx % interior, &
-!                                                               vector % interp % N, &
-!                                                               vector % nVar, &
-!                                                               vector % nElem)
-
-!     ELSE
-!       ! Assume that tensor(j,i) is vector i, component j
-!       ! => dot product is done along first dimension
-!       ! to project onto computational space
-!       DO iel = 1,vector % nElem
-!         DO ivar = 1,vector % nVar
-!           DO j = 0,vector % interp % N
-!             DO i = 0,vector % interp % N
-
-!               Fx = vector % interior(1,i,j,iEl,iVar)
-!               Fy = vector % interior(2,i,j,iEl,iVar)
-
-!               vector % interior(1,i,j,iEl,iVar) = &
-!                 geometry % dsdx % interior(1,1,i,j,iEl,1)*Fx + &
-!                 geometry % dsdx % interior(2,1,i,j,iEl,1)*Fy
-
-!               vector % interior(2,i,j,iEl,iVar) = &
-!                 geometry % dsdx % interior(1,2,i,j,iEl,1)*Fx + &
-!                 geometry % dsdx % interior(2,2,i,j,iEl,1)*Fy
-
-!             END DO
-!           END DO
-!         END DO
-!       END DO
-
-!     END IF
-
-!   END SUBROUTINE ContravariantProjection_MappedVector2D
 
 !   SUBROUTINE JacobianWeight_MappedVector2D(vector,geometry,gpuAccel)
 ! #undef __FUNC__
@@ -2514,10 +2552,10 @@ contains
 
 !   END SUBROUTINE BassiRebaySides_MappedVector3D
 
-!   SUBROUTINE Divergence_MappedVector3D(compVector,geometry,divVector,dForm,gpuAccel)
+!   SUBROUTINE Divergence_MappedVector3D(this,geometry,divVector,dForm,gpuAccel)
 !     !
 !     IMPLICIT NONE
-!     CLASS(MappedVector3D),INTENT(in) :: compVector
+!     CLASS(MappedVector3D),INTENT(in) :: this
 !     TYPE(SEMHex),INTENT(in) :: geometry
 !     TYPE(MappedScalar3D),INTENT(inout) :: divVector
 !     INTEGER,INTENT(in) :: dForm
@@ -2526,31 +2564,31 @@ contains
 !     IF (dForm == selfWeakDGForm) THEN
 
 !       IF (gpuAccel) THEN
-!         CALL compVector % interp % VectorDGDivergence_3D(compVector % interior, &
-!                                                          compVector % boundaryNormal, &
+!         CALL this % interp % VectorDGDivergence_3D(this % interior, &
+!                                                          this % boundaryNormal, &
 !                                                          divVector % interior, &
-!                                                          compVector % nvar, &
-!                                                          compVector % nelem)
+!                                                          this % nvar, &
+!                                                          this % nelem)
 !       ELSE
-!         CALL compVector % interp % VectorDGDivergence_3D(compVector % interior, &
-!                                                          compVector % boundaryNormal, &
+!         CALL this % interp % VectorDGDivergence_3D(this % interior, &
+!                                                          this % boundaryNormal, &
 !                                                          divVector % interior, &
-!                                                          compVector % nvar, &
-!                                                          compVector % nelem)
+!                                                          this % nvar, &
+!                                                          this % nelem)
 !       END IF
 
 !     ELSE IF (dForm == selfStrongForm) THEN
 
 !       IF (gpuAccel) THEN
-!         CALL compVector % interp % VectorDivergence_3D(compVector % interior, &
+!         CALL this % interp % VectorDivergence_3D(this % interior, &
 !                                                        divVector % interior, &
-!                                                        compVector % nvar, &
-!                                                        compVector % nelem)
+!                                                        this % nvar, &
+!                                                        this % nelem)
 !       ELSE
-!         CALL compVector % interp % VectorDivergence_3D(compVector % interior, &
+!         CALL this % interp % VectorDivergence_3D(this % interior, &
 !                                                        divVector % interior, &
-!                                                        compVector % nvar, &
-!                                                        compVector % nelem)
+!                                                        this % nvar, &
+!                                                        this % nelem)
 !       END IF
 
 !     END IF
@@ -3233,7 +3271,7 @@ contains
 
 ! !   END SUBROUTINE SideExchange_MappedP2Vector2D
 
-! !   SUBROUTINE Divergence_MappedP2Vector2D(compVector,geometry,divVector,dForm,gpuAccel)
+! !   SUBROUTINE Divergence_MappedP2Vector2D(this,geometry,divVector,dForm,gpuAccel)
 ! !     ! Strong Form Operator
 ! !     !
 ! !     ! DG Weak Form Operator
@@ -3241,7 +3279,7 @@ contains
 ! !     ! Assumes vector has been projected to computational coordinates
 ! !     !
 ! !     IMPLICIT NONE
-! !     CLASS(MappedP2Vector2D),INTENT(in) :: compVector
+! !     CLASS(MappedP2Vector2D),INTENT(in) :: this
 ! !     TYPE(SEMQuad),INTENT(in) :: geometry
 ! !     TYPE(MappedScalar2D),INTENT(inout) :: divVector
 ! !     INTEGER,INTENT(in) :: dForm
@@ -3250,31 +3288,31 @@ contains
 ! !     IF (dForm == selfWeakDGForm) THEN
 
 ! !       IF (gpuAccel) THEN
-! !         CALL compVector % interp % P2VectorDGDivergence_2D(compVector % interior, &
-! !                                                          compVector % boundaryNormal, &
+! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior, &
+! !                                                          this % boundaryNormal, &
 ! !                                                          divVector % interior, &
-! !                                                          compVector % nvar, &
-! !                                                          compVector % nelem)
+! !                                                          this % nvar, &
+! !                                                          this % nelem)
 ! !       ELSE
-! !         CALL compVector % interp % P2VectorDGDivergence_2D(compVector % interior, &
-! !                                                          compVector % boundaryNormal, &
+! !         CALL this % interp % P2VectorDGDivergence_2D(this % interior, &
+! !                                                          this % boundaryNormal, &
 ! !                                                          divVector % interior, &
-! !                                                          compVector % nvar, &
-! !                                                          compVector % nelem)
+! !                                                          this % nvar, &
+! !                                                          this % nelem)
 ! !       END IF
 
 ! !     ELSE IF (dForm == selfStrongForm) THEN
 
 ! !       IF (gpuAccel) THEN
-! !         CALL compVector % interp % P2VectorDivergence_2D(compVector % interior, &
+! !         CALL this % interp % P2VectorDivergence_2D(this % interior, &
 ! !                                                        divVector % interior, &
-! !                                                        compVector % nvar, &
-! !                                                        compVector % nelem)
+! !                                                        this % nvar, &
+! !                                                        this % nelem)
 ! !       ELSE
-! !         CALL compVector % interp % P2VectorDivergence_2D(compVector % interior, &
+! !         CALL this % interp % P2VectorDivergence_2D(this % interior, &
 ! !                                                        divVector % interior, &
-! !                                                        compVector % nvar, &
-! !                                                        compVector % nelem)
+! !                                                        this % nvar, &
+! !                                                        this % nelem)
 ! !       END IF
 
 ! !     END IF

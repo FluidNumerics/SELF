@@ -182,8 +182,8 @@ module SELF_Data
     procedure,private :: Divergence_Vector2D_gpu
     procedure,private :: Divergence_Vector2D_cpu
 
-    ! GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
-    ! PROCEDURE,PRIVATE :: SetEquation_Vector2D
+    GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
+    PROCEDURE,PRIVATE :: SetEquation_Vector2D
 
     ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector2D, WriteHDF5_Vector2D
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector2D
@@ -250,6 +250,10 @@ module SELF_Data
     generic,public :: Divergence => Divergence_Tensor2D_gpu,Divergence_Tensor2D_cpu
     procedure,private :: Divergence_Tensor2D_gpu
     procedure,private :: Divergence_Tensor2D_cpu
+
+    generic,public :: DGDivergence => DGDivergence_Tensor2D_gpu,DGDivergence_Tensor2D_cpu
+    procedure,private :: DGDivergence_Tensor2D_gpu
+    procedure,private :: DGDivergence_Tensor2D_cpu
 
     procedure,public :: Determinant => Determinant_Tensor2D
 
@@ -958,17 +962,17 @@ contains
 
   end subroutine Free_Vector2D
 
-!   SUBROUTINE SetEquation_Vector2D(this,idir,ivar,eqnChar)
-!     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
-!     IMPLICIT NONE
-!     CLASS(Vector2D),INTENT(inout) :: this
-!     INTEGER,INTENT(in) :: idir,ivar
-!     CHARACTER(*),INTENT(in) :: eqnChar
+  SUBROUTINE SetEquation_Vector2D(this,idir,ivar,eqnChar)
+    !! Sets the equation parser for the `idir` direction and `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: this
+    INTEGER,INTENT(in) :: idir,ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
 
-!     this % eqn(idir+2*(ivar-1)) = EquationParser( TRIM(eqnChar), &
-!                                               (/'x','y','z','t'/) )
+    this % eqn(idir+2*(ivar-1)) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
 
-!   END SUBROUTINE SetEquation_Vector2D
+  END SUBROUTINE SetEquation_Vector2D
 
   subroutine UpdateDevice_Vector2D(this)
     implicit none
@@ -1461,6 +1465,34 @@ contains
                                              handle)
 
   end subroutine Divergence_Tensor2D_gpu
+
+  subroutine DGDivergence_Tensor2D_cpu(this,that)
+    implicit none
+    class(Tensor2D),intent(in) :: this
+    class(Vector2D),intent(inout) :: that
+
+    call this % interp % TensorDGDivergence_2D(this % interior, &
+                                               this % boundary, &
+                                               that % interior, &
+                                               this % nVar, &
+                                               this % nElem)
+
+  end subroutine DGDivergence_Tensor2D_cpu
+
+  subroutine DGDivergence_Tensor2D_gpu(this,that,handle)
+    implicit none
+    class(Tensor2D),intent(in) :: this
+    class(Vector2D),intent(inout) :: that
+    type(c_ptr),intent(inout) :: handle
+
+    call this % interp % TensorDGDivergence_2D(this % interior, &
+                                             this % boundary, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             handle)
+
+  end subroutine DGDivergence_Tensor2D_gpu
 
   subroutine Determinant_Tensor2D(this,that)
     implicit none

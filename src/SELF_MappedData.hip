@@ -27,7 +27,7 @@ extern "C"
 
 extern "C"
 {
-  void JacobianWeight_2D_gpu(real **scalar, real **jacobian, int N, int nVar, int nEl)
+  void JacobianWeight_2D_gpu(real *scalar, real *jacobian, int N, int nVar, int nEl)
   {
     int ndof = (N+1)*(N+1)*(nEl);
     int threads_per_block = 256;
@@ -36,7 +36,7 @@ extern "C"
     dim3 nblocks(nblocksx,nVar,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    JacobianWeight<<<nblocks, nblocks, 0, 0>>>(*scalar, *jacobian, ndof);
+    JacobianWeight<<<nblocks, nblocks, 0, 0>>>(scalar, jacobian, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -76,7 +76,7 @@ __global__ void SideExchange_2D(real *extBoundary, real *boundary, int *sideInfo
 
 extern "C"
 {
-  void SideExchange_2D_gpu(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
+  void SideExchange_2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     int ndof = (N+1)*4*nEl;
     int threads_per_block = 256;
@@ -84,7 +84,7 @@ extern "C"
 
     dim3 nblocks(nblocks_x,nVar,1);
     dim3 nthreads(threads_per_block,1,1);
-    SideExchange_2D<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nEl);
+    SideExchange_2D<<<nblocks,nthreads>>>(extBoundary, boundary, sideInfo, elemToRank, rankId, offset, N, nEl);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -196,6 +196,38 @@ extern "C"
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
+
+__global__ void ContravariantProjection_MappedVector2D_gpu(real *vector, real *dsdx, int N, int ndof){
+
+    uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
+    uint32_t ivar = blockIdx.y;
+    uint32_t nvar = blockDim.y;
+
+    real Fx = vector[i+ndof*ivar];
+    real Fy = vector[i+ndof*(ivar + nvar)];
+
+    if( i < ndof ){
+      vector[i+ndof*ivar] = dsdx[i]*Fx + dsdx[i + ndof]*Fy;
+      vector[i+ndof*(ivar + nvar)] = dsdx[i + 2*ndof]*Fx + dsdx[i + 3*ndof]*Fy;
+    }
+
+}
+
+extern "C"
+{
+  void ContravariantProjection_MappedVector2D_gpu_wrapper(real *vector, real *dsdx, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*(N+1)*nEl;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,nVar,1);
+    dim3 nthreads(threads_per_block,1,1);
+    ContravariantProjection_MappedVector2D_gpu<<<nblocks,nthreads, 0, 0>>>(vector, dsdx, N, ndof);
+    HIP_SAFE_CALL(hipGetLastError());
+  } 
+}
+
 
 
 
@@ -713,34 +745,6 @@ extern "C"
 //   } 
 // }
 
-// // ContravariantProjection_MappedVector2D_gpu
-// __global__ void ContravariantProjection_MappedVector2D_gpu(real *vector, real *dsdx, int N, int nVar){
-
-//   size_t iVar = blockIdx.x;
-//   size_t iEl = blockIdx.y;
-//   size_t i = threadIdx.x;
-//   size_t j = threadIdx.y;
-
-
-//     real Fx = vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
-//     real Fy = vector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
-
-//     vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*Fx+
-//                 			         dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*Fy;
-
-//     vector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*Fx+
-// 						 dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*Fy;
-  
-// }
-
-// extern "C"
-// {
-//   void ContravariantProjection_MappedVector2D_gpu_wrapper(real **vector, real **dsdx, int N, int nVar, int nEl)
-//   {
-//     ContravariantProjection_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *dsdx, N, nVar);
-//     HIP_SAFE_CALL(hipGetLastError());
-//   } 
-// }
 
 // // ContravariantProjection_MappedP2Vector2D_gpu
 // __global__ void ContravariantProjection_MappedP2Vector2D_gpu(real *vector, real *physical, real *dsdx, int N, int nVar){

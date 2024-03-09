@@ -148,11 +148,14 @@ module SELF_Lagrange
     generic,public :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     procedure,private :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
 
+    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+    PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+
     generic,public :: TensorDivergence_2D => TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
     procedure,private :: TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
 
-    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+    generic,public :: TensorDGDivergence_2D => TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
+    procedure,private :: TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
 
     generic,public :: VectorGradient_3D => VectorGradient_3D_cpu,VectorGradient_3D_gpu
     procedure,private :: VectorGradient_3D_cpu,VectorGradient_3D_gpu
@@ -252,6 +255,16 @@ module SELF_Lagrange
       type(c_ptr),value :: bMatrix,qWeights,fbound,df
       integer(c_int),value :: N,nVar,nEl
     end subroutine VectorDGDivergence_BoundaryContribution_2D
+  end interface
+
+  interface
+    subroutine TensorDGDivergence_BoundaryContribution_2D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+      bind(c,name="TensorDGDivergence_BoundaryContribution_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine TensorDGDivergence_BoundaryContribution_2D
   end interface
 
 contains
@@ -1696,6 +1709,91 @@ contains
     floc => null()
 
   end subroutine TensorDivergence_2D_gpu
+
+  subroutine TensorDGDivergence_2D_cpu(this,f,bf,dF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(in)  :: bf(1:this % N + 1,1:4,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    ! Local
+    integer    :: i,j,ii,iel,ivar,idir
+    real(prec) :: dfLoc
+
+    do idir = 1, 2
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
+              end do
+              dF(i,j,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,2,iel,ivar,idir,1) +&
+                                               this % bMatrix(i,1)*bf(j,4,iel,ivar,idir,1))/&
+                                               this % qweights(i)
+
+
+            end do
+          end do
+        end do
+      end do
+
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
+              end do
+              dF(i,j,iel,ivar,idir) = dfLoc + (this % bMatrix(j,2)*bf(i,1,iel,ivar,idir,2) +&
+                                               this % bMatrix(j,1)*bf(i,3,iel,ivar,idir,2))/&
+                                               this % qweights(j)
+
+            end do
+          end do
+        end do
+      end do
+    enddo
+
+  end subroutine TensorDGDivergence_2D_cpu
+
+  subroutine TensorDGDivergence_2D_gpu(this,f,bf,df,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
+    real(prec),pointer,intent(in) :: bf(:,:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
+    type(c_ptr),intent(inout) :: handle
+    ! local
+    real(prec),pointer :: dfloc(:,:,:,:)
+    real(prec),pointer :: floc(:,:,:,:)
+
+    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1,1)
+    call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1,2)
+    call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+
+    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,1)
+    call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
+    call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    floc => null()
+
+    ! Add the boundary contributions
+    ! call TensorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
+    !                                                 c_loc(this % qWeights),&
+    !                                                 c_loc(bf), c_loc(df),&
+    !                                                 this % N, nvars, nelems)
+
+  end subroutine TensorDGDivergence_2D_gpu
 
   subroutine VectorDivergence_3D_cpu(this,f,dF,nvars,nelems)
     implicit none

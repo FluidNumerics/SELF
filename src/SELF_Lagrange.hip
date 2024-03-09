@@ -212,7 +212,43 @@ extern "C"
 {
   void VectorDGDivergence_BoundaryContribution_2D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
   {
-	  VectorDGDivergence_BoundaryContribution_2D<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
+	  VectorDGDivergence_BoundaryContribution_2D<<<dim3(nEl,nVar,1), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
+    HIP_SAFE_CALL(hipGetLastError());
+  } 
+}
+
+__global__ void TensorDGDivergence_BoundaryContribution_2D(real *bMatrix, real *qWeights, real *bf, real *df, int N){
+
+  uint32_t nel = blockDim.x;
+  uint32_t nvar = blockDim.y;
+
+  uint32_t iel = blockIdx.x;
+  uint32_t ivar = blockIdx.y;
+
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+
+  df[VE_2D_INDEX(i,j,iel,ivar,0,N,nel,nvar)] += (bf[TEB_2D_INDEX(j,1,iel,ivar,0,0,N,nel,nvar)]*bMatrix[i+(N+1)] +
+                                                    bf[TEB_2D_INDEX(j,3,iel,ivar,0,0,N,nel,nvar)]*bMatrix[i])/
+                                                   qWeights[i] +
+                                                   (bf[TEB_2D_INDEX(i,2,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j+(N+1)] +
+                                                    bf[TEB_2D_INDEX(i,0,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j])/
+                                                   qWeights[j];
+
+  df[VE_2D_INDEX(i,j,iel,ivar,1,N,nel,nvar)] += (bf[TEB_2D_INDEX(j,1,iel,ivar,1,0,N,nel,nvar)]*bMatrix[i+(N+1)] +
+                                                    bf[TEB_2D_INDEX(j,3,iel,ivar,1,0,N,nel,nvar)]*bMatrix[i])/
+                                                   qWeights[i] +
+                                                   (bf[TEB_2D_INDEX(i,2,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j+(N+1)] +
+                                                    bf[TEB_2D_INDEX(i,0,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j])/
+                                                   qWeights[j];
+
+}
+
+extern "C"
+{
+  void TensorDGDivergence_BoundaryContribution_2D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
+  {
+	  TensorDGDivergence_BoundaryContribution_2D<<<dim3(nEl,nVar,1), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }
