@@ -13,17 +13,20 @@ program test_program
     read(arg1, *, iostat=ierr) int_arg1
     if (ierr /= 0) then
         print *, "Error: Argument must be an integer"
-        stop
+        exit_code = 1
+        stop exit_code
     end if
     read(arg2, *, iostat=ierr) int_arg2
     if (ierr /= 0) then
         print *, "Error: Argument must be an integer"
-        stop
+        exit_code = 1
+        stop exit_code
     end if
     read(arg3, *, iostat=ierr) int_arg3
     if (ierr /= 0) then
         print *, "Error: Argument must be an integer"
-        stop
+        exit_code = 1
+        stop exit_code
     end if
 
     do i=1,100
