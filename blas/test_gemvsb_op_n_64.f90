@@ -10,6 +10,10 @@ program test_program
     call getarg(2, arg2)
     call getarg(3, arg3)
 
+    print*,arg1
+    print*,arg2
+    print*,arg3
+
     read(arg1, *, iostat=ierr) int_arg1
     if (ierr /= 0) then
         print *, "Error: Argument must be an integer"
@@ -28,10 +32,6 @@ program test_program
         exit_code = 1
         stop exit_code
     end if
-
-    print*,int_arg1
-    print*,int_arg2
-    print*,int_arg3
 
     exit_code = test_function(int_arg1,int_arg2,int_arg3)
 
@@ -70,7 +70,8 @@ program test_program
         stride_y = m
 
         ! gemv test for real64
-        allocate(A(m,n), x(m*batchCount), y(n*batchCount), expected(m))
+        print*,"HERE"
+        allocate(A(m,n), x(n*batchCount), y(m*batchCount), expected(m))
 
         A = 1.0_real64
         x = 1.0_real64

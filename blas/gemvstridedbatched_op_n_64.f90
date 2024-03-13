@@ -67,7 +67,7 @@ program test_program
         stride_y = m
 
         ! gemv test for real64
-        allocate(A(m,n), x(m*batchCount), y(n*batchCount), expected(m))
+        allocate(A(m,n), x(n*batchCount), y(m*batchCount), expected(m))
 
         A = 1.0_real64
         x = 1.0_real64
