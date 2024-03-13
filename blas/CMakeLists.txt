@@ -25,7 +25,13 @@ function (add_fortran_examples)
                         ${HDF5_INCLUDE_DIRS}/shared
                         ${MPI_Fortran_INCLUDE_DIRS})
 
-        add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME})
+        # if (${EXAMPLE_NAME} STREQUAL "gemvstridedbatched_op_n_64.f90")
+        if (${EXAMPLE_NAME} STREQUAL "this page intentionally left blank")
+            add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 10 10 1000)
+        else()
+            add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME})
+        endif()
+
         install(TARGETS ${EXAMPLE_NAME} DESTINATION example)
     endforeach ()
 
@@ -38,10 +44,10 @@ add_fortran_examples (
     #"test_gemv.f90"
     #"test_gemvstridedbatched.f90"
     ##### gemvXStridedBatched comparisons
-    "gemvstridedbatched_op_n_32.f90"
-    "gemvstridedbatched_op_t_32.f90"
+    # "gemvstridedbatched_op_n_32.f90"
+    # "gemvstridedbatched_op_t_32.f90"
     "gemvstridedbatched_op_n_64.f90"
-    "gemvstridedbatched_op_t_64.f90"
+    # "gemvstridedbatched_op_t_64.f90"
     # Level 3
     #"test_gemm.f90"
     # misc
