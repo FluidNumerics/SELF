@@ -10,16 +10,16 @@
 ! real64 (double, D) floating point operations in the BLAS library.
 !
 !   |- Level 1      |- Level 2      |- Level 3
-!   | |- amax       | |- gbmv       | |- gemm
-!   | |- amin       | |- gemv       | |- herk*
-!   | |- asu        | |- ger        | |- herkx*
-!   | |- axpy       | |- hbmv*      | |- her2k*
-!   | |- copy       | |- hemv*      | |- symm
-!   | |- dot        | |- her*       | |- syrk
-!   | |- nrm2       | |- her2*      | |- syr2k
-!   | |- rot        | |- hpmv*      | |- geam
-!   | |- rotg       | |- hpr*       | |- hemm*
-!   | |- rotm       | |- hpr2*      | |- trmm
+!   | |- amax       | |- gbmv       | |- gemm*
+!   | |- amin       | |- gemv*      | |- herk
+!   | |- asu        | |- ger        | |- herkx
+!   | |- axpy*      | |- hbmv       | |- her2k
+!   | |- copy       | |- hemv       | |- symm
+!   | |- dot        | |- her        | |- syrk
+!   | |- nrm2       | |- her2       | |- syr2k
+!   | |- rot        | |- hpmv       | |- geam
+!   | |- rotg       | |- hpr        | |- hemm
+!   | |- rotm       | |- hpr2       | |- trmm
 !   | |- rotmg      | |- sbmv       | |- trsm
 !   | |- scal       | |- spmv       | |- trtri
 !   | |- swap       | |- spr        | |- dgmm
