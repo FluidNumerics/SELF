@@ -37,7 +37,6 @@ MODULE SELF_DGModel3D
       PROCEDURE :: Init => Init_DGModel3D
       PROCEDURE :: Free => Free_DGModel3D
   
-      PROCEDURE :: UpdateHost => UpdateHost_DGModel3D
       PROCEDURE :: UpdateDevice => UpdateDevice_DGModel3D
   
       PROCEDURE :: UpdateSolution => UpdateSolution_DGModel3D
@@ -59,9 +58,7 @@ MODULE SELF_DGModel3D
         SetSolutionFromEqn_DGModel3D
       PROCEDURE,PRIVATE :: SetSolutionFromChar_DGModel3D
       PROCEDURE,PRIVATE :: SetSolutionFromEqn_DGModel3D
-  
-      PROCEDURE :: ReprojectFlux => ReprojectFlux_DGModel3D
-  
+    
       PROCEDURE :: ReadModel => Read_DGModel3D
       PROCEDURE :: WriteModel => Write_DGModel3D
       PROCEDURE :: WriteTecplot => WriteTecplot_DGModel3D
@@ -69,70 +66,70 @@ MODULE SELF_DGModel3D
     END TYPE Model3D
   
     INTERFACE
-      SUBROUTINE UpdateSolution_DGModel3D_gpu_wrapper(solution,dSdt,dt,N,nVar,nEl) &
-        BIND(c,name="UpdateSolution_DGModel3D_gpu_wrapper")
+      SUBROUTINE UpdateSolution_DGModel3D_gpu(solution,dSdt,dt,N,nVar,nEl) &
+        BIND(c,name="UpdateSolution_DGModel3D_gpu")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
-        TYPE(C_PTR) :: solution,dSdt
+        TYPE(C_PTR), value :: solution,dSdt
         INTEGER(C_INT),VALUE :: N,nVar,nEl
         REAL(c_prec),VALUE :: dt
-      END SUBROUTINE UpdateSolution_DGModel3D_gpu_wrapper
+      END SUBROUTINE UpdateSolution_DGModel3D_gpu
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGAB2_DGModel3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-        BIND(c,name="UpdateGAB2_DGModel3D_gpu_wrapper")
+      SUBROUTINE UpdateGAB2_DGModel3D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
+        BIND(c,name="UpdateGAB2_DGModel3D_gpu")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
-        TYPE(C_PTR) :: prevsol,solution
+        TYPE(C_PTR), value :: prevsol,solution
         INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-      END SUBROUTINE UpdateGAB2_DGModel3D_gpu_wrapper
+      END SUBROUTINE UpdateGAB2_DGModel3D_gpu
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGAB3_DGModel3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-        BIND(c,name="UpdateGAB3_DGModel3D_gpu_wrapper")
+      SUBROUTINE UpdateGAB3_DGModel3D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
+        BIND(c,name="UpdateGAB3_DGModel3D_gpu")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
-        TYPE(C_PTR) :: prevsol,solution
+        TYPE(C_PTR), value :: prevsol,solution
         INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-      END SUBROUTINE UpdateGAB3_DGModel3D_gpu_wrapper
+      END SUBROUTINE UpdateGAB3_DGModel3D_gpu
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGAB4_DGModel3D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-        BIND(c,name="UpdateGAB4_DGModel3D_gpu_wrapper")
+      SUBROUTINE UpdateGAB4_DGModel3D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
+        BIND(c,name="UpdateGAB4_DGModel3D_gpu")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
-        TYPE(C_PTR) :: prevsol,solution
+        TYPE(C_PTR), value :: prevsol,solution
         INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-      END SUBROUTINE UpdateGAB4_DGModel3D_gpu_wrapper
+      END SUBROUTINE UpdateGAB4_DGModel3D_gpu
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE UpdateGRK_DGModel3D_gpu_wrapper(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
-        BIND(c,name="UpdateGRK_DGModel3D_gpu_wrapper")
+      SUBROUTINE UpdateGRK_DGModel3D_gpu(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
+        BIND(c,name="UpdateGRK_DGModel3D_gpu")
         USE ISO_C_BINDING
         USE SELF_Constants
         IMPLICIT NONE
-        TYPE(C_PTR) :: grk,solution,dSdt
+        TYPE(C_PTR), value :: grk,solution,dSdt
         INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
         REAL(c_prec),VALUE :: rk_a,rk_g,dt
-      END SUBROUTINE UpdateGRK_DGModel3D_gpu_wrapper
+      END SUBROUTINE UpdateGRK_DGModel3D_gpu
     END INTERFACE
   
     INTERFACE
-      SUBROUTINE CalculateDSDt_DGModel3D_gpu_wrapper(fluxDivergence,source,dSdt,N,nVar,nEl) &
-        BIND(c,name="CalculateDSDt_DGModel3D_gpu_wrapper")
+      SUBROUTINE CalculateDSDt_DGModel3D_gpu(fluxDivergence,source,dSdt,N,nVar,nEl) &
+        BIND(c,name="CalculateDSDt_DGModel3D_gpu")
         USE ISO_C_BINDING
         IMPLICIT NONE
-        TYPE(C_PTR) :: fluxDivergence,source,dSdt
+        TYPE(C_PTR), value :: fluxDivergence,source,dSdt
         INTEGER(C_INT),VALUE :: N,nVar,nEl
-      END SUBROUTINE CalculateDSDt_DGModel3D_gpu_wrapper
+      END SUBROUTINE CalculateDSDt_DGModel3D_gpu
     END INTERFACE
   
   CONTAINS
@@ -152,7 +149,7 @@ MODULE SELF_DGModel3D
       this % decomp => decomp
       this % mesh => mesh
       this % geometry => geometry
-      this % gpuAccel = .FALSE.
+      this % GPUBackend = .FALSE.
   
       CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
       CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -205,22 +202,6 @@ MODULE SELF_DGModel3D
   
     END SUBROUTINE ResizePrevSol_DGModel3D
   
-    SUBROUTINE UpdateHost_DGModel3D(this)
-      IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
-  
-      CALL this % mesh % UpdateHost()
-      CALL this % geometry % UpdateHost()
-      CALL this % solution % UpdateHost()
-      CALL this % dSdt % UpdateHost()
-      CALL this % solution % UpdateHost()
-      CALL this % solutionGradient % UpdateHost()
-      CALL this % flux % UpdateHost()
-      CALL this % source % UpdateHost()
-      CALL this % fluxDivergence % UpdateHost()
-  
-    END SUBROUTINE UpdateHost_DGModel3D
-  
     SUBROUTINE UpdateDevice_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
@@ -249,11 +230,11 @@ MODULE SELF_DGModel3D
       END DO
   
       CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
-      CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
-  
-      IF (this % gpuAccel) THEN
-        CALL this % solution % UpdateDevice()
-      END IF
+      if ( this % GPUBackend ) then
+        CALL this % solution % BoundaryInterp(this % hipblas_handle)
+      else 
+        CALL this % solution % BoundaryInterp()
+      endif
   
     END SUBROUTINE SetSolutionFromEqn_DGModel3D
   
@@ -269,11 +250,11 @@ MODULE SELF_DGModel3D
       END DO
   
       CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
-      CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
-  
-      IF (this % gpuAccel) THEN
-        CALL this % solution % UpdateDevice()
-      END IF
+      if ( this % GPUBackend ) then
+        CALL this % solution % BoundaryInterp(this % hipblas_handle)
+      else 
+        CALL this % solution % BoundaryInterp()
+      endif
   
     END SUBROUTINE SetSolutionFromChar_DGModel3D
   
@@ -293,10 +274,10 @@ MODULE SELF_DGModel3D
         dtLoc = this % dt
       END IF
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateSolution_DGModel3D_gpu_wrapper(this % solution % interior % deviceData, &
-                                                this % dSdt % interior % deviceData, &
+        CALL UpdateSolution_DGModel3D_gpu(c_loc(this % solution % interior), &
+                                          c_loc(this % dSdt % interior), &
                                                 dtLoc, &
                                                 this % solution % interp % N, &
                                                 this % solution % nVar, &
@@ -306,14 +287,14 @@ MODULE SELF_DGModel3D
   
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO k = 0,this % solution % interp % N
+            DO k = 1,this % solution % interp % N+1
 
-            DO j = 0,this % solution % interp % N
-              DO i = 0,this % solution % interp % N
+            DO j = 1,this % solution % interp % N+1
+              DO i = 1,this % solution % interp % N+1
   
-                this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) + &
-                  dtLoc*this % dSdt % interior % hostData(i,j,k,iVar,iEl)
+                this % solution % interior(i,j,k,iEl,iVar) = &
+                  this % solution % interior(i,j,k,iEl,iVar) + &
+                  dtLoc*this % dSdt % interior(i,j,k,iEl,iVar)
   
               END DO
             END DO
@@ -332,10 +313,10 @@ MODULE SELF_DGModel3D
       ! Local
       INTEGER :: i,j,k,nVar,iVar,iEl
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateGAB2_DGModel3D_gpu_wrapper(this % prevSol % interior % deviceData, &
-                                            this % solution % interior % deviceData, &
+        CALL UpdateGAB2_DGModel3D_gpu(c_loc(this % prevSol % interior), &
+                                      c_loc(this % solution % interior), &
                                             m, &
                                             this % prevsol % nVar, &
                                             this % solution % interp % N, &
@@ -349,12 +330,12 @@ MODULE SELF_DGModel3D
   
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-                  this % prevSol % interior % hostData(i,j,k,iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+                  this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -366,12 +347,12 @@ MODULE SELF_DGModel3D
   
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) = this % prevSol % interior % hostData(i,j,k,iVar,iEl)
+                  this % solution % interior(i,j,k,iEl,iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -385,20 +366,20 @@ MODULE SELF_DGModel3D
           nVar = this % solution % nVar
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
                   ! Bump the last solution
-            this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,k,iVar,iEl)
+            this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
                   ! Store the new solution
-                  this % prevSol % interior % hostData(i,j,k,iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+                  this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                    1.5_PREC*this % prevSol % interior % hostData(i,j,k,iVar,iEl) - &
-                    0.5_PREC*this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl)
+                  this % solution % interior(i,j,k,iEl,iVar) = &
+                    1.5_PREC*this % prevSol % interior(i,j,k,iEl,iVar) - &
+                    0.5_PREC*this % prevSol % interior(i,j,k,iEl,nVar + iVar)
                 END DO
               END DO
             ENDDO
@@ -418,10 +399,10 @@ MODULE SELF_DGModel3D
       ! Local
       INTEGER :: i,j,k,nVar,iVar,iEl
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateGAB3_DGModel3D_gpu_wrapper(this % prevSol % interior % deviceData, &
-                                            this % solution % interior % deviceData, &
+        CALL UpdateGAB3_DGModel3D_gpu(c_loc(this % prevSol % interior), &
+                                            c_loc(this % solution % interior), &
                                             m, &
                                             this % prevsol % nVar, &
                                             this % solution % interp % N, &
@@ -435,12 +416,12 @@ MODULE SELF_DGModel3D
           nVar = this % solution % nVar
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-           this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+           this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -452,12 +433,12 @@ MODULE SELF_DGModel3D
   
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-                  this % prevSol % interior % hostData(i,j,k,iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+                  this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -469,12 +450,12 @@ MODULE SELF_DGModel3D
   
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) = this % prevSol % interior % hostData(i,j,k,iVar,iEl)
+                  this % solution % interior(i,j,k,iEl,iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -488,22 +469,22 @@ MODULE SELF_DGModel3D
           nVar = this % solution % nVar
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
                   ! Bump the last two stored solutions
-   this % prevSol % interior % hostData(i,j,k,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl)
-            this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,k,iVar,iEl)
+   this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,nVar + iVar)
+            this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
                   ! Store the new solution
-                  this % prevSol % interior % hostData(i,j,k,iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+                  this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                    (23.0_PREC*this % prevSol % interior % hostData(i,j,k,iVar,iEl) - &
-                     16.0_PREC*this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) + &
-                     5.0_PREC*this % prevSol % interior % hostData(i,j,k,2*nVar + iVar,iEl))/12.0_PREC
+                  this % solution % interior(i,j,k,iEl,iVar) = &
+                    (23.0_PREC*this % prevSol % interior(i,j,k,iEl,iVar) - &
+                     16.0_PREC*this % prevSol % interior(i,j,k,iEl,nVar + iVar) + &
+                     5.0_PREC*this % prevSol % interior(i,j,k,iEl,2*nVar + iVar))/12.0_PREC
   
                 END DO
               END DO
@@ -523,10 +504,10 @@ MODULE SELF_DGModel3D
       ! Local
       INTEGER :: i,j,k,nVar,iVar,iEl
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateGAB4_DGModel3D_gpu_wrapper(this % prevSol % interior % deviceData, &
-                                            this % solution % interior % deviceData, &
+        CALL UpdateGAB4_DGModel3D_gpu(c_loc(this % prevSol % interior), &
+                                            c_loc(this % solution % interior), &
                                             m, &
                                             this % prevsol % nVar, &
                                             this % solution % interp % N, &
@@ -540,12 +521,12 @@ MODULE SELF_DGModel3D
           nVar = this % solution % nVar
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-         this % prevSol % interior % hostData(i,j,k,2*nVar + iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+         this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -558,12 +539,12 @@ MODULE SELF_DGModel3D
           nVar = this % solution % nVar
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-           this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+           this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -575,12 +556,12 @@ MODULE SELF_DGModel3D
   
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-                  this % prevSol % interior % hostData(i,j,k,iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+                  this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
                 END DO
               END DO
@@ -592,12 +573,12 @@ MODULE SELF_DGModel3D
   
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) = this % prevSol % interior % hostData(i,j,k,iVar,iEl)
+                  this % solution % interior(i,j,k,iEl,iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
                 END DO
             ENDDO
@@ -611,24 +592,24 @@ MODULE SELF_DGModel3D
           nVar = this % solution % nVar
           DO iEl = 1,this % solution % nElem
             DO iVar = 1,this % solution % nVar
-                DO k = 0,this % solution % interp % N
+                DO k = 1,this % solution % interp % N+1
 
-              DO j = 0,this % solution % interp % N
-                DO i = 0,this % solution % interp % N
+              DO j = 1,this % solution % interp % N+1
+                DO i = 1,this % solution % interp % N+1
   
                   ! Bump the last two stored solutions
-     this % prevSol % interior % hostData(i,j,k,3*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,k,2*nVar+iVar,iEl)
-   this % prevSol % interior % hostData(i,j,k,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl)
-            this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,k,iVar,iEl)
+     this % prevSol % interior(i,j,k,iEl,3*nVar + iVar) = this % prevSol % interior(i,j,k,2*nVar+iVar,iEl)
+   this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,nVar + iVar)
+            this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
                   ! Store the new solution
-                  this % prevSol % interior % hostData(i,j,k,iVar,iEl) = this % solution % interior % hostData(i,j,k,iVar,iEl)
+                  this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
   
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                    (55.0_PREC*this % prevSol % interior % hostData(i,j,k,iVar,iEl) - &
-                     59.0_PREC*this % prevSol % interior % hostData(i,j,k,nVar + iVar,iEl) + &
-                     37.0_PREC*this % prevSol % interior % hostData(i,j,k,2*nVar + iVar,iEl) - &
-                     9.0_PREC*this % prevSol % interior % hostData(i,j,k,3*nVar + iVar,iEl))/24.0_PREC
+                  this % solution % interior(i,j,k,iEl,iVar) = &
+                    (55.0_PREC*this % prevSol % interior(i,j,k,iEl,iVar) - &
+                     59.0_PREC*this % prevSol % interior(i,j,k,iEl,nVar + iVar) + &
+                     37.0_PREC*this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) - &
+                     9.0_PREC*this % prevSol % interior(i,j,k,iEl,3*nVar + iVar))/24.0_PREC
   
                 END DO
               END DO
@@ -649,11 +630,11 @@ MODULE SELF_DGModel3D
       ! Local
       INTEGER :: i,j,k,iVar,iEl
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateGRK_DGModel3D_gpu_wrapper(this % workSol % interior % deviceData, &
-                                           this % solution % interior % deviceData, &
-                                           this % dSdt % interior % deviceData, &
+        CALL UpdateGRK_DGModel3D_gpu(c_loc(this % workSol % interior), &
+                                           c_loc(this % solution % interior), &
+                                           c_loc(this % dSdt % interior), &
                                            rk2_a(m),rk2_g(m),this % dt, &
                                            this % worksol % nVar, &
                                            this % solution % interp % N, &
@@ -664,18 +645,18 @@ MODULE SELF_DGModel3D
   
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO k = 0,this % solution % interp % N
+            DO k = 1,this % solution % interp % N+1
 
-            DO j = 0,this % solution % interp % N
-              DO i = 0,this % solution % interp % N
+            DO j = 1,this % solution % interp % N+1
+              DO i = 1,this % solution % interp % N+1
   
-                this % workSol % interior % hostData(i,j,k,iVar,iEl) = rk2_a(m)* &
-                                                                    this % workSol % interior % hostData(i,j,k,iVar,iEl) + &
-                                                                     this % dSdt % interior % hostData(i,j,k,iVar,iEl)
+                this % workSol % interior(i,j,k,iEl,iVar) = rk2_a(m)* &
+                                                                    this % workSol % interior(i,j,k,iEl,iVar) + &
+                                                                     this % dSdt % interior(i,j,k,iEl,iVar)
   
-                this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) + &
-                  rk2_g(m)*this % dt*this % workSol % interior % hostData(i,j,k,iVar,iEl)
+                this % solution % interior(i,j,k,iEl,iVar) = &
+                  this % solution % interior(i,j,k,iEl,iVar) + &
+                  rk2_g(m)*this % dt*this % workSol % interior(i,j,k,iEl,iVar)
   
               END DO
             ENDDO
@@ -694,11 +675,11 @@ MODULE SELF_DGModel3D
       ! Local
       INTEGER :: i,j,k,iVar,iEl
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateGRK_DGModel3D_gpu_wrapper(this % workSol % interior % deviceData, &
-                                           this % solution % interior % deviceData, &
-                                           this % dSdt % interior % deviceData, &
+        CALL UpdateGRK_DGModel3D_gpu(c_loc(this % workSol % interior), &
+                                           c_loc(this % solution % interior), &
+                                           c_loc(this % dSdt % interior), &
                                            rk3_a(m),rk3_g(m),this % dt, &
                                            this % worksol % nVar, &
                                            this % solution % interp % N, &
@@ -709,18 +690,18 @@ MODULE SELF_DGModel3D
   
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO k = 0,this % solution % interp % N
+            DO k = 1,this % solution % interp % N+1
 
-            DO j = 0,this % solution % interp % N
-              DO i = 0,this % solution % interp % N
+            DO j = 1,this % solution % interp % N+1
+              DO i = 1,this % solution % interp % N+1
   
-                this % workSol % interior % hostData(i,j,k,iVar,iEl) = rk3_a(m)* &
-                                                                    this % workSol % interior % hostData(i,j,k,iVar,iEl) + &
-                                                                     this % dSdt % interior % hostData(i,j,k,iVar,iEl)
+                this % workSol % interior(i,j,k,iEl,iVar) = rk3_a(m)* &
+                                                                    this % workSol % interior(i,j,k,iEl,iVar) + &
+                                                                     this % dSdt % interior(i,j,k,iEl,iVar)
   
-                this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) + &
-                  rk3_g(m)*this % dt*this % workSol % interior % hostData(i,j,k,iVar,iEl)
+                this % solution % interior(i,j,k,iEl,iVar) = &
+                  this % solution % interior(i,j,k,iEl,iVar) + &
+                  rk3_g(m)*this % dt*this % workSol % interior(i,j,k,iEl,iVar)
   
               END DO
             END DO
@@ -739,11 +720,11 @@ MODULE SELF_DGModel3D
       ! Local
       INTEGER :: i,j,k,iVar,iEl
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL UpdateGRK_DGModel3D_gpu_wrapper(this % workSol % interior % deviceData, &
-                                           this % solution % interior % deviceData, &
-                                           this % dSdt % interior % deviceData, &
+        CALL UpdateGRK_DGModel3D_gpu(c_loc(this % workSol % interior), &
+                                           c_loc(this % solution % interior), &
+                                           c_loc(this % dSdt % interior), &
                                            rk4_a(m),rk4_g(m),this % dt, &
                                            this % workSol % nVar, &
                                            this % solution % interp % N, &
@@ -754,18 +735,18 @@ MODULE SELF_DGModel3D
   
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO k = 0,this % solution % interp % N
+            DO k = 1,this % solution % interp % N+1
 
-            DO j = 0,this % solution % interp % N
-              DO i = 0,this % solution % interp % N
+            DO j = 1,this % solution % interp % N+1
+              DO i = 1,this % solution % interp % N+1
   
-                this % workSol % interior % hostData(i,j,k,iVar,iEl) = rk4_a(m)* &
-                                                                    this % workSol % interior % hostData(i,j,k,iVar,iEl) + &
-                                                                     this % dSdt % interior % hostData(i,j,k,iVar,iEl)
+                this % workSol % interior(i,j,k,iEl,iVar) = rk4_a(m)* &
+                                                                    this % workSol % interior(i,j,k,iEl,iVar) + &
+                                                                     this % dSdt % interior(i,j,k,iEl,iVar)
   
-                this % solution % interior % hostData(i,j,k,iVar,iEl) = &
-                  this % solution % interior % hostData(i,j,k,iVar,iEl) + &
-                  rk4_g(m)*this % dt*this % workSol % interior % hostData(i,j,k,iVar,iEl)
+                this % solution % interior(i,j,k,iEl,iVar) = &
+                  this % solution % interior(i,j,k,iEl,iVar) + &
+                  rk4_g(m)*this % dt*this % workSol % interior(i,j,k,iEl,iVar)
   
               END DO
             END DO
@@ -777,22 +758,16 @@ MODULE SELF_DGModel3D
   
     END SUBROUTINE UpdateGRK4_DGModel3D
   
-    SUBROUTINE ReprojectFlux_DGModel3D(this)
-      IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
-  
-      CALL this % flux % ContravariantProjection(this % geometry,this % gpuAccel)
-  
-    END SUBROUTINE ReprojectFlux_DGModel3D
-  
     SUBROUTINE CalculateFluxDivergence_DGModel3D(this)
       IMPLICIT NONE
       CLASS(Model3D),INTENT(inout) :: this
   
-      CALL this % flux % Divergence(this % geometry, &
-                                    this % fluxDivergence, &
-                                    selfWeakDGForm, &
-                                    this % gpuAccel)
+      if( this % GPUBackend )then
+        CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence, this % hipblas_handle)
+      else
+        CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence)
+      end if
+  
   
     END SUBROUTINE CalculateFluxDivergence_DGModel3D
   
@@ -803,20 +778,24 @@ MODULE SELF_DGModel3D
       INTEGER :: i,j,k,iVar,iEl
   
       CALL this % PreTendency()
-      CALL this % solution % BoundaryInterp(this % gpuAccel)
-      CALL this % solution % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+      if (this % GPUBackend)then
+        CALL this % solution % BoundaryInterp(this % hipblas_handle)
+        CALL this % solution % SideExchange(this % mesh,this % decomp,this % hipblas_handle)
+      else
+        CALL this % solution % BoundaryInterp()
+        CALL this % solution % SideExchange(this % mesh,this % decomp)
+      endif
       CALL this % SetBoundaryCondition()
       CALL this % SourceMethod()
       CALL this % RiemannSolver()
       CALL this % FluxMethod()
-      CALL this % ReprojectFlux()
       CALL this % CalculateFluxDivergence()
   
-      IF (this % gpuAccel) THEN
+      IF (this % GPUBackend) THEN
   
-        CALL CalculateDSDt_DGModel3D_gpu_wrapper(this % fluxDivergence % interior % deviceData, &
-                                               this % source % interior % deviceData, &
-                                               this % dSdt % interior % deviceData, &
+        CALL CalculateDSDt_DGModel3D_gpu(c_loc(this % fluxDivergence % interior), &
+                                               c_loc(this % source % interior), &
+                                               c_loc(this % dSdt % interior), &
                                                this % solution % interp % N, &
                                                this % solution % nVar, &
                                                this % solution % nElem)
@@ -825,14 +804,14 @@ MODULE SELF_DGModel3D
   
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO k = 0,this % solution % interp % N
+            DO k = 1,this % solution % interp % N+1
 
-            DO j = 0,this % solution % interp % N
-              DO i = 0,this % solution % interp % N
+            DO j = 1,this % solution % interp % N+1
+              DO i = 1,this % solution % interp % N+1
   
-                this % dSdt % interior % hostData(i,j,k,iVar,iEl) = &
-                  this % source % interior % hostData(i,j,k,iVar,iEl) - &
-                  this % fluxDivergence % interior % hostData(i,j,k,iVar,iEl)
+                this % dSdt % interior(i,j,k,iEl,iVar) = &
+                  this % source % interior(i,j,k,iEl,iVar) - &
+                  this % fluxDivergence % interior(i,j,k,iEl,iVar)
   
               END DO
             END DO
@@ -865,11 +844,6 @@ MODULE SELF_DGModel3D
         pickupFile = 'solution.'//timeStampString//'.h5'
       END IF
   
-      IF (this % gpuAccel) THEN
-        CALL this % solution % UpdateHost()
-        CALL this % solutionGradient % UpdateHost()
-      END IF
-  
       INFO("Writing pickup file : "//TRIM(pickupFile))
   
       IF (this % decomp % mpiEnabled) THEN
@@ -886,13 +860,13 @@ MODULE SELF_DGModel3D
         INFO("Writing control grid solution to file")
         CALL CreateGroup_HDF5(fileId,'/controlgrid')
         CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
-        this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+        this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
   
         ! Write the geometry to file
         INFO("Writing control grid geometry to file")
         CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
         CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
-        this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+        this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
   
         ! -- END : writing solution on control grid -- !
   
@@ -909,20 +883,20 @@ MODULE SELF_DGModel3D
         CALL x % Init(interp,1,this % solution % nElem)
   
         ! Map the mesh positions to the target grid
-        CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+        CALL this % geometry % x % GridInterp(x)
   
         ! Map the solution to the target grid
-        CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+        CALL this % solution % GridInterp(solution)
   
         ! Write the model state to file
         CALL CreateGroup_HDF5(fileId,'/targetgrid')
         CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
-        this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+        this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
   
         ! Write the geometry to file
         CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
         CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
-        this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+        this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
   
         CALL Close_HDF5(fileId)
   
@@ -961,10 +935,10 @@ MODULE SELF_DGModel3D
         CALL x % Init(interp,1,this % solution % nElem)
   
         ! Map the mesh positions to the target grid
-        CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+        CALL this % geometry % x % GridInterp(x)
   
         ! Map the solution to the target grid
-        CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+        CALL this % solution % GridInterp(solution)
   
         ! Write the model state to file
         INFO("Writing target grid solution to file")
@@ -1010,7 +984,7 @@ MODULE SELF_DGModel3D
       ! END IF
   
       IF (this % decomp % mpiEnabled) THEN
-        firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
+        firstElem = this % decomp % offsetElem(this % decomp % rankId) + 1
         solOffset(1:5) = (/0,0,0,1,firstElem/)
         CALL ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
                             this % solution % interior,solOffset)
@@ -1019,10 +993,6 @@ MODULE SELF_DGModel3D
       END IF
   
       CALL Close_HDF5(fileId)
-  
-      IF (this % gpuAccel) THEN
-        CALL this % solution % interior % UpdateDevice()
-      END IF
   
     END SUBROUTINE Read_DGModel3D
   
@@ -1073,13 +1043,13 @@ MODULE SELF_DGModel3D
       CALL x % Init(interp,1,this % solution % nElem)
   
       ! Map the mesh positions to the target grid
-      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+      CALL this % geometry % x % GridInterp(x)
   
       ! Map the solution to the target grid
-      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL this % solution % GridInterp(solution)
   
       ! Map the solution to the target grid
-      CALL this % solutionGradient % GridInterp(solutionGradient,gpuAccel=.FALSE.)
+      CALL this % solutionGradient % GridInterp(solutionGradient)
   
       OPEN (UNIT=NEWUNIT(fUnit), &
             FILE=TRIM(tecFile), &
@@ -1112,17 +1082,17 @@ MODULE SELF_DGModel3D
         WRITE (fUnit,*) 'ZONE T="el'//TRIM(zoneID)//'", I=',this % solution % interp % M + 1, &
           ', J=',this % solution % interp % M + 1
   
-        DO k = 0,this % solution % interp % M
-        DO j = 0,this % solution % interp % M
-          DO i = 0,this % solution % interp % M
+        DO k = 1,this % solution % interp % M+1
+        DO j = 1,this % solution % interp % M+1
+          DO i = 1,this % solution % interp % M+1
   
-            WRITE (fUnit,fmat) x % interior % hostData(1,i,j,k,1,iEl), &
-              x % interior % hostData(2,i,j,k,1,iEl), &
-              x % interior % hostData(3,i,j,k,1,iEl), &
-              solution % interior % hostData(i,j,k,1:this % solution % nvar,iEl), &
-              solutionGradient % interior % hostData(1,i,j,k,1:this % solution % nvar,iEl), &
-              solutionGradient % interior % hostData(2,i,j,k,1:this % solution % nvar,iEl), &
-              solutionGradient % interior % hostData(3,i,j,k,1:this % solution % nvar,iEl)
+            WRITE (fUnit,fmat) x % interior(1,i,j,k,iEl,1), &
+              x % interior(2,i,j,k,iEl,1), &
+              x % interior(3,i,j,k,iEl,1), &
+              solution % interior(i,j,k,iEl,1:this % solution % nvar), &
+              solutionGradient % interior(1,i,j,k,iEl,1:this % solution % nvar), &
+              solutionGradient % interior(2,i,j,k,iEl,1:this % solution % nvar), &
+              solutionGradient % interior(3,i,j,k,iEl,1:this % solution % nvar)
   
           END DO
         END DO

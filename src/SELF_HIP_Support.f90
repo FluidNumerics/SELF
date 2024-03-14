@@ -5,8 +5,8 @@ module SELF_HIP_Support
   use hipfort
   use hipfort_check
 
-  logical, private :: acquired = .false.
-  
+  logical,private :: acquired = .false.
+
 contains
 
   subroutine init_gpu(dev_id)
@@ -50,5 +50,19 @@ contains
       call hipCheck(hipdevicereset())
     end if
   end subroutine reset_gpu
+
+  logical function GPUAvailable()
+    ! Local
+    integer(c_int) :: gpuCount
+    integer(kind(hipSuccess)) :: err
+
+    err = hipGetDeviceCount(gpuCount)
+    if (gpuCount > 0 .and. err == hipSuccess) then
+      GPUAvailable = .true.
+    else
+      GPUAvailable = .false.
+    end if
+    
+  end function GPUAvailable
 
 end module SELF_HIP_Support

@@ -20,8 +20,8 @@ module SELF_Lagrange
   use SELF_Constants
   use SELF_SupportRoutines
   use SELF_Quadrature
-  !use SELF_HDF5
-  !use HDF5
+  use SELF_HDF5
+  use HDF5
 
   use hipfort_hipblas
 
@@ -172,7 +172,7 @@ module SELF_Lagrange
     GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
     PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
 
-    !procedure,public :: WriteHDF5 => WriteHDF5_Lagrange
+    procedure,public :: WriteHDF5 => WriteHDF5_Lagrange
     procedure,private :: CalculateBarycentricWeights
     procedure,private :: CalculateInterpolationMatrix
     procedure,private :: CalculateDerivativeMatrix
@@ -2880,31 +2880,31 @@ contains
 
   end function CalculateLagrangePolynomials
 
-  ! subroutine WriteHDF5_Lagrange(this,fileId)
-  !   implicit none
-  !   class(Lagrange),intent(in) :: this
-  !   integer(HID_T),intent(in) :: fileId
+  subroutine WriteHDF5_Lagrange(this,fileId)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer(HID_T),intent(in) :: fileId
 
-  !   call CreateGroup_HDF5(fileId,'/interp')
+    call CreateGroup_HDF5(fileId,'/interp')
 
-  !   call WriteArray_HDF5(fileId,'/interp/controlpoints', &
-  !                        this % controlPoints)
+    call WriteArray_HDF5(fileId,'/interp/controlpoints', &
+                         this % controlPoints)
 
-  !   call WriteArray_HDF5(fileId,'/interp/qweights', &
-  !                        this % qWeights)
+    call WriteArray_HDF5(fileId,'/interp/qweights', &
+                         this % qWeights)
 
-  !   call WriteArray_HDF5(fileId,'/interp/dgmatrix', &
-  !                        this % dgMatrix)
+    call WriteArray_HDF5(fileId,'/interp/dgmatrix', &
+                         this % dgMatrix)
 
-  !   call WriteArray_HDF5(fileId,'/interp/dmatrix', &
-  !                        this % dMatrix)
+    call WriteArray_HDF5(fileId,'/interp/dmatrix', &
+                         this % dMatrix)
 
-  !   call WriteArray_HDF5(fileId,'/interp/bmatrix', &
-  !                        this % bMatrix)
+    call WriteArray_HDF5(fileId,'/interp/bmatrix', &
+                         this % bMatrix)
 
-  !   call WriteArray_HDF5(fileId,'/interp/imatrix', &
-  !                        this % iMatrix)
+    call WriteArray_HDF5(fileId,'/interp/imatrix', &
+                         this % iMatrix)
 
-  ! end subroutine WriteHDF5_Lagrange
+  end subroutine WriteHDF5_Lagrange
 
 end module SELF_Lagrange

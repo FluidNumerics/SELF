@@ -37,7 +37,6 @@ MODULE SELF_DGModel1D
     PROCEDURE :: Init => Init_DGModel1D
     PROCEDURE :: Free => Free_DGModel1D
 
-    PROCEDURE :: UpdateHost => UpdateHost_DGModel1D
     PROCEDURE :: UpdateDevice => UpdateDevice_DGModel1D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_DGModel1D
@@ -66,70 +65,70 @@ MODULE SELF_DGModel1D
   END TYPE Model1D
 
   INTERFACE
-    SUBROUTINE UpdateSolution_DGModel1D_gpu_wrapper(solution,dSdt,dt,N,nVar,nEl) &
-      BIND(c,name="UpdateSolution_DGModel1D_gpu_wrapper")
+    SUBROUTINE UpdateSolution_DGModel1D_gpu(solution,dSdt,dt,N,nVar,nEl) &
+      BIND(c,name="UpdateSolution_DGModel1D_gpu")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(C_PTR) :: solution,dSdt
+      TYPE(C_PTR), value :: solution,dSdt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
       REAL(c_prec),VALUE :: dt
-    END SUBROUTINE UpdateSolution_DGModel1D_gpu_wrapper
+    END SUBROUTINE UpdateSolution_DGModel1D_gpu
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGAB2_DGModel1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB2_DGModel1D_gpu_wrapper")
+    SUBROUTINE UpdateGAB2_DGModel1D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
+      BIND(c,name="UpdateGAB2_DGModel1D_gpu")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(C_PTR) :: prevsol,solution
+      TYPE(C_PTR), value :: prevsol,solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB2_DGModel1D_gpu_wrapper
+    END SUBROUTINE UpdateGAB2_DGModel1D_gpu
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGAB3_DGModel1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB3_DGModel1D_gpu_wrapper")
+    SUBROUTINE UpdateGAB3_DGModel1D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
+      BIND(c,name="UpdateGAB3_DGModel1D_gpu")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(C_PTR) :: prevsol,solution
+      TYPE(C_PTR), value :: prevsol,solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB3_DGModel1D_gpu_wrapper
+    END SUBROUTINE UpdateGAB3_DGModel1D_gpu
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGAB4_DGModel1D_gpu_wrapper(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB4_DGModel1D_gpu_wrapper")
+    SUBROUTINE UpdateGAB4_DGModel1D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
+      BIND(c,name="UpdateGAB4_DGModel1D_gpu")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(C_PTR) :: prevsol,solution
+      TYPE(C_PTR), value :: prevsol,solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB4_DGModel1D_gpu_wrapper
+    END SUBROUTINE UpdateGAB4_DGModel1D_gpu
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK_DGModel1D_gpu_wrapper(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
-      BIND(c,name="UpdateGRK_DGModel1D_gpu_wrapper")
+    SUBROUTINE UpdateGRK_DGModel1D_gpu(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
+      BIND(c,name="UpdateGRK_DGModel1D_gpu")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(C_PTR) :: grk,solution,dSdt
+      TYPE(C_PTR), value :: grk,solution,dSdt
       INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
       REAL(c_prec),VALUE :: rk_a,rk_g,dt
-    END SUBROUTINE UpdateGRK_DGModel1D_gpu_wrapper
+    END SUBROUTINE UpdateGRK_DGModel1D_gpu
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE CalculateDSDt_DGModel1D_gpu_wrapper(fluxDivergence,source,dSdt,N,nVar,nEl) &
-      BIND(c,name="CalculateDSDt_DGModel1D_gpu_wrapper")
+    SUBROUTINE CalculateDSDt_DGModel1D_gpu(fluxDivergence,source,dSdt,N,nVar,nEl) &
+      BIND(c,name="CalculateDSDt_DGModel1D_gpu")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(C_PTR) :: fluxDivergence,source,dSdt
+      TYPE(C_PTR), value :: fluxDivergence,source,dSdt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE CalculateDSDt_DGModel1D_gpu_wrapper
+    END SUBROUTINE CalculateDSDt_DGModel1D_gpu
   END INTERFACE
 
 CONTAINS
@@ -145,7 +144,7 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
-    this % gpuAccel = .FALSE.
+    this % GPUBackend = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -192,22 +191,6 @@ CONTAINS
 
   END SUBROUTINE ResizePrevSol_DGModel1D
 
-  SUBROUTINE UpdateHost_DGModel1D(this)
-    IMPLICIT NONE
-    CLASS(Model1D),INTENT(inout) :: this
-
-    CALL this % mesh % UpdateHost()
-    CALL this % geometry % UpdateHost()
-    CALL this % velocity % UpdateHost()
-    CALL this % solution % UpdateHost()
-    CALL this % dSdt % UpdateHost()
-    CALL this % solutionGradient % UpdateHost()
-    CALL this % flux % UpdateHost()
-    CALL this % source % UpdateHost()
-    CALL this % fluxDivergence % UpdateHost()
-
-  END SUBROUTINE UpdateHost_DGModel1D
-
   SUBROUTINE UpdateDevice_DGModel1D(this)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
@@ -237,9 +220,9 @@ CONTAINS
     END DO
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
-    CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL this % solution % BoundaryInterp()
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
       CALL this % solution % UpdateDevice()
     END IF
 
@@ -258,9 +241,9 @@ CONTAINS
     END DO
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
-    CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL this % solution % BoundaryInterp()
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
       CALL this % solution % UpdateDevice()
     END IF
 
@@ -274,7 +257,7 @@ CONTAINS
     REAL(prec),OPTIONAL,INTENT(in) :: dt
     ! Local
     REAL(prec) :: dtLoc
-    INTEGER :: i,iVar,iEl
+    INTEGER :: i,iEl,iVar
 
     IF (PRESENT(dt)) THEN
       dtLoc = dt
@@ -282,10 +265,10 @@ CONTAINS
       dtLoc = this % dt
     END IF
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateSolution_DGModel1D_gpu_wrapper(this % solution % interior % deviceData, &
-                                              this % dSdt % interior % deviceData, &
+      CALL UpdateSolution_DGModel1D_gpu(c_loc(this % solution % interior), &
+                                              c_loc(this % dSdt % interior), &
                                               dtLoc, &
                                               this % solution % interp % N, &
                                               this % solution % nVar, &
@@ -295,11 +278,11 @@ CONTAINS
 
       DO iEl = 1,this % solution % nElem
         DO iVar = 1,this % solution % nVar
-          DO i = 0,this % solution % interp % N
+          DO i = 1,this % solution % interp % N+1
 
-            this % solution % interior % hostData(i,iVar,iEl) = &
-              this % solution % interior % hostData(i,iVar,iEl) + &
-              dtLoc*this % dSdt % interior % hostData(i,iVar,iEl)
+            this % solution % interior(i,iEl,iVar) = &
+              this % solution % interior(i,iEl,iVar) + &
+              dtLoc*this % dSdt % interior(i,iEl,iVar)
 
           END DO
         END DO
@@ -314,12 +297,12 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,nVar,iVar,iEl
+    INTEGER :: i,nVar,iEl,iVar
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateGAB2_DGModel1D_gpu_wrapper(this % prevSol % interior % deviceData, &
-                                          this % solution % interior % deviceData, &
+      CALL UpdateGAB2_DGModel1D_gpu(c_loc(this % prevSol % interior), &
+                                            c_loc(this % solution % interior), &
                                           m, &
                                           this % prevsol % nVar, &
                                           this % solution % interp % N, &
@@ -333,9 +316,9 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -345,9 +328,9 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-              this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+              this % solution % interior(i,iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -358,18 +341,18 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
               ! Bump the last solution
               nVar = this % solution % nVar
-              this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,nVar + iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
 
               ! Store the new solution
-              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
-              this % solution % interior % hostData(i,iVar,iEl) = &
-                1.5_PREC*this % prevSol % interior % hostData(i,iVar,iEl) - &
-                0.5_PREC*this % prevSol % interior % hostData(i,nVar + iVar,iEl)
+              this % solution % interior(i,iEl,iVar) = &
+                1.5_PREC*this % prevSol % interior(i,iEl,iVar) - &
+                0.5_PREC*this % prevSol % interior(i,nVar + iEl,iVar)
             END DO
           END DO
         END DO
@@ -384,12 +367,12 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,nVar,iVar,iEl
+    INTEGER :: i,nVar,iEl,iVar
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateGAB3_DGModel1D_gpu_wrapper(this % prevSol % interior % deviceData, &
-                                          this % solution % interior % deviceData, &
+      CALL UpdateGAB3_DGModel1D_gpu(c_loc(this % prevSol % interior), &
+                                            c_loc(this % solution % interior), &
                                           m, &
                                           this % prevsol % nVar, &
                                           this % solution % interp % N, &
@@ -403,9 +386,9 @@ CONTAINS
         nVar = this % solution % nVar
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-             this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+             this % prevSol % interior(i,nVar + iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -415,9 +398,9 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -427,9 +410,9 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-              this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+              this % solution % interior(i,iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -440,20 +423,20 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
               ! Bump the last two stored solutions
               nVar = this % solution % nVar
-     this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,nVar + iVar,iEl)
-              this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+     this % prevSol % interior(i,2*nVar + iEl,iVar) = this % prevSol % interior(i,nVar + iEl,iVar)
+              this % prevSol % interior(i,nVar + iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
 
               ! Store the new solution
-              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
-              this % solution % interior % hostData(i,iVar,iEl) = &
-                (23.0_PREC*this % prevSol % interior % hostData(i,iVar,iEl) - &
-                 16.0_PREC*this % prevSol % interior % hostData(i,nVar + iVar,iEl) + &
-                 5.0_PREC*this % prevSol % interior % hostData(i,2*nVar + iVar,iEl))/12.0_PREC
+              this % solution % interior(i,iEl,iVar) = &
+                (23.0_PREC*this % prevSol % interior(i,iEl,iVar) - &
+                 16.0_PREC*this % prevSol % interior(i,nVar + iEl,iVar) + &
+                 5.0_PREC*this % prevSol % interior(i,2*nVar + iEl,iVar))/12.0_PREC
 
             END DO
           END DO
@@ -470,12 +453,12 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,nVar,iVar,iEl
+    INTEGER :: i,nVar,iEl,iVar
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateGAB4_DGModel1D_gpu_wrapper(this % prevSol % interior % deviceData, &
-                                          this % solution % interior % deviceData, &
+      CALL UpdateGAB4_DGModel1D_gpu(c_loc(this % prevSol % interior), &
+                                          c_loc(this % solution % interior), &
                                           m, &
                                           this % prevsol % nVar, &
                                           this % solution % interp % N, &
@@ -489,9 +472,9 @@ CONTAINS
         nVar = this % solution % nVar
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-           this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+           this % prevSol % interior(i,2*nVar + iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -502,9 +485,9 @@ CONTAINS
         nVar = this % solution % nVar
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-             this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+             this % prevSol % interior(i,nVar + iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -514,9 +497,9 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -526,9 +509,9 @@ CONTAINS
 
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
-              this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+              this % solution % interior(i,iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -540,21 +523,21 @@ CONTAINS
         nVar = this % solution % nVar
         DO iEl = 1,this % solution % nElem
           DO iVar = 1,this % solution % nVar
-            DO i = 0,this % solution % interp % N
+            DO i = 1,this % solution % interp % N+1
 
               ! Bump the last two stored solutions
-   this % prevSol % interior % hostData(i,3*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,2*nVar + iVar,iEl)
-     this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,nVar + iVar,iEl)
-              this % prevSol % interior % hostData(i,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+   this % prevSol % interior(i,3*nVar + iEl,iVar) = this % prevSol % interior(i,2*nVar + iEl,iVar)
+     this % prevSol % interior(i,2*nVar + iEl,iVar) = this % prevSol % interior(i,nVar + iEl,iVar)
+              this % prevSol % interior(i,nVar + iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
 
               ! Store the new solution
-              this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+              this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
-              this % solution % interior % hostData(i,iVar,iEl) = &
-                (55.0_PREC*this % prevSol % interior % hostData(i,iVar,iEl) - &
-                 59.0_PREC*this % prevSol % interior % hostData(i,nVar + iVar,iEl) + &
-                 37.0_PREC*this % prevSol % interior % hostData(i,2*nVar + iVar,iEl) - &
-                 9.0_PREC*this % prevSol % interior % hostData(i,3*nVar + iVar,iEl))/24.0_PREC
+              this % solution % interior(i,iEl,iVar) = &
+                (55.0_PREC*this % prevSol % interior(i,iEl,iVar) - &
+                 59.0_PREC*this % prevSol % interior(i,nVar + iEl,iVar) + &
+                 37.0_PREC*this % prevSol % interior(i,2*nVar + iEl,iVar) - &
+                 9.0_PREC*this % prevSol % interior(i,3*nVar + iEl,iVar))/24.0_PREC
 
             END DO
           END DO
@@ -571,13 +554,13 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,iVar,iEl
+    INTEGER :: i,iEl,iVar
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateGRK_DGModel1D_gpu_wrapper(this % workSol % interior % deviceData, &
-                                         this % solution % interior % deviceData, &
-                                         this % dSdt % interior % deviceData, &
+      CALL UpdateGRK_DGModel1D_gpu(c_loc(this % workSol % interior), &
+                                           c_loc(this % solution % interior), &
+                                           c_loc(this % dSdt % interior), &
                                          rk2_a(m),rk2_g(m),this % dt, &
                                          this % worksol % nVar, &
                                          this % solution % interp % N, &
@@ -588,15 +571,15 @@ CONTAINS
 
       DO iEl = 1,this % solution % nElem
         DO iVar = 1,this % solution % nVar
-          DO i = 0,this % solution % interp % N
+          DO i = 1,this % solution % interp % N+1
 
-            this % workSol % interior % hostData(i,iVar,iEl) = rk2_a(m)* &
-                                                               this % workSol % interior % hostData(i,iVar,iEl) + &
-                                                               this % dSdt % interior % hostData(i,iVar,iEl)
+            this % workSol % interior(i,iEl,iVar) = rk2_a(m)* &
+                                                               this % workSol % interior(i,iEl,iVar) + &
+                                                               this % dSdt % interior(i,iEl,iVar)
 
-            this % solution % interior % hostData(i,iVar,iEl) = &
-              this % solution % interior % hostData(i,iVar,iEl) + &
-              rk2_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
+            this % solution % interior(i,iEl,iVar) = &
+              this % solution % interior(i,iEl,iVar) + &
+              rk2_g(m)*this % dt*this % workSol % interior(i,iEl,iVar)
 
           END DO
         END DO
@@ -611,13 +594,13 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,iVar,iEl
+    INTEGER :: i,iEl,iVar
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateGRK_DGModel1D_gpu_wrapper(this % workSol % interior % deviceData, &
-                                         this % solution % interior % deviceData, &
-                                         this % dSdt % interior % deviceData, &
+      CALL UpdateGRK_DGModel1D_gpu(c_loc(this % workSol % interior), &
+                                         c_loc(this % solution % interior), &
+                                         c_loc(this % dSdt % interior), &
                                          rk3_a(m),rk3_g(m),this % dt, &
                                          this % worksol % nVar, &
                                          this % solution % interp % N, &
@@ -628,15 +611,15 @@ CONTAINS
 
       DO iEl = 1,this % solution % nElem
         DO iVar = 1,this % solution % nVar
-          DO i = 0,this % solution % interp % N
+          DO i = 1,this % solution % interp % N+1
 
-            this % workSol % interior % hostData(i,iVar,iEl) = rk3_a(m)* &
-                                                               this % workSol % interior % hostData(i,iVar,iEl) + &
-                                                               this % dSdt % interior % hostData(i,iVar,iEl)
+            this % workSol % interior(i,iEl,iVar) = rk3_a(m)* &
+                                                               this % workSol % interior(i,iEl,iVar) + &
+                                                               this % dSdt % interior(i,iEl,iVar)
 
-            this % solution % interior % hostData(i,iVar,iEl) = &
-              this % solution % interior % hostData(i,iVar,iEl) + &
-              rk3_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
+            this % solution % interior(i,iEl,iVar) = &
+              this % solution % interior(i,iEl,iVar) + &
+              rk3_g(m)*this % dt*this % workSol % interior(i,iEl,iVar)
 
           END DO
         END DO
@@ -651,13 +634,13 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
-    INTEGER :: i,iVar,iEl
+    INTEGER :: i,iEl,iVar
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL UpdateGRK_DGModel1D_gpu_wrapper(this % workSol % interior % deviceData, &
-                                         this % solution % interior % deviceData, &
-                                         this % dSdt % interior % deviceData, &
+      CALL UpdateGRK_DGModel1D_gpu(c_loc(this % workSol % interior), &
+                                         c_loc(this % solution % interior), &
+                                         c_loc(this % dSdt % interior), &
                                          rk4_a(m),rk4_g(m),this % dt, &
                                          this % worksol % nVar, &
                                          this % solution % interp % N, &
@@ -668,15 +651,15 @@ CONTAINS
 
       DO iEl = 1,this % solution % nElem
         DO iVar = 1,this % solution % nVar
-          DO i = 0,this % solution % interp % N
+          DO i = 1,this % solution % interp % N+1
 
-            this % workSol % interior % hostData(i,iVar,iEl) = rk4_a(m)* &
-                                                               this % workSol % interior % hostData(i,iVar,iEl) + &
-                                                               this % dSdt % interior % hostData(i,iVar,iEl)
+            this % workSol % interior(i,iEl,iVar) = rk4_a(m)* &
+                                                               this % workSol % interior(i,iEl,iVar) + &
+                                                               this % dSdt % interior(i,iEl,iVar)
 
-            this % solution % interior % hostData(i,iVar,iEl) = &
-              this % solution % interior % hostData(i,iVar,iEl) + &
-              rk4_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
+            this % solution % interior(i,iEl,iVar) = &
+              this % solution % interior(i,iEl,iVar) + &
+              rk4_g(m)*this % dt*this % workSol % interior(i,iEl,iVar)
 
           END DO
         END DO
@@ -690,10 +673,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
 
-    CALL this % flux % Derivative(this % geometry, &
-                                  this % fluxDivergence, &
-                                  selfWeakDGForm, &
-                                  this % gpuAccel)
+    if( this % GPUBackend )then
+      CALL this % flux % DGDerivative(this % geometry,this % fluxDivergence)
+    else
+      CALL this % flux % DGDerivative(this % geometry,this % fluxDivergence,this % hipblas_handle)
+    endif
 
   END SUBROUTINE CalculateFluxDivergence_DGModel1D
 
@@ -701,10 +685,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     ! Local
-    INTEGER :: i,iVar,iEl
+    INTEGER :: i,iEl,iVar
 
-    CALL this % solution % BoundaryInterp(this % gpuAccel)
-    CALL this % solution % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+    if (this % GPUBackend)then
+      CALL this % solution % BoundaryInterp(this % hipblas_handle)
+    else
+      CALL this % solution % BoundaryInterp(this % hipblas_handle)
+    endif
+    CALL this % solution % SideExchange(this % mesh,this % decomp)
     CALL this % PreTendency()
     CALL this % SetBoundaryCondition()
     CALL this % SourceMethod()
@@ -712,11 +700,11 @@ CONTAINS
     CALL this % FluxMethod()
     CALL this % CalculateFluxDivergence()
 
-    IF (this % gpuAccel) THEN
+    IF (this % GPUBackend) THEN
 
-      CALL CalculateDSDt_DGModel1D_gpu_wrapper(this % fluxDivergence % interior % deviceData, &
-                                             this % source % interior % deviceData, &
-                                             this % dSdt % interior % deviceData, &
+      CALL CalculateDSDt_DGModel1D_gpu(c_loc(this % fluxDivergence % interior), &
+                                             c_loc(this % source % interior), &
+                                             c_loc(this % dSdt % interior), &
                                              this % solution % interp % N, &
                                              this % solution % nVar, &
                                              this % solution % nElem)
@@ -725,11 +713,11 @@ CONTAINS
 
       DO iEl = 1,this % solution % nElem
         DO iVar = 1,this % solution % nVar
-          DO i = 0,this % solution % interp % N
+          DO i = 1,this % solution % interp % N+1
 
-            this % dSdt % interior % hostData(i,iVar,iEl) = &
-              this % source % interior % hostData(i,iVar,iEl) - &
-              this % fluxDivergence % interior % hostData(i,iVar,iEl)
+            this % dSdt % interior(i,iEl,iVar) = &
+              this % source % interior(i,iEl,iVar) - &
+              this % fluxDivergence % interior(i,iEl,iVar)
 
           END DO
         END DO
@@ -760,11 +748,6 @@ CONTAINS
       pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 
-    IF (this % gpuAccel) THEN
-      CALL this % solution % UpdateHost()
-      CALL this % solutionGradient % UpdateHost()
-    END IF
-
     INFO("Writing pickup file : "//TRIM(pickupFile))
 
     IF (this % decomp % mpiEnabled) THEN
@@ -781,13 +764,13 @@ CONTAINS
       INFO("Writing control grid solution to file")
       CALL CreateGroup_HDF5(fileId,'/controlgrid')
       CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
 
       ! Write the geometry to file
       INFO("Writing control grid geometry to file")
       CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
       CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
 
       ! -- END : writing solution on control grid -- !
 
@@ -804,20 +787,20 @@ CONTAINS
       CALL x % Init(interp,1,this % solution % nElem)
 
       ! Map the mesh positions to the target grid
-      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+      CALL this % geometry % x % GridInterp(x)
 
       ! Map the solution to the target grid
-      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL this % solution % GridInterp(solution)
 
       ! Write the model state to file
       CALL CreateGroup_HDF5(fileId,'/targetgrid')
       CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
 
       ! Write the geometry to file
       CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
       CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
 
       CALL Close_HDF5(fileId)
 
@@ -856,10 +839,10 @@ CONTAINS
       CALL x % Init(interp,1,this % solution % nElem)
 
       ! Map the mesh positions to the target grid
-      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+      CALL this % geometry % x % GridInterp(x)
 
       ! Map the solution to the target grid
-      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL this % solution % GridInterp(solution)
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
@@ -905,7 +888,7 @@ CONTAINS
     ! END IF
 
     IF (this % decomp % mpiEnabled) THEN
-      firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
+      firstElem = this % decomp % offsetElem(this % decomp % rankId) + 1
       solOffset(1:3) = (/0,1,firstElem/)
       CALL ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
                           this % solution % interior,solOffset)
@@ -914,9 +897,6 @@ CONTAINS
     END IF
 
     CALL Close_HDF5(fileId)
-    IF (this % gpuAccel) THEN
-      CALL this % solution % interior % UpdateDevice()
-    END IF
 
   END SUBROUTINE Read_DGModel1D
 
@@ -960,10 +940,10 @@ CONTAINS
     CALL x % Init(interp,1,this % solution % nElem)
 
     ! Map the mesh positions to the target grid
-    CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+    CALL this % geometry % x % GridInterp(x)
 
     ! Map the solution to the target grid
-    CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+    CALL this % solution % GridInterp(solution)
 
     fmat = '(2(ES16.7E3,1x))'
     ! Let's write some tecplot!!
@@ -986,8 +966,8 @@ CONTAINS
 
         DO i = 0,this % solution % interp % M
 
-          WRITE (fUnit,fmat) x % interior % hostData(i,1,iEl), &
-            solution % interior % hostData(i,ivar,iEl)
+          WRITE (fUnit,fmat) x % interior(i,1,iEl), &
+            solution % interior(i,iEl,iVar)
 
         END DO
 

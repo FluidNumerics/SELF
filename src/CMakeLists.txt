@@ -1,6 +1,7 @@
 
 file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
 file(GLOB SELF_HIPSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.hip")
+file(GLOB SELF_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
 # Enable pre-processing for source code
 set_source_files_properties(
@@ -15,8 +16,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 # target_include_directories(self PRIVATE ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
 # target_compile_options(self PRIVATE -fPIC)
 
-add_library(self-static STATIC SELF_Constants.f90 SELF_SupportRoutines.f90 SELF_Quadrature.f90 SELF_HDF5.f90 SELF_Lagrange.f90 SELF_Metadata.f90 SELF_Data.f90 SELF_Lagrange.hip SELF_Geometry.f90 SELF_Mesh.f90 SELF_MappedData.f90 SELF_MappedData.hip) 
-##${SELF_FSRC} ${SELF_HIPSRC})
+add_library(self-static STATIC ${SELF_FSRC} ${SELF_HIPSRC})
 
 target_link_libraries(self-static PRIVATE 
                         ${FEQPARSE_LIBRARIES}
@@ -33,11 +33,13 @@ target_include_directories(self-static PRIVATE
                         ${HIPFORT_INCLUDE_DIRS})
                         
 #target_compile_options(self-static PRIVATE -fPIC)
+set_target_properties(self-static PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties(self-static PROPERTIES PUBLIC_HEADER ${SELF_HEADERS})
 
 install(TARGETS self-static
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include)
 
-set_target_properties(self-static PROPERTIES LINKER_LANGUAGE Fortran)
 
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)
