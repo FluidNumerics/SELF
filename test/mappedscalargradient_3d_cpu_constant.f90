@@ -61,7 +61,7 @@ integer function mappedscalargradient_3d_cpu_constant() result(r)
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % Gradient( geometry, df, selfStrongForm, .false. ) 
+  call f % Gradient( geometry, df ) 
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)

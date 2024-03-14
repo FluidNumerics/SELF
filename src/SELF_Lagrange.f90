@@ -166,8 +166,11 @@ module SELF_Lagrange
     generic,public :: TensorDivergence_3D => TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
     procedure,private :: TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
 
-    ! GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
-    ! PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
+    generic,public :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+    procedure,private :: TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+
+    GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
+    PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
 
     !procedure,public :: WriteHDF5 => WriteHDF5_Lagrange
     procedure,private :: CalculateBarycentricWeights
@@ -258,6 +261,16 @@ module SELF_Lagrange
   end interface
 
   interface
+    subroutine VectorDGDivergence_BoundaryContribution_3D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+      bind(c,name="VectorDGDivergence_BoundaryContribution_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine VectorDGDivergence_BoundaryContribution_3D
+  end interface
+
+  interface
     subroutine TensorDGDivergence_BoundaryContribution_2D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
       bind(c,name="TensorDGDivergence_BoundaryContribution_2D_gpu")
       use iso_c_binding
@@ -265,6 +278,16 @@ module SELF_Lagrange
       type(c_ptr),value :: bMatrix,qWeights,fbound,df
       integer(c_int),value :: N,nVar,nEl
     end subroutine TensorDGDivergence_BoundaryContribution_2D
+  end interface
+
+  interface
+    subroutine TensorDGDivergence_BoundaryContribution_3D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+      bind(c,name="TensorDGDivergence_BoundaryContribution_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine TensorDGDivergence_BoundaryContribution_3D
   end interface
 
 contains
@@ -500,7 +523,6 @@ contains
     strideA = 0 ! stride for the batches of A (no stride)
     incx = targetdegree + 1 !
     stridex = (controldegree + 1)*(targetdegree + 1)
-    !beta = 0.0_c_prec
     incy = targetdegree + 1
     stridey = (targetdegree + 1)*(targetdegree + 1)
     batchCount = nvars*nelems
@@ -649,7 +671,6 @@ contains
     strideA = 0 ! stride for the batches of A (no stride)
     incx = (targetdegree + 1)*(targetdegree + 1) !
     stridex = (controldegree + 1)*(targetdegree + 1)*(targetdegree + 1)
-    !beta = 0.0_c_prec
     incy = (targetdegree + 1)*(targetdegree + 1)
     stridey = (targetdegree + 1)*(targetdegree + 1)*(targetdegree + 1)
     batchCount = nvars*nelems
@@ -1161,55 +1182,6 @@ contains
                         c_loc(bf), c_loc(df), this % N, nvars, nelems)
 
   end subroutine DGDerivative_1D_gpu
-
-  ! subroutine DGDerivative_1D_cpu(this,f,bf,df,nvars,nelems)
-  !   implicit none
-  !   class(Lagrange),intent(in) :: this
-  !   integer,intent(in)     :: nvars,nelems
-  !   real(prec),intent(in)  :: f(1:this % N+1,1:nelems,1:nvars)
-  !   real(prec),intent(in)  :: bf(1:nvars,1:2,1:nelems)
-  !   real(prec),intent(out) :: df(1:this % N+1,1:nelems,1:nvars)
-  !   ! Local
-  !   integer :: i,ii,iel,ivar
-
-  !   do ivar = 1,nvars
-  !     do iel = 1,nelems
-  !       do i = 1,this % N+1
-
-  !         ! Interior Derivative Matrix Application
-  !         df(i,iel,ivar) = 0.0_prec
-  !         do ii = 1,this % N+1
-  !           df(i,iel,ivar) = df(i,iel,ivar) + this % dgMatrix (ii,i)*f(ii,iel,ivar)
-  !         end do
-
-  !         ! Boundary Contribution
-  !         df(i,iel,ivar) = df(i,iel,ivar) + (bf(ivar,2,iel)*this % bMatrix (i,1) + &
-  !                                            bf(ivar,1,iel)*this % bMatrix (i,0))/ &
-  !                          this % qWeights (i)
-
-  !       end do
-
-  !     end do
-  !   end do
-
-  ! end subroutine DGDerivative_1D_cpu
-
-  ! subroutine DGDerivative_1D_gpu(this,f_dev,bf_dev,df_dev,nvars,nelems)
-  !   implicit none
-  !   class(Lagrange),intent(in) :: this
-  !   integer,intent(in) :: nvars,nelems
-  !   type(c_ptr),intent(in)  :: f_dev
-  !   type(c_ptr),intent(in)  :: bf_dev
-  !   type(c_ptr),intent(out) :: df_dev
-
-  !   call DGDerivative_1D_gpu_wrapper(this % dgMatrix, &
-  !                                    this % bMatrix, &
-  !                                    this % qWeights, &
-  !                                    f_dev,bf_dev,df_dev, &
-  !                                    this % N, &
-  !                                    nvars,nelems)
-
-  ! end subroutine DGDerivative_1D_gpu
 
 ! ================================================================================================ !
 !
@@ -1788,10 +1760,10 @@ contains
     floc => null()
 
     ! Add the boundary contributions
-    ! call TensorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
-    !                                                 c_loc(this % qWeights),&
-    !                                                 c_loc(bf), c_loc(df),&
-    !                                                 this % N, nvars, nelems)
+    call TensorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
+                                                    c_loc(this % qWeights),&
+                                                    c_loc(bf), c_loc(df),&
+                                                    this % N, nvars, nelems)
 
   end subroutine TensorDGDivergence_2D_gpu
 
@@ -1880,6 +1852,108 @@ contains
     floc => null()
 
   end subroutine VectorDivergence_3D_gpu
+
+  subroutine VectorDGDivergence_3D_cpu(this,f,bf,dF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: bf(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars)
+    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar
+    real(prec) :: dfLoc
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k = 1,this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,k,iel,ivar,1)
+              end do
+              dF(i,j,k,iel,ivar) = dfLoc + (this % bMatrix(i,2)*bf(j,k,3,iel,ivar) +& ! east
+                                            this % bMatrix(i,1)*bf(j,k,5,iel,ivar))/& ! west
+                                           this % qweights(i)
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k = 1,this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,k,iel,ivar,2)
+              end do
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc + &
+                                   (this % bMatrix(j,2)*bf(i,k,4,iel,ivar) +& ! north
+                                    this % bMatrix(j,1)*bf(i,k,2,iel,ivar))/& ! south
+                                    this % qweights(j)
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+    do ivar = 1,nvars
+      do iel = 1,nelems
+        do k = 1,this % N + 1
+          do j = 1,this % N + 1
+            do i = 1,this % N + 1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this % N + 1
+                dfLoc = dfLoc + this % dgMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
+              end do
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc + &
+                                   (this % bMatrix(k,2)*bf(i,j,1,iel,ivar) +& ! top
+                                    this % bMatrix(k,1)*bf(i,j,6,iel,ivar))/& ! bottom
+                                    this % qweights(k)
+
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine VectorDGDivergence_3D_cpu
+
+  subroutine VectorDGDivergence_3D_gpu(this,f,bf,df,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:)
+    real(prec),pointer,intent(in) :: bf(:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
+    type(c_ptr),intent(inout) :: handle
+    ! local
+    real(prec),pointer :: floc(:,:,:,:,:)
+
+    floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,1)
+    call self_hipblas_matrixop_dim1_3d(this % dgMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
+    floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,2)
+    call self_hipblas_matrixop_dim2_3d(this % dgMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,3)
+    call self_hipblas_matrixop_dim2_3d(this % dgMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    floc => null()
+
+    ! Add the boundary contributions
+    call VectorDGDivergence_BoundaryContribution_3D(c_loc(this % bMatrix),&
+                                                    c_loc(this % qWeights),&
+                                                    c_loc(bf), c_loc(df),&
+                                                    this % N, nvars, nelems)
+
+  end subroutine VectorDGDivergence_3D_gpu
 
   subroutine TensorDivergence_3D_cpu(this,f,dF,nvars,nelems)
     implicit none
@@ -1974,6 +2048,116 @@ contains
     floc => null()
 
   end subroutine TensorDivergence_3D_gpu
+
+  subroutine TensorDGDivergence_3D_cpu(this,f,bf,dF,nvars,nelems)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)     :: nvars,nelems
+    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(in)  :: bf(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar,idir
+    real(prec) :: dfLoc
+
+    do idir = 1,3
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
+
+                dfLoc = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
+                end do
+                dF(i,j,k,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,k,4,iel,ivar,idir,1) +& ! east
+                                                   this % bMatrix(i,1)*bf(j,k,2,iel,ivar,idir,1))/& ! west
+                                                   this % qweights(i)
+
+              end do
+            end do
+          end do
+        end do
+      end do
+
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
+
+                dfLoc = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
+                end do
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc + &
+                                   (this % bMatrix(j,2)*bf(i,k,3,iel,ivar,idir,2) +& ! east
+                                    this % bMatrix(j,1)*bf(i,k,5,iel,ivar,idir,2))/& ! west
+                                    this % qweights(j)
+
+              end do
+            end do
+          end do
+        end do
+      end do
+
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do k = 1,this % N + 1
+            do j = 1,this % N + 1
+              do i = 1,this % N + 1
+
+                dfLoc = 0.0_prec
+                do ii = 1,this % N + 1
+                  dfLoc = dfLoc + this % dgMatrix(ii,k)*f(i,j,ii,iel,ivar,idir,3)
+                end do
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc + &
+                                   (this % bMatrix(k,2)*bf(i,j,6,iel,ivar,idir,3) +& ! top
+                                    this % bMatrix(k,1)*bf(i,j,1,iel,ivar,idir,3))/& ! bottom
+                                    this % qweights(k)
+
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
+
+  end subroutine TensorDGDivergence_3D_cpu
+
+  subroutine TensorDGDivergence_3D_gpu(this,f,bf,df,nvars,nelems,handle)
+    implicit none
+    class(Lagrange),intent(in) :: this
+    integer,intent(in)         :: nvars,nelems
+    real(prec),pointer,intent(in) :: f(:,:,:,:,:,:,:)
+    real(prec),pointer,intent(in) :: bf(:,:,:,:,:,:,:)
+    real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
+    type(c_ptr),intent(inout) :: handle
+    ! local
+    real(prec),pointer :: floc(:,:,:,:,:)
+    real(prec),pointer :: dfloc(:,:,:,:,:)
+    integer :: idir
+
+    do idir = 1,3
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)
+      call self_hipblas_matrixop_dim1_3d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,2)
+      call self_hipblas_matrixop_dim2_3d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,3)
+      call self_hipblas_matrixop_dim2_3d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    enddo
+
+    floc => null()
+
+    ! Add the boundary contributions
+    call TensorDGDivergence_BoundaryContribution_3D(c_loc(this % bMatrix),&
+                                                    c_loc(this % qWeights),&
+                                                    c_loc(bf), c_loc(df),&
+                                                    this % N, nvars, nelems)
+
+  end subroutine TensorDGDivergence_3D_gpu
 
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !

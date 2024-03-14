@@ -123,8 +123,8 @@ module SELF_Data
     real(prec),pointer,dimension(:,:,:,:,:) :: avgBoundary
     real(prec),pointer,dimension(:,:,:,:,:) :: jumpBoundary
 
-    real(prec),pointer,private,dimension(:,:,:,:,:) :: interpWork1
-    real(prec),pointer,private,dimension(:,:,:,:,:) :: interpWork2
+    real(prec),pointer,dimension(:,:,:,:,:) :: interpWork1
+    real(prec),pointer,dimension(:,:,:,:,:) :: interpWork2
 
   contains
 
@@ -170,9 +170,8 @@ module SELF_Data
     procedure,private :: BoundaryInterp_Vector2D_cpu
     procedure,private :: BoundaryInterp_Vector2D_gpu
 
-    generic,public :: GridInterp => GridInterp_Vector2D_cpu!,GridInterp_Vector2D_gpu
+    generic,public :: GridInterp => GridInterp_Vector2D_cpu
     procedure,private :: GridInterp_Vector2D_cpu
-    !procedure,private :: GridInterp_Vector2D_gpu
 
     generic,public :: Gradient => Gradient_Vector2D_gpu,Gradient_Vector2D_cpu
     procedure,private :: Gradient_Vector2D_gpu
@@ -209,9 +208,8 @@ module SELF_Data
     procedure,private :: BoundaryInterp_Vector3D_cpu
     procedure,private :: BoundaryInterp_Vector3D_gpu
 
-    generic,public :: GridInterp => GridInterp_Vector3D_cpu!,GridInterp_Vector3D_gpu
+    generic,public :: GridInterp => GridInterp_Vector3D_cpu
     procedure,private :: GridInterp_Vector3D_cpu
-    !procedure,private :: GridInterp_Vector3D_gpu
 
     generic,public :: Gradient => Gradient_Vector3D_gpu,Gradient_Vector3D_cpu
     procedure,private :: Gradient_Vector3D_gpu
@@ -221,8 +219,8 @@ module SELF_Data
     procedure,private :: Divergence_Vector3D_gpu
     procedure,private :: Divergence_Vector3D_cpu
 
-    ! GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
-    ! PROCEDURE,PRIVATE :: SetEquation_Vector3D
+    GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
+    PROCEDURE,PRIVATE :: SetEquation_Vector3D
 
     ! GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector3D, WriteHDF5_Vector3D
     ! PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector3D
@@ -274,6 +272,14 @@ module SELF_Data
     generic,public :: BoundaryInterp => BoundaryInterp_Tensor3D_cpu,BoundaryInterp_Tensor3D_gpu
     procedure,private :: BoundaryInterp_Tensor3D_cpu
     procedure,private :: BoundaryInterp_Tensor3D_gpu
+
+    generic,public :: Divergence => Divergence_Tensor3D_gpu,Divergence_Tensor3D_cpu
+    procedure,private :: Divergence_Tensor3D_gpu
+    procedure,private :: Divergence_Tensor3D_cpu
+
+    generic,public :: DGDivergence => DGDivergence_Tensor3D_gpu,DGDivergence_Tensor3D_cpu
+    procedure,private :: DGDivergence_Tensor3D_gpu
+    procedure,private :: DGDivergence_Tensor3D_cpu
 
     procedure,public :: Determinant => Determinant_Tensor3D
 
@@ -1184,17 +1190,17 @@ contains
 
   end subroutine Free_Vector3D
 
-!   SUBROUTINE SetEquation_Vector3D(this,idir,ivar,eqnChar)
-!     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
-!     IMPLICIT NONE
-!     CLASS(Vector3D),INTENT(inout) :: this
-!     INTEGER,INTENT(in) :: idir,ivar
-!     CHARACTER(*),INTENT(in) :: eqnChar
+  SUBROUTINE SetEquation_Vector3D(this,idir,ivar,eqnChar)
+    !! Sets the equation parser for the `idir` direction and `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(Vector3D),INTENT(inout) :: this
+    INTEGER,INTENT(in) :: idir,ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
 
-!     this % eqn(idir+2*(ivar-1)) = EquationParser( TRIM(eqnChar), &
-!                                               (/'x','y','z','t'/) )
+    this % eqn(idir+3*(ivar-1)) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
 
-!   END SUBROUTINE SetEquation_Vector3D
+  END SUBROUTINE SetEquation_Vector3D
 
   subroutine UpdateDevice_Vector3D(this)
     implicit none
@@ -1592,6 +1598,60 @@ contains
                                                  handle)
 
   end subroutine BoundaryInterp_Tensor3D_gpu
+  
+  subroutine Divergence_Tensor3D_cpu(this,that)
+    implicit none
+    class(Tensor3D),intent(in) :: this
+    class(Vector3D),intent(inout) :: that
+
+    call this % interp % TensorDivergence_3D(this % interior, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem)
+
+  end subroutine Divergence_Tensor3D_cpu
+
+  subroutine Divergence_Tensor3D_gpu(this,that,handle)
+    implicit none
+    class(Tensor3D),intent(in) :: this
+    class(Vector3D),intent(inout) :: that
+    type(c_ptr),intent(inout) :: handle
+
+    call this % interp % TensorDivergence_3D(this % interior, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             handle)
+
+  end subroutine Divergence_Tensor3D_gpu
+
+  subroutine DGDivergence_Tensor3D_cpu(this,that)
+    implicit none
+    class(Tensor3D),intent(in) :: this
+    class(Vector3D),intent(inout) :: that
+
+    call this % interp % TensorDGDivergence_3D(this % interior, &
+                                               this % boundary, &
+                                               that % interior, &
+                                               this % nVar, &
+                                               this % nElem)
+
+  end subroutine DGDivergence_Tensor3D_cpu
+
+  subroutine DGDivergence_Tensor3D_gpu(this,that,handle)
+    implicit none
+    class(Tensor3D),intent(in) :: this
+    class(Vector3D),intent(inout) :: that
+    type(c_ptr),intent(inout) :: handle
+
+    call this % interp % TensorDGDivergence_3D(this % interior, &
+                                             this % boundary, &
+                                             that % interior, &
+                                             this % nVar, &
+                                             this % nElem, &
+                                             handle)
+
+  end subroutine DGDivergence_Tensor3D_gpu
 
   subroutine Determinant_Tensor3D(this,that)
     implicit none
