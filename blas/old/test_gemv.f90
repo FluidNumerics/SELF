@@ -35,7 +35,6 @@ program test_program
         integer,parameter :: m_64 = 2
         integer,parameter :: n_64 = 3
 
-
         ! gemv test for real32
         allocate(A_input_32(n_32,m_32), x_input_32(n_32), y_input_32(m_32), expected_output_32(m_32))
 
