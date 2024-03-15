@@ -20,7 +20,7 @@ MODULE SELF_DGModel2D
 #include "SELF_Macros.h"
 
 
-  TYPE,EXTENDS(Model) :: Model2D
+  TYPE,EXTENDS(Model) :: DGModel2D
     TYPE(MappedScalar2D)   :: solution
     TYPE(MappedVector2D)   :: solutionGradient
     TYPE(MappedVector2D)   :: flux
@@ -63,7 +63,7 @@ MODULE SELF_DGModel2D
     PROCEDURE :: WriteModel => Write_DGModel2D
     PROCEDURE :: WriteTecplot => WriteTecplot_DGModel2D
 
-  END TYPE Model2D
+  END TYPE DGModel2D
 
   INTERFACE
     SUBROUTINE UpdateSolution_DGModel2D_gpu(solution,dSdt,dt,N,nVar,nEl) &
@@ -136,7 +136,7 @@ CONTAINS
 
   SUBROUTINE Init_DGModel2D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(out) :: this
+    CLASS(DGModel2D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
     TYPE(Mesh2D),INTENT(in),TARGET :: mesh
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
@@ -172,7 +172,7 @@ CONTAINS
 
   SUBROUTINE Free_DGModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
 
     CALL this % solution % Free()
     CALL this % workSol % Free()
@@ -187,7 +187,7 @@ CONTAINS
 
   SUBROUTINE ResizePrevSol_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: nVar
@@ -204,7 +204,7 @@ CONTAINS
 
   SUBROUTINE UpdateDevice_DGModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
 
     CALL this % mesh % UpdateDevice()
     CALL this % geometry % UpdateDevice()
@@ -219,7 +219,7 @@ CONTAINS
 
   SUBROUTINE SetSolutionFromEqn_DGModel2D(this,eqn)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
     ! Local
     INTEGER :: iVar
@@ -240,7 +240,7 @@ CONTAINS
 
   SUBROUTINE SetSolutionFromChar_DGModel2D(this,eqnChar)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: eqnChar(1:this % solution % nVar)
     ! Local
     INTEGER :: iVar
@@ -263,7 +263,7 @@ CONTAINS
     !! Computes a solution update as , where dt is either provided through the interface
     !! or taken as the Model's stored time step size (model % dt)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     REAL(prec),OPTIONAL,INTENT(in) :: dt
     ! Local
     REAL(prec) :: dtLoc
@@ -306,7 +306,7 @@ CONTAINS
 
   SUBROUTINE UpdateGAB2_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: i,j,nVar,iEl,iVar
@@ -383,7 +383,7 @@ CONTAINS
 
   SUBROUTINE UpdateGAB3_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: i,j,nVar,iEl,iVar
@@ -476,7 +476,7 @@ CONTAINS
 
   SUBROUTINE UpdateGAB4_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: i,j,nVar,iEl,iVar
@@ -587,7 +587,7 @@ CONTAINS
 
   SUBROUTINE UpdateGRK2_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: i,j,iEl,iVar
@@ -629,7 +629,7 @@ CONTAINS
 
   SUBROUTINE UpdateGRK3_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: i,j,iEl,iVar
@@ -671,7 +671,7 @@ CONTAINS
 
   SUBROUTINE UpdateGRK4_DGModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     INTEGER,INTENT(in) :: m
     ! Local
     INTEGER :: i,j,iEl,iVar
@@ -713,7 +713,7 @@ CONTAINS
 
   SUBROUTINE CalculateFluxDivergence_DGModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
 
     if( this % GPUBackend )then
       CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence, this % hipblas_handle)
@@ -725,7 +725,7 @@ CONTAINS
 
   SUBROUTINE CalculateTendency_DGModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
@@ -778,7 +778,7 @@ CONTAINS
 #undef __FUNC__
 #define __FUNC__ "Write_DGModel2D"
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
@@ -913,7 +913,7 @@ CONTAINS
 
   SUBROUTINE Read_DGModel2D(this,fileName)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
@@ -949,7 +949,7 @@ CONTAINS
 
   SUBROUTINE WriteTecplot_DGModel2D(this,filename)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(DGModel2D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in),OPTIONAL :: filename
     ! Local
     CHARACTER(8) :: zoneID

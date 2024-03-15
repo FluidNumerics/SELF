@@ -20,7 +20,7 @@ MODULE SELF_DGModel3D
 #include "SELF_Macros.h"
   
   
-    TYPE,EXTENDS(Model) :: Model3D
+    TYPE,EXTENDS(Model) :: DGModel3D
       TYPE(MappedScalar3D)   :: solution
       TYPE(MappedVector3D)   :: solutionGradient
       TYPE(MappedVector3D)   :: flux
@@ -63,7 +63,7 @@ MODULE SELF_DGModel3D
       PROCEDURE :: WriteModel => Write_DGModel3D
       PROCEDURE :: WriteTecplot => WriteTecplot_DGModel3D
   
-    END TYPE Model3D
+    END TYPE DGModel3D
   
     INTERFACE
       SUBROUTINE UpdateSolution_DGModel3D_gpu(solution,dSdt,dt,N,nVar,nEl) &
@@ -136,7 +136,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE Init_DGModel3D(this,nvar,mesh,geometry,decomp)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(out) :: this
+      CLASS(DGModel3D),INTENT(out) :: this
       INTEGER,INTENT(in) :: nvar
       TYPE(Mesh3D),INTENT(in),TARGET :: mesh
       TYPE(SEMHex),INTENT(in),TARGET :: geometry
@@ -172,7 +172,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE Free_DGModel3D(this)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
   
       CALL this % solution % Free()
       CALL this % workSol % Free()
@@ -187,7 +187,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE ResizePrevSol_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: nVar
@@ -204,7 +204,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateDevice_DGModel3D(this)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
   
       CALL this % mesh % UpdateDevice()
       CALL this % geometry % UpdateDevice()
@@ -219,7 +219,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE SetSolutionFromEqn_DGModel3D(this,eqn)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
       ! Local
       INTEGER :: iVar
@@ -240,7 +240,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE SetSolutionFromChar_DGModel3D(this,eqnChar)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       CHARACTER(*),INTENT(in) :: eqnChar(1:this % solution % nVar)
       ! Local
       INTEGER :: iVar
@@ -262,7 +262,7 @@ MODULE SELF_DGModel3D
       !! Computes a solution update as , where dt is either provided through the interface
       !! or taken as the Model's stored time step size (model % dt)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       REAL(prec),OPTIONAL,INTENT(in) :: dt
       ! Local
       REAL(prec) :: dtLoc
@@ -308,7 +308,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateGAB2_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: i,j,k,nVar,iVar,iEl
@@ -394,7 +394,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateGAB3_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: i,j,k,nVar,iVar,iEl
@@ -499,7 +499,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateGAB4_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: i,j,k,nVar,iVar,iEl
@@ -625,7 +625,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateGRK2_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: i,j,k,iVar,iEl
@@ -670,7 +670,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateGRK3_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: i,j,k,iVar,iEl
@@ -715,7 +715,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE UpdateGRK4_DGModel3D(this,m)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
       ! Local
       INTEGER :: i,j,k,iVar,iEl
@@ -760,7 +760,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE CalculateFluxDivergence_DGModel3D(this)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
   
       if( this % GPUBackend )then
         CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence, this % hipblas_handle)
@@ -773,7 +773,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE CalculateTendency_DGModel3D(this)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       ! Local
       INTEGER :: i,j,k,iVar,iEl
   
@@ -827,7 +827,7 @@ MODULE SELF_DGModel3D
 #undef __FUNC__
 #define __FUNC__ "Write_DGModel3D"
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
       ! Local
       INTEGER(HID_T) :: fileId
@@ -962,7 +962,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE Read_DGModel3D(this,fileName)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       CHARACTER(*),INTENT(in) :: fileName
       ! Local
       INTEGER(HID_T) :: fileId
@@ -998,7 +998,7 @@ MODULE SELF_DGModel3D
   
     SUBROUTINE WriteTecplot_DGModel3D(this,filename)
       IMPLICIT NONE
-      CLASS(Model3D),INTENT(inout) :: this
+      CLASS(DGModel3D),INTENT(inout) :: this
       CHARACTER(*),INTENT(in),OPTIONAL :: filename
       ! Local
       CHARACTER(8) :: zoneID

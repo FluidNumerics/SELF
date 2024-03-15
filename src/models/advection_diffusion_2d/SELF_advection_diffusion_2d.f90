@@ -1,12 +1,12 @@
 module self_advection_diffusion_2d
 
     use self_model
-    use self_model2d
+    use self_dgmodel2d
     use self_mesh
     
     implicit none
     
-      type, extends(model2d) :: advection_diffusion_2d
+      type, extends(dgmodel2d) :: advection_diffusion_2d
         real(prec) :: nu ! diffusion coefficient
         real(prec) :: u  ! constant x-component of velocity
         real(prec) :: v  ! constant y-component of velocity
@@ -40,42 +40,37 @@ module self_advection_diffusion_2d
       implicit none
       class(advection_diffusion_2d), intent(inout) :: this
       ! local
-      integer :: i, ivar, iEl, iSide, e2    
+      integer :: i, ivar, iEl, j, e2    
     
+      do ivar = 1, this % solution % nvar
         do iEl = 1,this % solution % nElem ! Loop over all elements
-            do iSide = 1,4 ! Loop over all sides
+          do j = 1,4 ! Loop over all sides
 
-                !bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
-                e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+            !bcid = this % mesh % sideInfo(5,j,iEl) ! Boundary Condition ID
+            e2 = this % mesh % sideInfo(3,j,iEl) ! Neighboring Element ID
 
-                if (e2 == 0) then
-                    do ivar = 1, this % solution % nvar
-                        do i = 0,this % solution % interp % N ! Loop over quadrature points
-                            this % solution % extBoundary % hostData(i,ivar,iSide,iEl) = 0.0_prec
-                        enddo
-                    enddo
-                  
-                end if
+            if (e2 == 0) then
+              do i = 1,this % solution % interp % N+1 ! Loop over quadrature points
+                this % solution % extBoundary(i,j,iEl,ivar) = 0.0_prec
+              enddo
+            end if
     
-            end do
+          end do
         end do
+      end do
     
         ! calculate the averages of the solutions on the element
         ! boundaries and store is this % solution % avgBoundary
-        call this % solution % BassiRebaySides(this % gpuaccel)
+        call this % solution % BassiRebaySides()
     
         ! calculate the derivative using the bassi-rebay form
-        call this % solution % Gradient(this % geometry, &
-                this % solutionGradient, selfWeakBRForm, &
-                this % gpuaccel)
+        call this % solution % BRGradient(this % geometry,this % solutionGradient)
     
         ! interpolate the solutiongradient to the element boundaries
-        call this % solutionGradient % BoundaryInterp(this % gpuaccel)
+        call this % solutionGradient % BoundaryInterp()
       
-        ! perform the side exchange to populate the 
-        ! solutionGradient % extBoundary attribute
-        call this % solutionGradient % SideExchange(this % mesh, &
-               this % decomp, this % gpuaccel) 
+        ! perform the side exchange to populate the solutionGradient % extBoundary attribute
+        call this % solutionGradient % SideExchange(this % mesh, this % decomp) 
     
     
       end subroutine pretendency_advection_diffusion_2d
@@ -89,28 +84,29 @@ module self_advection_diffusion_2d
       implicit none
       class(advection_diffusion_2d), intent(inout) :: this
       ! local
-      integer :: i, ivar, iEl, iSide, e2 
+      integer :: i, ivar, iEl, j, e2 
 
-        do iEl = 1,this % solution % nElem ! Loop over all elements
-            do iSide = 1,4 ! Loop over all sides
+        do ivar = 1, this % solution % nvar
 
-                !bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
-                e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+          do iEl = 1,this % solution % nElem ! Loop over all elements
+            do j = 1,4 ! Loop over all sides
 
-                if (e2 == 0) then
+              !bcid = this % mesh % sideInfo(5,j,iEl) ! Boundary Condition ID
+              e2 = this % mesh % sideInfo(3,j,iEl) ! Neighboring Element ID
 
-                    do ivar = 1, this % solution % nvar
-                        do i = 0,this % solution % interp % N ! Loop over quadrature points
-                            this % solutionGradient % extBoundary % hostData(1:2,i,ivar,iSide,iEl) = 0.0_prec
-                        enddo
-                    enddo
-                  
-                end if
+              if (e2 == 0) then
+
+                do i = 1,this % solution % interp % N+1 ! Loop over quadrature points
+                    this % solutionGradient % extBoundary(i,j,iEl,ivar,1:2) = 0.0_prec
+                end do
+                
+              end if
     
             end do
+          end do
         end do
 
-        call this % solutionGradient % BassiRebaySides(this % gpuaccel)
+        call this % solutionGradient % BassiRebaySides()
 
       end subroutine setboundarycondition_advection_diffusion_2d
     
@@ -127,19 +123,19 @@ module self_advection_diffusion_2d
         u = this % u
         v = this % v
         nu = this % nu
-        do iel = 1, this % mesh % nelem
-          do ivar = 1, this % solution % nvar
-            do j = 0, this % solution % interp % N
-                do i = 0, this % solution % interp % N
+        do ivar = 1, this % solution % nvar
+          do iel = 1, this % mesh % nelem
+            do j = 1, this % solution % interp % N
+              do i = 1, this % solution % interp % N+1
         
-                f = this % solution % interior % hostdata(i,j,ivar,iel)
-                dfdx = this % solutionGradient % interior % hostdata(1,i,j,ivar,iel)
-                dfdy = this % solutionGradient % interior % hostdata(2,i,j,ivar,iel)
+                f = this % solution % interior(i,j,iel,ivar)
+                dfdx = this % solutionGradient % interior(i,j,iel,ivar,1)
+                dfdy = this % solutionGradient % interior(i,j,iel,ivar,2)
         
-                this % flux % interior % hostdata(1,i,j,ivar,iel) = u*f - nu*dfdx  ! advective flux + diffusive flux (x-component)
-                this % flux % interior % hostdata(2,i,j,ivar,iel) = v*f - nu*dfdy  ! advective flux + diffusive flux (y-component)
+                this % flux % interior(i,j,iel,ivar,1) = u*f - nu*dfdx  ! advective flux + diffusive flux (x-component)
+                this % flux % interior(i,j,iel,ivar,2) = v*f - nu*dfdy  ! advective flux + diffusive flux (y-component)
         
-                enddo
+              enddo
             enddo
           enddo
         enddo
@@ -155,30 +151,32 @@ module self_advection_diffusion_2d
       ! Local
       integer :: iel
       integer :: ivar
-      integer :: iside
+      integer :: j
       integer :: i
       real(prec) :: fin, fout, dfdn, un
       real(prec) :: nhat(1:2), nmag
         
-      do iEl = 1,this % solution % nElem
-        do iSide = 1,4
-          do ivar = 1, this % solution % nvar
-            do i = 0,this % solution % interp % N
+      do ivar = 1, this % solution % nvar
+        do iEl = 1,this % solution % nElem
+          do j = 1,4
+            do i = 1,this % solution % interp % N+1
 
-            ! Get the boundary normals on cell edges from the mesh geometry
-            nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
-            nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
-    
-            un = this % u*nhat(1) + this % v*nhat(2)
-            dfdn = this % solutionGradient % boundary % hostData(1,i,ivar,iSide,iEl)*nhat(1) +&
-              this % solutionGradient % boundary % hostData(2,i,ivar,iSide,iEl)*nhat(2)
+              ! Get the boundary normals on cell edges from the mesh geometry
+              nhat(1:2) = this % geometry % nHat % boundary(i,j,iEl,1,1:2)
+      
+              un = this % u*nhat(1) + this % v*nhat(2)
+              dfdn = this % solutionGradient % boundary(i,j,iEl,ivar,1)*nhat(1) +&
+                this % solutionGradient % boundary(i,j,iEl,ivar,2)*nhat(2)
 
-            fin = this % solution % boundary % hostdata(i,ivar,iside,iel) ! interior solution
-            fout = this % solution % extboundary % hostdata(i,ivar,iside,iel) ! exterior solution
-    
-            this % flux % boundaryNormal % hostData(i,1,iSide,iEl) =  ( 0.5_prec*( &
-                un*(fin + fout) + abs(un)*(fin - fout) ) -& ! advective flux
-                this % nu*dfdn )*nmag
+              fin = this % solution % boundary(i,j,iel,ivar) ! interior solution
+              fout = this % solution % extboundary(i,j,iel,ivar) ! exterior solution
+      
+              nmag = this % geometry % nScale % boundary(i,j,iEl,1)
+
+              this % flux % boundaryNormal(i,j,iEl,1) =  ( 0.5_prec*( &
+                  un*(fin + fout) + abs(un)*(fin - fout) ) -& ! advective flux
+                  this % nu*dfdn )*nmag
+
             enddo
           enddo
         enddo

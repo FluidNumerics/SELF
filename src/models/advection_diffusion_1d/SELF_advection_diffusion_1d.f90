@@ -1,12 +1,12 @@
 module self_advection_diffusion_1d
 
 use self_model
-use self_model1d
+use self_dgmodel1d
 use self_mesh
 
 implicit none
 
-  type, extends(model1d) :: advection_diffusion_1d
+  type, extends(dgmodel1d) :: advection_diffusion_1d
     real(prec) :: nu ! diffusion coefficient
     real(prec) :: u  ! constant velocity
 
@@ -48,33 +48,32 @@ contains
     do ivar = 1, this % solution % nvar
 
       ! left-most boundary
-      this % solution % extBoundary % hostdata(ivar,1,1) = &
-        this % solution % boundary % hostdata(ivar,2,nelem)
+      this % solution % extBoundary(1,1,ivar) = &
+        this % solution % boundary(2,nelem,ivar)
 
       ! right-most boundary
-      this % solution % extBoundary % hostdata(ivar,2,nelem) = &
-        this % solution % boundary % hostdata(ivar,1,1)
+      this % solution % extBoundary(2,nelem,ivar) = &
+        this % solution % boundary(1,1,ivar)
 
     enddo
 
     ! calculate the averages of the solutions on the element
     ! boundaries and store is this % solution % avgBoundary
-    call this % solution % BassiRebaySides(this % gpuaccel)
+    call this % solution % BassiRebaySides()
 
     ! calculate the derivative using the bassi-rebay form
-    call this % solution % Derivative(this % geometry, &
-            this % solutionGradient, selfWeakBRForm, &
-            this % gpuaccel)
+    call this % solution % BRDerivative(this % geometry, &
+            this % solutionGradient)
 
     ! interpolate the solutiongradient to the element boundaries
-    call this % solutionGradient % BoundaryInterp(this % gpuaccel)
+    call this % solutionGradient % BoundaryInterp()
   
     ! perform the side exchange to populate the 
     ! solutionGradient % extBoundary attribute
     call this % solutionGradient % SideExchange(this % mesh, &
-           this % decomp, this % gpuaccel) 
+           this % decomp) 
 
-    call this % solutionGradient % BassiRebaySides(this % gpuaccel)
+    call this % solutionGradient % BassiRebaySides()
 
   end subroutine pretendency_advection_diffusion_1d
 
@@ -96,20 +95,20 @@ contains
     do ivar = 1, this % solution % nvar
 
       ! left-most boundary
-      this% solutionGradient % extBoundary % hostdata(ivar,1,1) = &
-        this % solutionGradient % boundary % hostdata(ivar,2,nelem)
+      this% solutionGradient % extBoundary(1,1,ivar) = &
+        this % solutionGradient % boundary(2,nelem,ivar)
 
-      this% solutionGradient % avgBoundary % hostdata(ivar,1,1) = &
-        -0.5_prec*(this% solutionGradient % extBoundary % hostdata(ivar,1,1) + &
-        this% solutionGradient % boundary % hostdata(ivar,1,1))
+      this% solutionGradient % avgBoundary(1,1,ivar) = &
+        -0.5_prec*(this% solutionGradient % extBoundary(1,1,ivar) + &
+        this% solutionGradient % boundary(ivar,1,1))
 
       ! right-most boundary
-      this % solutionGradient % extBoundary % hostdata(ivar,2,nelem) = &
-        this % solutionGradient % boundary % hostdata(ivar,1,1)
+      this % solutionGradient % extBoundary(2,nelem,ivar) = &
+        this % solutionGradient % boundary(1,1,ivar)
 
-      this% solutionGradient % avgBoundary % hostdata(ivar,2,nelem) = &
-        0.5_prec*(this% solutionGradient % extBoundary % hostdata(ivar,2,nelem) + &
-        this% solutionGradient % boundary % hostdata(ivar,2,nelem))
+      this% solutionGradient % avgBoundary(2,nelem,ivar) = &
+        0.5_prec*(this% solutionGradient % extBoundary(2,nelem,ivar) + &
+        this% solutionGradient % boundary(2,nelem,ivar))
     enddo
 
   end subroutine setboundarycondition_advection_diffusion_1d
@@ -125,14 +124,14 @@ contains
 
     u = this % u
     nu = this % nu
-    do iel = 1, this % mesh % nelem
-      do ivar = 1, this % solution % nvar
-        do i = 0, this % solution % interp % N
+    do ivar = 1, this % solution % nvar
+      do iel = 1, this % mesh % nelem
+        do i = 1, this % solution % interp % N+1
 
-          f = this % solution % interior % hostdata(i,ivar,iel)
-          dfdx = this % solutionGradient % interior % hostdata(i,ivar,iel)
+          f = this % solution % interior(i,iel,ivar)
+          dfdx = this % solutionGradient % interior(i,iel,ivar)
 
-          this % flux % interior % hostdata(i,ivar,iel) = u*f - nu*dfdx  ! advective flux + diffusive flux
+          this % flux % interior(i,iel,ivar) = u*f - nu*dfdx  ! advective flux + diffusive flux
 
         enddo
       enddo
@@ -152,29 +151,28 @@ contains
   integer :: iside
   real(prec) :: fin, fout, dfavg, un
 
-    call this % solutionGradient % BassiRebaySides(this % gpuaccel)
+    call this % solutionGradient % BassiRebaySides()
 
-    do iel = 1, this % mesh % nelem
-      do iside = 1, 2
+    do ivar = 1, this % solution % nvar
+      do iel = 1, this % mesh % nelem
+        do iside = 1, 2
 
-        ! set the normal velocity
-        if( iside == 1 )then
-          un = -this % u
-        else
-          un = this % u
-        endif
+          ! set the normal velocity
+          if( iside == 1 )then
+            un = -this % u
+          else
+            un = this % u
+          endif
 
-        do ivar = 1, this % solution % nvar
 
-          fin = this % solution % boundary % hostdata(ivar,iside,iel) ! interior solution
-          fout = this % solution % extboundary % hostdata(ivar,iside,iel) ! exterior solution
-          dfavg = this % solutionGradient % avgboundary % hostdata(ivar,iside,iel) ! average solution gradient (with direction taken into account)
+            fin = this % solution % boundary(iside,iel,ivar) ! interior solution
+            fout = this % solution % extboundary(iside,iel,ivar) ! exterior solution
+            dfavg = this % solutionGradient % avgboundary(iside,iel,ivar) ! average solution gradient (with direction taken into account)
 
-          this % flux % boundary % hostdata(ivar,iside,iel) = 0.5_prec*( un*(fin + fout) + abs(un)*(fin - fout) ) -& ! advective flux
-                                                              this % nu*dfavg ! diffusive flux
+            this % flux % boundary(iside,iel,ivar) = 0.5_prec*( un*(fin + fout) + abs(un)*(fin - fout) ) -& ! advective flux
+                                                                this % nu*dfavg ! diffusive flux
 
         enddo
-
       enddo
     enddo
 
