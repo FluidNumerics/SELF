@@ -53,7 +53,7 @@ program test_program
         real(real64), pointer, dimension(:) :: x
         real(real64), pointer, dimension(:) :: y
         real(real64), pointer, dimension(:) :: expected
-        real(real64),parameter :: tolerance = 10.0_real64**(-3)
+        real(real64),parameter :: tolerance = 10.0_real64**(-7)
         integer(c_int) :: lda
         ! strided batched stuff
         integer(c_int64_t) :: stride_A = 0 ! m*n
