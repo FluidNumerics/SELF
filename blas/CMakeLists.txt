@@ -25,13 +25,12 @@ function (add_fortran_examples)
                         ${HDF5_INCLUDE_DIRS}/shared
                         ${MPI_Fortran_INCLUDE_DIRS})
 
-        add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 128 128 1000)    
-        # if (${EXAMPLE_NAME} STREQUAL "gemvstridedbatched_op_n_64.f90")
-        # if (${EXAMPLE_NAME} STREQUAL "gemvstridedbatched_op_t_64")
-        #     add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 128 128 1000)
-        # else()
-        #     add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME})
-        # endif()
+        string(REGEX MATCH "^[^_]*" PREFIX "${EXAMPLE_NAME}")
+        if(PREFIX STREQUAL "gemvstridedbatched")
+            add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 100 100 1000)
+        elseif(PREFIX STREQUAL "gemm")
+            add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 100 1000)
+        endif()
 
         install(TARGETS ${EXAMPLE_NAME} DESTINATION example)
     endforeach ()
@@ -40,19 +39,14 @@ endfunction ()
 
 add_fortran_examples (
     # Level 1
-    # "axpy_test.f90"
     # Level 2
-    #"test_gemv.f90"
-    #"test_gemvstridedbatched.f90"
-    ##### gemvXStridedBatched comparisons
     "gemvstridedbatched_op_n_32.f90"
     "gemvstridedbatched_op_t_32.f90"
     "gemvstridedbatched_op_n_64.f90"
     "gemvstridedbatched_op_t_64.f90"
-    # "test_gemvsb_op_n_64.f90"
     # Level 3
-    #"test_gemm.f90"
-    # misc
-    # "example_hipSaxpy.f90"
-    # "example_hipDaxpy.f90"
+    "gemm_op_n_32.f90"
+    "gemm_op_t_32.f90"
+    "gemm_op_n_64.f90"
+    "gemm_op_t_64.f90"
 )
