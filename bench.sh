@@ -7,6 +7,11 @@
 #SBATCH -o stdout
 #SBATCH -e stderr
 
+# Which BLAS subroutine to execute
+# E.g., "gemvstridedbatched", "gemm"
+export SUBROUTINE="gemvstridedbatched"
+
+# Batch count for stridedbatched subroutines
 export BATCHCOUNT=1000
 
 # Use lowercase "op_n" for normal, "op_t" for transposed.
@@ -25,7 +30,7 @@ for OP in "op_n" "op_t"; do
         for ROWS in $(seq $START $STEPSIZE $STOP); do
             for COLUMNS in $(seq $START $STEPSIZE $STOP); do
                 export PROFILE_DIR=blas_results/${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}_${BATCHCOUNT}
-                export FILENAME=build/blas/gemvstridedbatched_${OPERATION}_${PRECISION}
+                export FILENAME=build/blas/${SUBROUTINE}_${OPERATION}_${PRECISION}
                 # If file does not already exist or if the number of files in the folder is not the expected value (9).
                 # The second condition is implemented to handle easy scancel/sbatch from the user.
                 # I.e., if a user stops the job early, you end up with a folder that exists, but has incomplete/missing files.
