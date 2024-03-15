@@ -57,6 +57,7 @@ module self_blas
     interface gemm
         module procedure sgemm
         module procedure dgemm
+        module procedure dgemm_op
     end interface gemm
     interface gemvstridedbatched
         module procedure sgemvstridedbatched
@@ -549,8 +550,57 @@ module self_blas
         call hipblasCheck(hipblasDestroy(handle))
 
     end subroutine sgemm
+    subroutine sgemm_op(alpha, A, B, beta, C, operation_A)
+        implicit none
+
+        real(kind=real32), intent(in) :: alpha
+        real(kind=real32), pointer, intent(in) :: A(:,:)
+        real(kind=real32), pointer, intent(in) :: B(:,:)
+        real(kind=real32), intent(in) :: beta
+        real(kind=real32), pointer, intent(inout) :: C(:,:)
+        integer, intent(in) :: operation_A
+
+        type(c_ptr) :: handle
+        integer :: operation_B = HIPBLAS_OP_N
+        integer :: m, n, k
+        integer :: lda, ldb, ldc
+        type(c_ptr) :: A_gpu, B_gpu, C_gpu
+        integer :: status
+
+        ! check if dimensions are fine
+
+        ! Assign m,n,k
+        ! A is mxm, so 
+        m = size(A, 1)
+        n = size(B, 2)
+        k = m
+        ! Assign lda, ldb, ldc
+        lda = m
+        ldb = m
+        ldc = m
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(B_gpu, sizeof(B)))
+        call hipcheck(hipmalloc(C_gpu, sizeof(C)))        
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(B_gpu, c_loc(B), sizeof(B), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(C_gpu, c_loc(C), sizeof(C), hipmemcpyhosttodevice))
+
+        status = hipblassgemm(handle, operation_A, operation_B, m, n, k, alpha, A_gpu, lda, B_gpu, ldb, beta, C_gpu, ldc)
+
+        call hipcheck(hipmemcpy(c_loc(C), C_gpu, sizeof(C), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(B_gpu))
+        call hipcheck(hipfree(C_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine sgemm_op
+
+
     subroutine dgemm(scalar1, A, matrix2, scalar2, matrix3)
-        ! prefer scalarX, matrixX, etc, or alpha, beta, A, B, C?
         implicit none
 
         real(kind=real64), intent(in) :: scalar1
@@ -603,5 +653,54 @@ module self_blas
         call hipblasCheck(hipblasDestroy(handle))
 
     end subroutine dgemm
+    subroutine dgemm_op(alpha, A, B, beta, C, operation_A)
+        implicit none
+
+        real(kind=real64), intent(in) :: alpha
+        real(kind=real64), pointer, intent(in) :: A(:,:)
+        real(kind=real64), pointer, intent(in) :: B(:,:)
+        real(kind=real64), intent(in) :: beta
+        real(kind=real64), pointer, intent(inout) :: C(:,:)
+        integer, intent(in) :: operation_A
+
+        type(c_ptr) :: handle
+        integer :: operation_B = HIPBLAS_OP_N
+        integer :: m, n, k
+        integer :: lda, ldb, ldc
+        type(c_ptr) :: A_gpu, B_gpu, C_gpu
+        integer :: status
+
+        ! check if dimensions are fine
+
+        ! Assign m,n,k
+        ! A is mxm, so 
+        m = size(A, 1)
+        n = size(B, 2)
+        k = m
+        ! Assign lda, ldb, ldc
+        lda = m
+        ldb = m
+        ldc = m
+
+        call hipcheck(hipmalloc(A_gpu, sizeof(A)))
+        call hipcheck(hipmalloc(B_gpu, sizeof(B)))
+        call hipcheck(hipmalloc(C_gpu, sizeof(C)))        
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(A_gpu, c_loc(A), sizeof(A), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(B_gpu, c_loc(B), sizeof(B), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(C_gpu, c_loc(C), sizeof(C), hipmemcpyhosttodevice))
+
+        status = hipblasdgemm(handle, operation_A, operation_B, m, n, k, alpha, A_gpu, lda, B_gpu, ldb, beta, C_gpu, ldc)
+
+        call hipcheck(hipmemcpy(c_loc(C), C_gpu, sizeof(C), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(A_gpu))
+        call hipcheck(hipfree(B_gpu))
+        call hipcheck(hipfree(C_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine dgemm_op
+
 
 end module self_blas
