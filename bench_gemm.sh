@@ -27,7 +27,7 @@ for OP in "op_n" "op_t"; do
         export STOP=16
         for ROWS in $(seq $START $STEPSIZE $STOP); do
             for COLUMNS in 1000 10000 100000; do
-                export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}_${BATCHCOUNT}
+                export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}
                 export FILENAME=build/blas/${SUBROUTINE}_${OPERATION}_${PRECISION}
                 # If file does not already exist or if the number of files in the folder is not the expected value (9).
                 # The second condition is implemented to handle easy scancel/sbatch from the user.
@@ -54,11 +54,11 @@ for OP in "op_n" "op_t"; do
                     mv results.json $PROFILE_DIR/
 
                     # Hardware events profile (for bandwidth estimates and L2 Cache hit)
-                    rocprof -i events.txt $FILENAME $ROWS $COLUMNS
-                    mv events.csv $PROFILE_DIR/
+                    # rocprof -i events.txt $FILENAME $ROWS $COLUMNS
+                    # mv events.csv $PROFILE_DIR/
 
-                    mv results.* $PROFILE_DIR/
-                    mv stdout $PROFILE_DIR/
+                    # mv results.* $PROFILE_DIR/
+                    # mv stdout $PROFILE_DIR/
                 fi
             done
         done
