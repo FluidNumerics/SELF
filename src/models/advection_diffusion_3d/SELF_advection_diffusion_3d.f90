@@ -130,13 +130,13 @@ module self_advection_diffusion_3d
                 do i = 1, this % solution % interp % N+1
             
                   f = this % solution % interior(i,j,k,iel,ivar)
-                  dfdx = this % solutionGradient % interior(1,i,j,k,iel,ivar)
-                  dfdy = this % solutionGradient % interior(2,i,j,k,iel,ivar)
-                  dfdz = this % solutionGradient % interior(3,i,j,k,iel,ivar)
+                  dfdx = this % solutionGradient % interior(i,j,k,iel,ivar,1)
+                  dfdy = this % solutionGradient % interior(i,j,k,iel,ivar,2)
+                  dfdz = this % solutionGradient % interior(i,j,k,iel,ivar,3)
           
-                  this % flux % interior(1,i,j,k,iel,ivar) = u*f - nu*dfdx  ! advective flux + diffusive flux (x-component)
-                  this % flux % interior(2,i,j,k,iel,ivar) = v*f - nu*dfdy  ! advective flux + diffusive flux (y-component)
-                  this % flux % interior(3,i,j,k,iel,ivar) = w*f - nu*dfdz  ! advective flux + diffusive flux (z-component)
+                  this % flux % interior(i,j,k,iel,ivar,1) = u*f - nu*dfdx  ! advective flux + diffusive flux (x-component)
+                  this % flux % interior(i,j,k,iel,ivar,2) = v*f - nu*dfdy  ! advective flux + diffusive flux (y-component)
+                  this % flux % interior(i,j,k,iel,ivar,3) = w*f - nu*dfdz  ! advective flux + diffusive flux (z-component)
           
                 enddo
               enddo
@@ -170,9 +170,9 @@ module self_advection_diffusion_3d
                 nhat(1:3) = this % geometry % nHat % boundary(i,j,k,iEl,1,1:3)
 
                 un = this % u*nhat(1) + this % v*nhat(2) + this % w*nhat(3)
-                dfdn = this % solutionGradient % boundary(i,j,k,iEl,iVar,1)*nhat(1) +&
-                    this % solutionGradient % boundary(i,j,k,iEl,iVar,2)*nhat(2) +&
-                    this % solutionGradient % boundary(i,j,k,iEl,iVar,3)*nhat(3)
+                dfdn = this % solutionGradient % avgBoundary(i,j,k,iEl,iVar,1)*nhat(1) +&
+                    this % solutionGradient % avgBoundary(i,j,k,iEl,iVar,2)*nhat(2) +&
+                    this % solutionGradient % avgBoundary(i,j,k,iEl,iVar,3)*nhat(3)
 
                 fin = this % solution % boundary(i,j,k,iEl,iVar) ! interior solution
                 fout = this % solution % extboundary(i,j,k,iEl,iVar) ! exterior solution

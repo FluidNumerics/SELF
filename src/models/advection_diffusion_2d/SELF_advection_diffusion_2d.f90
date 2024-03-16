@@ -125,7 +125,7 @@ module self_advection_diffusion_2d
         nu = this % nu
         do ivar = 1, this % solution % nvar
           do iel = 1, this % mesh % nelem
-            do j = 1, this % solution % interp % N
+            do j = 1, this % solution % interp % N+1
               do i = 1, this % solution % interp % N+1
         
                 f = this % solution % interior(i,j,iel,ivar)
@@ -165,8 +165,8 @@ module self_advection_diffusion_2d
               nhat(1:2) = this % geometry % nHat % boundary(i,j,iEl,1,1:2)
       
               un = this % u*nhat(1) + this % v*nhat(2)
-              dfdn = this % solutionGradient % boundary(i,j,iEl,ivar,1)*nhat(1) +&
-                this % solutionGradient % boundary(i,j,iEl,ivar,2)*nhat(2)
+              dfdn = this % solutionGradient % avgBoundary(i,j,iEl,ivar,1)*nhat(1) +&
+                this % solutionGradient % avgBoundary(i,j,iEl,ivar,2)*nhat(2)
 
               fin = this % solution % boundary(i,j,iel,ivar) ! interior solution
               fout = this % solution % extboundary(i,j,iel,ivar) ! exterior solution

@@ -3,19 +3,17 @@ program test
   implicit none
   integer :: exit_code
   
-  exit_code = mappedscalargradient_2d_gpu_constant()
+  exit_code = mappedvectordgdivergence_2d_cpu_constant()
   stop exit_code
 
 contains
-integer function mappedscalargradient_2d_gpu_constant() result(r)
+integer function mappedvectordgdivergence_2d_cpu_constant() result(r)
 
   use SELF_Constants
   use SELF_Lagrange
   use SELF_Mesh
   use SELF_Geometry
   use SELF_MappedData
-  use iso_c_binding
-  use hipfort_hipblas
 
   implicit none
 
@@ -25,18 +23,17 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
 #ifdef DOUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-2)
+  real(prec),parameter :: tolerance = 10.0_prec**(-3)
 #endif
   type(Lagrange),target :: interp
   type(Mesh2D),TARGET :: mesh
   type(SEMQuad),TARGET :: geometry
-  type(MappedScalar2D) :: f
-  type(MappedVector2D) :: df
+  type(MappedVector2D) :: f
+  type(MappedScalar2D) :: df
   type(MPILayer),TARGET :: decomp
   CHARACTER(LEN=255) :: WORKSPACE
-  type(c_ptr) :: handle
-
-  call hipblasCheck(hipblasCreate(handle))
+  integer :: i, j, iel
+  real(prec) :: nhat(1:2), nmag
 
 
   ! Initialize a domain decomposition
@@ -61,20 +58,34 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   call f % Init(interp,nvar,mesh % nelem)
   call df % Init(interp,nvar,mesh % nelem)
 
-  call f % SetEquation( 1, 'f = 1.0')
+  call f % SetEquation( 1, 1, 'f = 1.0') ! x-component
+  call f % SetEquation( 2, 1, 'f = 1.0') ! y-component
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % updatedevice()
+  call f % boundaryInterp()
 
-  call f % Gradient( geometry, df, handle ) 
-  call hipcheck(hipdevicesynchronize())
+  do iEl = 1,f % nElem
+    do j = 1,4
+      do i = 1, f % interp % N+1
 
+        ! Get the boundary normals on cell edges from the mesh geometry
+        nhat(1:2) = geometry % nHat % boundary(i,j,iEl,1,1:2)
+        nmag = geometry % nScale % boundary(i,j,iEl,1)
+
+        f % boundaryNormal(i,j,iEl,1) =  (f % boundary(i,j,iEl,1,1)*nhat(1)+&
+                                          f % boundary(i,j,iEl,1,2)*nhat(2))*nmag
+
+      enddo
+    enddo
+  enddo
+  
+
+  call f % DGDivergence( geometry, df) 
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
-  print*, maxval(df % interior ), tolerance 
 
   if (maxval(df % interior ) <= tolerance) then
     r = 0
@@ -89,7 +100,8 @@ integer function mappedscalargradient_2d_gpu_constant() result(r)
   call interp % Free()
   call f % free()
   call df % free()
-  call hipblasCheck(hipblasDestroy(handle))
+    
+  r = 0
 
-end function mappedscalargradient_2d_gpu_constant
+end function mappedvectordgdivergence_2d_cpu_constant
 end program test

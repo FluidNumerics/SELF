@@ -561,7 +561,7 @@ CONTAINS
               DO i = 1,this % solution % interp % N+1
 
                 ! Bump the last two stored solutions
-   this % prevSol % interior(i,j,iEl,iVar+3*nVar) = this % prevSol % interior(i,j,2*nVar+iEl,iVar)
+   this % prevSol % interior(i,j,iEl,iVar+3*nVar) = this % prevSol % interior(i,j,iEl,iVar+2*nVar)
  this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % prevSol % interior(i,j,iEl,iVar+nVar)
           this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
 

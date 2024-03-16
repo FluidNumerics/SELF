@@ -1552,7 +1552,7 @@ contains
 
             dfLoc = 0.0_prec
             do ii = 1,this % N + 1
-              dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,iel,ivar,1)
+              dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,iel,ivar,1)
             end do
             dF(i,j,iel,ivar) = dfLoc + (this % bMatrix(i,2)*bf(j,2,iel,ivar) +&
                                         this % bMatrix(i,1)*bf(j,4,iel,ivar))/&
@@ -1570,7 +1570,7 @@ contains
 
             dfLoc = 0.0_prec
             do ii = 1,this % N + 1
-              dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,iel,ivar,2)
+              dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,iel,ivar,2)
             end do
             dF(i,j,iel,ivar) = dF(i,j,iel,ivar) + dfLoc + &
                                  (this % bMatrix(j,2)*bf(i,3,iel,ivar) +&
@@ -1916,8 +1916,8 @@ contains
                 dfLoc = dfLoc + this % dgMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
               end do
               dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc + &
-                                   (this % bMatrix(k,2)*bf(i,j,1,iel,ivar) +& ! top
-                                    this % bMatrix(k,1)*bf(i,j,6,iel,ivar))/& ! bottom
+                                   (this % bMatrix(k,2)*bf(i,j,6,iel,ivar) +& ! top
+                                    this % bMatrix(k,1)*bf(i,j,1,iel,ivar))/& ! bottom
                                     this % qweights(k)
 
             end do
@@ -2071,8 +2071,8 @@ contains
                 do ii = 1,this % N + 1
                   dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
                 end do
-                dF(i,j,k,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,k,4,iel,ivar,idir,1) +& ! east
-                                                   this % bMatrix(i,1)*bf(j,k,2,iel,ivar,idir,1))/& ! west
+                dF(i,j,k,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,k,3,iel,ivar,idir,1) +& ! east
+                                                   this % bMatrix(i,1)*bf(j,k,5,iel,ivar,idir,1))/& ! west
                                                    this % qweights(i)
 
               end do
@@ -2092,8 +2092,8 @@ contains
                   dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
                 end do
                 dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc + &
-                                   (this % bMatrix(j,2)*bf(i,k,3,iel,ivar,idir,2) +& ! east
-                                    this % bMatrix(j,1)*bf(i,k,5,iel,ivar,idir,2))/& ! west
+                                   (this % bMatrix(j,2)*bf(i,k,4,iel,ivar,idir,2) +& ! north
+                                    this % bMatrix(j,1)*bf(i,k,2,iel,ivar,idir,2))/& ! south
                                     this % qweights(j)
 
               end do

@@ -56,8 +56,8 @@ program advection_diffusion_1d_rk2
   call modelobj % solution % SetInteriorFromEquation( geometry, 0.0_prec ) 
 
   print*, "min, max (interior)", &
-    minval(modelobj % solution % interior % hostdata), &
-    maxval(modelobj % solution % interior % hostdata)
+    minval(modelobj % solution % interior), &
+    maxval(modelobj % solution % interior)
 
   ! Set the model's time integration method
   call modelobj % SetTimeIntegrator( integrator )
@@ -67,8 +67,8 @@ program advection_diffusion_1d_rk2
   call modelobj % ForwardStep(endtime,dt,iointerval)
 
   print*, "min, max (interior)", &
-  minval(modelobj % solution % interior % hostdata), &
-  maxval(modelobj % solution % interior % hostdata)
+  minval(modelobj % solution % interior), &
+  maxval(modelobj % solution % interior)
   
 
   ! Clean up

@@ -76,6 +76,7 @@ add_fortran_tests (
     "mappedvectordivergence_2d_cpu_constant.f90"
     "mappedvectordivergence_2d_gpu_constant.f90"
     "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
+    "mappedvectordgdivergence_2d_cpu_constant.f90"
     "mappedscalargradient_3d_cpu_constant.f90"
     "mappedscalargradient_3d_gpu_constant.f90"
     "mappedscalarbrgradient_3d_cpu_constant.f90"

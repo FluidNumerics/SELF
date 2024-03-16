@@ -345,14 +345,14 @@ CONTAINS
 
               ! Bump the last solution
               nVar = this % solution % nVar
-              this % prevSol % interior(i,nVar + iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
+              this % prevSol % interior(i,iEl, nVar + iVar) = this % prevSol % interior(i,iEl,iVar)
 
               ! Store the new solution
               this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
               this % solution % interior(i,iEl,iVar) = &
                 1.5_PREC*this % prevSol % interior(i,iEl,iVar) - &
-                0.5_PREC*this % prevSol % interior(i,nVar + iEl,iVar)
+                0.5_PREC*this % prevSol % interior(i,iEl, nVar + iVar)
             END DO
           END DO
         END DO
@@ -388,7 +388,7 @@ CONTAINS
           DO iVar = 1,this % solution % nVar
             DO i = 1,this % solution % interp % N+1
 
-             this % prevSol % interior(i,nVar + iEl,iVar) = this % solution % interior(i,iEl,iVar)
+             this % prevSol % interior(i,iEl, nVar + iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -427,16 +427,16 @@ CONTAINS
 
               ! Bump the last two stored solutions
               nVar = this % solution % nVar
-     this % prevSol % interior(i,2*nVar + iEl,iVar) = this % prevSol % interior(i,nVar + iEl,iVar)
-              this % prevSol % interior(i,nVar + iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
+     this % prevSol % interior(i,iEl, 2*nVar + iVar) = this % prevSol % interior(i,iEl, nVar + iVar)
+              this % prevSol % interior(i,iEl, nVar + iVar) = this % prevSol % interior(i,iEl,iVar)
 
               ! Store the new solution
               this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
               this % solution % interior(i,iEl,iVar) = &
                 (23.0_PREC*this % prevSol % interior(i,iEl,iVar) - &
-                 16.0_PREC*this % prevSol % interior(i,nVar + iEl,iVar) + &
-                 5.0_PREC*this % prevSol % interior(i,2*nVar + iEl,iVar))/12.0_PREC
+                 16.0_PREC*this % prevSol % interior(i,iEl, nVar + iVar) + &
+                 5.0_PREC*this % prevSol % interior(i,iEl, 2*nVar + iVar))/12.0_PREC
 
             END DO
           END DO
@@ -474,7 +474,7 @@ CONTAINS
           DO iVar = 1,this % solution % nVar
             DO i = 1,this % solution % interp % N+1
 
-           this % prevSol % interior(i,2*nVar + iEl,iVar) = this % solution % interior(i,iEl,iVar)
+           this % prevSol % interior(i,iEl, 2*nVar + iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -487,7 +487,7 @@ CONTAINS
           DO iVar = 1,this % solution % nVar
             DO i = 1,this % solution % interp % N+1
 
-             this % prevSol % interior(i,nVar + iEl,iVar) = this % solution % interior(i,iEl,iVar)
+             this % prevSol % interior(i,iEl, nVar + iVar) = this % solution % interior(i,iEl,iVar)
 
             END DO
           END DO
@@ -526,18 +526,18 @@ CONTAINS
             DO i = 1,this % solution % interp % N+1
 
               ! Bump the last two stored solutions
-   this % prevSol % interior(i,3*nVar + iEl,iVar) = this % prevSol % interior(i,2*nVar + iEl,iVar)
-     this % prevSol % interior(i,2*nVar + iEl,iVar) = this % prevSol % interior(i,nVar + iEl,iVar)
-              this % prevSol % interior(i,nVar + iEl,iVar) = this % prevSol % interior(i,iEl,iVar)
+   this % prevSol % interior(i,iEl, 3*nVar + iVar) = this % prevSol % interior(i,iEl, 2*nVar + iVar)
+     this % prevSol % interior(i,iEl, 2*nVar + iVar) = this % prevSol % interior(i,iEl, nVar + iVar)
+              this % prevSol % interior(i,iEl, nVar + iVar) = this % prevSol % interior(i,iEl,iVar)
 
               ! Store the new solution
               this % prevSol % interior(i,iEl,iVar) = this % solution % interior(i,iEl,iVar)
 
               this % solution % interior(i,iEl,iVar) = &
                 (55.0_PREC*this % prevSol % interior(i,iEl,iVar) - &
-                 59.0_PREC*this % prevSol % interior(i,nVar + iEl,iVar) + &
-                 37.0_PREC*this % prevSol % interior(i,2*nVar + iEl,iVar) - &
-                 9.0_PREC*this % prevSol % interior(i,3*nVar + iEl,iVar))/24.0_PREC
+                 59.0_PREC*this % prevSol % interior(i,iEl, nVar + iVar) + &
+                 37.0_PREC*this % prevSol % interior(i,iEl, 2*nVar + iVar) - &
+                 9.0_PREC*this % prevSol % interior(i,iEl, 3*nVar + iVar))/24.0_PREC
 
             END DO
           END DO
@@ -674,9 +674,9 @@ CONTAINS
     CLASS(DGModel1D),INTENT(inout) :: this
 
     if( this % GPUBackend )then
-      CALL this % flux % DGDerivative(this % geometry,this % fluxDivergence)
-    else
       CALL this % flux % DGDerivative(this % geometry,this % fluxDivergence,this % hipblas_handle)
+    else
+      CALL this % flux % DGDerivative(this % geometry,this % fluxDivergence)
     endif
 
   END SUBROUTINE CalculateFluxDivergence_DGModel1D
@@ -690,7 +690,7 @@ CONTAINS
     if (this % GPUBackend)then
       CALL this % solution % BoundaryInterp(this % hipblas_handle)
     else
-      CALL this % solution % BoundaryInterp(this % hipblas_handle)
+      CALL this % solution % BoundaryInterp()
     endif
     CALL this % solution % SideExchange(this % mesh,this % decomp)
     CALL this % PreTendency()

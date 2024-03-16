@@ -12,7 +12,7 @@ program advection_diffusion_2d_rk3
     real(prec), parameter :: v = 0.25_prec
     real(prec), parameter :: nu = 0.001_prec ! diffusivity
     real(prec), parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-    real(prec), parameter :: endtime = 0.01_prec
+    real(prec), parameter :: endtime = 0.2_prec
     real(prec), parameter :: iointerval = 0.1_prec
     type(advection_diffusion_2d) :: modelobj
     type(Lagrange),target :: interp
@@ -52,8 +52,8 @@ program advection_diffusion_2d_rk3
     call modelobj % solution % SetInteriorFromEquation( geometry, 0.0_prec ) 
   
     print*, "min, max (interior)", &
-      minval(modelobj % solution % interior % hostdata), &
-      maxval(modelobj % solution % interior % hostdata)
+      minval(modelobj % solution % interior), &
+      maxval(modelobj % solution % interior)
   
     ! Set the model's time integration method
     call modelobj % SetTimeIntegrator( integrator )
@@ -63,8 +63,8 @@ program advection_diffusion_2d_rk3
     call modelobj % ForwardStep(endtime,dt,iointerval)
   
     print*, "min, max (interior)", &
-    minval(modelobj % solution % interior % hostdata), &
-    maxval(modelobj % solution % interior % hostdata)
+    minval(modelobj % solution % interior), &
+    maxval(modelobj % solution % interior)
   
     ! Clean up
     call modelobj % free()

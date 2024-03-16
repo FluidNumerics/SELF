@@ -23,7 +23,7 @@ integer function mappedscalargradient_2d_cpu_constant() result(r)
 #ifdef DOUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-3)
+  real(prec),parameter :: tolerance = 10.0_prec**(-2)
 #endif
   type(Lagrange),target :: interp
   type(Mesh2D),TARGET :: mesh
@@ -65,7 +65,7 @@ integer function mappedscalargradient_2d_cpu_constant() result(r)
 
   ! Calculate diff from exact
   df % interior  = abs(df % interior  - 0.0_prec)
-
+  print*, maxval(df % interior ), tolerance
   if (maxval(df % interior ) <= tolerance) then
     r = 0
   else

@@ -598,7 +598,7 @@ MODULE SELF_DGModel3D
                 DO i = 1,this % solution % interp % N+1
   
                   ! Bump the last two stored solutions
-     this % prevSol % interior(i,j,k,iEl,3*nVar + iVar) = this % prevSol % interior(i,j,k,2*nVar+iVar,iEl)
+     this % prevSol % interior(i,j,k,iEl,3*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,2*nVar+iVar)
    this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,nVar + iVar)
             this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
   
