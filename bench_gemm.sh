@@ -3,16 +3,14 @@
 #SBATCH --gpus-per-task=1
 #SBATCH --sockets=1 
 #SBATCH --cpus-per-task=16 
-#SBATCH --partition=mi210
+#SBATCH --partition=gpu
+#SBATCH --constraint=mi210
 #SBATCH -o stdout
 #SBATCH -e stderr
 
 # Which BLAS subroutine to execute
 # E.g., "gemvstridedbatched", "gemm"
-export SUBROUTINE="gemvstridedbatched"
-
-# Batch count for stridedbatched subroutines
-export BATCHCOUNT=1000
+export SUBROUTINE="gemm"
 
 # Use lowercase "op_n" for normal, "op_t" for transposed.
 for OP in "op_n" "op_t"; do
@@ -24,12 +22,12 @@ for OP in "op_n" "op_t"; do
         # It is usually expected to make START equal to STEPSIZE.
         # If rows/columns will not have the same START/STEPSIZE/STOP, this will need
         # to be changed in their respective for loops.
-        export STEPSIZE=8
+        export STEPSIZE=4
         export START=$STEPSIZE
-        export STOP=256
+        export STOP=16
         for ROWS in $(seq $START $STEPSIZE $STOP); do
-            for COLUMNS in $(seq $START $STEPSIZE $STOP); do
-                export PROFILE_DIR=blas_results/${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}_${BATCHCOUNT}
+            for COLUMNS in 1000 10000 100000; do
+                export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}_${BATCHCOUNT}
                 export FILENAME=build/blas/${SUBROUTINE}_${OPERATION}_${PRECISION}
                 # If file does not already exist or if the number of files in the folder is not the expected value (9).
                 # The second condition is implemented to handle easy scancel/sbatch from the user.
@@ -39,24 +37,24 @@ for OP in "op_n" "op_t"; do
 
                     source ~/.bashrc
                     source /etc/profile.d/z11_lmod.sh
-                    module avail
+                    module --default avail
                     module load gcc/13.2.0
                     module load hip/5.7.3
 
                     # Flat profile
-                    rocprof --timestamp on $FILENAME $ROWS $COLUMNS $BATCHCOUNT
+                    rocprof --timestamp on $FILENAME $ROWS $COLUMNS
                     mv results.csv $PROFILE_DIR/
 
                     # Hotspot profile
-                    rocprof --stats $FILENAME $ROWS $COLUMNS $BATCHCOUNT
+                    rocprof --stats $FILENAME $ROWS $COLUMNS
                     mv results.stats.csv $PROFILE_DIR/
 
                     # Trace Profile
-                    rocprof --sys-trace $FILENAME $ROWS $COLUMNS $BATCHCOUNT
+                    rocprof --sys-trace $FILENAME $ROWS $COLUMNS
                     mv results.json $PROFILE_DIR/
 
                     # Hardware events profile (for bandwidth estimates and L2 Cache hit)
-                    rocprof -i events.txt $FILENAME $ROWS $COLUMNS $BATCHCOUNT
+                    rocprof -i events.txt $FILENAME $ROWS $COLUMNS
                     mv events.csv $PROFILE_DIR/
 
                     mv results.* $PROFILE_DIR/
