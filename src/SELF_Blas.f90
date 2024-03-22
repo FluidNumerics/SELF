@@ -24,9 +24,8 @@
 
 module self_blas
     use hipfort_hipblas
-    use self_hip
-    use self_hip_enums
-    use self_constants
+    use hipfort
+    use hipfort_check
     use iso_c_binding
     use iso_fortran_env
 

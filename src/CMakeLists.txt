@@ -1,6 +1,3 @@
-file(GLOB hipfort_hipblas_sources hipfort_hipblas_*.f90)
-add_library(hipfort_hipblas STATIC ${hipfort_hipblas_sources})
-
 file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
 file(GLOB SELF_HIPSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.hip")
 
@@ -21,13 +18,17 @@ add_library(self-static STATIC ${SELF_FSRC} ${SELF_HIPSRC})
 
 target_link_libraries(self-static PRIVATE 
                         ${FEQPARSE_LIBRARIES}
-                        ${HDF5_LIBRARIES}
-                        ${MPI_Fortran_LIBRARIES})
+                        HDF5::HDF5
+                        ${MPI_Fortran_LIBRARIES}
+                        ${HIPFORT_LIBRARIES}
+                        hip::device
+                        roc::hipblas)
 
 target_include_directories(self-static PRIVATE 
                         ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
-                        ${MPI_Fortran_INCLUDE_DIRS})
+                        ${MPI_Fortran_INCLUDE_DIRS}
+                        ${HIPFORT_INCLUDE_DIRS})
                         
 target_compile_options(self-static PRIVATE -fPIC)
 

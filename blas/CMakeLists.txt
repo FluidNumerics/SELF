@@ -13,17 +13,18 @@ function (add_fortran_examples)
         add_executable (${EXAMPLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${TFILE})
         target_link_libraries(${EXAMPLE_NAME}
                     ${CMAKE_BINARY_DIR}/src/libself-static.a
-                    ${JSONFORTRAN_LIBRARIES}
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
+                    ${HIPFORT_LIBRARIES}
                     hip::device
                     roc::hipblas)
                            
         target_include_directories(${EXAMPLE_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
-                        ${HDF5_INCLUDE_DIRS}/shared
-                        ${MPI_Fortran_INCLUDE_DIRS})
+                        ${HDF5_INCLUDE_DIRS}
+                        ${MPI_Fortran_INCLUDE_DIRS}
+                        ${HIPFORT_INCLUDE_DIRS})
 
         string(REGEX MATCH "^[^_]*" PREFIX "${EXAMPLE_NAME}")
         if(PREFIX STREQUAL "gemvstridedbatched")
