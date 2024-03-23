@@ -34,25 +34,5 @@ function (add_fortran_examples)
 endfunction ()
 
 add_fortran_examples (
-    "advection_diffusion_1d_euler.f90"
-    "advection_diffusion_1d_rk2.f90"
-    "advection_diffusion_1d_rk3.f90"
-    "advection_diffusion_1d_rk4.f90"
-    "advection_diffusion_1d_ab2.f90"
-    "advection_diffusion_1d_ab3.f90"
-    "advection_diffusion_1d_ab4.f90"
-    "advection_diffusion_2d_euler.f90"
-    "advection_diffusion_2d_rk2.f90"
-    "advection_diffusion_2d_rk3.f90"
-    "advection_diffusion_2d_rk4.f90"
-    "advection_diffusion_2d_ab2.f90"
-    "advection_diffusion_2d_ab3.f90"
-    "advection_diffusion_2d_ab4.f90"
-    "advection_diffusion_3d_euler.f90"
-    "advection_diffusion_3d_rk2.f90"
-    "advection_diffusion_3d_rk3.f90"
-    "advection_diffusion_3d_rk4.f90"
-    "advection_diffusion_3d_ab2.f90"
-    "advection_diffusion_3d_ab3.f90"
-    "advection_diffusion_3d_ab4.f90"
+
 )

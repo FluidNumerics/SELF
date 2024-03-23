@@ -810,9 +810,10 @@ contains
     if (present(handle)) then
 
       call ContravariantWeight_MappedScalar2D_gpu(c_loc(scalar % interior), &
-                                                          c_loc(geometry % dsdx % interior), &
-                                                          c_loc(scalar % JaScalar % interior), &
-                                           scalar % interp % N + 1,scalar % interp % N + 1,scalar % nVar,scalar % nElem)
+                                                  c_loc(geometry % dsdx % interior), &
+                                                  c_loc(scalar % JaScalar % interior), &
+                                                  scalar % interp % N + 1,scalar % interp % N + 1, &
+                                                  scalar % nVar,scalar % nElem)
     else
 
       ! Interior
@@ -1888,6 +1889,7 @@ contains
               do i = 1,this % interp % N + 1
                 this % interior(i,j,iEl,iVar,idir) = this % interior(i,j,iEl,iVar,idir)/ &
                                                   geometry % J % interior(i,j,iEl,1)
+                
               end do
             end do
           end do

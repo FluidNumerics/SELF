@@ -230,14 +230,14 @@ __global__ void VectorDGDivergence_BoundaryContribution_3D(real *bMatrix, real *
 
   if( iq < (N+1)*(N+1)*(N+1) ){
 
-    df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] += (bf[SCB_3D_INDEX(j,k,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] +
-                                              bf[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])/
+    df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] += (bf[SCB_3D_INDEX(j,k,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] + // east
+                                              bf[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])/       // west
                                             qWeights[i] +
-                                            (bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] +
-                                              bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])/
+                                            (bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] +  //  north
+                                              bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])/       // south
                                             qWeights[j] +
-                                            (bf[SCB_3D_INDEX(i,j,5,iel,ivar,N,nel)]*bMatrix[k+(N+1)] +
-                                              bf[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])/
+                                            (bf[SCB_3D_INDEX(i,j,5,iel,ivar,N,nel)]*bMatrix[k+(N+1)] +  // top
+                                              bf[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])/       // bottom
                                             qWeights[k];
   }
 
@@ -270,16 +270,16 @@ __global__ void TensorDGDivergence_BoundaryContribution_2D(real *bMatrix, real *
 
   df[VE_2D_INDEX(i,j,iel,ivar,0,N,nel,nvar)] += (bf[TEB_2D_INDEX(j,1,iel,ivar,0,0,N,nel,nvar)]*bMatrix[i+(N+1)] + // east
                                                     bf[TEB_2D_INDEX(j,3,iel,ivar,0,0,N,nel,nvar)]*bMatrix[i])/    // west
-                                                   qWeights[i] +
-                                                   (bf[TEB_2D_INDEX(i,2,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
-                                                    bf[TEB_2D_INDEX(i,0,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j])/       // south
+                                                   qWeights[i]+
+                                                (bf[TEB_2D_INDEX(i,2,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
+                                                    bf[TEB_2D_INDEX(i,0,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j])/    // south
                                                    qWeights[j];
 
   df[VE_2D_INDEX(i,j,iel,ivar,1,N,nel,nvar)] += (bf[TEB_2D_INDEX(j,1,iel,ivar,1,0,N,nel,nvar)]*bMatrix[i+(N+1)] + // east
                                                     bf[TEB_2D_INDEX(j,3,iel,ivar,1,0,N,nel,nvar)]*bMatrix[i])/    // west
-                                                   qWeights[i] +
-                                                   (bf[TEB_2D_INDEX(i,2,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
-                                                    bf[TEB_2D_INDEX(i,0,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j])/       // south
+                                                   qWeights[i]+
+                                                (bf[TEB_2D_INDEX(i,2,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
+                                                    bf[TEB_2D_INDEX(i,0,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j])/    // south
                                                    qWeights[j];
 
 }
@@ -288,7 +288,7 @@ extern "C"
 {
   void TensorDGDivergence_BoundaryContribution_2D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
   {
-	  TensorDGDivergence_BoundaryContribution_2D<<<dim3(nEl,nVar,1), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
+	  TensorDGDivergence_BoundaryContribution_2D<<<dim3(nEl,nVar,2), dim3(N+1,N+1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
     HIP_SAFE_CALL(hipGetLastError());
   } 
 }

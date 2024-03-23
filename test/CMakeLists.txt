@@ -13,7 +13,6 @@ function (add_fortran_tests)
         add_executable (${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${TFILE})
         target_link_libraries(${TEST_NAME}
                     ${CMAKE_BINARY_DIR}/src/libself-static.a
-                    ${JSONFORTRAN_LIBRARIES}
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
                     ${MPI_Fortran_LIBRARIES}
@@ -71,8 +70,12 @@ add_fortran_tests (
     "mappedscalardgderivative_1d_gpu_constant.f90"
     "mappedscalargradient_2d_cpu_constant.f90"
     "mappedscalargradient_2d_gpu_constant.f90"
+    "mappedscalargradient_2d_cpu_linear.f90"
+    "mappedscalargradient_2d_gpu_linear.f90"
     "mappedscalarbrgradient_2d_cpu_constant.f90"
     "mappedscalarbrgradient_2d_gpu_constant.f90"
+    "mappedscalarbrgradient_2d_cpu_linear.f90"
+    "mappedscalarbrgradient_2d_gpu_linear.f90"
     "mappedvectordivergence_2d_cpu_constant.f90"
     "mappedvectordivergence_2d_gpu_constant.f90"
     "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
@@ -84,6 +87,27 @@ add_fortran_tests (
     "mappedvectordivergence_3d_cpu_constant.f90"
     "mappedvectordivergence_3d_gpu_constant.f90"
     "mappedvectordivergence_3d_cpu_gausslobatto_constant.f90"
+    "advection_diffusion_1d_euler.f90"
+    "advection_diffusion_1d_rk2.f90"
+    "advection_diffusion_1d_rk3.f90"
+    "advection_diffusion_1d_rk4.f90"
+    "advection_diffusion_1d_ab2.f90"
+    "advection_diffusion_1d_ab3.f90"
+    "advection_diffusion_1d_ab4.f90"
+    "advection_diffusion_2d_euler.f90"
+    "advection_diffusion_2d_rk2.f90"
+    "advection_diffusion_2d_rk3.f90"
+    "advection_diffusion_2d_rk4.f90"
+    "advection_diffusion_2d_ab2.f90"
+    "advection_diffusion_2d_ab3.f90"
+    "advection_diffusion_2d_ab4.f90"
+    "advection_diffusion_3d_euler.f90"
+    "advection_diffusion_3d_rk2.f90"
+    "advection_diffusion_3d_rk3.f90"
+    "advection_diffusion_3d_rk4.f90"
+    "advection_diffusion_3d_ab2.f90"
+    "advection_diffusion_3d_ab3.f90"
+    "advection_diffusion_3d_ab4.f90"
     )
 
 

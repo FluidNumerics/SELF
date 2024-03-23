@@ -3,26 +3,24 @@ program test
   implicit none
   integer :: exit_code
   
-  exit_code = mappedvectordivergence_2d_gpu_constant()
+  exit_code = mappedscalarbrgradient_2d_cpu_linear()
   stop exit_code
 
 contains
-integer function mappedvectordivergence_2d_gpu_constant() result(r)
+integer function mappedscalarbrgradient_2d_cpu_linear() result(r)
 
   use SELF_Constants
   use SELF_Lagrange
   use SELF_Mesh
   use SELF_Geometry
   use SELF_MappedData
-  use iso_c_binding
-  use hipfort_hipblas
 
   implicit none
 
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
   integer,parameter :: nvar = 1
-#ifdef DOUBLE_PRECISION
+#ifdef doUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
   real(prec),parameter :: tolerance = 10.0_prec**(-3)
@@ -30,15 +28,14 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   type(Lagrange),target :: interp
   type(Mesh2D),TARGET :: mesh
   type(SEMQuad),TARGET :: geometry
-  type(MappedVector2D) :: f
-  type(MappedScalar2D) :: df
+  type(MappedScalar2D) :: f
+  type(MappedVector2D) :: df
   type(MPILayer),TARGET :: decomp
+  integer :: iside
+  integer :: e2
   CHARACTER(LEN=255) :: WORKSPACE
-  type(c_ptr) :: handle
+  integer :: iel, j, i
   INTEGER(HID_T) :: fileId
-
-
-  call hipblasCheck(hipblasCreate(handle))
 
 
   ! Initialize a domain decomposition
@@ -63,20 +60,34 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   call f % Init(interp,nvar,mesh % nelem)
   call df % Init(interp,nvar,mesh % nelem)
 
-  call f % SetEquation( 1, 1, 'f = 1.0') ! x-component
-  call f % SetEquation( 2, 1, 'f = 1.0') ! y-component
+  call f % SetEquation( 1, 'f = x')
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % updatedevice()
+  call f % BoundaryInterp()
+  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
-  call f % Divergence( geometry, df, handle ) 
+  call f % SideExchange( mesh, decomp)
 
-  call hipcheck(hipdevicesynchronize())
+  ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
+  do iel = 1,f % nElem
+    do iside = 1,4
+      e2 = mesh % sideInfo(3,iside,iel) ! Neighboring Element ID
+      if (e2 == 0)then
+        do i = 1,f % interp % N+1
+          f % extBoundary(i,iside,iel,1) = f % boundary(i,iside,iel,1) 
+        end do
+      end if
+    end do
+  end do
 
-  CALL df % SetName(1, "f")
-  CALL df % SetUnits(1,"[null]")
+  print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
+
+  call f % BRGradient( geometry, df ) 
+
+  CALL f % SetName(1, "f")
+  CALL f % SetUnits(1,"[null]")
 
   CALL Open_HDF5('output.h5',H5F_ACC_TRUNC_F,fileId)
 
@@ -87,7 +98,11 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   ! Write the model state to file
   print*, "Writing control grid solution to file"
   CALL CreateGroup_HDF5(fileId,'/controlgrid')
-  CALL df % WriteHDF5( fileId, '/controlgrid/solution' )
+  CALL f % WriteHDF5( fileId, '/controlgrid/solution' )
+
+  print*, "Writing control grid solution gradient to file"
+  CALL CreateGroup_HDF5(fileId,'/controlgrid')
+  CALL df % WriteHDF5( fileId, '/controlgrid/solution_gradient' )
 
   ! Write the geometry to file
   print*, "Writing control grid  geometry to file"
@@ -96,10 +111,16 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
 
   CALL Close_HDF5(fileId)
 
-
   ! Calculate diff from exact
-  df % interior  = abs(df % interior  - 0.0_prec)
+  do iel = 1, mesh % nelem
+    do j = 1, controlDegree+1
+      do i = 1, controlDegree+1
+        df % interior(i,j,iel,1,1) = abs(df % interior(i,j,iel,1,1) - geometry % x % interior(i,j,iel,1,2)) ! df/dx = y
+        df % interior(i,j,iel,1,2) = abs(df % interior(i,j,iel,1,2) - geometry % x % interior(i,j,iel,1,1)) ! df/dy = x
 
+      end do
+    end do
+  end do
   if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
@@ -113,10 +134,8 @@ integer function mappedvectordivergence_2d_gpu_constant() result(r)
   call interp % Free()
   call f % free()
   call df % free()
-  call hipblasCheck(hipblasDestroy(handle))
-
     
   r = 0
 
-end function mappedvectordivergence_2d_gpu_constant
+end function mappedscalarbrgradient_2d_cpu_linear
 end program test

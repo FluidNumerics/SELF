@@ -18,6 +18,16 @@ module self_advection_diffusion_2d
         procedure :: fluxmethod => fluxmethod_advection_diffusion_2d
     
       end type advection_diffusion_2d
+
+      interface
+      subroutine SetBoundaryCondition_advection_diffusion_2d_gpu(sideInfo,extBoundary,N,nVar,nEl) &
+        bind(c,name="SideExchange_3D_gpu")
+        use iso_c_binding
+        implicit none
+        type(c_ptr),value :: extBoundary,sideInfo
+        integer(c_int),value :: N,nVar,nEl
+      end subroutine SetBoundaryCondition_advection_diffusion_2d_gpu
+    end interface
     
     ! Remember, the order of operations for the tendency calculation is
     !
@@ -42,23 +52,47 @@ module self_advection_diffusion_2d
       ! local
       integer :: i, ivar, iEl, j, e2    
     
-      do ivar = 1, this % solution % nvar
-        do iEl = 1,this % solution % nElem ! Loop over all elements
-          do j = 1,4 ! Loop over all sides
 
-            !bcid = this % mesh % sideInfo(5,j,iEl) ! Boundary Condition ID
-            e2 = this % mesh % sideInfo(3,j,iEl) ! Neighboring Element ID
-
-            if (e2 == 0) then
-              do i = 1,this % solution % interp % N+1 ! Loop over quadrature points
-                this % solution % extBoundary(i,j,iEl,ivar) = 0.0_prec
-              enddo
-            end if
     
+      if( this % gpuBackend )then
+
+        call SetBoundaryCondition_advection_diffusion_2d_gpu( c_loc(this % mesh % sideInfo), &
+                                                              c_loc(this % solution % extBoundary),&
+                                                              this % solution % interp % N, &
+                                                              this % solution % nvar, &
+                                                              this % solution % nelem )
+
+        ! calculate the averages of the solutions on the element
+        ! boundaries and store is this % solution % avgBoundary
+        call this % solution % BassiRebaySides(this % hipblas_handle)
+    
+        ! calculate the derivative using the bassi-rebay form
+        call this % solution % BRGradient(this % geometry,this % solutionGradient,this % hipblas_handle)
+    
+        ! interpolate the solutiongradient to the element boundaries
+        call this % solutionGradient % BoundaryInterp(this % hipblas_handle)
+      
+        ! perform the side exchange to populate the solutionGradient % extBoundary attribute
+        call this % solutionGradient % SideExchange(this % mesh, this % decomp,this % hipblas_handle) 
+    
+      else
+
+        do ivar = 1, this % solution % nvar
+          do iEl = 1,this % solution % nElem ! Loop over all elements
+            do j = 1,4 ! Loop over all sides
+  
+              !bcid = this % mesh % sideInfo(5,j,iEl) ! Boundary Condition ID
+              e2 = this % mesh % sideInfo(3,j,iEl) ! Neighboring Element ID
+  
+              if (e2 == 0) then
+                do i = 1,this % solution % interp % N+1 ! Loop over quadrature points
+                  this % solution % extBoundary(i,j,iEl,ivar) = 0.0_prec
+                enddo
+              end if
+      
+            end do
           end do
         end do
-      end do
-    
         ! calculate the averages of the solutions on the element
         ! boundaries and store is this % solution % avgBoundary
         call this % solution % BassiRebaySides()
@@ -71,7 +105,8 @@ module self_advection_diffusion_2d
       
         ! perform the side exchange to populate the solutionGradient % extBoundary attribute
         call this % solutionGradient % SideExchange(this % mesh, this % decomp) 
-    
+
+      end if
     
       end subroutine pretendency_advection_diffusion_2d
     

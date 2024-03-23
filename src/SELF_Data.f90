@@ -946,6 +946,13 @@ contains
     call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
     call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
 
+    call hipcheck(hipMemAdvise(c_loc(this % interior), sizeof(this % interior), hipMemAdviseSetCoarseGrain, 0))
+    call hipcheck(hipMemAdvise(c_loc(this % boundary), sizeof(this % boundary), hipMemAdviseSetCoarseGrain, 0))
+    call hipcheck(hipMemAdvise(c_loc(this % extBoundary), sizeof(this % extBoundary), hipMemAdviseSetCoarseGrain, 0))
+    call hipcheck(hipMemAdvise(c_loc(this % avgBoundary), sizeof(this % avgBoundary), hipMemAdviseSetCoarseGrain, 0))
+    call hipcheck(hipMemAdvise(c_loc(this % boundaryNormal), sizeof(this % boundaryNormal), hipMemAdviseSetCoarseGrain, 0))
+
+
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:2*nVar))
 

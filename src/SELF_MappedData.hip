@@ -36,7 +36,7 @@ extern "C"
     dim3 nblocks(nblocksx,nVar,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    JacobianWeight<<<nblocks, nblocks, 0, 0>>>(scalar, jacobian, ndof);
+    JacobianWeight<<<nblocks, nthreads, 0, 0>>>(scalar, jacobian, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -52,7 +52,7 @@ extern "C"
     dim3 nblocks(nblocksx,nVar,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    JacobianWeight<<<nblocks, nblocks, 0, 0>>>(scalar, jacobian, ndof);
+    JacobianWeight<<<nblocks, nthreads, 0, 0>>>(scalar, jacobian, ndof);
     HIP_SAFE_CALL(hipGetLastError());
   }
 }
@@ -62,9 +62,6 @@ __global__ void SideExchange_2D(real *extBoundary, real *boundary, int *sideInfo
 
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
   uint32_t ndof = (N+1)*nEl*4;
-  // uint32_t e1 = idof/((N+1)*4);
-  // uint32_t s1 = (idof - e1*(N+1)*4)/(N+1);
-  // uint32_t i1 = idof - e1*(N+1)*4 - (N+1)*s1;
   uint32_t i1 = idof % (N+1);
   uint32_t s1 = (idof/(N+1)) % 4;
   uint32_t e1 = idof/(N+1)/4;
@@ -318,6 +315,7 @@ __global__ void ContravariantWeight_MappedScalar_gpu(real *scalar, real *dsdx, r
   if( i < ndof ){
     tensor[i+ndof*(ivar + nvar*tdim)] = dsdx[i+ndof*tdim]*scalar[i+ndof*ivar];
   }
+
 }
 
 extern "C"

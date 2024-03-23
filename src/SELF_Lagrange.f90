@@ -470,7 +470,7 @@ contains
     n = nvars*nelems*(controldegree + 1) ! number of columns of B
     k = controldegree + 1! number of columns of A^T
     alpha = 1.0_c_prec
-    lda = k ! leading dimension of A (interoplation matrix)
+    lda = k ! leading dimension of A (interpolation matrix)
     ldb = k ! leading dimension of B (f)
     ldc = m ! leading dimension of C (fTarget)
     beta = 0.0_c_prec
@@ -1528,6 +1528,7 @@ contains
 
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1)
     call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
+    
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2)
     call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     floc => null()
@@ -1679,6 +1680,7 @@ contains
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
     call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     floc => null()
+    dfloc => null()
 
   end subroutine TensorDivergence_2D_gpu
 
@@ -1703,8 +1705,8 @@ contains
               do ii = 1,this % N + 1
                 dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
               end do
-              dF(i,j,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,2,iel,ivar,idir,1) +&
-                                               this % bMatrix(i,1)*bf(j,4,iel,ivar,idir,1))/&
+              dF(i,j,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,2,iel,ivar,idir,1) +& ! east
+                                               this % bMatrix(i,1)*bf(j,4,iel,ivar,idir,1))/& ! west
                                                this % qweights(i)
 
 
@@ -1722,8 +1724,9 @@ contains
               do ii = 1,this % N + 1
                 dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
               end do
-              dF(i,j,iel,ivar,idir) = dfLoc + (this % bMatrix(j,2)*bf(i,1,iel,ivar,idir,2) +&
-                                               this % bMatrix(j,1)*bf(i,3,iel,ivar,idir,2))/&
+              dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir)+ &
+                                      dfLoc + (this % bMatrix(j,2)*bf(i,3,iel,ivar,idir,2) +& ! north
+                                               this % bMatrix(j,1)*bf(i,1,iel,ivar,idir,2))/& ! south
                                                this % qweights(j)
 
             end do
@@ -1758,6 +1761,7 @@ contains
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
     call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     floc => null()
+    dfloc => null()
 
     ! Add the boundary contributions
     call TensorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
