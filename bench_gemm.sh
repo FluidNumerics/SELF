@@ -31,10 +31,12 @@ for OP in "op_n" "op_t"; do
                 export COLUMNS
                 export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}
                 export FILENAME=build/blas/${SUBROUTINE}_${OPERATION}_${PRECISION}
-                # If file does not already exist or if the number of files in the folder is not the expected value (9).
+                # If file does not already exist or if the number of files in the folder is not the expected value $EXPECTEDFILES.
                 # The second condition is implemented to handle easy scancel/sbatch from the user.
                 # I.e., if a user stops the job early, you end up with a folder that exists, but has incomplete/missing files.
-                if [ ! -d "$PROFILE_DIR" ] || [ "$(ls -l "$PROFILE_DIR" | grep "^-" | wc -l)" -ne 4 ]; then
+                # $EXPECTEDFILES will change depending on what you specify in events.txt, and how many profilers you specify below.
+                export EXPECTEDFILES=4
+                if [ ! -d "$PROFILE_DIR" ] || [ "$(ls -l "$PROFILE_DIR" | grep "^-" | wc -l)" -ne $EXPECTEDFILES ]; then
                     mkdir -p $PROFILE_DIR
 
                     source ~/.bashrc
