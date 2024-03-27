@@ -40,7 +40,7 @@ program test_program
         ! general
         integer(c_int), intent(in) :: m, n
         logical :: matrices_equal = .true.
-        integer(c_int) :: i,j
+        integer(c_int) :: j,k
         ! real32
         real(real32) :: alpha = 1.0_real32
         real(real32) :: beta = 1.0_real32
@@ -63,9 +63,9 @@ program test_program
 
         call sgemm_op(alpha, A, B, beta, C, operation)
 
-        do i=1,m
-            do j=1,n
-                if(abs(expected(i,j) - C(i,j)) > tolerance) then
+        do j=1,m
+            do k=1,n
+                if(abs(expected(j,k) - C(j,k)) > tolerance) then
                     matrices_equal = .false.
                     exit
                 end if
