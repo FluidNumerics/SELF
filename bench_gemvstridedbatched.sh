@@ -3,7 +3,8 @@
 #SBATCH --gpus-per-task=1
 #SBATCH --sockets=1 
 #SBATCH --cpus-per-task=16 
-#SBATCH --partition=mi210
+#SBATCH --partition=gpu
+#SBATCH --constraint=mi210
 #SBATCH -o stdout
 #SBATCH -e stderr
 

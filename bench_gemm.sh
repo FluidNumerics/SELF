@@ -27,14 +27,14 @@ for OP in "op_n" "op_t"; do
         export STOP=16
         for ROWS in $(seq $START $STEPSIZE $STOP); do
             for COLUMNS_FACTOR in 1000 10000 100000; do
-                let "COLUMNS=ROWS*COLUMNS_FACTOR"
+                let COLUMNS=ROWS*COLUMNS_FACTOR
                 export COLUMNS
                 export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}
                 export FILENAME=build/blas/${SUBROUTINE}_${OPERATION}_${PRECISION}
                 # If file does not already exist or if the number of files in the folder is not the expected value (9).
                 # The second condition is implemented to handle easy scancel/sbatch from the user.
                 # I.e., if a user stops the job early, you end up with a folder that exists, but has incomplete/missing files.
-                if [ ! -d "$PROFILE_DIR" ] || [ "$(ls -l "$PROFILE_DIR" | grep "^-" | wc -l)" -ne 3 ]; then
+                if [ ! -d "$PROFILE_DIR" ] || [ "$(ls -l "$PROFILE_DIR" | grep "^-" | wc -l)" -ne 4 ]; then
                     mkdir -p $PROFILE_DIR
 
                     source ~/.bashrc
@@ -56,8 +56,8 @@ for OP in "op_n" "op_t"; do
                     mv results.json $PROFILE_DIR/
 
                     # Hardware events profile (for bandwidth estimates and L2 Cache hit)
-                    # rocprof -i events.txt $FILENAME $ROWS $COLUMNS
-                    # mv events.csv $PROFILE_DIR/
+                    rocprof -i events.txt $FILENAME $ROWS $COLUMNS
+                    mv events.csv $PROFILE_DIR/
 
                     # mv results.* $PROFILE_DIR/
                     # mv stdout $PROFILE_DIR/
