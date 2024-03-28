@@ -45,7 +45,7 @@ program test_program
         integer(c_int), intent(in):: n
         integer(c_int), intent(in) :: batchCount
         logical :: vectors_equal = .true.
-        integer(c_int) :: i
+        integer(c_int) :: j
         ! real32
         real(real32) :: alpha = 1.0_real32
         real(real32) :: beta = 1.0_real32
@@ -77,8 +77,8 @@ program test_program
         
         ! print*,y(1:m)
 
-        do i=1,m
-            if(abs(expected(i) - y(i)) > tolerance) then
+        do j=1,m
+            if(abs(expected(j) - y(j)) > tolerance) then
                 vectors_equal = .false.
                 exit
             end if
