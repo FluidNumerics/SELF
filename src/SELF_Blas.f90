@@ -31,6 +31,11 @@ module self_blas
 
     implicit none
 
+    interface axpy
+        module procedure saxpy
+        module procedure daxpy
+    end interface axpy
+
     interface gemvstridedbatched
         module procedure sgemvstridedbatched
         module procedure sgemvstridedbatched_op
@@ -46,6 +51,76 @@ module self_blas
     end interface gemm
 
     contains
+
+    !!!!!!!!!!!
+    ! LEVEL 1 !
+    !!!!!!!!!!!
+
+    subroutine saxpy(alpha, x, y)
+        implicit none
+
+        real(kind=real32), intent(in) :: alpha
+        real(kind=real32), pointer, intent(in) :: x(:)
+        real(kind=real32), pointer, intent(in) :: y(:)
+
+        type(c_ptr) :: handle
+        integer :: n
+        integer :: incx = 1
+        integer :: incy = 1
+        type(c_ptr) :: x_gpu, y_gpu
+        integer :: status
+        
+        n = size(x,1)
+
+        call hipcheck(hipmalloc(x_gpu, sizeof(x)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(y)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(x_gpu, c_loc(x), sizeof(x), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(y), sizeof(y), hipmemcpyhosttodevice))
+
+        status = hipblassaxpy(handle, n, alpha, x_gpu, incx, y_gpu, incy)
+
+        call hipcheck(hipmemcpy(c_loc(y), y_gpu, sizeof(y), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine saxpy
+
+    subroutine daxpy(alpha, x, y)
+        implicit none
+
+        real(kind=real64), intent(in) :: alpha
+        real(kind=real64), pointer, intent(in) :: x(:)
+        real(kind=real64), pointer, intent(in) :: y(:)
+
+        type(c_ptr) :: handle
+        integer :: n
+        integer :: incx = 1
+        integer :: incy = 1
+        type(c_ptr) :: x_gpu, y_gpu
+        integer :: status
+        
+        n = size(x,1)
+
+        call hipcheck(hipmalloc(x_gpu, sizeof(x)))
+        call hipcheck(hipmalloc(y_gpu, sizeof(y)))
+        call hipblasCheck(hipblasCreate(handle))
+
+        call hipcheck(hipmemcpy(x_gpu, c_loc(x), sizeof(x), hipmemcpyhosttodevice))
+        call hipcheck(hipmemcpy(y_gpu, c_loc(y), sizeof(y), hipmemcpyhosttodevice))
+
+        status = hipblasdaxpy(handle, n, alpha, x_gpu, incx, y_gpu, incy)
+
+        call hipcheck(hipmemcpy(c_loc(y), y_gpu, sizeof(y), hipmemcpydevicetohost))
+
+        call hipcheck(hipfree(x_gpu))
+        call hipcheck(hipfree(y_gpu))
+        call hipblasCheck(hipblasDestroy(handle))
+
+    end subroutine daxpy
 
     !!!!!!!!!!!
     ! LEVEL 2 !
