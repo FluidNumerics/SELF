@@ -58,8 +58,9 @@ for OP in "op_n" "op_t"; do
                     mv results.json $PROFILE_DIR/
 
                     # Hardware events profile (for bandwidth estimates and L2 Cache hit)
-                    rocprof -i events.txt $FILENAME $ROWS $COLUMNS
-                    mv events.csv $PROFILE_DIR/
+                    rocprof -i events_gemm.txt $FILENAME $ROWS $COLUMNS
+                    mv events_gemm.csv $PROFILE_DIR/
+                    mv $PROFILE_DIR/events_gemm.csv $PROFILE_DIR/events.csv
 
                     # mv results.* $PROFILE_DIR/
                     # mv stdout $PROFILE_DIR/
