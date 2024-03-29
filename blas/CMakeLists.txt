@@ -31,6 +31,8 @@ function (add_fortran_examples)
             add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 100 100 1000)
         elseif(PREFIX STREQUAL "gemm")
             add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 100 1000)
+        elseif(PREFIX STREQUAL "axpy")
+            add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} 100)
         endif()
 
         install(TARGETS ${EXAMPLE_NAME} DESTINATION example)
@@ -40,6 +42,8 @@ endfunction ()
 
 add_fortran_examples (
     # Level 1
+    "axpy_32.f90"
+    "axpy_64.f90"
     # Level 2
     "gemvstridedbatched_op_n_32.f90"
     "gemvstridedbatched_op_t_32.f90"
