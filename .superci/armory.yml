@@ -1,15 +1,16 @@
 steps:
   - name : "Build on Noether"
     sbatch_options: 
-      - "--partition=mi210"
-      - "--gpus=1"
+      - "--partition=gpu"
+      - "--gres=gpu:1"
       - "--ntasks=1"
-      - "--cpus-per-task=16"
+      - "--cpus-per-task=12"
       - "--time=20:00"
     prerequisites:
       - "source /etc/profile.d/z11_lmod.sh"
     modules:
       - gcc/13.2.0
+      - hip/5.7.3
       - openmpi/5.0.0
       - hdf5
       - feq-parse
