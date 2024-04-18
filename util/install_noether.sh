@@ -1,13 +1,15 @@
 #!/usr/bin/env -S bash -e
 
 GPU_TARGET=gfx90a
-WORKSPACE_ROOT=$HOME/.local/workspace/
+#WORKSPACE_ROOT=$HOME/.local/workspace/
+WORKSPACE_ROOT=/scratch/joe/workspace
 BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
-BUILD_DIR=${SRC_DIR}/build
+#BUILD_DIR=${SRC_DIR}/build
+BUILD_DIR=/scratch/joe/build
 
 module load gcc/13.2.0
-module load hip/5.7.3 hipfort/5.7.1 openmpi hdf5/1.12.3 feq-parse
+module load hip/5.7.3 hipfort/5.7.1 openmpi/5.0.1 hdf5/1.12.3 feq-parse/2.1.0
 
 # Clean out any old builds
 rm -rf ${BUILD_DIR}
@@ -17,12 +19,14 @@ mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
 FC=gfortran \
-cmake -DCMAKE_PREFIX_PATH=/opt/rocm \
+cmake -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
       -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
       -DCMAKE_INSTALL_PREFIX=${WORKSPACE_ROOT}/opt/self \
       -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
       ${SRC_DIR}
+
 make VERBOSE=1 || exit 1
+
 make install
 
 
