@@ -106,7 +106,6 @@ integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
   call f % free()
   call df % free()
     
-  r = 0
 
 end function mappedscalarbrgradient_3d_cpu_constant
 end program test

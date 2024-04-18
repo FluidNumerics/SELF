@@ -60,7 +60,7 @@ integer function mappedscalarbrgradient_2d_cpu_linear() result(r)
   call f % Init(interp,nvar,mesh % nelem)
   call df % Init(interp,nvar,mesh % nelem)
 
-  call f % SetEquation( 1, 'f = x')
+  call f % SetEquation( 1, 'f = x*y')
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
@@ -85,6 +85,10 @@ integer function mappedscalarbrgradient_2d_cpu_linear() result(r)
   print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
   call f % BRGradient( geometry, df ) 
+
+
+  print *, "min, max (df/dx)",minval(df % interior(:,:,:,1,1)),maxval(df % interior(:,:,:,1,1)) 
+  print *, "min, max (df/dy)",minval(df % interior(:,:,:,1,2)),maxval(df % interior(:,:,:,1,2)) 
 
   CALL f % SetName(1, "f")
   CALL f % SetUnits(1,"[null]")
@@ -121,6 +125,9 @@ integer function mappedscalarbrgradient_2d_cpu_linear() result(r)
       end do
     end do
   end do
+
+  print*, "maxval(df_error)", maxval(df % interior ), tolerance
+
   if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
@@ -135,7 +142,5 @@ integer function mappedscalarbrgradient_2d_cpu_linear() result(r)
   call f % free()
   call df % free()
     
-  r = 0
-
 end function mappedscalarbrgradient_2d_cpu_linear
 end program test

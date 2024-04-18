@@ -116,7 +116,5 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
   call df % free()
   call hipblasCheck(hipblasDestroy(handle))
 
-  r = 0
-
 end function mappedscalarbrgradient_3d_gpu_constant
 end program test
