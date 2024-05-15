@@ -892,7 +892,7 @@ contains
                                   c_loc(scalar % extBoundary), &
                                   scalar % interp % N, &
                                   scalar % nvar, &
-                                  scalar % nElem)
+                                  scalar % nElem) 
 
     else
 
@@ -980,16 +980,41 @@ contains
 
     if (present(handle)) then
       call scalar % BassiRebaySides(handle)
+      call hipcheck(hipdevicesynchronize())
+      print *, "(br) min, max (avgboundary)",minval(scalar % avgBoundary),maxval(scalar % avgBoundary)
+
       call scalar % ContravariantWeightInterior(geometry,handle)
+      call hipcheck(hipdevicesynchronize())
+      print *, "(br) min, max (ja % interior)",minval(scalar % jascalar % interior),maxval(scalar % jascalar % interior)
+
       call scalar % ContravariantWeightAvgBoundary(geometry,handle)
+      call hipcheck(hipdevicesynchronize())
+      print *, "(br) min, max (ja % boundary)",minval(scalar % jascalar % boundary),maxval(scalar % jascalar % boundary)
+
       call scalar % JaScalar % DGDivergence(df,handle)
+      call hipcheck(hipdevicesynchronize())
+      print *, "(br) min, max (df % interior) [pre jacobian weight]",minval(df % interior),maxval(df % interior)
+
       call df % JacobianWeight(geometry,handle)
+      call hipcheck(hipdevicesynchronize())
+      print *, "(br) min, max (df % interior) [post jacobian weight]",minval(df % interior),maxval(df % interior)
+
     else
       call scalar % BassiRebaySides()
+      print *, "(br) min, max (avgboundary)",minval(scalar % avgBoundary),maxval(scalar % avgBoundary)
+
       call scalar % ContravariantWeightInterior(geometry)
+      print *, "(br) min, max (ja % interior)",minval(scalar % jascalar % interior),maxval(scalar % jascalar % interior)
+
       call scalar % ContravariantWeightAvgBoundary(geometry)
+      print *, "(br) min, max (ja % boundary)",minval(scalar % jascalar % boundary),maxval(scalar % jascalar % boundary)
+
       call scalar % JaScalar % DGDivergence(df)
+      print *, "(br) min, max (df % interior) [pre jacobian weight]",minval(df % interior),maxval(df % interior)
+
       call df % JacobianWeight(geometry)
+      print *, "(br) min, max (df % interior) [post jacobian weight]",minval(df % interior),maxval(df % interior)
+
     end if
 
   end subroutine BRGradient_MappedScalar2D

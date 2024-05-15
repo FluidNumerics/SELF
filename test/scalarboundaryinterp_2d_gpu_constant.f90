@@ -42,6 +42,7 @@ integer function scalarboundaryinterp_2d_gpu_constant() result(r)
 
   ! Set the source scalar (on the control grid) to a non-zero constant
   f % interior  = 1.0_prec
+  print*, "min/max interior", minval(f % interior), maxval(f % interior)
 
   ! copy data from host to device
   call f % updatedevice()
@@ -51,12 +52,15 @@ integer function scalarboundaryinterp_2d_gpu_constant() result(r)
 
   call hipcheck(hipdevicesynchronize())
 
+  print*, "min/max boundary", minval(f % boundary), maxval(f % boundary)
+
   ! Calculate diff from exact
   f % boundary  = abs(f % boundary  - 1.0_prec)
 
   if (maxval(f % boundary) <= tolerance) then
     r = 0
   else
+    print*, maxval(f % boundary)
     r = 1
   end if
 

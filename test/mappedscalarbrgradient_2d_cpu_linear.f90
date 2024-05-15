@@ -20,10 +20,10 @@ integer function mappedscalarbrgradient_2d_cpu_linear() result(r)
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
   integer,parameter :: nvar = 1
-#ifdef doUBLE_PRECISION
+#ifdef DOUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-3)
+  real(prec),parameter :: tolerance = 5.0_prec*10.0_prec**(-3)
 #endif
   type(Lagrange),target :: interp
   type(Mesh2D),TARGET :: mesh

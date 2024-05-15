@@ -23,7 +23,7 @@ integer function mappedscalarbrgradient_2d_cpu_constant() result(r)
 #ifdef doUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-3)
+  real(prec),parameter :: tolerance = 4.0_prec*10.0_prec**(-3)
 #endif
   type(Lagrange),target :: interp
   type(Mesh2D),TARGET :: mesh

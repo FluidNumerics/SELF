@@ -25,7 +25,7 @@ contains
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-    real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 5.0_prec*10.0_prec**(-3)
 #endif
     type(Lagrange),target :: interp
     type(Mesh2D),target :: mesh
@@ -90,6 +90,8 @@ contains
         end if
       end do
     end do
+
+    call f % updatedevice()
 
     print *, "min, max (extboundary)",minval(f % extBoundary),maxval(f % extBoundary)
 

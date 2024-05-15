@@ -17,11 +17,11 @@ MODULE SELF_Constants
 #include "SELF_Macros.h"
 
 #ifdef DOUBLE_PRECISION
-  INTEGER,PARAMETER :: prec = c_double
-  INTEGER,PARAMETER :: c_prec = C_DOUBLE
+  INTEGER,PARAMETER :: prec = c_Double
+  INTEGER,PARAMETER :: c_prec = c_Double
 #else
   INTEGER,PARAMETER :: prec = c_float
-  INTEGER,PARAMETER :: c_prec = c_float 
+  INTEGER,PARAMETER :: c_prec = C_float
 #endif
 
 !*************************************************************!

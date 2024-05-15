@@ -79,11 +79,11 @@ __global__ void SideExchange_2D(real *extBoundary, real *boundary, int *sideInfo
       int neighborRank = elemToRank[e2Global];
       if( neighborRank == rankId ){
         if(flip == 0){
-          extBoundary[idof + ndof*ivar] = boundary[SCB_2D_INDEX(i1,s2,e2,ivar,N,nEl)];
+          extBoundary[idof + ndof*ivar] = boundary[SCB_2D_INDEX(i1,s2-1,e2,ivar,N,nEl)];
         }
         else if(flip == 1){
           int i2 = N-i1;
-          extBoundary[idof + ndof*ivar] = boundary[SCB_2D_INDEX(i2,s2,e2,ivar,N,nEl)];
+          extBoundary[idof + ndof*ivar] = boundary[SCB_2D_INDEX(i2,s2-1,e2,ivar,N,nEl)];
         }
       }
     }
@@ -127,27 +127,27 @@ __global__ void SideExchange_3D(real *extBoundary, real *boundary, int *sideInfo
     int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i1,j1,ivar,s2,e2,N,nEl)];
+        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i1,j1,ivar,s2-1,e2,N,nEl)];
       }
       else if(flip == 1){
         int i2 = j1;
         int j2 = N-i1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2,e2,ivar,N,nEl)];
+        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
       }
       else if(flip == 2){
         int i2 = N-i1;
         int j2 = N-j1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2,e2,ivar,N,nEl)];
+        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
       }
       else if(flip == 3){
         int i2 = N-j1;
         int j2 = i1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2,e2,ivar,N,nEl)];
+        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
       }
       else if(flip == 4){
         int i2 = j1;
         int j2 = i1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2,e2,ivar,N,nEl)];
+        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
       }
     }
   }
@@ -264,12 +264,12 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_gpu(real* avgBoundary, real *boundary, real *extBoundary, int ndof){
+__global__ void BassiRebaySides_gpu(real *avgBoundary, real *boundary, real *extBoundary, int ndof){
 
   uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( i < ndof ){
-    avgBoundary[i] =0.5*(extBoundary[i]+boundary[i]);
+    avgBoundary[i] =0.5*(boundary[i]+extBoundary[i]);
   }
 }
 
@@ -311,7 +311,10 @@ __global__ void ContravariantWeight_MappedScalar_gpu(real *scalar, real *dsdx, r
   uint32_t nvar = gridDim.y; // number of variables
   uint32_t tdim = blockIdx.z; // tensor dimension (flattened index for the rows and columns of the tensor)
   uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
+  //uint32_t tid = threadIdx.x + blockIdx.x*blockDim.x;
+  //uint32_t stride = blockDim.x*gridDim.x;
 
+  //for (uint32_t i = tid; i < ndof; i += stride){
   if( i < ndof ){
     tensor[i+ndof*(ivar + nvar*tdim)] = dsdx[i+ndof*tdim]*scalar[i+ndof*ivar];
   }

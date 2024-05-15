@@ -181,114 +181,144 @@ module SELF_Lagrange
   end type Lagrange
 
   interface
-    subroutine ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    subroutine ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
       bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine ScalarBoundaryInterp_2D_gpu_wrapper
   end interface
 
   interface
-    subroutine VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    subroutine VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
       bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine VectorBoundaryInterp_2D_gpu_wrapper
   end interface
 
   interface
-    subroutine VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    subroutine VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
       bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine VectorBoundaryInterp_3D_gpu_wrapper
   end interface
 
   interface
-    subroutine TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    subroutine TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
       bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine TensorBoundaryInterp_2D_gpu_wrapper
   end interface
 
   interface
-    subroutine ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    subroutine ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
       bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine ScalarBoundaryInterp_3D_gpu_wrapper
   end interface
 
   interface
-    subroutine TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
+    subroutine TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
       bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix_dev,f_dev,fBound_dev
+      type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
       integer(c_int),value :: N,nVar,nEl
     end subroutine TensorBoundaryInterp_3D_gpu_wrapper
   end interface
 
   interface
-    subroutine DGDerivative_BoundaryContribution_1D_gpu(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+    subroutine DGDerivative_BoundaryContribution_1D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
       bind(c,name="DGDerivative_BoundaryContribution_1D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
       integer(c_int),value :: N,nVar,nEl
     end subroutine DGDerivative_BoundaryContribution_1D_gpu
   end interface
 
   interface
-    subroutine VectorDGDivergence_BoundaryContribution_2D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+    subroutine VectorDGDivergence_BoundaryContribution_2D(bMatrix,qWeights,bf,df,N,nVar,nEl) &
       bind(c,name="VectorDGDivergence_BoundaryContribution_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
       integer(c_int),value :: N,nVar,nEl
     end subroutine VectorDGDivergence_BoundaryContribution_2D
   end interface
 
   interface
-    subroutine VectorDGDivergence_BoundaryContribution_3D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
+    subroutine VectorDGDivergence_BoundaryContribution_3D(bMatrix,qWeights,bf,df,N,nVar,nEl) &
       bind(c,name="VectorDGDivergence_BoundaryContribution_3D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
       integer(c_int),value :: N,nVar,nEl
     end subroutine VectorDGDivergence_BoundaryContribution_3D
   end interface
 
   interface
-    subroutine TensorDGDivergence_BoundaryContribution_2D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
-      bind(c,name="TensorDGDivergence_BoundaryContribution_2D_gpu")
+    subroutine DGDivergence_BoundaryContribution_dim1_2D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+      bind(c,name="DGDivergence_BoundaryContribution_dim1_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
       integer(c_int),value :: N,nVar,nEl
-    end subroutine TensorDGDivergence_BoundaryContribution_2D
+    end subroutine DGDivergence_BoundaryContribution_dim1_2D_gpu
   end interface
 
   interface
-    subroutine TensorDGDivergence_BoundaryContribution_3D(bMatrix,qWeights,fbound,df,N,nVar,nEl) &
-      bind(c,name="TensorDGDivergence_BoundaryContribution_3D_gpu")
+    subroutine DGDivergence_BoundaryContribution_dim2_2D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+      bind(c,name="DGDivergence_BoundaryContribution_dim2_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: bMatrix,qWeights,fbound,df
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
       integer(c_int),value :: N,nVar,nEl
-    end subroutine TensorDGDivergence_BoundaryContribution_3D
+    end subroutine DGDivergence_BoundaryContribution_dim2_2D_gpu
   end interface
+
+  interface
+    subroutine DGDivergence_BoundaryContribution_dim1_3D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+      bind(c,name="DGDivergence_BoundaryContribution_dim1_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine DGDivergence_BoundaryContribution_dim1_3D_gpu
+  end interface
+
+  interface
+    subroutine DGDivergence_BoundaryContribution_dim2_3D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+      bind(c,name="DGDivergence_BoundaryContribution_dim2_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine DGDivergence_BoundaryContribution_dim2_3D_gpu
+  end interface
+
+  interface
+  subroutine DGDivergence_BoundaryContribution_dim3_3D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+    bind(c,name="DGDivergence_BoundaryContribution_dim3_3D_gpu")
+    use iso_c_binding
+    implicit none
+    type(c_ptr),value :: bMatrix,qWeights,bf,df
+    integer(c_int),value :: N,nVar,nEl
+  end subroutine DGDivergence_BoundaryContribution_dim3_3D_gpu
+end interface
 
 contains
 
@@ -470,7 +500,7 @@ contains
     n = nvars*nelems*(controldegree + 1) ! number of columns of B
     k = controldegree + 1! number of columns of A^T
     alpha = 1.0_c_prec
-    lda = k ! leading dimension of A (interpolation matrix)
+    lda = k ! leading dimension of A (interpolation/derivative matrix)
     ldb = k ! leading dimension of B (f)
     ldc = m ! leading dimension of C (fTarget)
     beta = 0.0_c_prec
@@ -1679,8 +1709,10 @@ contains
     call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
     floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
     call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    floc => null()
-    dfloc => null()
+
+
+    nullify(floc)
+    nullify(dfloc)
 
   end subroutine TensorDivergence_2D_gpu
 
@@ -1725,9 +1757,9 @@ contains
                 dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
               end do
               dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir)+ &
-                                      dfLoc + (this % bMatrix(j,2)*bf(i,3,iel,ivar,idir,2) +& ! north
-                                               this % bMatrix(j,1)*bf(i,1,iel,ivar,idir,2))/& ! south
-                                               this % qweights(j)
+                                      dfLoc  + (this % bMatrix(j,2)*bf(i,3,iel,ivar,idir,2) +& ! north
+                                                this % bMatrix(j,1)*bf(i,1,iel,ivar,idir,2))/& ! south
+                                                this % qweights(j)
 
             end do
           end do
@@ -1746,28 +1778,35 @@ contains
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:)
     type(c_ptr),intent(inout) :: handle
     ! local
+    integer :: idir
+    real(prec),pointer :: bfloc(:,:,:,:)
     real(prec),pointer :: dfloc(:,:,:,:)
     real(prec),pointer :: floc(:,:,:,:)
 
-    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
-    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1,1)
-    call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1,2)
-    call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    do idir = 1,2
+      dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir)   ! Set the gradient direction pointer
+      
+      floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir,1)   ! Set the interior pointer
+      bfloc(1:,1:,1:,1:) => bf(1:,1:,1:,1:,idir,1) ! Set the boundary pointer
+      call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+      call DGDivergence_BoundaryContribution_dim1_2D_gpu(c_loc(this % bMatrix),&
+                                                        c_loc(this % qWeights),&
+                                                        c_loc(bfloc), c_loc(dfloc),&
+                                                        this % N, nvars, nelems)
 
-    dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
-    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,1)
-    call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-    floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
-    call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    floc => null()
-    dfloc => null()
+      floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir,2)   ! Set the interior pointer
+      bfloc(1:,1:,1:,1:) => bf(1:,1:,1:,1:,idir,2) ! Set the boundary pointer
+      call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+      call DGDivergence_BoundaryContribution_dim2_2D_gpu(c_loc(this % bMatrix),&
+                                                        c_loc(this % qWeights),&
+                                                        c_loc(bfloc), c_loc(dfloc),&
+                                                        this % N, nvars, nelems)
 
-    ! Add the boundary contributions
-    call TensorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
-                                                    c_loc(this % qWeights),&
-                                                    c_loc(bf), c_loc(df),&
-                                                    this % N, nvars, nelems)
+    enddo
+
+    nullify(floc)
+    nullify(dfloc)
+    nullify(bfloc)
 
   end subroutine TensorDGDivergence_2D_gpu
 
@@ -2035,21 +2074,26 @@ contains
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
     type(c_ptr),intent(inout) :: handle
     ! local
-    real(prec),pointer :: floc(:,:,:,:,:)
-    real(prec),pointer :: dfloc(:,:,:,:,:)
     integer :: idir
+    real(prec),pointer :: dfloc(:,:,:,:,:)
+    real(prec),pointer :: floc(:,:,:,:,:)
 
     do idir = 1,3
-      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)
-      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)   ! Set the gradient direction pointer
+      
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)   ! Set the interior pointer
       call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,2)
+
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,2)   ! Set the interior pointer
       call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,3)
-      call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,3)   ! Set the interior pointer
+      call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+
     enddo
 
-    floc => null()
+    nullify(floc)
+    nullify(dfloc)
 
   end subroutine TensorDivergence_3D_gpu
 
@@ -2138,28 +2182,44 @@ contains
     real(prec),pointer,intent(in) :: bf(:,:,:,:,:,:,:)
     real(prec),pointer,intent(inout) :: df(:,:,:,:,:,:)
     type(c_ptr),intent(inout) :: handle
-    ! local
-    real(prec),pointer :: floc(:,:,:,:,:)
-    real(prec),pointer :: dfloc(:,:,:,:,:)
+ ! local
     integer :: idir
+    real(prec),pointer :: bfloc(:,:,:,:,:)
+    real(prec),pointer :: dfloc(:,:,:,:,:)
+    real(prec),pointer :: floc(:,:,:,:,:)
 
     do idir = 1,3
-      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)
-      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)
+      dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)   ! Set the gradient direction pointer
+      
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)   ! Set the interior pointer
+      bfloc(1:,1:,1:,1:,1:) => bf(1:,1:,1:,1:,1:,idir,1) ! Set the boundary pointer
       call self_hipblas_matrixop_dim1_3d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,2)
+      call DGDivergence_BoundaryContribution_dim1_3D_gpu(c_loc(this % bMatrix),&
+                                                        c_loc(this % qWeights),&
+                                                        c_loc(bfloc), c_loc(dfloc),&
+                                                        this % N, nvars, nelems)
+
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,2)   ! Set the interior pointer
+      bfloc(1:,1:,1:,1:,1:) => bf(1:,1:,1:,1:,1:,idir,2) ! Set the boundary pointer
       call self_hipblas_matrixop_dim2_3d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,3)
-      call self_hipblas_matrixop_dim2_3d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+      call DGDivergence_BoundaryContribution_dim2_3D_gpu(c_loc(this % bMatrix),&
+                                                        c_loc(this % qWeights),&
+                                                        c_loc(bfloc), c_loc(dfloc),&
+                                                        this % N, nvars, nelems)
+
+      floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,3)   ! Set the interior pointer
+      bfloc(1:,1:,1:,1:,1:) => bf(1:,1:,1:,1:,1:,idir,3) ! Set the boundary pointer
+      call self_hipblas_matrixop_dim3_3d(this % dgMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+      call DGDivergence_BoundaryContribution_dim3_3D_gpu(c_loc(this % bMatrix),&
+                                                        c_loc(this % qWeights),&
+                                                        c_loc(bfloc), c_loc(dfloc),&
+                                                        this % N, nvars, nelems)
+
     enddo
 
-    floc => null()
-
-    ! Add the boundary contributions
-    call TensorDGDivergence_BoundaryContribution_3D(c_loc(this % bMatrix),&
-                                                    c_loc(this % qWeights),&
-                                                    c_loc(bf), c_loc(df),&
-                                                    this % N, nvars, nelems)
+    nullify(floc)
+    nullify(dfloc)
+    nullify(bfloc)
 
   end subroutine TensorDGDivergence_3D_gpu
 
