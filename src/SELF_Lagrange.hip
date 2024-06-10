@@ -327,66 +327,6 @@ extern "C"
   } 
 }
 
-
-// __global__ void TensorDGDivergence_BoundaryContribution_3D(real *bMatrix, real *qWeights, real *bf, real *df, int N){
-
-//   uint32_t nel = blockDim.y;
-//   uint32_t nvar = blockDim.z;
-
-//   uint32_t iq = threadIdx.x + blockIdx.x*blockDim.x;
-//   uint32_t iel = blockIdx.y;
-//   uint32_t ivar = blockIdx.z;
-
-//   uint32_t i = iq % (N+1);
-//   uint32_t j = (iq/(N+1)) % (N+1);
-//   uint32_t k = iq/(N+1)/(N+1);
-
-//   if( iq < (N+1)*(N+1)*(N+1) ){
-//     df[VE_3D_INDEX(i,j,k,iel,ivar,0,N,nel,nvar)] += (bf[TEB_3D_INDEX(j,k,2,iel,ivar,0,0,N,nel,nvar)]*bMatrix[i+(N+1)] + // east
-//                                                       bf[TEB_3D_INDEX(j,k,4,iel,ivar,0,0,N,nel,nvar)]*bMatrix[i])/      // west
-//                                                     qWeights[i] +
-//                                                     (bf[TEB_3D_INDEX(i,k,3,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
-//                                                       bf[TEB_3D_INDEX(i,k,1,iel,ivar,0,1,N,nel,nvar)]*bMatrix[j])/      // south
-//                                                     qWeights[j] +
-//                                                     (bf[TEB_3D_INDEX(i,j,5,iel,ivar,0,2,N,nel,nvar)]*bMatrix[k+(N+1)] + // top
-//                                                       bf[TEB_3D_INDEX(i,j,0,iel,ivar,0,2,N,nel,nvar)]*bMatrix[k])/      // bottom
-//                                                     qWeights[k];
-
-//     df[VE_3D_INDEX(i,j,k,iel,ivar,1,N,nel,nvar)] += (bf[TEB_3D_INDEX(j,k,2,iel,ivar,1,0,N,nel,nvar)]*bMatrix[i+(N+1)] + // east
-//                                                       bf[TEB_3D_INDEX(j,k,4,iel,ivar,1,0,N,nel,nvar)]*bMatrix[i])/      // west
-//                                                     qWeights[i] +
-//                                                     (bf[TEB_3D_INDEX(i,k,3,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
-//                                                       bf[TEB_3D_INDEX(i,k,1,iel,ivar,1,1,N,nel,nvar)]*bMatrix[j])/      // south
-//                                                     qWeights[j] +
-//                                                     (bf[TEB_3D_INDEX(i,j,5,iel,ivar,1,2,N,nel,nvar)]*bMatrix[k+(N+1)] + // top
-//                                                       bf[TEB_3D_INDEX(i,j,0,iel,ivar,1,2,N,nel,nvar)]*bMatrix[k])/      // bottom
-//                                                     qWeights[k];
-
-//     df[VE_3D_INDEX(i,j,k,iel,ivar,2,N,nel,nvar)] += (bf[TEB_3D_INDEX(j,k,2,iel,ivar,2,0,N,nel,nvar)]*bMatrix[i+(N+1)] + // east
-//                                                       bf[TEB_3D_INDEX(j,k,4,iel,ivar,2,0,N,nel,nvar)]*bMatrix[i])/      // west
-//                                                     qWeights[i] +
-//                                                     (bf[TEB_3D_INDEX(i,k,3,iel,ivar,2,1,N,nel,nvar)]*bMatrix[j+(N+1)] + // north
-//                                                       bf[TEB_3D_INDEX(i,k,1,iel,ivar,2,1,N,nel,nvar)]*bMatrix[j])/      // south
-//                                                     qWeights[j] +
-//                                                     (bf[TEB_3D_INDEX(i,j,5,iel,ivar,2,2,N,nel,nvar)]*bMatrix[k+(N+1)] + // top
-//                                                       bf[TEB_3D_INDEX(i,j,0,iel,ivar,2,2,N,nel,nvar)]*bMatrix[k])/      // bottom
-//                                                     qWeights[k];
-//   }
-
-// }
-
-// extern "C"
-// {
-//   void TensorDGDivergence_BoundaryContribution_3D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
-//   {
-//     uint32_t nquad_pts = (N+1)*(N+1)*(N+1);
-//     uint32_t nthreads = 256;
-//     uint32_t nblocks_x = nquad_pts/nthreads + 1;
-// 	  TensorDGDivergence_BoundaryContribution_3D<<<dim3(nblocks_x,nEl,nVar), dim3(nthreads,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N);
-//     HIP_SAFE_CALL(hipGetLastError());
-//   } 
-// }
-
 __global__ void DGDivergence_BoundaryContribution_dim1_3D(real *bMatrix, real *qWeights, real *bf, real *df, int ndof, int nvar, int nel, int N){
 
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
@@ -428,8 +368,8 @@ __global__ void DGDivergence_BoundaryContribution_dim2_3D(real *bMatrix, real *q
   
   if( idof < ndof ){
 
-    df[idof] += ( bMatrix[j+(N+1)]*bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)] +              // north
-                        bMatrix[j]*bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)] )/qWeights[j]; // south
+    df[idof] += ( bMatrix[j+(N+1)]*bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)] +              // north
+                        bMatrix[j]*bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)] )/qWeights[j]; // south
 
   } 
 

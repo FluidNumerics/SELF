@@ -67,15 +67,14 @@ __global__ void SideExchange_2D(real *extBoundary, real *boundary, int *sideInfo
   uint32_t e1 = idof/(N+1)/4;
   size_t ivar = blockIdx.y;
   
-
-  int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
-  int e2 = e2Global - offset;
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
-
   if(idof < ndof){
-    if(bcid == 0){
+    int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
+    int e2 = e2Global - offset;
+    int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+    int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
+    int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+    
+    if(s2 > 0 || bcid == 0){
       int neighborRank = elemToRank[e2Global];
       if( neighborRank == rankId ){
         if(flip == 0){
@@ -108,7 +107,7 @@ extern "C"
 
 __global__ void SideExchange_3D(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nEl){
 
-   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
   uint32_t ndof = (N+1)*(N+1)*nEl*6;
   uint32_t i1 = idof % (N+1);
   uint32_t j1 = (idof/(N+1)) % (N+1);
@@ -117,37 +116,39 @@ __global__ void SideExchange_3D(real *extBoundary, real *boundary, int *sideInfo
   size_t ivar = blockIdx.y;
   
 
-  int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
-  int e2 = e2Global - offset;
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  if(idof < ndof){
+    int e2Global = sideInfo[INDEX3(2,s1,e1,5,6)]-1;
+    int e2 = e2Global - offset;
+    int s2 = sideInfo[INDEX3(3,s1,e1,5,6)]/10;
+    int flip = sideInfo[INDEX3(3,s1,e1,5,6)]-s2*10;
+    int bcid = sideInfo[INDEX3(4,s1,e1,5,6)];
 
-  if(bcid == 0){
-    int neighborRank = elemToRank[e2Global];
-    if( neighborRank == rankId ){
-      if(flip == 0){
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i1,j1,ivar,s2-1,e2,N,nEl)];
-      }
-      else if(flip == 1){
-        int i2 = j1;
-        int j2 = N-i1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
-      }
-      else if(flip == 2){
-        int i2 = N-i1;
-        int j2 = N-j1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
-      }
-      else if(flip == 3){
-        int i2 = N-j1;
-        int j2 = i1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
-      }
-      else if(flip == 4){
-        int i2 = j1;
-        int j2 = i1;
-        extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
+    if(s2 > 0 || bcid == 0){
+      int neighborRank = elemToRank[e2Global];
+      if( neighborRank == rankId ){
+        if(flip == 0){
+          extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i1,j1,s2-1,e2,ivar,N,nEl)];
+        }
+        else if(flip == 1){
+          int i2 = j1;
+          int j2 = N-i1;
+          extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
+        }
+        else if(flip == 2){
+          int i2 = N-i1;
+          int j2 = N-j1;
+          extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
+        }
+        else if(flip == 3){
+          int i2 = N-j1;
+          int j2 = i1;
+          extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
+        }
+        else if(flip == 4){
+          int i2 = j1;
+          int j2 = i1;
+          extBoundary[SCB_3D_INDEX(i1,j1,s1,e1,ivar,N,nEl)] = boundary[SCB_3D_INDEX(i2,j2,s2-1,e2,ivar,N,nEl)];
+        }
       }
     }
   }
@@ -178,12 +179,13 @@ __global__ void ApplyFlip_2D(real *extBoundary, int *sideInfo, int *elemToRank, 
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
   int i2 = N-i1;
   int neighborRank = elemToRank[e2];
+  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
 
-  if(bcid == 0){ // Interior Element
-    if( neighborRank /= rankId ){ // Side shared with another rank
+
+  if(s2 > 0 || bcid == 0){ // Interior Element
+    if( neighborRank != rankId ){ // Side shared with another rank
       if(flip == 1){ // Neighboring elements have different orientation
 
         __shared__ real extBuff[16];
@@ -216,10 +218,10 @@ __global__ void ApplyFlip_3D(real *extBoundary, int *sideInfo, int *elemToRank, 
   size_t i1 = threadIdx.x;
   size_t j1 = threadIdx.y;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1,e1,5,6)];
+  int s2 = sideInfo[INDEX3(3,s1,e1,5,6)]/10;
+  int flip = sideInfo[INDEX3(3,s1,e1,5,6)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1,e1,5,6)];
 
   __shared__ real extBuff[256];
 
@@ -227,9 +229,9 @@ __global__ void ApplyFlip_3D(real *extBoundary, int *sideInfo, int *elemToRank, 
 
   __syncthreads();
 
-  if(bcid == 0){
+  if(s2 > 0 || bcid == 0){
     int neighborRank = elemToRank[e2];
-    if( neighborRank /= rankId ){
+    if( neighborRank != rankId ){
       if(flip == 1){
         int i2 = j1;
         int j2 = N-i1;

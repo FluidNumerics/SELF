@@ -3,26 +3,24 @@ program test
   implicit none
   integer :: exit_code
   
-  exit_code = mappedscalarbrgradient_3d_gpu_constant()
+  exit_code = mappedscalarbrgradient_3d_cpu_linear()
   stop exit_code
 
 contains
-integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
+integer function mappedscalarbrgradient_3d_cpu_linear() result(r)
 
   use SELF_Constants
   use SELF_Lagrange
   use SELF_Mesh
   use SELF_Geometry
   use SELF_MappedData
-  use iso_c_binding
-  use hipfort_hipblas
 
   implicit none
 
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
   integer,parameter :: nvar = 1
-#ifdef doUBLE_PRECISION
+#ifdef DOUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
   real(prec),parameter :: tolerance = 10.0_prec**(-2)
@@ -37,11 +35,9 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
   integer :: iside
   integer :: i
   integer :: j
+  integer :: k
   integer :: e2, s2, bcid
   CHARACTER(LEN=255) :: WORKSPACE
-  type(c_ptr) :: handle
-
-  call hipblasCheck(hipblasCreate(handle))
 
 
   ! Initialize a domain decomposition
@@ -66,17 +62,15 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
   call f % Init(interp,nvar,mesh % nelem)
   call df % Init(interp,nvar,mesh % nelem)
 
-  call f % SetEquation( 1, 'f = 1.0')
+  call f % SetEquation( 1, 'f = x*y*z')
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % BoundaryInterp(handle)
-  call hipcheck(hipdevicesynchronize())
-  print*, "min, max (boundary)", minval(f % boundary), maxval(f % boundary)
+  call f % BoundaryInterp()
+  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
 
-  call f % SideExchange(mesh, decomp, handle)
-  call hipcheck(hipdevicesynchronize())
+  call f % SideExchange(mesh, decomp)
 
   ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
   do iel = 1,f % nElem
@@ -91,22 +85,25 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
           end do
         end do
       end if
-      if (minval(f % extBoundary(:,:,iside,iel,1)) < 1.0_prec) then
-        print*, "wrong extBoundary at (iside,iel,e2,s2,bcid,flip) ", iside, iel, e2,mesh % sideInfo(4,iside,iel)/10,mesh % sideInfo(5,iside,iel),mesh % sideInfo(4,iside,iel)- 10*(mesh % sideInfo(4,iside,iel)/10)
-      end if
     end do
   end do
 
-  call f % updatedevice()
-
   print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
 
-  call f % BRGradient( geometry, df, handle ) 
-
-  call hipcheck(hipdevicesynchronize())
+  call f % BRGradient( geometry, df ) 
 
   ! Calculate diff from exact
-  df % interior  = abs(df % interior  - 0.0_prec)
+  do iel = 1,mesh % nelem
+    do k = 1,controlDegree + 1
+      do j = 1,controlDegree + 1
+        do i = 1,controlDegree + 1
+          df % interior(i,j,k,iel,1,1) = abs(df % interior(i,j,k,iel,1,1) - geometry % x % interior(i,j,k,iel,1,2)*geometry % x % interior(i,j,k,iel,1,3)) ! df/dx = y*z
+          df % interior(i,j,k,iel,1,2) = abs(df % interior(i,j,k,iel,1,2) - geometry % x % interior(i,j,k,iel,1,1)*geometry % x % interior(i,j,k,iel,1,3)) ! df/dy = x*z
+          df % interior(i,j,k,iel,1,3) = abs(df % interior(i,j,k,iel,1,3) - geometry % x % interior(i,j,k,iel,1,1)*geometry % x % interior(i,j,k,iel,1,2)) ! df/dy = x*y
+        end do
+      end do
+    end do
+  end do
   print*, "maxval(df_error)", maxval(df % interior ), tolerance
 
   if (maxval(df % interior ) <= tolerance) then
@@ -122,7 +119,7 @@ integer function mappedscalarbrgradient_3d_gpu_constant() result(r)
   call interp % Free()
   call f % free()
   call df % free()
-  call hipblasCheck(hipblasDestroy(handle))
+    
 
-end function mappedscalarbrgradient_3d_gpu_constant
+end function mappedscalarbrgradient_3d_cpu_linear
 end program test

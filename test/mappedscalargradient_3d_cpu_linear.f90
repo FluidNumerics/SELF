@@ -3,11 +3,11 @@ program test
   implicit none
   integer :: exit_code
   
-  exit_code = mappedscalarbrgradient_3d_cpu_constant()
+  exit_code = mappedscalargradient_3d_cpu_linear()
   stop exit_code
 
 contains
-integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
+integer function mappedscalargradient_3d_cpu_linear() result(r)
 
   use SELF_Constants
   use SELF_Lagrange
@@ -23,7 +23,7 @@ integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
 #ifdef DOUBLE_PRECISION
   real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-2)
+  real(prec),parameter :: tolerance = 10.0_prec**(-3)
 #endif
   type(Lagrange),target :: interp
   type(Mesh3D),TARGET :: mesh
@@ -31,12 +31,8 @@ integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
   type(MappedScalar3D) :: f
   type(MappedVector3D) :: df
   type(MPILayer),TARGET :: decomp
-  integer :: iel
-  integer :: iside
-  integer :: i
-  integer :: j
-  integer :: e2, s2, bcid
   CHARACTER(LEN=255) :: WORKSPACE
+  integer :: i,j,k,iel
 
 
   ! Initialize a domain decomposition
@@ -61,44 +57,26 @@ integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
   call f % Init(interp,nvar,mesh % nelem)
   call df % Init(interp,nvar,mesh % nelem)
 
-  call f % SetEquation( 1, 'f = 1.0')
+  call f % SetEquation( 1, 'f = x*y*z')
 
   call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
   print*, "min, max (interior)", minval(f % interior ), maxval(f % interior )
 
-  call f % BoundaryInterp()
-  print*, "min, max (boundary)", minval(f % boundary ), maxval(f % boundary )
-
-  call f % SideExchange(mesh, decomp)
-
-  ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
-  do iel = 1,f % nElem
-    do iside = 1,6
-      e2 = mesh % sideInfo(3,iside,iel) ! Neighboring Element ID
-      s2 = mesh % sideInfo(4,iside,iel)/10
-      bcid = mesh % sideInfo(5,iside,iel)
-      if (s2 == 0 .or. bcid /= 0)then
-        do j = 1,f % interp % N+1
-          do i = 1,f % interp % N+1
-            f % extBoundary(i,j,iside,iel,1) = f % boundary (i,j,iside,iel,1) 
-          end do
-        end do
-      end if
-
-      if (minval(f % extBoundary(:,:,iside,iel,1)) < 1.0_prec) then
-        print*, "wrong extBoundary at (iside,iel, e2) ", iside, iel, e2
-      end if
-    end do
-  end do
-
-  print*, "min, max (extboundary)", minval(f % extBoundary ), maxval(f % extBoundary )
-
-  call f % BRGradient( geometry, df ) 
+  call f % Gradient( geometry, df ) 
 
   ! Calculate diff from exact
-  df % interior  = abs(df % interior  - 0.0_prec)
-  print*, "maxval(df_error)", maxval(df % interior ), tolerance
-
+  ! Calculate diff from exact
+  do iel = 1,mesh % nelem
+    do k = 1,controlDegree + 1
+      do j = 1,controlDegree + 1
+        do i = 1,controlDegree + 1
+          df % interior(i,j,k,iel,1,1) = abs(df % interior(i,j,k,iel,1,1) - geometry % x % interior(i,j,k,iel,1,2)*geometry % x % interior(i,j,k,iel,1,3)) ! df/dx = y*z
+          df % interior(i,j,k,iel,1,2) = abs(df % interior(i,j,k,iel,1,2) - geometry % x % interior(i,j,k,iel,1,1)*geometry % x % interior(i,j,k,iel,1,3)) ! df/dy = x*z
+          df % interior(i,j,k,iel,1,3) = abs(df % interior(i,j,k,iel,1,3) - geometry % x % interior(i,j,k,iel,1,1)*geometry % x % interior(i,j,k,iel,1,2)) ! df/dy = x*y
+        end do
+      end do
+    end do
+  end do
   if (maxval(df % interior ) <= tolerance) then
     r = 0
   else
@@ -113,6 +91,7 @@ integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
   call f % free()
   call df % free()
     
+  r = 0
 
-end function mappedscalarbrgradient_3d_cpu_constant
+end function mappedscalargradient_3d_cpu_linear
 end program test

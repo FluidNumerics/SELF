@@ -5,6 +5,7 @@ The Spectral Element Library in Fortran can be built provided the following depe
 * [Cmake (v3.21 or greater)](https://cmake.org/resources/)
 * MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
 * [ROCm v5.7.0 or greater](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/)
+* [HIPFort](https://github.com/ROCm/hipfort/tree/develop) - HIPFort needs to be built with your preferred Fortran compiler.
 * [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 * [FluidNumerics/feq-parse](https://github.com/FluidNumerics/feq-parse)
 * (Optional) [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit), if you are building for Nvidia GPU hardware.

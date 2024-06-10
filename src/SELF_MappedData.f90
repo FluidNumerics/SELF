@@ -678,13 +678,13 @@ contains
             do s1 = 1,4
 
               e2 = mesh % sideInfo(3,s1,e1) ! Neighbor Element
+              s2 = mesh % sideInfo(4,s1,e1)/10
               bcid = mesh % sideInfo(5,s1,e1)
-              if (bcid == 0) then ! Interior Element
+              if (s2 > 0 .or. bcid == 0) then ! Interior Element
                 r2 = mpiHandler % elemToRank(e2) ! Neighbor Rank
 
                 if (r2 /= mpiHandler % rankId) then
 
-                  s2 = mesh % sideInfo(4,s1,e1)/10
                   flip = mesh % sideInfo(4,s1,e1) - s2*10
                   globalSideId = mesh % sideInfo(2,s1,e1)
 
@@ -753,8 +753,7 @@ contains
             flip = mesh % sideInfo(4,s1,e1) - s2*10
             bcid = mesh % sideInfo(5,s1,e1)
 
-            if (bcid == 0) then
-
+            if (s2 > 0 .or. bcid == 0) then
               neighborRank = decomp % elemToRank(e2Global)
 
               if (neighborRank == decomp % rankId) then
@@ -980,41 +979,16 @@ contains
 
     if (present(handle)) then
       call scalar % BassiRebaySides(handle)
-      call hipcheck(hipdevicesynchronize())
-      print *, "(br) min, max (avgboundary)",minval(scalar % avgBoundary),maxval(scalar % avgBoundary)
-
       call scalar % ContravariantWeightInterior(geometry,handle)
-      call hipcheck(hipdevicesynchronize())
-      print *, "(br) min, max (ja % interior)",minval(scalar % jascalar % interior),maxval(scalar % jascalar % interior)
-
       call scalar % ContravariantWeightAvgBoundary(geometry,handle)
-      call hipcheck(hipdevicesynchronize())
-      print *, "(br) min, max (ja % boundary)",minval(scalar % jascalar % boundary),maxval(scalar % jascalar % boundary)
-
       call scalar % JaScalar % DGDivergence(df,handle)
-      call hipcheck(hipdevicesynchronize())
-      print *, "(br) min, max (df % interior) [pre jacobian weight]",minval(df % interior),maxval(df % interior)
-
       call df % JacobianWeight(geometry,handle)
-      call hipcheck(hipdevicesynchronize())
-      print *, "(br) min, max (df % interior) [post jacobian weight]",minval(df % interior),maxval(df % interior)
-
     else
       call scalar % BassiRebaySides()
-      print *, "(br) min, max (avgboundary)",minval(scalar % avgBoundary),maxval(scalar % avgBoundary)
-
       call scalar % ContravariantWeightInterior(geometry)
-      print *, "(br) min, max (ja % interior)",minval(scalar % jascalar % interior),maxval(scalar % jascalar % interior)
-
       call scalar % ContravariantWeightAvgBoundary(geometry)
-      print *, "(br) min, max (ja % boundary)",minval(scalar % jascalar % boundary),maxval(scalar % jascalar % boundary)
-
       call scalar % JaScalar % DGDivergence(df)
-      print *, "(br) min, max (df % interior) [pre jacobian weight]",minval(df % interior),maxval(df % interior)
-
       call df % JacobianWeight(geometry)
-      print *, "(br) min, max (df % interior) [post jacobian weight]",minval(df % interior),maxval(df % interior)
-
     end if
 
   end subroutine BRGradient_MappedScalar2D
@@ -1193,13 +1167,13 @@ contains
             do s1 = 1,6
 
               e2 = mesh % sideInfo(3,s1,e1) ! Neighbor Element
+              s2 = mesh % sideInfo(4,s1,e1)/10
               bcid = mesh % sideInfo(5,s1,e1)
-              if (bcid == 0) then ! Interior Element
+              if (s2 > 0 .or. bcid == 0) then ! Interior Element
                 r2 = mpiHandler % elemToRank(e2) ! Neighbor Rank
 
                 if (r2 /= mpiHandler % rankId) then
 
-                  s2 = mesh % sideInfo(4,s1,e1)/10
                   flip = mesh % sideInfo(4,s1,e1) - s2*10
                   globalSideId = mesh % sideInfo(2,s1,e1)
 
@@ -1306,7 +1280,9 @@ contains
             flip = mesh % sideInfo(4,s1,e1) - s2*10
             bcid = mesh % sideInfo(5,s1,e1)
 
-            if (bcid == 0) then
+            ! If either s2 or e2 are equal to zero, then this is an exterior boundary and
+            ! the extBoundary attribute is assigned by a boundary condition
+            if (s2 > 0 .or. bcid == 0) then
 
               neighborRank = decomp % elemToRank(e2Global)
 
@@ -1445,9 +1421,9 @@ contains
     if (present(handle)) then
 
       call ContravariantWeight_MappedScalar3D_gpu(c_loc(scalar % avgBoundary), &
-                                                          c_loc(geometry % dsdx % boundary), &
-                                                          c_loc(scalar % JaScalar % boundary), &
-                                                          scalar % interp % N + 1,scalar % interp % N + 1,6,scalar % nVar,scalar % nElem)
+                                                  c_loc(geometry % dsdx % boundary), &
+                                                  c_loc(scalar % JaScalar % boundary), &
+                                                  scalar % interp % N + 1,scalar % interp % N + 1,6,scalar % nVar,scalar % nElem)
     else
 
       ! Interior
@@ -1582,15 +1558,35 @@ contains
 
     if (present(handle)) then
       call scalar % BassiRebaySides(handle)
+      call hipcheck(hipdevicesynchronize())
+      print*, "min/max scalar % avgboundary : ", minval(scalar % avgBoundary), maxval(scalar % avgBoundary)
+
       call scalar % ContravariantWeightInterior(geometry,handle)
+      call hipcheck(hipdevicesynchronize())
+      print*, "min/max scalar % jascalar % interior : ", minval(scalar % jascalar % interior), maxval(scalar % jascalar % interior)
+
       call scalar % ContravariantWeightAvgBoundary(geometry,handle)
+      call hipcheck(hipdevicesynchronize())
+      print*, "min/max scalar % jascalar % boundary : ", minval(scalar % jascalar % boundary), maxval(scalar % jascalar % boundary)
+
       call scalar % JaScalar % DGDivergence(df,handle)
+      call hipcheck(hipdevicesynchronize())
+      print*, "min/max df % interior (pre JacobianWeight) : ", minval(df % interior), maxval(df % interior)
+
       call df % JacobianWeight(geometry,handle)
     else
       call scalar % BassiRebaySides()
+      print*, "min/max scalar % avgboundary : ", minval(scalar % avgBoundary), maxval(scalar % avgBoundary)
+
       call scalar % ContravariantWeightInterior(geometry)
+      print*, "min/max scalar % jascalar % interior : ", minval(scalar % jascalar % interior), maxval(scalar % jascalar % interior)
+
       call scalar % ContravariantWeightAvgBoundary(geometry)
+      print*, "min/max scalar % jascalar % boundary : ", minval(scalar % jascalar % boundary), maxval(scalar % jascalar % boundary)
+
       call scalar % JaScalar % DGDivergence(df)
+      print*, "min/max df % interior (pre JacobianWeight) : ", minval(df % interior), maxval(df % interior)
+
       call df % JacobianWeight(geometry)
     end if
 
@@ -1726,13 +1722,13 @@ contains
               do s1 = 1,4
 
                 e2 = mesh % sideInfo(3,s1,e1) ! Neighbor Element
+                s2 = mesh % sideInfo(4,s1,e1)/10
                 bcid = mesh % sideInfo(5,s1,e1)
-                if (bcid == 0) then ! Interior Element
+                if (s2 > 0 .or. bcid == 0) then ! Interior Element
                   r2 = mpiHandler % elemToRank(e2) ! Neighbor Rank
 
                   if (r2 /= mpiHandler % rankId) then
 
-                    s2 = mesh % sideInfo(4,s1,e1)/10
                     flip = mesh % sideInfo(4,s1,e1) - s2*10
                     globalSideId = mesh % sideInfo(2,s1,e1)
 
@@ -1803,7 +1799,7 @@ contains
               flip = mesh % sideInfo(4,s1,e1) - s2*10
               bcid = mesh % sideInfo(5,s1,e1)
 
-              if (bcid == 0) then
+              if (s2 > 0 .or. bcid == 0) then
 
                 neighborRank = decomp % elemToRank(e2Global)
 
@@ -2198,13 +2194,13 @@ contains
                 do s1 = 1,6
     
                   e2 = mesh % sideInfo(3,s1,e1) ! Neighbor Element
+                  s2 = mesh % sideInfo(4,s1,e1)/10
                   bcid = mesh % sideInfo(5,s1,e1)
-                  if (bcid == 0) then ! Interior Element
+                  if (s2 > 0 .or. bcid == 0) then ! Interior Element
                     r2 = mpiHandler % elemToRank(e2) ! Neighbor Rank
     
                     if (r2 /= mpiHandler % rankId) then
     
-                      s2 = mesh % sideInfo(4,s1,e1)/10
                       flip = mesh % sideInfo(4,s1,e1) - s2*10
                       globalSideId = mesh % sideInfo(2,s1,e1)
     
@@ -2314,7 +2310,7 @@ contains
                 flip = mesh % sideInfo(4,s1,e1) - s2*10
                 bcid = mesh % sideInfo(5,s1,e1)
     
-                if (bcid == 0) then
+                if (s2 > 0 .or. bcid == 0) then
     
                   neighborRank = decomp % elemToRank(e2Global)
     
