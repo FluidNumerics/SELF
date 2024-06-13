@@ -66,6 +66,7 @@ jobs:
           spack -e . config add packages:all:compiler:[${{ matrix.spack_compiler }}]
           cat ./spack.yaml
           spack compilers
+          ls /opt/rocm/bin/
           spack -e . concretize -f
           spack -e . install --no-check-signature
 
