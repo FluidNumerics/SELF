@@ -91,7 +91,6 @@ jobs:
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
           spack -e . compiler find
           spack -e . config add packages:all:require:["'%${{ matrix.spack_compiler }}'"]
-          cat ./spack.yaml
           spack -e . concretize -f
           spack -e . install --no-check-signature
 

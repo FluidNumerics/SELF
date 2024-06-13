@@ -17,41 +17,9 @@ SELF is an object-oriented Fortran library that support the implementation of Sp
 
 The SELF API is designed based on the assumption that SEM developers and researchers need to be able to implement derivatives in 1-D and divergence, gradient, and curl in 2-D and 3-D on scalar, vector, and tensor functions using spectral collocation, continuous galerkin, and discontinuous galerkin spectral element methods. Additionally, as we enter the exascale era, we are currently faced with a zoo of compute hardware that is available. Because of this, SELF routines provide support for GPU acceleration through AMD's HIP and support for multi-core, multi-node, and multi-GPU platforms with MPI.
 
-## Installation
-`self` can be installed using CMake on Linux platforms that have the following packages already installed
-
-* CMake (3.21-3.27)
-* 2008 standard compliant Fortran Compiler
-* ROCm 6.0.0 or greater (HIP, HIPFort, HIPBLAS)
-* CUDA 11 or greater (if building for Nvidia GPU)
-* HDF5
-* [FEQParse](https://github.com/fluidnumerics/feq-parse)
 
 ### Prerequisites
 All you need is a Fortran compiler that is compliant with the Fortran 2008 standard and supports C interoperability. You can see which compilers are regularly tested on the [Github actions page](https://github.com/FluidNumerics/feq-parse/actions/workflows/ci.yml). Additionally, the table below lists the [supported compilers](#supported-compilers)
-
-### CMake
-For a quick installation to `${HOME}/.local/self`,
-```
-mkdir build/
-cd build/
-cmake ../ -DCMAKE_INSTALL_PREFIX=${HOME}/.local/self
-make
-sudo make install
-```
-If you'd like to run the provided tests to verify your installation, use `ctest` to run the provided tests from within the `build/` directory
-```
-ctest .
-```
-
-The above steps install
-```
-${HOME}/.local/self/lib/libself-static.a
-${HOME}/.local/self/lib/libself.so
-${HOME}/.local/self/include/*.mod
-${HOME}/.local/self/example/
-${HOME}/.local/self/test
-```
 
 ## Supported Compilers, Operating Systems, and software stacks
 

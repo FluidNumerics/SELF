@@ -15,6 +15,15 @@ Allow spack to locate your compilers (make sure you have C, C++, and Fortran com
 spack compiler find
 ```
 
+If you have a preferred compiler you would like for spack to use, you can use `spack -e . config add`, e.g.
+```
+spack -e . config add packages:all:compiler:[rocmcc@6.1.1]
+```
+
+The example above will force packages to be built with version 6.1.1 of amdflang from the `rocmcc` compiler set
+
+
+
 To reduce build time, import existing packages on your system
 ```
 spack external find
