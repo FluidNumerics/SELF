@@ -51,13 +51,21 @@ jobs:
 
       - name: Install dependencies in spack environment
         run: |
+          # Login
+          spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+
           # set the compiler to use for builds
           spack compiler find
           spack config add packages:all:compiler:[${{ matrix.spack_compiler }}]
+
+          # Concretize the build
+          spack -e . concretize
+
+          # Install
           spack -e . install --no-check-signature
 
       - name: Build with Cmake
-        shell: spack-bash
+        shell: spack-bash {0}
         run: |
           spack env activate .
           mkdir build
