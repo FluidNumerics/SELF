@@ -17,7 +17,7 @@ on:
 
 jobs:
   linux-tests:
-    timeout-minutes: 20
+    timeout-minutes: 15
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
@@ -86,35 +86,6 @@ jobs:
         run: |
           cd build/test
           ctest || ctest --rerun-failed --output-on-failure
-
-      - name: Create coverage report
-        if: ${{ matrix.build_type == 'coverage' }}
-        run: |
-          
-          lcov --no-external \
-              --capture \
-              --directory /home/runner/work/self \
-              --exclude '*/test/*' \
-              --output-file /home/runner/work/lcov.info
-
-      - name: codecov
-        if: ${{ matrix.build_type == 'coverage' }}
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          files: /home/runner/work/lcov.info
-          flags: ctests
-
-      - name: Run memory checks with Valgrind (only Linux and GNU compilers)
-        if: ${{ matrix.memcheck }}
-        run: |
-          sudo apt-get install -y valgrind
-          for f in $(find ./build/test/ -executable -type f)
-          do
-                  echo $f
-                  valgrind --undef-value-errors=no --error-exitcode=1 -s $f -A
-          done
 
       - name: Push packages and update index
         run: |
