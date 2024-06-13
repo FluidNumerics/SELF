@@ -3,6 +3,9 @@ Copyright 2020-2023 Fluid Numerics LLC
 
 [![codecov](https://codecov.io/gh/FluidNumerics/SELF/branch/main/graph/badge.svg?token=AKKSL5CWK6)](https://codecov.io/gh/FluidNumerics/SELF)
 
+[![linux-gnu-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-cmake.yml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-cmake.yml)
+
+[![linux-amdflang-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml)
 
 ## Licensing
 SELF is licensed for use under a [non-commercial use visible-source license](./LICENSE). Fluid Numerics is a small family-owned business and wants to make SELF available to researchers for academic use. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. However, since we are interested in protecting our time-and-effort investment in SELF, sale and commercial-use of SELF is prohibited under the license.
