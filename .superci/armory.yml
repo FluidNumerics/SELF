@@ -10,8 +10,6 @@ steps:
       - "source /etc/profile.d/z11_lmod.sh"
     modules:
       - gcc/13.2.0
-      - hip/5.7.3
-      - hipfort/5.7.1
       - openmpi/5.0.1
       - hdf5/1.12.3
       - feq-parse/2.1.0
@@ -29,7 +27,6 @@ steps:
         cd ${WORKSPACE}/build
         FC=gfortran \
         cmake -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
-              -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
               -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/opt/self \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
               ../
