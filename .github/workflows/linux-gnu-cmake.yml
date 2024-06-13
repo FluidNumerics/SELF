@@ -1,0 +1,127 @@
+name: linux-gnu-cmake
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+jobs:
+  linux-tests:
+    timeout-minutes: 15
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+            # Linux
+            - os: ubuntu-22.04
+              fcompiler: gfortran-9
+              ccompiler: gcc-9
+              shell: bash
+              build_type: coverage
+              memcheck: true
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-9
+              ccompiler: gcc-9
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-10
+              ccompiler: gcc-10
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-11
+              ccompiler: gcc-11
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-12
+              ccompiler: gcc-12
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+
+      - name: Show version information
+        run: |
+          ${{ matrix.fcompiler }} --version
+          ${{ matrix.ccompiler }} --version
+
+      - name: Build with Cmake
+        run: |
+          mkdir build
+          cd build
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          make VERBOSE=1
+
+      - name: Initialize coverage counters
+        if: ${{ matrix.build_type == 'coverage' }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install lcov
+          lcov --no-external \
+               --directory /home/runner/work/self \
+               --zerocounters
+
+      - name: Run ctests
+        run: |
+          cd build/test
+          ctest || ctest --rerun-failed --output-on-failure
+
+      - name: Create coverage report
+        if: ${{ matrix.build_type == 'coverage' }}
+        run: |
+          
+          lcov --no-external \
+              --capture \
+              --directory /home/runner/work/self \
+              --exclude '*/test/*' \
+              --output-file /home/runner/work/lcov.info
+
+      - name: codecov
+        if: ${{ matrix.build_type == 'coverage' }}
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: /home/runner/work/lcov.info
+          flags: ctests
+
+      - name: Run memory checks with Valgrind (only Linux and GNU compilers)
+        if: ${{ matrix.memcheck }}
+        run: |
+          sudo apt-get install -y valgrind
+          for f in $(find ./build/test/ -executable -type f)
+          do
+                  echo $f
+                  valgrind --undef-value-errors=no --error-exitcode=1 -s $f -A
+          done
+    
+          

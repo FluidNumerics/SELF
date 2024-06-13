@@ -1,0 +1,72 @@
+name: windows-gnu-cmake
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+    
+env:
+  # Modify this variable to change the ifort compiler version - do NOT hardcode the version
+  # anywhere else!
+  INTEL_ONEAPI_VERSION: 2023.2.1
+
+jobs:
+  windows-tests:
+    timeout-minutes: 8
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+            
+            # Windows
+            - os: windows-latest
+              fcompiler: gfortran
+              ccompiler: gcc
+              shell: 'msys2 {0}'
+              build_type: debug
+            
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install packages 
+        uses: msys2/setup-msys2@v2
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          update: true
+          install: git base-devel mingw-w64-x86_64-toolchain cmake mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-fpm
+
+      - name: Show version information
+        run: |
+          ${{ matrix.fcompiler }} --version
+          ${{ matrix.ccompiler }} --version
+
+      - name: Build with Cmake
+        run: |
+          mkdir build
+          cd build
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          make VERBOSE=1
+     
+      - name: Run ctests
+        run: |
+          cd build/test
+          ctest || ctest --rerun-failed --output-on-failure
+

@@ -17,7 +17,8 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
     endif()
 endif()
-#set( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIE")
+
+SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
@@ -45,7 +46,49 @@ if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
     set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
     set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
     set( CMAKE_C_FLAGS_COVERAGE "-g -O0 --coverage")
+
+elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel" )
+    set( CMAKE_Fortran_FLAGS "-fpp" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "-O0 -g -debug all -check all -traceback" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG} -prof-gen=srcpos")
+    set( CMAKE_Fortran_FLAGS_PROFILE "-O3")
+    set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
+    set( CMAKE_C_FLAGS_COVERAGE "-g -O0")
+
+elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "IntelLLVM" )
+    set( CMAKE_Fortran_FLAGS "-fpp" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "-debug all -check all,nouninit -traceback" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG}") # Code coverage not available with ifx
+    set( CMAKE_Fortran_FLAGS_PROFILE "-O3")
+    set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
+    set( CMAKE_C_FLAGS_COVERAGE "-g -O0")
+
+elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Flang" )
+    set( CMAKE_Fortran_FLAGS "-Mpreprocess" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS} -O0 -g -Wall -pedantic" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG}") # Code coverage not available with ifx
+    set( CMAKE_Fortran_FLAGS_PROFILE "-O3")
+    set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
+    set( CMAKE_C_FLAGS_COVERAGE "-g -O0")
+
+elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NVHPC" )
+    set( CMAKE_Fortran_FLAGS "-Mpreprocess" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS} -O0 -Wall -C -g -traceback" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_DEBUG}") # Code coverage not available with ifx
+    set( CMAKE_Fortran_FLAGS_PROFILE "-O3 -Mstack_arrays -Minfo")
+    set( CMAKE_Fortran_FLAGS_RELEASE "-O3 -Mstack_arrays -Minfo" )
+    set( CMAKE_C_FLAGS_COVERAGE "-g -O0")
 endif()
+
+# check for openmp support
+# See https://cliutils.gitlab.io/modern-cmake/chapters/packages/OpenMP.html
+# Also see https://cmake.org/cmake/help/latest/module/FindOpenMP.html
+#find_package(OpenMP COMPONENTS Fortran)
+#
+# To get target offload flags
+# https://gitlab.kitware.com/cmake/cmake/-/issues/21784
+
+
 
 # ------ dependencies ------ #
 # # HIP

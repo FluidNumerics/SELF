@@ -1,0 +1,132 @@
+name: linux-intel-cmake
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+env:
+  # Modify this variable to change the ifort compiler version - do NOT hardcode the version
+  # anywhere else!
+  INTEL_ONEAPI_VERSION: 2023.2.1
+
+jobs:
+  linux-tests:
+    timeout-minutes: 8
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+            - os: ubuntu-22.04
+              fcompiler: ifx
+              ccompiler: icx-cc
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: ifort
+              ccompiler: icx-cc
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Intel oneAPI Fortran compiler
+        run: |
+          # download the key to system keyring
+          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+          | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+
+          # add signed entry to apt sources and configure the APT client to use Intel repository:
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+
+          # update package index and install Fortran compiler
+          sudo apt update -y
+          sudo apt-get -y install intel-oneapi-compiler-fortran-$INTEL_ONEAPI_VERSION intel-oneapi-dpcpp-cpp-$INTEL_ONEAPI_VERSION
+
+          # set environment variables and make them persistent across steps
+          . /opt/intel/oneapi/setvars.sh
+          env | grep oneapi >> $GITHUB_ENV
+
+      - name: Use existing Intel oneAPI Fortran compiler
+        run: |
+          # set environment variables and make them persistent across steps
+          . /opt/intel/oneapi/setvars.sh
+          env | grep oneapi >> $GITHUB_ENV
+
+      - name: Show version information
+        run: |
+          ${{ matrix.fcompiler }} --version
+          ${{ matrix.ccompiler }} --version
+
+      - name: Build with Cmake
+        run: |
+          mkdir build
+          cd build
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          make VERBOSE=1
+
+      - name: Initialize coverage counters
+        if: ${{ matrix.build_type == 'coverage' }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install lcov
+          lcov --no-external \
+               --directory /home/runner/work/feq-parse \
+               --zerocounters
+
+      - name: Run ctests
+        run: |
+          cd build/test
+          ctest || ctest --rerun-failed --output-on-failure
+
+      - name: Create coverage report
+        if: ${{ matrix.build_type == 'coverage' }}
+        run: |
+          
+          lcov --no-external \
+              --capture \
+              --directory /home/runner/work/feq-parse \
+              --exclude '*/test/*' \
+              --output-file /home/runner/work/lcov.info
+
+      - name: codecov
+        if: ${{ matrix.build_type == 'coverage' }}
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: /home/runner/work/lcov.info
+          flags: ctests
+
+      - name: Run memory checks with Valgrind (only Linux and GNU compilers)
+        if: ${{ matrix.memcheck }}
+        run: |
+          sudo apt-get install -y valgrind
+          for f in $(find ./build/test/ -executable -type f)
+          do
+                  echo $f
+                  valgrind --undef-value-errors=no --error-exitcode=1 -s $f -A
+          done
+    
+          
