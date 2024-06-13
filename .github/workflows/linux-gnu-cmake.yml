@@ -48,11 +48,6 @@ jobs:
 
       - name: Set up Spack
         uses: spack/setup-spack@v2
-        with:
-          ref: develop      # Spack version (examples: develop, releases/v0.21)
-          buildcache: true  # Configure oci://ghcr.io/spack/github-actions-buildcache
-          color: true       # Force color output (SPACK_COLOR=always)
-          path: spack       # Where to clone Spack
 
       - name: Install dependencies in spack environment
         run: |
@@ -62,6 +57,7 @@ jobs:
           spack -e . install --no-check-signature
 
       - name: Build with Cmake
+        shell: spack-bash
         run: |
           spack env activate .
           mkdir build
