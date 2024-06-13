@@ -62,8 +62,10 @@ jobs:
           export PATH=${PATH}:/opt/rocm/bin
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
           spack compiler find
+          cat /home/runner/work/SELF/SELF/spack/etc/spack/linux/compilers.yaml
           spack -e . config add packages:all:compiler:[${{ matrix.spack_compiler }}]
           cat ./spack.yaml
+          spack compilers
           spack -e . concretize -f
           spack -e . install --no-check-signature
 
