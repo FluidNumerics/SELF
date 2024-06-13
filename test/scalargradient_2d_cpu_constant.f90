@@ -1,60 +1,60 @@
 program test
   implicit none
   integer :: exit_code
-  
+
   exit_code = scalargradient_2d_cpu_constant()
   stop exit_code
-  
-  contains  
 
-integer function scalargradient_2d_cpu_constant() result(r)
-  use SELF_Constants
-  use SELF_Lagrange
-  use SELF_Data
+contains
 
-  implicit none
+  integer function scalargradient_2d_cpu_constant() result(r)
+    use SELF_Constants
+    use SELF_Lagrange
+    use SELF_Data
 
-  integer,parameter :: controlDegree = 7
-  integer,parameter :: targetDegree = 16
-  integer,parameter :: nvar = 1
-  integer,parameter :: nelem = 100
+    implicit none
+
+    integer,parameter :: controlDegree = 7
+    integer,parameter :: targetDegree = 16
+    integer,parameter :: nvar = 1
+    integer,parameter :: nelem = 100
 #ifdef DOUBLE_PRECISION
-  real(prec),parameter :: tolerance = 10.0_prec**(-7)
+    real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 10.0_prec**(-3)
 #endif
-  type(Scalar2D) :: f
-  type(Vector2D) :: df
-  type(Lagrange),target :: interp
+    type(Scalar2D) :: f
+    type(Vector2D) :: df
+    type(Lagrange),target :: interp
 
-  ! Create an interpolant
-  call interp % Init(N=controlDegree, &
+    ! Create an interpolant
+    call interp%Init(N=controlDegree, &
                      controlNodeType=GAUSS, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
-  ! Initialize scalars
-  call f % Init(interp,nvar,nelem)
+    ! Initialize scalars
+    call f%Init(interp,nvar,nelem)
 
-  call df % Init(interp,nvar,nelem)
+    call df%Init(interp,nvar,nelem)
 
-  ! Set the source scalar (on the control grid) to a non-zero constant
-  f % interior  = 1.0_prec
+    ! Set the source scalar (on the control grid) to a non-zero constant
+    f%interior = 1.0_prec
 
-  call f % Gradient(df)
+    call f%Gradient(df)
 
-  ! Calculate diff from exact
-  df % interior  = abs(df % interior  - 0.0_prec)
+    ! Calculate diff from exact
+    df%interior = abs(df%interior-0.0_prec)
 
-  if (maxval(df % interior ) <= tolerance) then
-    r = 0
-  else
-    r = 1
-  end if
+    if(maxval(df%interior) <= tolerance) then
+      r = 0
+    else
+      r = 1
+    endif
 
-  call f % free()
-  call df % free()
-  call interp % free()
+    call f%free()
+    call df%free()
+    call interp%free()
 
-end function scalargradient_2d_cpu_constant
-end program test
+  endfunction scalargradient_2d_cpu_constant
+endprogram test

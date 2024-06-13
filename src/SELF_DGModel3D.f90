@@ -4,793 +4,789 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_DGModel3D
+module SELF_DGModel3D
 
-  USE SELF_SupportRoutines
-  USE SELF_Metadata
-  USE SELF_Mesh
-  USE SELF_MappedData
-  USE SELF_HDF5
-  USE HDF5
-  USE FEQParse
-  USE SELF_Model
+  use SELF_SupportRoutines
+  use SELF_Metadata
+  use SELF_Mesh
+  use SELF_MappedData
+  use SELF_HDF5
+  use HDF5
+  use FEQParse
+  use SELF_Model
 
-  IMPLICIT NONE
+  implicit none
 
 #include "SELF_Macros.h"
 
+  type,extends(Model) :: DGModel3D
+    type(MappedScalar3D)   :: solution
+    type(MappedVector3D)   :: solutionGradient
+    type(MappedVector3D)   :: flux
+    type(MappedScalar3D)   :: source
+    type(MappedScalar3D)   :: fluxDivergence
+    type(MappedScalar3D)   :: dSdt
+    type(MappedScalar3D)   :: workSol
+    type(MappedScalar3D)   :: prevSol
+    type(Mesh3D),pointer   :: mesh
+    type(SEMHex),pointer  :: geometry
 
-  TYPE,EXTENDS(Model) :: DGModel3D
-    TYPE(MappedScalar3D)   :: solution
-    TYPE(MappedVector3D)   :: solutionGradient
-    TYPE(MappedVector3D)   :: flux
-    TYPE(MappedScalar3D)   :: source
-    TYPE(MappedScalar3D)   :: fluxDivergence
-    TYPE(MappedScalar3D)   :: dSdt
-    TYPE(MappedScalar3D)   :: workSol
-    TYPE(MappedScalar3D)   :: prevSol
-    TYPE(Mesh3D),POINTER   :: mesh
-    TYPE(SEMHex),POINTER  :: geometry
+  contains
 
-  CONTAINS
+    procedure :: Init => Init_DGModel3D
+    procedure :: Free => Free_DGModel3D
 
-    PROCEDURE :: Init => Init_DGModel3D
-    PROCEDURE :: Free => Free_DGModel3D
-  
-    PROCEDURE :: UpdateSolution => UpdateSolution_DGModel3D
+    procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
-    PROCEDURE :: ResizePrevSol => ResizePrevSol_DGModel3D
+    procedure :: ResizePrevSol => ResizePrevSol_DGModel3D
 
-    PROCEDURE :: UpdateGAB2 => UpdateGAB2_DGModel3D
-    PROCEDURE :: UpdateGAB3 => UpdateGAB3_DGModel3D
-    PROCEDURE :: UpdateGAB4 => UpdateGAB4_DGModel3D
+    procedure :: UpdateGAB2 => UpdateGAB2_DGModel3D
+    procedure :: UpdateGAB3 => UpdateGAB3_DGModel3D
+    procedure :: UpdateGAB4 => UpdateGAB4_DGModel3D
 
-    PROCEDURE :: UpdateGRK2 => UpdateGRK2_DGModel3D
-    PROCEDURE :: UpdateGRK3 => UpdateGRK3_DGModel3D
-    PROCEDURE :: UpdateGRK4 => UpdateGRK4_DGModel3D
+    procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D
+    procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D
+    procedure :: UpdateGRK4 => UpdateGRK4_DGModel3D
 
-    PROCEDURE :: CalculateTendency => CalculateTendency_DGModel3D
-    
-    GENERIC :: SetSolution => SetSolutionFromChar_DGModel3D, &
+    procedure :: CalculateTendency => CalculateTendency_DGModel3D
+
+    generic :: SetSolution => SetSolutionFromChar_DGModel3D, &
       SetSolutionFromEqn_DGModel3D
-    PROCEDURE,PRIVATE :: SetSolutionFromChar_DGModel3D
-    PROCEDURE,PRIVATE :: SetSolutionFromEqn_DGModel3D
-  
-    PROCEDURE :: ReadModel => Read_DGModel3D
-    PROCEDURE :: WriteModel => Write_DGModel3D
-    PROCEDURE :: WriteTecplot => WriteTecplot_DGModel3D
+    procedure,private :: SetSolutionFromChar_DGModel3D
+    procedure,private :: SetSolutionFromEqn_DGModel3D
 
-  END TYPE DGModel3D
+    procedure :: ReadModel => Read_DGModel3D
+    procedure :: WriteModel => Write_DGModel3D
+    procedure :: WriteTecplot => WriteTecplot_DGModel3D
 
-  
-CONTAINS
+  endtype DGModel3D
 
-  SUBROUTINE Init_DGModel3D(this,nvar,mesh,geometry,decomp)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(out) :: this
-    INTEGER,INTENT(in) :: nvar
-    TYPE(Mesh3D),INTENT(in),TARGET :: mesh
-    TYPE(SEMHex),INTENT(in),TARGET :: geometry
-    TYPE(MPILayer),INTENT(in),TARGET :: decomp
+contains
+
+  subroutine Init_DGModel3D(this,nvar,mesh,geometry,decomp)
+    implicit none
+    class(DGModel3D),intent(out) :: this
+    integer,intent(in) :: nvar
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    type(MPILayer),intent(in),target :: decomp
     ! Local
-    INTEGER :: ivar
-    CHARACTER(LEN=3) :: ivarChar
-    CHARACTER(LEN=25) :: varname
+    integer :: ivar
+    character(LEN=3) :: ivarChar
+    character(LEN=25) :: varname
 
-    this % decomp => decomp
-    this % mesh => mesh
-    this % geometry => geometry
+    this%decomp => decomp
+    this%mesh => mesh
+    this%geometry => geometry
 
-    CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % solutionGradient % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % source % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % fluxDivergence % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%prevSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%dSdt%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%solutionGradient%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%flux%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
 
     ! set default metadata
-    DO ivar = 1,nvar
-      WRITE (ivarChar,'(I3.3)') ivar
-      varname = "solution"//TRIM(ivarChar)
-      CALL this % solution % SetName(ivar,varname)
-      CALL this % solution % SetUnits(ivar,"[null]")
-    END DO
+    do ivar = 1,nvar
+      write(ivarChar,'(I3.3)') ivar
+      varname = "solution"//trim(ivarChar)
+      call this%solution%SetName(ivar,varname)
+      call this%solution%SetUnits(ivar,"[null]")
+    enddo
 
-  END SUBROUTINE Init_DGModel3D
+  endsubroutine Init_DGModel3D
 
-  SUBROUTINE Free_DGModel3D(this)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
+  subroutine Free_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
 
-    CALL this % solution % Free()
-    CALL this % workSol % Free()
-    CALL this % prevSol % Free()
-    CALL this % dSdt % Free()
-    CALL this % solutionGradient % Free()
-    CALL this % flux % Free()
-    CALL this % source % Free()
-    CALL this % fluxDivergence % Free()
+    call this%solution%Free()
+    call this%workSol%Free()
+    call this%prevSol%Free()
+    call this%dSdt%Free()
+    call this%solutionGradient%Free()
+    call this%flux%Free()
+    call this%source%Free()
+    call this%fluxDivergence%Free()
 
-  END SUBROUTINE Free_DGModel3D
+  endsubroutine Free_DGModel3D
 
-  SUBROUTINE ResizePrevSol_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine ResizePrevSol_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: nVar
+    integer :: nVar
 
     ! Free space, if necessary
-    CALL this % prevSol % Free()
+    call this%prevSol%Free()
 
     ! Reallocate with increased variable dimension for
     ! storing "m" copies of solution data
-    nVar = this % solution % nVar
-    CALL this % prevSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
+    nVar = this%solution%nVar
+    call this%prevSol%Init(this%geometry%x%interp,m*nVar,this%mesh%nElem)
 
-  END SUBROUTINE ResizePrevSol_DGModel3D
+  endsubroutine ResizePrevSol_DGModel3D
 
-  SUBROUTINE SetSolutionFromEqn_DGModel3D(this,eqn)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
+  subroutine SetSolutionFromEqn_DGModel3D(this,eqn)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    type(EquationParser),intent(in) :: eqn(1:this%solution%nVar)
     ! Local
-    INTEGER :: iVar
+    integer :: iVar
 
     ! Copy the equation parser
-    DO iVar = 1,this % solution % nVar
-      CALL this % solution % SetEquation(ivar,eqn(iVar) % equation)
-    END DO
+    do iVar = 1,this%solution%nVar
+      call this%solution%SetEquation(ivar,eqn(iVar)%equation)
+    enddo
 
-    CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
+    call this%solution%SetInteriorFromEquation(this%geometry,this%t)
 
-    CALL this % solution % BoundaryInterp()
+    call this%solution%BoundaryInterp()
 
+  endsubroutine SetSolutionFromEqn_DGModel3D
 
-  END SUBROUTINE SetSolutionFromEqn_DGModel3D
-
-  SUBROUTINE SetSolutionFromChar_DGModel3D(this,eqnChar)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in) :: eqnChar(1:this % solution % nVar)
+  subroutine SetSolutionFromChar_DGModel3D(this,eqnChar)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    character(*),intent(in) :: eqnChar(1:this%solution%nVar)
     ! Local
-    INTEGER :: iVar
+    integer :: iVar
 
-    DO iVar = 1,this % solution % nVar
-      CALL this % solution % SetEquation(ivar,TRIM(eqnChar(iVar)))
-    END DO
+    do iVar = 1,this%solution%nVar
+      call this%solution%SetEquation(ivar,trim(eqnChar(iVar)))
+    enddo
 
-    CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
+    call this%solution%SetInteriorFromEquation(this%geometry,this%t)
 
-    CALL this % solution % BoundaryInterp()
+    call this%solution%BoundaryInterp()
 
-  END SUBROUTINE SetSolutionFromChar_DGModel3D
+  endsubroutine SetSolutionFromChar_DGModel3D
 
-  SUBROUTINE UpdateSolution_DGModel3D(this,dt)
+  subroutine UpdateSolution_DGModel3D(this,dt)
     !! Computes a solution update as , where dt is either provided through the interface
     !! or taken as the Model's stored time step size (model % dt)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    REAL(prec),OPTIONAL,INTENT(in) :: dt
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    real(prec),optional,intent(in) :: dt
     ! Local
-    REAL(prec) :: dtLoc
-    INTEGER :: i,j,k,iVar,iEl
+    real(prec) :: dtLoc
+    integer :: i,j,k,iVar,iEl
 
-    IF (PRESENT(dt)) THEN
+    if(present(dt)) then
       dtLoc = dt
-    ELSE
-      dtLoc = this % dt
-    END IF
+    else
+      dtLoc = this%dt
+    endif
 
     !$omp target map(to:this % dsdt % interior) map(tofrom:this % solution)
-    !$omp teams distribute parallel do collapse(4) num_threads(256)  
-    DO iEl = 1,this % solution % nElem
-      DO iVar = 1,this % solution % nVar
-        DO k = 1,this % solution % interp % N+1
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
+    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    do iEl = 1,this%solution%nElem
+      do iVar = 1,this%solution%nVar
+        do k = 1,this%solution%interp%N+1
+          do j = 1,this%solution%interp%N+1
+            do i = 1,this%solution%interp%N+1
 
-              this % solution % interior(i,j,k,iEl,iVar) = &
-                this % solution % interior(i,j,k,iEl,iVar) + &
-                dtLoc*this % dSdt % interior(i,j,k,iEl,iVar)
+              this%solution%interior(i,j,k,iEl,iVar) = &
+                this%solution%interior(i,j,k,iEl,iVar)+ &
+                dtLoc*this%dSdt%interior(i,j,k,iEl,iVar)
 
-            END DO
-          END DO
-        ENDDO
-      END DO
-    END DO
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  END SUBROUTINE UpdateSolution_DGModel3D
+  endsubroutine UpdateSolution_DGModel3D
 
-  SUBROUTINE UpdateGAB2_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine UpdateGAB2_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: i,j,k,nVar,iVar,iEl
+    integer :: i,j,k,nVar,iVar,iEl
 
     ! ab2_weight
-    IF (m == 0) THEN ! Initialization step - store the solution in the prevSol
+    if(m == 0) then ! Initialization step - store the solution in the prevSol
 
       !$omp target map(tofrom: this % solution % interior) map(from:this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSEIF (m == 1) THEN ! Reset solution
+    elseif(m == 1) then ! Reset solution
 
       !$omp target map(from: this % solution % interior) map(to:this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % solution % interior(i,j,k,iEl,iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
+                this%solution%interior(i,j,k,iEl,iVar) = this%prevSol%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSE ! Main looping section - nVar the previous solution, store the new solution, and
+    else ! Main looping section - nVar the previous solution, store the new solution, and
       ! create an interpolated solution to use for tendency calculation
 
-      nVar = this % solution % nVar
+      nVar = this%solution%nVar
       !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
                 ! Bump the last solution
-                this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,nVar+iVar) = this%prevSol%interior(i,j,k,iEl,iVar)
 
                 ! Store the new solution
-                this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-                this % solution % interior(i,j,k,iEl,iVar) = &
-                  1.5_PREC*this % prevSol % interior(i,j,k,iEl,iVar) - &
-                  0.5_PREC*this % prevSol % interior(i,j,k,iEl,nVar + iVar)
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+                this%solution%interior(i,j,k,iEl,iVar) = &
+                  1.5_prec*this%prevSol%interior(i,j,k,iEl,iVar)- &
+                  0.5_prec*this%prevSol%interior(i,j,k,iEl,nVar+iVar)
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    END IF
+    endif
 
-  END SUBROUTINE UpdateGAB2_DGModel3D
+  endsubroutine UpdateGAB2_DGModel3D
 
-  SUBROUTINE UpdateGAB3_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine UpdateGAB3_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: i,j,k,nVar,iVar,iEl
+    integer :: i,j,k,nVar,iVar,iEl
 
-    IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
-
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
-      nVar = this % solution % nVar
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
-
-                this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % solution % interior(i,j,k,iEl,iVar)
-
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
-      !$omp end target
-
-    ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
+    if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
       !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      nVar = this%solution%nVar
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,nVar+iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSEIF (m == 2) THEN ! Copy the solution back from the most recent prevsol
+    elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
+
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
+
+                this%prevSol%interior(i,j,k,iEl,iVar) = this%solution%interior(i,j,k,iEl,iVar)
+
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+      !$omp end target
+
+    elseif(m == 2) then ! Copy the solution back from the most recent prevsol
 
       !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % solution % interior(i,j,k,iEl,iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
+                this%solution%interior(i,j,k,iEl,iVar) = this%prevSol%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSE ! Main looping section - nVar the previous solution, store the new solution, and
+    else ! Main looping section - nVar the previous solution, store the new solution, and
       ! create an interpolated solution to use for tendency calculation
 
-      nVar = this % solution % nVar
+      nVar = this%solution%nVar
       !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
                 ! Bump the last two stored solutions
-                this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,nVar + iVar)
-                this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,2*nVar+iVar) = this%prevSol%interior(i,j,k,iEl,nVar+iVar)
+                this%prevSol%interior(i,j,k,iEl,nVar+iVar) = this%prevSol%interior(i,j,k,iEl,iVar)
 
                 ! Store the new solution
-                this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-                this % solution % interior(i,j,k,iEl,iVar) = &
-                (23.0_PREC*this % prevSol % interior(i,j,k,iEl,iVar) - &
-                  16.0_PREC*this % prevSol % interior(i,j,k,iEl,nVar + iVar) + &
-                  5.0_PREC*this % prevSol % interior(i,j,k,iEl,2*nVar + iVar))/12.0_PREC
+                this%solution%interior(i,j,k,iEl,iVar) = &
+                  (23.0_prec*this%prevSol%interior(i,j,k,iEl,iVar)- &
+                   16.0_prec*this%prevSol%interior(i,j,k,iEl,nVar+iVar)+ &
+                   5.0_prec*this%prevSol%interior(i,j,k,iEl,2*nVar+iVar))/12.0_prec
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    END IF
+    endif
 
-  END SUBROUTINE UpdateGAB3_DGModel3D
+  endsubroutine UpdateGAB3_DGModel3D
 
-  SUBROUTINE UpdateGAB4_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine UpdateGAB4_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: i,j,k,nVar,iVar,iEl
+    integer :: i,j,k,nVar,iVar,iEl
 
-    IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
+    if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
-      nVar = this % solution % nVar
+      nVar = this%solution%nVar
       !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,2*nVar+iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
+    elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
-      nVar = this % solution % nVar
+      nVar = this%solution%nVar
       !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,nVar+iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSEIF (m == 2) THEN ! Initialization step - store the solution in the prevSol at ivar
+    elseif(m == 2) then ! Initialization step - store the solution in the prevSol at ivar
 
       !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSEIF (m == 3) THEN ! Copy the solution back from the most recent prevsol
+    elseif(m == 3) then ! Copy the solution back from the most recent prevsol
 
       !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
-                this % solution % interior(i,j,k,iEl,iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
+                this%solution%interior(i,j,k,iEl,iVar) = this%prevSol%interior(i,j,k,iEl,iVar)
 
-              END DO
-            ENDDO
-          END DO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    ELSE ! Main looping section - nVar the previous solution, store the new solution, and
+    else ! Main looping section - nVar the previous solution, store the new solution, and
       ! create an interpolated solution to use for tendency calculation
 
-      nVar = this % solution % nVar
+      nVar = this%solution%nVar
       !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       !$omp teams distribute parallel do collapse(5) num_threads(256)
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO k = 1,this % solution % interp % N+1
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      do iEl = 1,this%solution%nElem
+        do iVar = 1,this%solution%nVar
+          do k = 1,this%solution%interp%N+1
+            do j = 1,this%solution%interp%N+1
+              do i = 1,this%solution%interp%N+1
 
                 ! Bump the last two stored solutions
-                this % prevSol % interior(i,j,k,iEl,3*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,2*nVar+iVar)
-                this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) = this % prevSol % interior(i,j,k,iEl,nVar + iVar)
-                this % prevSol % interior(i,j,k,iEl,nVar + iVar) = this % prevSol % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,3*nVar+iVar) = this%prevSol%interior(i,j,k,iEl,2*nVar+iVar)
+                this%prevSol%interior(i,j,k,iEl,2*nVar+iVar) = this%prevSol%interior(i,j,k,iEl,nVar+iVar)
+                this%prevSol%interior(i,j,k,iEl,nVar+iVar) = this%prevSol%interior(i,j,k,iEl,iVar)
 
                 ! Store the new solution
-                this % prevSol % interior(i,j,k,iEl,iVar) = this % solution % interior(i,j,k,iEl,iVar)
+                this%prevSol%interior(i,j,k,iEl,iVar) = this%solution%interior(i,j,k,iEl,iVar)
 
-                this % solution % interior(i,j,k,iEl,iVar) = &
-                (55.0_PREC*this % prevSol % interior(i,j,k,iEl,iVar) - &
-                  59.0_PREC*this % prevSol % interior(i,j,k,iEl,nVar + iVar) + &
-                  37.0_PREC*this % prevSol % interior(i,j,k,iEl,2*nVar + iVar) - &
-                  9.0_PREC*this % prevSol % interior(i,j,k,iEl,3*nVar + iVar))/24.0_PREC
+                this%solution%interior(i,j,k,iEl,iVar) = &
+                  (55.0_prec*this%prevSol%interior(i,j,k,iEl,iVar)- &
+                   59.0_prec*this%prevSol%interior(i,j,k,iEl,nVar+iVar)+ &
+                   37.0_prec*this%prevSol%interior(i,j,k,iEl,2*nVar+iVar)- &
+                   9.0_prec*this%prevSol%interior(i,j,k,iEl,3*nVar+iVar))/24.0_prec
 
-              END DO
-            END DO
-          ENDDO
-        END DO
-      END DO
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp end target
 
-    END IF
+    endif
 
-  END SUBROUTINE UpdateGAB4_DGModel3D
+  endsubroutine UpdateGAB4_DGModel3D
 
-  SUBROUTINE UpdateGRK2_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine UpdateGRK2_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: i,j,k,iVar,iEl
+    integer :: i,j,k,iVar,iEl
 
     !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
     !$omp teams distribute parallel do collapse(5) num_threads(256)
-    DO iEl = 1,this % solution % nElem
-      DO iVar = 1,this % solution % nVar
-        DO k = 1,this % solution % interp % N+1
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
+    do iEl = 1,this%solution%nElem
+      do iVar = 1,this%solution%nVar
+        do k = 1,this%solution%interp%N+1
+          do j = 1,this%solution%interp%N+1
+            do i = 1,this%solution%interp%N+1
 
-              this % workSol % interior(i,j,k,iEl,iVar) = rk2_a(m)* &
-                                                                this % workSol % interior(i,j,k,iEl,iVar) + &
-                                                                  this % dSdt % interior(i,j,k,iEl,iVar)
+              this%workSol%interior(i,j,k,iEl,iVar) = rk2_a(m)* &
+                                                      this%workSol%interior(i,j,k,iEl,iVar)+ &
+                                                      this%dSdt%interior(i,j,k,iEl,iVar)
 
-              this % solution % interior(i,j,k,iEl,iVar) = &
-                this % solution % interior(i,j,k,iEl,iVar) + &
-                rk2_g(m)*this % dt*this % workSol % interior(i,j,k,iEl,iVar)
+              this%solution%interior(i,j,k,iEl,iVar) = &
+                this%solution%interior(i,j,k,iEl,iVar)+ &
+                rk2_g(m)*this%dt*this%workSol%interior(i,j,k,iEl,iVar)
 
-            END DO
-          ENDDO
-        END DO
-      END DO
-    END DO
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  END SUBROUTINE UpdateGRK2_DGModel3D
+  endsubroutine UpdateGRK2_DGModel3D
 
-  SUBROUTINE UpdateGRK3_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine UpdateGRK3_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: i,j,k,iVar,iEl
+    integer :: i,j,k,iVar,iEl
 
     !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
     !$omp teams distribute parallel do collapse(5) num_threads(256)
-    DO iEl = 1,this % solution % nElem
-      DO iVar = 1,this % solution % nVar
-        DO k = 1,this % solution % interp % N+1
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
+    do iEl = 1,this%solution%nElem
+      do iVar = 1,this%solution%nVar
+        do k = 1,this%solution%interp%N+1
+          do j = 1,this%solution%interp%N+1
+            do i = 1,this%solution%interp%N+1
 
-              this % workSol % interior(i,j,k,iEl,iVar) = rk3_a(m)* &
-                                                                this % workSol % interior(i,j,k,iEl,iVar) + &
-                                                                  this % dSdt % interior(i,j,k,iEl,iVar)
+              this%workSol%interior(i,j,k,iEl,iVar) = rk3_a(m)* &
+                                                      this%workSol%interior(i,j,k,iEl,iVar)+ &
+                                                      this%dSdt%interior(i,j,k,iEl,iVar)
 
-              this % solution % interior(i,j,k,iEl,iVar) = &
-                this % solution % interior(i,j,k,iEl,iVar) + &
-                rk3_g(m)*this % dt*this % workSol % interior(i,j,k,iEl,iVar)
+              this%solution%interior(i,j,k,iEl,iVar) = &
+                this%solution%interior(i,j,k,iEl,iVar)+ &
+                rk3_g(m)*this%dt*this%workSol%interior(i,j,k,iEl,iVar)
 
-            END DO
-          END DO
-        ENDDO
-      END DO
-    END DO
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  END SUBROUTINE UpdateGRK3_DGModel3D
+  endsubroutine UpdateGRK3_DGModel3D
 
-  SUBROUTINE UpdateGRK4_DGModel3D(this,m)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: m
+  subroutine UpdateGRK4_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
     ! Local
-    INTEGER :: i,j,k,iVar,iEl
+    integer :: i,j,k,iVar,iEl
 
     !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
-    !$omp teams distribute parallel do collapse(5) num_threads(256) 
-    DO iEl = 1,this % solution % nElem
-      DO iVar = 1,this % solution % nVar
-        DO k = 1,this % solution % interp % N+1
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
+    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    do iEl = 1,this%solution%nElem
+      do iVar = 1,this%solution%nVar
+        do k = 1,this%solution%interp%N+1
+          do j = 1,this%solution%interp%N+1
+            do i = 1,this%solution%interp%N+1
 
-              this % workSol % interior(i,j,k,iEl,iVar) = rk4_a(m)* &
-                                                                this % workSol % interior(i,j,k,iEl,iVar) + &
-                                                                  this % dSdt % interior(i,j,k,iEl,iVar)
+              this%workSol%interior(i,j,k,iEl,iVar) = rk4_a(m)* &
+                                                      this%workSol%interior(i,j,k,iEl,iVar)+ &
+                                                      this%dSdt%interior(i,j,k,iEl,iVar)
 
-              this % solution % interior(i,j,k,iEl,iVar) = &
-                this % solution % interior(i,j,k,iEl,iVar) + &
-                rk4_g(m)*this % dt*this % workSol % interior(i,j,k,iEl,iVar)
+              this%solution%interior(i,j,k,iEl,iVar) = &
+                this%solution%interior(i,j,k,iEl,iVar)+ &
+                rk4_g(m)*this%dt*this%workSol%interior(i,j,k,iEl,iVar)
 
-            END DO
-          END DO
-        ENDDO
-      END DO
-    END DO
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  END SUBROUTINE UpdateGRK4_DGModel3D
+  endsubroutine UpdateGRK4_DGModel3D
 
-  SUBROUTINE CalculateTendency_DGModel3D(this)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
+  subroutine CalculateTendency_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
     ! Local
-    INTEGER :: i,j,k,iVar,iEl
+    integer :: i,j,k,iVar,iEl
 
-    CALL this % PreTendency()
-    CALL this % solution % BoundaryInterp()
-    CALL this % solution % SideExchange(this % mesh,this % decomp)
-    CALL this % SetBoundaryCondition()
-    CALL this % SourceMethod()
-    CALL this % RiemannSolver()
-    CALL this % FluxMethod()
-    CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence)
+    call this%PreTendency()
+    call this%solution%BoundaryInterp()
+    call this%solution%SideExchange(this%mesh,this%decomp)
+    call this%SetBoundaryCondition()
+    call this%SourceMethod()
+    call this%RiemannSolver()
+    call this%FluxMethod()
+    call this%flux%DGDivergence(this%geometry,this%fluxDivergence)
 
     !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
     !$omp teams distribute parallel do collapse(5) num_threads(256)
-    DO iEl = 1,this % solution % nElem
-      DO iVar = 1,this % solution % nVar
-        DO k = 1,this % solution % interp % N+1
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
+    do iEl = 1,this%solution%nElem
+      do iVar = 1,this%solution%nVar
+        do k = 1,this%solution%interp%N+1
+          do j = 1,this%solution%interp%N+1
+            do i = 1,this%solution%interp%N+1
 
-              this % dSdt % interior(i,j,k,iEl,iVar) = &
-                this % source % interior(i,j,k,iEl,iVar) - &
-                this % fluxDivergence % interior(i,j,k,iEl,iVar)
+              this%dSdt%interior(i,j,k,iEl,iVar) = &
+                this%source%interior(i,j,k,iEl,iVar)- &
+                this%fluxDivergence%interior(i,j,k,iEl,iVar)
 
-            END DO
-          END DO
-        ENDDO
-      END DO
-    END DO
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
+  endsubroutine CalculateTendency_DGModel3D
 
-  END SUBROUTINE CalculateTendency_DGModel3D
-
-  SUBROUTINE Write_DGModel3D(this,fileName)
+  subroutine Write_DGModel3D(this,fileName)
 #undef __FUNC__
 #define __FUNC__ "Write_DGModel3D"
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    character(*),optional,intent(in) :: fileName
     ! Local
-    INTEGER(HID_T) :: fileId
-    TYPE(Scalar3D) :: solution
-    TYPE(Vector3D) :: x
-    TYPE(Lagrange),TARGET :: interp
-    CHARACTER(LEN=self_FileNameLength) :: pickupFile
-    CHARACTER(13) :: timeStampString
+    integer(HID_T) :: fileId
+    type(Scalar3D) :: solution
+    type(Vector3D) :: x
+    type(Lagrange),target :: interp
+    character(LEN=self_FileNameLength) :: pickupFile
+    character(13) :: timeStampString
 
-    IF (PRESENT(filename)) THEN
+    if(present(filename)) then
       pickupFile = filename
-    ELSE
-      WRITE (timeStampString,'(I13.13)') this % ioIterate
+    else
+      write(timeStampString,'(I13.13)') this%ioIterate
       pickupFile = 'solution.'//timeStampString//'.h5'
-    END IF
+    endif
 
-    INFO("Writing pickup file : "//TRIM(pickupFile))
+    INFO("Writing pickup file : "//trim(pickupFile))
 
-    IF (this % decomp % mpiEnabled) THEN
+    if(this%decomp%mpiEnabled) then
 
-      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
+      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%decomp%mpiComm)
 
       ! Write the interpolant to the file
       INFO("Writing interpolant data to file")
-      CALL this % solution % interp % WriteHDF5( fileId )
+      call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
       ! Write the model state to file
       INFO("Writing control grid solution to file")
-      CALL CreateGroup_HDF5(fileId,'/controlgrid')
-      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
-      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
+      call CreateGroup_HDF5(fileId,'/controlgrid')
+      call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
+                                   this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
 
       ! Write the geometry to file
       INFO("Writing control grid geometry to file")
-      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
-      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
+      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x', &
+                                     this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
 
       ! -- END : writing solution on control grid -- !
 
       ! Interpolate the solution to a grid for plotting results
       ! Create an interpolant for the uniform grid
-      CALL interp % Init(this % solution % interp % M, &
-                          this % solution % interp % targetNodeType, &
-                          this % solution % interp % N, &
-                          this % solution % interp % controlNodeType)
+      call interp%Init(this%solution%interp%M, &
+                       this%solution%interp%targetNodeType, &
+                       this%solution%interp%N, &
+                       this%solution%interp%controlNodeType)
 
-      CALL solution % Init(interp, &
-                            this % solution % nVar,this % solution % nElem)
+      call solution%Init(interp, &
+                         this%solution%nVar,this%solution%nElem)
 
-      CALL x % Init(interp,1,this % solution % nElem)
+      call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      CALL this % geometry % x % GridInterp(x)
+      call this%geometry%x%GridInterp(x)
 
       ! Map the solution to the target grid
-      CALL this % solution % GridInterp(solution)
+      call this%solution%GridInterp(solution)
 
       ! Write the model state to file
-      CALL CreateGroup_HDF5(fileId,'/targetgrid')
-      CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
-      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
+      call CreateGroup_HDF5(fileId,'/targetgrid')
+      call solution%WriteHDF5(fileId,'/targetgrid/solution', &
+                              this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
 
       ! Write the geometry to file
-      CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
-      CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
-      this % decomp % offsetElem(this % decomp % rankId), this % decomp % nElem )
+      call CreateGroup_HDF5(fileId,'/targetgrid/mesh')
+      call x%WriteHDF5(fileId,'/targetgrid/mesh/coords', &
+                       this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
 
-      CALL Close_HDF5(fileId)
+      call Close_HDF5(fileId)
 
-    ELSE
+    else
 
-      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
       ! Write the interpolant to the file
       INFO("Writing interpolant data to file")
-      CALL this % solution % interp % WriteHDF5( fileId )
+      call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
 
       ! Write the model state to file
       INFO("Writing control grid solution to file")
-      CALL CreateGroup_HDF5(fileId,'/controlgrid')
-      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution' )
+      call CreateGroup_HDF5(fileId,'/controlgrid')
+      call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
       ! Write the geometry to file
       INFO("Writing control grid  geometry to file")
-      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      CALL this % geometry % x % WriteHDF5(fileId,'/controlgrid/geometry/x')
+      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
       ! -- END : writing solution on control grid -- !
 
       ! Interpolate the solution to a grid for plotting results
       ! Create an interpolant for the uniform grid
-      CALL interp % Init(this % solution % interp % M, &
-                          this % solution % interp % targetNodeType, &
-                          this % solution % interp % N, &
-                          this % solution % interp % controlNodeType)
+      call interp%Init(this%solution%interp%M, &
+                       this%solution%interp%targetNodeType, &
+                       this%solution%interp%N, &
+                       this%solution%interp%controlNodeType)
 
-      CALL solution % Init(interp, &
-                            this % solution % nVar,this % solution % nElem)
+      call solution%Init(interp, &
+                         this%solution%nVar,this%solution%nElem)
 
-      CALL x % Init(interp,1,this % solution % nElem)
+      call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      CALL this % geometry % x % GridInterp(x)
+      call this%geometry%x%GridInterp(x)
 
       ! Map the solution to the target grid
-      CALL this % solution % GridInterp(solution)
+      call this%solution%GridInterp(solution)
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
-      CALL CreateGroup_HDF5(fileId,'/targetgrid')
-      CALL solution % WriteHDF5(fileId, '/targetgrid/solution')
+      call CreateGroup_HDF5(fileId,'/targetgrid')
+      call solution%WriteHDF5(fileId,'/targetgrid/solution')
 
       ! Write the geometry to file
       INFO("Writing target grid geometry to file")
-      CALL CreateGroup_HDF5(fileId,'/targetgrid/geometry')
-      CALL x % WriteHDF5(fileId,'/targetgrid/geometry/x')
+      call CreateGroup_HDF5(fileId,'/targetgrid/geometry')
+      call x%WriteHDF5(fileId,'/targetgrid/geometry/x')
 
-      CALL Close_HDF5(fileId)
+      call Close_HDF5(fileId)
 
-    END IF
+    endif
 
-    CALL x % Free()
-    CALL solution % Free()
-    CALL interp % Free()
+    call x%Free()
+    call solution%Free()
+    call interp%Free()
 
-  END SUBROUTINE Write_DGModel3D
+  endsubroutine Write_DGModel3D
 
-  SUBROUTINE Read_DGModel3D(this,fileName)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in) :: fileName
+  subroutine Read_DGModel3D(this,fileName)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    character(*),intent(in) :: fileName
     ! Local
-    INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: solOffset(1:5)
-    INTEGER :: firstElem
-    INTEGER :: N
+    integer(HID_T) :: fileId
+    integer(HID_T) :: solOffset(1:5)
+    integer :: firstElem
+    integer :: N
 
-    IF (this % decomp % mpiEnabled) THEN
-      CALL Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
-                      this % decomp % mpiComm)
-    ELSE
-      CALL Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
-    END IF
+    if(this%decomp%mpiEnabled) then
+      call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
+                     this%decomp%mpiComm)
+    else
+      call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
+    endif
 
     ! CALL ReadAttribute_HDF5(fileId,'N',N)
 
@@ -798,129 +794,129 @@ CONTAINS
     !   STOP 'Error : Solution polynomial degree does not match input file'
     ! END IF
 
-    IF (this % decomp % mpiEnabled) THEN
-      firstElem = this % decomp % offsetElem(this % decomp % rankId) + 1
+    if(this%decomp%mpiEnabled) then
+      firstElem = this%decomp%offsetElem(this%decomp%rankId)+1
       solOffset(1:5) = (/0,0,0,1,firstElem/)
-      CALL ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
-                          this % solution % interior,solOffset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this % solution % interior)
-    END IF
+      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
+                          this%solution%interior,solOffset)
+    else
+      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this%solution%interior)
+    endif
 
-    CALL Close_HDF5(fileId)
+    call Close_HDF5(fileId)
 
-  END SUBROUTINE Read_DGModel3D
+  endsubroutine Read_DGModel3D
 
-  SUBROUTINE WriteTecplot_DGModel3D(this,filename)
-    IMPLICIT NONE
-    CLASS(DGModel3D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in),OPTIONAL :: filename
+  subroutine WriteTecplot_DGModel3D(this,filename)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    character(*),intent(in),optional :: filename
     ! Local
-    CHARACTER(8) :: zoneID
-    INTEGER :: fUnit
-    INTEGER :: iEl,i,j,k,iVar
-    CHARACTER(LEN=self_FileNameLength) :: tecFile
-    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
-    CHARACTER(LEN=self_FormatLength) :: fmat
-    CHARACTER(13) :: timeStampString
-    CHARACTER(5) :: rankString
-    TYPE(Scalar3D) :: solution
-    TYPE(Vector3D) :: solutionGradient
-    TYPE(Vector3D) :: x
-    TYPE(Lagrange),TARGET :: interp
+    character(8) :: zoneID
+    integer :: fUnit
+    integer :: iEl,i,j,k,iVar
+    character(LEN=self_FileNameLength) :: tecFile
+    character(LEN=self_TecplotHeaderLength) :: tecHeader
+    character(LEN=self_FormatLength) :: fmat
+    character(13) :: timeStampString
+    character(5) :: rankString
+    type(Scalar3D) :: solution
+    type(Vector3D) :: solutionGradient
+    type(Vector3D) :: x
+    type(Lagrange),target :: interp
 
-    IF (PRESENT(filename)) THEN
+    if(present(filename)) then
       tecFile = filename
-    ELSE
-      WRITE (timeStampString,'(I13.13)') this % ioIterate
+    else
+      write(timeStampString,'(I13.13)') this%ioIterate
 
-      IF (this % decomp % mpiEnabled) THEN
-        WRITE (rankString,'(I5.5)') this % decomp % rankId
+      if(this%decomp%mpiEnabled) then
+        write(rankString,'(I5.5)') this%decomp%rankId
         tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
-      ELSE
+      else
         tecFile = 'solution.'//timeStampString//'.tec'
-      END IF
+      endif
 
-    END IF
+    endif
 
     ! Create an interpolant for the uniform grid
-    CALL interp % Init(this % solution % interp % M, &
-                        this % solution % interp % targetNodeType, &
-                        this % solution % interp % N, &
-                        this % solution % interp % controlNodeType)
+    call interp%Init(this%solution%interp%M, &
+                     this%solution%interp%targetNodeType, &
+                     this%solution%interp%N, &
+                     this%solution%interp%controlNodeType)
 
-    CALL solution % Init(interp, &
-                          this % solution % nVar,this % solution % nElem)
+    call solution%Init(interp, &
+                       this%solution%nVar,this%solution%nElem)
 
-    CALL solutionGradient % Init(interp, &
-                                  this % solution % nVar,this % solution % nElem)
+    call solutionGradient%Init(interp, &
+                               this%solution%nVar,this%solution%nElem)
 
-    CALL x % Init(interp,1,this % solution % nElem)
+    call x%Init(interp,1,this%solution%nElem)
 
     ! Map the mesh positions to the target grid
-    CALL this % geometry % x % GridInterp(x)
+    call this%geometry%x%GridInterp(x)
 
     ! Map the solution to the target grid
-    CALL this % solution % GridInterp(solution)
+    call this%solution%GridInterp(solution)
 
     ! Map the solution to the target grid
-    CALL this % solutionGradient % GridInterp(solutionGradient)
+    call this%solutionGradient%GridInterp(solutionGradient)
 
-    OPEN (UNIT=NEWUNIT(fUnit), &
-          FILE=TRIM(tecFile), &
-          FORM='formatted', &
-          STATUS='replace')
+    open(UNIT=NEWUNIT(fUnit), &
+         FILE=trim(tecFile), &
+         FORM='formatted', &
+         STATUS='replace')
 
     tecHeader = 'VARIABLES = "X", "Y", "Z"'
-    DO iVar = 1,this % solution % nVar
-      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
-    END DO
+    do iVar = 1,this%solution%nVar
+      tecHeader = trim(tecHeader)//', "'//trim(this%solution%meta(iVar)%name)//'"'
+    enddo
 
-    DO iVar = 1,this % solution % nVar
-      tecHeader = TRIM(tecHeader)//', "d/dx('//TRIM(this % solution % meta(iVar) % name)//')"'
-    END DO
+    do iVar = 1,this%solution%nVar
+      tecHeader = trim(tecHeader)//', "d/dx('//trim(this%solution%meta(iVar)%name)//')"'
+    enddo
 
-    DO iVar = 1,this % solution % nVar
-      tecHeader = TRIM(tecHeader)//', "d/dy('//TRIM(this % solution % meta(iVar) % name)//')"'
-    END DO
+    do iVar = 1,this%solution%nVar
+      tecHeader = trim(tecHeader)//', "d/dy('//trim(this%solution%meta(iVar)%name)//')"'
+    enddo
 
-    WRITE (fUnit,*) TRIM(tecHeader)
+    write(fUnit,*) trim(tecHeader)
 
     ! Create format statement
-    WRITE (fmat,*) 3*this % solution % nvar + 3
-    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+    write(fmat,*) 3*this%solution%nvar+3
+    fmat = '('//trim(fmat)//'(ES16.7E3,1x))'
 
-    DO iEl = 1,this % solution % nElem
+    do iEl = 1,this%solution%nElem
 
       ! TO DO :: Get the global element ID
-      WRITE (zoneID,'(I8.8)') iEl
-      WRITE (fUnit,*) 'ZONE T="el'//TRIM(zoneID)//'", I=',this % solution % interp % M + 1, &
-        ', J=',this % solution % interp % M + 1
+      write(zoneID,'(I8.8)') iEl
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%solution%interp%M+1, &
+        ', J=',this%solution%interp%M+1
 
-      DO k = 1,this % solution % interp % M+1
-      DO j = 1,this % solution % interp % M+1
-        DO i = 1,this % solution % interp % M+1
+      do k = 1,this%solution%interp%M+1
+        do j = 1,this%solution%interp%M+1
+          do i = 1,this%solution%interp%M+1
 
-          WRITE (fUnit,fmat) x % interior(1,i,j,k,iEl,1), &
-            x % interior(2,i,j,k,iEl,1), &
-            x % interior(3,i,j,k,iEl,1), &
-            solution % interior(i,j,k,iEl,1:this % solution % nvar), &
-            solutionGradient % interior(1,i,j,k,iEl,1:this % solution % nvar), &
-            solutionGradient % interior(2,i,j,k,iEl,1:this % solution % nvar), &
-            solutionGradient % interior(3,i,j,k,iEl,1:this % solution % nvar)
+            write(fUnit,fmat) x%interior(1,i,j,k,iEl,1), &
+              x%interior(2,i,j,k,iEl,1), &
+              x%interior(3,i,j,k,iEl,1), &
+              solution%interior(i,j,k,iEl,1:this%solution%nvar), &
+              solutionGradient%interior(1,i,j,k,iEl,1:this%solution%nvar), &
+              solutionGradient%interior(2,i,j,k,iEl,1:this%solution%nvar), &
+              solutionGradient%interior(3,i,j,k,iEl,1:this%solution%nvar)
 
-        END DO
-      END DO
-      ENDDO
+          enddo
+        enddo
+      enddo
 
-    END DO
+    enddo
 
-    CLOSE (UNIT=fUnit)
+    close(UNIT=fUnit)
 
-    CALL x % Free()
-    CALL solution % Free()
-    CALL interp % Free()
+    call x%Free()
+    call solution%Free()
+    call interp%Free()
 
-  END SUBROUTINE WriteTecplot_DGModel3D
+  endsubroutine WriteTecplot_DGModel3D
 
-END MODULE SELF_DGModel3D
+endmodule SELF_DGModel3D

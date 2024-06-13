@@ -4,390 +4,389 @@
 ! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Geometry
+module SELF_Geometry
 
-  USE SELF_Constants
-  USE SELF_Lagrange
-  USE SELF_Data
-  USE SELF_SupportRoutines
-  USE SELF_Mesh
+  use SELF_Constants
+  use SELF_Lagrange
+  use SELF_Data
+  use SELF_SupportRoutines
+  use SELF_Mesh
 
-  IMPLICIT NONE
+  implicit none
 
 #include "SELF_Macros.h"
-  TYPE,PUBLIC :: SEMGeometry
-  INTEGER :: nElem
-  END TYPE SEMGeometry
+  type,public :: SEMGeometry
+    integer :: nElem
+  endtype SEMGeometry
 
-  TYPE,EXTENDS(SEMGeometry),PUBLIC :: Geometry1D
-    TYPE(Scalar1D) :: x ! Physical Positions
-    TYPE(Scalar1D) :: dxds ! Conversion from computational to physical space
+  type,extends(SEMGeometry),public :: Geometry1D
+    type(Scalar1D) :: x ! Physical Positions
+    type(Scalar1D) :: dxds ! Conversion from computational to physical space
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_Geometry1D
-    PROCEDURE,PUBLIC :: Free => Free_Geometry1D
-    PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_Geometry1D
-    PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
+    procedure,public :: Init => Init_Geometry1D
+    procedure,public :: Free => Free_Geometry1D
+    procedure,public :: GenerateFromMesh => GenerateFromMesh_Geometry1D
+    procedure,public :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
 
-    PROCEDURE :: Write => Write_Geometry1D
+    procedure :: write => Write_Geometry1D
 
-  END TYPE Geometry1D
+  endtype Geometry1D
 
-  TYPE,EXTENDS(SEMGeometry),PUBLIC :: SEMQuad
-    TYPE(Vector2D) :: x ! Physical positions
-    TYPE(Tensor2D) :: dxds ! Covariant basis vectors
-    TYPE(Tensor2D) :: dsdx ! Contavariant basis vectors
-    TYPE(Vector2D) :: nHat ! Normal Vectors pointing across coordinate lines
-    TYPE(Scalar2D) :: nScale ! Boundary scale
-    TYPE(Scalar2D) :: J ! Jacobian of the transformation
+  type,extends(SEMGeometry),public :: SEMQuad
+    type(Vector2D) :: x ! Physical positions
+    type(Tensor2D) :: dxds ! Covariant basis vectors
+    type(Tensor2D) :: dsdx ! Contavariant basis vectors
+    type(Vector2D) :: nHat ! Normal Vectors pointing across coordinate lines
+    type(Scalar2D) :: nScale ! Boundary scale
+    type(Scalar2D) :: J ! Jacobian of the transformation
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_SEMQuad
-    PROCEDURE,PUBLIC :: Free => Free_SEMQuad
-    PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMQuad
-    PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
-    PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
+    procedure,public :: Init => Init_SEMQuad
+    procedure,public :: Free => Free_SEMQuad
+    procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMQuad
+    procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
+    procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
 
     !PROCEDURE,PUBLIC :: CovariantArcMin => CovariantArcMin_SEMQuad
     !PROCEDURE :: Write => Write_SEMQuad
 
-  END TYPE SEMQuad
+  endtype SEMQuad
 
-  TYPE,EXTENDS(SEMGeometry),PUBLIC :: SEMHex
-    TYPE(Vector3D) :: x ! Physical positions
-    TYPE(Tensor3D) :: dxds ! Covariant basis vectors
-    TYPE(Tensor3D) :: dsdx ! Contavariant basis vectors
-    TYPE(Vector3D) :: nHat ! Normal Vectors pointing across coordinate lines
-    TYPE(Scalar3D) :: nScale ! Boundary scale
-    TYPE(Scalar3D) :: J ! Jacobian of the transformation
+  type,extends(SEMGeometry),public :: SEMHex
+    type(Vector3D) :: x ! Physical positions
+    type(Tensor3D) :: dxds ! Covariant basis vectors
+    type(Tensor3D) :: dsdx ! Contavariant basis vectors
+    type(Vector3D) :: nHat ! Normal Vectors pointing across coordinate lines
+    type(Scalar3D) :: nScale ! Boundary scale
+    type(Scalar3D) :: J ! Jacobian of the transformation
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_SEMHex
-    PROCEDURE,PUBLIC :: Free => Free_SEMHex
-    PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMHex
-    PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
-    PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
-    PROCEDURE,PRIVATE :: CheckSides => CheckSides_SEMHex
+    procedure,public :: Init => Init_SEMHex
+    procedure,public :: Free => Free_SEMHex
+    procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMHex
+    procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
+    procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
+    procedure,private :: CheckSides => CheckSides_SEMHex
 
     !PROCEDURE :: Write => Write_SEMHex
 
-  END TYPE SEMHex
+  endtype SEMHex
 
-CONTAINS
+contains
 
-  SUBROUTINE Init_Geometry1D(myGeom,interp,nElem)
-    IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(out) :: myGeom
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in) :: nElem
+  subroutine Init_Geometry1D(myGeom,interp,nElem)
+    implicit none
+    class(Geometry1D),intent(out) :: myGeom
+    type(Lagrange),pointer,intent(in) :: interp
+    integer,intent(in) :: nElem
 
-    myGeom % nElem = nElem
+    myGeom%nElem = nElem
 
-    CALL myGeom % x % Init(interp=interp,&
-                           nVar=1, &
-                           nElem=nElem)
+    call myGeom%x%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
 
-    CALL myGeom % dxds % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%dxds%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-  END SUBROUTINE Init_Geometry1D
+  endsubroutine Init_Geometry1D
 
-  SUBROUTINE Free_Geometry1D(myGeom)
-    IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(inout) :: myGeom
+  subroutine Free_Geometry1D(myGeom)
+    implicit none
+    class(Geometry1D),intent(inout) :: myGeom
 
-    CALL myGeom % x % Free()
-    CALL myGeom % dxds % Free()
+    call myGeom%x%Free()
+    call myGeom%dxds%Free()
 
-  END SUBROUTINE Free_Geometry1D
+  endsubroutine Free_Geometry1D
 
-  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh)
+  subroutine GenerateFromMesh_Geometry1D(myGeom,mesh)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
-    IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(inout) :: myGeom
-    TYPE(Mesh1D),INTENT(in) :: mesh
+    implicit none
+    class(Geometry1D),intent(inout) :: myGeom
+    type(Mesh1D),intent(in) :: mesh
     ! Local
-    INTEGER :: iel,i,nid
-    TYPE(Lagrange),TARGET :: meshToModel
-    TYPE(Scalar1D) :: xMesh
+    integer :: iel,i,nid
+    type(Lagrange),target :: meshToModel
+    type(Scalar1D) :: xMesh
 
-    CALL meshToModel % Init(mesh % nGeo, mesh % quadrature,&
-            myGeom % x % interp % N, &
-            myGeom % x % interp % controlNodeType )
+    call meshToModel%Init(mesh%nGeo,mesh%quadrature, &
+                          myGeom%x%interp%N, &
+                          myGeom%x%interp%controlNodeType)
 
-    CALL xMesh % Init(meshToModel,&
-                      1,mesh % nElem)
+    call xMesh%Init(meshToModel, &
+                    1,mesh%nElem)
 
     ! Set the element internal mesh locations
     nid = 1
-    DO iel = 1,mesh % nElem
-      DO i = 1,mesh % nGeo+1
-        xMesh % interior(i,iel,1) = mesh % nodeCoords(nid)
-        nid = nid + 1
-      END DO
-    END DO
+    do iel = 1,mesh%nElem
+      do i = 1,mesh%nGeo+1
+        xMesh%interior(i,iel,1) = mesh%nodeCoords(nid)
+        nid = nid+1
+      enddo
+    enddo
 
     ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    CALL xMesh % GridInterp(myGeom % x)
+    call xMesh%GridInterp(myGeom%x)
 
-    CALL myGeom % x % BoundaryInterp()
+    call myGeom%x%BoundaryInterp()
 
-    CALL myGeom % CalculateMetricTerms()
+    call myGeom%CalculateMetricTerms()
 
-    CALL xMesh % Free()
+    call xMesh%Free()
 
-    CALL meshToModel % Free() 
+    call meshToModel%Free()
 
-  END SUBROUTINE GenerateFromMesh_Geometry1D
+  endsubroutine GenerateFromMesh_Geometry1D
 
-  SUBROUTINE CalculateMetricTerms_Geometry1D(myGeom)
-    IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(inout) :: myGeom
+  subroutine CalculateMetricTerms_Geometry1D(myGeom)
+    implicit none
+    class(Geometry1D),intent(inout) :: myGeom
 
-    CALL myGeom % x % Derivative(myGeom % dxds)
-    CALL myGeom % dxds % BoundaryInterp()
+    call myGeom%x%Derivative(myGeom%dxds)
+    call myGeom%dxds%BoundaryInterp()
 
-  END SUBROUTINE CalculateMetricTerms_Geometry1D
+  endsubroutine CalculateMetricTerms_Geometry1D
 
-  SUBROUTINE Write_Geometry1D(myGeom,fileName)
-    IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(in) :: myGeom
-    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+  subroutine Write_Geometry1D(myGeom,fileName)
+    implicit none
+    class(Geometry1D),intent(in) :: myGeom
+    character(*),optional,intent(in) :: fileName
     ! Local
-    INTEGER(HID_T) :: fileId
+    integer(HID_T) :: fileId
     ! Local
-    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+    character(LEN=self_FileNameLength) :: pickupFile
 
-    IF( PRESENT(filename) )THEN
+    if(present(filename)) then
       pickupFile = filename
-    ELSE
+    else
       pickupFile = 'mesh.h5'
-    ENDIF
+    endif
 
-    CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+    call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
-    CALL CreateGroup_HDF5(fileId,'/quadrature')
+    call CreateGroup_HDF5(fileId,'/quadrature')
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                         myGeom % x % interp % controlPoints)
+    call WriteArray_HDF5(fileId,'/quadrature/xi', &
+                         myGeom%x%interp%controlPoints)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                         myGeom % x % interp % qWeights)
+    call WriteArray_HDF5(fileId,'/quadrature/weights', &
+                         myGeom%x%interp%qWeights)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                         myGeom % x % interp % dgMatrix)
+    call WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                         myGeom%x%interp%dgMatrix)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                         myGeom % x % interp % dMatrix)
+    call WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                         myGeom%x%interp%dMatrix)
 
-    CALL CreateGroup_HDF5(fileId,'/mesh')
+    call CreateGroup_HDF5(fileId,'/mesh')
 
-    CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+    call CreateGroup_HDF5(fileId,'/mesh/interior')
 
-    CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+    call CreateGroup_HDF5(fileId,'/mesh/boundary')
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom%x%interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom%dxds%interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom%x%boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom%dxds%boundary)
 
-    CALL Close_HDF5(fileId)
+    call Close_HDF5(fileId)
 
-  END SUBROUTINE Write_Geometry1D
+  endsubroutine Write_Geometry1D
 
-  SUBROUTINE Init_SEMQuad(myGeom,interp,nElem)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(out) :: myGeom
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in) :: nElem
+  subroutine Init_SEMQuad(myGeom,interp,nElem)
+    implicit none
+    class(SEMQuad),intent(out) :: myGeom
+    type(Lagrange),pointer,intent(in) :: interp
+    integer,intent(in) :: nElem
 
-    myGeom % nElem = nElem
+    myGeom%nElem = nElem
 
-    CALL myGeom % x % Init(interp=interp,&
-                           nVar=1, &
-                           nElem=nElem)
+    call myGeom%x%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
 
-    CALL myGeom % dxds % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%dxds%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-    CALL myGeom % dsdx % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%dsdx%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-    CALL myGeom % nHat % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%nHat%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-    CALL myGeom % nScale % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%nScale%Init(interp=interp, &
+                            nVar=1, &
+                            nElem=nElem)
 
-    CALL myGeom % J % Init(interp=interp,&
-                           nVar=1, &
-                           nElem=nElem)
+    call myGeom%J%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
 
-  END SUBROUTINE Init_SEMQuad
+  endsubroutine Init_SEMQuad
 
-  SUBROUTINE Free_SEMQuad(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(inout) :: myGeom
+  subroutine Free_SEMQuad(myGeom)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
 
-    CALL myGeom % x % Free()
-    CALL myGeom % dxds % Free()
-    CALL myGeom % dsdx % Free()
-    CALL myGeom % nHat % Free()
-    CALL myGeom % nScale % Free()
-    CALL myGeom % J % Free()
+    call myGeom%x%Free()
+    call myGeom%dxds%Free()
+    call myGeom%dsdx%Free()
+    call myGeom%nHat%Free()
+    call myGeom%nScale%Free()
+    call myGeom%J%Free()
 
-  END SUBROUTINE Free_SEMQuad
+  endsubroutine Free_SEMQuad
 
-  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(inout) :: myGeom
-    TYPE(Mesh2D),INTENT(in) :: mesh
+  subroutine GenerateFromMesh_SEMQuad(myGeom,mesh)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+    type(Mesh2D),intent(in) :: mesh
     ! Local
-    INTEGER :: iel
-    INTEGER :: i,j,nid
-    TYPE(Lagrange),TARGET :: meshToModel
-    TYPE(Vector2D) :: xMesh
+    integer :: iel
+    integer :: i,j,nid
+    type(Lagrange),target :: meshToModel
+    type(Vector2D) :: xMesh
 
-    CALL meshToModel % Init(mesh % nGeo, &
-            mesh % quadrature, &
-            myGeom % x % interp % N, &
-            myGeom % x % interp % controlNodeType )
+    call meshToModel%Init(mesh%nGeo, &
+                          mesh%quadrature, &
+                          myGeom%x%interp%N, &
+                          myGeom%x%interp%controlNodeType)
 
-    CALL xMesh % Init(meshToModel,1,mesh % nElem)
+    call xMesh%Init(meshToModel,1,mesh%nElem)
 
     ! Set the element internal mesh locations
-    DO iel = 1, mesh % nElem
-      DO j = 1, mesh % nGeo+1
-        DO i = 1, mesh % nGeo+1
-          xMesh % interior(i,j,iel,1,1:2) = mesh % nodeCoords(1:2,i,j,iel)
-        END DO
-      END DO
-    END DO
+    do iel = 1,mesh%nElem
+      do j = 1,mesh%nGeo+1
+        do i = 1,mesh%nGeo+1
+          xMesh%interior(i,j,iel,1,1:2) = mesh%nodeCoords(1:2,i,j,iel)
+        enddo
+      enddo
+    enddo
 
-    CALL xMesh % GridInterp(myGeom % x)
-    CALL myGeom % x % BoundaryInterp()
-    CALL myGeom % CalculateMetricTerms()
+    call xMesh%GridInterp(myGeom%x)
+    call myGeom%x%BoundaryInterp()
+    call myGeom%CalculateMetricTerms()
 
-    CALL xMesh % Free()
-    CALL meshToModel % Free()
+    call xMesh%Free()
+    call meshToModel%Free()
 
-  END SUBROUTINE GenerateFromMesh_SEMQuad
+  endsubroutine GenerateFromMesh_SEMQuad
 
-  SUBROUTINE CalculateContravariantBasis_SEMQuad(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(inout) :: myGeom
+  subroutine CalculateContravariantBasis_SEMQuad(myGeom)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
     ! Local
-    INTEGER :: iEl,i,j,k
-    REAL(prec) :: fac
-    REAL(prec) :: mag
+    integer :: iEl,i,j,k
+    real(prec) :: fac
+    real(prec) :: mag
 
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
-    DO iEl = 1,myGeom % nElem
-      DO j = 1,myGeom % dxds % interp % N+1
-        DO i = 1,myGeom % dxds % interp % N+1
+    do iEl = 1,myGeom%nElem
+      do j = 1,myGeom%dxds%interp%N+1
+        do i = 1,myGeom%dxds%interp%N+1
 
-          myGeom % dsdx % interior(i,j,iel,1,1,1) =  myGeom % dxds % interior(i,j,iel,1,2,2)
-          myGeom % dsdx % interior(i,j,iel,1,2,1) = -myGeom % dxds % interior(i,j,iel,1,1,2)
-          myGeom % dsdx % interior(i,j,iel,1,1,2) = -myGeom % dxds % interior(i,j,iel,1,2,1)
-          myGeom % dsdx % interior(i,j,iel,1,2,2) =  myGeom % dxds % interior(i,j,iel,1,1,1)
+          myGeom%dsdx%interior(i,j,iel,1,1,1) = myGeom%dxds%interior(i,j,iel,1,2,2)
+          myGeom%dsdx%interior(i,j,iel,1,2,1) = -myGeom%dxds%interior(i,j,iel,1,1,2)
+          myGeom%dsdx%interior(i,j,iel,1,1,2) = -myGeom%dxds%interior(i,j,iel,1,2,1)
+          myGeom%dsdx%interior(i,j,iel,1,2,2) = myGeom%dxds%interior(i,j,iel,1,1,1)
 
-        END DO
-      END DO
-    END DO
+        enddo
+      enddo
+    enddo
 
     ! Interpolate the contravariant tensor to the boundaries
-    CALL myGeom % dsdx % BoundaryInterp()
+    call myGeom%dsdx%BoundaryInterp()
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-    DO iEl = 1,myGeom % nElem
-      DO k = 1,4
-        DO i = 1,myGeom % J % interp % N+1
-          IF (k == selfSide2D_East .OR. k == selfSide2D_North) THEN
-            fac = SIGN(1.0_prec,myGeom % J % boundary(i,k,iEl,1))
-          ELSE
-            fac = -SIGN(1.0_prec,myGeom % J % boundary(i,k,iEl,1))
-          END IF
+    do iEl = 1,myGeom%nElem
+      do k = 1,4
+        do i = 1,myGeom%J%interp%N+1
+          if(k == selfSide2D_East .or. k == selfSide2D_North) then
+            fac = sign(1.0_prec,myGeom%J%boundary(i,k,iEl,1))
+          else
+            fac = -sign(1.0_prec,myGeom%J%boundary(i,k,iEl,1))
+          endif
 
-          IF( k == 1 )THEN ! South
+          if(k == 1) then ! South
 
-            mag = SQRT( myGeom % dsdx % boundary(i,k,iEl,1,1,2)**2 +&
-                        myGeom % dsdx % boundary(i,k,iEl,1,2,2)**2 )
- 
-            myGeom % nScale % boundary(i,k,iEl,1) = mag
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,2)**2)
 
-            myGeom % nHat % boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2,2)/mag
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
 
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
 
-          ELSEIF( k == 2 )THEN ! East
+          elseif(k == 2) then ! East
 
-            mag = SQRT( myGeom % dsdx % boundary(i,k,iEl,1,1,1)**2 +&
-                        myGeom % dsdx % boundary(i,k,iEl,1,2,1)**2 )
- 
-            myGeom % nScale % boundary(i,k,iEl,1) = mag
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,1)**2)
 
-            myGeom % nHat % boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2,1)/mag
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
 
-          ELSEIF( k == 3 )THEN ! North
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
 
-            mag = SQRT( myGeom % dsdx % boundary(i,k,iEl,1,1,2)**2 +&
-                        myGeom % dsdx % boundary(i,k,iEl,1,2,2)**2 )
- 
-            myGeom % nScale % boundary(i,k,iEl,1) = mag
+          elseif(k == 3) then ! North
 
-            myGeom % nHat % boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2,2)/mag
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,2)**2)
 
-          ELSEIF( k == 4 )THEN ! West
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
 
-            mag = SQRT( myGeom % dsdx % boundary(i,k,iEl,1,1,1)**2 +&
-                        myGeom % dsdx % boundary(i,k,iEl,1,2,1)**2 )
- 
-            myGeom % nScale % boundary(i,k,iEl,1) = mag
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
 
-            myGeom % nHat % boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom % dsdx % boundary(i,k,iEl,1,1:2,1)/mag
+          elseif(k == 4) then ! West
 
-          ENDIF
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,1)**2)
+
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
+
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
+
+          endif
 
           ! Set the directionality for dsdx on the boundaries
-          myGeom % dsdx % boundary(i,k,iEl,1,1:2,1:2) = & 
-              myGeom % dsdx % boundary(i,k,iEl,1,1:2,1:2)*fac
+          myGeom%dsdx%boundary(i,k,iEl,1,1:2,1:2) = &
+            myGeom%dsdx%boundary(i,k,iEl,1,1:2,1:2)*fac
 
-        END DO
-      END DO
-    END DO
+        enddo
+      enddo
+    enddo
 
-  END SUBROUTINE CalculateContravariantBasis_SEMQuad
+  endsubroutine CalculateContravariantBasis_SEMQuad
 
-  SUBROUTINE CalculateMetricTerms_SEMQuad(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(inout) :: myGeom
+  subroutine CalculateMetricTerms_SEMQuad(myGeom)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
 
-    CALL myGeom % x % Gradient(myGeom % dxds)
-    CALL myGeom % dxds % BoundaryInterp()
-    CALL myGeom % dxds % Determinant(myGeom % J)
-    CALL myGeom % J % BoundaryInterp()
+    call myGeom%x%Gradient(myGeom%dxds)
+    call myGeom%dxds%BoundaryInterp()
+    call myGeom%dxds%Determinant(myGeom%J)
+    call myGeom%J%BoundaryInterp()
 
-    CALL myGeom % CalculateContravariantBasis()
+    call myGeom%CalculateContravariantBasis()
 
-  END SUBROUTINE CalculateMetricTerms_SEMQuad
+  endsubroutine CalculateMetricTerms_SEMQuad
 
   ! SUBROUTINE Write_SEMQuad(myGeom,fileName)
   !   IMPLICIT NONE
@@ -450,386 +449,386 @@ CONTAINS
 
   ! END SUBROUTINE Write_SEMQuad
 
-  SUBROUTINE Init_SEMHex(myGeom,interp,nElem)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(out) :: myGeom
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in) :: nElem
+  subroutine Init_SEMHex(myGeom,interp,nElem)
+    implicit none
+    class(SEMHex),intent(out) :: myGeom
+    type(Lagrange),pointer,intent(in) :: interp
+    integer,intent(in) :: nElem
 
-    myGeom % nElem = nElem
+    myGeom%nElem = nElem
 
-    CALL myGeom % x % Init(interp=interp,&
-                           nVar=1, &
-                           nElem=nElem)
+    call myGeom%x%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
 
-    CALL myGeom % dxds % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%dxds%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-    CALL myGeom % dsdx % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%dsdx%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-    CALL myGeom % nHat % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%nHat%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
 
-    CALL myGeom % nScale % Init(interp=interp,&
-                              nVar=1, &
-                              nElem=nElem)
+    call myGeom%nScale%Init(interp=interp, &
+                            nVar=1, &
+                            nElem=nElem)
 
-    CALL myGeom % J % Init(interp=interp,&
-                           nVar=1, &
-                           nElem=nElem)
+    call myGeom%J%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
 
-  END SUBROUTINE Init_SEMHex
+  endsubroutine Init_SEMHex
 
-  SUBROUTINE Free_SEMHex(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(inout) :: myGeom
+  subroutine Free_SEMHex(myGeom)
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
 
-    CALL myGeom % x % Free()
-    CALL myGeom % dxds % Free()
-    CALL myGeom % dsdx % Free()
-    CALL myGeom % nHat % Free()
-    CALL myGeom % nScale % Free()
-    CALL myGeom % J % Free()
+    call myGeom%x%Free()
+    call myGeom%dxds%Free()
+    call myGeom%dsdx%Free()
+    call myGeom%nHat%Free()
+    call myGeom%nScale%Free()
+    call myGeom%J%Free()
 
-  END SUBROUTINE Free_SEMHex
+  endsubroutine Free_SEMHex
 
-  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(inout) :: myGeom
-    TYPE(Mesh3D),INTENT(in) :: mesh
+  subroutine GenerateFromMesh_SEMHex(myGeom,mesh)
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
+    type(Mesh3D),intent(in) :: mesh
     ! Local
-    INTEGER :: iel
-    INTEGER :: i,j,k,nid
-    TYPE(Lagrange),TARGET :: meshToModel
-    TYPE(Vector3D) :: xMesh
+    integer :: iel
+    integer :: i,j,k,nid
+    type(Lagrange),target :: meshToModel
+    type(Vector3D) :: xMesh
 
-    CALL meshToModel % Init(mesh % nGeo, mesh % quadrature,&
-            myGeom % x % interp % N, &
-            myGeom % x % interp % controlNodeType )
+    call meshToModel%Init(mesh%nGeo,mesh%quadrature, &
+                          myGeom%x%interp%N, &
+                          myGeom%x%interp%controlNodeType)
 
-    CALL xMesh % Init(meshToModel,&
-                      1,mesh % nElem)
+    call xMesh%Init(meshToModel, &
+                    1,mesh%nElem)
 
     ! Set the element internal mesh locations
-    DO iel = 1,mesh % nElem
-      DO k = 1,mesh % nGeo+1
-        DO j = 1,mesh % nGeo+1
-          DO i = 1,mesh % nGeo+1
-            xMesh % interior(i,j,k,iel,1,1:3) = mesh % nodeCoords(1:3,i,j,k,iel)
-          END DO
-        END DO
-      END DO
-    END DO
+    do iel = 1,mesh%nElem
+      do k = 1,mesh%nGeo+1
+        do j = 1,mesh%nGeo+1
+          do i = 1,mesh%nGeo+1
+            xMesh%interior(i,j,k,iel,1,1:3) = mesh%nodeCoords(1:3,i,j,k,iel)
+          enddo
+        enddo
+      enddo
+    enddo
 
-    CALL xMesh % GridInterp(myGeom % x)
-    CALL myGeom % x % BoundaryInterp()
-    CALL myGeom % CalculateMetricTerms()
+    call xMesh%GridInterp(myGeom%x)
+    call myGeom%x%BoundaryInterp()
+    call myGeom%CalculateMetricTerms()
 
-    CALL xMesh % Free()
-    CALL meshToModel % Free()
+    call xMesh%Free()
+    call meshToModel%Free()
 
-  END SUBROUTINE GenerateFromMesh_SEMHex
+  endsubroutine GenerateFromMesh_SEMHex
 
-  SUBROUTINE CheckSides_SEMHex(myGeom,mesh)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(in) :: myGeom
-    TYPE(Mesh3D),INTENT(in) :: mesh
-    ! 
-    INTEGER :: e1, s1
-    INTEGER :: e2, s2
-    INTEGER :: i1, j1
-    INTEGER :: i2, j2
-    INTEGER :: flip, bcid
-    REAL(prec) :: rms
+  subroutine CheckSides_SEMHex(myGeom,mesh)
+    implicit none
+    class(SEMHex),intent(in) :: myGeom
+    type(Mesh3D),intent(in) :: mesh
+    !
+    integer :: e1,s1
+    integer :: e2,s2
+    integer :: i1,j1
+    integer :: i2,j2
+    integer :: flip,bcid
+    real(prec) :: rms
 
-      DO e1 = 1,mesh % nElem
-        DO s1 = 1,6
+    do e1 = 1,mesh%nElem
+      do s1 = 1,6
 
-          e2 = mesh % sideInfo(3,s1,e1)
-          s2 = mesh % sideInfo(4,s1,e1)/10
-          flip = mesh % sideInfo(4,s1,e1) - s2*10
-          bcid = mesh % sideInfo(5,s1,e1)
+        e2 = mesh%sideInfo(3,s1,e1)
+        s2 = mesh%sideInfo(4,s1,e1)/10
+        flip = mesh%sideInfo(4,s1,e1)-s2*10
+        bcid = mesh%sideInfo(5,s1,e1)
 
-          IF (bcid == 0) THEN ! Interior
+        if(bcid == 0) then ! Interior
 
-            rms = 0.0_prec
+          rms = 0.0_prec
 
-            IF (flip == 0) THEN
+          if(flip == 0) then
 
-                DO j1 = 1,myGeom % x % interp % N+1
-                  DO i1 = 1,myGeom % x % interp % N+1
-                    rms = rms + &
-                          sqrt( (myGeom % x % boundary(i1,j1,s1,e1,1,1)-&
-                                 myGeom % x % boundary(i1,j1,s2,e2,1,1))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,2)-&
-                                 myGeom % x % boundary(i1,j1,s2,e2,1,2))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,3)-&
-                                 myGeom % x % boundary(i1,j1,s2,e2,1,3))**2 )
-                  END DO
-                END DO
+            do j1 = 1,myGeom%x%interp%N+1
+              do i1 = 1,myGeom%x%interp%N+1
+                rms = rms+ &
+                      sqrt((myGeom%x%boundary(i1,j1,s1,e1,1,1)- &
+                            myGeom%x%boundary(i1,j1,s2,e2,1,1))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,2)- &
+                            myGeom%x%boundary(i1,j1,s2,e2,1,2))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,3)- &
+                            myGeom%x%boundary(i1,j1,s2,e2,1,3))**2)
+              enddo
+            enddo
 
-            ELSEIF (flip == 1) THEN
+          elseif(flip == 1) then
 
-                DO j1 = 1,myGeom % x % interp % N+1
-                  DO i1 = 1,myGeom % x % interp % N+1
-                    i2 = j1
-                    j2 = myGeom % x % interp % N - i1
-                    rms = rms + &
-                          sqrt( (myGeom % x % boundary(i1,j1,s1,e1,1,1)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,1))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,2)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,2))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,3)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,3))**2 )
-                  END DO
-                END DO
+            do j1 = 1,myGeom%x%interp%N+1
+              do i1 = 1,myGeom%x%interp%N+1
+                i2 = j1
+                j2 = myGeom%x%interp%N-i1
+                rms = rms+ &
+                      sqrt((myGeom%x%boundary(i1,j1,s1,e1,1,1)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,1))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,2)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,2))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,3)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,3))**2)
+              enddo
+            enddo
 
-            ELSEIF (flip == 2) THEN
+          elseif(flip == 2) then
 
-                DO j1 = 1,myGeom % x % interp % N+1
-                  DO i1 = 1,myGeom % x % interp % N+1
-                    i2 = myGeom % x % interp % N - i1
-                    j2 = myGeom % x % interp % N - j1
-                    rms = rms + &
-                          sqrt( (myGeom % x % boundary(i1,j1,s1,e1,1,1)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,1))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,2)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,2))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,3)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,3))**2 )
-                  END DO
-                END DO
+            do j1 = 1,myGeom%x%interp%N+1
+              do i1 = 1,myGeom%x%interp%N+1
+                i2 = myGeom%x%interp%N-i1
+                j2 = myGeom%x%interp%N-j1
+                rms = rms+ &
+                      sqrt((myGeom%x%boundary(i1,j1,s1,e1,1,1)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,1))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,2)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,2))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,3)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,3))**2)
+              enddo
+            enddo
 
-            ELSEIF (flip == 3) THEN
+          elseif(flip == 3) then
 
-                DO j1 = 1,myGeom % x % interp % N+1
-                  DO i1 = 1,myGeom % x % interp % N+1
-                    i2 = myGeom % x % interp % N - j1
-                    j2 = i1
-                    rms = rms + &
-                          sqrt( (myGeom % x % boundary(i1,j1,s1,e1,1,1)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,1))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,2)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,2))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,3)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,3))**2 )
-                  END DO
-                END DO
+            do j1 = 1,myGeom%x%interp%N+1
+              do i1 = 1,myGeom%x%interp%N+1
+                i2 = myGeom%x%interp%N-j1
+                j2 = i1
+                rms = rms+ &
+                      sqrt((myGeom%x%boundary(i1,j1,s1,e1,1,1)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,1))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,2)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,2))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,3)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,3))**2)
+              enddo
+            enddo
 
-            ELSEIF (flip == 4) THEN
+          elseif(flip == 4) then
 
-                DO j1 = 1,myGeom % x % interp % N+1
-                  DO i1 = 1,myGeom % x % interp % N+1
-                    i2 = j1
-                    j2 = i1
-                    rms = rms + &
-                          sqrt( (myGeom % x % boundary(i1,j1,s1,e1,1,1)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,1))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,2)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,2))**2+&
-                                (myGeom % x % boundary(i1,j1,s1,e1,1,3)-&
-                                 myGeom % x % boundary(i2,j2,s2,e2,1,3))**2 )
-                  END DO
-                END DO
-            END IF
+            do j1 = 1,myGeom%x%interp%N+1
+              do i1 = 1,myGeom%x%interp%N+1
+                i2 = j1
+                j2 = i1
+                rms = rms+ &
+                      sqrt((myGeom%x%boundary(i1,j1,s1,e1,1,1)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,1))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,2)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,2))**2+ &
+                           (myGeom%x%boundary(i1,j1,s1,e1,1,3)- &
+                            myGeom%x%boundary(i2,j2,s2,e2,1,3))**2)
+              enddo
+            enddo
+          endif
 
-          END IF
+        endif
 
-        END DO
-      END DO
+      enddo
+    enddo
 
-  END SUBROUTINE CheckSides_SEMHex
+  endsubroutine CheckSides_SEMHex
 
-  SUBROUTINE CalculateContravariantBasis_SEMHex(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(inout) :: myGeom
+  subroutine CalculateContravariantBasis_SEMHex(myGeom)
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
     ! Local
-    INTEGER :: iEl,i,j,k
-    REAL(prec) :: fac
-    REAL(prec) :: mag
+    integer :: iEl,i,j,k
+    real(prec) :: fac
+    real(prec) :: mag
 
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
     ! TO DO : Curl Invariant Form
-    DO iEl = 1,myGeom % nElem
-      DO k = 1,myGeom % dxds % interp % N+1
-        DO j = 1,myGeom % dxds % interp % N+1
-          DO i = 1,myGeom % dxds % interp % N+1
+    do iEl = 1,myGeom%nElem
+      do k = 1,myGeom%dxds%interp%N+1
+        do j = 1,myGeom%dxds%interp%N+1
+          do i = 1,myGeom%dxds%interp%N+1
 
             ! Ja1
-              myGeom % dsdx % interior(i,j,k,iel,1,1,1) = &
-              myGeom % dxds % interior(i,j,k,iel,1,2,2)* &
-              myGeom % dxds % interior(i,j,k,iel,1,3,3) - &
-              myGeom % dxds % interior(i,j,k,iel,1,3,2)* &
-              myGeom % dxds % interior(i,j,k,iel,1,2,3)
+            myGeom%dsdx%interior(i,j,k,iel,1,1,1) = &
+              myGeom%dxds%interior(i,j,k,iel,1,2,2)* &
+              myGeom%dxds%interior(i,j,k,iel,1,3,3)- &
+              myGeom%dxds%interior(i,j,k,iel,1,3,2)* &
+              myGeom%dxds%interior(i,j,k,iel,1,2,3)
 
-              myGeom % dsdx % interior(i,j,k,iel,1,2,1) = &
-              myGeom % dxds % interior(i,j,k,iel,1,1,3)* &
-              myGeom % dxds % interior(i,j,k,iel,1,3,2) - &
-              myGeom % dxds % interior(i,j,k,iel,1,3,3)* &
-              myGeom % dxds % interior(i,j,k,iel,1,1,2)
+            myGeom%dsdx%interior(i,j,k,iel,1,2,1) = &
+              myGeom%dxds%interior(i,j,k,iel,1,1,3)* &
+              myGeom%dxds%interior(i,j,k,iel,1,3,2)- &
+              myGeom%dxds%interior(i,j,k,iel,1,3,3)* &
+              myGeom%dxds%interior(i,j,k,iel,1,1,2)
 
-              myGeom % dsdx % interior(i,j,k,iel,1,3,1) = &
-              myGeom % dxds % interior(i,j,k,iel,1,1,2)* &
-              myGeom % dxds % interior(i,j,k,iel,1,2,3) - &
-              myGeom % dxds % interior(i,j,k,iel,1,2,2)* &
-              myGeom % dxds % interior(i,j,k,iel,1,1,3)
+            myGeom%dsdx%interior(i,j,k,iel,1,3,1) = &
+              myGeom%dxds%interior(i,j,k,iel,1,1,2)* &
+              myGeom%dxds%interior(i,j,k,iel,1,2,3)- &
+              myGeom%dxds%interior(i,j,k,iel,1,2,2)* &
+              myGeom%dxds%interior(i,j,k,iel,1,1,3)
 
             ! Ja2
-              myGeom % dsdx % interior(i,j,k,iel,1,1,2) = &
-              myGeom % dxds % interior(i,j,k,iel,1,2,3)* &
-              myGeom % dxds % interior(i,j,k,iel,1,3,1) - &
-              myGeom % dxds % interior(i,j,k,iel,1,3,3)* &
-              myGeom % dxds % interior(i,j,k,iel,1,2,1)
+            myGeom%dsdx%interior(i,j,k,iel,1,1,2) = &
+              myGeom%dxds%interior(i,j,k,iel,1,2,3)* &
+              myGeom%dxds%interior(i,j,k,iel,1,3,1)- &
+              myGeom%dxds%interior(i,j,k,iel,1,3,3)* &
+              myGeom%dxds%interior(i,j,k,iel,1,2,1)
 
-              myGeom % dsdx % interior(i,j,k,iel,1,2,2) = &
-              myGeom % dxds % interior(i,j,k,iel,1,1,1)* &
-              myGeom % dxds % interior(i,j,k,iel,1,3,3) - &
-              myGeom % dxds % interior(i,j,k,iel,1,3,1)* &
-              myGeom % dxds % interior(i,j,k,iel,1,1,3)
+            myGeom%dsdx%interior(i,j,k,iel,1,2,2) = &
+              myGeom%dxds%interior(i,j,k,iel,1,1,1)* &
+              myGeom%dxds%interior(i,j,k,iel,1,3,3)- &
+              myGeom%dxds%interior(i,j,k,iel,1,3,1)* &
+              myGeom%dxds%interior(i,j,k,iel,1,1,3)
 
-              myGeom % dsdx % interior(i,j,k,iel,1,3,2) = &
-              myGeom % dxds % interior(i,j,k,iel,1,1,3)* &
-              myGeom % dxds % interior(i,j,k,iel,1,2,1) - &
-              myGeom % dxds % interior(i,j,k,iel,1,2,3)* &
-              myGeom % dxds % interior(i,j,k,iel,1,1,1)
+            myGeom%dsdx%interior(i,j,k,iel,1,3,2) = &
+              myGeom%dxds%interior(i,j,k,iel,1,1,3)* &
+              myGeom%dxds%interior(i,j,k,iel,1,2,1)- &
+              myGeom%dxds%interior(i,j,k,iel,1,2,3)* &
+              myGeom%dxds%interior(i,j,k,iel,1,1,1)
 
             ! Ja3
-              myGeom % dsdx % interior(i,j,k,iel,1,1,3) = &
-              myGeom % dxds % interior(i,j,k,iel,1,2,1)* &
-              myGeom % dxds % interior(i,j,k,iel,1,3,2) - &
-              myGeom % dxds % interior(i,j,k,iel,1,3,1)* &
-              myGeom % dxds % interior(i,j,k,iel,1,2,2)
+            myGeom%dsdx%interior(i,j,k,iel,1,1,3) = &
+              myGeom%dxds%interior(i,j,k,iel,1,2,1)* &
+              myGeom%dxds%interior(i,j,k,iel,1,3,2)- &
+              myGeom%dxds%interior(i,j,k,iel,1,3,1)* &
+              myGeom%dxds%interior(i,j,k,iel,1,2,2)
 
-              myGeom % dsdx % interior(i,j,k,iel,1,2,3) = &
-              myGeom % dxds % interior(i,j,k,iel,1,1,2)* &
-              myGeom % dxds % interior(i,j,k,iel,1,3,1) - &
-              myGeom % dxds % interior(i,j,k,iel,1,3,2)* &
-              myGeom % dxds % interior(i,j,k,iel,1,1,1)
+            myGeom%dsdx%interior(i,j,k,iel,1,2,3) = &
+              myGeom%dxds%interior(i,j,k,iel,1,1,2)* &
+              myGeom%dxds%interior(i,j,k,iel,1,3,1)- &
+              myGeom%dxds%interior(i,j,k,iel,1,3,2)* &
+              myGeom%dxds%interior(i,j,k,iel,1,1,1)
 
-              myGeom % dsdx % interior(i,j,k,iel,1,3,3) = &
-              myGeom % dxds % interior(i,j,k,iel,1,1,1)* &
-              myGeom % dxds % interior(i,j,k,iel,1,2,2) - &
-              myGeom % dxds % interior(i,j,k,iel,1,2,1)* &
-              myGeom % dxds % interior(i,j,k,iel,1,1,2)
+            myGeom%dsdx%interior(i,j,k,iel,1,3,3) = &
+              myGeom%dxds%interior(i,j,k,iel,1,1,1)* &
+              myGeom%dxds%interior(i,j,k,iel,1,2,2)- &
+              myGeom%dxds%interior(i,j,k,iel,1,2,1)* &
+              myGeom%dxds%interior(i,j,k,iel,1,1,2)
 
-          END DO
-        END DO
-      END DO
-    END DO
+          enddo
+        enddo
+      enddo
+    enddo
 
     ! Interpolate the contravariant tensor to the boundaries
-    CALL myGeom % dsdx % BoundaryInterp()
+    call myGeom%dsdx%BoundaryInterp()
 
     ! Now, calculate nHat (outward pointing normal)
-    DO iEl = 1,myGeom % nElem
-      DO k = 1,6
-        DO j = 1,myGeom % J % interp % N+1
-          DO i = 1,myGeom % J % interp % N+1
-            IF (k == selfSide3D_Top .OR. k == selfSide3D_East .OR. k == selfSide3D_North) THEN
-              fac = SIGN(1.0_prec,myGeom % J % boundary(i,j,k,iEl,1))
-            ELSE
-              fac = -SIGN(1.0_prec,myGeom % J % boundary(i,j,k,iEl,1))
-            END IF
+    do iEl = 1,myGeom%nElem
+      do k = 1,6
+        do j = 1,myGeom%J%interp%N+1
+          do i = 1,myGeom%J%interp%N+1
+            if(k == selfSide3D_Top .or. k == selfSide3D_East .or. k == selfSide3D_North) then
+              fac = sign(1.0_prec,myGeom%J%boundary(i,j,k,iEl,1))
+            else
+              fac = -sign(1.0_prec,myGeom%J%boundary(i,j,k,iEl,1))
+            endif
 
-            IF( k == 1 )THEN ! Bottom
+            if(k == 1) then ! Bottom
 
-              mag = SQRT( myGeom % dsdx % boundary(i,j,k,iEl,1,1,3)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,2,3)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,3,3)**2 )
- 
-              myGeom % nScale % boundary(i,j,k,iEl,1) = mag
+              mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,3)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,2,3)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,3,3)**2)
 
-              myGeom % nHat % boundary(i,j,k,iEl,1,1:3) = &
-                fac*myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,3)/mag
+              myGeom%nScale%boundary(i,j,k,iEl,1) = mag
 
-            ELSEIF( k == 2 )THEN  ! South
+              myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
+                fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)/mag
 
-              mag = SQRT( myGeom % dsdx % boundary(i,j,k,iEl,1,1,2)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,2,2)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,3,2)**2 )
+            elseif(k == 2) then ! South
 
-              myGeom % nScale % boundary(i,j,k,iEl,1) = mag
+              mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,2)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,2,2)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,3,2)**2)
 
-              myGeom % nHat % boundary(i,j,k,iEl,1,1:3) = &
-                fac*myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,2)/mag
+              myGeom%nScale%boundary(i,j,k,iEl,1) = mag
 
-            ELSEIF( k == 3 )THEN  ! East
+              myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
+                fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)/mag
 
-              mag = SQRT( myGeom % dsdx % boundary(i,j,k,iEl,1,1,1)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,2,1)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,3,1)**2 )
+            elseif(k == 3) then ! East
 
-              myGeom % nScale % boundary(i,j,k,iEl,1) = mag
+              mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,1)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,2,1)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,3,1)**2)
 
-              myGeom % nHat % boundary(i,j,k,iEl,1,1:3) = &
-                fac*myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,1)/mag
+              myGeom%nScale%boundary(i,j,k,iEl,1) = mag
 
-            ELSEIF( k == 4 )THEN  ! North
+              myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
+                fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)/mag
 
-              mag = SQRT( myGeom % dsdx % boundary(i,j,k,iEl,1,1,2)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,2,2)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,3,2)**2 )
+            elseif(k == 4) then ! North
 
-              myGeom % nScale % boundary(i,j,k,iEl,1) = mag
+              mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,2)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,2,2)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,3,2)**2)
 
-              myGeom % nHat % boundary(i,j,k,iEl,1,1:3) = &
-                fac*myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,2)/mag
+              myGeom%nScale%boundary(i,j,k,iEl,1) = mag
 
-            ELSEIF( k == 5 )THEN  ! West
+              myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
+                fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)/mag
 
-              mag = SQRT( myGeom % dsdx % boundary(i,j,k,iEl,1,1,1)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,2,1)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,3,1)**2 )
+            elseif(k == 5) then ! West
 
-              myGeom % nScale % boundary(i,j,k,iEl,1) = mag
+              mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,1)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,2,1)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,3,1)**2)
 
-              myGeom % nHat % boundary(i,j,k,iEl,1,1:3) = &
-                fac*myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,1)/mag
+              myGeom%nScale%boundary(i,j,k,iEl,1) = mag
 
-            ELSEIF( k == 6 )THEN  ! Top
+              myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
+                fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)/mag
 
-              mag = SQRT( myGeom % dsdx % boundary(i,j,k,iEl,1,1,3)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,2,3)**2 +&
-                          myGeom % dsdx % boundary(i,j,k,iEl,1,3,3)**2 )
- 
-              myGeom % nScale % boundary(i,j,k,iEl,1) = mag
+            elseif(k == 6) then ! Top
 
-              myGeom % nHat % boundary(i,j,k,iEl,1,1:3) = &
-                fac*myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,3)/mag
+              mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,3)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,2,3)**2+ &
+                         myGeom%dsdx%boundary(i,j,k,iEl,1,3,3)**2)
 
-            ENDIF
+              myGeom%nScale%boundary(i,j,k,iEl,1) = mag
+
+              myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
+                fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)/mag
+
+            endif
 
             ! Set the directionality for dsdx on the boundaries
             ! This is primarily used for DG gradient calculations,
             ! which do not use nHat for the boundary terms.
-            myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,1:3) = & 
-                myGeom % dsdx % boundary(i,j,k,iEl,1,1:3,1:3)*fac
+            myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1:3) = &
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1:3)*fac
 
-          END DO
-        END DO
-      END DO
-    END DO
+          enddo
+        enddo
+      enddo
+    enddo
 
-  END SUBROUTINE CalculateContravariantBasis_SEMHex
+  endsubroutine CalculateContravariantBasis_SEMHex
 
-  SUBROUTINE CalculateMetricTerms_SEMHex(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(inout) :: myGeom
+  subroutine CalculateMetricTerms_SEMHex(myGeom)
+    implicit none
+    class(SEMHex),intent(inout) :: myGeom
 
-    CALL myGeom % x % Gradient(myGeom % dxds)
-    CALL myGeom % dxds % BoundaryInterp()
-    CALL myGeom % dxds % Determinant(myGeom % J)
-    CALL myGeom % J % BoundaryInterp()
+    call myGeom%x%Gradient(myGeom%dxds)
+    call myGeom%dxds%BoundaryInterp()
+    call myGeom%dxds%Determinant(myGeom%J)
+    call myGeom%J%BoundaryInterp()
 
-    CALL myGeom % CalculateContravariantBasis()
+    call myGeom%CalculateContravariantBasis()
 
-  END SUBROUTINE CalculateMetricTerms_SEMHex
+  endsubroutine CalculateMetricTerms_SEMHex
 
   ! SUBROUTINE Write_SEMHex(myGeom,fileName)
   !   IMPLICIT NONE
@@ -892,4 +891,4 @@ CONTAINS
 
   ! END SUBROUTINE Write_SEMHex
 
-END MODULE SELF_Geometry
+endmodule SELF_Geometry

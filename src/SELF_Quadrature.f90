@@ -12,19 +12,19 @@
 ! Routines are defined for computing Legendre and Chebyshev Gauss and Gauss-Lobatto
 ! quadrature nodes and weights.
 
-MODULE SELF_Quadrature
+module SELF_Quadrature
 
-  USE ISO_FORTRAN_ENV
-  USE SELF_Constants
+  use iso_fortran_env
+  use SELF_Constants
 
-  IMPLICIT NONE
+  implicit none
 
-  PUBLIC  :: ChebyshevQuadrature,LegendreQuadrature
-  PRIVATE :: ChebyshevGauss,ChebyshevGaussLobatto, &
+  public  :: ChebyshevQuadrature,LegendreQuadrature
+  private :: ChebyshevGauss,ChebyshevGaussLobatto, &
              LegendreGauss,LegendreGaussLobatto, &
              LegendreQandL
 
-CONTAINS
+contains
 
 ! =============================================================================================== !
 ! LegendreQuadrature
@@ -56,33 +56,33 @@ CONTAINS
 !
 ! =============================================================================================== !
 
-  SUBROUTINE LegendreQuadrature(N,nodes,weights,QuadType)
-    IMPLICIT NONE
-    INTEGER,INTENT(in)     :: N
-    REAL(prec),INTENT(out) :: nodes(0:N)
-    REAL(prec),INTENT(out) :: weights(0:N)
-    INTEGER,INTENT(in)     :: QuadType
+  subroutine LegendreQuadrature(N,nodes,weights,QuadType)
+    implicit none
+    integer,intent(in)     :: N
+    real(prec),intent(out) :: nodes(0:N)
+    real(prec),intent(out) :: weights(0:N)
+    integer,intent(in)     :: QuadType
     ! Local
-    REAL(real64) :: nodesLocal(0:N)
-    REAL(real64) :: weightsLocal(0:N)
-    INTEGER :: i
+    real(real64) :: nodesLocal(0:N)
+    real(real64) :: weightsLocal(0:N)
+    integer :: i
 
-    IF (QuadType == GAUSS_LOBATTO) THEN
+    if(QuadType == GAUSS_LOBATTO) then
 
-      CALL LegendreGaussLobatto(N,nodesLocal,weightsLocal)
+      call LegendreGaussLobatto(N,nodesLocal,weightsLocal)
 
-    ELSEIF (QuadType == GAUSS) THEN
+    elseif(QuadType == GAUSS) then
 
-      CALL LegendreGauss(N,nodesLocal,weightsLocal)
+      call LegendreGauss(N,nodesLocal,weightsLocal)
 
-    END IF
+    endif
 
-    DO i = 0,N
-      nodes(i) = REAL(nodesLocal(i),prec)
-      weights(i) = REAL(weightsLocal(i),prec)
-    END DO
+    do i = 0,N
+      nodes(i) = real(nodesLocal(i),prec)
+      weights(i) = real(weightsLocal(i),prec)
+    enddo
 
-  END SUBROUTINE LegendreQuadrature
+  endsubroutine LegendreQuadrature
 
 ! =============================================================================================== !
 ! ChebyshevQuadrature
@@ -115,33 +115,33 @@ CONTAINS
 !
 ! ================================================================================================ !
 
-  SUBROUTINE ChebyshevQuadrature(N,nodes,weights,quadType)
-    IMPLICIT NONE
-    INTEGER,INTENT(in)     :: N
-    REAL(prec),INTENT(out) :: nodes(0:N)
-    REAL(prec),INTENT(out) :: weights(0:N)
-    INTEGER,INTENT(in)     :: QuadType
+  subroutine ChebyshevQuadrature(N,nodes,weights,quadType)
+    implicit none
+    integer,intent(in)     :: N
+    real(prec),intent(out) :: nodes(0:N)
+    real(prec),intent(out) :: weights(0:N)
+    integer,intent(in)     :: QuadType
     ! Local
-    REAL(real64) :: nodesLocal(0:N)
-    REAL(real64) :: weightsLocal(0:N)
-    INTEGER :: i
+    real(real64) :: nodesLocal(0:N)
+    real(real64) :: weightsLocal(0:N)
+    integer :: i
 
-    IF (QuadType == CHEBYSHEV_GAUSS_LOBATTO) then
+    if(QuadType == CHEBYSHEV_GAUSS_LOBATTO) then
 
-      CALL ChebyshevGaussLobatto(N,nodesLocal,weightsLocal)
+      call ChebyshevGaussLobatto(N,nodesLocal,weightsLocal)
 
-    ELSEIF (QuadType == CHEBYSHEV_GAUSS) then
+    elseif(QuadType == CHEBYSHEV_GAUSS) then
 
-      CALL ChebyshevGauss(N,nodesLocal,weightsLocal)
+      call ChebyshevGauss(N,nodesLocal,weightsLocal)
 
-    END IF
+    endif
 
-    DO i = 0,N
-      nodes(i) = REAL(nodesLocal(i),prec)
-      weights(i) = REAL(weightsLocal(i),prec)
-    END DO
+    do i = 0,N
+      nodes(i) = real(nodesLocal(i),prec)
+      weights(i) = real(weightsLocal(i),prec)
+    enddo
 
-  END SUBROUTINE ChebyshevQuadrature
+  endsubroutine ChebyshevQuadrature
 
 ! =============================================================================================== !
 ! S/R ChebyshevGauss
@@ -149,22 +149,22 @@ CONTAINS
 !   Algorithm 26
 ! =============================================================================================== !
 
-  SUBROUTINE ChebyshevGauss(N,nodes,weights)
-    IMPLICIT NONE
-    INTEGER       :: N
-    REAL(real64)    :: nodes(0:N)
-    REAL(real64)    :: weights(0:N)
+  subroutine ChebyshevGauss(N,nodes,weights)
+    implicit none
+    integer       :: N
+    real(real64)    :: nodes(0:N)
+    real(real64)    :: weights(0:N)
     ! Local
-    INTEGER    :: j
+    integer    :: j
 
-    DO j = 0,N
+    do j = 0,N
 
-      weights(j) = pi/(REAL(N,real64) + 1.0_real64)
-      nodes(j) = -cos(pi*(2.0_real64*REAL(j,real64) + 1.0_real64)/(2.0_real64*REAL(N,real64)+2.0_real64))
+      weights(j) = pi/(real(N,real64)+1.0_real64)
+      nodes(j) = -cos(pi*(2.0_real64*real(j,real64)+1.0_real64)/(2.0_real64*real(N,real64)+2.0_real64))
 
-    END DO
+    enddo
 
-  END SUBROUTINE ChebyshevGauss
+  endsubroutine ChebyshevGauss
 
 ! =============================================================================================== !
 ! S/R ChebyshevGaussLobatto
@@ -172,25 +172,25 @@ CONTAINS
 !   Algorithm 27
 ! =============================================================================================== !
 
-  SUBROUTINE ChebyshevGaussLobatto(N,nodes,weights)
-    IMPLICIT NONE
-    INTEGER       :: N
-    REAL(real64)    :: nodes(0:N)
-    REAL(real64)    :: weights(0:N)
+  subroutine ChebyshevGaussLobatto(N,nodes,weights)
+    implicit none
+    integer       :: N
+    real(real64)    :: nodes(0:N)
+    real(real64)    :: weights(0:N)
     ! LOCAL
-    INTEGER    :: j
+    integer    :: j
 
-    DO j = 0,N
+    do j = 0,N
 
-      weights(j) = pi/REAL(N,real64)
-      nodes(j) = -cos(pi*REAL(j,real64)/REAL(N,real64))
+      weights(j) = pi/real(N,real64)
+      nodes(j) = -cos(pi*real(j,real64)/real(N,real64))
 
-    END DO
+    enddo
 
     weights(0) = weights(0)*0.5_real64
     weights(N) = weights(N)*0.5_real64
 
-  END SUBROUTINE ChebyshevGaussLobatto
+  endsubroutine ChebyshevGaussLobatto
 
 ! =============================================================================================== !
 ! S/R LegendreGauss
@@ -198,68 +198,68 @@ CONTAINS
 !   Algorithm 23
 ! =============================================================================================== !
 
-  SUBROUTINE LegendreGauss(N,nodes,weights)
-    IMPLICIT NONE
-    INTEGER    :: N
-    REAL(real64) :: nodes(0:N)
-    REAL(real64) :: weights(0:N)
+  subroutine LegendreGauss(N,nodes,weights)
+    implicit none
+    integer    :: N
+    real(real64) :: nodes(0:N)
+    real(real64) :: weights(0:N)
     ! Local
-    REAL(real64) :: nodes_local(0:N)
-    REAL(real64) :: weights_local(0:N)
-    REAL(real64) :: lN1,dlN1
-    REAL(real64) :: delta
-    INTEGER  :: j,kIt
+    real(real64) :: nodes_local(0:N)
+    real(real64) :: weights_local(0:N)
+    real(real64) :: lN1,dlN1
+    real(real64) :: delta
+    integer  :: j,kIt
 
-    IF (N == 0) then
+    if(N == 0) then
 
       nodes_local(0) = 0.0_real64
       weights_local(0) = 2.0_real64
 
-    ELSEIF (N == 1) then
+    elseif(N == 1) then
 
-      nodes_local(0) = -SQRT(1.0_real64/3.0_real64)
+      nodes_local(0) = -sqrt(1.0_real64/3.0_real64)
       weights_local(0) = 1.0_real64
       nodes_local(1) = -nodes(0)
       weights_local(1) = weights(0)
 
-    ELSE
+    else
 
-      DO j = 0, ((N + 1)/2)
+      do j = 0,((N+1)/2)
 
-        nodes_local(j) = -cos((2.0_real64*REAL(j,real64) + 1.0_real64)*pi/(2.0_real64*REAL(N,real64) + 1.0_real64))
+        nodes_local(j) = -cos((2.0_real64*real(j,real64)+1.0_real64)*pi/(2.0_real64*real(N,real64)+1.0_real64))
 
-        DO kIt = 1,newtonMax
+        do kIt = 1,newtonMax
 
-          CALL LegendrePolynomial(N + 1,nodes_local(j),lN1,dlN1)
+          call LegendrePolynomial(N+1,nodes_local(j),lN1,dlN1)
           delta = -lN1/dlN1
-          nodes_local(j) = nodes_local(j) + delta
-          IF (abs(delta) <= TOL*nodes_local(j)) EXIT
+          nodes_local(j) = nodes_local(j)+delta
+          if(abs(delta) <= TOL*nodes_local(j)) exit
 
-        END DO
+        enddo
 
-        CALL LegendrePolynomial(N + 1,nodes_local(j),lN1,dlN1)
-        weights_local(j) = 2.0_real64/((1.0_real64 - nodes_local(j)*nodes_local(j))*dlN1*dlN1)
-        weights_local(N - j) = weights_local(j)
-        nodes_local(N - j) = -nodes_local(j)
+        call LegendrePolynomial(N+1,nodes_local(j),lN1,dlN1)
+        weights_local(j) = 2.0_real64/((1.0_real64-nodes_local(j)*nodes_local(j))*dlN1*dlN1)
+        weights_local(N-j) = weights_local(j)
+        nodes_local(N-j) = -nodes_local(j)
 
-      END DO
+      enddo
 
-    END IF
+    endif
 
-    IF (MOD(REAL(N,real64),2.0_real64) == 0.0_real64) then
+    if(mod(real(N,real64),2.0_real64) == 0.0_real64) then
 
-      CALL LegendrePolynomial(N + 1,0.0_real64,lN1,dlN1)
+      call LegendrePolynomial(N+1,0.0_real64,lN1,dlN1)
       nodes_local(N/2) = 0.0_real64
       weights_local(N/2) = 2.0/(dlN1*dlN1)
 
-    END IF
+    endif
 
-    DO j = 0,N
-      nodes(j) = REAL(nodes_local(j),real64)
-      weights(j) = REAL(weights_local(j),real64)
-    END DO
+    do j = 0,N
+      nodes(j) = real(nodes_local(j),real64)
+      weights(j) = real(weights_local(j),real64)
+    enddo
 
-  END SUBROUTINE LegendreGauss
+  endsubroutine LegendreGauss
 
   ! =============================================================================================== !
   ! S/R LegendreGaussLobatto
@@ -267,71 +267,71 @@ CONTAINS
   !   Algorithm 25
   ! =============================================================================================== !
 
-  SUBROUTINE LegendreGaussLobatto(N,nodes,weights)
-    IMPLICIT NONE
-    INTEGER    :: N
-    REAL(real64) :: nodes(0:N)
-    REAL(real64) :: weights(0:N)
+  subroutine LegendreGaussLobatto(N,nodes,weights)
+    implicit none
+    integer    :: N
+    real(real64) :: nodes(0:N)
+    real(real64) :: weights(0:N)
     ! Local
-    REAL(real64) :: nodes_local(0:N)
-    REAL(real64) :: weights_local(0:N)
-    REAL(real64) :: delta,q,qprime,lN
-    INTEGER  :: j,kIt
+    real(real64) :: nodes_local(0:N)
+    real(real64) :: weights_local(0:N)
+    real(real64) :: delta,q,qprime,lN
+    integer  :: j,kIt
 
-    IF (N == 1) then
+    if(N == 1) then
 
       nodes_local(0) = -1.0_real64
       weights_local(0) = 1.0_real64
       nodes_local(1) = 1.0_real64
       weights_local(1) = 1.0_real64
 
-    ELSE
+    else
 
       nodes_local(0) = -1.0_real64
-      weights_local(0) = 2.0_real64/(REAL(N,real64)*(REAL(N,real64) + 1.0_real64))
+      weights_local(0) = 2.0_real64/(real(N,real64)*(real(N,real64)+1.0_real64))
       nodes_local(N) = 1.0_real64
       weights_local(N) = weights_local(0)
 
-      DO j = 1, ((N + 1)/2 - 1)
+      do j = 1,((N+1)/2-1)
 
-        nodes_local(j) = -COS((REAL(j,real64) + 0.25_real64)*pi/REAL(N,real64) - &
-                              3.0_real64/(8.0_real64*REAL(N,real64)*pi*(REAL(j,real64) + 0.25_real64)))
+        nodes_local(j) = -cos((real(j,real64)+0.25_real64)*pi/real(N,real64)- &
+                              3.0_real64/(8.0_real64*real(N,real64)*pi*(real(j,real64)+0.25_real64)))
 
-        DO kIt = 1,newtonMax
+        do kIt = 1,newtonMax
 
-          CALL LegendreQandL(N,nodes_local(j),q,qprime,lN)
+          call LegendreQandL(N,nodes_local(j),q,qprime,lN)
 
           delta = -q/qprime
-          nodes_local(j) = nodes_local(j) + delta
-          IF (ABS(delta) <= TOL*nodes_local(j)) EXIT
+          nodes_local(j) = nodes_local(j)+delta
+          if(abs(delta) <= TOL*nodes_local(j)) exit
 
-        END DO
+        enddo
 
-        CALL LegendreQandL(N,nodes_local(j),q,qprime,lN)
+        call LegendreQandL(N,nodes_local(j),q,qprime,lN)
 
-        weights_local(j) = 2.0_real64/(REAL(N,real64)*(REAL(N,real64) + 1.0_real64)*lN*lN)
-        weights_local(N - j) = weights_local(j)
-        nodes_local(N - j) = -nodes_local(j)
+        weights_local(j) = 2.0_real64/(real(N,real64)*(real(N,real64)+1.0_real64)*lN*lN)
+        weights_local(N-j) = weights_local(j)
+        nodes_local(N-j) = -nodes_local(j)
 
-      END DO
+      enddo
 
-    END IF
+    endif
 
-    IF (MOD(REAL(N,real64),2.0_real64) == 0.0_real64) THEN
+    if(mod(real(N,real64),2.0_real64) == 0.0_real64) then
 
-      CALL LegendreQandL(N,0.0_real64,q,qprime,lN)
+      call LegendreQandL(N,0.0_real64,q,qprime,lN)
 
       nodes_local(N/2) = 0.0_real64
-      weights_local(N/2) = 2.0_real64/(REAL(N,real64)*(REAL(N,real64) + 1.0_real64)*lN*lN)
+      weights_local(N/2) = 2.0_real64/(real(N,real64)*(real(N,real64)+1.0_real64)*lN*lN)
 
-    END IF
+    endif
 
-    DO j = 0,N
-      nodes(j) = REAL(nodes_local(j),real64)
-      weights(j) = REAL(weights_local(j),real64)
-    END DO
+    do j = 0,N
+      nodes(j) = real(nodes_local(j),real64)
+      weights(j) = real(weights_local(j),real64)
+    enddo
 
-  END SUBROUTINE LegendreGaussLobatto
+  endsubroutine LegendreGaussLobatto
 
 ! =============================================================================================== !
 ! S/R LegendrePolynomial
@@ -339,48 +339,48 @@ CONTAINS
 !   Algorithm 22
 ! =============================================================================================== !
 
-  SUBROUTINE LegendrePolynomial(N,x,lAtX,dLdxAtX)
-    IMPLICIT NONE
-    INTEGER     :: N
-    REAL(real64)    :: x
-    REAL(real64)    :: lAtX,dLdxAtX
+  subroutine LegendrePolynomial(N,x,lAtX,dLdxAtX)
+    implicit none
+    integer     :: N
+    real(real64)    :: x
+    real(real64)    :: lAtX,dLdxAtX
     ! Local
-    REAL(real64) :: lNm1,lNm2,dlNm1,dlNm2
-    INTEGER  :: i
+    real(real64) :: lNm1,lNm2,dlNm1,dlNm2
+    integer  :: i
 
-    IF (N == 0) then
+    if(N == 0) then
 
       lAtX = 1.0_real64
       dLdxAtX = 0.0_real64
 
-    ELSEIF (N == 1) then
+    elseif(N == 1) then
 
       lAtX = x
       dLdxAtX = 1.0_real64
 
-    ELSE
+    else
 
       lnM2 = 1.0_real64
       lnM1 = x
       dlnM2 = 0.0_real64
       dlnM1 = 1.0_real64
 
-      DO i = 2,N
+      do i = 2,N
 
-        lAtX = ((2.0_real64*REAL(i,real64) - 1.0_real64)*x*lnM1 - &
-                (REAL(i,real64) - 1.0_real64)*lnM2)/(REAL(i,real64))
+        lAtX = ((2.0_real64*real(i,real64)-1.0_real64)*x*lnM1- &
+                (real(i,real64)-1.0_real64)*lnM2)/(real(i,real64))
 
-        dldxAtX = dlnM2 + (2.0_real64*REAL(i,real64) - 1.0_real64)*lnM1
+        dldxAtX = dlnM2+(2.0_real64*real(i,real64)-1.0_real64)*lnM1
         lnM2 = lnM1
         lnM1 = lAtX
         dlnM2 = dlnM1
         dlnM1 = dldxAtX
 
-      END DO
+      enddo
 
-    END IF
+    endif
 
-  END SUBROUTINE LegendrePolynomial
+  endsubroutine LegendrePolynomial
 
 ! =============================================================================================== !
 ! S/R LegendreQandL
@@ -388,37 +388,37 @@ CONTAINS
 !   Algorithm 24
 ! =============================================================================================== !
 
-  SUBROUTINE LegendreQandL(N,x,q,qprime,lN)
-    IMPLICIT NONE
-    INTEGER    :: N
-    REAL(real64) :: x
-    REAL(real64) :: lN,q,qprime
+  subroutine LegendreQandL(N,x,q,qprime,lN)
+    implicit none
+    integer    :: N
+    real(real64) :: x
+    real(real64) :: lN,q,qprime
     ! Local
-    REAL(real64) :: lNm1,lNm2,dlNm1,dlNm2,dlN,lN1,dlN1
-    INTEGER    :: i
+    real(real64) :: lNm1,lNm2,dlNm1,dlNm2,dlN,lN1,dlN1
+    integer    :: i
 
     lNm2 = 1.0_real64
     lNm1 = x
     dlNm2 = 0.0_real64
     dlNm1 = 1.0_real64
 
-    DO i = 2,N
+    do i = 2,N
 
-      lN = (2.0_real64*i - 1.0_real64)/(REAL(i,real64))*x*lNm1 - (REAL(i,real64) - 1.0_real64)/(REAL(i,real64))*lNm2
-      dlN = dlNm2 + (2.0_real64*REAL(i,real64) - 1.0_real64)*lNm1
+      lN = (2.0_real64*i-1.0_real64)/(real(i,real64))*x*lNm1-(real(i,real64)-1.0_real64)/(real(i,real64))*lNm2
+      dlN = dlNm2+(2.0_real64*real(i,real64)-1.0_real64)*lNm1
       lNm2 = lNm1
       lNm1 = lN
       dlNm2 = dlNm1
       dlNm1 = dlN
 
-    END DO
+    enddo
 
-    i = N + 1
-    lN1 = (2.0_real64*i - 1.0_real64)/(REAL(i,real64))*x*lN - (REAL(i,real64) - 1.0_real64)/(REAL(i,real64))*lNm2
-    dlN1 = dlNm2 + (2.0_real64*REAL(i,real64) - 1.0_real64)*lNm1
-    q = lN1 - lNm2
-    qprime = dlN1 - dlNm2
+    i = N+1
+    lN1 = (2.0_real64*i-1.0_real64)/(real(i,real64))*x*lN-(real(i,real64)-1.0_real64)/(real(i,real64))*lNm2
+    dlN1 = dlNm2+(2.0_real64*real(i,real64)-1.0_real64)*lNm1
+    q = lN1-lNm2
+    qprime = dlN1-dlNm2
 
-  END SUBROUTINE LegendreQandL
+  endsubroutine LegendreQandL
 
-END MODULE SELF_Quadrature
+endmodule SELF_Quadrature

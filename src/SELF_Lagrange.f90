@@ -127,8 +127,7 @@ module SELF_Lagrange
     procedure,private :: CalculateDerivativeMatrix
     procedure,private :: CalculateLagrangePolynomials
 
-  end type Lagrange
-
+  endtype Lagrange
 
 contains
 
@@ -154,18 +153,18 @@ contains
     ! Local
     real(prec) :: q(0:M)
 
-    this % N = N
-    this % M = M
-    this % controlNodeType = controlNodeType
-    this % targetNodeType = targetNodeType
-    allocate( this % controlPoints(1:N+1),&
-              this % targetPoints(1:M+1),&
-              this % bWeights(1:N+1),&
-              this % qWeights(1:N+1),&
-              this % iMatrix(1:N+1,1:M+1),&
-              this % dMatrix(1:N+1,1:N+1),&
-              this % dgMatrix(1:N+1,1:N+1),&
-              this % bMatrix(1:N+1,1:2) )
+    this%N = N
+    this%M = M
+    this%controlNodeType = controlNodeType
+    this%targetNodeType = targetNodeType
+    allocate(this%controlPoints(1:N+1), &
+             this%targetPoints(1:M+1), &
+             this%bWeights(1:N+1), &
+             this%qWeights(1:N+1), &
+             this%iMatrix(1:N+1,1:M+1), &
+             this%dMatrix(1:N+1,1:N+1), &
+             this%dgMatrix(1:N+1,1:N+1), &
+             this%bMatrix(1:N+1,1:2))
 
     !$omp target enter data map(alloc: this % controlPoints)
     !$omp target enter data map(alloc: this % targetPoints)
@@ -176,47 +175,46 @@ contains
     !$omp target enter data map(alloc: this % dgMatrix)
     !$omp target enter data map(alloc: this % bMatrix)
 
-
-    if (controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
+    if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
       call LegendreQuadrature(N, &
-                              this % controlPoints, &
-                              this % qWeights, &
+                              this%controlPoints, &
+                              this%qWeights, &
                               controlNodeType)
 
-    elseif (controlNodeType == CHEBYSHEV_GAUSS .or. controlNodeType == CHEBYSHEV_GAUSS_LOBATTO) then
+    elseif(controlNodeType == CHEBYSHEV_GAUSS .or. controlNodeType == CHEBYSHEV_GAUSS_LOBATTO) then
 
       call ChebyshevQuadrature(N, &
-                               this % controlPoints, &
-                               this % qWeights, &
+                               this%controlPoints, &
+                               this%qWeights, &
                                controlNodeType)
 
-    elseif (controlNodeType == UNIFORM) then
+    elseif(controlNodeType == UNIFORM) then
 
-      this % controlPoints = UniformPoints(-1.0_prec,1.0_prec,0,N)
-      this % qWeights = 2.0_prec/real(N,prec)
+      this%controlPoints = UniformPoints(-1.0_prec,1.0_prec,0,N)
+      this%qWeights = 2.0_prec/real(N,prec)
 
-    end if
+    endif
 
     ! Target Points
-    if (targetNodeType == GAUSS .or. targetNodeType == GAUSS_LOBATTO) then
+    if(targetNodeType == GAUSS .or. targetNodeType == GAUSS_LOBATTO) then
 
       call LegendreQuadrature(M, &
-                              this % targetPoints, &
+                              this%targetPoints, &
                               q, &
                               targetNodeType)
 
-    elseif (targetNodeType == UNIFORM) then
+    elseif(targetNodeType == UNIFORM) then
 
-      this % targetPoints = UniformPoints(-1.0_prec,1.0_prec,0,M)
+      this%targetPoints = UniformPoints(-1.0_prec,1.0_prec,0,M)
 
-    end if
+    endif
 
-    call this % CalculateBarycentricWeights()
-    call this % CalculateInterpolationMatrix()
-    call this % CalculateDerivativeMatrix()
-    this % bMatrix(1:N + 1,1) = this % CalculateLagrangePolynomials(-1.0_prec)
-    this % bMatrix(1:N + 1,2) = this % CalculateLagrangePolynomials(1.0_prec)
+    call this%CalculateBarycentricWeights()
+    call this%CalculateInterpolationMatrix()
+    call this%CalculateDerivativeMatrix()
+    this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
+    this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
 
     !$omp target update to(this % controlPoints)
     !$omp target update to(this % targetPoints)
@@ -226,8 +224,8 @@ contains
     !$omp target update to(this % dMatrix)
     !$omp target update to(this % dgMatrix)
     !$omp target update to(this % bMatrix)
-    
-  end subroutine Init_Lagrange
+
+  endsubroutine Init_Lagrange
 
   subroutine Free_Lagrange(this)
     !! Frees all memory (host and device) associated with an instance of the Lagrange class
@@ -235,14 +233,14 @@ contains
     class(Lagrange),intent(inout) :: this
     !! Lagrange class instance
 
-    deallocate(this % controlPoints)
-    deallocate(this % targetPoints)
-    deallocate(this % bWeights)
-    deallocate(this % qWeights)
-    deallocate(this % iMatrix)
-    deallocate(this % dMatrix)
-    deallocate(this % dgMatrix)
-    deallocate(this % bMatrix)
+    deallocate(this%controlPoints)
+    deallocate(this%targetPoints)
+    deallocate(this%bWeights)
+    deallocate(this%qWeights)
+    deallocate(this%iMatrix)
+    deallocate(this%dMatrix)
+    deallocate(this%dgMatrix)
+    deallocate(this%bMatrix)
 
     !$omp target exit data map(delete: this % controlPoints)
     !$omp target exit data map(delete: this % targetPoints)
@@ -253,7 +251,7 @@ contains
     !$omp target exit data map(delete: this % dgMatrix)
     !$omp target exit data map(delete: this % bMatrix)
 
-  end subroutine Free_Lagrange
+  endsubroutine Free_Lagrange
 
 !   subroutine self_hipblas_matrixop_1d(A,f,Af,opArows,opAcols,bcols,handle)
 !     real(prec),pointer,intent(in) :: A(:,:)
@@ -564,9 +562,9 @@ contains
     !! The number of variables/functions that are interpolated
     integer,intent(in)     :: nelems
     !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(out) :: fTarget(1:this % M + 1,1:nelems,1:nvars)
+    real(prec),intent(out) :: fTarget(1:this%M+1,1:nelems,1:nvars)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: iel,ivar,i,ii
@@ -576,20 +574,20 @@ contains
     !$omp teams distribute parallel do collapse(3) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do i = 1,this % M + 1
+        do i = 1,this%M+1
           floc = 0.0_prec
-          do ii = 1,this % N + 1
-            floc = floc + this % iMatrix(ii,i)*f(ii,iel,ivar)
-          end do
+          do ii = 1,this%N+1
+            floc = floc+this%iMatrix(ii,i)*f(ii,iel,ivar)
+          enddo
           fTarget(i,iel,ivar) = floc
-        end do
-      end do
-    end do
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  !   call self_hipblas_matrixop_1d(this % iMatrix,f,fTarget,this % M + 1,this % N + 1,nvars*nelems,handle)
+    !   call self_hipblas_matrixop_1d(this % iMatrix,f,fTarget,this % M + 1,this % N + 1,nvars*nelems,handle)
 
-  end subroutine ScalarGridInterp_1D
+  endsubroutine ScalarGridInterp_1D
 
   subroutine ScalarGridInterp_2D(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_2D interface.
@@ -611,9 +609,9 @@ contains
     !! The number of variables/functions that are interpolated
     integer,intent(in)     :: nelems
     !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this % M + 1,1:this % M + 1,1:nelems,1:nvars)
+    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,ii,jj,iel,ivar
@@ -623,28 +621,28 @@ contains
     !$omp teams distribute parallel do collapse(4) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do j = 1,this % M + 1
-          do i = 1,this % M + 1
+        do j = 1,this%M+1
+          do i = 1,this%M+1
 
             fij = 0.0_prec
-            do jj = 1,this % N + 1
+            do jj = 1,this%N+1
               fi = 0.0_prec
-              do ii = 1,this % N + 1
-                fi = fi + f(ii,jj,iel,ivar)*this % iMatrix(ii,i)
-              end do
-              fij = fij + fi*this % iMatrix(jj,j)
-            end do
+              do ii = 1,this%N+1
+                fi = fi+f(ii,jj,iel,ivar)*this%iMatrix(ii,i)
+              enddo
+              fij = fij+fi*this%iMatrix(jj,j)
+            enddo
             fTarget(i,j,iel,ivar) = fij
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     !call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
     !call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
-  end subroutine ScalarGridInterp_2D
+  endsubroutine ScalarGridInterp_2D
 
   subroutine ScalarGridInterp_3D(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_3D interface.
@@ -666,9 +664,9 @@ contains
     !! The number of variables/functions that are interpolated
     integer,intent(in)     :: nelems
     !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this % M + 1,1:this % M + 1,1:this % M + 1,1:nelems,1:nvars)
+    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:this%M+1,1:nelems,1:nvars)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,k,ii,jj,kk,iel,ivar
@@ -678,36 +676,36 @@ contains
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % M + 1
-          do j = 1,this % M + 1
-            do i = 1,this % M + 1
+        do k = 1,this%M+1
+          do j = 1,this%M+1
+            do i = 1,this%M+1
 
               fijk = 0.0_prec
-              do kk = 1,this % N + 1
+              do kk = 1,this%N+1
                 fij = 0.0_prec
-                do jj = 1,this % N + 1
+                do jj = 1,this%N+1
                   fi = 0.0_prec
-                  do ii = 1,this % N + 1
-                    fi = fi + f(ii,jj,kk,iel,ivar)*this % iMatrix(ii,i)
-                  end do
-                  fij = fij + fi*this % iMatrix(jj,j)
-                end do
-                fijk = fijk + fij*this % iMatrix(kk,k)
-              end do
+                  do ii = 1,this%N+1
+                    fi = fi+f(ii,jj,kk,iel,ivar)*this%iMatrix(ii,i)
+                  enddo
+                  fij = fij+fi*this%iMatrix(jj,j)
+                enddo
+                fijk = fijk+fij*this%iMatrix(kk,k)
+              enddo
               fTarget(i,j,k,iel,ivar) = fijk
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,handle)
     ! call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
     ! call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
 
-  end subroutine ScalarGridInterp_3D
+  endsubroutine ScalarGridInterp_3D
 
   subroutine VectorGridInterp_2D(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_2D interface.
@@ -729,9 +727,9 @@ contains
     !! The number of variables/functions that are interpolated
     integer,intent(in)     :: nelems
     !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this % M + 1,1:this % M + 1,1:nelems,1:nvars,1:2)
+    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars,1:2)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,ii,jj,iel,ivar,idir
@@ -742,27 +740,27 @@ contains
     do idir = 1,2
       do ivar = 1,nvars
         do iel = 1,nelems
-          do j = 1,this % M + 1
-            do i = 1,this % M + 1
+          do j = 1,this%M+1
+            do i = 1,this%M+1
 
               fij = 0.0_prec
-              do jj = 1,this % N + 1
+              do jj = 1,this%N+1
                 fi = 0.0_prec
-                do ii = 1,this % N + 1
-                  fi = fi + f(ii,jj,iel,ivar,idir)*this % iMatrix(ii,i)
-                end do
-                fij = fij + fi*this % iMatrix(jj,j)
-              end do
+                do ii = 1,this%N+1
+                  fi = fi+f(ii,jj,iel,ivar,idir)*this%iMatrix(ii,i)
+                enddo
+                fij = fij+fi*this%iMatrix(jj,j)
+              enddo
               fTarget(i,j,iel,ivar,idir) = fij
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine VectorGridInterp_2D
+  endsubroutine VectorGridInterp_2D
 
   subroutine VectorGridInterp_3D(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_3D interface.
@@ -784,9 +782,9 @@ contains
     !! The number of variables/functions that are interpolated
     integer,intent(in)     :: nelems
     !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this % M + 1,1:this % M + 1,1:this % M + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:this%M+1,1:nelems,1:nvars,1:3)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,k,ii,jj,kk,iel,ivar,idir
@@ -797,33 +795,33 @@ contains
     do idir = 1,3
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % M + 1
-            do j = 1,this % M + 1
-              do i = 1,this % M + 1
+          do k = 1,this%M+1
+            do j = 1,this%M+1
+              do i = 1,this%M+1
 
                 fijk = 0.0_prec
-                do kk = 1,this % N + 1
+                do kk = 1,this%N+1
                   fij = 0.0_prec
-                  do jj = 1,this % N + 1
+                  do jj = 1,this%N+1
                     fi = 0.0_prec
-                    do ii = 1,this % N + 1
-                      fi = fi + f(ii,jj,kk,iel,ivar,idir)*this % iMatrix(ii,i)
-                    end do
-                    fij = fij + fi*this % iMatrix(jj,j)
-                  end do
-                  fijk = fijk + fij*this % iMatrix(kk,k)
-                end do
+                    do ii = 1,this%N+1
+                      fi = fi+f(ii,jj,kk,iel,ivar,idir)*this%iMatrix(ii,i)
+                    enddo
+                    fij = fij+fi*this%iMatrix(jj,j)
+                  enddo
+                  fijk = fijk+fij*this%iMatrix(kk,k)
+                enddo
                 fTarget(i,j,k,iel,ivar,idir) = fijk
 
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine VectorGridInterp_3D
+  endsubroutine VectorGridInterp_3D
 
 ! Derivative_1D
 !
@@ -872,8 +870,8 @@ contains
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
+    real(prec),intent(out) :: df(1:this%N+1,1:nelems,1:nvars)
     ! Local
     integer :: i,ii,iel,ivar
     real(prec) :: dfloc
@@ -882,30 +880,30 @@ contains
     !$omp teams distribute parallel do collapse(3) num_threads(256)
     do iel = 1,nelems
       do ivar = 1,nvars
-        do i = 1,this % N + 1
+        do i = 1,this%N+1
 
           dfloc = 0.0_prec
-          do ii = 1,this % N + 1
-            dfloc = dfloc + this % dMatrix(ii,i)*f(ii,iel,ivar)
-          end do
+          do ii = 1,this%N+1
+            dfloc = dfloc+this%dMatrix(ii,i)*f(ii,iel,ivar)
+          enddo
           df(i,iel,ivar) = dfloc
 
-        end do
-      end do
-    end do
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     !call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
 
-  end subroutine Derivative_1D
+  endsubroutine Derivative_1D
 
   subroutine DGDerivative_1D(this,f,bf,df,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
     real(prec),intent(in)  :: bf(1:2,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(out) :: df(1:this%N+1,1:nelems,1:nvars)
     ! Local
     integer :: i,ii,iel,ivar
     real(prec) :: dfloc
@@ -914,20 +912,20 @@ contains
     !$omp teams distribute parallel do collapse(3) num_threads(256)
     do iel = 1,nelems
       do ivar = 1,nvars
-        do i = 1,this % N + 1
+        do i = 1,this%N+1
 
           dfloc = 0.0_prec
-          do ii = 1,this % N + 1
-            dfloc = dfloc + this % dgMatrix(ii,i)*f(ii,iel,ivar)
-          end do
-      
-          df(i,iel,ivar) = dfloc + (bf(2,iel,ivar)*this % bMatrix (i,2) + &
-                                    bf(1,iel,ivar)*this % bMatrix (i,1))/ &
-                            this % qWeights (i)
+          do ii = 1,this%N+1
+            dfloc = dfloc+this%dgMatrix(ii,i)*f(ii,iel,ivar)
+          enddo
 
-        end do
-      end do
-    end do
+          df(i,iel,ivar) = dfloc+(bf(2,iel,ivar)*this%bMatrix(i,2)+ &
+                                  bf(1,iel,ivar)*this%bMatrix(i,1))/ &
+                           this%qWeights(i)
+
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! call self_hipblas_matrixop_1d(this % dgMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
@@ -935,7 +933,7 @@ contains
     ! call DGDerivative_BoundaryContribution_1D_gpu(c_loc(this % bMatrix),c_loc(this % qWeights), &
     !                     c_loc(bf), c_loc(df), this % N, nvars, nelems)
 
-  end subroutine DGDerivative_1D
+  endsubroutine DGDerivative_1D
 
 ! ================================================================================================ !
 !
@@ -986,8 +984,8 @@ contains
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
     ! Local
     integer    :: i,j,ii,iel,ivar
     real(prec) :: df1,df2
@@ -996,22 +994,22 @@ contains
     !$omp teams distribute parallel do collapse(4) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do j = 1,this % N + 1
-          do i = 1,this % N + 1
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
             df1 = 0.0_prec
             df2 = 0.0_prec
-            do ii = 1,this % N + 1
-              df1 = df1 + this % dMatrix(ii,i)*f(ii,j,iel,ivar)
-              df2 = df2 + this % dMatrix(ii,j)*f(i,ii,iel,ivar)
-            end do
+            do ii = 1,this%N+1
+              df1 = df1+this%dMatrix(ii,i)*f(ii,j,iel,ivar)
+              df2 = df2+this%dMatrix(ii,j)*f(i,ii,iel,ivar)
+            enddo
             df(i,j,iel,ivar,1) = df1
             df(i,j,iel,ivar,2) = df2
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
@@ -1020,14 +1018,14 @@ contains
     ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! dfloc => null()
 
-  end subroutine ScalarGradient_2D
+  endsubroutine ScalarGradient_2D
 
   subroutine ScalarGradient_3D(this,f,df,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars)
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
     ! Local
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: df1,df2,df3
@@ -1036,26 +1034,26 @@ contains
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               df1 = 0.0_prec
               df2 = 0.0_prec
               df3 = 0.0_prec
-              do ii = 1,this % N + 1
-                df1 = df1 + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar)
-                df2 = df2 + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar)
-                df3 = df3 + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar)
-              end do
+              do ii = 1,this%N+1
+                df1 = df1+this%dMatrix(ii,i)*f(ii,j,k,iel,ivar)
+                df2 = df2+this%dMatrix(ii,j)*f(i,ii,k,iel,ivar)
+                df3 = df3+this%dMatrix(ii,k)*f(i,j,ii,iel,ivar)
+              enddo
               df(i,j,k,iel,ivar,1) = df1
               df(i,j,k,iel,ivar,2) = df2
               df(i,j,k,iel,ivar,3) = df3
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,1)
@@ -1066,7 +1064,7 @@ contains
     ! call self_hipblas_matrixop_dim3_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! dfloc => null()
 
-  end subroutine ScalarGradient_3D
+  endsubroutine ScalarGradient_3D
 
   subroutine VectorGradient_2D(this,f,df,nvars,nelems)
     ! Input : Vector(1:2,...)
@@ -1078,8 +1076,8 @@ contains
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
-    real(prec),intent(out) :: df(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2,1:2)
     ! Local
     integer    :: i,j,ii,idir,iel,ivar
     real(prec) :: dfds1,dfds2
@@ -1089,23 +1087,23 @@ contains
     do idir = 1,2
       do ivar = 1,nvars
         do iel = 1,nelems
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfds1 = 0.0_prec
               dfds2 = 0.0_prec
-              do ii = 1,this % N + 1
-                dfds1 = dfds1 + this % dMatrix(ii,i)*f(ii,j,iel,ivar,idir)
-                dfds2 = dfds2 + this % dMatrix(ii,j)*f(i,ii,iel,ivar,idir)
-              end do
+              do ii = 1,this%N+1
+                dfds1 = dfds1+this%dMatrix(ii,i)*f(ii,j,iel,ivar,idir)
+                dfds2 = dfds2+this%dMatrix(ii,j)*f(i,ii,iel,ivar,idir)
+              enddo
               df(i,j,iel,ivar,idir,1) = dfds1
               df(i,j,iel,ivar,idir,2) = dfds2
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! do idir = 1,2
@@ -1117,7 +1115,7 @@ contains
     ! end do
     !dfloc => null()
 
-  end subroutine VectorGradient_2D
+  endsubroutine VectorGradient_2D
 
   subroutine VectorGradient_3D(this,f,df,nvars,nelems)
     ! Input : Vector(1:3,...)
@@ -1129,8 +1127,8 @@ contains
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
-    real(prec),intent(out) :: df(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3,1:3)
     ! Local
     integer    :: i,j,k,ii,idir,iel,ivar
     real(prec) :: dfds1,dfds2,dfds3
@@ -1140,49 +1138,49 @@ contains
     do idir = 1,3
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfds1 = 0.0_prec
                 dfds2 = 0.0_prec
                 dfds3 = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfds1 = dfds1 + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar,idir)
-                  dfds2 = dfds2 + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar,idir)
-                  dfds3 = dfds3 + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar,idir)
-                end do
+                do ii = 1,this%N+1
+                  dfds1 = dfds1+this%dMatrix(ii,i)*f(ii,j,k,iel,ivar,idir)
+                  dfds2 = dfds2+this%dMatrix(ii,j)*f(i,ii,k,iel,ivar,idir)
+                  dfds3 = dfds3+this%dMatrix(ii,k)*f(i,j,ii,iel,ivar,idir)
+                enddo
                 df(i,j,k,iel,ivar,idir,1) = dfds1
                 df(i,j,k,iel,ivar,idir,2) = dfds2
                 df(i,j,k,iel,ivar,idir,3) = dfds3
 
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  !   do idir = 1,3
-  !     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir)
-  !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,1)
-  !     call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-  !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,2)
-  !     call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-  !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,3)
-  !     call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-  !   end do
-  !   dfloc => null()
+    !   do idir = 1,3
+    !     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir)
+    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,1)
+    !     call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,2)
+    !     call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,3)
+    !     call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    !   end do
+    !   dfloc => null()
 
-  end subroutine VectorGradient_3D
+  endsubroutine VectorGradient_3D
 
   subroutine VectorDivergence_2D(this,f,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     ! Local
     integer    :: i,j,ii,iel,ivar
     real(prec) :: dfLoc
@@ -1191,36 +1189,36 @@ contains
     !$omp teams distribute parallel do collapse(4) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do j = 1,this % N + 1
-          do i = 1,this % N + 1
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
             dfLoc = 0.0_prec
-            do ii = 1,this % N + 1
-              dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,iel,ivar,1)
-            end do
+            do ii = 1,this%N+1
+              dfLoc = dfLoc+this%dMatrix(ii,i)*f(ii,j,iel,ivar,1)
+            enddo
             dF(i,j,iel,ivar) = dfLoc
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp teams distribute parallel do collapse(4) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do j = 1,this % N + 1
-          do i = 1,this % N + 1
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
             dfLoc = 0.0_prec
-            do ii = 1,this % N + 1
-              dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,iel,ivar,2)
-            end do
-            dF(i,j,iel,ivar) = dF(i,j,iel,ivar) + dfLoc
+            do ii = 1,this%N+1
+              dfLoc = dfLoc+this%dMatrix(ii,j)*f(i,ii,iel,ivar,2)
+            enddo
+            dF(i,j,iel,ivar) = dF(i,j,iel,ivar)+dfLoc
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp end target
 
@@ -1230,15 +1228,15 @@ contains
     ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! floc => null()
 
-  end subroutine VectorDivergence_2D
+  endsubroutine VectorDivergence_2D
 
   subroutine VectorDGDivergence_2D(this,f,bf,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
-    real(prec),intent(in)  :: bf(1:this % N + 1,4,1:nelems,1:nvars) ! boundary normal component (\vec{f} \cdot \hat{n})
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(in)  :: bf(1:this%N+1,4,1:nelems,1:nvars) ! boundary normal component (\vec{f} \cdot \hat{n})
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     ! Local
     integer    :: i,j,ii,iel,ivar
     real(prec) :: dfLoc
@@ -1247,41 +1245,41 @@ contains
     !$omp teams distribute parallel do collapse(4) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do j = 1,this % N + 1
-          do i = 1,this % N + 1
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
             dfLoc = 0.0_prec
-            do ii = 1,this % N + 1
-              dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,iel,ivar,1)
-            end do
-            dF(i,j,iel,ivar) = dfLoc + (this % bMatrix(i,2)*bf(j,2,iel,ivar) +&
-                                        this % bMatrix(i,1)*bf(j,4,iel,ivar))/&
-                                      this % qweights(i)
+            do ii = 1,this%N+1
+              dfLoc = dfLoc+this%dgMatrix(ii,i)*f(ii,j,iel,ivar,1)
+            enddo
+            dF(i,j,iel,ivar) = dfLoc+(this%bMatrix(i,2)*bf(j,2,iel,ivar)+ &
+                                      this%bMatrix(i,1)*bf(j,4,iel,ivar))/ &
+                               this%qweights(i)
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp teams distribute parallel do collapse(4) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do j = 1,this % N + 1
-          do i = 1,this % N + 1
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
             dfLoc = 0.0_prec
-            do ii = 1,this % N + 1
-              dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,iel,ivar,2)
-            end do
-            dF(i,j,iel,ivar) = dF(i,j,iel,ivar) + dfLoc + &
-                                 (this % bMatrix(j,2)*bf(i,3,iel,ivar) +&
-                                  this % bMatrix(j,1)*bf(i,1,iel,ivar))/&
-                                 this % qweights(j)
+            do ii = 1,this%N+1
+              dfLoc = dfLoc+this%dgMatrix(ii,j)*f(i,ii,iel,ivar,2)
+            enddo
+            dF(i,j,iel,ivar) = dF(i,j,iel,ivar)+dfLoc+ &
+                               (this%bMatrix(j,2)*bf(i,3,iel,ivar)+ &
+                                this%bMatrix(j,1)*bf(i,1,iel,ivar))/ &
+                               this%qweights(j)
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! ! Interior components of the vector divergence
@@ -1297,54 +1295,54 @@ contains
     !                                                 c_loc(bf), c_loc(df),&
     !                                                 this % N, nvars, nelems)
 
-  end subroutine VectorDGDivergence_2D
+  endsubroutine VectorDGDivergence_2D
 
   subroutine TensorDivergence_2D(this,f,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
     ! Local
     integer    :: i,j,ii,iel,ivar,idir
     real(prec) :: dfLoc
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    do idir = 1, 2
+    do idir = 1,2
 
       !$omp teams distribute parallel do collapse(4) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
-              end do
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
+              enddo
               dF(i,j,iel,ivar,idir) = dfLoc
 
-            end do
-          end do
-        end do
-      end do
+            enddo
+          enddo
+        enddo
+      enddo
 
-     !$omp teams distribute parallel do collapse(4) num_threads(256)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
-              end do
-              dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir) + dfLoc
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
+              enddo
+              dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir)+dfLoc
 
-            end do
-          end do
-        end do
-      end do
+            enddo
+          enddo
+        enddo
+      enddo
     enddo
     !$omp end target
 
@@ -1363,65 +1361,63 @@ contains
     ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2,2)
     ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
 
-
     ! nullify(floc)
     ! nullify(dfloc)
 
-  end subroutine TensorDivergence_2D
+  endsubroutine TensorDivergence_2D
 
   subroutine TensorDGDivergence_2D(this,f,bf,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
-    real(prec),intent(in)  :: bf(1:this % N + 1,1:4,1:nelems,1:nvars,1:2,1:2)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(in)  :: bf(1:this%N+1,1:4,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
     ! Local
     integer    :: i,j,ii,iel,ivar,idir
     real(prec) :: dfLoc
 
     !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix, this % qWeights) map(from:df)
-    do idir = 1, 2
-
-     !$omp teams distribute parallel do collapse(4) num_threads(256)
-      do ivar = 1,nvars
-        do iel = 1,nelems
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
-
-              dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
-              end do
-              dF(i,j,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,2,iel,ivar,idir,1) +& ! east
-                                               this % bMatrix(i,1)*bf(j,4,iel,ivar,idir,1))/& ! west
-                                               this % qweights(i)
-
-
-            end do
-          end do
-        end do
-      end do
+    do idir = 1,2
 
       !$omp teams distribute parallel do collapse(4) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
-              end do
-              dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir)+ &
-                                      dfLoc  + (this % bMatrix(j,2)*bf(i,3,iel,ivar,idir,2) +& ! north
-                                                this % bMatrix(j,1)*bf(i,1,iel,ivar,idir,2))/& ! south
-                                                this % qweights(j)
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dgMatrix(ii,i)*f(ii,j,iel,ivar,idir,1)
+              enddo
+              dF(i,j,iel,ivar,idir) = dfLoc+(this%bMatrix(i,2)*bf(j,2,iel,ivar,idir,1)+ & ! east
+                                             this%bMatrix(i,1)*bf(j,4,iel,ivar,idir,1))/ & ! west
+                                      this%qweights(i)
 
-            end do
-          end do
-        end do
-      end do
+            enddo
+          enddo
+        enddo
+      enddo
+
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      do ivar = 1,nvars
+        do iel = 1,nelems
+          do j = 1,this%N+1
+            do i = 1,this%N+1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dgMatrix(ii,j)*f(i,ii,iel,ivar,idir,2)
+              enddo
+              dF(i,j,iel,ivar,idir) = dF(i,j,iel,ivar,idir)+ &
+                                      dfLoc+(this%bMatrix(j,2)*bf(i,3,iel,ivar,idir,2)+ & ! north
+                                             this%bMatrix(j,1)*bf(i,1,iel,ivar,idir,2))/ & ! south
+                                      this%qweights(j)
+
+            enddo
+          enddo
+        enddo
+      enddo
     enddo
     !$omp end target
 
@@ -1433,7 +1429,7 @@ contains
 
 !     do idir = 1,2
 !       dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir)   ! Set the gradient direction pointer
-      
+
 !       floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir,1)   ! Set the interior pointer
 !       bfloc(1:,1:,1:,1:) => bf(1:,1:,1:,1:,idir,1) ! Set the boundary pointer
 !       call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
@@ -1455,14 +1451,14 @@ contains
 !     nullify(floc)
 !     nullify(dfloc)
 !     nullify(bfloc)
-  end subroutine TensorDGDivergence_2D
+  endsubroutine TensorDGDivergence_2D
 
   subroutine VectorDivergence_3D(this,f,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     ! Local
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: dfLoc
@@ -1471,59 +1467,59 @@ contains
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar,1)
-              end do
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dMatrix(ii,i)*f(ii,j,k,iel,ivar,1)
+              enddo
               dF(i,j,k,iel,ivar) = dfLoc
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar,2)
-              end do
-              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dMatrix(ii,j)*f(i,ii,k,iel,ivar,2)
+              enddo
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
-              end do
-              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
+              enddo
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! ! local
@@ -1537,15 +1533,15 @@ contains
     ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! floc => null()
 
-  end subroutine VectorDivergence_3D
+  endsubroutine VectorDivergence_3D
 
   subroutine VectorDGDivergence_3D(this,f,bf,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
-    real(prec),intent(in)  :: bf(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: bf(1:this%N+1,1:this%N+1,1:6,1:nelems,1:nvars)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     ! Local
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: dfLoc
@@ -1554,67 +1550,67 @@ contains
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,k,iel,ivar,1)
-              end do
-              dF(i,j,k,iel,ivar) = dfLoc + (this % bMatrix(i,2)*bf(j,k,3,iel,ivar) +& ! east
-                                            this % bMatrix(i,1)*bf(j,k,5,iel,ivar))/& ! west
-                                           this % qweights(i)
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dgMatrix(ii,i)*f(ii,j,k,iel,ivar,1)
+              enddo
+              dF(i,j,k,iel,ivar) = dfLoc+(this%bMatrix(i,2)*bf(j,k,3,iel,ivar)+ & ! east
+                                          this%bMatrix(i,1)*bf(j,k,5,iel,ivar))/ & ! west
+                                   this%qweights(i)
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,k,iel,ivar,2)
-              end do
-              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc + &
-                                   (this % bMatrix(j,2)*bf(i,k,4,iel,ivar) +& ! north
-                                    this % bMatrix(j,1)*bf(i,k,2,iel,ivar))/& ! south
-                                    this % qweights(j)
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dgMatrix(ii,j)*f(i,ii,k,iel,ivar,2)
+              enddo
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc+ &
+                                   (this%bMatrix(j,2)*bf(i,k,4,iel,ivar)+ & ! north
+                                    this%bMatrix(j,1)*bf(i,k,2,iel,ivar))/ & ! south
+                                   this%qweights(j)
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
 
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems
-        do k = 1,this % N + 1
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               dfLoc = 0.0_prec
-              do ii = 1,this % N + 1
-                dfLoc = dfLoc + this % dgMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
-              end do
-              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar) + dfLoc + &
-                                   (this % bMatrix(k,2)*bf(i,j,6,iel,ivar) +& ! top
-                                    this % bMatrix(k,1)*bf(i,j,1,iel,ivar))/& ! bottom
-                                    this % qweights(k)
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%dgMatrix(ii,k)*f(i,j,ii,iel,ivar,3)
+              enddo
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc+ &
+                                   (this%bMatrix(k,2)*bf(i,j,6,iel,ivar)+ & ! top
+                                    this%bMatrix(k,1)*bf(i,j,1,iel,ivar))/ & ! bottom
+                                   this%qweights(k)
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     !     ! local
@@ -1633,14 +1629,14 @@ contains
     !                                                 c_loc(this % qWeights),&
     !                                                 c_loc(bf), c_loc(df),&
     !                                                 this % N, nvars, nelems)
-  end subroutine VectorDGDivergence_3D
+  endsubroutine VectorDGDivergence_3D
 
   subroutine TensorDivergence_3D(this,f,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
     ! Local
     integer    :: i,j,k,ii,iel,ivar,idir
     real(prec) :: dfLoc
@@ -1650,58 +1646,58 @@ contains
       !$omp teams distribute parallel do collapse(5) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfLoc = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfLoc = dfLoc + this % dMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
-                end do
+                do ii = 1,this%N+1
+                  dfLoc = dfLoc+this%dMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
+                enddo
                 dF(i,j,k,iel,ivar,idir) = dfLoc
 
-              end do
-            end do
-          end do
-        end do
-      end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp teams distribute parallel do collapse(5) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfLoc = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfLoc = dfLoc + this % dMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
-                end do
-                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc
+                do ii = 1,this%N+1
+                  dfLoc = dfLoc+this%dMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
+                enddo
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir)+dfLoc
 
-              end do
-            end do
-          end do
-        end do
-      end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp teams distribute parallel do collapse(5) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfLoc = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfLoc = dfLoc + this % dMatrix(ii,k)*f(i,j,ii,iel,ivar,idir,3)
-                end do
-                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc
+                do ii = 1,this%N+1
+                  dfLoc = dfLoc+this%dMatrix(ii,k)*f(i,j,ii,iel,ivar,idir,3)
+                enddo
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir)+dfLoc
 
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
     ! ! local
     ! integer :: idir
@@ -1710,7 +1706,7 @@ contains
 
     ! do idir = 1,3
     !   dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)   ! Set the gradient direction pointer
-      
+
     !   floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)   ! Set the interior pointer
     !   call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
 
@@ -1724,15 +1720,15 @@ contains
 
     ! nullify(floc)
     ! nullify(dfloc)
-  end subroutine TensorDivergence_3D
+  endsubroutine TensorDivergence_3D
 
   subroutine TensorDGDivergence_3D(this,f,bf,dF,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
-    real(prec),intent(in)  :: bf(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars,1:3,1:3)
-    real(prec),intent(out) :: dF(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(in)  :: bf(1:this%N+1,1:this%N+1,1:6,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out) :: dF(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
     ! Local
     integer    :: i,j,k,ii,iel,ivar,idir
     real(prec) :: dfLoc
@@ -1742,75 +1738,75 @@ contains
       !$omp teams distribute parallel do collapse(5) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfLoc = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfLoc = dfLoc + this % dgMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
-                end do
-                dF(i,j,k,iel,ivar,idir) = dfLoc + (this % bMatrix(i,2)*bf(j,k,3,iel,ivar,idir,1) +& ! east
-                                                   this % bMatrix(i,1)*bf(j,k,5,iel,ivar,idir,1))/& ! west
-                                                   this % qweights(i)
+                do ii = 1,this%N+1
+                  dfLoc = dfLoc+this%dgMatrix(ii,i)*f(ii,j,k,iel,ivar,idir,1)
+                enddo
+                dF(i,j,k,iel,ivar,idir) = dfLoc+(this%bMatrix(i,2)*bf(j,k,3,iel,ivar,idir,1)+ & ! east
+                                                 this%bMatrix(i,1)*bf(j,k,5,iel,ivar,idir,1))/ & ! west
+                                          this%qweights(i)
 
-              end do
-            end do
-          end do
-        end do
-      end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp teams distribute parallel do collapse(5) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfLoc = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfLoc = dfLoc + this % dgMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
-                end do
-                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc + &
-                                     (this % bMatrix(j,2)*bf(i,k,4,iel,ivar,idir,2) +& ! north
-                                      this % bMatrix(j,1)*bf(i,k,2,iel,ivar,idir,2))/& ! south
-                                      this % qweights(j)
+                do ii = 1,this%N+1
+                  dfLoc = dfLoc+this%dgMatrix(ii,j)*f(i,ii,k,iel,ivar,idir,2)
+                enddo
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir)+dfLoc+ &
+                                          (this%bMatrix(j,2)*bf(i,k,4,iel,ivar,idir,2)+ & ! north
+                                           this%bMatrix(j,1)*bf(i,k,2,iel,ivar,idir,2))/ & ! south
+                                          this%qweights(j)
 
-              end do
-            end do
-          end do
-        end do
-      end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
       !$omp teams distribute parallel do collapse(5) num_threads(256)
       do ivar = 1,nvars
         do iel = 1,nelems
-          do k = 1,this % N + 1
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 dfLoc = 0.0_prec
-                do ii = 1,this % N + 1
-                  dfLoc = dfLoc + this % dgMatrix(ii,k)*f(i,j,ii,iel,ivar,idir,3)
-                end do
-                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir) + dfLoc + &
-                                    (this % bMatrix(k,2)*bf(i,j,6,iel,ivar,idir,3) +& ! top
-                                     this % bMatrix(k,1)*bf(i,j,1,iel,ivar,idir,3))/& ! bottom
-                                     this % qweights(k)
+                do ii = 1,this%N+1
+                  dfLoc = dfLoc+this%dgMatrix(ii,k)*f(i,j,ii,iel,ivar,idir,3)
+                enddo
+                dF(i,j,k,iel,ivar,idir) = dF(i,j,k,iel,ivar,idir)+dfLoc+ &
+                                          (this%bMatrix(k,2)*bf(i,j,6,iel,ivar,idir,3)+ & ! top
+                                           this%bMatrix(k,1)*bf(i,j,1,iel,ivar,idir,3))/ & ! bottom
+                                          this%qweights(k)
 
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
- ! local
+    ! local
     ! real(prec),pointer :: bfloc(:,:,:,:,:)
     ! real(prec),pointer :: dfloc(:,:,:,:,:)
     ! real(prec),pointer :: floc(:,:,:,:,:)
 
     ! do idir = 1,3
     !   dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir)   ! Set the gradient direction pointer
-      
+
     !   floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir,1)   ! Set the interior pointer
     !   bfloc(1:,1:,1:,1:,1:) => bf(1:,1:,1:,1:,1:,idir,1) ! Set the boundary pointer
     !   call self_hipblas_matrixop_dim1_3d(this % dgMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
@@ -1841,7 +1837,7 @@ contains
     ! nullify(dfloc)
     ! nullify(bfloc)
 
-  end subroutine TensorDGDivergence_3D
+  endsubroutine TensorDGDivergence_3D
 
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !
@@ -1850,7 +1846,7 @@ contains
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
-    real(prec),intent(in)      :: f(1:this % N + 1,1:nelems,1:nvars)
+    real(prec),intent(in)      :: f(1:this%N+1,1:nelems,1:nvars)
     real(prec),intent(inout)   :: fTarget(1:2,1:nelems,1:nvars)
     ! Local
     integer :: ii,iel,ivar
@@ -1861,24 +1857,24 @@ contains
     do iel = 1,nelems
       do ivar = 1,nvars
         fb(1:2) = 0.0_prec
-        do ii = 1,this % N + 1
-          fb(1) = fb(1) + this % bMatrix(ii,1)*f(ii,iel,ivar) ! West
-          fb(2) = fb(2) + this % bMatrix(ii,2)*f(ii,iel,ivar) ! East
-        end do
+        do ii = 1,this%N+1
+          fb(1) = fb(1)+this%bMatrix(ii,1)*f(ii,iel,ivar) ! West
+          fb(2) = fb(2)+this%bMatrix(ii,2)*f(ii,iel,ivar) ! East
+        enddo
         fTarget(1:2,iel,ivar) = fb(1:2)
-      end do
-    end do
+      enddo
+    enddo
     !$omp end target
     !call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,handle)
 
-  end subroutine ScalarBoundaryInterp_1D
+  endsubroutine ScalarBoundaryInterp_1D
 
   subroutine ScalarBoundaryInterp_2D(this,f,fTarget,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
-    real(prec),intent(in)      :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
-    real(prec),intent(out)     :: fTarget(1:this % N + 1,1:4,1:nelems,1:nvars)
+    real(prec),intent(in)      :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
+    real(prec),intent(out)     :: fTarget(1:this%N+1,1:4,1:nelems,1:nvars)
     ! Local
     integer :: i,ii,iel,ivar
     real(prec) :: fb(1:4)
@@ -1887,36 +1883,36 @@ contains
     !$omp teams distribute parallel do collapse(3)
     do iel = 1,nelems
       do ivar = 1,nvars
-        do i = 1,this % N + 1
+        do i = 1,this%N+1
 
           fb(1:4) = 0.0_prec
 
-          do ii = 1,this % N + 1
-            fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,ii,iel,ivar) ! South
-            fb(2) = fb(2) + this % bMatrix(ii,2)*f(ii,i,iel,ivar) ! East
-            fb(3) = fb(3) + this % bMatrix(ii,2)*f(i,ii,iel,ivar) ! North
-            fb(4) = fb(4) + this % bMatrix(ii,1)*f(ii,i,iel,ivar) ! West
-          end do
+          do ii = 1,this%N+1
+            fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,ii,iel,ivar) ! South
+            fb(2) = fb(2)+this%bMatrix(ii,2)*f(ii,i,iel,ivar) ! East
+            fb(3) = fb(3)+this%bMatrix(ii,2)*f(i,ii,iel,ivar) ! North
+            fb(4) = fb(4)+this%bMatrix(ii,1)*f(ii,i,iel,ivar) ! West
+          enddo
 
           fTarget(i,1:4,iel,ivar) = fb(1:4)
 
-        end do
-      end do
-    end do
+        enddo
+      enddo
+    enddo
     !$omp end target
 
     ! call ScalarBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
     ! c_loc(f),c_loc(fTarget), &
     ! this % N,nvars,nelems)
 
-  end subroutine ScalarBoundaryInterp_2D
+  endsubroutine ScalarBoundaryInterp_2D
 
   subroutine ScalarBoundaryInterp_3D(this,f,fTarget,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)         :: nvars,nelems
-    real(prec),intent(in)      :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars)
-    real(prec),intent(out)     :: fTarget(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars)
+    real(prec),intent(in)      :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars)
+    real(prec),intent(out)     :: fTarget(1:this%N+1,1:this%N+1,1:6,1:nelems,1:nvars)
     ! Local
     integer :: i,j,ii,iel,ivar
     real(prec) :: fb(1:6)
@@ -1925,36 +1921,36 @@ contains
     !$omp teams distribute parallel do collapse(4)
     do iel = 1,nelems
       do ivar = 1,nvars
-        do j = 1,this % N + 1
-          do i = 1,this % N + 1
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
             fb(1:6) = 0.0_prec
 
-            do ii = 1,this % N + 1
-              fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,j,ii,iel,ivar) ! Bottom
-              fb(2) = fb(2) + this % bMatrix(ii,1)*f(i,ii,j,iel,ivar) ! South
-              fb(3) = fb(3) + this % bMatrix(ii,2)*f(ii,i,j,iel,ivar) ! East
-              fb(4) = fb(4) + this % bMatrix(ii,2)*f(i,ii,j,iel,ivar) ! North
-              fb(5) = fb(5) + this % bMatrix(ii,1)*f(ii,i,j,iel,ivar) ! West
-              fb(6) = fb(6) + this % bMatrix(ii,2)*f(i,j,ii,iel,ivar) ! Top
-            end do
+            do ii = 1,this%N+1
+              fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,j,ii,iel,ivar) ! Bottom
+              fb(2) = fb(2)+this%bMatrix(ii,1)*f(i,ii,j,iel,ivar) ! South
+              fb(3) = fb(3)+this%bMatrix(ii,2)*f(ii,i,j,iel,ivar) ! East
+              fb(4) = fb(4)+this%bMatrix(ii,2)*f(i,ii,j,iel,ivar) ! North
+              fb(5) = fb(5)+this%bMatrix(ii,1)*f(ii,i,j,iel,ivar) ! West
+              fb(6) = fb(6)+this%bMatrix(ii,2)*f(i,j,ii,iel,ivar) ! Top
+            enddo
 
             fTarget(i,j,1:6,iel,ivar) = fb(1:6)
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine ScalarBoundaryInterp_3D
+  endsubroutine ScalarBoundaryInterp_3D
 
   subroutine VectorBoundaryInterp_2D(this,f,fTarget,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)  :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2)
-    real(prec),intent(out)  :: fTarget(1:this % N + 1,1:4,1:nelems,1:nvars,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out)  :: fTarget(1:this%N+1,1:4,1:nelems,1:nvars,1:2)
     ! Local
     integer :: i,ii,idir,iel,ivar
     real(prec) :: fb(1:4)
@@ -1964,32 +1960,32 @@ contains
     do idir = 1,2
       do ivar = 1,nvars
         do iel = 1,nelems
-          do i = 1,this % N + 1
+          do i = 1,this%N+1
 
             fb(1:4) = 0.0_prec
-            do ii = 1,this % N + 1
-              fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,ii,iel,ivar,idir) ! South
-              fb(2) = fb(2) + this % bMatrix(ii,2)*f(ii,i,iel,ivar,idir) ! East
-              fb(3) = fb(3) + this % bMatrix(ii,2)*f(i,ii,iel,ivar,idir) ! North
-              fb(4) = fb(4) + this % bMatrix(ii,1)*f(ii,i,iel,ivar,idir) ! West
-            end do
+            do ii = 1,this%N+1
+              fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,ii,iel,ivar,idir) ! South
+              fb(2) = fb(2)+this%bMatrix(ii,2)*f(ii,i,iel,ivar,idir) ! East
+              fb(3) = fb(3)+this%bMatrix(ii,2)*f(i,ii,iel,ivar,idir) ! North
+              fb(4) = fb(4)+this%bMatrix(ii,1)*f(ii,i,iel,ivar,idir) ! West
+            enddo
 
             fTarget(i,1:4,iel,ivar,idir) = fb(1:4)
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine VectorBoundaryInterp_2D
+  endsubroutine VectorBoundaryInterp_2D
 
   subroutine VectorBoundaryInterp_3D(this,f,fTarget,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)  :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3)
-    real(prec),intent(out)  :: fTarget(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out)  :: fTarget(1:this%N+1,1:this%N+1,1:6,1:nelems,1:nvars,1:3)
     ! Local
     integer :: i,j,ii,idir,iel,ivar
     real(prec) :: fb(1:6)
@@ -1999,36 +1995,36 @@ contains
     do idir = 1,3
       do ivar = 1,nvars
         do iel = 1,nelems
-          do j = 1,this % N + 1
-            do i = 1,this % N + 1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
               fb(1:6) = 0.0_prec
-              do ii = 1,this % N + 1
-                fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,j,ii,iel,ivar,idir) ! Bottom
-                fb(2) = fb(2) + this % bMatrix(ii,1)*f(i,ii,j,iel,ivar,idir) ! South
-                fb(3) = fb(3) + this % bMatrix(ii,2)*f(ii,i,j,iel,ivar,idir) ! East
-                fb(4) = fb(4) + this % bMatrix(ii,2)*f(i,ii,j,iel,ivar,idir) ! North
-                fb(5) = fb(5) + this % bMatrix(ii,1)*f(ii,i,j,iel,ivar,idir) ! West
-                fb(6) = fb(6) + this % bMatrix(ii,2)*f(i,j,ii,iel,ivar,idir) ! Bottom
-              end do
+              do ii = 1,this%N+1
+                fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,j,ii,iel,ivar,idir) ! Bottom
+                fb(2) = fb(2)+this%bMatrix(ii,1)*f(i,ii,j,iel,ivar,idir) ! South
+                fb(3) = fb(3)+this%bMatrix(ii,2)*f(ii,i,j,iel,ivar,idir) ! East
+                fb(4) = fb(4)+this%bMatrix(ii,2)*f(i,ii,j,iel,ivar,idir) ! North
+                fb(5) = fb(5)+this%bMatrix(ii,1)*f(ii,i,j,iel,ivar,idir) ! West
+                fb(6) = fb(6)+this%bMatrix(ii,2)*f(i,j,ii,iel,ivar,idir) ! Bottom
+              enddo
 
               fTarget(i,j,1:6,iel,ivar,idir) = fb(1:6)
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine VectorBoundaryInterp_3D
+  endsubroutine VectorBoundaryInterp_3D
 
   subroutine TensorBoundaryInterp_2D(this,f,fTarget,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)  :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:2,1:2)
-    real(prec),intent(out)  :: fTarget(1:this % N + 1,1:4,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2,1:2)
+    real(prec),intent(out)  :: fTarget(1:this%N+1,1:4,1:nelems,1:nvars,1:2,1:2)
     ! Local
     integer :: i,ii,idir,jdir,iel,ivar
     real(prec) :: fb(1:4)
@@ -2039,33 +2035,33 @@ contains
       do idir = 1,2
         do ivar = 1,nvars
           do iel = 1,nelems
-            do i = 1,this % N + 1
+            do i = 1,this%N+1
 
               fb(1:4) = 0.0_prec
-              do ii = 1,this % N + 1
-                fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,ii,iel,ivar,idir,jdir) ! South
-                fb(2) = fb(2) + this % bMatrix(ii,2)*f(ii,i,iel,ivar,idir,jdir) ! East
-                fb(3) = fb(3) + this % bMatrix(ii,2)*f(i,ii,iel,ivar,idir,jdir) ! North
-                fb(4) = fb(4) + this % bMatrix(ii,1)*f(ii,i,iel,ivar,idir,jdir) ! West
-              end do
+              do ii = 1,this%N+1
+                fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,ii,iel,ivar,idir,jdir) ! South
+                fb(2) = fb(2)+this%bMatrix(ii,2)*f(ii,i,iel,ivar,idir,jdir) ! East
+                fb(3) = fb(3)+this%bMatrix(ii,2)*f(i,ii,iel,ivar,idir,jdir) ! North
+                fb(4) = fb(4)+this%bMatrix(ii,1)*f(ii,i,iel,ivar,idir,jdir) ! West
+              enddo
 
               fTarget(i,1:4,iel,ivar,idir,jdir) = fb(1:4)
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine TensorBoundaryInterp_2D
+  endsubroutine TensorBoundaryInterp_2D
 
   subroutine TensorBoundaryInterp_3D(this,f,fTarget,nvars,nelems)
     implicit none
     class(Lagrange),intent(in) :: this
     integer,intent(in)  :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this % N + 1,1:this % N + 1,1:this % N + 1,1:nelems,1:nvars,1:3,1:3)
-    real(prec),intent(out)  :: fTarget(1:this % N + 1,1:this % N + 1,1:6,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3,1:3)
+    real(prec),intent(out)  :: fTarget(1:this%N+1,1:this%N+1,1:6,1:nelems,1:nvars,1:3,1:3)
     ! Local
     integer :: i,j,ii,idir,jdir,iel,ivar
     real(prec) :: fb(1:6)
@@ -2076,31 +2072,30 @@ contains
       do idir = 1,3
         do ivar = 1,nvars
           do iel = 1,nelems
-            do j = 1,this % N + 1
-              do i = 1,this % N + 1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
                 fb(1:6) = 0.0_prec
-                do ii = 1,this % N + 1
-                  fb(1) = fb(1) + this % bMatrix(ii,1)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
-                  fb(2) = fb(2) + this % bMatrix(ii,1)*f(i,ii,j,iel,ivar,idir,jdir) ! South
-                  fb(3) = fb(3) + this % bMatrix(ii,2)*f(ii,i,j,iel,ivar,idir,jdir) ! East
-                  fb(4) = fb(4) + this % bMatrix(ii,2)*f(i,ii,j,iel,ivar,idir,jdir) ! North
-                  fb(5) = fb(5) + this % bMatrix(ii,1)*f(ii,i,j,iel,ivar,idir,jdir) ! West
-                  fb(6) = fb(6) + this % bMatrix(ii,2)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
-                end do
+                do ii = 1,this%N+1
+                  fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fb(2) = fb(2)+this%bMatrix(ii,1)*f(i,ii,j,iel,ivar,idir,jdir) ! South
+                  fb(3) = fb(3)+this%bMatrix(ii,2)*f(ii,i,j,iel,ivar,idir,jdir) ! East
+                  fb(4) = fb(4)+this%bMatrix(ii,2)*f(i,ii,j,iel,ivar,idir,jdir) ! North
+                  fb(5) = fb(5)+this%bMatrix(ii,1)*f(ii,i,j,iel,ivar,idir,jdir) ! West
+                  fb(6) = fb(6)+this%bMatrix(ii,2)*f(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                enddo
 
                 fTarget(i,j,1:6,iel,ivar,idir,jdir) = fb(1:6)
 
-              end do
-            end do
-          end do
-        end do
-      end do
-    end do
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
     !$omp end target
 
-  end subroutine TensorBoundaryInterp_3D
-
+  endsubroutine TensorBoundaryInterp_3D
 
 ! ================================================================================================ !
 !
@@ -2118,30 +2113,30 @@ contains
     class(Lagrange),intent(inout) :: this
     ! Local
     integer :: i,j
-    real(real64) :: bWeights(0:this % N)
-    real(real64) :: controlPoints(0:this % N)
+    real(real64) :: bWeights(0:this%N)
+    real(real64) :: controlPoints(0:this%N)
 
-    do i = 0,this % N
+    do i = 0,this%N
       bWeights(i) = 1.0_real64
-      controlPoints(i) = real(this % controlPoints(i + 1),real64)
-    end do
+      controlPoints(i) = real(this%controlPoints(i+1),real64)
+    enddo
 
     ! Computes the product w_k = w_k*(s_k - s_j), k /= j
-    do j = 1,this % N
-      do i = 0,j - 1
+    do j = 1,this%N
+      do i = 0,j-1
 
-        bWeights(i) = bWeights(i)*(controlPoints(i) - controlPoints(j))
-        bWeights(j) = bWeights(j)*(controlPoints(j) - controlPoints(i))
+        bWeights(i) = bWeights(i)*(controlPoints(i)-controlPoints(j))
+        bWeights(j) = bWeights(j)*(controlPoints(j)-controlPoints(i))
 
-      end do
-    end do
+      enddo
+    enddo
 
-    do j = 0,this % N
+    do j = 0,this%N
       bWeights(j) = 1.0_prec/bWeights(j)
-      this % bWeights(j + 1) = real(bWeights(j),prec)
-    end do
+      this%bWeights(j+1) = real(bWeights(j),prec)
+    enddo
 
-  end subroutine CalculateBarycentricWeights
+  endsubroutine CalculateBarycentricWeights
 
 ! ================================================================================================ !
 !
@@ -2160,61 +2155,61 @@ contains
     integer    :: row,col
     logical    :: rowHasMatch
     real(real64) :: temp1,temp2
-    real(real64) :: iMatrix(0:this % M,0:this % N)
-    real(real64) :: bWeights(0:this % N)
-    real(real64) :: controlPoints(0:this % N)
-    real(real64) :: targetPoints(0:this % M)
+    real(real64) :: iMatrix(0:this%M,0:this%N)
+    real(real64) :: bWeights(0:this%N)
+    real(real64) :: controlPoints(0:this%N)
+    real(real64) :: targetPoints(0:this%M)
 
-    do col = 0,this % N
-      controlPoints(col) = real(this % controlPoints(col + 1),real64)
-      bWeights(col) = real(this % bWeights(col + 1),real64)
-    end do
-    do row = 0,this % M
-      targetPoints(row) = real(this % targetPoints(row + 1),real64)
-    end do
+    do col = 0,this%N
+      controlPoints(col) = real(this%controlPoints(col+1),real64)
+      bWeights(col) = real(this%bWeights(col+1),real64)
+    enddo
+    do row = 0,this%M
+      targetPoints(row) = real(this%targetPoints(row+1),real64)
+    enddo
 
-    do row = 0,this % M
+    do row = 0,this%M
 
       rowHasMatch = .false.
 
-      do col = 0,this % N
+      do col = 0,this%N
 
         iMatrix(row,col) = 0.0_real64
 
-        if (AlmostEqual(targetPoints(row),controlPoints(col))) then
+        if(AlmostEqual(targetPoints(row),controlPoints(col))) then
           rowHasMatch = .true.
           iMatrix(row,col) = 1.0_real64
-        end if
+        endif
 
-      end do
+      enddo
 
-      if (.not. (rowHasMatch)) then
+      if(.not.(rowHasMatch)) then
 
         temp1 = 0.0_real64
 
-        do col = 0,this % N
+        do col = 0,this%N
           temp2 = bWeights(col)/ &
-                  (targetPoints(row) - &
+                  (targetPoints(row)- &
                    controlPoints(col))
           iMatrix(row,col) = temp2
-          temp1 = temp1 + temp2
-        end do
+          temp1 = temp1+temp2
+        enddo
 
-        do col = 0,this % N
+        do col = 0,this%N
           iMatrix(row,col) = iMatrix(row,col)/temp1
-        end do
+        enddo
 
-      end if
+      endif
 
-    end do
+    enddo
 
-    do row = 0,this % M
-      do col = 0,this % N
-        this % iMatrix(col + 1,row + 1) = real(iMatrix(row,col),prec)
-      end do
-    end do
+    do row = 0,this%M
+      do col = 0,this%N
+        this%iMatrix(col+1,row+1) = real(iMatrix(row,col),prec)
+      enddo
+    enddo
 
-  end subroutine CalculateInterpolationMatrix
+  endsubroutine CalculateInterpolationMatrix
 
 ! ================================================================================================ !
 !
@@ -2232,55 +2227,55 @@ contains
     class(Lagrange),intent(inout) :: this
     ! Local
     integer      :: row,col
-    real(real64) :: dmat(0:this % N,0:this % N)
-    real(real64) :: dgmat(0:this % N,0:this % N)
-    real(real64) :: bWeights(0:this % N)
-    real(real64) :: qWeights(0:this % N)
-    real(real64) :: controlPoints(0:this % N)
+    real(real64) :: dmat(0:this%N,0:this%N)
+    real(real64) :: dgmat(0:this%N,0:this%N)
+    real(real64) :: bWeights(0:this%N)
+    real(real64) :: qWeights(0:this%N)
+    real(real64) :: controlPoints(0:this%N)
 
-    do row = 0,this % N
-      bWeights(row) = real(this % bWeights(row + 1),real64)
-      qWeights(row) = real(this % qWeights(row + 1),real64)
-      controlPoints(row) = real(this % controlPoints(row + 1),real64)
-    end do
+    do row = 0,this%N
+      bWeights(row) = real(this%bWeights(row+1),real64)
+      qWeights(row) = real(this%qWeights(row+1),real64)
+      controlPoints(row) = real(this%controlPoints(row+1),real64)
+    enddo
 
-    do row = 0,this % N
+    do row = 0,this%N
 
       dmat(row,row) = 0.0_prec
 
-      do col = 0,this % N
+      do col = 0,this%N
 
-        if (.not. (col == row)) then
+        if(.not.(col == row)) then
 
           dmat(row,col) = bWeights(col)/ &
                           (bWeights(row)* &
-                           (controlPoints(row) - &
+                           (controlPoints(row)- &
                             controlPoints(col)))
 
-          dmat(row,row) = dmat(row,row) - dmat(row,col)
+          dmat(row,row) = dmat(row,row)-dmat(row,col)
 
-        end if
+        endif
 
-      end do
+      enddo
 
-    end do
+    enddo
 
-    do row = 0,this % N
-      do col = 0,this % N
+    do row = 0,this%N
+      do col = 0,this%N
         dgmat(row,col) = -dmat(col,row)* &
                          qWeights(col)/ &
                          qWeights(row)
-      end do
-    end do
+      enddo
+    enddo
 
-    do row = 0,this % N
-      do col = 0,this % N
-        this % dMatrix(row + 1,col + 1) = real(dmat(col,row),prec)
-        this % dgMatrix(row + 1,col + 1) = real(dgmat(col,row),prec)
-      end do
-    end do
+    do row = 0,this%N
+      do col = 0,this%N
+        this%dMatrix(row+1,col+1) = real(dmat(col,row),prec)
+        this%dgMatrix(row+1,col+1) = real(dgmat(col,row),prec)
+      enddo
+    enddo
 
-  end subroutine CalculateDerivativeMatrix
+  endsubroutine CalculateDerivativeMatrix
 
 ! ================================================================================================ !
 !
@@ -2296,56 +2291,56 @@ contains
     implicit none
     class(Lagrange) :: this
     real(prec)      :: sE
-    real(prec)      :: lAtS(0:this % N)
+    real(prec)      :: lAtS(0:this%N)
     ! Local
     integer    :: j
     logical    :: xMatchesNode
     real(real64) :: temp1,temp2
     real(real64) :: sELocal
-    real(real64) :: controlPoints(0:this % N)
-    real(real64) :: bWeights(0:this % N)
-    real(real64) :: lS(0:this % N)
+    real(real64) :: controlPoints(0:this%N)
+    real(real64) :: bWeights(0:this%N)
+    real(real64) :: lS(0:this%N)
 
     sELocal = real(sE,real64)
-    do j = 0,this % N
-      controlPoints(j) = real(this % controlPoints(j + 1),real64)
-      bWeights(j) = real(this % bWeights(j + 1),real64)
-    end do
+    do j = 0,this%N
+      controlPoints(j) = real(this%controlPoints(j+1),real64)
+      bWeights(j) = real(this%bWeights(j+1),real64)
+    enddo
 
     xMatchesNode = .false.
 
-    do j = 0,this % N
+    do j = 0,this%N
 
       lS(j) = 0.0_real64
-      if (AlmostEqual(sELocal,controlPoints(j))) then
+      if(AlmostEqual(sELocal,controlPoints(j))) then
         lS(j) = 1.0_real64
         xMatchesNode = .true.
-      end if
+      endif
 
-    end do
+    enddo
 
-    if (xMatchesNode) then
-      do j = 0,this % N
+    if(xMatchesNode) then
+      do j = 0,this%N
         lAtS(j) = real(lS(j),prec)
-      end do
+      enddo
       return
-    end if
+    endif
 
     temp1 = 0.0_real64
 
-    do j = 0,this % N
-      temp2 = bWeights(j)/(sE - controlPoints(j))
+    do j = 0,this%N
+      temp2 = bWeights(j)/(sE-controlPoints(j))
       lS(j) = temp2
-      temp1 = temp1 + temp2
-    end do
+      temp1 = temp1+temp2
+    enddo
 
     lS = lS/temp1
 
-    do j = 0,this % N
+    do j = 0,this%N
       lAtS(j) = real(lS(j),prec)
-    end do
+    enddo
 
-  end function CalculateLagrangePolynomials
+  endfunction CalculateLagrangePolynomials
 
   subroutine WriteHDF5_Lagrange(this,fileId)
     implicit none
@@ -2355,23 +2350,23 @@ contains
     call CreateGroup_HDF5(fileId,'/interp')
 
     call WriteArray_HDF5(fileId,'/interp/controlpoints', &
-                         this % controlPoints)
+                         this%controlPoints)
 
     call WriteArray_HDF5(fileId,'/interp/qweights', &
-                         this % qWeights)
+                         this%qWeights)
 
     call WriteArray_HDF5(fileId,'/interp/dgmatrix', &
-                         this % dgMatrix)
+                         this%dgMatrix)
 
     call WriteArray_HDF5(fileId,'/interp/dmatrix', &
-                         this % dMatrix)
+                         this%dMatrix)
 
     call WriteArray_HDF5(fileId,'/interp/bmatrix', &
-                         this % bMatrix)
+                         this%bMatrix)
 
     call WriteArray_HDF5(fileId,'/interp/imatrix', &
-                         this % iMatrix)
+                         this%iMatrix)
 
-  end subroutine WriteHDF5_Lagrange
+  endsubroutine WriteHDF5_Lagrange
 
-end module SELF_Lagrange
+endmodule SELF_Lagrange

@@ -48,7 +48,7 @@ module SELF_Data
     generic,public :: SetEquation => SetEquation_DataObj
     procedure,private :: SetEquation_DataObj
 
-  end type SELF_DataObj
+  endtype SELF_DataObj
 
 ! ---------------------- Scalars ---------------------- !
   type,extends(SELF_DataObj),public :: Scalar1D
@@ -69,11 +69,11 @@ module SELF_Data
     generic,public :: Derivative => Derivative_Scalar1D
     procedure,private :: Derivative_Scalar1D
 
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_Scalar1D, WriteHDF5_MPI_Scalar1D
-    PROCEDURE, PRIVATE :: WriteHDF5_Scalar1D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar1D
+    generic,public :: WriteHDF5 => WriteHDF5_Scalar1D,WriteHDF5_MPI_Scalar1D
+    procedure,private :: WriteHDF5_Scalar1D
+    procedure,private :: WriteHDF5_MPI_Scalar1D
 
-  end type Scalar1D
+  endtype Scalar1D
 
   type,extends(SELF_DataObj),public :: Scalar2D
 
@@ -94,11 +94,11 @@ module SELF_Data
     generic,public :: Gradient => Gradient_Scalar2D
     procedure,private :: Gradient_Scalar2D
 
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
-    PROCEDURE, PRIVATE :: WriteHDF5_Scalar2D
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Scalar2D,WriteHDF5_Scalar2D
+    procedure,private :: WriteHDF5_MPI_Scalar2D
+    procedure,private :: WriteHDF5_Scalar2D
 
-  end type Scalar2D
+  endtype Scalar2D
 
   type,extends(SELF_DataObj),public :: Scalar3D
 
@@ -121,11 +121,11 @@ module SELF_Data
     generic,public :: Gradient => Gradient_Scalar3D
     procedure,private :: Gradient_Scalar3D
 
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
-    PROCEDURE, PRIVATE :: WriteHDF5_Scalar3D
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Scalar3D,WriteHDF5_Scalar3D
+    procedure,private :: WriteHDF5_MPI_Scalar3D
+    procedure,private :: WriteHDF5_Scalar3D
 
-  end type Scalar3D
+  endtype Scalar3D
 
 ! ! ! ---------------------- Vectors ---------------------- !
 
@@ -148,14 +148,14 @@ module SELF_Data
     generic,public :: Divergence => Divergence_Vector2D
     procedure,private :: Divergence_Vector2D
 
-    GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
-    PROCEDURE,PRIVATE :: SetEquation_Vector2D
+    generic,public :: SetEquation => SetEquation_Vector2D
+    procedure,private :: SetEquation_Vector2D
 
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector2D, WriteHDF5_Vector2D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector2D
-    PROCEDURE, PRIVATE :: WriteHDF5_Vector2D
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Vector2D,WriteHDF5_Vector2D
+    procedure,private :: WriteHDF5_MPI_Vector2D
+    procedure,private :: WriteHDF5_Vector2D
 
-  end type Vector2D
+  endtype Vector2D
 
   type,extends(SELF_DataObj),public :: Vector3D
 
@@ -176,14 +176,14 @@ module SELF_Data
     generic,public :: Divergence => Divergence_Vector3D
     procedure,private :: Divergence_Vector3D
 
-    GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
-    PROCEDURE,PRIVATE :: SetEquation_Vector3D
+    generic,public :: SetEquation => SetEquation_Vector3D
+    procedure,private :: SetEquation_Vector3D
 
-    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector3D, WriteHDF5_Vector3D
-    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector3D
-    PROCEDURE, PRIVATE :: WriteHDF5_Vector3D
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Vector3D,WriteHDF5_Vector3D
+    procedure,private :: WriteHDF5_MPI_Vector3D
+    procedure,private :: WriteHDF5_Vector3D
 
-  end type Vector3D
+  endtype Vector3D
 ! ! ---------------------- Tensors ---------------------- !
 
   type,extends(SELF_DataObj),public :: Tensor2D
@@ -202,7 +202,7 @@ module SELF_Data
     procedure,public :: DGDivergence => DGDivergence_Tensor2D
     procedure,public :: Determinant => Determinant_Tensor2D
 
-  end type Tensor2D
+  endtype Tensor2D
 
   type,extends(SELF_DataObj),public :: Tensor3D
 
@@ -220,7 +220,7 @@ module SELF_Data
     procedure,public :: DGDivergence => DGDivergence_Tensor3D
     procedure,public :: Determinant => Determinant_Tensor3D
 
-  end type Tensor3D
+  endtype Tensor3D
 
   integer,parameter :: selfStrongForm = 0
   integer,parameter :: selfWeakDGForm = 1
@@ -238,9 +238,9 @@ contains
     integer,intent(in) :: ivar
     character(*),intent(in) :: name
 
-    call this % meta(ivar) % SetName(name)
+    call this%meta(ivar)%SetName(name)
 
-  end subroutine SetName_DataObj
+  endsubroutine SetName_DataObj
 
   subroutine SetDescription_DataObj(this,ivar,description)
     !! Set the description of the `ivar-th` variable
@@ -249,9 +249,9 @@ contains
     integer,intent(in) :: ivar
     character(*),intent(in) :: description
 
-    call this % meta(ivar) % SetDescription(description)
+    call this%meta(ivar)%SetDescription(description)
 
-  end subroutine SetDescription_DataObj
+  endsubroutine SetDescription_DataObj
 
   subroutine SetUnits_DataObj(this,ivar,units)
     !! Set the units of the `ivar-th` variable
@@ -260,9 +260,9 @@ contains
     integer,intent(in) :: ivar
     character(*),intent(in) :: units
 
-    call this % meta(ivar) % SetUnits(units)
+    call this%meta(ivar)%SetUnits(units)
 
-  end subroutine SetUnits_DataObj
+  endsubroutine SetUnits_DataObj
 
   subroutine SetEquation_DataObj(this,ivar,eqnChar)
     !! Sets the equation parser for the `ivar-th` variable
@@ -271,10 +271,10 @@ contains
     integer,intent(in) :: ivar
     character(*),intent(in) :: eqnChar
 
-    this % eqn(ivar) = EquationParser(trim(eqnChar), &
-                                      (/'x','y','z','t'/))
+    this%eqn(ivar) = EquationParser(trim(eqnChar), &
+                                    (/'x','y','z','t'/))
 
-  end subroutine SetEquation_DataObj
+  endsubroutine SetEquation_DataObj
 
 ! -- Scalar1D -- !
 
@@ -285,15 +285,15 @@ contains
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
 
-    allocate( this % interior(1:interp % N + 1,1:nelem,1:nvar),&
-              this % boundary(1:2,1:nelem,1:nvar),&
-              this % extBoundary(1:2,1:nelem,1:nvar),&
-              this % avgBoundary(2,1:nelem,1:nvar),&
-              this % jumpBoundary(1:2,1:nelem,1:nvar) )
+    allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
+             this%boundary(1:2,1:nelem,1:nvar), &
+             this%extBoundary(1:2,1:nelem,1:nvar), &
+             this%avgBoundary(2,1:nelem,1:nvar), &
+             this%jumpBoundary(1:2,1:nelem,1:nvar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % boundary)
@@ -301,24 +301,23 @@ contains
     !$omp target enter data map(alloc: this % avgBoundary)
     !$omp target enter data map(alloc: this % jumpBoundary)
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:nVar))
-    
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:nVar))
 
-  end subroutine Init_Scalar1D
+  endsubroutine Init_Scalar1D
 
   subroutine Free_Scalar1D(this)
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    this % interp => null()
-    deallocate(this % interior)
-    deallocate(this % boundary)
-    deallocate(this % extBoundary)
-    deallocate(this % avgBoundary)
-    deallocate(this % jumpBoundary)
-    deallocate(this % meta)
-    deallocate(this % eqn)
+    this%interp => null()
+    deallocate(this%interior)
+    deallocate(this%boundary)
+    deallocate(this%extBoundary)
+    deallocate(this%avgBoundary)
+    deallocate(this%jumpBoundary)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % boundary)
@@ -326,103 +325,103 @@ contains
     !$omp target exit data map(delete: this % avgBoundary)
     !$omp target exit data map(delete: this % jumpBoundary)
 
-  end subroutine Free_Scalar1D
+  endsubroutine Free_Scalar1D
 
   subroutine BoundaryInterp_Scalar1D(this)
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call this % interp % ScalarBoundaryInterp_1D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%ScalarBoundaryInterp_1D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Scalar1D
+  endsubroutine BoundaryInterp_Scalar1D
 
   subroutine GridInterp_Scalar1D(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: that
 
-    call this % interp % ScalarGridInterp_1D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%ScalarGridInterp_1D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine GridInterp_Scalar1D
+  endsubroutine GridInterp_Scalar1D
 
   subroutine Derivative_Scalar1D(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: that
 
-    call this % interp % Derivative_1D(this % interior, &
-                                       that % interior, &
-                                       this % nVar, &
-                                       this % nElem)
+    call this%interp%Derivative_1D(this%interior, &
+                                   that%interior, &
+                                   this%nVar, &
+                                   this%nElem)
 
-  end subroutine Derivative_Scalar1D
+  endsubroutine Derivative_Scalar1D
 
-  SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
-    IMPLICIT NONE
-    CLASS(Scalar1D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+  subroutine WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
+    implicit none
+    class(Scalar1D),intent(in) :: this
+    character(*),intent(in) :: group
+    integer(HID_T),intent(in) :: fileId
+    integer,intent(in) :: elemoffset
+    integer,intent(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:3)
-    INTEGER(HID_T) :: bOffset(1:3)
-    INTEGER(HID_T) :: globalDims(1:3)
-    INTEGER(HID_T) :: bGlobalDims(1:3)
-    INTEGER :: ivar
+    integer(HID_T) :: offset(1:3)
+    integer(HID_T) :: bOffset(1:3)
+    integer(HID_T) :: globalDims(1:3)
+    integer(HID_T) :: bGlobalDims(1:3)
+    integer :: ivar
 
-      offset(1:3) = (/0,0,elemoffset/)
-      globalDims(1:3) = (/this % interp % N + 1, &
-                          this % nVar, &
-                          nGlobalElem/)
+    offset(1:3) = (/0,0,elemoffset/)
+    globalDims(1:3) = (/this%interp%N+1, &
+                        this%nVar, &
+                        nGlobalElem/)
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:3) = (/0,0,elemoffset/)
-      bGlobalDims(1:3) = (/this % nVar, &
-                           2, &
-                           nGlobalElem/)
+    ! Offsets and dimensions for element boundary data
+    bOffset(1:3) = (/0,0,elemoffset/)
+    bGlobalDims(1:3) = (/this%nVar, &
+                         2, &
+                         nGlobalElem/)
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior,offset,globalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior,offset,globalDims)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary,bOffset,bGlobalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary,bOffset,bGlobalDims)
 
-  END SUBROUTINE WriteHDF5_MPI_Scalar1D
+  endsubroutine WriteHDF5_MPI_Scalar1D
 
-  SUBROUTINE WriteHDF5_Scalar1D(this,fileId,group)
-    IMPLICIT NONE
-    CLASS(Scalar1D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group
+  subroutine WriteHDF5_Scalar1D(this,fileId,group)
+    implicit none
+    class(Scalar1D),intent(in) :: this
+    integer(HID_T),intent(in) :: fileId
+    character(*),intent(in) :: group
     ! Local
-    INTEGER :: ivar
+    integer :: ivar
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary)
 
-  END SUBROUTINE WriteHDF5_Scalar1D
+  endsubroutine WriteHDF5_Scalar1D
 
 ! ! -- Scalar2D -- !
 
@@ -433,16 +432,16 @@ contains
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
 
-    allocate( this % interior(1:interp % N + 1,interp % N + 1,nelem,nvar),&
-              this % interpWork(1:interp % M + 1,1:interp % N + 1,1:nelem,1:nvar),&
-              this % boundary(1:interp % N + 1,1:4,1:nelem,1:nvar),&
-              this % extBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar),&
-              this % avgBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar),&
-              this % jumpBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar) )
+    allocate(this%interior(1:interp%N+1,interp%N+1,nelem,nvar), &
+             this%interpWork(1:interp%M+1,1:interp%N+1,1:nelem,1:nvar), &
+             this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%jumpBoundary(1:interp%N+1,1:4,1:nelem,1:nvar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % interpWork)
@@ -451,26 +450,26 @@ contains
     !$omp target enter data map(alloc: this % avgBoundary)
     !$omp target enter data map(alloc: this % jumpBoundary)
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:nVar))
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:nVar))
 
-  end subroutine Init_Scalar2D
+  endsubroutine Init_Scalar2D
 
   subroutine Free_Scalar2D(this)
     implicit none
     class(Scalar2D),intent(inout) :: this
 
-    this % nVar = 0
-    this % nElem = 0
-    this % interp => null()
-    deallocate(this % interior)
-    deallocate(this % interpWork)
-    deallocate(this % boundary)
-    deallocate(this % extBoundary)
-    deallocate(this % avgBoundary)
-    deallocate(this % jumpBoundary)
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    this%nVar = 0
+    this%nElem = 0
+    this%interp => null()
+    deallocate(this%interior)
+    deallocate(this%interpWork)
+    deallocate(this%boundary)
+    deallocate(this%extBoundary)
+    deallocate(this%avgBoundary)
+    deallocate(this%jumpBoundary)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % interpWork)
@@ -479,105 +478,105 @@ contains
     !$omp target exit data map(delete: this % avgBoundary)
     !$omp target exit data map(delete: this % jumpBoundary)
 
-  end subroutine Free_Scalar2D
+  endsubroutine Free_Scalar2D
 
   subroutine BoundaryInterp_Scalar2D(this)
     implicit none
     class(Scalar2D),intent(inout) :: this
 
-    call this % interp % ScalarBoundaryInterp_2D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%ScalarBoundaryInterp_2D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Scalar2D
+  endsubroutine BoundaryInterp_Scalar2D
 
   subroutine GridInterp_Scalar2D(this,that)
     implicit none
     class(Scalar2D),intent(in) :: this
     type(Scalar2D),intent(inout) :: that
 
-    call this % interp % ScalarGridInterp_2D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%ScalarGridInterp_2D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine GridInterp_Scalar2D
+  endsubroutine GridInterp_Scalar2D
 
   subroutine Gradient_Scalar2D(this,df)
     implicit none
     class(Scalar2D),intent(in) :: this
     type(Vector2D),intent(inout) :: df
 
-    call this % interp % ScalarGradient_2D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem)
+    call this%interp%ScalarGradient_2D(this%interior, &
+                                       df%interior, &
+                                       this%nVar, &
+                                       this%nElem)
 
-  end subroutine Gradient_Scalar2D
+  endsubroutine Gradient_Scalar2D
 
-  SUBROUTINE WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
-    IMPLICIT NONE
-    CLASS(Scalar2D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+  subroutine WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
+    implicit none
+    class(Scalar2D),intent(in) :: this
+    character(*),intent(in) :: group
+    integer(HID_T),intent(in) :: fileId
+    integer,intent(in) :: elemoffset
+    integer,intent(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:4)
-    INTEGER(HID_T) :: bOffset(1:4)
-    INTEGER(HID_T) :: globalDims(1:4)
-    INTEGER(HID_T) :: bGlobalDims(1:4)
-    INTEGER :: ivar
+    integer(HID_T) :: offset(1:4)
+    integer(HID_T) :: bOffset(1:4)
+    integer(HID_T) :: globalDims(1:4)
+    integer(HID_T) :: bGlobalDims(1:4)
+    integer :: ivar
 
-      offset(1:4) = (/0,0,0,elemoffset/)
-      globalDims(1:4) = (/this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % nVar, &
-                          nglobalelem/)
+    offset(1:4) = (/0,0,0,elemoffset/)
+    globalDims(1:4) = (/this%interp%N+1, &
+                        this%interp%N+1, &
+                        this%nVar, &
+                        nglobalelem/)
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:4) = (/0,0,0,elemoffset/)
-      bGlobalDims(1:4) = (/this % interp % N + 1, &
-                           this % nVar, &
-                           4, &
-                           nglobalelem/)
+    ! Offsets and dimensions for element boundary data
+    bOffset(1:4) = (/0,0,0,elemoffset/)
+    bGlobalDims(1:4) = (/this%interp%N+1, &
+                         this%nVar, &
+                         4, &
+                         nglobalelem/)
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior,offset,globalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior,offset,globalDims)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary,bOffset,bGlobalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary,bOffset,bGlobalDims)
 
-  END SUBROUTINE WriteHDF5_MPI_Scalar2D
+  endsubroutine WriteHDF5_MPI_Scalar2D
 
-  SUBROUTINE WriteHDF5_Scalar2D(this,fileId,group)
-    IMPLICIT NONE
-    CLASS(Scalar2D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group
+  subroutine WriteHDF5_Scalar2D(this,fileId,group)
+    implicit none
+    class(Scalar2D),intent(in) :: this
+    integer(HID_T),intent(in) :: fileId
+    character(*),intent(in) :: group
     ! Local
-    INTEGER :: ivar
+    integer :: ivar
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary)
 
-  END SUBROUTINE WriteHDF5_Scalar2D
+  endsubroutine WriteHDF5_Scalar2D
 
 ! ! -- Scalar3D -- !
 
@@ -588,17 +587,17 @@ contains
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
 
-    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar),&
-              this % interpWork1(1:interp % M + 1,1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar),&
-              this % interpWork2(1:interp % M + 1,1:interp % M + 1,1:interp % N + 1,1:nelem,1:nvar),&
-              this % boundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar),&
-              this % extBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar),&
-              this % avgBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar),&
-              this % jumpBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar))
+    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
+             this%interpWork1(1:interp%M+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
+             this%interpWork2(1:interp%M+1,1:interp%M+1,1:interp%N+1,1:nelem,1:nvar), &
+             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
+             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
+             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
+             this%jumpBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % interpWork1)
@@ -608,27 +607,27 @@ contains
     !$omp target enter data map(alloc: this % avgBoundary)
     !$omp target enter data map(alloc: this % jumpBoundary)
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:nVar))
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:nVar))
 
-  end subroutine Init_Scalar3D
+  endsubroutine Init_Scalar3D
 
   subroutine Free_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
 
-    this % nVar = 0
-    this % nElem = 0
-    this % interp => null()
-    deallocate(this % interior)
-    deallocate(this % interpWork1)
-    deallocate(this % interpWork2)
-    deallocate(this % boundary)
-    deallocate(this % extBoundary)
-    deallocate(this % avgBoundary)
-    deallocate(this % jumpBoundary)
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    this%nVar = 0
+    this%nElem = 0
+    this%interp => null()
+    deallocate(this%interior)
+    deallocate(this%interpWork1)
+    deallocate(this%interpWork2)
+    deallocate(this%boundary)
+    deallocate(this%extBoundary)
+    deallocate(this%avgBoundary)
+    deallocate(this%jumpBoundary)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % interpWork1)
@@ -638,107 +637,107 @@ contains
     !$omp target exit data map(delete: this % avgBoundary)
     !$omp target exit data map(delete: this % jumpBoundary)
 
-  end subroutine Free_Scalar3D
+  endsubroutine Free_Scalar3D
 
   subroutine BoundaryInterp_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
 
-    call this % interp % ScalarBoundaryInterp_3D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%ScalarBoundaryInterp_3D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Scalar3D
+  endsubroutine BoundaryInterp_Scalar3D
 
   subroutine GridInterp_Scalar3D(this,that)
     implicit none
     class(Scalar3D),intent(in) :: this
     type(Scalar3D),intent(inout) :: that
 
-    call this % interp % ScalarGridInterp_3D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%ScalarGridInterp_3D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine GridInterp_Scalar3D
+  endsubroutine GridInterp_Scalar3D
 
   subroutine Gradient_Scalar3D(this,df)
     implicit none
     class(Scalar3D),intent(in) :: this
     type(Vector3D),intent(inout) :: df
 
-    call this % interp % ScalarGradient_3D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem)
+    call this%interp%ScalarGradient_3D(this%interior, &
+                                       df%interior, &
+                                       this%nVar, &
+                                       this%nElem)
 
-  end subroutine Gradient_Scalar3D
+  endsubroutine Gradient_Scalar3D
 
-  SUBROUTINE WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
-    IMPLICIT NONE
-    CLASS(Scalar3D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+  subroutine WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
+    implicit none
+    class(Scalar3D),intent(in) :: this
+    character(*),intent(in) :: group
+    integer(HID_T),intent(in) :: fileId
+    integer,intent(in) :: elemoffset
+    integer,intent(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:5)
-    INTEGER(HID_T) :: bOffset(1:5)
-    INTEGER(HID_T) :: globalDims(1:5)
-    INTEGER(HID_T) :: bGlobalDims(1:5)
-    INTEGER :: ivar
+    integer(HID_T) :: offset(1:5)
+    integer(HID_T) :: bOffset(1:5)
+    integer(HID_T) :: globalDims(1:5)
+    integer(HID_T) :: bGlobalDims(1:5)
+    integer :: ivar
 
-      offset(1:5) = (/0,0,0,0,elemoffset/)
-      globalDims(1:5) = (/this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % nVar, &
-                          nglobalelem/)
+    offset(1:5) = (/0,0,0,0,elemoffset/)
+    globalDims(1:5) = (/this%interp%N+1, &
+                        this%interp%N+1, &
+                        this%interp%N+1, &
+                        this%nVar, &
+                        nglobalelem/)
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:5) = (/0,0,0,0,elemoffset/)
-      bGlobalDims(1:5) = (/this % interp % N + 1, &
-                           this % interp % N + 1, &
-                           this % nVar, &
-                           6, &
-                           nglobalelem/)
+    ! Offsets and dimensions for element boundary data
+    bOffset(1:5) = (/0,0,0,0,elemoffset/)
+    bGlobalDims(1:5) = (/this%interp%N+1, &
+                         this%interp%N+1, &
+                         this%nVar, &
+                         6, &
+                         nglobalelem/)
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior,offset,globalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior,offset,globalDims)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary,bOffset,bGlobalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary,bOffset,bGlobalDims)
 
-  END SUBROUTINE WriteHDF5_MPI_Scalar3D
+  endsubroutine WriteHDF5_MPI_Scalar3D
 
-  SUBROUTINE WriteHDF5_Scalar3D(this,fileId,group)
-    IMPLICIT NONE
-    CLASS(Scalar3D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group
+  subroutine WriteHDF5_Scalar3D(this,fileId,group)
+    implicit none
+    class(Scalar3D),intent(in) :: this
+    integer(HID_T),intent(in) :: fileId
+    character(*),intent(in) :: group
     ! Local
-    INTEGER :: ivar
+    integer :: ivar
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary)
 
-  END SUBROUTINE WriteHDF5_Scalar3D
+  endsubroutine WriteHDF5_Scalar3D
 
 ! -- Vector2D -- !
 
@@ -751,19 +750,19 @@ contains
     ! Local
     integer :: N
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
-    N = interp % N
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
+    N = interp%N
 
-    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar,1:2),&
-              this % boundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2),&
-              this % extBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2),&
-              this % avgBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2),&
-              this % boundaryNormal(1:interp % N + 1,1:4,1:nelem,1:nvar))
+    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:2), &
+             this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2), &
+             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2), &
+             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2), &
+             this%boundaryNormal(1:interp%N+1,1:4,1:nelem,1:nvar))
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:2*nVar))
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:2*nVar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % boundary)
@@ -771,21 +770,21 @@ contains
     !$omp target enter data map(alloc: this % avgBoundary)
     !$omp target enter data map(alloc: this % boundaryNormal)
 
-  end subroutine Init_Vector2D
+  endsubroutine Init_Vector2D
 
   subroutine Free_Vector2D(this)
     implicit none
     class(Vector2D),intent(inout) :: this
 
-    this % interp => null()
-    this % nVar = 0
-    this % nElem = 0
+    this%interp => null()
+    this%nVar = 0
+    this%nElem = 0
 
-    deallocate(this % interior)
-    deallocate(this % boundary)
-    deallocate(this % boundaryNormal)
-    deallocate(this % extBoundary)
-    deallocate(this % avgBoundary)
+    deallocate(this%interior)
+    deallocate(this%boundary)
+    deallocate(this%boundaryNormal)
+    deallocate(this%extBoundary)
+    deallocate(this%avgBoundary)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % boundary)
@@ -793,134 +792,134 @@ contains
     !$omp target exit data map(delete: this % extBoundary)
     !$omp target exit data map(delete: this % avgBoundary)
 
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
-  end subroutine Free_Vector2D
+  endsubroutine Free_Vector2D
 
-  SUBROUTINE SetEquation_Vector2D(this,idir,ivar,eqnChar)
+  subroutine SetEquation_Vector2D(this,idir,ivar,eqnChar)
     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
-    IMPLICIT NONE
-    CLASS(Vector2D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: idir,ivar
-    CHARACTER(*),INTENT(in) :: eqnChar
+    implicit none
+    class(Vector2D),intent(inout) :: this
+    integer,intent(in) :: idir,ivar
+    character(*),intent(in) :: eqnChar
 
-    this % eqn(idir+2*(ivar-1)) = EquationParser( TRIM(eqnChar), &
-                                              (/'x','y','z','t'/) )
+    this%eqn(idir+2*(ivar-1)) = EquationParser(trim(eqnChar), &
+                                               (/'x','y','z','t'/))
 
-  END SUBROUTINE SetEquation_Vector2D
+  endsubroutine SetEquation_Vector2D
 
   subroutine GridInterp_Vector2D(this,that)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Vector2D),intent(inout) :: that
 
-    call this % interp % VectorGridInterp_2D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%VectorGridInterp_2D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine GridInterp_Vector2D
+  endsubroutine GridInterp_Vector2D
 
   subroutine BoundaryInterp_Vector2D(this)
     implicit none
     class(Vector2D),intent(inout) :: this
 
-    call this % interp % VectorBoundaryInterp_2D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%VectorBoundaryInterp_2D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Vector2D
+  endsubroutine BoundaryInterp_Vector2D
 
   subroutine Gradient_Vector2D(this,df)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Tensor2D),intent(inout) :: df
 
-    call this % interp % VectorGradient_2D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem)
+    call this%interp%VectorGradient_2D(this%interior, &
+                                       df%interior, &
+                                       this%nVar, &
+                                       this%nElem)
 
-  end subroutine Gradient_Vector2D
+  endsubroutine Gradient_Vector2D
 
   subroutine Divergence_Vector2D(this,that)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Scalar2D),intent(inout) :: that
 
-    call this % interp % VectorDivergence_2D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%VectorDivergence_2D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine Divergence_Vector2D
+  endsubroutine Divergence_Vector2D
 
-  SUBROUTINE WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
-    IMPLICIT NONE
-    CLASS(Vector2D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+  subroutine WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    character(*),intent(in) :: group
+    integer(HID_T),intent(in) :: fileId
+    integer,intent(in) :: elemoffset
+    integer,intent(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:5)
-    INTEGER(HID_T) :: bOffset(1:5)
-    INTEGER(HID_T) :: globalDims(1:5)
-    INTEGER(HID_T) :: bGlobalDims(1:5)
-    INTEGER :: ivar
+    integer(HID_T) :: offset(1:5)
+    integer(HID_T) :: bOffset(1:5)
+    integer(HID_T) :: globalDims(1:5)
+    integer(HID_T) :: bGlobalDims(1:5)
+    integer :: ivar
 
-      offset(1:5) = (/0,0,0,0,elemoffset/)
-      globalDims(1:5) = (/2, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % nVar, &
-                          nglobalelem/)
+    offset(1:5) = (/0,0,0,0,elemoffset/)
+    globalDims(1:5) = (/2, &
+                        this%interp%N+1, &
+                        this%interp%N+1, &
+                        this%nVar, &
+                        nglobalelem/)
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:5) = (/0,0,0,0,elemoffset/)
-      bGlobalDims(1:5) = (/2, &
-                           this % interp % N + 1, &
-                           this % nVar, &
-                           4, &
-                           nglobalelem/)
+    ! Offsets and dimensions for element boundary data
+    bOffset(1:5) = (/0,0,0,0,elemoffset/)
+    bGlobalDims(1:5) = (/2, &
+                         this%interp%N+1, &
+                         this%nVar, &
+                         4, &
+                         nglobalelem/)
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior,offset,globalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior,offset,globalDims)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary,bOffset,bGlobalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary,bOffset,bGlobalDims)
 
-  END SUBROUTINE WriteHDF5_MPI_Vector2D
+  endsubroutine WriteHDF5_MPI_Vector2D
 
-  SUBROUTINE WriteHDF5_Vector2D(this,fileId,group)
-    IMPLICIT NONE
-    CLASS(Vector2D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group
+  subroutine WriteHDF5_Vector2D(this,fileId,group)
+    implicit none
+    class(Vector2D),intent(in) :: this
+    integer(HID_T),intent(in) :: fileId
+    character(*),intent(in) :: group
     ! Local
-    INTEGER :: ivar
+    integer :: ivar
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary)
 
-  END SUBROUTINE WriteHDF5_Vector2D
+  endsubroutine WriteHDF5_Vector2D
 
 ! ! -- Vector3D -- !
   subroutine Init_Vector3D(this,interp,nVar,nElem)
@@ -932,19 +931,19 @@ contains
     ! Local
     integer :: N
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
-    N = interp % N
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
+    N = interp%N
 
-    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar,1:3),&
-              this % boundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3),&
-              this % extBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3),&
-              this % avgBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3),&
-              this % boundaryNormal(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar))
+    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3), &
+             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
+             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
+             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
+             this%boundaryNormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:3*nVar))
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:3*nVar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % boundary)
@@ -952,21 +951,21 @@ contains
     !$omp target enter data map(alloc: this % avgBoundary)
     !$omp target enter data map(alloc: this % boundaryNormal)
 
-  end subroutine Init_Vector3D
+  endsubroutine Init_Vector3D
 
   subroutine Free_Vector3D(this)
     implicit none
     class(Vector3D),intent(inout) :: this
 
-    this % interp => null()
-    this % nVar = 0
-    this % nElem = 0
+    this%interp => null()
+    this%nVar = 0
+    this%nElem = 0
 
-    deallocate(this % interior)
-    deallocate(this % boundary)
-    deallocate(this % boundaryNormal)
-    deallocate(this % extBoundary)
-    deallocate(this % avgBoundary)
+    deallocate(this%interior)
+    deallocate(this%boundary)
+    deallocate(this%boundaryNormal)
+    deallocate(this%extBoundary)
+    deallocate(this%avgBoundary)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % boundary)
@@ -974,136 +973,136 @@ contains
     !$omp target exit data map(delete: this % avgBoundary)
     !$omp target exit data map(delete: this % boundaryNormal)
 
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
-  end subroutine Free_Vector3D
+  endsubroutine Free_Vector3D
 
-  SUBROUTINE SetEquation_Vector3D(this,idir,ivar,eqnChar)
+  subroutine SetEquation_Vector3D(this,idir,ivar,eqnChar)
     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
-    IMPLICIT NONE
-    CLASS(Vector3D),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: idir,ivar
-    CHARACTER(*),INTENT(in) :: eqnChar
+    implicit none
+    class(Vector3D),intent(inout) :: this
+    integer,intent(in) :: idir,ivar
+    character(*),intent(in) :: eqnChar
 
-    this % eqn(idir+3*(ivar-1)) = EquationParser( TRIM(eqnChar), &
-                                              (/'x','y','z','t'/) )
+    this%eqn(idir+3*(ivar-1)) = EquationParser(trim(eqnChar), &
+                                               (/'x','y','z','t'/))
 
-  END SUBROUTINE SetEquation_Vector3D
+  endsubroutine SetEquation_Vector3D
 
   subroutine GridInterp_Vector3D(this,that)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Vector3D),intent(inout) :: that
 
-    call this % interp % VectorGridInterp_3D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%VectorGridInterp_3D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine GridInterp_Vector3D
+  endsubroutine GridInterp_Vector3D
 
   subroutine BoundaryInterp_Vector3D(this)
     implicit none
     class(Vector3D),intent(inout) :: this
 
-    call this % interp % VectorBoundaryInterp_3D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%VectorBoundaryInterp_3D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Vector3D
+  endsubroutine BoundaryInterp_Vector3D
 
   subroutine Gradient_Vector3D(this,df)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Tensor3D),intent(inout) :: df
 
-    call this % interp % VectorGradient_3D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem)
+    call this%interp%VectorGradient_3D(this%interior, &
+                                       df%interior, &
+                                       this%nVar, &
+                                       this%nElem)
 
-  end subroutine Gradient_Vector3D
+  endsubroutine Gradient_Vector3D
 
   subroutine Divergence_Vector3D(this,that)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Scalar3D),intent(inout) :: that
 
-    call this % interp % VectorDivergence_3D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%VectorDivergence_3D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine Divergence_Vector3D
+  endsubroutine Divergence_Vector3D
 
-  SUBROUTINE WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
-    IMPLICIT NONE
-    CLASS(Vector3D), INTENT(in) :: this
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER(HID_T), INTENT(in) :: fileId
-    INTEGER, INTENT(in) :: elemoffset
-    INTEGER, INTENT(in) :: nglobalelem
+  subroutine WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
+    implicit none
+    class(Vector3D),intent(in) :: this
+    character(*),intent(in) :: group
+    integer(HID_T),intent(in) :: fileId
+    integer,intent(in) :: elemoffset
+    integer,intent(in) :: nglobalelem
     ! Local
-    INTEGER(HID_T) :: offset(1:6)
-    INTEGER(HID_T) :: bOffset(1:6)
-    INTEGER(HID_T) :: globalDims(1:6)
-    INTEGER(HID_T) :: bGlobalDims(1:6)
-    INTEGER :: ivar
+    integer(HID_T) :: offset(1:6)
+    integer(HID_T) :: bOffset(1:6)
+    integer(HID_T) :: globalDims(1:6)
+    integer(HID_T) :: bGlobalDims(1:6)
+    integer :: ivar
 
-      offset(1:6) = (/0,0,0,0,0,elemoffset/)
-      globalDims(1:6) = (/3, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % interp % N + 1, &
-                          this % nVar, &
-                          nglobalelem/)
+    offset(1:6) = (/0,0,0,0,0,elemoffset/)
+    globalDims(1:6) = (/3, &
+                        this%interp%N+1, &
+                        this%interp%N+1, &
+                        this%interp%N+1, &
+                        this%nVar, &
+                        nglobalelem/)
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:6) = (/0,0,0,0,0,elemoffset/)
-      bGlobalDims(1:6) = (/3, &
-                           this % interp % N + 1, &
-                           this % interp % N + 1, &
-                           this % nVar, &
-                           6, &
-                           nglobalelem/)
+    ! Offsets and dimensions for element boundary data
+    bOffset(1:6) = (/0,0,0,0,0,elemoffset/)
+    bGlobalDims(1:6) = (/3, &
+                         this%interp%N+1, &
+                         this%interp%N+1, &
+                         this%nVar, &
+                         6, &
+                         nglobalelem/)
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior,offset,globalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior,offset,globalDims)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary,bOffset,bGlobalDims)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary,bOffset,bGlobalDims)
 
-  END SUBROUTINE WriteHDF5_MPI_Vector3D
+  endsubroutine WriteHDF5_MPI_Vector3D
 
-  SUBROUTINE WriteHDF5_Vector3D(this,fileId,group)
-    IMPLICIT NONE
-    CLASS(Vector3D), INTENT(in) :: this
-    INTEGER(HID_T), INTENT(in) :: fileId
-    CHARACTER(*), INTENT(in) :: group
+  subroutine WriteHDF5_Vector3D(this,fileId,group)
+    implicit none
+    class(Vector3D),intent(in) :: this
+    integer(HID_T),intent(in) :: fileId
+    character(*),intent(in) :: group
     ! Local
-    INTEGER :: ivar
+    integer :: ivar
 
-      CALL CreateGroup_HDF5(fileId,TRIM(group))
+    call CreateGroup_HDF5(fileId,trim(group))
 
-      DO ivar = 1, this % nVar
-        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
-      ENDDO
+    do ivar = 1,this%nVar
+      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    enddo
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
-                           this % interior)
+    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
+                         this%interior)
 
-      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
-                           this % boundary)
+    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
+                         this%boundary)
 
-  END SUBROUTINE WriteHDF5_Vector3D
+  endsubroutine WriteHDF5_Vector3D
 
 ! ! -- Tensor2D -- !
 
@@ -1116,80 +1115,80 @@ contains
     ! Local
     integer :: N
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
-    N = interp % N
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
+    N = interp%N
 
-    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar,1:2,1:2),&
-              this % boundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2,1:2),&
-              this % extBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2,1:2))
+    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:2,1:2), &
+             this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2,1:2), &
+             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2,1:2))
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:4*nVar))
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:4*nVar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % boundary)
     !$omp target enter data map(alloc: this % extBoundary)
 
-  end subroutine Init_Tensor2D
+  endsubroutine Init_Tensor2D
 
   subroutine Free_Tensor2D(this)
     implicit none
     class(Tensor2D),intent(inout) :: this
 
-    this % interp => null()
-    this % nVar = 0
-    this % nElem = 0
+    this%interp => null()
+    this%nVar = 0
+    this%nElem = 0
 
-    deallocate(this % interior)
-    deallocate(this % boundary)
-    deallocate(this % extBoundary)
+    deallocate(this%interior)
+    deallocate(this%boundary)
+    deallocate(this%extBoundary)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % boundary)
     !$omp target exit data map(delete: this % extBoundary)
 
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
-  end subroutine Free_Tensor2D
+  endsubroutine Free_Tensor2D
 
   subroutine BoundaryInterp_Tensor2D(this)
     implicit none
     class(Tensor2D),intent(inout) :: this
 
-    call this % interp % TensorBoundaryInterp_2D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%TensorBoundaryInterp_2D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Tensor2D
+  endsubroutine BoundaryInterp_Tensor2D
 
   subroutine Divergence_Tensor2D(this,that)
     implicit none
     class(Tensor2D),intent(in) :: this
     class(Vector2D),intent(inout) :: that
 
-    call this % interp % TensorDivergence_2D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%TensorDivergence_2D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine Divergence_Tensor2D
+  endsubroutine Divergence_Tensor2D
 
   subroutine DGDivergence_Tensor2D(this,that)
     implicit none
     class(Tensor2D),intent(in) :: this
     class(Vector2D),intent(inout) :: that
 
-    call this % interp % TensorDGDivergence_2D(this % interior, &
-                                               this % boundary, &
-                                               that % interior, &
-                                               this % nVar, &
-                                               this % nElem)
+    call this%interp%TensorDGDivergence_2D(this%interior, &
+                                           this%boundary, &
+                                           that%interior, &
+                                           this%nVar, &
+                                           this%nElem)
 
-  end subroutine DGDivergence_Tensor2D
+  endsubroutine DGDivergence_Tensor2D
 
   subroutine Determinant_Tensor2D(this,that)
     implicit none
@@ -1198,22 +1197,22 @@ contains
     ! Local
     integer :: iEl,iVar,i,j
 
-    do iVar = 1,this % nVar
-      do iEl = 1,this % nElem
-        do j = 1,this % interp % N + 1
-          do i = 1,this % interp % N + 1
+    do iVar = 1,this%nVar
+      do iEl = 1,this%nElem
+        do j = 1,this%interp%N+1
+          do i = 1,this%interp%N+1
 
-            that % interior(i,j,iEl,iVar) = this % interior(i,j,iEl,iVar,1,1)* &
-                                               this % interior(i,j,iEl,iVar,2,2) - &
-                                               this % interior(i,j,iEl,iVar,1,2)* &
-                                               this % interior(i,j,iEl,iVar,2,1)
+            that%interior(i,j,iEl,iVar) = this%interior(i,j,iEl,iVar,1,1)* &
+                                          this%interior(i,j,iEl,iVar,2,2)- &
+                                          this%interior(i,j,iEl,iVar,1,2)* &
+                                          this%interior(i,j,iEl,iVar,2,1)
 
-          end do
-        end do
-      end do
-    end do
+          enddo
+        enddo
+      enddo
+    enddo
 
-  end subroutine Determinant_Tensor2D
+  endsubroutine Determinant_Tensor2D
 
 ! ! -- Tensor3D -- !
 
@@ -1226,80 +1225,80 @@ contains
     ! Local
     integer :: N
 
-    this % interp => interp
-    this % nVar = nVar
-    this % nElem = nElem
-    N = interp % N
+    this%interp => interp
+    this%nVar = nVar
+    this%nElem = nElem
+    N = interp%N
 
-    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:interp % N +1,1:nelem,1:nvar,1:3,1:3),&
-              this % boundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3,1:3),&
-              this % extBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3,1:3))
+    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3,1:3), &
+             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3,1:3), &
+             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3,1:3))
 
-    allocate (this % meta(1:nVar))
-    allocate (this % eqn(1:9*nVar))
+    allocate(this%meta(1:nVar))
+    allocate(this%eqn(1:9*nVar))
 
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % boundary)
     !$omp target enter data map(alloc: this % extBoundary)
 
-  end subroutine Init_Tensor3D
+  endsubroutine Init_Tensor3D
 
   subroutine Free_Tensor3D(this)
     implicit none
     class(Tensor3D),intent(inout) :: this
 
-    this % interp => null()
-    this % nVar = 0
-    this % nElem = 0
+    this%interp => null()
+    this%nVar = 0
+    this%nElem = 0
 
-    deallocate(this % interior)
-    deallocate(this % boundary)
-    deallocate(this % extBoundary)
+    deallocate(this%interior)
+    deallocate(this%boundary)
+    deallocate(this%extBoundary)
 
     !$omp target exit data map(delete: this % interior)
     !$omp target exit data map(delete: this % boundary)
     !$omp target exit data map(delete: this % extBoundary)
 
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    deallocate(this%meta)
+    deallocate(this%eqn)
 
-  end subroutine Free_Tensor3D
+  endsubroutine Free_Tensor3D
 
   subroutine BoundaryInterp_Tensor3D(this)
     implicit none
     class(Tensor3D),intent(inout) :: this
 
-    call this % interp % TensorBoundaryInterp_3D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem)
+    call this%interp%TensorBoundaryInterp_3D(this%interior, &
+                                             this%boundary, &
+                                             this%nVar, &
+                                             this%nElem)
 
-  end subroutine BoundaryInterp_Tensor3D
-  
+  endsubroutine BoundaryInterp_Tensor3D
+
   subroutine Divergence_Tensor3D(this,that)
     implicit none
     class(Tensor3D),intent(in) :: this
     class(Vector3D),intent(inout) :: that
 
-    call this % interp % TensorDivergence_3D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem)
+    call this%interp%TensorDivergence_3D(this%interior, &
+                                         that%interior, &
+                                         this%nVar, &
+                                         this%nElem)
 
-  end subroutine Divergence_Tensor3D
+  endsubroutine Divergence_Tensor3D
 
   subroutine DGDivergence_Tensor3D(this,that)
     implicit none
     class(Tensor3D),intent(in) :: this
     class(Vector3D),intent(inout) :: that
 
-    call this % interp % TensorDGDivergence_3D(this % interior, &
-                                               this % boundary, &
-                                               that % interior, &
-                                               this % nVar, &
-                                               this % nElem)
+    call this%interp%TensorDGDivergence_3D(this%interior, &
+                                           this%boundary, &
+                                           that%interior, &
+                                           this%nVar, &
+                                           this%nElem)
 
-  end subroutine DGDivergence_Tensor3D
+  endsubroutine DGDivergence_Tensor3D
 
   subroutine Determinant_Tensor3D(this,that)
     implicit none
@@ -1308,35 +1307,35 @@ contains
     ! Local
     integer :: iEl,iVar,i,j,k
 
-    do iEl = 1,this % nElem
-      do iVar = 1,this % nVar
-        do k = 1,this % interp % N+1
-          do j = 1,this % interp % N+1
-            do i = 1,this % interp % N+1
+    do iEl = 1,this%nElem
+      do iVar = 1,this%nVar
+        do k = 1,this%interp%N+1
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
 
-              that % interior(i,j,k,iEl,iVar) = &
-                this % interior(i,j,k,iEl,iVar,1,1)* &
-                (this % interior(i,j,k,iEl,iVar,2,2)* &
-                 this % interior(i,j,k,iEl,iVar,3,3) - &
-                 this % interior(i,j,k,iEl,iVar,2,3)* &
-                 this % interior(i,j,k,iEl,iVar,3,2)) - &
-                this % interior(i,j,k,iEl,iVar,2,1)* &
-                (this % interior(i,j,k,iEl,iVar,1,2)* &
-                 this % interior(i,j,k,iEl,iVar,3,3) - &
-                 this % interior(i,j,k,iEl,iVar,1,3)* &
-                 this % interior(i,j,k,iEl,iVar,3,2)) + &
-                this % interior(i,j,k,iEl,iVar,3,1)* &
-                (this % interior(i,j,k,iEl,iVar,1,2)* &
-                 this % interior(i,j,k,iEl,iVar,2,3) - &
-                 this % interior(i,j,k,iEl,iVar,1,3)* &
-                 this % interior(i,j,k,iEl,iVar,2,2))
+              that%interior(i,j,k,iEl,iVar) = &
+                this%interior(i,j,k,iEl,iVar,1,1)* &
+                (this%interior(i,j,k,iEl,iVar,2,2)* &
+                 this%interior(i,j,k,iEl,iVar,3,3)- &
+                 this%interior(i,j,k,iEl,iVar,2,3)* &
+                 this%interior(i,j,k,iEl,iVar,3,2))- &
+                this%interior(i,j,k,iEl,iVar,2,1)* &
+                (this%interior(i,j,k,iEl,iVar,1,2)* &
+                 this%interior(i,j,k,iEl,iVar,3,3)- &
+                 this%interior(i,j,k,iEl,iVar,1,3)* &
+                 this%interior(i,j,k,iEl,iVar,3,2))+ &
+                this%interior(i,j,k,iEl,iVar,3,1)* &
+                (this%interior(i,j,k,iEl,iVar,1,2)* &
+                 this%interior(i,j,k,iEl,iVar,2,3)- &
+                 this%interior(i,j,k,iEl,iVar,1,3)* &
+                 this%interior(i,j,k,iEl,iVar,2,2))
 
-            end do
-          end do
-        end do
-      end do
-    end do
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
 
-  end subroutine Determinant_Tensor3D
+  endsubroutine Determinant_Tensor3D
 
-end module SELF_Data
+endmodule SELF_Data

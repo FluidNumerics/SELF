@@ -4,17 +4,17 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Model
+module SELF_Model
 
-  USE SELF_SupportRoutines
-  USE SELF_Metadata
-  USE SELF_Mesh
-  USE SELF_MappedData
-  USE SELF_HDF5
-  USE HDF5
-  USE FEQParse
+  use SELF_SupportRoutines
+  use SELF_Metadata
+  use SELF_Mesh
+  use SELF_MappedData
+  use SELF_HDF5
+  use HDF5
+  use FEQParse
 
-  IMPLICIT NONE
+  implicit none
 
 #include "SELF_Macros.h"
 
@@ -22,276 +22,285 @@ MODULE SELF_Model
 !   Time integration parameters
 
   ! Runge-Kutta 2nd Order (Low Storage)
-  REAL(prec),PARAMETER :: rk2_a(1:2) = (/0.0_PREC,-0.5_PREC/)
-  REAL(prec),PARAMETER :: rk2_b(1:2) = (/0.5_PREC,0.5_PREC/)
-  REAL(prec),PARAMETER :: rk2_g(1:2) = (/0.5_PREC,1.0_PREC/)
+  real(prec),parameter :: rk2_a(1:2) = (/0.0_prec,-0.5_prec/)
+  real(prec),parameter :: rk2_b(1:2) = (/0.5_prec,0.5_prec/)
+  real(prec),parameter :: rk2_g(1:2) = (/0.5_prec,1.0_prec/)
 
   ! Williamson's Runge-Kutta 3rd Order (Low Storage)
-  REAL(prec),PARAMETER :: rk3_a(1:3) = (/0.0_PREC,-5.0_PREC/9.0_PREC,-153.0_PREC/128.0_PREC/)
-  REAL(prec),PARAMETER :: rk3_b(1:3) = (/0.0_PREC,1.0_PREC/3.0_PREC,3.0_PREC/4.0_PREC/)
-  REAL(prec),PARAMETER :: rk3_g(1:3) = (/1.0_PREC/3.0_PREC,15.0_PREC/16.0_PREC,8.0_PREC/15.0_PREC/)
+  real(prec),parameter :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
+  real(prec),parameter :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
+  real(prec),parameter :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
 
   ! Carpenter-Kennedy Runge-Kuttta 4th Order (Low Storage)
-  REAL(prec),PARAMETER :: rk4_a(1:5) = (/0.0_PREC, &
-                                         -1.0_PREC, &
-                                         -1.0_PREC/3.0_PREC + 2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC, &
-                                         -2.0_PREC**(1.0_PREC/3.0_PREC) - 2.0_PREC**(2.0_PREC/3.0_PREC) - 2.0_PREC, &
-                                         -1.0_PREC + 2.0_PREC**(1.0_PREC/3.0_PREC)/)
+  real(prec),parameter :: rk4_a(1:5) = (/0.0_prec, &
+                                         -1.0_prec, &
+                                         -1.0_prec/3.0_prec+ &
+                                         2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+                                         -2.0_prec**(1.0_prec/3.0_prec)- &
+                                         2.0_prec**(2.0_prec/3.0_prec)-2.0_prec, &
+                                         -1.0_prec+2.0_prec**(1.0_prec/3.0_prec)/)
 
-  REAL(prec),PARAMETER :: rk4_b(1:5) = (/0.0_PREC, &
-                  2.0_PREC/3.0_PREC + 2.0_PREC**(1.0_PREC/3.0_PREC)/3.0_PREC + 2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC, &
-                  2.0_PREC/3.0_PREC + 2.0_PREC**(1.0_PREC/3.0_PREC)/3.0_PREC + 2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC, &
-                  1.0_PREC/3.0_PREC - 2.0_PREC**(1.0_PREC/3.0_PREC)/3.0_PREC - 2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC, &
-                                         1.0_PREC/)
+  real(prec),parameter :: rk4_b(1:5) = (/ &
+                          0.0_prec, &
+                          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+ &
+                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+                          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+ &
+                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+                          1.0_prec/3.0_prec-2.0_prec**(1.0_prec/3.0_prec)/3.0_prec- &
+                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+                          1.0_prec/)
 
-  REAL(prec),PARAMETER :: rk4_g(1:5) = (/ &
-                  2.0_PREC/3.0_PREC + 2.0_PREC**(1.0_PREC/3.0_PREC)/3.0_PREC + 2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC, &
-                          -2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC + 1.0_PREC/6.0_PREC, &
-        -1.0_PREC/3.0_PREC - 2.0_PREC*2.0_PREC**(1.0_PREC/3.0_PREC)/3.0_PREC - 2.0_PREC**(2.0_PREC/3.0_PREC)/3.0_PREC, &
-                  1.0_PREC/3.0_PREC - 2.0_PREC**(1.0_PREC/3.0_PREC)/3.0_PREC - 2.0_PREC**(2.0_PREC/3.0_PREC)/6.0_PREC, &
-                  1.0_PREC/3.0_PREC + 2.0_PREC**(1.0_PREC/3.0_PREC)/6.0_PREC + 2.0_PREC**(2.0_PREC/3.0_PREC)/12.0_PREC/)
+  real(prec),parameter :: rk4_g(1:5) = (/ &
+                          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+ &
+                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+                          -2.0_prec**(2.0_prec/3.0_prec)/6.0_prec+1.0_prec/6.0_prec, &
+                          -1.0_prec/3.0_prec-2.0_prec*2.0_prec**(1.0_prec/3.0_prec)/3.0_prec- &
+                          2.0_prec**(2.0_prec/3.0_prec)/3.0_prec, &
+                          1.0_prec/3.0_prec-2.0_prec**(1.0_prec/3.0_prec)/3.0_prec- &
+                          2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+                          1.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/6.0_prec+ &
+                          2.0_prec**(2.0_prec/3.0_prec)/12.0_prec/)
 
 !
-  INTEGER,PARAMETER :: SELF_EULER = 100
-  INTEGER,PARAMETER :: SELF_RK2 = 200
-  INTEGER,PARAMETER :: SELF_RK3 = 300
-  INTEGER,PARAMETER :: SELF_RK4 = 400
-  INTEGER,PARAMETER :: SELF_AB2 = 201
-  INTEGER,PARAMETER :: SELF_AB3 = 301
-  INTEGER,PARAMETER :: SELF_AB4 = 401
+  integer,parameter :: SELF_EULER = 100
+  integer,parameter :: SELF_RK2 = 200
+  integer,parameter :: SELF_RK3 = 300
+  integer,parameter :: SELF_RK4 = 400
+  integer,parameter :: SELF_AB2 = 201
+  integer,parameter :: SELF_AB3 = 301
+  integer,parameter :: SELF_AB4 = 401
 
-  INTEGER,PARAMETER :: SELF_INTEGRATOR_LENGTH = 10 ! max length of integrator methods when specified as char
-  INTEGER,PARAMETER :: SELF_EQUATION_LENGTH = 500
+  integer,parameter :: SELF_INTEGRATOR_LENGTH = 10 ! max length of integrator methods when specified as char
+  integer,parameter :: SELF_EQUATION_LENGTH = 500
 
 ! //////////////////////////////////////////////// !
 !   Boundary Condition parameters
 !
 
   ! Conditions on the solution
-  INTEGER,PARAMETER :: SELF_BC_PRESCRIBED = 100
-  INTEGER,PARAMETER :: SELF_BC_RADIATION = 101
-  INTEGER,PARAMETER :: SELF_BC_NONORMALFLOW = 102
+  integer,parameter :: SELF_BC_PRESCRIBED = 100
+  integer,parameter :: SELF_BC_RADIATION = 101
+  integer,parameter :: SELF_BC_NONORMALFLOW = 102
 
   ! Conditions on the solution gradients
-  INTEGER,PARAMETER :: SELF_BC_PRESCRIBED_STRESS = 200
-  INTEGER,PARAMETER :: SELF_BC_NOSTRESS = 201
+  integer,parameter :: SELF_BC_PRESCRIBED_STRESS = 200
+  integer,parameter :: SELF_BC_NOSTRESS = 201
 
 ! //////////////////////////////////////////////// !
 !   Model Formulations
 !
-  INTEGER,PARAMETER :: SELF_FORMULATION_LENGTH = 30 ! max length of integrator methods when specified as char
+  integer,parameter :: SELF_FORMULATION_LENGTH = 30 ! max length of integrator methods when specified as char
 
-  TYPE,ABSTRACT :: Model
+  type,abstract :: Model
 
     ! Time integration attributes
-    PROCEDURE(SELF_timeIntegrator),POINTER :: timeIntegrator => Euler_timeIntegrator
-    REAL(prec) :: dt
-    REAL(prec) :: t
-    INTEGER :: ioIterate = 0
+    procedure(SELF_timeIntegrator),pointer :: timeIntegrator => Euler_timeIntegrator
+    real(prec) :: dt
+    real(prec) :: t
+    integer :: ioIterate = 0
 
     ! Standard Diagnostics
-    REAL(prec) :: entropy ! Mathematical entropy function for the model
+    real(prec) :: entropy ! Mathematical entropy function for the model
 
     ! Domain Decomposition
-    TYPE(MPILayer),POINTER :: decomp
+    type(MPILayer),pointer :: decomp
 
-  CONTAINS
+  contains
 
-    PROCEDURE :: IncrementIOCounter
+    procedure :: IncrementIOCounter
 
-    PROCEDURE :: PrintType => PrintType_Model
+    procedure :: PrintType => PrintType_Model
 
-    PROCEDURE :: SetInitialConditions => SetInitialConditions_Model
+    procedure :: SetInitialConditions => SetInitialConditions_Model
 
-    PROCEDURE :: ForwardStep => ForwardStep_Model
+    procedure :: ForwardStep => ForwardStep_Model
 
-    PROCEDURE :: Euler_timeIntegrator
+    procedure :: Euler_timeIntegrator
 
     ! Adams-Bashforth Methods
-    PROCEDURE(ResizePrevSol),DEFERRED :: ResizePrevSol
+    procedure(ResizePrevSol),deferred :: ResizePrevSol
 
-    PROCEDURE :: AdamsBashforth2_timeIntegrator
-    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB2
+    procedure :: AdamsBashforth2_timeIntegrator
+    procedure(UpdateGAB),deferred :: UpdateGAB2
 
-    PROCEDURE :: AdamsBashforth3_timeIntegrator
-    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB3
+    procedure :: AdamsBashforth3_timeIntegrator
+    procedure(UpdateGAB),deferred :: UpdateGAB3
 
-    PROCEDURE :: AdamsBashforth4_timeIntegrator
-    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB4
+    procedure :: AdamsBashforth4_timeIntegrator
+    procedure(UpdateGAB),deferred :: UpdateGAB4
 
     ! Runge-Kutta methods
-    PROCEDURE :: LowStorageRK2_timeIntegrator
-    PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK2
+    procedure :: LowStorageRK2_timeIntegrator
+    procedure(UpdateGRK),deferred :: UpdateGRK2
 
-    PROCEDURE :: LowStorageRK3_timeIntegrator
-    PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK3
+    procedure :: LowStorageRK3_timeIntegrator
+    procedure(UpdateGRK),deferred :: UpdateGRK3
 
-    PROCEDURE :: LowStorageRK4_timeIntegrator
-    PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK4
+    procedure :: LowStorageRK4_timeIntegrator
+    procedure(UpdateGRK),deferred :: UpdateGRK4
 
-    PROCEDURE :: PreTendency => PreTendency_Model
-    PROCEDURE :: PreFlux => PreFlux_Model
-    PROCEDURE :: SourceMethod => Source_Model
-    PROCEDURE :: FluxMethod => Flux_Model
-    PROCEDURE :: RiemannSolver => RiemannSolver_Model
-    PROCEDURE :: UpdateBoundary => UpdateBoundary_Model
-    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Model
+    procedure :: PreTendency => PreTendency_Model
+    procedure :: PreFlux => PreFlux_Model
+    procedure :: SourceMethod => Source_Model
+    procedure :: FluxMethod => Flux_Model
+    procedure :: RiemannSolver => RiemannSolver_Model
+    procedure :: UpdateBoundary => UpdateBoundary_Model
+    procedure :: SetBoundaryCondition => SetBoundaryCondition_Model
 
-    PROCEDURE :: ReportEntropy => ReportEntropy_Model
-    PROCEDURE :: CalculateEntropy => CalculateEntropy_Model
+    procedure :: ReportEntropy => ReportEntropy_Model
+    procedure :: CalculateEntropy => CalculateEntropy_Model
 
-    PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
-    PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
-    PROCEDURE(ReadModel),DEFERRED :: ReadModel
-    PROCEDURE(WriteModel),DEFERRED :: WriteModel
-    PROCEDURE(WriteTecplot),DEFERRED :: WriteTecplot
+    procedure(UpdateSolution),deferred :: UpdateSolution
+    procedure(CalculateTendency),deferred :: CalculateTendency
+    procedure(ReadModel),deferred :: ReadModel
+    procedure(WriteModel),deferred :: WriteModel
+    procedure(WriteTecplot),deferred :: WriteTecplot
 
-    GENERIC :: SetTimeIntegrator => SetTimeIntegrator_withInt, &
+    generic :: SetTimeIntegrator => SetTimeIntegrator_withInt, &
       SetTimeIntegrator_withChar
-    PROCEDURE,PRIVATE :: SetTimeIntegrator_withInt
-    PROCEDURE,PRIVATE :: SetTimeIntegrator_withChar
+    procedure,private :: SetTimeIntegrator_withInt
+    procedure,private :: SetTimeIntegrator_withChar
 
-    PROCEDURE :: SetSimulationTime
-    PROCEDURE :: GetSimulationTime
+    procedure :: SetSimulationTime
+    procedure :: GetSimulationTime
 
-  END TYPE Model
+  endtype Model
 
-  INTERFACE
-    SUBROUTINE SELF_timeIntegrator(this,tn)
-      USE SELF_Constants,ONLY:prec
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      REAL(prec),INTENT(in) :: tn
-    END SUBROUTINE SELF_timeIntegrator
-  END INTERFACE
+  interface
+    subroutine SELF_timeIntegrator(this,tn)
+      use SELF_Constants,only:prec
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      real(prec),intent(in) :: tn
+    endsubroutine SELF_timeIntegrator
+  endinterface
 
-  INTERFACE
-    SUBROUTINE ResizePrevSol(this,m)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      INTEGER,INTENT(in) :: m
-    END SUBROUTINE ResizePrevSol
-  END INTERFACE
+  interface
+    subroutine ResizePrevSol(this,m)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      integer,intent(in) :: m
+    endsubroutine ResizePrevSol
+  endinterface
 
-  INTERFACE
-    SUBROUTINE UpdateGAB(this,m)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      INTEGER,INTENT(in) :: m
-    END SUBROUTINE UpdateGAB
-  END INTERFACE
+  interface
+    subroutine UpdateGAB(this,m)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      integer,intent(in) :: m
+    endsubroutine UpdateGAB
+  endinterface
 
-  INTERFACE
-    SUBROUTINE UpdateGRK(this,m)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      INTEGER,INTENT(in) :: m
-    END SUBROUTINE UpdateGRK
-  END INTERFACE
+  interface
+    subroutine UpdateGRK(this,m)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      integer,intent(in) :: m
+    endsubroutine UpdateGRK
+  endinterface
 
-  INTERFACE
-    SUBROUTINE UpdateSolution(this,dt)
-      USE SELF_Constants,ONLY:prec
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      REAL(prec),OPTIONAL,INTENT(in) :: dt
-    END SUBROUTINE UpdateSolution
-  END INTERFACE
+  interface
+    subroutine UpdateSolution(this,dt)
+      use SELF_Constants,only:prec
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      real(prec),optional,intent(in) :: dt
+    endsubroutine UpdateSolution
+  endinterface
 
-  INTERFACE
-    SUBROUTINE CalculateTendency(this)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-    END SUBROUTINE CalculateTendency
-  END INTERFACE
+  interface
+    subroutine CalculateTendency(this)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+    endsubroutine CalculateTendency
+  endinterface
 
-  INTERFACE
-    SUBROUTINE WriteModel(this,filename)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      CHARACTER(*),INTENT(in),OPTIONAL :: filename
-    END SUBROUTINE WriteModel
-  END INTERFACE
+  interface
+    subroutine WriteModel(this,filename)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      character(*),intent(in),optional :: filename
+    endsubroutine WriteModel
+  endinterface
 
-  INTERFACE
-    SUBROUTINE ReadModel(this,filename)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      CHARACTER(*),INTENT(in) :: filename
-    END SUBROUTINE ReadModel
-  END INTERFACE
+  interface
+    subroutine ReadModel(this,filename)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      character(*),intent(in) :: filename
+    endsubroutine ReadModel
+  endinterface
 
-  INTERFACE
-    SUBROUTINE WriteTecplot(this,filename)
-      IMPORT Model
-      IMPLICIT NONE
-      CLASS(Model),INTENT(inout) :: this
-      CHARACTER(*),INTENT(in),OPTIONAL :: filename
-    END SUBROUTINE WriteTecplot
-  END INTERFACE
+  interface
+    subroutine WriteTecplot(this,filename)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+      character(*),intent(in),optional :: filename
+    endsubroutine WriteTecplot
+  endinterface
 
-CONTAINS
+contains
 
-SUBROUTINE IncrementIOCounter(this)
-  IMPLICIT NONE
-  CLASS(Model), intent(inout) :: this
+  subroutine IncrementIOCounter(this)
+    implicit none
+    class(Model),intent(inout) :: this
 
-  ! Increment the ioIterate
-  this % ioIterate = this % ioIterate + 1
+    ! Increment the ioIterate
+    this%ioIterate = this%ioIterate+1
 
-END SUBROUTINE IncrementIOCounter
+  endsubroutine IncrementIOCounter
 
-FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
+  function GetBCFlagForChar(charFlag) result(intFlag)
   !! This method is used to return the integer flag from a char for boundary conditions
   !!
-    IMPLICIT NONE
-    CHARACTER(*),INTENT(in) :: charFlag
-    INTEGER :: intFlag
+    implicit none
+    character(*),intent(in) :: charFlag
+    integer :: intFlag
 
-  
-    SELECT CASE( UpperCase(TRIM(charFlag)) )
+    select case(UpperCase(trim(charFlag)))
 
-      CASE ("PRESCRIBED")
-        intFlag = SELF_BC_PRESCRIBED
+    case("PRESCRIBED")
+      intFlag = SELF_BC_PRESCRIBED
 
-      CASE ("RADIATION")
-        intFlag = SELF_BC_RADIATION
+    case("RADIATION")
+      intFlag = SELF_BC_RADIATION
 
-      CASE ("NO_NORMAL_FLOW")
-        intFlag = SELF_BC_NONORMALFLOW
+    case("NO_NORMAL_FLOW")
+      intFlag = SELF_BC_NONORMALFLOW
 
-      CASE ("PRESCRIBED_STRESS")
-        intFlag = SELF_BC_PRESCRIBED_STRESS
+    case("PRESCRIBED_STRESS")
+      intFlag = SELF_BC_PRESCRIBED_STRESS
 
-      CASE ("NO_STRESS")
-        intFlag = SELF_BC_NOSTRESS
+    case("NO_STRESS")
+      intFlag = SELF_BC_NOSTRESS
 
-      CASE DEFAULT
-        intFlag = 0
+    case DEFAULT
+      intFlag = 0
 
-    END SELECT
-    
-  END FUNCTION GetBCFlagForChar
+    endselect
 
-  SUBROUTINE PrintType_Model(this)
+  endfunction GetBCFlagForChar
+
+  subroutine PrintType_Model(this)
 #undef __FUNC__
 #define __FUNC__ "PrintType"
-    IMPLICIT NONE
-    CLASS(Model),INTENT(in) :: this
+    implicit none
+    class(Model),intent(in) :: this
 
     INFO("None")
 
-  END SUBROUTINE PrintType_Model
+  endsubroutine PrintType_Model
 
-  SUBROUTINE PreTendency_Model(this)
+  subroutine PreTendency_Model(this)
     !! PreTendency is a template routine that is used to house any additional calculations
     !! that you want to execute at the beginning of the tendency calculation routine.
     !! This default PreTendency simply returns back to the caller without executing any instructions
@@ -299,14 +308,14 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
     !! The intention is to provide a method that can be overridden through type-extension, to handle
     !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
+    return
 
-  END SUBROUTINE PreTendency_Model
+  endsubroutine PreTendency_Model
 
-  SUBROUTINE PreFlux_Model(this)
+  subroutine PreFlux_Model(this)
     !! PreFlux is a template routine that is used to house any additional calculations
     !! that you want to execute just before the calculation of flux terms.
     !! This default PreFlux simply returns back to the caller without executing any instructions
@@ -314,57 +323,57 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
     !! The intention is to provide a method that can be overridden through type-extension, to handle
     !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
+    return
 
-  END SUBROUTINE PreFlux_Model
+  endsubroutine PreFlux_Model
 
-  SUBROUTINE Source_Model(this)
+  subroutine Source_Model(this)
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
+    return
 
-  END SUBROUTINE Source_Model
+  endsubroutine Source_Model
 
-  SUBROUTINE RiemannSolver_Model(this)
+  subroutine RiemannSolver_Model(this)
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
+    return
 
-  END SUBROUTINE RiemannSolver_Model
+  endsubroutine RiemannSolver_Model
 
-  SUBROUTINE Flux_Model(this)
+  subroutine Flux_Model(this)
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
+    return
 
-  END SUBROUTINE Flux_Model
+  endsubroutine Flux_Model
 
-  SUBROUTINE UpdateBoundary_Model(this)
+  subroutine UpdateBoundary_Model(this)
   !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
-  END SUBROUTINE UpdateBoundary_Model
+    return
+  endsubroutine UpdateBoundary_Model
 
-  SUBROUTINE SetBoundaryCondition_Model(this)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+  subroutine SetBoundaryCondition_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
 
-    RETURN
+    return
 
-  END SUBROUTINE SetBoundaryCondition_Model
+  endsubroutine SetBoundaryCondition_Model
 
-  SUBROUTINE SetTimeIntegrator_withInt(this,integrator)
+  subroutine SetTimeIntegrator_withInt(this,integrator)
     !! Sets the time integrator method, using an integer flag
     !!
     !! Valid options for  are
@@ -373,37 +382,37 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
     !!    SELF_RK3
     !!    SELF_RK4
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: integrator
+    implicit none
+    class(Model),intent(inout) :: this
+    integer,intent(in) :: integrator
 
-    SELECT CASE (integrator)
+    select case(integrator)
 
-    CASE (SELF_EULER)
-      this % timeIntegrator => Euler_timeIntegrator
-    CASE (SELF_AB2)
-      this % timeIntegrator => AdamsBashforth2_timeIntegrator
-      CALL this % ResizePrevSol(2)
-    CASE (SELF_AB3)
-      this % timeIntegrator => AdamsBashforth3_timeIntegrator
-      CALL this % ResizePrevSol(3)
-    CASE (SELF_AB4)
-      this % timeIntegrator => AdamsBashforth4_timeIntegrator
-      CALL this % ResizePrevSol(4)
-    CASE (SELF_RK2)
-      this % timeIntegrator => LowStorageRK2_timeIntegrator
-    CASE (SELF_RK3)
-      this % timeIntegrator => LowStorageRK3_timeIntegrator
-    CASE (SELF_RK4)
-      this % timeIntegrator => LowStorageRK4_timeIntegrator
-    CASE DEFAULT
-      this % timeIntegrator => LowStorageRK3_timeIntegrator
+    case(SELF_EULER)
+      this%timeIntegrator => Euler_timeIntegrator
+    case(SELF_AB2)
+      this%timeIntegrator => AdamsBashforth2_timeIntegrator
+      call this%ResizePrevSol(2)
+    case(SELF_AB3)
+      this%timeIntegrator => AdamsBashforth3_timeIntegrator
+      call this%ResizePrevSol(3)
+    case(SELF_AB4)
+      this%timeIntegrator => AdamsBashforth4_timeIntegrator
+      call this%ResizePrevSol(4)
+    case(SELF_RK2)
+      this%timeIntegrator => LowStorageRK2_timeIntegrator
+    case(SELF_RK3)
+      this%timeIntegrator => LowStorageRK3_timeIntegrator
+    case(SELF_RK4)
+      this%timeIntegrator => LowStorageRK4_timeIntegrator
+    case DEFAULT
+      this%timeIntegrator => LowStorageRK3_timeIntegrator
 
-    END SELECT
+    endselect
 
-  END SUBROUTINE SetTimeIntegrator_withInt
+  endsubroutine SetTimeIntegrator_withInt
 
-  SUBROUTINE SetTimeIntegrator_withChar(this,integrator)
+  subroutine SetTimeIntegrator_withChar(this,integrator)
     !! Sets the time integrator method, using a character input
     !!
     !! Valid options for integrator are
@@ -414,78 +423,78 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
     !!
     !! Note that the character provided is not case-sensitive
     !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in) :: integrator
+    implicit none
+    class(Model),intent(inout) :: this
+    character(*),intent(in) :: integrator
     ! Local
-    CHARACTER(SELF_INTEGRATOR_LENGTH) :: upperCaseInt
+    character(SELF_INTEGRATOR_LENGTH) :: upperCaseInt
 
-    upperCaseInt = UpperCase(TRIM(integrator))
+    upperCaseInt = UpperCase(trim(integrator))
 
-    SELECT CASE (TRIM(upperCaseInt))
+    select case(trim(upperCaseInt))
 
-    CASE ("EULER")
-      this % timeIntegrator => Euler_timeIntegrator
+    case("EULER")
+      this%timeIntegrator => Euler_timeIntegrator
 
-    CASE ("AB2")
-      this % timeIntegrator => AdamsBashforth2_timeIntegrator
-      CALL this % ResizePrevSol(2)
+    case("AB2")
+      this%timeIntegrator => AdamsBashforth2_timeIntegrator
+      call this%ResizePrevSol(2)
 
-    CASE ("AB3")
-      this % timeIntegrator => AdamsBashforth3_timeIntegrator
-      CALL this % ResizePrevSol(3)
+    case("AB3")
+      this%timeIntegrator => AdamsBashforth3_timeIntegrator
+      call this%ResizePrevSol(3)
 
-    CASE ("AB4")
-      this % timeIntegrator => AdamsBashforth4_timeIntegrator
-      CALL this % ResizePrevSol(4)
+    case("AB4")
+      this%timeIntegrator => AdamsBashforth4_timeIntegrator
+      call this%ResizePrevSol(4)
 
-    CASE ("RK2")
-      this % timeIntegrator => LowStorageRK2_timeIntegrator
+    case("RK2")
+      this%timeIntegrator => LowStorageRK2_timeIntegrator
 
-    CASE ("RK3")
-      this % timeIntegrator => LowStorageRK3_timeIntegrator
+    case("RK3")
+      this%timeIntegrator => LowStorageRK3_timeIntegrator
 
-    CASE ("RK4")
-      this % timeIntegrator => LowStorageRK4_timeIntegrator
+    case("RK4")
+      this%timeIntegrator => LowStorageRK4_timeIntegrator
 
-    CASE DEFAULT
-      this % timeIntegrator => LowStorageRK3_timeIntegrator
+    case DEFAULT
+      this%timeIntegrator => LowStorageRK3_timeIntegrator
 
-    END SELECT
+    endselect
 
-  END SUBROUTINE SetTimeIntegrator_withChar
+  endsubroutine SetTimeIntegrator_withChar
 
-  SUBROUTINE GetSimulationTime(this,t)
+  subroutine GetSimulationTime(this,t)
     !! Returns the current simulation time stored in the model % t attribute
-    IMPLICIT NONE
-    CLASS(Model),INTENT(in) :: this
-    REAL(prec),INTENT(out) :: t
+    implicit none
+    class(Model),intent(in) :: this
+    real(prec),intent(out) :: t
 
-    t = this % t
+    t = this%t
 
-  END SUBROUTINE GetSimulationTime
+  endsubroutine GetSimulationTime
 
-  SUBROUTINE SetSimulationTime(this,t)
+  subroutine SetSimulationTime(this,t)
     !! Sets the model % t attribute with the provided simulation time
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: t
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: t
 
-    this % t = t
+    this%t = t
 
-  END SUBROUTINE SetSimulationTime
+  endsubroutine SetSimulationTime
 
-  SUBROUTINE SetInitialConditions_Model(this)
+  subroutine SetInitialConditions_Model(this)
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
     INFO("No model, so nothing to set")
 
-  END SUBROUTINE SetInitialConditions_Model
+  endsubroutine SetInitialConditions_Model
 
-  SUBROUTINE CalculateEntropy_Model(this)
+  subroutine CalculateEntropy_Model(this)
   !! Base method for calculating entropy of a model
   !! When this method is not overridden, the entropy
   !! is simply set to 0.0. When you develop a model
@@ -493,14 +502,14 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
   !! children, it is recommended that you define a
   !! convex mathematical entropy function that is used
   !! as a measure of the model stability.
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
+    implicit none
+    class(Model),intent(inout) :: this
 
-    this % entropy = 0.0_PREC
+    this%entropy = 0.0_prec
 
-  END SUBROUTINE CalculateEntropy_Model
+  endsubroutine CalculateEntropy_Model
 
-  SUBROUTINE ReportEntropy_Model(this)
+  subroutine ReportEntropy_Model(this)
 #undef __FUNC__
 #define __FUNC__ "ReportEntropy"
   !! Base method for reporting the entropy of a model
@@ -509,35 +518,35 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
   !! additional reporting would be valuable for all models,
   !! open a pull request with modifications to this base
   !! method.
-    USE,INTRINSIC :: ISO_FORTRAN_ENV
-    IMPLICIT NONE
-    CLASS(Model),INTENT(in) :: this
+    use,intrinsic :: iso_fortran_env
+    implicit none
+    class(Model),intent(in) :: this
     ! Local
-    INTEGER,PARAMETER :: ucs2 = SELECTED_CHAR_KIND('ISO_10646')
-    CHARACTER(KIND=ucs2,len=20) :: modelTime
-    CHARACTER(KIND=ucs2,len=20) :: entropy
-    CHARACTER(KIND=ucs2,len=:),ALLOCATABLE :: str
+    integer,parameter :: ucs2 = selected_char_kind('ISO_10646')
+    character(KIND=ucs2,len=20) :: modelTime
+    character(KIND=ucs2,len=20) :: entropy
+    character(KIND=ucs2,len=:),allocatable :: str
 
-    IF (this % decomp % rankId == 0) THEN
+    if(this%decomp%rankId == 0) then
       ! Copy the time and entropy to a string
-      WRITE (modelTime,"(ES16.7E3)") this % t
-      WRITE (entropy,"(ES16.7E3)") this % entropy
+      write(modelTime,"(ES16.7E3)") this%t
+      write(entropy,"(ES16.7E3)") this%entropy
 
       ! Write the output to STDOUT
-      OPEN (OUTPUT_UNIT,ENCODING='utf-8')
-      WRITE(OUTPUT_UNIT,'("INFO : [",A,"] : ")',ADVANCE='no')__FUNC__
-      str = ucs2_'t\u1D62 ='//TRIM(modelTime)
-      WRITE (OUTPUT_UNIT,'(A)',ADVANCE='no') str
-      str = ucs2_'  |  e\u1D62 ='//TRIM(entropy)
-      WRITE (OUTPUT_UNIT,'(A)',ADVANCE='yes') str
-    END IF
+      open(output_unit,ENCODING='utf-8')
+      write(output_unit,'("INFO : [",A,"] : ")',ADVANCE='no') __FUNC__
+      str = ucs2_'t\u1D62 ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = ucs2_'  |  e\u1D62 ='//trim(entropy)
+      write(output_unit,'(A)',ADVANCE='yes') str
+    endif
 
-  END SUBROUTINE ReportEntropy_Model
+  endsubroutine ReportEntropy_Model
 
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
 
-  SUBROUTINE ForwardStep_Model(this,tn,dt,ioInterval)
+  subroutine ForwardStep_Model(this,tn,dt,ioInterval)
   !!  Forward steps the model using the associated tendency procedure and time integrator
   !!
   !!  If the final time  is provided, the model is forward stepped to that final time,
@@ -548,284 +557,284 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
   !!
   !! If ioInterval is provided, file IO will be conducted every ioInterval seconds until tn
   !! is reached
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),OPTIONAL,INTENT(in) :: tn
-    REAL(prec),OPTIONAL,INTENT(in) :: dt
-    REAL(prec),OPTIONAL,INTENT(in) :: ioInterval
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),optional,intent(in) :: tn
+    real(prec),optional,intent(in) :: dt
+    real(prec),optional,intent(in) :: ioInterval
     ! Local
-    REAL(prec) :: targetTime,tNext
-    INTEGER :: i,nIO
+    real(prec) :: targetTime,tNext
+    integer :: i,nIO
 
-    IF (PRESENT(dt)) THEN
-      this % dt = dt
-    END IF
+    if(present(dt)) then
+      this%dt = dt
+    endif
 
-    IF (PRESENT(tn)) THEN
+    if(present(tn)) then
       targetTime = tn
-    ELSE
-      targetTime = this % t + this % dt
-    END IF
+    else
+      targetTime = this%t+this%dt
+    endif
 
-    IF (PRESENT(ioInterval)) THEN
-      nIO = INT((targetTime - this % t)/ioInterval)
-      DO i = 1,nIO
-        tNext = this % t + ioInterval
-        CALL this % timeIntegrator(tNext)
-        this % t = tNext
-        CALL this % WriteModel()
-        CALL this % IncrementIOCounter()
-        CALL this % CalculateEntropy()
-        CALL this % ReportEntropy()
-      END DO
+    if(present(ioInterval)) then
+      nIO = int((targetTime-this%t)/ioInterval)
+      do i = 1,nIO
+        tNext = this%t+ioInterval
+        call this%timeIntegrator(tNext)
+        this%t = tNext
+        call this%WriteModel()
+        call this%IncrementIOCounter()
+        call this%CalculateEntropy()
+        call this%ReportEntropy()
+      enddo
 
-    ELSE
-      CALL this % timeIntegrator(targetTime)
-      this % t = targetTime
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
-    END IF
+    else
+      call this%timeIntegrator(targetTime)
+      this%t = targetTime
+      call this%CalculateEntropy()
+      call this%ReportEntropy()
+    endif
 
-  END SUBROUTINE ForwardStep_Model
+  endsubroutine ForwardStep_Model
 
-  SUBROUTINE Euler_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine Euler_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
+    real(prec) :: tRemain
+    real(prec) :: dtLim
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
-    DO WHILE (this % t < tn)
+    dtLim = this%dt ! Get the max time step size from the dt attribute
+    do while(this%t < tn)
 
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
-      CALL this % CalculateTendency()
-      CALL this % UpdateSolution()
-      this % t = this % t + this % dt
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
+      call this%CalculateTendency()
+      call this%UpdateSolution()
+      this%t = this%t+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE Euler_timeIntegrator
+  endsubroutine Euler_timeIntegrator
 
-  SUBROUTINE AdamsBashforth2_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine AdamsBashforth2_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    INTEGER :: m
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
-    REAL(prec) :: t0
+    integer :: m
+    real(prec) :: tRemain
+    real(prec) :: dtLim
+    real(prec) :: t0
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
-    t0 = this % t
+    dtLim = this%dt ! Get the max time step size from the dt attribute
+    t0 = this%t
 
     ! Do a single step with RK2
     ! Initialize the PrevSol attribute
-    CALL this % UpdateGAB2(0)
-    CALL this % LowStorageRK2_timeIntegrator(t0 + this % dt)
+    call this%UpdateGAB2(0)
+    call this%LowStorageRK2_timeIntegrator(t0+this%dt)
 
-    DO WHILE (this % t < tn)
+    do while(this%t < tn)
 
-      t0 = this % t
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
+      t0 = this%t
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
 
-      CALL this % UpdateGAB2(2) ! Store the solution in PrevSol and store the interpolated
+      call this%UpdateGAB2(2) ! Store the solution in PrevSol and store the interpolated
       ! solution in the solution attribute for tendency calculation
-      CALL this % CalculateTendency()
-      CALL this % UpdateGAB2(1) ! Reset the solution from the PrevSol
-      CALL this % UpdateSolution()
+      call this%CalculateTendency()
+      call this%UpdateGAB2(1) ! Reset the solution from the PrevSol
+      call this%UpdateSolution()
 
-      this % t = t0 + this % dt
+      this%t = t0+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE AdamsBashforth2_timeIntegrator
+  endsubroutine AdamsBashforth2_timeIntegrator
 
-  SUBROUTINE AdamsBashforth3_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine AdamsBashforth3_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    INTEGER :: m
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
-    REAL(prec) :: t0
+    integer :: m
+    real(prec) :: tRemain
+    real(prec) :: dtLim
+    real(prec) :: t0
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
+    dtLim = this%dt ! Get the max time step size from the dt attribute
 
     ! Do two time steps with RK3
     ! Initialize the PrevSol attribute
-    t0 = this % t
-    CALL this % UpdateGAB3(0)
-    CALL this % LowStorageRK3_timeIntegrator(t0 + this % dt)
+    t0 = this%t
+    call this%UpdateGAB3(0)
+    call this%LowStorageRK3_timeIntegrator(t0+this%dt)
 
-    t0 = this % t
-    CALL this % UpdateGAB3(1)
-    CALL this % LowStorageRK3_timeIntegrator(t0 + this % dt)
+    t0 = this%t
+    call this%UpdateGAB3(1)
+    call this%LowStorageRK3_timeIntegrator(t0+this%dt)
 
-    DO WHILE (this % t < tn)
+    do while(this%t < tn)
 
-      t0 = this % t
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
+      t0 = this%t
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
 
-      CALL this % UpdateGAB3(3) ! Store the solution in PrevSol and store the interpolated
+      call this%UpdateGAB3(3) ! Store the solution in PrevSol and store the interpolated
       ! solution in the solution attribute for tendency calculation
-      CALL this % CalculateTendency()
-      CALL this % UpdateGAB3(2) ! Reset the solution from the PrevSol
-      CALL this % UpdateSolution()
+      call this%CalculateTendency()
+      call this%UpdateGAB3(2) ! Reset the solution from the PrevSol
+      call this%UpdateSolution()
 
-      this % t = t0 + this % dt
+      this%t = t0+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE AdamsBashforth3_timeIntegrator
+  endsubroutine AdamsBashforth3_timeIntegrator
 
-  SUBROUTINE AdamsBashforth4_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine AdamsBashforth4_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    INTEGER :: m
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
-    REAL(prec) :: t0
+    integer :: m
+    real(prec) :: tRemain
+    real(prec) :: dtLim
+    real(prec) :: t0
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
+    dtLim = this%dt ! Get the max time step size from the dt attribute
 
     ! Do three time steps with RK4
     ! Initialize the PrevSol attribute
-    t0 = this % t
-    CALL this % UpdateGAB4(0)
-    CALL this % LowStorageRK4_timeIntegrator(t0 + this % dt)
+    t0 = this%t
+    call this%UpdateGAB4(0)
+    call this%LowStorageRK4_timeIntegrator(t0+this%dt)
 
-    t0 = this % t
-    CALL this % UpdateGAB4(1)
-    CALL this % LowStorageRK4_timeIntegrator(t0 + this % dt)
+    t0 = this%t
+    call this%UpdateGAB4(1)
+    call this%LowStorageRK4_timeIntegrator(t0+this%dt)
 
-    t0 = this % t
-    CALL this % UpdateGAB4(2)
-    CALL this % LowStorageRK4_timeIntegrator(t0 + this % dt)
+    t0 = this%t
+    call this%UpdateGAB4(2)
+    call this%LowStorageRK4_timeIntegrator(t0+this%dt)
 
-    DO WHILE (this % t < tn)
+    do while(this%t < tn)
 
-      t0 = this % t
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
+      t0 = this%t
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
 
-      CALL this % UpdateGAB4(4) ! Store the solution in PrevSol and store the interpolated
+      call this%UpdateGAB4(4) ! Store the solution in PrevSol and store the interpolated
       ! solution in the solution attribute for tendency calculation
-      CALL this % CalculateTendency()
-      CALL this % UpdateGAB4(3) ! Reset the solution from the PrevSol
-      CALL this % UpdateSolution()
+      call this%CalculateTendency()
+      call this%UpdateGAB4(3) ! Reset the solution from the PrevSol
+      call this%UpdateSolution()
 
-      this % t = t0 + this % dt
+      this%t = t0+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE AdamsBashforth4_timeIntegrator
+  endsubroutine AdamsBashforth4_timeIntegrator
 
-  SUBROUTINE LowStorageRK2_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine LowStorageRK2_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    INTEGER :: m
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
-    REAL(prec) :: t0
+    integer :: m
+    real(prec) :: tRemain
+    real(prec) :: dtLim
+    real(prec) :: t0
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
-    DO WHILE (this % t < tn)
+    dtLim = this%dt ! Get the max time step size from the dt attribute
+    do while(this%t < tn)
 
-      t0 = this % t
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
-      DO m = 1,2
-        CALL this % CalculateTendency()
-        CALL this % UpdateGRK2(m)
-        this % t = t0 + rk2_b(m)*this % dt
-      END DO
+      t0 = this%t
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
+      do m = 1,2
+        call this%CalculateTendency()
+        call this%UpdateGRK2(m)
+        this%t = t0+rk2_b(m)*this%dt
+      enddo
 
-      this % t = t0 + this % dt
+      this%t = t0+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE LowStorageRK2_timeIntegrator
+  endsubroutine LowStorageRK2_timeIntegrator
 
-  SUBROUTINE LowStorageRK3_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine LowStorageRK3_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    INTEGER :: m
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
-    REAL(prec) :: t0
+    integer :: m
+    real(prec) :: tRemain
+    real(prec) :: dtLim
+    real(prec) :: t0
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
-    DO WHILE (this % t < tn)
+    dtLim = this%dt ! Get the max time step size from the dt attribute
+    do while(this%t < tn)
 
-      t0 = this % t
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
-      DO m = 1,3
-        CALL this % CalculateTendency()
-        CALL this % UpdateGRK3(m)
-        this % t = t0 + rk3_b(m)*this % dt
-      END DO
+      t0 = this%t
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
+      do m = 1,3
+        call this%CalculateTendency()
+        call this%UpdateGRK3(m)
+        this%t = t0+rk3_b(m)*this%dt
+      enddo
 
-      this % t = t0 + this % dt
+      this%t = t0+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE LowStorageRK3_timeIntegrator
+  endsubroutine LowStorageRK3_timeIntegrator
 
-  SUBROUTINE LowStorageRK4_timeIntegrator(this,tn)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tn
+  subroutine LowStorageRK4_timeIntegrator(this,tn)
+    implicit none
+    class(Model),intent(inout) :: this
+    real(prec),intent(in) :: tn
     ! Local
-    INTEGER :: m
-    REAL(prec) :: tRemain
-    REAL(prec) :: dtLim
-    REAL(prec) :: t0
+    integer :: m
+    real(prec) :: tRemain
+    real(prec) :: dtLim
+    real(prec) :: t0
 
-    dtLim = this % dt ! Get the max time step size from the dt attribute
-    DO WHILE (this % t < tn)
+    dtLim = this%dt ! Get the max time step size from the dt attribute
+    do while(this%t < tn)
 
-      t0 = this % t
-      tRemain = tn - this % t
-      this % dt = MIN(dtLim,tRemain)
-      DO m = 1,5
-        CALL this % CalculateTendency()
-        CALL this % UpdateGRK4(m)
-        this % t = t0 + rk4_b(m)*this % dt
-      END DO
+      t0 = this%t
+      tRemain = tn-this%t
+      this%dt = min(dtLim,tRemain)
+      do m = 1,5
+        call this%CalculateTendency()
+        call this%UpdateGRK4(m)
+        this%t = t0+rk4_b(m)*this%dt
+      enddo
 
-      this % t = t0 + this % dt
+      this%t = t0+this%dt
 
-    END DO
+    enddo
 
-    this % dt = dtLim
+    this%dt = dtLim
 
-  END SUBROUTINE LowStorageRK4_timeIntegrator
+  endsubroutine LowStorageRK4_timeIntegrator
 
 !  SUBROUTINE CrankNicholson_timeIntegrator(this,tn)
 !    !! Solves the equation formed by the Crank Nicholson method
@@ -879,4 +888,4 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
 !
 !  END SUBROUTINE CrankNicholson_timeIntegrator
 
-END MODULE SELF_Model
+endmodule SELF_Model

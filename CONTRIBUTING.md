@@ -27,13 +27,13 @@ If you are interested in making a code contribution and would like to learn more
 7. You are encouraged to run the SELF test harness before opening a pull request. These tests will help you make sure you're changes meet formatting guidelines, build successfully, and produce test results within acceptable tolerance levels. If you don't have a GPU, that's ok. Your contribution will be fully tested when you open a pull request.
 8. Open a pull request with the upstream SELF repository. In the title, reference the issue number that you worked on. Include a detailed description of the changes you made and why. If you have recommendations for updates to documentation as a result of your changes, please indicate so. If you've added a new routine, you will need to work with the maintainers to develop tests when integrating your new feature in. 
 
-### Code Formatting
-To help code maintain consistent formatting, use the `fprettify` toolkit (`pip3 install fprettify`). To format your code before submitting changes,
-```
-fprettify --silent -i 2 -l 120 --whitespace-type true --whitespace-comma false --case 1 1 1 1 src/your-modified-module.f90
-```
-Verify that no warnings are printed to screen during this process.
+### Code formatting
+Each pull request is checked for formatting before running other tests. The `feq-parse` project uses [`fprettify`](https://pypi.org/project/fprettify/) for formatting fortran source code. We have included a configuration file in the `feq-parse` repository (`fprettify.config`) that can be used for ensuring formatting correctness. 
 
+You can run the following to format code to conform to the expected format for `feq-parse`.
 
-## What does the Code of Conduct mean for me?
-Our Code of Conduct means that you are responsible for treating everyone on the project with respect and courtesy regardless of their identity. If you are the victim of any inappropriate behavior or comments as described in our Code of Conduct, we are here for you and will do the best to ensure that the abuser is reprimanded appropriately, per our code.
+```
+fprettify  './src/' --config-file ./fprettify.config --recursive --case 1 1 1 1
+fprettify  './test/' --config-file ./fprettify.config --recursive --case 1 1 1 1
+fprettify  './example/' --config-file ./fprettify.config --recursive --case 1 1 1 1
+```

@@ -4,21 +4,21 @@
 ! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Mesh
+module SELF_Mesh
 
-  USE SELF_Constants
+  use SELF_Constants
   !USE hipfort
-  USE SELF_Lagrange
-  USE SELF_Data
-  USE SELF_SupportRoutines
-  USE SELF_HDF5
-  
+  use SELF_Lagrange
+  use SELF_Data
+  use SELF_SupportRoutines
+  use SELF_HDF5
+
   ! External Libs !
-  USE HDF5
+  use HDF5
 
-  USE ISO_C_BINDING
+  use iso_c_binding
 
-  IMPLICIT NONE
+  implicit none
 
 #include "SELF_Macros.h"
 ! ========================================================================= !
@@ -91,350 +91,350 @@ MODULE SELF_Mesh
 ! ========================================================================= !
 
   ! Element Types - From Table 4.1 of https://www.hopr-project.org/externals/Meshformat.pdf
-  INTEGER,PARAMETER :: selfLineLinear = 1
-  INTEGER,PARAMETER :: selfLineNonlinear = 2
-  INTEGER,PARAMETER :: selfTriangleLinear = 3
-  INTEGER,PARAMETER :: selfQuadLinear = 4
-  INTEGER,PARAMETER :: selfQuadBilinear = 14
-  INTEGER,PARAMETER :: selfTriangleNonlinear = 23
-  INTEGER,PARAMETER :: selfQuadNonlinear = 24
-  INTEGER,PARAMETER :: selfTetrahedronLinear = 104
-  INTEGER,PARAMETER :: selfPyramidLinear = 105
-  INTEGER,PARAMETER :: selfPrismLinear = 106
-  INTEGER,PARAMETER :: selfHexahedronLinear = 108
-  INTEGER,PARAMETER :: selfPyramidBilinear = 115
-  INTEGER,PARAMETER :: selfPrismBilinear = 116
-  INTEGER,PARAMETER :: selfHexahedronBilinear = 118
-  INTEGER,PARAMETER :: selfTetrahedronNonlinear = 204
-  INTEGER,PARAMETER :: selfPyramidNonlinear = 205
-  INTEGER,PARAMETER :: selfPrismNonlinear = 206
-  INTEGER,PARAMETER :: selfHexahedronNonlinear = 208
+  integer,parameter :: selfLineLinear = 1
+  integer,parameter :: selfLineNonlinear = 2
+  integer,parameter :: selfTriangleLinear = 3
+  integer,parameter :: selfQuadLinear = 4
+  integer,parameter :: selfQuadBilinear = 14
+  integer,parameter :: selfTriangleNonlinear = 23
+  integer,parameter :: selfQuadNonlinear = 24
+  integer,parameter :: selfTetrahedronLinear = 104
+  integer,parameter :: selfPyramidLinear = 105
+  integer,parameter :: selfPrismLinear = 106
+  integer,parameter :: selfHexahedronLinear = 108
+  integer,parameter :: selfPyramidBilinear = 115
+  integer,parameter :: selfPrismBilinear = 116
+  integer,parameter :: selfHexahedronBilinear = 118
+  integer,parameter :: selfTetrahedronNonlinear = 204
+  integer,parameter :: selfPyramidNonlinear = 205
+  integer,parameter :: selfPrismNonlinear = 206
+  integer,parameter :: selfHexahedronNonlinear = 208
 
   !
-  INTEGER,PARAMETER :: selfMinNodalValence2D = 4
-  INTEGER,PARAMETER :: selfMinNodalValence3D = 8
-  INTEGER,PARAMETER :: selfMaxNodalValence2D = 6
-  INTEGER,PARAMETER :: selfMaxNodalValence3D = 10
+  integer,parameter :: selfMinNodalValence2D = 4
+  integer,parameter :: selfMinNodalValence3D = 8
+  integer,parameter :: selfMaxNodalValence2D = 6
+  integer,parameter :: selfMaxNodalValence3D = 10
 
   ! Side Ordering
-  INTEGER,PARAMETER :: selfSide2D_South = 1
-  INTEGER,PARAMETER :: selfSide2D_East = 2
-  INTEGER,PARAMETER :: selfSide2D_North = 3
-  INTEGER,PARAMETER :: selfSide2D_West = 4
-  INTEGER,PARAMETER :: selfSide3D_Bottom = 1
-  INTEGER,PARAMETER :: selfSide3D_South = 2
-  INTEGER,PARAMETER :: selfSide3D_East = 3
-  INTEGER,PARAMETER :: selfSide3D_North = 4
-  INTEGER,PARAMETER :: selfSide3D_West = 5
-  INTEGER,PARAMETER :: selfSide3D_Top = 6
+  integer,parameter :: selfSide2D_South = 1
+  integer,parameter :: selfSide2D_East = 2
+  integer,parameter :: selfSide2D_North = 3
+  integer,parameter :: selfSide2D_West = 4
+  integer,parameter :: selfSide3D_Bottom = 1
+  integer,parameter :: selfSide3D_South = 2
+  integer,parameter :: selfSide3D_East = 3
+  integer,parameter :: selfSide3D_North = 4
+  integer,parameter :: selfSide3D_West = 5
+  integer,parameter :: selfSide3D_Top = 6
   !
-  INTEGER,PARAMETER :: self_BCDefault = 1
-  INTEGER,PARAMETER :: self_nBCsDefault = 5
+  integer,parameter :: self_BCDefault = 1
+  integer,parameter :: self_nBCsDefault = 5
 
   !==============================================!
   ! --------------- File Types------------------ !
   !==============================================!
-  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_2D = 1
-  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_3D = 2
-  INTEGER, PARAMETER :: SELF_MESH_HOPR_2D = 3
-  INTEGER, PARAMETER :: SELF_MESH_HOPR_3D = 4
+  integer,parameter :: SELF_MESH_ISM_V2_2D = 1
+  integer,parameter :: SELF_MESH_ISM_V2_3D = 2
+  integer,parameter :: SELF_MESH_HOPR_2D = 3
+  integer,parameter :: SELF_MESH_HOPR_3D = 4
 
-  TYPE MeshSpec
-    CHARACTER(self_FileNameLength) :: filename
-    INTEGER :: fileType
+  type MeshSpec
+    character(self_FileNameLength) :: filename
+    integer :: fileType
 
-    LOGICAL :: blockMesh
-    INTEGER :: blockMesh_nGeo
-    INTEGER :: blockMesh_nElemX
-    INTEGER :: blockMesh_nElemY
-    INTEGER :: blockMesh_nElemZ
-    REAL(prec) :: blockMesh_x0,blockMesh_x1
-    REAL(prec) :: blockMesh_y0,blockMesh_y1
-    REAL(prec) :: blockMesh_z0,blockMesh_z1
+    logical :: blockMesh
+    integer :: blockMesh_nGeo
+    integer :: blockMesh_nElemX
+    integer :: blockMesh_nElemY
+    integer :: blockMesh_nElemZ
+    real(prec) :: blockMesh_x0,blockMesh_x1
+    real(prec) :: blockMesh_y0,blockMesh_y1
+    real(prec) :: blockMesh_z0,blockMesh_z1
 
-  END TYPE MeshSpec
+  endtype MeshSpec
 
-  TYPE MPILayer
-    LOGICAL :: mpiEnabled
-    INTEGER :: mpiComm
-    INTEGER :: mpiPrec
-    INTEGER :: rankId
-    INTEGER :: nRanks
-    INTEGER :: nElem
-    INTEGER :: maxMsg
-    INTEGER :: msgCount
-    integer, pointer, dimension(:) :: elemToRank
-    integer, pointer, dimension(:) :: offSetElem
-    INTEGER, ALLOCATABLE :: requests(:)
-    INTEGER, ALLOCATABLE :: stats(:,:)
+  type MPILayer
+    logical :: mpiEnabled
+    integer :: mpiComm
+    integer :: mpiPrec
+    integer :: rankId
+    integer :: nRanks
+    integer :: nElem
+    integer :: maxMsg
+    integer :: msgCount
+    integer,pointer,dimension(:) :: elemToRank
+    integer,pointer,dimension(:) :: offSetElem
+    integer,allocatable :: requests(:)
+    integer,allocatable :: stats(:,:)
 
-  CONTAINS
+  contains
 
-    PROCEDURE :: Init => Init_MPILayer
-    PROCEDURE :: Free => Free_MPILayer
-    PROCEDURE :: Finalize => Finalize_MPILayer
+    procedure :: Init => Init_MPILayer
+    procedure :: Free => Free_MPILayer
+    procedure :: Finalize => Finalize_MPILayer
 
-    PROCEDURE :: GenerateDecomposition => GenerateDecomposition_MPILayer
-    PROCEDURE :: SetElemToRank
-    PROCEDURE :: SetMaxMsg
+    procedure :: GenerateDecomposition => GenerateDecomposition_MPILayer
+    procedure :: SetElemToRank
+    procedure :: SetMaxMsg
 
-    PROCEDURE,PUBLIC :: FinalizeMPIExchangeAsync
+    procedure,public :: FinalizeMPIExchangeAsync
 
-    GENERIC, PUBLIC :: GlobalReduce => GlobalReduce_RealScalar
-    PROCEDURE, PRIVATE :: GlobalReduce_RealScalar
+    generic,public :: GlobalReduce => GlobalReduce_RealScalar
+    procedure,private :: GlobalReduce_RealScalar
 
-  END TYPE MPILayer
+  endtype MPILayer
 
-  TYPE :: SEMMesh
-    INTEGER :: nGeo
-    INTEGER :: nElem
-    INTEGER :: nGlobalElem
-    INTEGER :: nNodes
-    INTEGER :: nSides
-    INTEGER :: nCornerNodes
-    INTEGER :: nUniqueNodes
-    INTEGER :: nUniqueSides
-    INTEGER :: nBCs
-    INTEGER :: quadrature
+  type :: SEMMesh
+    integer :: nGeo
+    integer :: nElem
+    integer :: nGlobalElem
+    integer :: nNodes
+    integer :: nSides
+    integer :: nCornerNodes
+    integer :: nUniqueNodes
+    integer :: nUniqueSides
+    integer :: nBCs
+    integer :: quadrature
 
-  END TYPE SEMMesh
+  endtype SEMMesh
 
-  TYPE,EXTENDS(SEMMesh) :: Mesh1D
-    integer, pointer, dimension(:,:) :: elemInfo
-    real(prec), pointer, dimension(:) :: nodeCoords
-    integer, pointer, dimension(:) :: globalNodeIDs
-    integer, pointer, dimension(:,:) :: BCType
-    CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
+  type,extends(SEMMesh) :: Mesh1D
+    integer,pointer,dimension(:,:) :: elemInfo
+    real(prec),pointer,dimension(:) :: nodeCoords
+    integer,pointer,dimension(:) :: globalNodeIDs
+    integer,pointer,dimension(:,:) :: BCType
+    character(LEN=255),allocatable :: BCNames(:)
 
-  CONTAINS
-    PROCEDURE,PUBLIC :: Init => Init_Mesh1D
-    PROCEDURE,PUBLIC :: Free => Free_Mesh1D
-    PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
+  contains
+    procedure,public :: Init => Init_Mesh1D
+    procedure,public :: Free => Free_Mesh1D
+    procedure,public :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
-    PROCEDURE,PUBLIC  :: Write_Mesh => Write_Mesh1D
+    procedure,public  :: Write_Mesh => Write_Mesh1D
 
-  END TYPE Mesh1D
+  endtype Mesh1D
 
   ! Mesh format is set up similar to the HOPr format
   ! See https://hopr-project.org/externals/MeshFormat.pdf
 
-  TYPE,EXTENDS(SEMMesh) :: Mesh2D
-    integer, pointer, dimension(:,:,:) :: sideInfo
-    real(prec), pointer, dimension(:,:,:,:) :: nodeCoords
-    integer, pointer, dimension(:,:) :: elemInfo
-    integer, pointer, dimension(:,:,:) :: globalNodeIDs
-    integer, pointer, dimension(:,:) :: CGNSCornerMap
-    integer, pointer, dimension(:,:) :: CGNSSideMap
-    integer, pointer, dimension(:,:) :: BCType
-    CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
+  type,extends(SEMMesh) :: Mesh2D
+    integer,pointer,dimension(:,:,:) :: sideInfo
+    real(prec),pointer,dimension(:,:,:,:) :: nodeCoords
+    integer,pointer,dimension(:,:) :: elemInfo
+    integer,pointer,dimension(:,:,:) :: globalNodeIDs
+    integer,pointer,dimension(:,:) :: CGNSCornerMap
+    integer,pointer,dimension(:,:) :: CGNSSideMap
+    integer,pointer,dimension(:,:) :: BCType
+    character(LEN=255),allocatable :: BCNames(:)
 
-  CONTAINS
-    PROCEDURE,PUBLIC :: Init => Init_Mesh2D
-    PROCEDURE,PUBLIC :: Free => Free_Mesh2D
+  contains
+    procedure,public :: Init => Init_Mesh2D
+    procedure,public :: Free => Free_Mesh2D
 
-    PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D
+    procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D
 
-    PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D
+    procedure,public :: Read_HOPr => Read_HOPr_Mesh2D
 
-    PROCEDURE,PUBLIC :: Write_Mesh => Write_Mesh2D
+    procedure,public :: Write_Mesh => Write_Mesh2D
 
-    PROCEDURE,PRIVATE :: RecalculateFlip => RecalculateFlip_Mesh2D
+    procedure,private :: RecalculateFlip => RecalculateFlip_Mesh2D
 
-  END TYPE Mesh2D
+  endtype Mesh2D
 
-  TYPE,EXTENDS(SEMMesh) :: Mesh3D
-    integer, pointer, dimension(:,:,:) :: sideInfo
-    real(prec), pointer, dimension(:,:,:,:,:) :: nodeCoords
-    integer, pointer, dimension(:,:) :: elemInfo
-    integer, pointer, dimension(:,:,:,:) :: globalNodeIDs
-    integer, pointer, dimension(:,:) :: CGNSCornerMap
-    integer, pointer, dimension(:,:) :: sideMap
-    integer, pointer, dimension(:,:) :: CGNSSideMap
-    integer, pointer, dimension(:,:) :: BCType
-    CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
+  type,extends(SEMMesh) :: Mesh3D
+    integer,pointer,dimension(:,:,:) :: sideInfo
+    real(prec),pointer,dimension(:,:,:,:,:) :: nodeCoords
+    integer,pointer,dimension(:,:) :: elemInfo
+    integer,pointer,dimension(:,:,:,:) :: globalNodeIDs
+    integer,pointer,dimension(:,:) :: CGNSCornerMap
+    integer,pointer,dimension(:,:) :: sideMap
+    integer,pointer,dimension(:,:) :: CGNSSideMap
+    integer,pointer,dimension(:,:) :: BCType
+    character(LEN=255),allocatable :: BCNames(:)
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: Init => Init_Mesh3D
-    PROCEDURE,PUBLIC :: Free => Free_Mesh3D
+    procedure,public :: Init => Init_Mesh3D
+    procedure,public :: Free => Free_Mesh3D
 
-    PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
+    procedure,public :: Read_HOPr => Read_HOPr_Mesh3D
 
-    PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh3D
+    procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh3D
 
-    PROCEDURE,PUBLIC :: Write_Mesh => Write_Mesh3D
+    procedure,public :: Write_Mesh => Write_Mesh3D
 
-    PROCEDURE,PRIVATE :: RecalculateFlip => RecalculateFlip_Mesh3D
+    procedure,private :: RecalculateFlip => RecalculateFlip_Mesh3D
 
-  END TYPE Mesh3D
+  endtype Mesh3D
 
-CONTAINS
+contains
 
-  SUBROUTINE Init_Mesh1D(this,nGeo,nElem,nNodes,nBCs)
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(out) :: this
-    INTEGER,INTENT(in) :: nGeo
-    INTEGER,INTENT(in) :: nElem
-    INTEGER,INTENT(in) :: nNodes
-    INTEGER,INTENT(in) :: nBCs
+  subroutine Init_Mesh1D(this,nGeo,nElem,nNodes,nBCs)
+    implicit none
+    class(Mesh1D),intent(out) :: this
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: nElem
+    integer,intent(in) :: nNodes
+    integer,intent(in) :: nBCs
 
-    this % nGeo = nGeo
-    this % nElem = nElem
-    this % nGlobalElem = nElem
-    this % nNodes = nNodes
-    this % nCornerNodes = nElem*2
-    this % nUniqueNodes = 0
-    this % nBCs = nBCs
+    this%nGeo = nGeo
+    this%nElem = nElem
+    this%nGlobalElem = nElem
+    this%nNodes = nNodes
+    this%nCornerNodes = nElem*2
+    this%nUniqueNodes = 0
+    this%nBCs = nBCs
 
-    allocate(this % elemInfo(1:4,1:nElem))
-    allocate(this % nodeCoords(1:nNodes))
-    allocate(this % globalNodeIDs(1:nNodes))
-    allocate(this % BCType(1:4,1:nBCs))
+    allocate(this%elemInfo(1:4,1:nElem))
+    allocate(this%nodeCoords(1:nNodes))
+    allocate(this%globalNodeIDs(1:nNodes))
+    allocate(this%BCType(1:4,1:nBCs))
 
     !$omp target enter data map(alloc: this % elemInfo)
     !$omp target enter data map(alloc: this % nodeCoords)
     !$omp target enter data map(alloc: this % globalNodeIDs)
     !$omp target enter data map(alloc: this % BCType)
 
-    ALLOCATE (this % BCNames(1:nBCs))
+    allocate(this%BCNames(1:nBCs))
 
-  END SUBROUTINE Init_Mesh1D
+  endsubroutine Init_Mesh1D
 
-  SUBROUTINE Free_Mesh1D(this)
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: this
+  subroutine Free_Mesh1D(this)
+    implicit none
+    class(Mesh1D),intent(inout) :: this
 
-    this % nElem = 0
-    this % nNodes = 0
-    this % nCornerNodes = 0
-    this % nUniqueNodes = 0
-    this % nBCs = 0
-    deallocate(this % elemInfo)
-    deallocate(this % nodeCoords)
-    deallocate(this % globalNodeIDs)
-    deallocate(this % BCType)
+    this%nElem = 0
+    this%nNodes = 0
+    this%nCornerNodes = 0
+    this%nUniqueNodes = 0
+    this%nBCs = 0
+    deallocate(this%elemInfo)
+    deallocate(this%nodeCoords)
+    deallocate(this%globalNodeIDs)
+    deallocate(this%BCType)
     !$omp target exit data map(delete: this % elemInfo)
     !$omp target exit data map(delete: this % nodeCoords)
     !$omp target exit data map(delete: this % globalNodeIDs)
     !$omp target exit data map(delete: this % BCType)
-    DEALLOCATE (this % BCNames)
+    deallocate(this%BCNames)
 
-  END SUBROUTINE Free_Mesh1D
+  endsubroutine Free_Mesh1D
 
-  SUBROUTINE UniformBlockMesh_Mesh1D(this,nGeo,nElem,x)
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(out) :: this
-    INTEGER,INTENT(in) :: nGeo
-    INTEGER,INTENT(in) :: nElem
-    REAL(prec),INTENT(in) :: x(1:2)
+  subroutine UniformBlockMesh_Mesh1D(this,nGeo,nElem,x)
+    implicit none
+    class(Mesh1D),intent(out) :: this
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: nElem
+    real(prec),intent(in) :: x(1:2)
     ! Local
-    INTEGER :: iel
-    INTEGER :: nid,nNodes
-    INTEGER :: i
-    REAL(prec) :: xU(1:nElem + 1)
-    TYPE(Lagrange), TARGET :: linearInterp
-    TYPE(Lagrange), TARGET :: nGeoInterp
-    TYPE(Scalar1D) :: xLinear
-    TYPE(Scalar1D) :: xGeo
+    integer :: iel
+    integer :: nid,nNodes
+    integer :: i
+    real(prec) :: xU(1:nElem+1)
+    type(Lagrange),target :: linearInterp
+    type(Lagrange),target :: nGeoInterp
+    type(Scalar1D) :: xLinear
+    type(Scalar1D) :: xGeo
 
-    nNodes = nElem*(nGeo + 1)
-    CALL this % Init(nGeo,nElem,nNodes,2)
-    this % quadrature = GAUSS_LOBATTO
+    nNodes = nElem*(nGeo+1)
+    call this%Init(nGeo,nElem,nNodes,2)
+    this%quadrature = GAUSS_LOBATTO
 
     ! Set the hopr_nodeCoords
-    xU = UniformPoints(x(1),x(2),1,nElem + 1)
+    xU = UniformPoints(x(1),x(2),1,nElem+1)
 
-    CALL linearInterp % Init(1,GAUSS_LOBATTO,&
-            nGeo,GAUSS_LOBATTO)
+    call linearInterp%Init(1,GAUSS_LOBATTO, &
+                           nGeo,GAUSS_LOBATTO)
 
-    CALL nGeoInterp % Init(nGeo,GAUSS_LOBATTO,&
-            nGeo,GAUSS_LOBATTO)
+    call nGeoInterp%Init(nGeo,GAUSS_LOBATTO, &
+                         nGeo,GAUSS_LOBATTO)
 
     ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(linearInterp,1,nElem)
-    CALL xGeo % Init(nGeoInterp,1,nElem)
+    call xLinear%Init(linearInterp,1,nElem)
+    call xGeo%Init(nGeoInterp,1,nElem)
 
-    DO iel = 1,nElem
-      xLinear % interior(1:2,iel,1) = xU(iel:iel + 1)
-    END DO
+    do iel = 1,nElem
+      xLinear%interior(1:2,iel,1) = xU(iel:iel+1)
+    enddo
 
-    CALL xLinear % GridInterp(xGeo)
+    call xLinear%GridInterp(xGeo)
 
     ! Set the element information
     nid = 1
-    DO iel = 1,nElem
-      this % elemInfo(1,iel) = selfLineLinear ! Element Type
-      this % elemInfo(2,iel) = 1 ! Element Zone
-      this % elemInfo(3,iel) = nid ! Node Index Start
-      DO i = 1,nGeo+1
-        this % nodeCoords(nid) = xGeo % interior(i,iel,1)
-        nid = nid + 1
-      END DO
-      this % elemInfo(4,iel) = nid - 1 ! Node Index End
-    END DO
+    do iel = 1,nElem
+      this%elemInfo(1,iel) = selfLineLinear ! Element Type
+      this%elemInfo(2,iel) = 1 ! Element Zone
+      this%elemInfo(3,iel) = nid ! Node Index Start
+      do i = 1,nGeo+1
+        this%nodeCoords(nid) = xGeo%interior(i,iel,1)
+        nid = nid+1
+      enddo
+      this%elemInfo(4,iel) = nid-1 ! Node Index End
+    enddo
 
-    CALL xLinear % Free()
-    CALL xGeo % Free()
-    CALL linearInterp % Free()
-    CALL nGeoInterp % Free()
+    call xLinear%Free()
+    call xGeo%Free()
+    call linearInterp%Free()
+    call nGeoInterp%Free()
 
-  END SUBROUTINE UniformBlockMesh_Mesh1D
+  endsubroutine UniformBlockMesh_Mesh1D
 
-  SUBROUTINE Write_Mesh1D(this,meshFile)
+  subroutine Write_Mesh1D(this,meshFile)
     ! Writes mesh output in HOPR format (serial IO only)
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in) :: meshFile
+    implicit none
+    class(Mesh1D),intent(inout) :: this
+    character(*),intent(in) :: meshFile
     ! Local
-    INTEGER(HID_T) :: fileId
+    integer(HID_T) :: fileId
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    call Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL WriteAttribute_HDF5(fileId,'nElems',this % nElem)
-    CALL WriteAttribute_HDF5(fileId,'Ngeo',this % nGeo)
-    CALL WriteAttribute_HDF5(fileId,'nBCs',this % nBCs)
+    call WriteAttribute_HDF5(fileId,'nElems',this%nElem)
+    call WriteAttribute_HDF5(fileId,'Ngeo',this%nGeo)
+    call WriteAttribute_HDF5(fileId,'nBCs',this%nBCs)
 
-    CALL WriteArray_HDF5(fileId,'BCType',this % bcType)
+    call WriteArray_HDF5(fileId,'BCType',this%bcType)
 
     ! Read local subarray of ElemInfo
-    CALL WriteArray_HDF5(fileId,'ElemInfo',this % elemInfo)
+    call WriteArray_HDF5(fileId,'ElemInfo',this%elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId,'NodeCoords',this % nodeCoords)
-    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',this % globalNodeIDs)
+    call WriteArray_HDF5(fileId,'NodeCoords',this%nodeCoords)
+    call WriteArray_HDF5(fileId,'GlobalNodeIDs',this%globalNodeIDs)
 
-    CALL Close_HDF5(fileID)
+    call Close_HDF5(fileID)
 
-  END SUBROUTINE Write_Mesh1D
+  endsubroutine Write_Mesh1D
 
-  SUBROUTINE Init_Mesh2D(this,nGeo,nElem,nSides,nNodes,nBCs)
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(out) :: this
-    INTEGER,INTENT(in) :: nGeo
-    INTEGER,INTENT(in) :: nElem
-    INTEGER,INTENT(in) :: nSides
-    INTEGER,INTENT(in) :: nNodes
-    INTEGER,INTENT(in) :: nBCs
+  subroutine Init_Mesh2D(this,nGeo,nElem,nSides,nNodes,nBCs)
+    implicit none
+    class(Mesh2D),intent(out) :: this
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: nElem
+    integer,intent(in) :: nSides
+    integer,intent(in) :: nNodes
+    integer,intent(in) :: nBCs
     ! Local
-    INTEGER :: i,j,l
+    integer :: i,j,l
 
-    this % nGeo = nGeo
-    this % nElem = nElem
-    this % nGlobalElem = nElem
-    this % nNodes = nNodes
-    this % nSides = nSides
-    this % nCornerNodes = 0
-    this % nUniqueNodes = 0
-    this % nUniqueSides = 0
-    this % nBCs = nBCs
+    this%nGeo = nGeo
+    this%nElem = nElem
+    this%nGlobalElem = nElem
+    this%nNodes = nNodes
+    this%nSides = nSides
+    this%nCornerNodes = 0
+    this%nUniqueNodes = 0
+    this%nUniqueSides = 0
+    this%nBCs = nBCs
 
-    allocate(this % elemInfo(1:6,1:nElem))
-    allocate(this % sideInfo(1:5,1:4,1:nElem))
-    allocate(this % nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nElem))
-    allocate(this % globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nElem))
-    allocate(this % CGNSCornerMap(1:2,1:4))
-    allocate(this % CGNSSideMap(1:2,1:4))
-    allocate(this % BCType(1:4,1:nBCs))
+    allocate(this%elemInfo(1:6,1:nElem))
+    allocate(this%sideInfo(1:5,1:4,1:nElem))
+    allocate(this%nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this%globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this%CGNSCornerMap(1:2,1:4))
+    allocate(this%CGNSSideMap(1:2,1:4))
+    allocate(this%BCType(1:4,1:nBCs))
 
     !$omp target enter data map(alloc: this % elemInfo)
     !$omp target enter data map(alloc: this % sideInfo)
@@ -444,45 +444,45 @@ CONTAINS
     !$omp target enter data map(alloc: this % CGNSSideMap)
     !$omp target enter data map(alloc: this % BCType)
 
-    ALLOCATE (this % BCNames(1:nBCs))
+    allocate(this%BCNames(1:nBCs))
 
     ! Create lookup tables to assist with connectivity generation
-    this % CGNSCornerMap(1:2,1) = (/1, 1/)
-    this % CGNSCornerMap(1:2,2) = (/nGeo+1, 1/)
-    this % CGNSCornerMap(1:2,3) = (/nGeo+1, nGeo+1/)
-    this % CGNSCornerMap(1:2,4) = (/1, nGeo+1/)
+    this%CGNSCornerMap(1:2,1) = (/1,1/)
+    this%CGNSCornerMap(1:2,2) = (/nGeo+1,1/)
+    this%CGNSCornerMap(1:2,3) = (/nGeo+1,nGeo+1/)
+    this%CGNSCornerMap(1:2,4) = (/1,nGeo+1/)
 
     ! Maps from local corner node id to CGNS side
-    this % CGNSSideMap(1:2,1) = (/1,2/)
-    this % CGNSSideMap(1:2,2) = (/2,3/)
-    this % CGNSSideMap(1:2,3) = (/4,3/)
-    this % CGNSSideMap(1:2,4) = (/1,4/)
+    this%CGNSSideMap(1:2,1) = (/1,2/)
+    this%CGNSSideMap(1:2,2) = (/2,3/)
+    this%CGNSSideMap(1:2,3) = (/4,3/)
+    this%CGNSSideMap(1:2,4) = (/1,4/)
 
     !$omp target update to(this % CGNSCornerMap)
     !$omp target update to(this % CGNSSideMap)
 
-  END SUBROUTINE Init_Mesh2D
+  endsubroutine Init_Mesh2D
 
-  SUBROUTINE Free_Mesh2D(this)
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: this
+  subroutine Free_Mesh2D(this)
+    implicit none
+    class(Mesh2D),intent(inout) :: this
 
-    this % nElem = 0
-    this % nNodes = 0
-    this % nSides = 0
-    this % nCornerNodes = 0
-    this % nUniqueSides = 0
-    this % nUniqueNodes = 0
-    this % nBCs = 0
+    this%nElem = 0
+    this%nNodes = 0
+    this%nSides = 0
+    this%nCornerNodes = 0
+    this%nUniqueSides = 0
+    this%nUniqueNodes = 0
+    this%nBCs = 0
 
-    deallocate(this % elemInfo)
-    deallocate(this % sideInfo)
-    deallocate(this % nodeCoords)
-    deallocate(this % globalNodeIDs)
-    deallocate(this % CGNSCornerMap)
-    deallocate(this % CGNSSideMap)
-    deallocate(this % BCType)
-    DEALLOCATE (this % BCNames)
+    deallocate(this%elemInfo)
+    deallocate(this%sideInfo)
+    deallocate(this%nodeCoords)
+    deallocate(this%globalNodeIDs)
+    deallocate(this%CGNSCornerMap)
+    deallocate(this%CGNSSideMap)
+    deallocate(this%BCType)
+    deallocate(this%BCNames)
 
     !$omp target exit data map(delete: this % elemInfo)
     !$omp target exit data map(delete: this % sideInfo)
@@ -492,142 +492,141 @@ CONTAINS
     !$omp target exit data map(delete: this % CGNSSideMap)
     !$omp target exit data map(delete: this % BCType)
 
-  END SUBROUTINE Free_Mesh2D
+  endsubroutine Free_Mesh2D
 
-  SUBROUTINE ResetBoundaryConditionType_Mesh2D(this,bcid)
+  subroutine ResetBoundaryConditionType_Mesh2D(this,bcid)
     !! This method can be used to reset all of the boundary elements
     !! boundary condition type to the desired value.
     !!
-    !! Note that ALL physical boundaries will be set to have this boundary 
+    !! Note that ALL physical boundaries will be set to have this boundary
     !! condition
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: this
-    INTEGER, INTENT(in) :: bcid
+    implicit none
+    class(Mesh2D),intent(inout) :: this
+    integer,intent(in) :: bcid
     ! Local
-    INTEGER :: iSide,iEl,e2      
+    integer :: iSide,iEl,e2
 
-    DO iEl = 1, this % nElem
-      DO iSide = 1, 4
+    do iEl = 1,this%nElem
+      do iSide = 1,4
 
-        e2 = this % sideInfo(3,iSide,iEl)
+        e2 = this%sideInfo(3,iSide,iEl)
 
-        IF( e2 == 0 )THEN
-          this % sideInfo(5,iSide,iEl) = bcid
-        ENDIF
+        if(e2 == 0) then
+          this%sideInfo(5,iSide,iEl) = bcid
+        endif
 
-      ENDDO
-    ENDDO
+      enddo
+    enddo
 
-  END SUBROUTINE ResetBoundaryConditionType_Mesh2D 
+  endsubroutine ResetBoundaryConditionType_Mesh2D
 
-  SUBROUTINE Read_HOPr_Mesh2D(this,meshFile,decomp)
+  subroutine Read_HOPr_Mesh2D(this,meshFile,decomp)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(out) :: this
-    CHARACTER(*),INTENT(in) :: meshFile
-    TYPE(MPILayer),INTENT(inout) :: decomp
+    implicit none
+    class(Mesh2D),intent(out) :: this
+    character(*),intent(in) :: meshFile
+    type(MPILayer),intent(inout) :: decomp
     ! Local
-    INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: offset(1:2),gOffset(1)
-    INTEGER :: nGlobalElem
-    INTEGER :: firstElem
-    INTEGER :: firstNode
-    INTEGER :: firstSide
-    INTEGER :: nLocalElems
-    INTEGER :: nLocalNodes3D
-    INTEGER :: nLocalSides3D
-    INTEGER :: nUniqueSides3D
-    INTEGER :: nLocalNodes2D
-    INTEGER :: nLocalSides2D
-    INTEGER :: nUniqueSides2D
-    INTEGER :: nGeo,nBCs
-    INTEGER :: eid, lsid, iSide
-    INTEGER :: i, j, nid
-    integer, dimension(:,:), allocatable :: hopr_elemInfo
-    integer, dimension(:,:), allocatable :: hopr_sideInfo
-    real(prec), dimension(:,:), allocatable :: hopr_nodeCoords
-    integer, dimension(:), allocatable :: hopr_globalNodeIDs
-    integer, dimension(:,:), allocatable :: bcType
+    integer(HID_T) :: fileId
+    integer(HID_T) :: offset(1:2),gOffset(1)
+    integer :: nGlobalElem
+    integer :: firstElem
+    integer :: firstNode
+    integer :: firstSide
+    integer :: nLocalElems
+    integer :: nLocalNodes3D
+    integer :: nLocalSides3D
+    integer :: nUniqueSides3D
+    integer :: nLocalNodes2D
+    integer :: nLocalSides2D
+    integer :: nUniqueSides2D
+    integer :: nGeo,nBCs
+    integer :: eid,lsid,iSide
+    integer :: i,j,nid
+    integer,dimension(:,:),allocatable :: hopr_elemInfo
+    integer,dimension(:,:),allocatable :: hopr_sideInfo
+    real(prec),dimension(:,:),allocatable :: hopr_nodeCoords
+    integer,dimension(:),allocatable :: hopr_globalNodeIDs
+    integer,dimension(:,:),allocatable :: bcType
 
+    if(decomp%mpiEnabled) then
+      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp%mpiComm)
+    else
+      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
+    endif
 
-    IF ( decomp % mpiEnabled )THEN
-      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
-    ELSE
-      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
-    ENDIF
-
-    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
-    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
-    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
+    call ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    call ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    call ReadAttribute_HDF5(fileId,'nBCs',nBCs)
+    call ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
 
     ! Read BCType
     allocate(bcType(1:4,1:nBCS))
 
-    IF ( decomp % mpiEnabled )THEN
+    if(decomp%mpiEnabled) then
       offset(:) = 0
-      CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'BCType',bcType)
-    ENDIF
+      call ReadArray_HDF5(fileId,'BCType',bcType,offset)
+    else
+      call ReadArray_HDF5(fileId,'BCType',bcType)
+    endif
 
     ! Read local subarray of ElemInfo
-    CALL decomp % GenerateDecomposition(nGlobalElem,nUniqueSides3D)
+    call decomp%GenerateDecomposition(nGlobalElem,nUniqueSides3D)
 
-    firstElem = decomp % offsetElem(decomp % rankId+1) + 1
-    nLocalElems = decomp % offsetElem(decomp % rankId + 2) - &
-                  decomp % offsetElem(decomp % rankId+1)
+    firstElem = decomp%offsetElem(decomp%rankId+1)+1
+    nLocalElems = decomp%offsetElem(decomp%rankId+2)- &
+                  decomp%offsetElem(decomp%rankId+1)
 
     ! Allocate Space for hopr_elemInfo!
     allocate(hopr_elemInfo(1:6,1:nLocalElems))
 
-    IF ( decomp % mpiEnabled )THEN
-      offset = (/0,firstElem - 1/)
-      CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
-    ENDIF
+    if(decomp%mpiEnabled) then
+      offset = (/0,firstElem-1/)
+      call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
+    else
+      call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
+    endif
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode = hopr_elemInfo(5,1) + 1
-    nLocalNodes3D = hopr_elemInfo(6,nLocalElems) - hopr_elemInfo(5,1)
+    firstNode = hopr_elemInfo(5,1)+1
+    nLocalNodes3D = hopr_elemInfo(6,nLocalElems)-hopr_elemInfo(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
-    allocate( hopr_nodeCoords(1:3,nLocalNodes3D), hopr_globalNodeIDs(1:nLocalNodes3D))
+    allocate(hopr_nodeCoords(1:3,nLocalNodes3D),hopr_globalNodeIDs(1:nLocalNodes3D))
 
-    IF ( decomp % mpiEnabled )THEN
-      offset = (/0,firstNode - 1/)
-      CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
-      gOffset = (/firstNode - 1/)
-      CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
-      CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
-    ENDIF
+    if(decomp%mpiEnabled) then
+      offset = (/0,firstNode-1/)
+      call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
+      gOffset = (/firstNode-1/)
+      call ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
+    else
+      call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
+      call ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
+    endif
 
     ! Read local subarray of SideInfo
-    firstSide = hopr_elemInfo(3,1) + 1
-    nLocalSides3D = hopr_elemInfo(4,nLocalElems) - hopr_elemInfo(3,1)
+    firstSide = hopr_elemInfo(3,1)+1
+    nLocalSides3D = hopr_elemInfo(4,nLocalElems)-hopr_elemInfo(3,1)
 
     ! Allocate space for hopr_sideInfo
-    allocate( hopr_sideInfo(1:5,1:nLocalSides3D) )
-    IF ( decomp % mpiEnabled )THEN
-      offset = (/0,firstSide - 1/)
-      CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
-    ENDIF
+    allocate(hopr_sideInfo(1:5,1:nLocalSides3D))
+    if(decomp%mpiEnabled) then
+      offset = (/0,firstSide-1/)
+      call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
+    else
+      call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
+    endif
 
-    CALL Close_HDF5(fileID)
+    call Close_HDF5(fileID)
     ! ---- Done reading 3-D Mesh information ---- !
 
     ! Now we need to convert from 3-D to 2-D !
-    nLocalSides2D = nLocalSides3D - 2*nGlobalElem
-    nUniqueSides2D = nUniqueSides3D - 2*nGlobalElem ! Remove the "top" and "bottom" faces
-    nLocalNodes2D = nLocalNodes2D - nGlobalElem*nGeo*(nGeo+1)**2 ! Remove the third dimension
+    nLocalSides2D = nLocalSides3D-2*nGlobalElem
+    nUniqueSides2D = nUniqueSides3D-2*nGlobalElem ! Remove the "top" and "bottom" faces
+    nLocalNodes2D = nLocalNodes2D-nGlobalElem*nGeo*(nGeo+1)**2 ! Remove the third dimension
 
-    CALL this % Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
+    call this%Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
 
     ! Copy data from local arrays into this
     !  elemInfo(1:6,iEl)
@@ -637,21 +636,21 @@ CONTAINS
     !    4 - last index for side array (not needed when all quads are assumed)
     !    5 - offset index for node array (not needed when all quads are assumed)
     !    6 - last index for node array (not needed when all quads are assumed)
-    this % elemInfo = hopr_elemInfo
-    this % quadrature = UNIFORM  ! HOPr uses uniformly spaced points
+    this%elemInfo = hopr_elemInfo
+    this%quadrature = UNIFORM ! HOPr uses uniformly spaced points
 
     ! Grab the node coordinates (x and y only) from the "bottom" layer of the extruded mesh
-    DO eid = 1, this % nElem
-      DO j = 1,nGeo+1
-        DO i = 1,nGeo+1
-          nid = i + (nGeo+1)*(j-1 + (nGeo+1)*((nGeo+1)*(eid-1)))
-          this % nodeCoords(1:2,i,j,eid) = hopr_nodeCoords(1:2,nid)
-          this % globalNodeIDs(i,j,eid) = hopr_globalNodeIDs(nid)
-        ENDDO
-      ENDDO
-    ENDDO
+    do eid = 1,this%nElem
+      do j = 1,nGeo+1
+        do i = 1,nGeo+1
+          nid = i+(nGeo+1)*(j-1+(nGeo+1)*((nGeo+1)*(eid-1)))
+          this%nodeCoords(1:2,i,j,eid) = hopr_nodeCoords(1:2,nid)
+          this%globalNodeIDs(i,j,eid) = hopr_globalNodeIDs(nid)
+        enddo
+      enddo
+    enddo
 
-    ! Grab the south, west, north, and south sides of the elements 
+    ! Grab the south, west, north, and south sides of the elements
     !  sideInfo(1:5,iSide,iEl)
     !
     !    1 - Side Type (currently unused in SELF)
@@ -659,237 +658,235 @@ CONTAINS
     !    3 - Neighbor Element ID (Can stay the same)
     !    4 - 10*( neighbor local side )  + flip (Need to recalculate flip)
     !    5 - Boundary Condition ID (Can stay the same)
-    DO eid = 1,this % nElem
-      DO lsid = 1,4
+    do eid = 1,this%nElem
+      do lsid = 1,4
         ! Calculate the 3-D side ID from the 2-D local side id and element ID
-        iSide = lsid + 1 + 6*(eid-1)
-        this % sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
+        iSide = lsid+1+6*(eid-1)
+        this%sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
         ! Adjust the secondary side index for 2-D
-        this % sideInfo(4,lsid,eid) = this % sideInfo(4,lsid,eid)-10
-      ENDDO
-    ENDDO
+        this%sideInfo(4,lsid,eid) = this%sideInfo(4,lsid,eid)-10
+      enddo
+    enddo
 
-    CALL this % RecalculateFlip()
+    call this%RecalculateFlip()
 
-    deallocate( hopr_elemInfo, hopr_nodeCoords, hopr_globalNodeIDs, hopr_sideInfo)
+    deallocate(hopr_elemInfo,hopr_nodeCoords,hopr_globalNodeIDs,hopr_sideInfo)
 
-  END SUBROUTINE Read_HOPr_Mesh2D
+  endsubroutine Read_HOPr_Mesh2D
 
-  SUBROUTINE RecalculateFlip_Mesh2D(this,decomp)  
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: this
-    TYPE(MPILayer),INTENT(inout),OPTIONAL :: decomp
+  subroutine RecalculateFlip_Mesh2D(this,decomp)
+    implicit none
+    class(Mesh2D),intent(inout) :: this
+    type(MPILayer),intent(inout),optional :: decomp
     ! Local
-    INTEGER :: e1
-    INTEGER :: s1
-    INTEGER :: e2
-    INTEGER :: e2Global
-    INTEGER :: s2
-    INTEGER :: flip
-    INTEGER :: bcid
-    INTEGER :: lnid1(1:2)
-    INTEGER :: lnid2(1:2)
-    INTEGER :: nid1(1:2,1:4,1:this % nElem)
-    INTEGER :: nid2(1:2,1:4,1:this % nElem)
-    INTEGER :: nloc1(1:2)
-    INTEGER :: nloc2(1:2)
-    INTEGER :: n1
-    INTEGER :: n1Global
-    INTEGER :: n2
-    INTEGER :: n2Global
-    INTEGER :: c1
-    INTEGER :: c2
-    INTEGER :: i, j
-    INTEGER :: l
-    INTEGER :: nShifts
-    INTEGER :: neighborRank
-    INTEGER :: rankId
-    INTEGER :: offset
-    INTEGER :: msgCount
-    INTEGER :: globalSideId
-    INTEGER, ALLOCATABLE :: requests(:)
-    INTEGER, ALLOCATABLE :: stats(:,:)
-    INTEGER :: iError
-    LOGICAL :: theyMatch
+    integer :: e1
+    integer :: s1
+    integer :: e2
+    integer :: e2Global
+    integer :: s2
+    integer :: flip
+    integer :: bcid
+    integer :: lnid1(1:2)
+    integer :: lnid2(1:2)
+    integer :: nid1(1:2,1:4,1:this%nElem)
+    integer :: nid2(1:2,1:4,1:this%nElem)
+    integer :: nloc1(1:2)
+    integer :: nloc2(1:2)
+    integer :: n1
+    integer :: n1Global
+    integer :: n2
+    integer :: n2Global
+    integer :: c1
+    integer :: c2
+    integer :: i,j
+    integer :: l
+    integer :: nShifts
+    integer :: neighborRank
+    integer :: rankId
+    integer :: offset
+    integer :: msgCount
+    integer :: globalSideId
+    integer,allocatable :: requests(:)
+    integer,allocatable :: stats(:,:)
+    integer :: iError
+    logical :: theyMatch
 
-    ALLOCATE(requests(1:this % nSides*2))
-    ALLOCATE(stats(MPI_STATUS_SIZE,1:this % nSides*2))
+    allocate(requests(1:this%nSides*2))
+    allocate(stats(MPI_STATUS_SIZE,1:this%nSides*2))
 
-    IF (PRESENT(decomp)) THEN
-      rankId = decomp % rankId
-      offset = decomp % offsetElem(rankId+1)
-    ELSE
+    if(present(decomp)) then
+      rankId = decomp%rankId
+      offset = decomp%offsetElem(rankId+1)
+    else
       rankId = 0
       offset = 0
-    ENDIF
+    endif
 
     msgCount = 0
-    DO e1 = 1,this % nElem
-      DO s1 = 1,4
+    do e1 = 1,this%nElem
+      do s1 = 1,4
 
-        e2Global = this % sideInfo(3,s1,e1)
-        e2 = e2Global - offset
-        s2 = this % sideInfo(4,s1,e1)/10
-        flip = this % sideInfo(4,s1,e1) - s2*10
-        bcid = this % sideInfo(5,s1,e1)
+        e2Global = this%sideInfo(3,s1,e1)
+        e2 = e2Global-offset
+        s2 = this%sideInfo(4,s1,e1)/10
+        flip = this%sideInfo(4,s1,e1)-s2*10
+        bcid = this%sideInfo(5,s1,e1)
 
-        IF (bcid == 0) THEN
+        if(bcid == 0) then
 
-          IF (PRESENT(decomp)) THEN
-            neighborRank = decomp % elemToRank(e2Global)
-          ELSE
+          if(present(decomp)) then
+            neighborRank = decomp%elemToRank(e2Global)
+          else
             neighborRank = 0
-          ENDIF
+          endif
 
-          IF (neighborRank == rankId) THEN
+          if(neighborRank == rankId) then
 
-            lnid1 = this % CGNSSideMap(1:2,s1) ! local CGNS corner node ids for element 1 side
-            lnid2 = this % CGNSSideMap(1:2,s2) ! local CGNS corner node ids for element 2 side
+            lnid1 = this%CGNSSideMap(1:2,s1) ! local CGNS corner node ids for element 1 side
+            lnid2 = this%CGNSSideMap(1:2,s2) ! local CGNS corner node ids for element 2 side
 
-            DO l = 1, 2
+            do l = 1,2
 
-              i = this % CGNSCornerMap(1,lnid1(l))
-              j = this % CGNSCornerMap(2,lnid1(l))
-              nid1(l,s1,e1) = this % globalNodeIDs(i,j,e1)
+              i = this%CGNSCornerMap(1,lnid1(l))
+              j = this%CGNSCornerMap(2,lnid1(l))
+              nid1(l,s1,e1) = this%globalNodeIDs(i,j,e1)
 
-              i = this % CGNSCornerMap(1,lnid2(l))
-              j = this % CGNSCornerMap(2,lnid2(l))
-              nid2(l,s1,e1) = this % globalNodeIDs(i,j,e2)
+              i = this%CGNSCornerMap(1,lnid2(l))
+              j = this%CGNSCornerMap(2,lnid2(l))
+              nid2(l,s1,e1) = this%globalNodeIDs(i,j,e2)
 
-            ENDDO
+            enddo
 
-          ELSE ! In this case, we need to exchange
+          else ! In this case, we need to exchange
 
-            globalSideId = ABS(this % sideInfo(2,s1,e1))
+            globalSideId = abs(this%sideInfo(2,s1,e1))
 
-            lnid1 = this % CGNSSideMap(1:2,s1) ! local CGNS corner node ids for element 1 side
+            lnid1 = this%CGNSSideMap(1:2,s1) ! local CGNS corner node ids for element 1 side
 
-            DO l = 1, 2
+            do l = 1,2
 
-              i = this % CGNSCornerMap(1,lnid1(l))
-              j = this % CGNSCornerMap(2,lnid1(l))
-              nid1(l,s1,e1) = this % globalNodeIDs(i,j,e1)
+              i = this%CGNSCornerMap(1,lnid1(l))
+              j = this%CGNSCornerMap(2,lnid1(l))
+              nid1(l,s1,e1) = this%globalNodeIDs(i,j,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(nid2(l,s1,e1), &
+              msgCount = msgCount+1
+              call MPI_IRECV(nid2(l,s1,e1), &
                              1, &
                              MPI_INTEGER, &
                              neighborRank,globalSideId, &
-                             decomp % mpiComm, &
+                             decomp%mpiComm, &
                              requests(msgCount),iError)
-  
+
               ! Send nid1(l) from this rank to nid2(l) on the other rank
-              msgCount = msgCount + 1
-              CALL MPI_ISEND(nid1(l,s1,e1), &
+              msgCount = msgCount+1
+              call MPI_ISEND(nid1(l,s1,e1), &
                              1, &
                              MPI_INTEGER, &
                              neighborRank,globalSideId, &
-                             decomp % mpiComm, &
+                             decomp%mpiComm, &
                              requests(msgCount),iError)
-  
 
-            ENDDO
+            enddo
 
-          ENDIF ! MPI or not
+          endif ! MPI or not
 
-        ENDIF ! If not physical boundary
+        endif ! If not physical boundary
 
-      ENDDO
-    ENDDO
+      enddo
+    enddo
 
-    IF (PRESENT(decomp) .AND. msgCount > 0) THEN
-      CALL MPI_WaitAll(msgCount, &
+    if(present(decomp) .and. msgCount > 0) then
+      call MPI_WaitAll(msgCount, &
                        requests(1:msgCount), &
                        stats(1:MPI_STATUS_SIZE,1:msgCount), &
                        iError)
-    ENDIF
+    endif
 
-    DO e1 = 1,this % nElem
-      DO s1 = 1,4
+    do e1 = 1,this%nElem
+      do s1 = 1,4
 
-        s2 = this % sideInfo(4,s1,e1)/10
-        bcid = this % sideInfo(5,s1,e1)
+        s2 = this%sideInfo(4,s1,e1)/10
+        bcid = this%sideInfo(5,s1,e1)
         nloc1(1:2) = nid1(1:2,s1,e1)
         nloc2(1:2) = nid2(1:2,s1,e1)
 
-        IF (bcid == 0) THEN
-          theyMatch = CompareArray( nloc1, nloc2, 2 )
+        if(bcid == 0) then
+          theyMatch = CompareArray(nloc1,nloc2,2)
 
-          IF( theyMatch )THEN
-            this % sideInfo(4,s1,e1) = 10*s2
-          ELSE
-            this % sideInfo(4,s1,e1) = 10*s2+1
-          ENDIF
+          if(theyMatch) then
+            this%sideInfo(4,s1,e1) = 10*s2
+          else
+            this%sideInfo(4,s1,e1) = 10*s2+1
+          endif
 
+        endif
 
-        ENDIF
+      enddo
+    enddo
 
-      ENDDO
-    ENDDO
+    deallocate(requests)
+    deallocate(stats)
 
-    DEALLOCATE(requests)
-    DEALLOCATE(stats)
+  endsubroutine RecalculateFlip_Mesh2D
 
-  END SUBROUTINE RecalculateFlip_Mesh2D
-
-  SUBROUTINE Write_Mesh2D(this,meshFile)
+  subroutine Write_Mesh2D(this,meshFile)
     ! Writes mesh output in HOPR format (serial only)
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in) :: meshFile
+    implicit none
+    class(Mesh2D),intent(inout) :: this
+    character(*),intent(in) :: meshFile
     ! Local
-    INTEGER(HID_T) :: fileId
+    integer(HID_T) :: fileId
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
-    CALL WriteAttribute_HDF5(fileId,'nElems',this % nElem)
-    CALL WriteAttribute_HDF5(fileId,'Ngeo',this % nGeo)
-    CALL WriteAttribute_HDF5(fileId,'nBCs',this % nBCs)
+    call Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    call WriteAttribute_HDF5(fileId,'nElems',this%nElem)
+    call WriteAttribute_HDF5(fileId,'Ngeo',this%nGeo)
+    call WriteAttribute_HDF5(fileId,'nBCs',this%nBCs)
 
-    CALL WriteArray_HDF5(fileId,'BCType',this % bcType)
+    call WriteArray_HDF5(fileId,'BCType',this%bcType)
 
     ! Write local subarray of ElemInfo
-    CALL WriteArray_HDF5(fileId,'ElemInfo',this % elemInfo)
+    call WriteArray_HDF5(fileId,'ElemInfo',this%elemInfo)
 
     ! Write local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId,'NodeCoords',this % nodeCoords)
-    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',this % globalNodeIDs)
+    call WriteArray_HDF5(fileId,'NodeCoords',this%nodeCoords)
+    call WriteArray_HDF5(fileId,'GlobalNodeIDs',this%globalNodeIDs)
 
     ! Write local subarray of SideInfo
-    CALL WriteArray_HDF5(fileId,'SideInfo',this % sideInfo)
+    call WriteArray_HDF5(fileId,'SideInfo',this%sideInfo)
 
-    CALL Close_HDF5(fileID)
+    call Close_HDF5(fileID)
 
-  END SUBROUTINE Write_Mesh2D
+  endsubroutine Write_Mesh2D
 
-  SUBROUTINE Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(out) :: this
-    INTEGER,INTENT(in) :: nGeo
-    INTEGER,INTENT(in) :: nElem
-    INTEGER,INTENT(in) :: nSides
-    INTEGER,INTENT(in) :: nNodes
-    INTEGER,INTENT(in) :: nBCs
+  subroutine Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
+    implicit none
+    class(Mesh3D),intent(out) :: this
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: nElem
+    integer,intent(in) :: nSides
+    integer,intent(in) :: nNodes
+    integer,intent(in) :: nBCs
     ! Local
-    INTEGER :: i,j,k,l
+    integer :: i,j,k,l
 
-    this % nElem = nElem
-    this % nGlobalElem = nElem
-    this % nGeo = nGeo
-    this % nSides = nSides
-    this % nNodes = nNodes
-    this % nCornerNodes = 0
-    this % nUniqueSides = 0
-    this % nUniqueNodes = 0
-    this % nBCs = nBCs
+    this%nElem = nElem
+    this%nGlobalElem = nElem
+    this%nGeo = nGeo
+    this%nSides = nSides
+    this%nNodes = nNodes
+    this%nCornerNodes = 0
+    this%nUniqueSides = 0
+    this%nUniqueNodes = 0
+    this%nBCs = nBCs
 
-    allocate(this % elemInfo(1:6,1:nElem))
-    allocate(this % sideInfo(1:5,1:6,1:nElem))
-    allocate(this % nodeCoords(1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem))
-    allocate(this % globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem))
-    allocate(this % CGNSCornerMap(1:3,1:8))
-    allocate(this % CGNSSideMap(1:4,1:6))
-    allocate(this % sideMap(1:4,1:6))
-    allocate(this % BCType(1:4,1:nBCs))
+    allocate(this%elemInfo(1:6,1:nElem))
+    allocate(this%sideInfo(1:5,1:6,1:nElem))
+    allocate(this%nodeCoords(1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this%globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this%CGNSCornerMap(1:3,1:8))
+    allocate(this%CGNSSideMap(1:4,1:6))
+    allocate(this%sideMap(1:4,1:6))
+    allocate(this%BCType(1:4,1:nBCs))
 
     !$omp target enter data map(alloc: this % elemInfo)
     !$omp target enter data map(alloc: this % sideInfo)
@@ -900,59 +897,59 @@ CONTAINS
     !$omp target enter data map(alloc: this % sideMap)
     !$omp target enter data map(alloc: this % BCType)
 
-    ALLOCATE (this % BCNames(1:nBCs))
+    allocate(this%BCNames(1:nBCs))
 
     ! Create lookup tables to assist with connectivity generation
-    this % CGNSCornerMap(1:3,1) = (/1,1,1/) ! Bottom-South-West
-    this % CGNSCornerMap(1:3,2) = (/nGeo+1,1,1/) ! Bottom-South-East
-    this % CGNSCornerMap(1:3,3) = (/nGeo+1,nGeo+1,1/)! Bottom-North-East
-    this % CGNSCornerMap(1:3,4) = (/1,nGeo+1,1/)! Bottom-North-West
-    this % CGNSCornerMap(1:3,5) = (/1,1,nGeo+1/) ! Top-South-West
-    this % CGNSCornerMap(1:3,6) = (/nGeo+1,1,nGeo+1/) ! Top-South-East
-    this % CGNSCornerMap(1:3,7) = (/nGeo+1,nGeo+1,nGeo+1/)! Top-North-East
-    this % CGNSCornerMap(1:3,8) = (/1,nGeo+1,nGeo+1/)! Top-North-West
+    this%CGNSCornerMap(1:3,1) = (/1,1,1/) ! Bottom-South-West
+    this%CGNSCornerMap(1:3,2) = (/nGeo+1,1,1/) ! Bottom-South-East
+    this%CGNSCornerMap(1:3,3) = (/nGeo+1,nGeo+1,1/) ! Bottom-North-East
+    this%CGNSCornerMap(1:3,4) = (/1,nGeo+1,1/) ! Bottom-North-West
+    this%CGNSCornerMap(1:3,5) = (/1,1,nGeo+1/) ! Top-South-West
+    this%CGNSCornerMap(1:3,6) = (/nGeo+1,1,nGeo+1/) ! Top-South-East
+    this%CGNSCornerMap(1:3,7) = (/nGeo+1,nGeo+1,nGeo+1/) ! Top-North-East
+    this%CGNSCornerMap(1:3,8) = (/1,nGeo+1,nGeo+1/) ! Top-North-West
 
     ! Maps from local corner node id to CGNS side
-    this % CGNSSideMap(1:4,1) = (/1,4,3,2/)
-    this % CGNSSideMap(1:4,2) = (/1,2,6,5/)
-    this % CGNSSideMap(1:4,3) = (/2,3,7,6/)
-    this % CGNSSideMap(1:4,4) = (/3,4,8,7/)
-    this % CGNSSideMap(1:4,5) = (/1,5,8,4/)
-    this % CGNSSideMap(1:4,6) = (/5,6,7,8/)
+    this%CGNSSideMap(1:4,1) = (/1,4,3,2/)
+    this%CGNSSideMap(1:4,2) = (/1,2,6,5/)
+    this%CGNSSideMap(1:4,3) = (/2,3,7,6/)
+    this%CGNSSideMap(1:4,4) = (/3,4,8,7/)
+    this%CGNSSideMap(1:4,5) = (/1,5,8,4/)
+    this%CGNSSideMap(1:4,6) = (/5,6,7,8/)
 
-    this % sideMap(1:4,1) = (/1,2,3,4/) ! Bottom
-    this % sideMap(1:4,2) = (/1,2,6,5/) ! South
-    this % sideMap(1:4,3) = (/2,3,7,6/) ! East
-    this % sideMap(1:4,4) = (/4,3,7,8/) ! North
-    this % sideMap(1:4,5) = (/1,4,8,5/) ! West
-    this % sideMap(1:4,6) = (/5,6,7,8/) ! Top
+    this%sideMap(1:4,1) = (/1,2,3,4/) ! Bottom
+    this%sideMap(1:4,2) = (/1,2,6,5/) ! South
+    this%sideMap(1:4,3) = (/2,3,7,6/) ! East
+    this%sideMap(1:4,4) = (/4,3,7,8/) ! North
+    this%sideMap(1:4,5) = (/1,4,8,5/) ! West
+    this%sideMap(1:4,6) = (/5,6,7,8/) ! Top
 
     !$omp target update to(this % CGNSCornerMap)
     !$omp target update to(this % CGNSSideMap)
     !$omp target update to(this % sideMap)
 
-  END SUBROUTINE Init_Mesh3D
+  endsubroutine Init_Mesh3D
 
-  SUBROUTINE Free_Mesh3D(this)
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: this
+  subroutine Free_Mesh3D(this)
+    implicit none
+    class(Mesh3D),intent(inout) :: this
 
-    this % nElem = 0
-    this % nSides = 0
-    this % nNodes = 0
-    this % nCornerNodes = 0
-    this % nUniqueSides = 0
-    this % nUniqueNodes = 0
-    this % nBCs = 0
+    this%nElem = 0
+    this%nSides = 0
+    this%nNodes = 0
+    this%nCornerNodes = 0
+    this%nUniqueSides = 0
+    this%nUniqueNodes = 0
+    this%nBCs = 0
 
-    deallocate(this % elemInfo)
-    deallocate(this % sideInfo)
-    deallocate(this % nodeCoords)
-    deallocate(this % globalNodeIDs)
-    deallocate(this % CGNSCornerMap)
-    deallocate(this % sideMap)
-    deallocate(this % CGNSSideMap)
-    deallocate(this % BCType)
+    deallocate(this%elemInfo)
+    deallocate(this%sideInfo)
+    deallocate(this%nodeCoords)
+    deallocate(this%globalNodeIDs)
+    deallocate(this%CGNSCornerMap)
+    deallocate(this%sideMap)
+    deallocate(this%CGNSSideMap)
+    deallocate(this%BCType)
 
     !$omp target exit data map(delete: this % elemInfo)
     !$omp target exit data map(delete: this % sideInfo)
@@ -963,614 +960,612 @@ CONTAINS
     !$omp target exit data map(delete: this % sideMap)
     !$omp target exit data map(delete: this % BCType)
 
-    DEALLOCATE (this % BCNames)
+    deallocate(this%BCNames)
 
-  END SUBROUTINE Free_Mesh3D
+  endsubroutine Free_Mesh3D
 
-  SUBROUTINE ResetBoundaryConditionType_Mesh3D(this,bcid)
+  subroutine ResetBoundaryConditionType_Mesh3D(this,bcid)
     !! This method can be used to reset all of the boundary elements
     !! boundary condition type to the desired value.
     !!
-    !! Note that ALL physical boundaries will be set to have this boundary 
+    !! Note that ALL physical boundaries will be set to have this boundary
     !! condition
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: this
-    INTEGER, INTENT(in) :: bcid
+    implicit none
+    class(Mesh3D),intent(inout) :: this
+    integer,intent(in) :: bcid
     ! Local
-    INTEGER :: iSide,iEl,e2      
+    integer :: iSide,iEl,e2
 
-    DO iEl = 1, this % nElem
-      DO iSide = 1, 6
+    do iEl = 1,this%nElem
+      do iSide = 1,6
 
-        e2 = this % sideInfo(3,iSide,iEl)
+        e2 = this%sideInfo(3,iSide,iEl)
 
-        IF( e2 == 0 )THEN
-          this % sideInfo(5,iSide,iEl) = bcid
-        ENDIF
+        if(e2 == 0) then
+          this%sideInfo(5,iSide,iEl) = bcid
+        endif
 
-      ENDDO
-    ENDDO
+      enddo
+    enddo
 
-  END SUBROUTINE ResetBoundaryConditionType_Mesh3D 
+  endsubroutine ResetBoundaryConditionType_Mesh3D
 
-  SUBROUTINE RecalculateFlip_Mesh3D(this,decomp)  
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: this
-    TYPE(MPILayer),INTENT(inout),OPTIONAL :: decomp
+  subroutine RecalculateFlip_Mesh3D(this,decomp)
+    implicit none
+    class(Mesh3D),intent(inout) :: this
+    type(MPILayer),intent(inout),optional :: decomp
     ! Local
-    INTEGER :: e1
-    INTEGER :: s1
-    INTEGER :: e2
-    INTEGER :: e2Global
-    INTEGER :: s2
-    INTEGER :: flip
-    INTEGER :: bcid
-    INTEGER :: lnid1(1:4)
-    INTEGER :: lnid2(1:4)
-    INTEGER :: nid1(1:4,1:6,1:this % nElem)
-    INTEGER :: nid2(1:4,1:6,1:this % nElem)
-    INTEGER :: nloc1(1:4)
-    INTEGER :: nloc2(1:4)
-    INTEGER :: n1
-    INTEGER :: n1Global
-    INTEGER :: n2
-    INTEGER :: n2Global
-    INTEGER :: c1
-    INTEGER :: c2
-    INTEGER :: i,j,k
-    INTEGER :: l
-    INTEGER :: nShifts
-    INTEGER :: neighborRank
-    INTEGER :: rankId
-    INTEGER :: offset
-    INTEGER :: msgCount
-    INTEGER :: globalSideId
-    INTEGER, ALLOCATABLE :: requests(:)
-    INTEGER, ALLOCATABLE :: stats(:,:)
-    INTEGER :: iError
-    LOGICAL :: theyMatch
+    integer :: e1
+    integer :: s1
+    integer :: e2
+    integer :: e2Global
+    integer :: s2
+    integer :: flip
+    integer :: bcid
+    integer :: lnid1(1:4)
+    integer :: lnid2(1:4)
+    integer :: nid1(1:4,1:6,1:this%nElem)
+    integer :: nid2(1:4,1:6,1:this%nElem)
+    integer :: nloc1(1:4)
+    integer :: nloc2(1:4)
+    integer :: n1
+    integer :: n1Global
+    integer :: n2
+    integer :: n2Global
+    integer :: c1
+    integer :: c2
+    integer :: i,j,k
+    integer :: l
+    integer :: nShifts
+    integer :: neighborRank
+    integer :: rankId
+    integer :: offset
+    integer :: msgCount
+    integer :: globalSideId
+    integer,allocatable :: requests(:)
+    integer,allocatable :: stats(:,:)
+    integer :: iError
+    logical :: theyMatch
 
+    allocate(requests(1:this%nSides*2))
+    allocate(stats(MPI_STATUS_SIZE,1:this%nSides*2))
 
-    ALLOCATE(requests(1:this % nSides*2))
-    ALLOCATE(stats(MPI_STATUS_SIZE,1:this % nSides*2))
-
-    IF (PRESENT(decomp)) THEN
-      rankId = decomp % rankId
-      offset = decomp % offsetElem(rankId+1)
-    ELSE
+    if(present(decomp)) then
+      rankId = decomp%rankId
+      offset = decomp%offsetElem(rankId+1)
+    else
       rankId = 0
       offset = 0
-    ENDIF
+    endif
 
     msgCount = 0
-    DO e1 = 1,this % nElem
-      DO s1 = 1,6
+    do e1 = 1,this%nElem
+      do s1 = 1,6
 
-        e2Global = this % sideInfo(3,s1,e1)
-        e2 = e2Global - offset
-        s2 = this % sideInfo(4,s1,e1)/10
-        flip = this % sideInfo(4,s1,e1) - s2*10
-        bcid = this % sideInfo(5,s1,e1)
+        e2Global = this%sideInfo(3,s1,e1)
+        e2 = e2Global-offset
+        s2 = this%sideInfo(4,s1,e1)/10
+        flip = this%sideInfo(4,s1,e1)-s2*10
+        bcid = this%sideInfo(5,s1,e1)
 
-        IF (bcid == 0) THEN
+        if(bcid == 0) then
 
-          IF (PRESENT(decomp)) THEN
-            neighborRank = decomp % elemToRank(e2Global)
-          ELSE
+          if(present(decomp)) then
+            neighborRank = decomp%elemToRank(e2Global)
+          else
             neighborRank = 0
-          ENDIF
+          endif
 
-          IF (neighborRank == rankId) THEN
+          if(neighborRank == rankId) then
 
-            lnid1 = this % sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
-            lnid2 = this % sideMap(1:4,s2) ! local CGNS corner node ids for element 2 side
+            lnid1 = this%sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
+            lnid2 = this%sideMap(1:4,s2) ! local CGNS corner node ids for element 2 side
 
-            DO l = 1, 4
-              
-              i = this % CGNSCornerMap(1,lnid1(l))
-              j = this % CGNSCornerMap(2,lnid1(l))
-              k = this % CGNSCornerMap(3,lnid1(l))
-              nid1(l,s1,e1) = this % globalNodeIDs(i,j,k,e1)
+            do l = 1,4
 
-              i = this % CGNSCornerMap(1,lnid2(l))
-              j = this % CGNSCornerMap(2,lnid2(l))
-              k = this % CGNSCornerMap(3,lnid2(l))
-              nid2(l,s1,e1) = this % globalNodeIDs(i,j,k,e1)
+              i = this%CGNSCornerMap(1,lnid1(l))
+              j = this%CGNSCornerMap(2,lnid1(l))
+              k = this%CGNSCornerMap(3,lnid1(l))
+              nid1(l,s1,e1) = this%globalNodeIDs(i,j,k,e1)
 
-            ENDDO
+              i = this%CGNSCornerMap(1,lnid2(l))
+              j = this%CGNSCornerMap(2,lnid2(l))
+              k = this%CGNSCornerMap(3,lnid2(l))
+              nid2(l,s1,e1) = this%globalNodeIDs(i,j,k,e1)
 
-          ELSE ! In this case, we need to exchange
+            enddo
 
-            globalSideId = ABS(this % sideInfo(2,s1,e1))
+          else ! In this case, we need to exchange
 
-            lnid1 = this % sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
+            globalSideId = abs(this%sideInfo(2,s1,e1))
 
-            DO l = 1, 4
-              
-              i = this % CGNSCornerMap(1,lnid1(l))
-              j = this % CGNSCornerMap(2,lnid1(l))
-              k = this % CGNSCornerMap(3,lnid1(l))
-              nid1(l,s1,e1) = this % globalNodeIDs(i,j,k,e1)
+            lnid1 = this%sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
+
+            do l = 1,4
+
+              i = this%CGNSCornerMap(1,lnid1(l))
+              j = this%CGNSCornerMap(2,lnid1(l))
+              k = this%CGNSCornerMap(3,lnid1(l))
+              nid1(l,s1,e1) = this%globalNodeIDs(i,j,k,e1)
 
               ! Receive nid2(l) on this rank from  nid1(l) on the other rank
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(nid2(l,s1,e1), &
+              msgCount = msgCount+1
+              call MPI_IRECV(nid2(l,s1,e1), &
                              1, &
                              MPI_INTEGER, &
                              neighborRank,globalSideId, &
-                             decomp % mpiComm, &
+                             decomp%mpiComm, &
                              requests(msgCount),iError)
-  
+
               ! Send nid1(l) from this rank to nid2(l) on the other rank
-              msgCount = msgCount + 1
-              CALL MPI_ISEND(nid1(l,s1,e1), &
+              msgCount = msgCount+1
+              call MPI_ISEND(nid1(l,s1,e1), &
                              1, &
                              MPI_INTEGER, &
                              neighborRank,globalSideId, &
-                             decomp % mpiComm, &
+                             decomp%mpiComm, &
                              requests(msgCount),iError)
-  
-            ENDDO
 
-          ENDIF ! MPI or not
+            enddo
 
-        ENDIF ! If not physical boundary
+          endif ! MPI or not
 
-      ENDDO
-    ENDDO
+        endif ! If not physical boundary
 
-    IF (PRESENT(decomp) .AND. msgCount > 0) THEN
-      CALL MPI_WaitAll(msgCount, &
+      enddo
+    enddo
+
+    if(present(decomp) .and. msgCount > 0) then
+      call MPI_WaitAll(msgCount, &
                        requests(1:msgCount), &
                        stats(1:MPI_STATUS_SIZE,1:msgCount), &
                        iError)
-    ENDIF
+    endif
 
-    DO e1 = 1,this % nElem
-      DO s1 = 1,6
+    do e1 = 1,this%nElem
+      do s1 = 1,6
 
-        s2 = this % sideInfo(4,s1,e1)/10
-        bcid = this % sideInfo(5,s1,e1)
+        s2 = this%sideInfo(4,s1,e1)/10
+        bcid = this%sideInfo(5,s1,e1)
         nloc1(1:4) = nid1(1:4,s1,e1)
         nloc2(1:4) = nid2(1:4,s1,e1)
 
-        IF (bcid == 0) THEN
+        if(bcid == 0) then
           nShifts = 0
-          theyMatch = .FALSE.
+          theyMatch = .false.
 
-          DO i = 1, 4
+          do i = 1,4
 
-            theyMatch = CompareArray( nloc1, nloc2, 4 )
+            theyMatch = CompareArray(nloc1,nloc2,4)
 
-            IF( theyMatch )THEN
-              EXIT
-            ELSE
-              nShifts = nShifts + 1
-              CALL ForwardShift( nloc1, 4 )
-            ENDIF
+            if(theyMatch) then
+              exit
+            else
+              nShifts = nShifts+1
+              call ForwardShift(nloc1,4)
+            endif
 
-          ENDDO
+          enddo
 
-          this % sideInfo(4,s1,e1) = 10*s2+nShifts
+          this%sideInfo(4,s1,e1) = 10*s2+nShifts
 
-        ENDIF
+        endif
 
-      ENDDO
-    ENDDO
+      enddo
+    enddo
 
-    DEALLOCATE(requests)
-    DEALLOCATE(stats)
+    deallocate(requests)
+    deallocate(stats)
 
-  END SUBROUTINE RecalculateFlip_Mesh3D
+  endsubroutine RecalculateFlip_Mesh3D
 
-  SUBROUTINE Read_HOPr_Mesh3D(this,meshFile,decomp)
+  subroutine Read_HOPr_Mesh3D(this,meshFile,decomp)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(out) :: this
-    CHARACTER(*),INTENT(in) :: meshFile
-    TYPE(MPILayer),INTENT(inout) :: decomp
+    implicit none
+    class(Mesh3D),intent(out) :: this
+    character(*),intent(in) :: meshFile
+    type(MPILayer),intent(inout) :: decomp
     ! Local
-    INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: offset(1:2),gOffset(1)
-    INTEGER :: nGlobalElem
-    INTEGER :: firstElem
-    INTEGER :: firstNode
-    INTEGER :: firstSide
-    INTEGER :: nLocalElems
-    INTEGER :: nLocalNodes
-    INTEGER :: nLocalSides
-    INTEGER :: nUniqueSides
-    INTEGER :: nGeo,nBCs
-    INTEGER :: eid, lsid, iSide
-    INTEGER :: i, j, k, nid
-    integer, dimension(:,:), allocatable :: hopr_elemInfo
-    integer, dimension(:,:), allocatable :: hopr_sideInfo
-    real(prec), dimension(:,:), allocatable :: hopr_nodeCoords
-    integer, dimension(:), allocatable :: hopr_globalNodeIDs
-    integer, dimension(:,:), allocatable :: bcType
+    integer(HID_T) :: fileId
+    integer(HID_T) :: offset(1:2),gOffset(1)
+    integer :: nGlobalElem
+    integer :: firstElem
+    integer :: firstNode
+    integer :: firstSide
+    integer :: nLocalElems
+    integer :: nLocalNodes
+    integer :: nLocalSides
+    integer :: nUniqueSides
+    integer :: nGeo,nBCs
+    integer :: eid,lsid,iSide
+    integer :: i,j,k,nid
+    integer,dimension(:,:),allocatable :: hopr_elemInfo
+    integer,dimension(:,:),allocatable :: hopr_sideInfo
+    real(prec),dimension(:,:),allocatable :: hopr_nodeCoords
+    integer,dimension(:),allocatable :: hopr_globalNodeIDs
+    integer,dimension(:,:),allocatable :: bcType
 
+    if(decomp%mpiEnabled) then
+      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp%mpiComm)
+    else
+      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
+    endif
 
-    IF ( decomp % mpiEnabled )THEN
-      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
-    ELSE
-      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
-    ENDIF
-
-    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
-    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
-    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
+    call ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    call ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    call ReadAttribute_HDF5(fileId,'nBCs',nBCs)
+    call ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
 
     ! Read BCType
-    allocate( bcType(1:4,1:nBCs) )
-    IF ( decomp % mpiEnabled )THEN
+    allocate(bcType(1:4,1:nBCs))
+    if(decomp%mpiEnabled) then
       offset(:) = 0
-      CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'BCType',bcType)
-    ENDIF
+      call ReadArray_HDF5(fileId,'BCType',bcType,offset)
+    else
+      call ReadArray_HDF5(fileId,'BCType',bcType)
+    endif
 
     ! Read local subarray of ElemInfo
-    CALL decomp % GenerateDecomposition(nGlobalElem,nUniqueSides)
+    call decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
 
-    firstElem = decomp % offsetElem(decomp % rankId+1) + 1
-    nLocalElems = decomp % offsetElem(decomp % rankId + 2) - &
-                  decomp % offsetElem(decomp % rankId+1)
+    firstElem = decomp%offsetElem(decomp%rankId+1)+1
+    nLocalElems = decomp%offsetElem(decomp%rankId+2)- &
+                  decomp%offsetElem(decomp%rankId+1)
 
     ! Allocate Space for hopr_elemInfo!
-    allocate( hopr_elemInfo(1:6,1:nLocalElems) )
-    IF ( decomp % mpiEnabled )THEN
-      offset = (/0,firstElem - 1/)
-      CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
-    ENDIF
+    allocate(hopr_elemInfo(1:6,1:nLocalElems))
+    if(decomp%mpiEnabled) then
+      offset = (/0,firstElem-1/)
+      call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
+    else
+      call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
+    endif
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode = hopr_elemInfo(5,1) + 1
-    nLocalNodes = hopr_elemInfo(6,nLocalElems) - hopr_elemInfo(5,1)
+    firstNode = hopr_elemInfo(5,1)+1
+    nLocalNodes = hopr_elemInfo(6,nLocalElems)-hopr_elemInfo(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
-    allocate( hopr_nodeCoords(1:3,1:nLocalNodes), hopr_globalNodeIDs(1:nLocalNodes) )
+    allocate(hopr_nodeCoords(1:3,1:nLocalNodes),hopr_globalNodeIDs(1:nLocalNodes))
 
-    IF ( decomp % mpiEnabled )THEN
-      offset = (/0,firstNode - 1/)
-      CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
-      gOffset = (/firstNode - 1/)
-      CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
-      CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
-    ENDIF
+    if(decomp%mpiEnabled) then
+      offset = (/0,firstNode-1/)
+      call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
+      gOffset = (/firstNode-1/)
+      call ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
+    else
+      call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
+      call ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
+    endif
 
     ! Read local subarray of SideInfo
-    firstSide = hopr_elemInfo(3,1) + 1
-    nLocalSides = hopr_elemInfo(4,nLocalElems) - hopr_elemInfo(3,1)
+    firstSide = hopr_elemInfo(3,1)+1
+    nLocalSides = hopr_elemInfo(4,nLocalElems)-hopr_elemInfo(3,1)
 
     ! Allocate space for hopr_sideInfo
-    allocate( hopr_sideInfo(1:5,1:nLocalSides) )
+    allocate(hopr_sideInfo(1:5,1:nLocalSides))
 
-    IF ( decomp % mpiEnabled )THEN
-      offset = (/0,firstSide - 1/)
-      CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
-    ELSE
-      CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
-    ENDIF
+    if(decomp%mpiEnabled) then
+      offset = (/0,firstSide-1/)
+      call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
+    else
+      call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
+    endif
 
-    CALL Close_HDF5(fileID)
+    call Close_HDF5(fileID)
     ! ---- Done reading 3-D Mesh information ---- !
     ! Load hopr data into mesh data structure
 
-    CALL this % Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
+    call this%Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
 
     ! Copy data from local arrays into this
-    this % elemInfo = hopr_elemInfo
-    this % nUniqueSides = nUniqueSides
-    this % quadrature = UNIFORM
+    this%elemInfo = hopr_elemInfo
+    this%nUniqueSides = nUniqueSides
+    this%quadrature = UNIFORM
 
     ! Grab the node coordinates
-    DO eid = 1, this % nElem
-      DO k = 1,nGeo+1
-        DO j = 1,nGeo+1
-          DO i = 1,nGeo+1
-            nid = i + (nGeo+1)*(j-1 + (nGeo+1)*(k-1 + (nGeo+1)*(eid-1)))
-            this % nodeCoords(1:3,i,j,k,eid) = hopr_nodeCoords(1:3,nid)
-            this % globalNodeIDs(i,j,k,eid) = hopr_globalNodeIDs(nid)
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+    do eid = 1,this%nElem
+      do k = 1,nGeo+1
+        do j = 1,nGeo+1
+          do i = 1,nGeo+1
+            nid = i+(nGeo+1)*(j-1+(nGeo+1)*(k-1+(nGeo+1)*(eid-1)))
+            this%nodeCoords(1:3,i,j,k,eid) = hopr_nodeCoords(1:3,nid)
+            this%globalNodeIDs(i,j,k,eid) = hopr_globalNodeIDs(nid)
+          enddo
+        enddo
+      enddo
+    enddo
 
-    iSide = 0 
-    DO eid = 1,this % nElem
-      DO lsid = 1,6
-        iSide = iSide + 1
-        this % sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
-      ENDDO
-    ENDDO
+    iSide = 0
+    do eid = 1,this%nElem
+      do lsid = 1,6
+        iSide = iSide+1
+        this%sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
+      enddo
+    enddo
 
-    CALL this % RecalculateFlip()
+    call this%RecalculateFlip()
 
-    deallocate( hopr_elemInfo, hopr_nodeCoords, hopr_globalNodeIDs, hopr_sideInfo )
+    deallocate(hopr_elemInfo,hopr_nodeCoords,hopr_globalNodeIDs,hopr_sideInfo)
 
-  END SUBROUTINE Read_HOPr_Mesh3D
+  endsubroutine Read_HOPr_Mesh3D
 
-  SUBROUTINE Write_Mesh3D(this,meshFile)
+  subroutine Write_Mesh3D(this,meshFile)
     ! Writes mesh output in HOPR format (serial only)
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in) :: meshFile
+    implicit none
+    class(Mesh3D),intent(inout) :: this
+    character(*),intent(in) :: meshFile
     ! Local
-    INTEGER(HID_T) :: fileId
+    integer(HID_T) :: fileId
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    call Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL WriteAttribute_HDF5(fileId,'nElems',this % nElem)
-    CALL WriteAttribute_HDF5(fileId,'Ngeo',this % nGeo)
-    CALL WriteAttribute_HDF5(fileId,'nBCs',this % nBCs)
+    call WriteAttribute_HDF5(fileId,'nElems',this%nElem)
+    call WriteAttribute_HDF5(fileId,'Ngeo',this%nGeo)
+    call WriteAttribute_HDF5(fileId,'nBCs',this%nBCs)
 
-    CALL WriteArray_HDF5(fileId,'BCType',this % bcType)
-    CALL WriteArray_HDF5(fileId,'ElemInfo',this % elemInfo)
+    call WriteArray_HDF5(fileId,'BCType',this%bcType)
+    call WriteArray_HDF5(fileId,'ElemInfo',this%elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId,'NodeCoords',this % nodeCoords)
-    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',this % globalNodeIDs)
+    call WriteArray_HDF5(fileId,'NodeCoords',this%nodeCoords)
+    call WriteArray_HDF5(fileId,'GlobalNodeIDs',this%globalNodeIDs)
 
     ! Read local subarray of SideInfo
-    CALL WriteArray_HDF5(fileId,'SideInfo',this % sideInfo)
+    call WriteArray_HDF5(fileId,'SideInfo',this%sideInfo)
 
-    CALL Close_HDF5(fileID)
+    call Close_HDF5(fileID)
 
-  END SUBROUTINE Write_Mesh3D
+  endsubroutine Write_Mesh3D
 
-  SUBROUTINE Init_MPILayer(this,enableMPI)
+  subroutine Init_MPILayer(this,enableMPI)
 #undef __FUNC__
 #define __FUNC__ "Init_MPILayer"
-    IMPLICIT NONE
-    CLASS(MPILayer),INTENT(out) :: this
-    LOGICAL,INTENT(in) :: enableMPI
+    implicit none
+    class(MPILayer),intent(out) :: this
+    logical,intent(in) :: enableMPI
     ! Local
-    INTEGER       :: ierror
-    CHARACTER(50) :: msg
-    INTEGER :: nGPU, gpuID
-    CHARACTER(2) :: msg2
+    integer       :: ierror
+    character(50) :: msg
+    integer :: nGPU,gpuID
+    character(2) :: msg2
 
-    this % mpiComm = 0
-    this % mpiPrec = prec
-    this % rankId = 0
-    this % nRanks = 1
-    this % nElem = 0
-    this % mpiEnabled = enableMPI
+    this%mpiComm = 0
+    this%mpiPrec = prec
+    this%rankId = 0
+    this%nRanks = 1
+    this%nElem = 0
+    this%mpiEnabled = enableMPI
 
-    IF (enableMPI) THEN
-      this % mpiComm = MPI_COMM_WORLD
-      CALL MPI_INIT(ierror)
-      CALL MPI_COMM_RANK(this % mpiComm,this % rankId,ierror)
-      CALL MPI_COMM_SIZE(this % mpiComm,this % nRanks,ierror)
-    END IF
+    if(enableMPI) then
+      this%mpiComm = MPI_COMM_WORLD
+      call MPI_INIT(ierror)
+      call MPI_COMM_RANK(this%mpiComm,this%rankId,ierror)
+      call MPI_COMM_SIZE(this%mpiComm,this%nRanks,ierror)
+    endif
 
-    IF (prec == real32) THEN
-      this % mpiPrec = MPI_FLOAT
-    ELSE
-      this % mpiPrec = MPI_DOUBLE
-    END IF
+    if(prec == real32) then
+      this%mpiPrec = MPI_FLOAT
+    else
+      this%mpiPrec = MPI_DOUBLE
+    endif
 
-    allocate(this % offsetElem(1:this % nRanks+1))
+    allocate(this%offsetElem(1:this%nRanks+1))
     !$omp target enter data map(alloc: this % offsetElem)
 
-    WRITE (msg,'(I5)') this % rankId
-    msg = "Greetings from rank "//TRIM(msg)//"."
-    INFO(TRIM(msg))
+    write(msg,'(I5)') this%rankId
+    msg = "Greetings from rank "//trim(msg)//"."
+    INFO(trim(msg))
 
-      ! ! Get the number of GPUs per node
-      ! CALL hipCheck(hipGetDeviceCount(nGPU))
+    ! ! Get the number of GPUs per node
+    ! CALL hipCheck(hipGetDeviceCount(nGPU))
 
-      ! ! Assume that we have the 1 GPU per rank
-      ! ! implying that nMPIRanksPerNode = nGPU
-      ! ! Assume that all nodes have the same number of GPUs per node
-      ! gpuID = MOD(this % rankId, nGPU)
+    ! ! Assume that we have the 1 GPU per rank
+    ! ! implying that nMPIRanksPerNode = nGPU
+    ! ! Assume that all nodes have the same number of GPUs per node
+    ! gpuID = MOD(this % rankId, nGPU)
 
-      ! CALL hipCheck(hipSetDevice(gpuID))
-     ! WRITE (msg,'(I5)') this % rankId
-      !WRITE (msg2,'(I2)') gpuID
-      !msg = "Rank "//TRIM(msg)//": Setting device to GPU"//TRIM(msg2)
-     !NFO(TRIM(msg))
+    ! CALL hipCheck(hipSetDevice(gpuID))
+    ! WRITE (msg,'(I5)') this % rankId
+    !WRITE (msg2,'(I2)') gpuID
+    !msg = "Rank "//TRIM(msg)//": Setting device to GPU"//TRIM(msg2)
+    !NFO(TRIM(msg))
 
-  END SUBROUTINE Init_MPILayer
+  endsubroutine Init_MPILayer
 
-  SUBROUTINE Free_MPILayer(this)
-    IMPLICIT NONE
-    CLASS(MPILayer),INTENT(inout) :: this
+  subroutine Free_MPILayer(this)
+    implicit none
+    class(MPILayer),intent(inout) :: this
 
-    IF (ASSOCIATED(this % offSetElem)) THEN
-      deallocate(this % offSetElem)
+    if(associated(this%offSetElem)) then
+      deallocate(this%offSetElem)
       !$omp target exit data map(delete: this % offsetElem)
-    ENDIF
-    IF (ASSOCIATED(this % elemToRank)) THEN
-      deallocate(this % elemToRank)
+    endif
+    if(associated(this%elemToRank)) then
+      deallocate(this%elemToRank)
       !$omp target exit data map(delete: this % elemToRank)
-    ENDIF
+    endif
 
-    DEALLOCATE( this % requests )
-    DEALLOCATE( this % stats )
+    deallocate(this%requests)
+    deallocate(this%stats)
 
-  END SUBROUTINE Free_MPILayer
+  endsubroutine Free_MPILayer
 
-  SUBROUTINE Finalize_MPILayer(this)
+  subroutine Finalize_MPILayer(this)
 #undef __FUNC__
 #define __FUNC__ "Finalize_MPILayer"
-    IMPLICIT NONE
-    CLASS(MPILayer),INTENT(inout) :: this
+    implicit none
+    class(MPILayer),intent(inout) :: this
     ! Local
-    INTEGER       :: ierror
-    CHARACTER(30) :: msg
+    integer       :: ierror
+    character(30) :: msg
 
-    IF (this % mpiEnabled) THEN
-      WRITE (msg,'(I5)') this % rankId
-      msg = "Goodbye from rank "//TRIM(msg)//"."
-      INFO(TRIM(msg))
-      CALL MPI_FINALIZE(ierror)
-    ENDIF
+    if(this%mpiEnabled) then
+      write(msg,'(I5)') this%rankId
+      msg = "Goodbye from rank "//trim(msg)//"."
+      INFO(trim(msg))
+      call MPI_FINALIZE(ierror)
+    endif
 
-  END SUBROUTINE Finalize_MPILayer
+  endsubroutine Finalize_MPILayer
 
-  SUBROUTINE GenerateDecomposition_MPILayer(this,nGlobalElem,maxMsg)
+  subroutine GenerateDecomposition_MPILayer(this,nGlobalElem,maxMsg)
 #undef __FUNC__
 #define __FUNC__ "GenerateDecomposition_MPILayer"
-    IMPLICIT NONE
-    CLASS(MPILayer),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: nGlobalElem
-    INTEGER,INTENT(in) :: maxMsg
+    implicit none
+    class(MPILayer),intent(inout) :: this
+    integer,intent(in) :: nGlobalElem
+    integer,intent(in) :: maxMsg
     ! Local
-    INTEGER :: maxMsgLoc
-    CHARACTER(50) :: msg
-    CHARACTER(5) :: msg2
+    integer :: maxMsgLoc
+    character(50) :: msg
+    character(5) :: msg2
 
-    CALL this % setElemToRank(nGlobalElem)
-    CALL this % SetMaxMsg(maxMsg)
+    call this%setElemToRank(nGlobalElem)
+    call this%SetMaxMsg(maxMsg)
 
-    WRITE (msg,'(I5)') this % rankId
-    WRITE (msg2,'(I5)') this % offSetElem(this % rankId+2)-&
-                        this % offSetElem(this % rankId+1)
-    msg = "Rank "//TRIM(msg)//": nElem = "//TRIM(msg2)
-    INFO(TRIM(msg))
+    write(msg,'(I5)') this%rankId
+    write(msg2,'(I5)') this%offSetElem(this%rankId+2)- &
+      this%offSetElem(this%rankId+1)
+    msg = "Rank "//trim(msg)//": nElem = "//trim(msg2)
+    INFO(trim(msg))
 
-  END SUBROUTINE GenerateDecomposition_MPILayer
+  endsubroutine GenerateDecomposition_MPILayer
 
-  SUBROUTINE SetMaxMsg(this,maxMsg)
-    IMPLICIT NONE
-    CLASS(MPILayer),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: maxMsg
+  subroutine SetMaxMsg(this,maxMsg)
+    implicit none
+    class(MPILayer),intent(inout) :: this
+    integer,intent(in) :: maxMsg
 
-    IF (ALLOCATED(this % requests) ) DEALLOCATE( this % requests )
-    IF (ALLOCATED(this % stats) ) DEALLOCATE( this % stats )
+    if(allocated(this%requests)) deallocate(this%requests)
+    if(allocated(this%stats)) deallocate(this%stats)
 
-    ALLOCATE( this % requests(1:maxMsg) )
-    ALLOCATE( this % stats(MPI_STATUS_SIZE,1:maxMsg) )
-    this % maxMsg = maxMsg
+    allocate(this%requests(1:maxMsg))
+    allocate(this%stats(MPI_STATUS_SIZE,1:maxMsg))
+    this%maxMsg = maxMsg
 
-  END SUBROUTINE SetMaxMsg
+  endsubroutine SetMaxMsg
 
-  SUBROUTINE SetElemToRank(this,nElem)
-    IMPLICIT NONE
-    CLASS(MPILayer),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: nElem
+  subroutine SetElemToRank(this,nElem)
+    implicit none
+    class(MPILayer),intent(inout) :: this
+    integer,intent(in) :: nElem
     ! Local
-    INTEGER :: iel
+    integer :: iel
 
-    this % nElem = nElem
+    this%nElem = nElem
 
-    allocate(this % elemToRank(1:nelem))
+    allocate(this%elemToRank(1:nelem))
     !$omp target enter data map(alloc:this % elemToRank)
 
-    CALL DomainDecomp(nElem, &
-                      this % nRanks, &
-                      this % offSetElem)
+    call DomainDecomp(nElem, &
+                      this%nRanks, &
+                      this%offSetElem)
 
-    DO iel = 1,nElem
-      CALL ElemToRank(this % nRanks, &
-                      this % offSetElem, &
+    do iel = 1,nElem
+      call ElemToRank(this%nRanks, &
+                      this%offSetElem, &
                       iel, &
-                      this % elemToRank(iel))
-    END DO
+                      this%elemToRank(iel))
+    enddo
 
     !$omp target update to(this % offsetElem)
     !$omp target update to(this % elemToRank)
 
-  END SUBROUTINE SetElemToRank
+  endsubroutine SetElemToRank
 
-  SUBROUTINE DomainDecomp(nElems,nDomains,offSetElem)
+  subroutine DomainDecomp(nElems,nDomains,offSetElem)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 4
-    IMPLICIT NONE
-    INTEGER,INTENT(in) :: nElems
-    INTEGER,INTENT(in) :: nDomains
-    INTEGER,INTENT(out) :: offsetElem(0:nDomains)
+    implicit none
+    integer,intent(in) :: nElems
+    integer,intent(in) :: nDomains
+    integer,intent(out) :: offsetElem(0:nDomains)
     ! Local
-    INTEGER :: nLocalElems
-    INTEGER :: remainElems
-    INTEGER :: iDom
+    integer :: nLocalElems
+    integer :: remainElems
+    integer :: iDom
 
     nLocalElems = nElems/nDomains
-    remainElems = nElems - nLocalElems*nDomains
-    DO iDom = 0,nDomains - 1
-      offSetElem(iDom) = iDom*nLocalElems + MIN(iDom,remainElems)
-    END DO
+    remainElems = nElems-nLocalElems*nDomains
+    do iDom = 0,nDomains-1
+      offSetElem(iDom) = iDom*nLocalElems+min(iDom,remainElems)
+    enddo
     offSetElem(nDomains) = nElems
 
-  END SUBROUTINE DomainDecomp
+  endsubroutine DomainDecomp
 
-  SUBROUTINE ElemToRank(nDomains,offsetElem,elemID,domain)
+  subroutine ElemToRank(nDomains,offsetElem,elemID,domain)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 7
     !   "Find domain containing element index"
     !
-    IMPLICIT NONE
-    INTEGER,INTENT(in) :: nDomains
-    INTEGER,INTENT(in) :: offsetElem(0:nDomains)
-    INTEGER,INTENT(in) :: elemID
-    INTEGER,INTENT(out) :: domain
+    implicit none
+    integer,intent(in) :: nDomains
+    integer,intent(in) :: offsetElem(0:nDomains)
+    integer,intent(in) :: elemID
+    integer,intent(out) :: domain
     ! Local
-    INTEGER :: maxSteps
-    INTEGER :: low,up,mid
-    INTEGER :: i
+    integer :: maxSteps
+    integer :: low,up,mid
+    integer :: i
 
     domain = 0
-    maxSteps = INT(LOG10(REAL(nDomains))/LOG10(2.0)) + 1
+    maxSteps = int(log10(real(nDomains))/log10(2.0))+1
     low = 0
     up = nDomains-1
 
-    IF (offsetElem(low) < elemID .AND. elemID <= offsetElem(low + 1)) THEN
+    if(offsetElem(low) < elemID .and. elemID <= offsetElem(low+1)) then
       domain = low
-    ELSEIF (offsetElem(up) < elemID .AND. elemID <= offsetElem(up + 1)) THEN
+    elseif(offsetElem(up) < elemID .and. elemID <= offsetElem(up+1)) then
       domain = up
-    ELSE
-      DO i = 1,maxSteps
-        mid = (up - low)/2 + low
-        IF (offsetElem(mid) < elemID .AND. elemID <= offsetElem(mid + 1)) THEN
+    else
+      do i = 1,maxSteps
+        mid = (up-low)/2+low
+        if(offsetElem(mid) < elemID .and. elemID <= offsetElem(mid+1)) then
           domain = mid
-          RETURN
-        ELSEIF (elemID > offsetElem(mid + 1)) THEN
-          low = mid + 1
-        ELSE
+          return
+        elseif(elemID > offsetElem(mid+1)) then
+          low = mid+1
+        else
           up = mid
-        END IF
-      END DO
-    END IF
+        endif
+      enddo
+    endif
 
-  END SUBROUTINE ElemToRank
+  endsubroutine ElemToRank
 
-  SUBROUTINE FinalizeMPIExchangeAsync(mpiHandler)
-    CLASS(MPILayer),INTENT(inout) :: mpiHandler
+  subroutine FinalizeMPIExchangeAsync(mpiHandler)
+    class(MPILayer),intent(inout) :: mpiHandler
     ! Local
-    INTEGER :: ierror
+    integer :: ierror
 
-    IF( mpiHandler % mpiEnabled )THEN
-    CALL MPI_WaitAll(mpiHandler % msgCount, &
-                     mpiHandler % requests(1:mpiHandler % msgCount), &
-                     mpiHandler % stats(1:MPI_STATUS_SIZE,1:mpiHandler % msgCount), &
-                     iError)
-    ENDIF
+    if(mpiHandler%mpiEnabled) then
+      call MPI_WaitAll(mpiHandler%msgCount, &
+                       mpiHandler%requests(1:mpiHandler%msgCount), &
+                       mpiHandler%stats(1:MPI_STATUS_SIZE,1:mpiHandler%msgCount), &
+                       iError)
+    endif
 
-  END SUBROUTINE FinalizeMPIExchangeAsync
+  endsubroutine FinalizeMPIExchangeAsync
 
-  SUBROUTINE GlobalReduce_RealScalar(mpiHandler, sendBuf, recvBuf)
-    CLASS(MPILayer), INTENT(in) :: mpiHandler
-    REAL(prec), INTENT(in) :: sendBuf
-    REAL(prec), INTENT(out) :: recvBuf
+  subroutine GlobalReduce_RealScalar(mpiHandler,sendBuf,recvBuf)
+    class(MPILayer),intent(in) :: mpiHandler
+    real(prec),intent(in) :: sendBuf
+    real(prec),intent(out) :: recvBuf
     ! Local
-    INTEGER :: iError
+    integer :: iError
 
-      IF (mpiHandler % mpiEnabled) THEN
-        CALL MPI_ALLREDUCE(sendBuf, &
-                           recvBuf, &
-                           1, &
-                           mpiHandler % mpiPrec, &
-                           MPI_SUM, &
-                           mpiHandler % mpiComm, &
-                           iError)
-      ELSE
-        recvBuf = sendBuf
-      ENDIF
+    if(mpiHandler%mpiEnabled) then
+      call MPI_ALLREDUCE(sendBuf, &
+                         recvBuf, &
+                         1, &
+                         mpiHandler%mpiPrec, &
+                         MPI_SUM, &
+                         mpiHandler%mpiComm, &
+                         iError)
+    else
+      recvBuf = sendBuf
+    endif
 
-  END SUBROUTINE GlobalReduce_RealScalar
+  endsubroutine GlobalReduce_RealScalar
 
-END MODULE SELF_Mesh
+endmodule SELF_Mesh
