@@ -87,13 +87,15 @@ jobs:
         uses: spack/setup-spack@v2
 
       - name: Install dependencies in spack environment
+        shell: spack-bash {0}
         run: |
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
           spack -e . compiler find
           spack -e . config add packages:all:compiler:[${{ matrix.spack_compiler }}]
           cat ./spack.yaml
-          spack -e . concretize -f
-          spack -e . install --no-check-signature
+          spack env activate .
+          spack concretize -f
+          spack install --no-check-signature
 
       - name: Build with Cmake
         shell: spack-bash {0}
