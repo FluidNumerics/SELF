@@ -28,7 +28,7 @@ jobs:
             - os: ubuntu-22.04
               fcompiler: amdflang
               ccompiler: amdclang
-              spack_compiler: rocmcc
+              spack_compiler: rocmcc@6.1.1
               spack_os: "ubuntu:22.04"
               shell: bash
               build_type: debug
@@ -62,7 +62,7 @@ jobs:
           export PATH=${PATH}:/opt/rocm/bin
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
           spack compiler find
-          spack config add packages:all:compiler:[${{ matrix.spack_compiler }}]
+          spack -e . config add packages:all:compiler:[${{ matrix.spack_compiler }}]
           spack -e . concretize
           spack -e . install --no-check-signature
 
