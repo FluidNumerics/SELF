@@ -1,0 +1,90 @@
+name: linux-nvidia-hpc-cmake
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+jobs:
+  linux-tests:
+    timeout-minutes: 20
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: ${{ matrix.os }} - ${{ matrix.toolchain.compiler }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - {compiler: nvidia-hpc, version: '23.11'}
+        include:
+            - os: ubuntu-22.04
+              shell: bash
+              build_type: debug
+              toolchain: {compiler: nvidia-hpc, version: '23.11'}
+              spack_compiler: nvhpc@=23.11
+              spack_os: "ubuntu:22.04"
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: ${{ matrix.toolchain.compiler }}
+          version: ${{ matrix.toolchain.version }}
+
+      - name: Show version information
+        run: |
+          ${{ env.FC }} --version
+          ${{ env.CC }} --version
+
+      - name: Set up Spack
+        uses: spack/setup-spack@v2
+
+      - name: Install dependencies in spack environment
+        run: |
+          spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e . compiler find /opt/rocm/bin
+          spack -e . external find --not-buildable
+          spack -e . config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e . config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e . config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
+          sed -i 's/fc: null/fc: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
+          sed -i 's/f77: null/f77: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
+          spack -e . concretize -f
+          spack -e . install --no-check-signature
+
+      - name: Build with Cmake
+        shell: spack-bash {0}
+        run: |
+          export PATH=${PATH}:/opt/rocm/bin
+          spack env activate .
+          mkdir build
+          cd build
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          make VERBOSE=1
+
+      - name: Run ctests
+        run: |
+          cd build/test
+          ctest || ctest --rerun-failed --output-on-failure
+
+      - name: Push packages and update index
+        run: |
+          spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e . buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
+        if: ${{ !cancelled() }}
