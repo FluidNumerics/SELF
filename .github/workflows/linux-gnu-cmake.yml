@@ -34,7 +34,6 @@ jobs:
               build_type: debug
               memcheck: false
 
-
     defaults:
       run:
         shell: ${{ matrix.shell }}
@@ -57,10 +56,10 @@ jobs:
 
       - name: Install dependencies in spack environment
         run: |
-        # set the compiler to use for builds
-        spack compiler find
-        spack config add packages:all:compiler:[${{ matrix.spack_compiler }}]
-        spack -e . install --no-check-signature
+          # set the compiler to use for builds
+          spack compiler find
+          spack config add packages:all:compiler:[${{ matrix.spack_compiler }}]
+          spack -e . install --no-check-signature
 
       - name: Build with Cmake
         run: |
