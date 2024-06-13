@@ -130,7 +130,7 @@ contains
 
     if(error == -1) then
       print*,'Failed to open '//trim(fileName)//'.'
-      stop-1
+      stop
     endif
 
   endsubroutine Open_HDF5_serial
@@ -159,7 +159,7 @@ contains
 
     if(error == -1) then
       print*,'Failed to open '//trim(fileName)//'.'
-      stop-1
+      stop
     endif
 
   endsubroutine Open_HDF5_parallel
