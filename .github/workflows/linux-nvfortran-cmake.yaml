@@ -58,13 +58,11 @@ jobs:
       - name: Install dependencies in spack environment
         run: |
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
-          spack -e . compiler find /opt/rocm/bin
+          spack -e . compiler find /opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin
           spack -e . external find --not-buildable
           spack -e . config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
           spack -e . config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
           spack -e . config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
-          sed -i 's/fc: null/fc: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
-          sed -i 's/f77: null/f77: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
           spack -e . concretize -f
           spack -e . install --no-check-signature
 
