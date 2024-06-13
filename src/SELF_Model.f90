@@ -518,14 +518,12 @@ contains
   !! additional reporting would be valuable for all models,
   !! open a pull request with modifications to this base
   !! method.
-    use,intrinsic :: iso_fortran_env
     implicit none
     class(Model),intent(in) :: this
     ! Local
-    integer,parameter :: ucs2 = selected_char_kind('ISO_10646')
-    character(KIND=ucs2,len=20) :: modelTime
-    character(KIND=ucs2,len=20) :: entropy
-    character(KIND=ucs2,len=:),allocatable :: str
+    character(len=20) :: modelTime
+    character(len=20) :: entropy
+    character(len=:),allocatable :: str
 
     if(this%decomp%rankId == 0) then
       ! Copy the time and entropy to a string
@@ -535,9 +533,9 @@ contains
       ! Write the output to STDOUT
       open(output_unit,ENCODING='utf-8')
       write(output_unit,'("INFO : [",A,"] : ")',ADVANCE='no') __FUNC__
-      str = ucs2_'t\u1D62 ='//trim(modelTime)
+      str = 'tᵢ ='//trim(modelTime)
       write(output_unit,'(A)',ADVANCE='no') str
-      str = ucs2_'  |  e\u1D62 ='//trim(entropy)
+      str = '  |  eᵢ ='//trim(entropy)
       write(output_unit,'(A)',ADVANCE='yes') str
     endif
 
