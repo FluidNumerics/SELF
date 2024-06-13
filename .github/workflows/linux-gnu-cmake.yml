@@ -25,38 +25,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-            # Linux
-            - os: ubuntu-22.04
-              fcompiler: gfortran-9
-              ccompiler: gcc-9
-              shell: bash
-              build_type: coverage
-              memcheck: true
-
-            - os: ubuntu-22.04
-              fcompiler: gfortran-9
-              ccompiler: gcc-9
-              shell: bash
-              build_type: debug
-              memcheck: false
-
-            - os: ubuntu-22.04
-              fcompiler: gfortran-10
-              ccompiler: gcc-10
-              shell: bash
-              build_type: debug
-              memcheck: false
-
-            - os: ubuntu-22.04
-              fcompiler: gfortran-11
-              ccompiler: gcc-11
-              shell: bash
-              build_type: debug
-              memcheck: false
-
             - os: ubuntu-22.04
               fcompiler: gfortran-12
               ccompiler: gcc-12
+              spack_compiler: gcc@12.5.0
+              spack_os: "ubuntu:22.04"
               shell: bash
               build_type: debug
               memcheck: false
@@ -69,14 +42,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-
       - name: Show version information
         run: |
           ${{ matrix.fcompiler }} --version
           ${{ matrix.ccompiler }} --version
 
+      - name: Set up Spack
+        uses: spack/setup-spack@v2
+        with:
+          ref: develop      # Spack version (examples: develop, releases/v0.21)
+          buildcache: true  # Configure oci://ghcr.io/spack/github-actions-buildcache
+          color: true       # Force color output (SPACK_COLOR=always)
+          path: spack       # Where to clone Spack
+
+      - name: Install dependencies in spack environment
+        run: |
+        # set the compiler to use for builds
+        spack compiler find
+        spack config add packages:all:compiler:[${{ matrix.spack_compiler }}]
+        spack -e . install --no-check-signature
+
       - name: Build with Cmake
         run: |
+          spack env activate .
           mkdir build
           cd build
           FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
@@ -123,5 +111,11 @@ jobs:
                   echo $f
                   valgrind --undef-value-errors=no --error-exitcode=1 -s $f -A
           done
+
+      - name: Push packages and update index
+        run: |
+          spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e . buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
+        if: ${{ !cancelled() }}
     
           
