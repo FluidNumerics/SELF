@@ -41,7 +41,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: rocm-setup
+      - name: Set up ROCm
         run: |
           sudo apt update -y
           wget https://repo.radeon.com/amdgpu-install/6.1.1/ubuntu/jammy/amdgpu-install_6.1.60101-1_all.deb
@@ -73,14 +73,6 @@ jobs:
           cd build
           FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
           make VERBOSE=1
-
-     - name: Initialize coverage counters
-        if: ${{ matrix.build_type == 'coverage' }}
-        run: |
-          sudo apt-get update -y && sudo apt-get install lcov
-          lcov --no-external \
-               --directory /home/runner/work/self \
-               --zerocounters
 
       - name: Run ctests
         run: |
