@@ -134,7 +134,7 @@ contains
     !$omp target exit data map(delete: this % extBoundary)
     !$omp target exit data map(delete: this % avgBoundary)
     !$omp target exit data map(delete: this % jumpBoundary)
-    
+
     call this%JaScalar%Free()
 
   endsubroutine Free_MappedScalar2D

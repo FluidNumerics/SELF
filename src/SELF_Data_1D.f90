@@ -22,7 +22,6 @@ module SELF_Data_1D
 
 #include "SELF_Macros.h"
 
-
 ! ---------------------- Scalars ---------------------- !
   type,extends(SELF_DataObj),public :: Scalar1D
 

@@ -50,7 +50,6 @@ module SELF_Data
 
   endtype SELF_DataObj
 
-
   integer,parameter :: selfStrongForm = 0
   integer,parameter :: selfWeakDGForm = 1
   integer,parameter :: selfWeakCGForm = 2
