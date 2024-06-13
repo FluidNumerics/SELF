@@ -9,7 +9,7 @@ module SELF_DGModel2D
   use SELF_SupportRoutines
   use SELF_Metadata
   use SELF_Mesh
-  use SELF_MappedData
+  use SELF_MappedData_2D
   use SELF_HDF5
   use HDF5
   use FEQParse

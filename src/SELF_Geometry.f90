@@ -9,6 +9,9 @@ module SELF_Geometry
   use SELF_Constants
   use SELF_Lagrange
   use SELF_Data
+  use SELF_Data_1D
+  use SELF_Data_2D
+  use SELF_Data_3D
   use SELF_SupportRoutines
   use SELF_Mesh
 
