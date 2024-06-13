@@ -63,7 +63,7 @@ jobs:
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
           spack -e . compiler find /opt/rocm/bin
           spack -e . external find --not-buildable
-          spack -e . config add packages:all:requires:["'%${{ matrix.spack_compiler }}'"]
+          spack -e . config add packages:all:require:["'%${{ matrix.spack_compiler }}'"]
           sed -i 's/fc: null/fc: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
           sed -i 's/f77: null/f77: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
           spack -e . concretize -f
