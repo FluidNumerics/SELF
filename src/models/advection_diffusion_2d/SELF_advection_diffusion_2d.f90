@@ -18,16 +18,6 @@ module self_advection_diffusion_2d
         procedure :: fluxmethod => fluxmethod_advection_diffusion_2d
     
       end type advection_diffusion_2d
-
-      interface
-      subroutine SetBoundaryCondition_advection_diffusion_2d_gpu(sideInfo,extBoundary,N,nVar,nEl) &
-        bind(c,name="SideExchange_3D_gpu")
-        use iso_c_binding
-        implicit none
-        type(c_ptr),value :: extBoundary,sideInfo
-        integer(c_int),value :: N,nVar,nEl
-      end subroutine SetBoundaryCondition_advection_diffusion_2d_gpu
-    end interface
     
     ! Remember, the order of operations for the tendency calculation is
     !
@@ -52,31 +42,8 @@ module self_advection_diffusion_2d
       ! local
       integer :: i, ivar, iEl, j, e2    
     
-
-    
-      if( this % gpuBackend )then
-
-        call SetBoundaryCondition_advection_diffusion_2d_gpu( c_loc(this % mesh % sideInfo), &
-                                                              c_loc(this % solution % extBoundary),&
-                                                              this % solution % interp % N, &
-                                                              this % solution % nvar, &
-                                                              this % solution % nelem )
-
-        ! calculate the averages of the solutions on the element
-        ! boundaries and store is this % solution % avgBoundary
-        call this % solution % BassiRebaySides(this % hipblas_handle)
-    
-        ! calculate the derivative using the bassi-rebay form
-        call this % solution % BRGradient(this % geometry,this % solutionGradient,this % hipblas_handle)
-    
-        ! interpolate the solutiongradient to the element boundaries
-        call this % solutionGradient % BoundaryInterp(this % hipblas_handle)
-      
-        ! perform the side exchange to populate the solutionGradient % extBoundary attribute
-        call this % solutionGradient % SideExchange(this % mesh, this % decomp,this % hipblas_handle) 
-    
-      else
-
+        !$omp target map(from: this % mesh % sideInfo) map(tofrom: this % solution % extBoundary)
+        !$omp teams distribute parallel do collapse(3) num_threads(256)
         do ivar = 1, this % solution % nvar
           do iEl = 1,this % solution % nElem ! Loop over all elements
             do j = 1,4 ! Loop over all sides
@@ -93,6 +60,8 @@ module self_advection_diffusion_2d
             end do
           end do
         end do
+        !$omp end target
+
         ! calculate the averages of the solutions on the element
         ! boundaries and store is this % solution % avgBoundary
         call this % solution % BassiRebaySides()
@@ -105,8 +74,6 @@ module self_advection_diffusion_2d
       
         ! perform the side exchange to populate the solutionGradient % extBoundary attribute
         call this % solutionGradient % SideExchange(this % mesh, this % decomp) 
-
-      end if
     
       end subroutine pretendency_advection_diffusion_2d
     
@@ -121,8 +88,9 @@ module self_advection_diffusion_2d
       ! local
       integer :: i, ivar, iEl, j, e2 
 
+        !$omp target map(from: this % mesh % sideInfo) map(tofrom: this % solutionGradient % extBoundary)
+        !$omp teams distribute parallel do collapse(3) num_threads(256)
         do ivar = 1, this % solution % nvar
-
           do iEl = 1,this % solution % nElem ! Loop over all elements
             do j = 1,4 ! Loop over all sides
 
@@ -140,6 +108,7 @@ module self_advection_diffusion_2d
             end do
           end do
         end do
+        !$omp end target
 
         call this % solutionGradient % BassiRebaySides()
 
@@ -158,6 +127,8 @@ module self_advection_diffusion_2d
         u = this % u
         v = this % v
         nu = this % nu
+        !$omp target map(to:this % solution % interior, this % solutionGradient % interior) map(from:this % flux % interior)
+        !$omp teams distribute parallel do collapse(4) num_threads(256)
         do ivar = 1, this % solution % nvar
           do iel = 1, this % mesh % nelem
             do j = 1, this % solution % interp % N+1
@@ -174,6 +145,7 @@ module self_advection_diffusion_2d
             enddo
           enddo
         enddo
+        !$omp end target
     
       end subroutine fluxmethod_advection_diffusion_2d
     
@@ -190,7 +162,11 @@ module self_advection_diffusion_2d
       integer :: i
       real(prec) :: fin, fout, dfdn, un
       real(prec) :: nhat(1:2), nmag
-        
+      
+      !$omp target map(to:this % geometry % nHat % boundary, this % solutionGradient % avgBoundary) &
+      !$omp& map(to:this % solution % boundary, this % solution % extBoundary) &
+      !$omp& map(to:this % geometry % nscale % boundary) map(from: this % flux % boundaryNormal)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
       do ivar = 1, this % solution % nvar
         do iEl = 1,this % solution % nElem
           do j = 1,4
@@ -216,8 +192,8 @@ module self_advection_diffusion_2d
           enddo
         enddo
       enddo
+      !$omp end target
     
       end subroutine riemannsolver_advection_diffusion_2d
     
-      
     end module self_advection_diffusion_2d

@@ -17,13 +17,13 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
     endif()
 endif()
-set( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIE")
+#set( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIE")
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
 project(self VERSION 1.0.0
 	DESCRIPTION "Spectral Element Library in Fortran"
-	LANGUAGES Fortran HIP C CXX)
+	LANGUAGES Fortran C)
 
 # Fortran compiler requirements
 INCLUDE(FortranCInterface)
@@ -48,12 +48,12 @@ if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
 endif()
 
 # ------ dependencies ------ #
-# HIP
-#find_package(hipfort REQUIRED COMPONENTS hip hipblas)
-find_package(hip REQUIRED)
-find_package(hipblas REQUIRED)
-find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
-find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
+# # HIP
+# #find_package(hipfort REQUIRED COMPONENTS hip hipblas)
+# find_package(hip REQUIRED)
+# find_package(hipblas REQUIRED)
+# find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
+# find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
 
 
 # MPI

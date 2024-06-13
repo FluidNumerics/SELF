@@ -209,7 +209,6 @@ MODULE SELF_Mesh
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh1D
     PROCEDURE,PUBLIC :: Free => Free_Mesh1D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
     PROCEDURE,PUBLIC  :: Write_Mesh => Write_Mesh1D
@@ -232,7 +231,6 @@ MODULE SELF_Mesh
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh2D
     PROCEDURE,PUBLIC :: Free => Free_Mesh2D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
 
     PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D
 
@@ -259,7 +257,6 @@ MODULE SELF_Mesh
 
     PROCEDURE,PUBLIC :: Init => Init_Mesh3D
     PROCEDURE,PUBLIC :: Free => Free_Mesh3D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
 
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
 
@@ -289,10 +286,15 @@ CONTAINS
     this % nUniqueNodes = 0
     this % nBCs = nBCs
 
-    call hipcheck(hipMallocManaged(this % elemInfo,4,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % nodeCoords,nNodes,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % globalNodeIDs,nNodes,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % BCType,4,nBCs,hipMemAttachGlobal))
+    allocate(this % elemInfo(1:4,1:nElem))
+    allocate(this % nodeCoords(1:nNodes))
+    allocate(this % globalNodeIDs(1:nNodes))
+    allocate(this % BCType(1:4,1:nBCs))
+
+    !$omp target enter data map(alloc: this % elemInfo)
+    !$omp target enter data map(alloc: this % nodeCoords)
+    !$omp target enter data map(alloc: this % globalNodeIDs)
+    !$omp target enter data map(alloc: this % BCType)
 
     ALLOCATE (this % BCNames(1:nBCs))
 
@@ -307,24 +309,17 @@ CONTAINS
     this % nCornerNodes = 0
     this % nUniqueNodes = 0
     this % nBCs = 0
-    call hipcheck(hipFree(this % elemInfo))
-    call hipcheck(hipFree(this % nodeCoords))
-    call hipcheck(hipFree(this % globalNodeIDs))
-    call hipcheck(hipFree(this % BCType))
+    deallocate(this % elemInfo)
+    deallocate(this % nodeCoords)
+    deallocate(this % globalNodeIDs)
+    deallocate(this % BCType)
+    !$omp target exit data map(delete: this % elemInfo)
+    !$omp target exit data map(delete: this % nodeCoords)
+    !$omp target exit data map(delete: this % globalNodeIDs)
+    !$omp target exit data map(delete: this % BCType)
     DEALLOCATE (this % BCNames)
 
   END SUBROUTINE Free_Mesh1D
-
-  SUBROUTINE UpdateDevice_Mesh1D(this)
-    IMPLICIT NONE
-    CLASS(Mesh1D),INTENT(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemInfo),sizeof(this % elemInfo),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % nodeCoords),sizeof(this % nodeCoords),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % globalNodeIDs),sizeof(this % globalNodeIDs),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % BCType),sizeof(this % BCType),0,c_null_ptr))
-
-  END SUBROUTINE UpdateDevice_Mesh1D
 
   SUBROUTINE UniformBlockMesh_Mesh1D(this,nGeo,nElem,x)
     IMPLICIT NONE
@@ -377,9 +372,6 @@ CONTAINS
       END DO
       this % elemInfo(4,iel) = nid - 1 ! Node Index End
     END DO
-
-
-    CALL this % UpdateDevice()
 
     CALL xLinear % Free()
     CALL xGeo % Free()
@@ -436,13 +428,21 @@ CONTAINS
     this % nUniqueSides = 0
     this % nBCs = nBCs
 
-    call hipcheck(hipMallocManaged(this % elemInfo,6,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % sideInfo,5,4,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % nodeCoords,2,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % globalNodeIDs,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % CGNSCornerMap,2,4,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % CGNSSideMap,2,4,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % BCType,4,nBCs,hipMemAttachGlobal))
+    allocate(this % elemInfo(1:6,1:nElem))
+    allocate(this % sideInfo(1:5,1:4,1:nElem))
+    allocate(this % nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this % globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this % CGNSCornerMap(1:2,1:4))
+    allocate(this % CGNSSideMap(1:2,1:4))
+    allocate(this % BCType(1:4,1:nBCs))
+
+    !$omp target enter data map(alloc: this % elemInfo)
+    !$omp target enter data map(alloc: this % sideInfo)
+    !$omp target enter data map(alloc: this % nodeCoords)
+    !$omp target enter data map(alloc: this % globalNodeIDs)
+    !$omp target enter data map(alloc: this % CGNSCornerMap)
+    !$omp target enter data map(alloc: this % CGNSSideMap)
+    !$omp target enter data map(alloc: this % BCType)
 
     ALLOCATE (this % BCNames(1:nBCs))
 
@@ -458,6 +458,9 @@ CONTAINS
     this % CGNSSideMap(1:2,3) = (/4,3/)
     this % CGNSSideMap(1:2,4) = (/1,4/)
 
+    !$omp target update to(this % CGNSCornerMap)
+    !$omp target update to(this % CGNSSideMap)
+
   END SUBROUTINE Init_Mesh2D
 
   SUBROUTINE Free_Mesh2D(this)
@@ -472,28 +475,24 @@ CONTAINS
     this % nUniqueNodes = 0
     this % nBCs = 0
 
-    call hipcheck(hipFree(this % elemInfo))
-    call hipcheck(hipFree(this % sideInfo))
-    call hipcheck(hipFree(this % nodeCoords))
-    call hipcheck(hipFree(this % globalNodeIDs))
-    call hipcheck(hipFree(this % CGNSCornerMap))
-    call hipcheck(hipFree(this % CGNSSideMap))
-    call hipcheck(hipFree(this % BCType))
+    deallocate(this % elemInfo)
+    deallocate(this % sideInfo)
+    deallocate(this % nodeCoords)
+    deallocate(this % globalNodeIDs)
+    deallocate(this % CGNSCornerMap)
+    deallocate(this % CGNSSideMap)
+    deallocate(this % BCType)
     DEALLOCATE (this % BCNames)
 
+    !$omp target exit data map(delete: this % elemInfo)
+    !$omp target exit data map(delete: this % sideInfo)
+    !$omp target exit data map(delete: this % nodeCoords)
+    !$omp target exit data map(delete: this % globalNodeIDs)
+    !$omp target exit data map(delete: this % CGNSCornerMap)
+    !$omp target exit data map(delete: this % CGNSSideMap)
+    !$omp target exit data map(delete: this % BCType)
+
   END SUBROUTINE Free_Mesh2D
-
-  SUBROUTINE UpdateDevice_Mesh2D(this)
-    IMPLICIT NONE
-    CLASS(Mesh2D),INTENT(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemInfo),sizeof(this % elemInfo),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % sideInfo),sizeof(this % sideInfo),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % nodeCoords),sizeof(this % nodeCoords),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % globalNodeIDs),sizeof(this % globalNodeIDs),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % BCType),sizeof(this % BCType),0,c_null_ptr))
-
-  END SUBROUTINE UpdateDevice_Mesh2D
 
   SUBROUTINE ResetBoundaryConditionType_Mesh2D(this,bcid)
     !! This method can be used to reset all of the boundary elements
@@ -671,8 +670,6 @@ CONTAINS
     ENDDO
 
     CALL this % RecalculateFlip()
-
-    CALL this % UpdateDevice()
 
     deallocate( hopr_elemInfo, hopr_nodeCoords, hopr_globalNodeIDs, hopr_sideInfo)
 
@@ -885,14 +882,23 @@ CONTAINS
     this % nUniqueNodes = 0
     this % nBCs = nBCs
 
-    call hipcheck(hipMallocManaged(this % elemInfo,6,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % sideInfo,5,6,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % nodeCoords,3,nGeo+1,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % globalNodeIDs,nGeo+1,nGeo+1,nGeo+1,nElem,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % CGNSCornerMap,3,8,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % CGNSSideMap,4,6,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % sideMap,4,6,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % BCType,4,nBCs,hipMemAttachGlobal))
+    allocate(this % elemInfo(1:6,1:nElem))
+    allocate(this % sideInfo(1:5,1:6,1:nElem))
+    allocate(this % nodeCoords(1:3,1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this % globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nGeo+1,1:nElem))
+    allocate(this % CGNSCornerMap(1:3,1:8))
+    allocate(this % CGNSSideMap(1:4,1:6))
+    allocate(this % sideMap(1:4,1:6))
+    allocate(this % BCType(1:4,1:nBCs))
+
+    !$omp target enter data map(alloc: this % elemInfo)
+    !$omp target enter data map(alloc: this % sideInfo)
+    !$omp target enter data map(alloc: this % nodeCoords)
+    !$omp target enter data map(alloc: this % globalNodeIDs)
+    !$omp target enter data map(alloc: this % CGNSCornerMap)
+    !$omp target enter data map(alloc: this % CGNSSideMap)
+    !$omp target enter data map(alloc: this % sideMap)
+    !$omp target enter data map(alloc: this % BCType)
 
     ALLOCATE (this % BCNames(1:nBCs))
 
@@ -921,6 +927,10 @@ CONTAINS
     this % sideMap(1:4,5) = (/1,4,8,5/) ! West
     this % sideMap(1:4,6) = (/5,6,7,8/) ! Top
 
+    !$omp target update to(this % CGNSCornerMap)
+    !$omp target update to(this % CGNSSideMap)
+    !$omp target update to(this % sideMap)
+
   END SUBROUTINE Init_Mesh3D
 
   SUBROUTINE Free_Mesh3D(this)
@@ -935,30 +945,27 @@ CONTAINS
     this % nUniqueNodes = 0
     this % nBCs = 0
 
-    call hipcheck(hipFree(this % elemInfo))
-    call hipcheck(hipFree(this % sideInfo))
-    call hipcheck(hipFree(this % nodeCoords))
-    call hipcheck(hipFree(this % globalNodeIDs))
-    call hipcheck(hipFree(this % CGNSCornerMap))
-    call hipcheck(hipFree(this % sideMap))
-    call hipcheck(hipFree(this % CGNSSideMap))
-    call hipcheck(hipFree(this % BCType))
+    deallocate(this % elemInfo)
+    deallocate(this % sideInfo)
+    deallocate(this % nodeCoords)
+    deallocate(this % globalNodeIDs)
+    deallocate(this % CGNSCornerMap)
+    deallocate(this % sideMap)
+    deallocate(this % CGNSSideMap)
+    deallocate(this % BCType)
+
+    !$omp target exit data map(delete: this % elemInfo)
+    !$omp target exit data map(delete: this % sideInfo)
+    !$omp target exit data map(delete: this % nodeCoords)
+    !$omp target exit data map(delete: this % globalNodeIDs)
+    !$omp target exit data map(delete: this % CGNSCornerMap)
+    !$omp target exit data map(delete: this % CGNSSideMap)
+    !$omp target exit data map(delete: this % sideMap)
+    !$omp target exit data map(delete: this % BCType)
 
     DEALLOCATE (this % BCNames)
 
   END SUBROUTINE Free_Mesh3D
-
-  SUBROUTINE UpdateDevice_Mesh3D(this)
-    IMPLICIT NONE
-    CLASS(Mesh3D),INTENT(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemInfo),sizeof(this % elemInfo),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % sideInfo),sizeof(this % sideInfo),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % nodeCoords),sizeof(this % nodeCoords),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % globalNodeIDs),sizeof(this % globalNodeIDs),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % BCType),sizeof(this % BCType),0,c_null_ptr))
-
-  END SUBROUTINE UpdateDevice_Mesh3D
 
   SUBROUTINE ResetBoundaryConditionType_Mesh3D(this,bcid)
     !! This method can be used to reset all of the boundary elements
@@ -1284,8 +1291,6 @@ CONTAINS
 
     CALL this % RecalculateFlip()
 
-    CALL this % UpdateDevice()
-
     deallocate( hopr_elemInfo, hopr_nodeCoords, hopr_globalNodeIDs, hopr_sideInfo )
 
   END SUBROUTINE Read_HOPr_Mesh3D
@@ -1350,24 +1355,26 @@ CONTAINS
       this % mpiPrec = MPI_DOUBLE
     END IF
 
-    call hipcheck(hipMallocManaged(this % offsetElem,this % nRanks+1,hipMemAttachGlobal))
+    allocate(this % offsetElem(1:this % nRanks+1))
+    !$omp target enter data map(alloc: this % offsetElem)
+
     WRITE (msg,'(I5)') this % rankId
     msg = "Greetings from rank "//TRIM(msg)//"."
     INFO(TRIM(msg))
 
-      ! Get the number of GPUs per node
-      CALL hipCheck(hipGetDeviceCount(nGPU))
+      ! ! Get the number of GPUs per node
+      ! CALL hipCheck(hipGetDeviceCount(nGPU))
 
-      ! Assume that we have the 1 GPU per rank
-      ! implying that nMPIRanksPerNode = nGPU
-      ! Assume that all nodes have the same number of GPUs per node
-      gpuID = MOD(this % rankId, nGPU)
+      ! ! Assume that we have the 1 GPU per rank
+      ! ! implying that nMPIRanksPerNode = nGPU
+      ! ! Assume that all nodes have the same number of GPUs per node
+      ! gpuID = MOD(this % rankId, nGPU)
 
-      CALL hipCheck(hipSetDevice(gpuID))
-      WRITE (msg,'(I5)') this % rankId
-      WRITE (msg2,'(I2)') gpuID
-      msg = "Rank "//TRIM(msg)//": Setting device to GPU"//TRIM(msg2)
-      INFO(TRIM(msg))
+      ! CALL hipCheck(hipSetDevice(gpuID))
+     ! WRITE (msg,'(I5)') this % rankId
+      !WRITE (msg2,'(I2)') gpuID
+      !msg = "Rank "//TRIM(msg)//": Setting device to GPU"//TRIM(msg2)
+     !NFO(TRIM(msg))
 
   END SUBROUTINE Init_MPILayer
 
@@ -1376,10 +1383,12 @@ CONTAINS
     CLASS(MPILayer),INTENT(inout) :: this
 
     IF (ASSOCIATED(this % offSetElem)) THEN
-      call hipcheck(hipfree(this % offSetElem))
+      deallocate(this % offSetElem)
+      !$omp target exit data map(delete: this % offsetElem)
     ENDIF
     IF (ASSOCIATED(this % elemToRank)) THEN
-      call hipcheck(hipfree(this % elemToRank))
+      deallocate(this % elemToRank)
+      !$omp target exit data map(delete: this % elemToRank)
     ENDIF
 
     DEALLOCATE( this % requests )
@@ -1451,7 +1460,8 @@ CONTAINS
 
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % elemToRank,nelem,hipMemAttachGlobal))
+    allocate(this % elemToRank(1:nelem))
+    !$omp target enter data map(alloc:this % elemToRank)
 
     CALL DomainDecomp(nElem, &
                       this % nRanks, &
@@ -1464,8 +1474,8 @@ CONTAINS
                       this % elemToRank(iel))
     END DO
 
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % offsetElem),sizeof(this % offsetElem),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % elemToRank),sizeof(this % elemToRank),0,c_null_ptr))
+    !$omp target update to(this % offsetElem)
+    !$omp target update to(this % elemToRank)
 
   END SUBROUTINE SetElemToRank
 

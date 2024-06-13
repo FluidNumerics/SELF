@@ -36,9 +36,6 @@ MODULE SELF_DGModel2D
 
     PROCEDURE :: Init => Init_DGModel2D
     PROCEDURE :: Free => Free_DGModel2D
-
-    PROCEDURE :: UpdateDevice => UpdateDevice_DGModel2D
-
     PROCEDURE :: UpdateSolution => UpdateSolution_DGModel2D
 
     PROCEDURE :: ResizePrevSol => ResizePrevSol_DGModel2D
@@ -52,7 +49,6 @@ MODULE SELF_DGModel2D
     PROCEDURE :: UpdateGRK4 => UpdateGRK4_DGModel2D
 
     PROCEDURE :: CalculateTendency => CalculateTendency_DGModel2D
-    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_DGModel2D
 
     GENERIC :: SetSolution => SetSolutionFromChar_DGModel2D, &
       SetSolutionFromEqn_DGModel2D
@@ -64,73 +60,6 @@ MODULE SELF_DGModel2D
     PROCEDURE :: WriteTecplot => WriteTecplot_DGModel2D
 
   END TYPE DGModel2D
-
-  INTERFACE
-    SUBROUTINE UpdateSolution_DGModel2D_gpu(solution,dSdt,dt,N,nVar,nEl) &
-      BIND(c,name="UpdateSolution_DGModel2D_gpu")
-      USE ISO_C_BINDING
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(C_PTR), value :: solution,dSdt
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: dt
-    END SUBROUTINE UpdateSolution_DGModel2D_gpu
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE UpdateGAB2_DGModel2D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB2_DGModel2D_gpu")
-      USE ISO_C_BINDING
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(C_PTR), value :: prevsol,solution
-      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB2_DGModel2D_gpu
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE UpdateGAB3_DGModel2D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB3_DGModel2D_gpu")
-      USE ISO_C_BINDING
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(C_PTR), value :: prevsol,solution
-      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB3_DGModel2D_gpu
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE UpdateGAB4_DGModel2D_gpu(prevsol,solution,m,nPrev,N,nVar,nEl) &
-      BIND(c,name="UpdateGAB4_DGModel2D_gpu")
-      USE ISO_C_BINDING
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(C_PTR), value :: prevsol,solution
-      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB4_DGModel2D_gpu
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE UpdateGRK_DGModel2D_gpu(grk,solution,dSdt,rk_a,rk_g,dt,nWork,N,nVar,nEl) &
-      BIND(c,name="UpdateGRK_DGModel2D_gpu")
-      USE ISO_C_BINDING
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(C_PTR), value :: grk,solution,dSdt
-      INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
-      REAL(c_prec),VALUE :: rk_a,rk_g,dt
-    END SUBROUTINE UpdateGRK_DGModel2D_gpu
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE CalculateDSDt_DGModel2D_gpu(fluxDivergence,source,dSdt,N,nVar,nEl) &
-      BIND(c,name="CalculateDSDt_DGModel2D_gpu")
-      USE ISO_C_BINDING
-      IMPLICIT NONE
-      TYPE(C_PTR), value :: fluxDivergence,source,dSdt
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE CalculateDSDt_DGModel2D_gpu
-  END INTERFACE
 
 CONTAINS
 
@@ -149,7 +78,6 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
-    this % GPUBackend = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -202,21 +130,6 @@ CONTAINS
 
   END SUBROUTINE ResizePrevSol_DGModel2D
 
-  SUBROUTINE UpdateDevice_DGModel2D(this)
-    IMPLICIT NONE
-    CLASS(DGModel2D),INTENT(inout) :: this
-
-    CALL this % mesh % UpdateDevice()
-    CALL this % geometry % UpdateDevice()
-    CALL this % dSdt % UpdateDevice()
-    CALL this % solution % UpdateDevice()
-    CALL this % solutionGradient % UpdateDevice()
-    CALL this % flux % UpdateDevice()
-    CALL this % source % UpdateDevice()
-    CALL this % fluxDivergence % UpdateDevice()
-
-  END SUBROUTINE UpdateDevice_DGModel2D
-
   SUBROUTINE SetSolutionFromEqn_DGModel2D(this,eqn)
     IMPLICIT NONE
     CLASS(DGModel2D),INTENT(inout) :: this
@@ -230,11 +143,8 @@ CONTAINS
     END DO
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
-    if ( this % GPUBackend ) then
-      CALL this % solution % BoundaryInterp(this % hipblas_handle)
-    else 
-      CALL this % solution % BoundaryInterp()
-    endif
+
+    CALL this % solution % BoundaryInterp()
 
   END SUBROUTINE SetSolutionFromEqn_DGModel2D
 
@@ -251,11 +161,7 @@ CONTAINS
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
 
-    if ( this % GPUBackend ) then
-      CALL this % solution % BoundaryInterp(this % hipblas_handle)
-    else 
-      CALL this % solution % BoundaryInterp()
-    endif
+    CALL this % solution % BoundaryInterp()
 
   END SUBROUTINE SetSolutionFromChar_DGModel2D
 
@@ -275,32 +181,22 @@ CONTAINS
       dtLoc = this % dt
     END IF
 
-    IF (this % GPUBackend) THEN
+    !$omp target map(to:this % dsdt % interior) map(tofrom:this % solution)
+    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1,this % solution % nVar
+        DO j = 1,this % solution % interp % N+1
+          DO i = 1,this % solution % interp % N+1
 
-      CALL UpdateSolution_DGModel2D_gpu(c_loc(this % solution % interior), &
-                                        c_loc(this % dSdt % interior), &
-                                              dtLoc, &
-                                              this % solution % interp % N, &
-                                              this % solution % nVar, &
-                                              this % solution % nElem)
+            this % solution % interior(i,j,iEl,iVar) = &
+              this % solution % interior(i,j,iEl,iVar) + &
+              dtLoc*this % dSdt % interior(i,j,iEl,iVar)
 
-    ELSE
-
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
-
-              this % solution % interior(i,j,iEl,iVar) = &
-                this % solution % interior(i,j,iEl,iVar) + &
-                dtLoc*this % dSdt % interior(i,j,iEl,iVar)
-
-            END DO
           END DO
         END DO
       END DO
-
-    END IF
+    END DO
+    !$omp end target
 
   END SUBROUTINE UpdateSolution_DGModel2D
 
@@ -311,71 +207,67 @@ CONTAINS
     ! Local
     INTEGER :: i,j,nVar,iEl,iVar
 
-    IF (this % GPUBackend) THEN
 
-      CALL UpdateGAB2_DGModel2D_gpu(c_loc(this % prevSol % interior), &
-                                    c_loc(this % solution % interior), &
-                                          m, &
-                                          this % prevsol % nVar, &
-                                          this % solution % interp % N, &
-                                          this % solution % nVar, &
-                                          this % solution % nElem)
+    ! ab2_weight
+    IF (m == 0) THEN ! Initialization step - store the solution in the prevSol
 
-    ELSE
+      !$omp target map(tofrom: this % solution % interior) map(from:this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-      ! ab2_weight
-      IF (m == 0) THEN ! Initialization step - store the solution in the prevSol
+              this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
 
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
-
-                this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
-
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSEIF (m == 1) THEN ! Reset solution
+    ELSEIF (m == 1) THEN ! Reset solution
 
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      !$omp target map(from: this % solution % interior) map(to:this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-                this % solution % interior(i,j,iEl,iVar) = this % prevSol % interior(i,j,iEl,iVar)
+              this % solution % interior(i,j,iEl,iVar) = this % prevSol % interior(i,j,iEl,iVar)
 
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSE ! Main looping section - nVar the previous solution, store the new solution, and
-        ! create an interpolated solution to use for tendency calculation
+    ELSE ! Main looping section - nVar the previous solution, store the new solution, and
+      ! create an interpolated solution to use for tendency calculation
 
-        nVar = this % solution % nVar
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      nVar = this % solution % nVar
+      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-                ! Bump the last solution
-          this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
+              ! Bump the last solution
+        this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
 
-                ! Store the new solution
-                this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
+              ! Store the new solution
+              this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
 
-                this % solution % interior(i,j,iEl,iVar) = &
-                  1.5_PREC*this % prevSol % interior(i,j,iEl,iVar) - &
-                  0.5_PREC*this % prevSol % interior(i,j,iEl,iVar+nVar)
-              END DO
+              this % solution % interior(i,j,iEl,iVar) = &
+                1.5_PREC*this % prevSol % interior(i,j,iEl,iVar) - &
+                0.5_PREC*this % prevSol % interior(i,j,iEl,iVar+nVar)
             END DO
           END DO
         END DO
-
-      END IF
+      END DO
+      !$omp end target
 
     END IF
 
@@ -388,87 +280,87 @@ CONTAINS
     ! Local
     INTEGER :: i,j,nVar,iEl,iVar
 
-    IF (this % GPUBackend) THEN
 
-      CALL UpdateGAB3_DGModel2D_gpu(c_loc(this % prevSol % interior), &
-                                    c_loc(this % solution % interior), &
-                                          m, &
-                                          this % prevsol % nVar, &
-                                          this % solution % interp % N, &
-                                          this % solution % nVar, &
-                                          this % solution % nElem)
+    IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
 
-    ELSE
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      nVar = this % solution % nVar
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-      IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
+        this % prevSol % interior(i,j,iEl,iVar+nVar) = this % solution % interior(i,j,iEl,iVar)
 
-        nVar = this % solution % nVar
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
-
-         this % prevSol % interior(i,j,iEl,iVar+nVar) = this % solution % interior(i,j,iEl,iVar)
-
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
+    ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
 
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-                this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
+              this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
 
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSEIF (m == 2) THEN ! Copy the solution back from the most recent prevsol
+    ELSEIF (m == 2) THEN ! Copy the solution back from the most recent prevsol
 
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-                this % solution % interior(i,j,iEl,iVar) = this % prevSol % interior(i,j,iEl,iVar)
+              this % solution % interior(i,j,iEl,iVar) = this % prevSol % interior(i,j,iEl,iVar)
 
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSE ! Main looping section - nVar the previous solution, store the new solution, and
-        ! create an interpolated solution to use for tendency calculation
+    ELSE ! Main looping section - nVar the previous solution, store the new solution, and
+      ! create an interpolated solution to use for tendency calculation
+      
+      nVar = this % solution % nVar
+      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-        nVar = this % solution % nVar
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+              ! Bump the last two stored solutions
+              this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % prevSol % interior(i,j,iEl,iVar+nVar)
+              this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
 
-                ! Bump the last two stored solutions
- this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % prevSol % interior(i,j,iEl,iVar+nVar)
-          this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
+              ! Store the new solution
+              this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
 
-                ! Store the new solution
-                this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
+              this % solution % interior(i,j,iEl,iVar) = &
+                (23.0_PREC*this % prevSol % interior(i,j,iEl,iVar) - &
+                  16.0_PREC*this % prevSol % interior(i,j,iEl,iVar+nVar) + &
+                  5.0_PREC*this % prevSol % interior(i,j,iEl,iVar+2*nVar))/12.0_PREC
 
-                this % solution % interior(i,j,iEl,iVar) = &
-                  (23.0_PREC*this % prevSol % interior(i,j,iEl,iVar) - &
-                   16.0_PREC*this % prevSol % interior(i,j,iEl,iVar+nVar) + &
-                   5.0_PREC*this % prevSol % interior(i,j,iEl,iVar+2*nVar))/12.0_PREC
-
-              END DO
             END DO
           END DO
         END DO
-      END IF
+      END DO
+      !$omp end target
 
     END IF
 
@@ -481,105 +373,107 @@ CONTAINS
     ! Local
     INTEGER :: i,j,nVar,iEl,iVar
 
-    IF (this % GPUBackend) THEN
 
-      CALL UpdateGAB4_DGModel2D_gpu(c_loc(this % prevSol % interior), &
-                                    c_loc(this % solution % interior), &
-                                          m, &
-                                          this % prevsol % nVar, &
-                                          this % solution % interp % N, &
-                                          this % solution % nVar, &
-                                          this % solution % nElem)
+    IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
+      
+      nVar = this % solution % nVar
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-    ELSE
+      this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % solution % interior(i,j,iEl,iVar)
 
-      IF (m == 0) THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
-
-        nVar = this % solution % nVar
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
-
-       this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % solution % interior(i,j,iEl,iVar)
-
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
+    ELSEIF (m == 1) THEN ! Initialization step - store the solution in the prevSol at ivar
+      
+      nVar = this % solution % nVar
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-        nVar = this % solution % nVar
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+        this % prevSol % interior(i,j,iEl,iVar+nVar) = this % solution % interior(i,j,iEl,iVar)
 
-         this % prevSol % interior(i,j,iEl,iVar+nVar) = this % solution % interior(i,j,iEl,iVar)
-
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSEIF (m == 2) THEN ! Initialization step - store the solution in the prevSol at ivar
+    ELSEIF (m == 2) THEN ! Initialization step - store the solution in the prevSol at ivar
 
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-                this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
+              this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
 
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSEIF (m == 3) THEN ! Copy the solution back from the most recent prevsol
+    ELSEIF (m == 3) THEN ! Copy the solution back from the most recent prevsol
 
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+      !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-                this % solution % interior(i,j,iEl,iVar) = this % prevSol % interior(i,j,iEl,iVar)
+              this % solution % interior(i,j,iEl,iVar) = this % prevSol % interior(i,j,iEl,iVar)
 
-              END DO
             END DO
           END DO
         END DO
+      END DO
+      !$omp end target
 
-      ELSE ! Main looping section - nVar the previous solution, store the new solution, and
-        ! create an interpolated solution to use for tendency calculation
+    ELSE ! Main looping section - nVar the previous solution, store the new solution, and
+      ! create an interpolated solution to use for tendency calculation
+      
+      nVar = this % solution % nVar
+      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      DO iEl = 1,this % solution % nElem
+        DO iVar = 1,this % solution % nVar
+          DO j = 1,this % solution % interp % N+1
+            DO i = 1,this % solution % interp % N+1
 
-        nVar = this % solution % nVar
-        DO iEl = 1,this % solution % nElem
-          DO iVar = 1,this % solution % nVar
-            DO j = 1,this % solution % interp % N+1
-              DO i = 1,this % solution % interp % N+1
+              ! Bump the last two stored solutions
+              this % prevSol % interior(i,j,iEl,iVar+3*nVar) = this % prevSol % interior(i,j,iEl,iVar+2*nVar)
+              this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % prevSol % interior(i,j,iEl,iVar+nVar)
+              this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
 
-                ! Bump the last two stored solutions
-   this % prevSol % interior(i,j,iEl,iVar+3*nVar) = this % prevSol % interior(i,j,iEl,iVar+2*nVar)
- this % prevSol % interior(i,j,iEl,iVar+2*nVar) = this % prevSol % interior(i,j,iEl,iVar+nVar)
-          this % prevSol % interior(i,j,iEl,iVar+nVar) = this % prevSol % interior(i,j,iEl,iVar)
+              ! Store the new solution
+              this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
 
-                ! Store the new solution
-                this % prevSol % interior(i,j,iEl,iVar) = this % solution % interior(i,j,iEl,iVar)
+              this % solution % interior(i,j,iEl,iVar) = &
+                (55.0_PREC*this % prevSol % interior(i,j,iEl,iVar) - &
+                  59.0_PREC*this % prevSol % interior(i,j,iEl,iVar+nVar) + &
+                  37.0_PREC*this % prevSol % interior(i,j,iEl,iVar+2*nVar) - &
+                  9.0_PREC*this % prevSol % interior(i,j,iEl,iVar+3*nVar))/24.0_PREC
 
-                this % solution % interior(i,j,iEl,iVar) = &
-                  (55.0_PREC*this % prevSol % interior(i,j,iEl,iVar) - &
-                   59.0_PREC*this % prevSol % interior(i,j,iEl,iVar+nVar) + &
-                   37.0_PREC*this % prevSol % interior(i,j,iEl,iVar+2*nVar) - &
-                   9.0_PREC*this % prevSol % interior(i,j,iEl,iVar+3*nVar))/24.0_PREC
-
-              END DO
             END DO
           END DO
         END DO
-
-      END IF
+      END DO
+      !$omp end target
 
     END IF
 
@@ -592,38 +486,26 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    IF (this % GPUBackend) THEN
+    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1,this % solution % nVar
+        DO j = 1,this % solution % interp % N+1
+          DO i = 1,this % solution % interp % N+1
 
-      CALL UpdateGRK_DGModel2D_gpu(c_loc(this % workSol % interior), &
-                                   c_loc(this % solution % interior), &
-                                   c_loc(this % dSdt % interior), &
-                                         rk2_a(m),rk2_g(m),this % dt, &
-                                         this % worksol % nVar, &
-                                         this % solution % interp % N, &
-                                         this % solution % nVar, &
-                                         this % solution % nElem)
+            this % workSol % interior(i,j,iEl,iVar) = rk2_a(m)* &
+                                                                this % workSol % interior(i,j,iEl,iVar) + &
+                                                                  this % dSdt % interior(i,j,iEl,iVar)
 
-    ELSE
+            this % solution % interior(i,j,iEl,iVar) = &
+              this % solution % interior(i,j,iEl,iVar) + &
+              rk2_g(m)*this % dt*this % workSol % interior(i,j,iEl,iVar)
 
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
-
-              this % workSol % interior(i,j,iEl,iVar) = rk2_a(m)* &
-                                                                  this % workSol % interior(i,j,iEl,iVar) + &
-                                                                   this % dSdt % interior(i,j,iEl,iVar)
-
-              this % solution % interior(i,j,iEl,iVar) = &
-                this % solution % interior(i,j,iEl,iVar) + &
-                rk2_g(m)*this % dt*this % workSol % interior(i,j,iEl,iVar)
-
-            END DO
           END DO
         END DO
       END DO
-
-    END IF
+    END DO
+    !$omp end target
 
   END SUBROUTINE UpdateGRK2_DGModel2D
 
@@ -634,38 +516,26 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    IF (this % GPUBackend) THEN
+    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1,this % solution % nVar
+        DO j = 1,this % solution % interp % N+1
+          DO i = 1,this % solution % interp % N+1
 
-      CALL UpdateGRK_DGModel2D_gpu(c_loc(this % workSol % interior), &
-                                   c_loc(this % solution % interior), &
-                                   c_loc(this % dSdt % interior), &
-                                         rk3_a(m),rk3_g(m),this % dt, &
-                                         this % worksol % nVar, &
-                                         this % solution % interp % N, &
-                                         this % solution % nVar, &
-                                         this % solution % nElem)
+            this % workSol % interior(i,j,iEl,iVar) = rk3_a(m)* &
+                                                                this % workSol % interior(i,j,iEl,iVar) + &
+                                                                  this % dSdt % interior(i,j,iEl,iVar)
 
-    ELSE
+            this % solution % interior(i,j,iEl,iVar) = &
+              this % solution % interior(i,j,iEl,iVar) + &
+              rk3_g(m)*this % dt*this % workSol % interior(i,j,iEl,iVar)
 
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
-
-              this % workSol % interior(i,j,iEl,iVar) = rk3_a(m)* &
-                                                                  this % workSol % interior(i,j,iEl,iVar) + &
-                                                                   this % dSdt % interior(i,j,iEl,iVar)
-
-              this % solution % interior(i,j,iEl,iVar) = &
-                this % solution % interior(i,j,iEl,iVar) + &
-                rk3_g(m)*this % dt*this % workSol % interior(i,j,iEl,iVar)
-
-            END DO
           END DO
         END DO
       END DO
-
-    END IF
+    END DO
+    !$omp end target
 
   END SUBROUTINE UpdateGRK3_DGModel2D
 
@@ -676,52 +546,28 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    IF (this % GPUBackend) THEN
+    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp teams distribute parallel do collapse(4) num_threads(256)    
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1,this % solution % nVar
+        DO j = 1,this % solution % interp % N+1
+          DO i = 1,this % solution % interp % N+1
 
-      CALL UpdateGRK_DGModel2D_gpu(c_loc(this % workSol % interior), &
-                                   c_loc(this % solution % interior), &
-                                   c_loc(this % dSdt % interior), &
-                                         rk4_a(m),rk4_g(m),this % dt, &
-                                         this % workSol % nVar, &
-                                         this % solution % interp % N, &
-                                         this % solution % nVar, &
-                                         this % solution % nElem)
+            this % workSol % interior(i,j,iEl,iVar) = rk4_a(m)* &
+                                                                this % workSol % interior(i,j,iEl,iVar) + &
+                                                                  this % dSdt % interior(i,j,iEl,iVar)
 
-    ELSE
+            this % solution % interior(i,j,iEl,iVar) = &
+              this % solution % interior(i,j,iEl,iVar) + &
+              rk4_g(m)*this % dt*this % workSol % interior(i,j,iEl,iVar)
 
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
-
-              this % workSol % interior(i,j,iEl,iVar) = rk4_a(m)* &
-                                                                  this % workSol % interior(i,j,iEl,iVar) + &
-                                                                   this % dSdt % interior(i,j,iEl,iVar)
-
-              this % solution % interior(i,j,iEl,iVar) = &
-                this % solution % interior(i,j,iEl,iVar) + &
-                rk4_g(m)*this % dt*this % workSol % interior(i,j,iEl,iVar)
-
-            END DO
           END DO
         END DO
       END DO
-
-    END IF
+    END DO
+    !$omp end target
 
   END SUBROUTINE UpdateGRK4_DGModel2D
-
-  SUBROUTINE CalculateFluxDivergence_DGModel2D(this)
-    IMPLICIT NONE
-    CLASS(DGModel2D),INTENT(inout) :: this
-
-    if( this % GPUBackend )then
-      CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence, this % hipblas_handle)
-    else
-      CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence)
-    end if
-
-  END SUBROUTINE CalculateFluxDivergence_DGModel2D
 
   SUBROUTINE CalculateTendency_DGModel2D(this)
     IMPLICIT NONE
@@ -730,47 +576,30 @@ CONTAINS
     INTEGER :: i,j,iEl,iVar
 
     CALL this % PreTendency()
-
-    if (this % GPUBackend)then
-      CALL this % solution % BoundaryInterp(this % hipblas_handle)
-      CALL this % solution % SideExchange(this % mesh,this % decomp,this % hipblas_handle)
-    else
-      CALL this % solution % BoundaryInterp()
-      CALL this % solution % SideExchange(this % mesh,this % decomp)
-    endif
-
+    CALL this % solution % BoundaryInterp()
+    CALL this % solution % SideExchange(this % mesh,this % decomp)
     CALL this % SetBoundaryCondition()
     CALL this % SourceMethod()
     CALL this % RiemannSolver()
     CALL this % FluxMethod()
-    CALL this % CalculateFluxDivergence()
+    CALL this % flux % DGDivergence(this % geometry, this % fluxDivergence)
 
-    IF (this % GPUBackend) THEN
+    !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
+    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1,this % solution % nVar
+        DO j = 1,this % solution % interp % N+1
+          DO i = 1,this % solution % interp % N+1
 
-      CALL CalculateDSDt_DGModel2D_gpu(c_loc(this % fluxDivergence % interior), &
-                                       c_loc(this % source % interior), &
-                                       c_loc(this % dSdt % interior), &
-                                             this % solution % interp % N, &
-                                             this % solution % nVar, &
-                                             this % solution % nElem)
+            this % dSdt % interior(i,j,iEl,iVar) = &
+              this % source % interior(i,j,iEl,iVar) - &
+              this % fluxDivergence % interior(i,j,iEl,iVar)
 
-    ELSE
-
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1,this % solution % nVar
-          DO j = 1,this % solution % interp % N+1
-            DO i = 1,this % solution % interp % N+1
-
-              this % dSdt % interior(i,j,iEl,iVar) = &
-                this % source % interior(i,j,iEl,iVar) - &
-                this % fluxDivergence % interior(i,j,iEl,iVar)
-
-            END DO
           END DO
         END DO
       END DO
-
-    END IF
+    END DO
+    !$omp end target
 
   END SUBROUTINE CalculateTendency_DGModel2D
 

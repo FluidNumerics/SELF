@@ -15,16 +15,12 @@ function (add_fortran_tests)
                     ${CMAKE_BINARY_DIR}/src/libself-static.a
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
-                    ${MPI_Fortran_LIBRARIES}
-                    ${HIPFORT_LIBRARIES}
-                    hip::device
-                    roc::hipblas)
+                    ${MPI_Fortran_LIBRARIES})
                            
         target_include_directories(${TEST_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
                         ${HDF5_INCLUDE_DIRS}
-                        ${MPI_Fortran_INCLUDE_DIRS}
-                        ${HIPFORT_INCLUDE_DIRS})
+                        ${MPI_Fortran_INCLUDE_DIRS})
 
         add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
         install(TARGETS ${TEST_NAME} DESTINATION example)
@@ -35,56 +31,33 @@ endfunction ()
 
 add_fortran_tests (
     "scalargridinterp_1d_cpu_constant.f90"
-    "scalargridinterp_1d_gpu_constant.f90"
     "scalarderivative_1d_cpu_constant.f90"
-    "scalarderivative_1d_gpu_constant.f90"
     "scalarboundaryinterp_1d_cpu_constant.f90"
-    "scalarboundaryinterp_1d_gpu_constant.f90"
     "scalargridinterp_2d_cpu_constant.f90"
-    "scalargridinterp_2d_gpu_constant.f90"
     "scalargradient_2d_cpu_constant.f90"
-    "scalargradient_2d_gpu_constant.f90"
     "scalarboundaryinterp_2d_cpu_constant.f90"
-    "scalarboundaryinterp_2d_gpu_constant.f90"
     "vectordivergence_2d_cpu_constant.f90"
-    "vectordivergence_2d_gpu_constant.f90"
     "vectorboundaryinterp_2d_cpu_constant.f90"
-    "vectorboundaryinterp_2d_gpu_constant.f90"
     "scalargridinterp_3d_cpu_constant.f90"
-    "scalargridinterp_3d_gpu_constant.f90"
     "scalargradient_3d_cpu_constant.f90"
-    "scalargradient_3d_gpu_constant.f90"
     "scalarboundaryinterp_3d_cpu_constant.f90"
-    "scalarboundaryinterp_3d_gpu_constant.f90"
     "vectordivergence_3d_cpu_constant.f90"
-    "vectordivergence_3d_gpu_constant.f90"
     "vectorboundaryinterp_3d_cpu_constant.f90"
-    "vectorboundaryinterp_3d_gpu_constant.f90"
     "mesh2d_setup.f90"
     "mesh3d_setup.f90"
     "mappedscalarderivative_1d_cpu_constant.f90"
-    "mappedscalarderivative_1d_gpu_constant.f90"
     "mappedscalarbrderivative_1d_cpu_constant.f90"
-    "mappedscalarbrderivative_1d_gpu_constant.f90"
     "mappedscalardgderivative_1d_cpu_constant.f90"
-    "mappedscalardgderivative_1d_gpu_constant.f90"
     "mappedscalargradient_2d_cpu_constant.f90"
-    "mappedscalargradient_2d_gpu_constant.f90"
     "mappedscalargradient_2d_cpu_linear.f90"
-    "mappedscalargradient_2d_gpu_linear.f90"
     "mappedscalarbrgradient_2d_cpu_constant.f90"
-    "mappedscalarbrgradient_2d_gpu_constant.f90"
     "mappedscalarbrgradient_2d_cpu_linear.f90"
-    "mappedscalarbrgradient_2d_gpu_linear.f90"
     "mappedvectordivergence_2d_cpu_constant.f90"
-    "mappedvectordivergence_2d_gpu_constant.f90"
     "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
     "mappedvectordgdivergence_2d_cpu_constant.f90"
     "mappedscalargradient_3d_cpu_constant.f90"
-    "mappedscalargradient_3d_gpu_constant.f90"
     "mappedscalargradient_3d_cpu_linear.f90"
     "mappedvectordivergence_3d_cpu_constant.f90"
-    "mappedvectordivergence_3d_gpu_constant.f90"
     "mappedvectordivergence_3d_cpu_gausslobatto_constant.f90"
     "advection_diffusion_1d_euler.f90"
     "advection_diffusion_1d_rk2.f90"

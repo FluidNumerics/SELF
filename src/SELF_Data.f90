@@ -64,19 +64,10 @@ module SELF_Data
     procedure,public :: Init => Init_Scalar1D
     procedure,public :: Free => Free_Scalar1D
 
-    procedure,public :: UpdateDevice => UpdateDevice_Scalar1D
-
-    generic,public :: BoundaryInterp => BoundaryInterp_Scalar1D_cpu,BoundaryInterp_Scalar1D_gpu
-    procedure,private :: BoundaryInterp_Scalar1D_cpu
-    procedure,private :: BoundaryInterp_Scalar1D_gpu
-
-    generic,public :: GridInterp => GridInterp_Scalar1D_cpu,GridInterp_Scalar1D_gpu
-    procedure,private :: GridInterp_Scalar1D_cpu
-    procedure,private :: GridInterp_Scalar1D_gpu
-
-    generic,public :: Derivative => Derivative_Scalar1D_cpu,Derivative_Scalar1D_gpu
-    procedure,private :: Derivative_Scalar1D_cpu
-    procedure,private :: Derivative_Scalar1D_gpu
+    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D
+    procedure,public :: GridInterp => GridInterp_Scalar1D
+    generic,public :: Derivative => Derivative_Scalar1D
+    procedure,private :: Derivative_Scalar1D
 
     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_Scalar1D, WriteHDF5_MPI_Scalar1D
     PROCEDURE, PRIVATE :: WriteHDF5_Scalar1D
@@ -97,19 +88,11 @@ module SELF_Data
 
     procedure,public :: Init => Init_Scalar2D
     procedure,public :: Free => Free_Scalar2D
-    procedure,public :: UpdateDevice => UpdateDevice_Scalar2D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Scalar2D_cpu,BoundaryInterp_Scalar2D_gpu
-    procedure,private :: BoundaryInterp_Scalar2D_cpu
-    procedure,private :: BoundaryInterp_Scalar2D_gpu
-
-    generic,public :: GridInterp => GridInterp_Scalar2D_cpu,GridInterp_Scalar2D_gpu
-    procedure,private :: GridInterp_Scalar2D_cpu
-    procedure,private :: GridInterp_Scalar2D_gpu
-
-    generic,public :: Gradient => Gradient_Scalar2D_cpu,Gradient_Scalar2D_gpu
-    procedure,private :: Gradient_Scalar2D_cpu
-    procedure,private :: Gradient_Scalar2D_gpu
+    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar2D
+    procedure,public :: GridInterp => GridInterp_Scalar2D
+    generic,public :: Gradient => Gradient_Scalar2D
+    procedure,private :: Gradient_Scalar2D
 
     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
@@ -132,19 +115,11 @@ module SELF_Data
 
     procedure,public :: Init => Init_Scalar3D
     procedure,public :: Free => Free_Scalar3D
-    procedure,public :: UpdateDevice => UpdateDevice_Scalar3D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Scalar3D_cpu,BoundaryInterp_Scalar3D_gpu
-    procedure,private :: BoundaryInterp_Scalar3D_cpu
-    procedure,private :: BoundaryInterp_Scalar3D_gpu
-
-    generic,public :: GridInterp => GridInterp_Scalar3D_cpu,GridInterp_Scalar3D_gpu
-    procedure,private :: GridInterp_Scalar3D_cpu
-    procedure,private :: GridInterp_Scalar3D_gpu
-
-    generic,public :: Gradient => Gradient_Scalar3D_cpu,Gradient_Scalar3D_gpu
-    procedure,private :: Gradient_Scalar3D_cpu
-    procedure,private :: Gradient_Scalar3D_gpu
+    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar3D
+    procedure,public :: GridInterp => GridInterp_Scalar3D
+    generic,public :: Gradient => Gradient_Scalar3D
+    procedure,private :: Gradient_Scalar3D
 
     GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar3D, WriteHDF5_Scalar3D
     PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar3D
@@ -166,22 +141,12 @@ module SELF_Data
 
     procedure,public :: Init => Init_Vector2D
     procedure,public :: Free => Free_Vector2D
-    procedure,public :: UpdateDevice => UpdateDevice_Vector2D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Vector2D_cpu,BoundaryInterp_Vector2D_gpu
-    procedure,private :: BoundaryInterp_Vector2D_cpu
-    procedure,private :: BoundaryInterp_Vector2D_gpu
-
-    generic,public :: GridInterp => GridInterp_Vector2D_cpu
-    procedure,private :: GridInterp_Vector2D_cpu
-
-    generic,public :: Gradient => Gradient_Vector2D_gpu,Gradient_Vector2D_cpu
-    procedure,private :: Gradient_Vector2D_gpu
-    procedure,private :: Gradient_Vector2D_cpu
-
-    generic,public :: Divergence => Divergence_Vector2D_gpu,Divergence_Vector2D_cpu
-    procedure,private :: Divergence_Vector2D_gpu
-    procedure,private :: Divergence_Vector2D_cpu
+    procedure,public :: BoundaryInterp => BoundaryInterp_Vector2D
+    procedure,public :: GridInterp => GridInterp_Vector2D
+    procedure,public :: Gradient => Gradient_Vector2D
+    generic,public :: Divergence => Divergence_Vector2D
+    procedure,private :: Divergence_Vector2D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
     PROCEDURE,PRIVATE :: SetEquation_Vector2D
@@ -204,22 +169,12 @@ module SELF_Data
 
     procedure,public :: Init => Init_Vector3D
     procedure,public :: Free => Free_Vector3D
-    procedure,public :: UpdateDevice => UpdateDevice_Vector3D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Vector3D_cpu,BoundaryInterp_Vector3D_gpu
-    procedure,private :: BoundaryInterp_Vector3D_cpu
-    procedure,private :: BoundaryInterp_Vector3D_gpu
-
-    generic,public :: GridInterp => GridInterp_Vector3D_cpu
-    procedure,private :: GridInterp_Vector3D_cpu
-
-    generic,public :: Gradient => Gradient_Vector3D_gpu,Gradient_Vector3D_cpu
-    procedure,private :: Gradient_Vector3D_gpu
-    procedure,private :: Gradient_Vector3D_cpu
-
-    generic,public :: Divergence => Divergence_Vector3D_gpu,Divergence_Vector3D_cpu
-    procedure,private :: Divergence_Vector3D_gpu
-    procedure,private :: Divergence_Vector3D_cpu
+    procedure,public :: BoundaryInterp => BoundaryInterp_Vector3D
+    procedure,public :: GridInterp => GridInterp_Vector3D
+    procedure,public :: Gradient => Gradient_Vector3D
+    generic,public :: Divergence => Divergence_Vector3D
+    procedure,private :: Divergence_Vector3D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
     PROCEDURE,PRIVATE :: SetEquation_Vector3D
@@ -241,20 +196,10 @@ module SELF_Data
 
     procedure,public :: Init => Init_Tensor2D
     procedure,public :: Free => Free_Tensor2D
-    procedure,public :: UpdateDevice => UpdateDevice_Tensor2D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Tensor2D_cpu,BoundaryInterp_Tensor2D_gpu
-    procedure,private :: BoundaryInterp_Tensor2D_cpu
-    procedure,private :: BoundaryInterp_Tensor2D_gpu
-
-    generic,public :: Divergence => Divergence_Tensor2D_gpu,Divergence_Tensor2D_cpu
-    procedure,private :: Divergence_Tensor2D_gpu
-    procedure,private :: Divergence_Tensor2D_cpu
-
-    generic,public :: DGDivergence => DGDivergence_Tensor2D_gpu,DGDivergence_Tensor2D_cpu
-    procedure,private :: DGDivergence_Tensor2D_gpu
-    procedure,private :: DGDivergence_Tensor2D_cpu
-
+    procedure,public :: BoundaryInterp => BoundaryInterp_Tensor2D
+    procedure,public :: Divergence => Divergence_Tensor2D
+    procedure,public :: DGDivergence => DGDivergence_Tensor2D
     procedure,public :: Determinant => Determinant_Tensor2D
 
   end type Tensor2D
@@ -269,20 +214,10 @@ module SELF_Data
 
     procedure,public :: Init => Init_Tensor3D
     procedure,public :: Free => Free_Tensor3D
-    procedure,public :: UpdateDevice => UpdateDevice_Tensor3D
 
-    generic,public :: BoundaryInterp => BoundaryInterp_Tensor3D_cpu,BoundaryInterp_Tensor3D_gpu
-    procedure,private :: BoundaryInterp_Tensor3D_cpu
-    procedure,private :: BoundaryInterp_Tensor3D_gpu
-
-    generic,public :: Divergence => Divergence_Tensor3D_gpu,Divergence_Tensor3D_cpu
-    procedure,private :: Divergence_Tensor3D_gpu
-    procedure,private :: Divergence_Tensor3D_cpu
-
-    generic,public :: DGDivergence => DGDivergence_Tensor3D_gpu,DGDivergence_Tensor3D_cpu
-    procedure,private :: DGDivergence_Tensor3D_gpu
-    procedure,private :: DGDivergence_Tensor3D_cpu
-
+    procedure,public :: BoundaryInterp => BoundaryInterp_Tensor3D
+    procedure,public :: Divergence => Divergence_Tensor3D
+    procedure,public :: DGDivergence => DGDivergence_Tensor3D
     procedure,public :: Determinant => Determinant_Tensor3D
 
   end type Tensor3D
@@ -354,14 +289,21 @@ contains
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,2,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,2,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,2,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary,2,nelem,nvar,hipMemAttachGlobal))
+    allocate( this % interior(1:interp % N + 1,1:nelem,1:nvar),&
+              this % boundary(1:2,1:nelem,1:nvar),&
+              this % extBoundary(1:2,1:nelem,1:nvar),&
+              this % avgBoundary(2,1:nelem,1:nvar),&
+              this % jumpBoundary(1:2,1:nelem,1:nvar) )
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
+    !$omp target enter data map(alloc: this % avgBoundary)
+    !$omp target enter data map(alloc: this % jumpBoundary)
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:nVar))
+    
 
   end subroutine Init_Scalar1D
 
@@ -370,29 +312,23 @@ contains
     class(Scalar1D),intent(inout) :: this
 
     this % interp => null()
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
-    call hipcheck(hipFree(this % jumpBoundary))
-    deallocate (this % meta)
-    deallocate (this % eqn)
+    deallocate(this % interior)
+    deallocate(this % boundary)
+    deallocate(this % extBoundary)
+    deallocate(this % avgBoundary)
+    deallocate(this % jumpBoundary)
+    deallocate(this % meta)
+    deallocate(this % eqn)
+
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % extBoundary)
+    !$omp target exit data map(delete: this % avgBoundary)
+    !$omp target exit data map(delete: this % jumpBoundary)
 
   end subroutine Free_Scalar1D
 
-  subroutine UpdateDevice_Scalar1D(this)
-    implicit none
-    class(Scalar1D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
-
-  end subroutine UpdateDevice_Scalar1D
-
-  subroutine BoundaryInterp_Scalar1D_cpu(this)
+  subroutine BoundaryInterp_Scalar1D(this)
     implicit none
     class(Scalar1D),intent(inout) :: this
 
@@ -401,22 +337,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Scalar1D_cpu
+  end subroutine BoundaryInterp_Scalar1D
 
-  subroutine BoundaryInterp_Scalar1D_gpu(this,handle)
-    implicit none
-    class(Scalar1D),intent(inout) :: this
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % ScalarBoundaryInterp_1D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Scalar1D_gpu
-
-  subroutine GridInterp_Scalar1D_cpu(this,that)
+  subroutine GridInterp_Scalar1D(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: that
@@ -426,23 +349,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine GridInterp_Scalar1D_cpu
+  end subroutine GridInterp_Scalar1D
 
-  subroutine GridInterp_Scalar1D_gpu(this,that,handle)
-    implicit none
-    class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % ScalarGridInterp_1D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine GridInterp_Scalar1D_gpu
-
-  subroutine Derivative_Scalar1D_cpu(this,that)
+  subroutine Derivative_Scalar1D(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(Scalar1D),intent(inout) :: that
@@ -452,21 +361,7 @@ contains
                                        this % nVar, &
                                        this % nElem)
 
-  end subroutine Derivative_Scalar1D_cpu
-
-  subroutine Derivative_Scalar1D_gpu(this,that,handle)
-    implicit none
-    class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % Derivative_1D(this % interior, &
-                                       that % interior, &
-                                       this % nVar, &
-                                       this % nElem, &
-                                       handle)
-
-  end subroutine Derivative_Scalar1D_gpu
+  end subroutine Derivative_Scalar1D
 
   SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -542,12 +437,19 @@ contains
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % interpWork,interp % M + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
+    allocate( this % interior(1:interp % N + 1,interp % N + 1,nelem,nvar),&
+              this % interpWork(1:interp % M + 1,1:interp % N + 1,1:nelem,1:nvar),&
+              this % boundary(1:interp % N + 1,1:4,1:nelem,1:nvar),&
+              this % extBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar),&
+              this % avgBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar),&
+              this % jumpBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar) )
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % interpWork)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
+    !$omp target enter data map(alloc: this % avgBoundary)
+    !$omp target enter data map(alloc: this % jumpBoundary)
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:nVar))
@@ -561,30 +463,25 @@ contains
     this % nVar = 0
     this % nElem = 0
     this % interp => null()
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % interpWork))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
-    call hipcheck(hipFree(this % jumpBoundary))
+    deallocate(this % interior)
+    deallocate(this % interpWork)
+    deallocate(this % boundary)
+    deallocate(this % extBoundary)
+    deallocate(this % avgBoundary)
+    deallocate(this % jumpBoundary)
     deallocate (this % meta)
     deallocate (this % eqn)
 
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % interpWork)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % extBoundary)
+    !$omp target exit data map(delete: this % avgBoundary)
+    !$omp target exit data map(delete: this % jumpBoundary)
+
   end subroutine Free_Scalar2D
 
-  subroutine UpdateDevice_Scalar2D(this)
-    implicit none
-    class(Scalar2D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
-
-  end subroutine UpdateDevice_Scalar2D
-
-  subroutine BoundaryInterp_Scalar2D_cpu(this)
+  subroutine BoundaryInterp_Scalar2D(this)
     implicit none
     class(Scalar2D),intent(inout) :: this
 
@@ -593,22 +490,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Scalar2D_cpu
+  end subroutine BoundaryInterp_Scalar2D
 
-  subroutine BoundaryInterp_Scalar2D_gpu(this,handle)
-    implicit none
-    class(Scalar2D),intent(inout) :: this
-    type(c_ptr),intent(in) :: handle
-
-    call this % interp % ScalarBoundaryInterp_2D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Scalar2D_gpu
-
-  subroutine GridInterp_Scalar2D_cpu(this,that)
+  subroutine GridInterp_Scalar2D(this,that)
     implicit none
     class(Scalar2D),intent(in) :: this
     type(Scalar2D),intent(inout) :: that
@@ -618,24 +502,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine GridInterp_Scalar2D_cpu
+  end subroutine GridInterp_Scalar2D
 
-  subroutine GridInterp_Scalar2D_gpu(this,that,handle)
-    implicit none
-    class(Scalar2D),intent(inout) :: this
-    type(Scalar2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % ScalarGridInterp_2D(this % interior, &
-                                             this % interpWork, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine GridInterp_Scalar2D_gpu
-
-  subroutine Gradient_Scalar2D_cpu(this,df)
+  subroutine Gradient_Scalar2D(this,df)
     implicit none
     class(Scalar2D),intent(in) :: this
     type(Vector2D),intent(inout) :: df
@@ -645,21 +514,7 @@ contains
                                            this % nVar, &
                                            this % nElem)
 
-  end subroutine Gradient_Scalar2D_cpu
-
-  subroutine Gradient_Scalar2D_gpu(this,df,handle)
-    implicit none
-    class(Scalar2D),intent(in) :: this
-    type(Vector2D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % ScalarGradient_2D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem, &
-                                           handle)
-
-  end subroutine Gradient_Scalar2D_gpu
+  end subroutine Gradient_Scalar2D
 
   SUBROUTINE WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -737,13 +592,21 @@ contains
     this % nVar = nVar
     this % nElem = nElem
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % interpWork1,interp % M + 1,interp % N + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % interpWork2,interp % M + 1,interp % M + 1,interp % N + 1,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % jumpBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
+    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar),&
+              this % interpWork1(1:interp % M + 1,1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar),&
+              this % interpWork2(1:interp % M + 1,1:interp % M + 1,1:interp % N + 1,1:nelem,1:nvar),&
+              this % boundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar),&
+              this % extBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar),&
+              this % avgBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar),&
+              this % jumpBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar))
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % interpWork1)
+    !$omp target enter data map(alloc: this % interpWork2)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
+    !$omp target enter data map(alloc: this % avgBoundary)
+    !$omp target enter data map(alloc: this % jumpBoundary)
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:nVar))
@@ -757,31 +620,27 @@ contains
     this % nVar = 0
     this % nElem = 0
     this % interp => null()
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % interpWork1))
-    call hipcheck(hipFree(this % interpWork2))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
-    call hipcheck(hipFree(this % jumpBoundary))
+    deallocate(this % interior)
+    deallocate(this % interpWork1)
+    deallocate(this % interpWork2)
+    deallocate(this % boundary)
+    deallocate(this % extBoundary)
+    deallocate(this % avgBoundary)
+    deallocate(this % jumpBoundary)
     deallocate (this % meta)
     deallocate (this % eqn)
 
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % interpWork1)
+    !$omp target exit data map(delete: this % interpWork2)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % extBoundary)
+    !$omp target exit data map(delete: this % avgBoundary)
+    !$omp target exit data map(delete: this % jumpBoundary)
+
   end subroutine Free_Scalar3D
 
-  subroutine UpdateDevice_Scalar3D(this)
-    implicit none
-    class(Scalar3D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % jumpBoundary),sizeof(this % jumpBoundary),0,c_null_ptr))
-
-  end subroutine UpdateDevice_Scalar3D
-
-  subroutine BoundaryInterp_Scalar3D_cpu(this)
+  subroutine BoundaryInterp_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
 
@@ -790,22 +649,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Scalar3D_cpu
+  end subroutine BoundaryInterp_Scalar3D
 
-  subroutine BoundaryInterp_Scalar3D_gpu(this,handle)
-    implicit none
-    class(Scalar3D),intent(inout) :: this
-    type(c_ptr),intent(in) :: handle
-
-    call this % interp % ScalarBoundaryInterp_3D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Scalar3D_gpu
-
-  subroutine GridInterp_Scalar3D_cpu(this,that)
+  subroutine GridInterp_Scalar3D(this,that)
     implicit none
     class(Scalar3D),intent(in) :: this
     type(Scalar3D),intent(inout) :: that
@@ -815,25 +661,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine GridInterp_Scalar3D_cpu
+  end subroutine GridInterp_Scalar3D
 
-  subroutine GridInterp_Scalar3D_gpu(this,that,handle)
-    implicit none
-    class(Scalar3D),intent(inout) :: this
-    type(Scalar3D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % ScalarGridInterp_3D(this % interior, &
-                                             this % interpWork1, &
-                                             this % interpWork2, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine GridInterp_Scalar3D_gpu
-
-  subroutine Gradient_Scalar3D_cpu(this,df)
+  subroutine Gradient_Scalar3D(this,df)
     implicit none
     class(Scalar3D),intent(in) :: this
     type(Vector3D),intent(inout) :: df
@@ -843,21 +673,7 @@ contains
                                            this % nVar, &
                                            this % nElem)
 
-  end subroutine Gradient_Scalar3D_cpu
-
-  subroutine Gradient_Scalar3D_gpu(this,df,handle)
-    implicit none
-    class(Scalar3D),intent(in) :: this
-    type(Vector3D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % ScalarGradient_3D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem, &
-                                           handle)
-
-  end subroutine Gradient_Scalar3D_gpu
+  end subroutine Gradient_Scalar3D
 
   SUBROUTINE WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -940,21 +756,20 @@ contains
     this % nElem = nElem
     N = interp % N
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,4,nelem,nvar,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,4,nelem,nvar,hipMemAttachGlobal))
-
-    call hipcheck(hipMemAdvise(c_loc(this % interior), sizeof(this % interior), hipMemAdviseSetCoarseGrain, 0))
-    call hipcheck(hipMemAdvise(c_loc(this % boundary), sizeof(this % boundary), hipMemAdviseSetCoarseGrain, 0))
-    call hipcheck(hipMemAdvise(c_loc(this % extBoundary), sizeof(this % extBoundary), hipMemAdviseSetCoarseGrain, 0))
-    call hipcheck(hipMemAdvise(c_loc(this % avgBoundary), sizeof(this % avgBoundary), hipMemAdviseSetCoarseGrain, 0))
-    call hipcheck(hipMemAdvise(c_loc(this % boundaryNormal), sizeof(this % boundaryNormal), hipMemAdviseSetCoarseGrain, 0))
-
+    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar,1:2),&
+              this % boundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2),&
+              this % extBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2),&
+              this % avgBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2),&
+              this % boundaryNormal(1:interp % N + 1,1:4,1:nelem,1:nvar))
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:2*nVar))
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
+    !$omp target enter data map(alloc: this % avgBoundary)
+    !$omp target enter data map(alloc: this % boundaryNormal)
 
   end subroutine Init_Vector2D
 
@@ -966,11 +781,17 @@ contains
     this % nVar = 0
     this % nElem = 0
 
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % boundaryNormal))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
+    deallocate(this % interior)
+    deallocate(this % boundary)
+    deallocate(this % boundaryNormal)
+    deallocate(this % extBoundary)
+    deallocate(this % avgBoundary)
+
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % boundaryNormal)
+    !$omp target exit data map(delete: this % extBoundary)
+    !$omp target exit data map(delete: this % avgBoundary)
 
     deallocate (this % meta)
     deallocate (this % eqn)
@@ -989,19 +810,7 @@ contains
 
   END SUBROUTINE SetEquation_Vector2D
 
-  subroutine UpdateDevice_Vector2D(this)
-    implicit none
-    class(Vector2D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundaryNormal),sizeof(this % boundaryNormal),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-
-  end subroutine UpdateDevice_Vector2D
-
-  subroutine GridInterp_Vector2D_cpu(this,that)
+  subroutine GridInterp_Vector2D(this,that)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Vector2D),intent(inout) :: that
@@ -1011,9 +820,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine GridInterp_Vector2D_cpu
+  end subroutine GridInterp_Vector2D
 
-  subroutine BoundaryInterp_Vector2D_cpu(this)
+  subroutine BoundaryInterp_Vector2D(this)
     implicit none
     class(Vector2D),intent(inout) :: this
 
@@ -1022,22 +831,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Vector2D_cpu
+  end subroutine BoundaryInterp_Vector2D
 
-  subroutine BoundaryInterp_Vector2D_gpu(this,handle)
-    implicit none
-    class(Vector2D),intent(inout) :: this
-    type(c_ptr),intent(in) :: handle
-
-    call this % interp % VectorBoundaryInterp_2D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Vector2D_gpu
-
-  subroutine Gradient_Vector2D_cpu(this,df)
+  subroutine Gradient_Vector2D(this,df)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Tensor2D),intent(inout) :: df
@@ -1047,23 +843,9 @@ contains
                                            this % nVar, &
                                            this % nElem)
 
-  end subroutine Gradient_Vector2D_cpu
+  end subroutine Gradient_Vector2D
 
-  subroutine Gradient_Vector2D_gpu(this,df,handle)
-    implicit none
-    class(Vector2D),intent(in) :: this
-    type(Tensor2D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % VectorGradient_2D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem, &
-                                           handle)
-
-  end subroutine Gradient_Vector2D_gpu
-
-  subroutine Divergence_Vector2D_cpu(this,that)
+  subroutine Divergence_Vector2D(this,that)
     implicit none
     class(Vector2D),intent(in) :: this
     type(Scalar2D),intent(inout) :: that
@@ -1073,21 +855,7 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine Divergence_Vector2D_cpu
-
-  subroutine Divergence_Vector2D_gpu(this,that,handle)
-    implicit none
-    class(Vector2D),intent(in) :: this
-    type(Scalar2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % VectorDivergence_2D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine Divergence_Vector2D_gpu
+  end subroutine Divergence_Vector2D
 
   SUBROUTINE WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -1169,14 +937,20 @@ contains
     this % nElem = nElem
     N = interp % N
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,interp % N + 1,nelem,nvar,3,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % avgBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundaryNormal,interp % N + 1,interp % N + 1,6,nelem,nvar,hipMemAttachGlobal))
+    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar,1:3),&
+              this % boundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3),&
+              this % extBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3),&
+              this % avgBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3),&
+              this % boundaryNormal(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar))
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:3*nVar))
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
+    !$omp target enter data map(alloc: this % avgBoundary)
+    !$omp target enter data map(alloc: this % boundaryNormal)
 
   end subroutine Init_Vector3D
 
@@ -1188,11 +962,17 @@ contains
     this % nVar = 0
     this % nElem = 0
 
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % boundaryNormal))
-    call hipcheck(hipFree(this % extBoundary))
-    call hipcheck(hipFree(this % avgBoundary))
+    deallocate(this % interior)
+    deallocate(this % boundary)
+    deallocate(this % boundaryNormal)
+    deallocate(this % extBoundary)
+    deallocate(this % avgBoundary)
+
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % extBoundary)
+    !$omp target exit data map(delete: this % avgBoundary)
+    !$omp target exit data map(delete: this % boundaryNormal)
 
     deallocate (this % meta)
     deallocate (this % eqn)
@@ -1211,20 +991,7 @@ contains
 
   END SUBROUTINE SetEquation_Vector3D
 
-  subroutine UpdateDevice_Vector3D(this)
-    implicit none
-    class(Vector3D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundaryNormal),sizeof(this % boundaryNormal),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % avgBoundary),sizeof(this % avgBoundary),0,c_null_ptr))
-    
-
-  end subroutine UpdateDevice_Vector3D
-
-  subroutine GridInterp_Vector3D_cpu(this,that)
+  subroutine GridInterp_Vector3D(this,that)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Vector3D),intent(inout) :: that
@@ -1234,9 +1001,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine GridInterp_Vector3D_cpu
+  end subroutine GridInterp_Vector3D
 
-  subroutine BoundaryInterp_Vector3D_cpu(this)
+  subroutine BoundaryInterp_Vector3D(this)
     implicit none
     class(Vector3D),intent(inout) :: this
 
@@ -1245,22 +1012,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Vector3D_cpu
+  end subroutine BoundaryInterp_Vector3D
 
-  subroutine BoundaryInterp_Vector3D_gpu(this,handle)
-    implicit none
-    class(Vector3D),intent(inout) :: this
-    type(c_ptr),intent(in) :: handle
-
-    call this % interp % VectorBoundaryInterp_3D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Vector3D_gpu
-
-  subroutine Gradient_Vector3D_cpu(this,df)
+  subroutine Gradient_Vector3D(this,df)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Tensor3D),intent(inout) :: df
@@ -1270,23 +1024,9 @@ contains
                                            this % nVar, &
                                            this % nElem)
 
-  end subroutine Gradient_Vector3D_cpu
+  end subroutine Gradient_Vector3D
 
-  subroutine Gradient_Vector3D_gpu(this,df,handle)
-    implicit none
-    class(Vector3D),intent(in) :: this
-    type(Tensor3D),intent(inout) :: df
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % VectorGradient_3D(this % interior, &
-                                           df % interior, &
-                                           this % nVar, &
-                                           this % nElem, &
-                                           handle)
-
-  end subroutine Gradient_Vector3D_gpu
-
-  subroutine Divergence_Vector3D_cpu(this,that)
+  subroutine Divergence_Vector3D(this,that)
     implicit none
     class(Vector3D),intent(in) :: this
     type(Scalar3D),intent(inout) :: that
@@ -1296,21 +1036,7 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine Divergence_Vector3D_cpu
-
-  subroutine Divergence_Vector3D_gpu(this,that,handle)
-    implicit none
-    class(Vector3D),intent(in) :: this
-    type(Scalar3D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % VectorDivergence_3D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine Divergence_Vector3D_gpu
+  end subroutine Divergence_Vector3D
 
   SUBROUTINE WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
     IMPLICIT NONE
@@ -1395,12 +1121,16 @@ contains
     this % nElem = nElem
     N = interp % N
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,nelem,nvar,2,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,4,nelem,nvar,2,2,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,4,nelem,nvar,2,2,hipMemAttachGlobal))
+    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:nelem,1:nvar,1:2,1:2),&
+              this % boundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2,1:2),&
+              this % extBoundary(1:interp % N + 1,1:4,1:nelem,1:nvar,1:2,1:2))
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:4*nVar))
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
 
   end subroutine Init_Tensor2D
 
@@ -1412,26 +1142,20 @@ contains
     this % nVar = 0
     this % nElem = 0
 
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
+    deallocate(this % interior)
+    deallocate(this % boundary)
+    deallocate(this % extBoundary)
+
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % extBoundary)
 
     deallocate (this % meta)
     deallocate (this % eqn)
 
   end subroutine Free_Tensor2D
 
-  subroutine UpdateDevice_Tensor2D(this)
-    implicit none
-    class(Tensor2D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-
-  end subroutine UpdateDevice_Tensor2D
-
-  subroutine BoundaryInterp_Tensor2D_cpu(this)
+  subroutine BoundaryInterp_Tensor2D(this)
     implicit none
     class(Tensor2D),intent(inout) :: this
 
@@ -1440,22 +1164,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Tensor2D_cpu
+  end subroutine BoundaryInterp_Tensor2D
 
-  subroutine BoundaryInterp_Tensor2D_gpu(this,handle)
-    implicit none
-    class(Tensor2D),intent(inout) :: this
-    type(c_ptr),intent(in) :: handle
-
-    call this % interp % TensorBoundaryInterp_2D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Tensor2D_gpu
-
-  subroutine Divergence_Tensor2D_cpu(this,that)
+  subroutine Divergence_Tensor2D(this,that)
     implicit none
     class(Tensor2D),intent(in) :: this
     class(Vector2D),intent(inout) :: that
@@ -1465,23 +1176,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine Divergence_Tensor2D_cpu
+  end subroutine Divergence_Tensor2D
 
-  subroutine Divergence_Tensor2D_gpu(this,that,handle)
-    implicit none
-    class(Tensor2D),intent(in) :: this
-    class(Vector2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % TensorDivergence_2D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine Divergence_Tensor2D_gpu
-
-  subroutine DGDivergence_Tensor2D_cpu(this,that)
+  subroutine DGDivergence_Tensor2D(this,that)
     implicit none
     class(Tensor2D),intent(in) :: this
     class(Vector2D),intent(inout) :: that
@@ -1492,22 +1189,7 @@ contains
                                                this % nVar, &
                                                this % nElem)
 
-  end subroutine DGDivergence_Tensor2D_cpu
-
-  subroutine DGDivergence_Tensor2D_gpu(this,that,handle)
-    implicit none
-    class(Tensor2D),intent(in) :: this
-    class(Vector2D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % TensorDGDivergence_2D(this % interior, &
-                                             this % boundary, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine DGDivergence_Tensor2D_gpu
+  end subroutine DGDivergence_Tensor2D
 
   subroutine Determinant_Tensor2D(this,that)
     implicit none
@@ -1515,6 +1197,7 @@ contains
     type(Scalar2D),intent(inout) :: that
     ! Local
     integer :: iEl,iVar,i,j
+
     do iVar = 1,this % nVar
       do iEl = 1,this % nElem
         do j = 1,this % interp % N + 1
@@ -1548,12 +1231,16 @@ contains
     this % nElem = nElem
     N = interp % N
 
-    call hipcheck(hipMallocManaged(this % interior,interp % N + 1,interp % N + 1,interp % N +1,nelem,nvar,3,3,hipMemAttachGlobal))
-    call hipcheck(hipMallocManaged(this % boundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,3,hipMemAttachGlobal))
-   call hipcheck(hipMallocManaged(this % extBoundary,interp % N + 1,interp % N + 1,6,nelem,nvar,3,3,hipMemAttachGlobal))
+    allocate( this % interior(1:interp % N + 1,1:interp % N + 1,1:interp % N +1,1:nelem,1:nvar,1:3,1:3),&
+              this % boundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3,1:3),&
+              this % extBoundary(1:interp % N + 1,1:interp % N + 1,1:6,1:nelem,1:nvar,1:3,1:3))
 
     allocate (this % meta(1:nVar))
     allocate (this % eqn(1:9*nVar))
+
+    !$omp target enter data map(alloc: this % interior)
+    !$omp target enter data map(alloc: this % boundary)
+    !$omp target enter data map(alloc: this % extBoundary)
 
   end subroutine Init_Tensor3D
 
@@ -1565,26 +1252,20 @@ contains
     this % nVar = 0
     this % nElem = 0
 
-    call hipcheck(hipFree(this % interior))
-    call hipcheck(hipFree(this % boundary))
-    call hipcheck(hipFree(this % extBoundary))
+    deallocate(this % interior)
+    deallocate(this % boundary)
+    deallocate(this % extBoundary)
+
+    !$omp target exit data map(delete: this % interior)
+    !$omp target exit data map(delete: this % boundary)
+    !$omp target exit data map(delete: this % extBoundary)
 
     deallocate (this % meta)
     deallocate (this % eqn)
 
   end subroutine Free_Tensor3D
 
-  subroutine UpdateDevice_Tensor3D(this)
-    implicit none
-    class(Tensor3D),intent(inout) :: this
-
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % interior),sizeof(this % interior),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % boundary),sizeof(this % boundary),0,c_null_ptr))
-    call hipcheck(hipMemPrefetchAsync(c_loc(this % extBoundary),sizeof(this % extBoundary),0,c_null_ptr))
-
-  end subroutine UpdateDevice_Tensor3D
-
-  subroutine BoundaryInterp_Tensor3D_cpu(this)
+  subroutine BoundaryInterp_Tensor3D(this)
     implicit none
     class(Tensor3D),intent(inout) :: this
 
@@ -1593,22 +1274,9 @@ contains
                                                  this % nVar, &
                                                  this % nElem)
 
-  end subroutine BoundaryInterp_Tensor3D_cpu
-
-  subroutine BoundaryInterp_Tensor3D_gpu(this,handle)
-    implicit none
-    class(Tensor3D),intent(inout) :: this
-    type(c_ptr),intent(in) :: handle
-
-    call this % interp % TensorBoundaryInterp_3D(this % interior, &
-                                                 this % boundary, &
-                                                 this % nVar, &
-                                                 this % nElem, &
-                                                 handle)
-
-  end subroutine BoundaryInterp_Tensor3D_gpu
+  end subroutine BoundaryInterp_Tensor3D
   
-  subroutine Divergence_Tensor3D_cpu(this,that)
+  subroutine Divergence_Tensor3D(this,that)
     implicit none
     class(Tensor3D),intent(in) :: this
     class(Vector3D),intent(inout) :: that
@@ -1618,23 +1286,9 @@ contains
                                              this % nVar, &
                                              this % nElem)
 
-  end subroutine Divergence_Tensor3D_cpu
+  end subroutine Divergence_Tensor3D
 
-  subroutine Divergence_Tensor3D_gpu(this,that,handle)
-    implicit none
-    class(Tensor3D),intent(in) :: this
-    class(Vector3D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % TensorDivergence_3D(this % interior, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine Divergence_Tensor3D_gpu
-
-  subroutine DGDivergence_Tensor3D_cpu(this,that)
+  subroutine DGDivergence_Tensor3D(this,that)
     implicit none
     class(Tensor3D),intent(in) :: this
     class(Vector3D),intent(inout) :: that
@@ -1645,22 +1299,7 @@ contains
                                                this % nVar, &
                                                this % nElem)
 
-  end subroutine DGDivergence_Tensor3D_cpu
-
-  subroutine DGDivergence_Tensor3D_gpu(this,that,handle)
-    implicit none
-    class(Tensor3D),intent(in) :: this
-    class(Vector3D),intent(inout) :: that
-    type(c_ptr),intent(inout) :: handle
-
-    call this % interp % TensorDGDivergence_3D(this % interior, &
-                                             this % boundary, &
-                                             that % interior, &
-                                             this % nVar, &
-                                             this % nElem, &
-                                             handle)
-
-  end subroutine DGDivergence_Tensor3D_gpu
+  end subroutine DGDivergence_Tensor3D
 
   subroutine Determinant_Tensor3D(this,that)
     implicit none

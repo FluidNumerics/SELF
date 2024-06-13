@@ -13,7 +13,6 @@ MODULE SELF_Model
   USE SELF_HDF5
   USE HDF5
   USE FEQParse
-  use SELF_HIP_Support
 
   IMPLICIT NONE
 
@@ -83,8 +82,6 @@ MODULE SELF_Model
   INTEGER,PARAMETER :: SELF_FORMULATION_LENGTH = 30 ! max length of integrator methods when specified as char
 
   TYPE,ABSTRACT :: Model
-    LOGICAL :: GPUBackend
-    type(c_ptr) :: hipblas_handle
 
     ! Time integration attributes
     PROCEDURE(SELF_timeIntegrator),POINTER :: timeIntegrator => Euler_timeIntegrator
@@ -156,9 +153,6 @@ MODULE SELF_Model
 
     PROCEDURE :: SetSimulationTime
     PROCEDURE :: GetSimulationTime
-
-    PROCEDURE :: EnableGPUBackend => EnableGPUBackend_Model
-    PROCEDURE :: DisableGPUBackend => DisableGPUBackend_Model
 
   END TYPE Model
 
@@ -481,28 +475,6 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
 
   END SUBROUTINE SetSimulationTime
 
-  SUBROUTINE EnableGPUBackend_Model(this)
-#undef __FUNC__
-#define __FUNC__ "EnableGPUBackend"
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-
-    IF (GPUAvailable()) THEN
-      this % GPUBackend = .TRUE.
-
-      if (.not. c_associated(this % hipblas_handle))then
-        call hipblasCheck(hipblasCreate(this % hipblas_handle))
-      endif
-
-    ELSE
-
-      call this % DisableGPUBackend()
-      WARNING("GPU acceleration requested, but no GPU is available")
-
-    END IF
-
-  END SUBROUTINE EnableGPUBackend_Model
-
   SUBROUTINE SetInitialConditions_Model(this)
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
@@ -512,17 +484,6 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
     INFO("No model, so nothing to set")
 
   END SUBROUTINE SetInitialConditions_Model
-
-  SUBROUTINE DisableGPUBackend_Model(this)
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-
-    this % GPUBackend = .FALSE.
-    if (c_associated(this % hipblas_handle))then
-      this % hipblas_handle = c_null_ptr
-    endif
-
-  END SUBROUTINE DisableGPUBackend_Model
 
   SUBROUTINE CalculateEntropy_Model(this)
   !! Base method for calculating entropy of a model

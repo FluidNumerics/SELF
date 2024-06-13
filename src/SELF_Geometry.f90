@@ -28,7 +28,6 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_Geometry1D
     PROCEDURE,PUBLIC :: Free => Free_Geometry1D
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_Geometry1D
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Geometry1D
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
 
     PROCEDURE :: Write => Write_Geometry1D
@@ -48,7 +47,6 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_SEMQuad
     PROCEDURE,PUBLIC :: Free => Free_SEMQuad
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMQuad
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMQuad
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
 
@@ -70,7 +68,6 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_SEMHex
     PROCEDURE,PUBLIC :: Free => Free_SEMHex
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMHex
-    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMHex
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
     PROCEDURE,PRIVATE :: CheckSides => CheckSides_SEMHex
@@ -108,15 +105,6 @@ CONTAINS
 
   END SUBROUTINE Free_Geometry1D
 
-  SUBROUTINE UpdateDevice_Geometry1D(myGeom)
-    IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(inout) :: myGeom
-
-    CALL myGeom % x % UpdateDevice()
-    CALL myGeom % dxds % UpdateDevice()
-
-  END SUBROUTINE UpdateDevice_Geometry1D
-
   SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
@@ -151,8 +139,6 @@ CONTAINS
 
     CALL myGeom % CalculateMetricTerms()
 
-    CALL myGeom % UpdateDevice()
-
     CALL xMesh % Free()
 
     CALL meshToModel % Free() 
@@ -165,7 +151,6 @@ CONTAINS
 
     CALL myGeom % x % Derivative(myGeom % dxds)
     CALL myGeom % dxds % BoundaryInterp()
-    CALL myGeom % UpdateDevice()
 
   END SUBROUTINE CalculateMetricTerms_Geometry1D
 
@@ -265,19 +250,6 @@ CONTAINS
 
   END SUBROUTINE Free_SEMQuad
 
-  SUBROUTINE UpdateDevice_SEMQuad(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(inout) :: myGeom
-
-    CALL myGeom % x % UpdateDevice()
-    CALL myGeom % dxds % UpdateDevice()
-    CALL myGeom % dsdx % UpdateDevice()
-    CALL myGeom % nHat % UpdateDevice()
-    CALL myGeom % nScale % UpdateDevice()
-    CALL myGeom % J % UpdateDevice()
-
-  END SUBROUTINE UpdateDevice_SEMQuad
-
   SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh)
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
@@ -308,7 +280,6 @@ CONTAINS
     CALL myGeom % x % BoundaryInterp()
     CALL myGeom % CalculateMetricTerms()
 
-    CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
     CALL meshToModel % Free()
 
@@ -416,41 +387,7 @@ CONTAINS
 
     CALL myGeom % CalculateContravariantBasis()
 
-    CALL myGeom % dsdx % UpdateDevice()
-    CALL myGeom % nHat % UpdateDevice()
-    CALL myGeom % nScale % UpdateDevice()
-
   END SUBROUTINE CalculateMetricTerms_SEMQuad
-
-  ! FUNCTION CovariantArcMin_SEMQuad(myGeom) RESULT(dxMin)
-  !   IMPLICIT NONE
-  !   CLASS(SEMQuad) :: myGeom
-  !   REAL(prec) :: dxMin
-  !   ! Local
-  !   INTEGER :: i, j, iEl, N
-  !   REAL(prec) :: dx, dy
-  !   REAL(prec) :: dxds(1:2,1:2)
-  !   REAL(prec) :: ds(0:1,myGeom % dxds % interp % N+1,&
-  !                    0:1,myGeom % dxds % interp % N+1,&
-  !                    1:myGeom % nElem)
-
-  !   N = 1,myGeom % dxds % interp % N+1
-  !   DO iEl = 1,myGeom % nElem
-  !     DO j = 0, N
-  !       DO i = 0, N
-
-  !         dxds =  myGeom % dxds % interior(1:2,1:2,i,j,iel,1)
-  !         dx = SQRT(dxds(1,1)**2 + dxds(1,2)**2)
-  !         dy = SQRT(dxds(2,1)**2 + dxds(2,2)**2)
-  !         ds(i,j,iEl) = 2.0_prec*MIN(dx,dy)/(REAL(N,prec)**2)
-
-  !       ENDDO
-  !     ENDDO
-  !   ENDDO
-
-  !   dxMin = MINVAL(ds) 
-
-  ! END FUNCTION CovariantArcMin_SEMQuad
 
   ! SUBROUTINE Write_SEMQuad(myGeom,fileName)
   !   IMPLICIT NONE
@@ -560,19 +497,6 @@ CONTAINS
 
   END SUBROUTINE Free_SEMHex
 
-  SUBROUTINE UpdateDevice_SEMHex(myGeom)
-    IMPLICIT NONE
-    CLASS(SEMHex),INTENT(inout) :: myGeom
-
-    CALL myGeom % x % UpdateDevice()
-    CALL myGeom % dxds % UpdateDevice()
-    CALL myGeom % dsdx % UpdateDevice()
-    CALL myGeom % nHat % UpdateDevice()
-    CALL myGeom % nScale % UpdateDevice()
-    CALL myGeom % J % UpdateDevice()
-
-  END SUBROUTINE UpdateDevice_SEMHex
-
   SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh)
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
@@ -604,8 +528,6 @@ CONTAINS
     CALL xMesh % GridInterp(myGeom % x)
     CALL myGeom % x % BoundaryInterp()
     CALL myGeom % CalculateMetricTerms()
-
-    CALL myGeom % UpdateDevice()
 
     CALL xMesh % Free()
     CALL meshToModel % Free()
@@ -906,7 +828,6 @@ CONTAINS
     CALL myGeom % J % BoundaryInterp()
 
     CALL myGeom % CalculateContravariantBasis()
-    CALL myGeom % UpdateDevice()
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 

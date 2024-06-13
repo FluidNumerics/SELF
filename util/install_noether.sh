@@ -9,7 +9,7 @@ SRC_DIR=$(pwd)
 BUILD_DIR=/scratch/joe/build
 
 module load gcc/13.2.0
-module load hip/5.7.3 hipfort/5.7.1 openmpi/5.0.1 hdf5/1.12.3 feq-parse/2.1.0
+module load openmpi/5.0.1 hdf5/1.12.3 feq-parse/2.1.0
 
 # Clean out any old builds
 rm -rf ${BUILD_DIR}

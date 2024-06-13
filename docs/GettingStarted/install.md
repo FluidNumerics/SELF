@@ -1,16 +1,26 @@
 # Install SELF
+
+## Dependencies
 The Spectral Element Library in Fortran can be built provided the following dependencies are met
 
-* Fortran 2008 compliant compiler ( `gfortran` recommended )
 * [Cmake (v3.21 or greater)](https://cmake.org/resources/)
+* Fortran 2008 compliant compiler ( `gfortran` recommended )
 * MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
-* [ROCm v5.7.0 or greater](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/)
-* [HIPFort](https://github.com/ROCm/hipfort/tree/develop) - HIPFort needs to be built with your preferred Fortran compiler.
+* [MAGMA](https://icl.utk.edu/magma/)
 * [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 * [FluidNumerics/feq-parse](https://github.com/FluidNumerics/feq-parse)
-* (Optional) [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit), if you are building for Nvidia GPU hardware.
+* (Optional, AMD GPU Support) [ROCm v5.7.0 or greater](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/)
+* (Optional, Nvidia GPU Support) [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 
 
+## Installation Notes
+
+### GPU Support 
+SELF uses OpenMP for GPU offloading. Some of our "heavy-lifting" kernels, such as divergence, gradient, and grid interpolation operations are expressed using the BLAS API. For these, we use MAGMA.
+
+
+
+### OS Support
 !!! note
     Since HIP is officially supported only on CentOS, RHEL, Ubuntu, SLES, and Windows operating systems, SELF currently can only be built on these operating systems. Further, testing is only being carried out on Ubuntu at this time. 
 
