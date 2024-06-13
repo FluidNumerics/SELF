@@ -63,7 +63,8 @@ jobs:
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
           spack compiler find
           spack -e . config add packages:all:compiler:[${{ matrix.spack_compiler }}]
-          spack -e . concretize
+          cat ./spack.yaml
+          spack -e . concretize -f
           spack -e . install --no-check-signature
 
       - name: Build with Cmake
