@@ -14,7 +14,6 @@ module SELF_Mesh
 
 #include "SELF_Macros.h"
 
-
   type :: SEMMesh
     integer :: nGeo
     integer :: nElem

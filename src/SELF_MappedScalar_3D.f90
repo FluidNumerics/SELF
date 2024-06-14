@@ -530,7 +530,7 @@ contains
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
                 df(i,j,k,iEl,iVar,idir) = df(i,j,k,iEl,iVar,idir)/ &
-                                                geometry%J%interior(i,j,k,iEl,1)
+                                          geometry%J%interior(i,j,k,iEl,1)
               enddo
             enddo
           enddo
@@ -552,7 +552,7 @@ contains
     real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
     ! Local
     integer :: iEl,iVar,i,j,k,idir
-    
+
     call this%BassiRebaySides()
     call this%ContravariantWeightInterior(geometry)
     call this%ContravariantWeightAvgBoundary(geometry)
@@ -566,7 +566,7 @@ contains
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
                 df(i,j,k,iEl,iVar,idir) = df(i,j,k,iEl,iVar,idir)/ &
-                                                geometry%J%interior(i,j,k,iEl,1)
+                                          geometry%J%interior(i,j,k,iEl,1)
               enddo
             enddo
           enddo

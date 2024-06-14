@@ -34,7 +34,7 @@ module SELF_Geometry_2D
     procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMQuad
     procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
-    procedure,public :: Write => Write_SEMQuad
+    procedure,public :: write => Write_SEMQuad
 
   endtype SEMQuad
 
@@ -225,65 +225,65 @@ contains
 
   endsubroutine CalculateMetricTerms_SEMQuad
 
-  SUBROUTINE Write_SEMQuad(myGeom,fileName)
-    IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(in) :: myGeom
-    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+  subroutine Write_SEMQuad(myGeom,fileName)
+    implicit none
+    class(SEMQuad),intent(in) :: myGeom
+    character(*),optional,intent(in) :: fileName
     ! Local
-    INTEGER(HID_T) :: fileId
+    integer(HID_T) :: fileId
     ! Local
-    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+    character(LEN=self_FileNameLength) :: pickupFile
 
-    IF( PRESENT(filename) )THEN
+    if(present(filename)) then
       pickupFile = filename
-    ELSE
+    else
       pickupFile = 'mesh.h5'
-    ENDIF
+    endif
 
-    CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+    call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
-    CALL CreateGroup_HDF5(fileId,'/quadrature')
+    call CreateGroup_HDF5(fileId,'/quadrature')
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                         myGeom % x % interp % controlPoints)
+    call WriteArray_HDF5(fileId,'/quadrature/xi', &
+                         myGeom%x%interp%controlPoints)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                         myGeom % x % interp % qWeights)
+    call WriteArray_HDF5(fileId,'/quadrature/weights', &
+                         myGeom%x%interp%qWeights)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                         myGeom % x % interp % dgMatrix)
+    call WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                         myGeom%x%interp%dgMatrix)
 
-    CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                         myGeom % x % interp % dMatrix)
+    call WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                         myGeom%x%interp%dMatrix)
 
-    CALL CreateGroup_HDF5(fileId,'/mesh')
+    call CreateGroup_HDF5(fileId,'/mesh')
 
-    CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+    call CreateGroup_HDF5(fileId,'/mesh/interior')
 
-    CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+    call CreateGroup_HDF5(fileId,'/mesh/boundary')
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom%x%interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom%dxds%interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom % dsdx % interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom%dsdx%interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom % J % interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom%J%interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom%x%boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom%dxds%boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom % dsdx % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom%dsdx%boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom % nHat % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom%nHat%boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom % nScale % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom%nScale%boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom % J % boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom%J%boundary)
 
-    CALL Close_HDF5(fileId)
+    call Close_HDF5(fileId)
 
-  END SUBROUTINE Write_SEMQuad
+  endsubroutine Write_SEMQuad
 
 endmodule SELF_Geometry_2D

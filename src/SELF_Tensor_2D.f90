@@ -138,9 +138,9 @@ contains
           do i = 1,this%interp%N+1
 
             det(i,j,iEl,iVar) = this%interior(i,j,iEl,iVar,1,1)* &
-                                          this%interior(i,j,iEl,iVar,2,2)- &
-                                          this%interior(i,j,iEl,iVar,1,2)* &
-                                          this%interior(i,j,iEl,iVar,2,1)
+                                this%interior(i,j,iEl,iVar,2,2)- &
+                                this%interior(i,j,iEl,iVar,1,2)* &
+                                this%interior(i,j,iEl,iVar,2,1)
 
           enddo
         enddo

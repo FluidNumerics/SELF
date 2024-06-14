@@ -12,7 +12,7 @@ contains
     use SELF_Memory
     use SELF_Lagrange
     use SELF_Vector_2D
-    
+
     implicit none
 
     integer,parameter :: controlDegree = 7

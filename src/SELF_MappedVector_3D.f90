@@ -465,7 +465,7 @@ contains
           do j = 1,this%interp%N+1
             do i = 1,this%interp%N+1
               df(i,j,k,iEl,iVar) = df(i,j,k,iEl,iVar)/ &
-                                                    geometry%J%interior(i,j,k,iEl,1)
+                                   geometry%J%interior(i,j,k,iEl,1)
             enddo
           enddo
         enddo
@@ -505,7 +505,7 @@ contains
           do j = 1,this%interp%N+1
             do i = 1,this%interp%N+1
               df(i,j,k,iEl,iVar) = df(i,j,k,iEl,iVar)/ &
-                                                    geometry%J%interior(i,j,k,iEl,1)
+                                   geometry%J%interior(i,j,k,iEl,1)
             enddo
           enddo
         enddo

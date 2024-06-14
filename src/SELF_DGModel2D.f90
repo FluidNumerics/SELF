@@ -107,7 +107,7 @@ contains
     call this%workSol%Free()
     call this%prevSol%Free()
     call this%dSdt%Free()
-    call this%solutionGradient%Free() 
+    call this%solutionGradient%Free()
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()

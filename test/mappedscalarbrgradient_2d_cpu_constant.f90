@@ -16,7 +16,7 @@ contains
     use SELF_MappedScalar_2D
     use SELF_MappedVector_2D
     use SELF_MPI
-    
+
     implicit none
 
     integer,parameter :: controlDegree = 7

@@ -149,7 +149,7 @@ contains
     real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: iEl,iVar,i
-    
+
     call this%interp%Derivative_1D(this%interior, &
                                    df, &
                                    this%nVar, &
@@ -160,7 +160,7 @@ contains
       do iVar = 1,this%nVar
         do i = 1,this%interp%N+1
           df(i,iEl,iVar) = df(i,iEl,iVar)/ &
-                                    geometry%dxds%interior(i,iEl,1)
+                           geometry%dxds%interior(i,iEl,1)
         enddo
       enddo
     enddo
@@ -187,7 +187,7 @@ contains
       do iVar = 1,this%nVar
         do i = 1,this%interp%N+1
           df(i,iEl,iVar) = df(i,iEl,iVar)/ &
-                                    geometry%dxds%interior(i,iEl,1)
+                           geometry%dxds%interior(i,iEl,1)
         enddo
       enddo
     enddo
@@ -209,20 +209,18 @@ contains
                                      this%nVar, &
                                      this%nElem)
 
-
     !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
     !$omp teams distribute parallel do collapse(3)
     do iEl = 1,this%nElem
       do iVar = 1,this%nVar
         do i = 1,this%interp%N+1
           df(i,iEl,iVar) = df(i,iEl,iVar)/ &
-                                      geometry%dxds%interior(i,iEl,1)
+                           geometry%dxds%interior(i,iEl,1)
         enddo
       enddo
     enddo
     !$omp end target
 
   endsubroutine BRDerivative_MappedScalar1D
-
 
 endmodule SELF_MappedScalar_1D

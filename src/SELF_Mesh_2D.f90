@@ -67,13 +67,11 @@ module SELF_Mesh_2D
 !
 ! ========================================================================= !
 
-
   ! Side Ordering
   integer,parameter :: selfSide2D_South = 1
   integer,parameter :: selfSide2D_East = 2
   integer,parameter :: selfSide2D_North = 3
   integer,parameter :: selfSide2D_West = 4
-
 
   ! Mesh format is set up similar to the HOPr format
   ! See https://hopr-project.org/externals/MeshFormat.pdf

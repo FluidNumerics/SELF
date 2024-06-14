@@ -47,7 +47,6 @@ module SELF_MPI
 
   endtype MPILayer
 
-
 contains
 
   subroutine Init_MPILayer(this,enableMPI)
