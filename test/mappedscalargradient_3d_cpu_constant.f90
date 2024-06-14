@@ -11,9 +11,11 @@ contains
 
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Mesh
-    use SELF_Geometry
-    use SELF_MappedData
+    use SELF_Mesh_3D
+    use SELF_Geometry_3D
+    use SELF_MappedScalar_3D
+    use SELF_MappedVector_3D
+    use SELF_MPI
 
     implicit none
 
@@ -60,7 +62,7 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%Gradient(geometry,df)
+    call f%Gradient(geometry,df%interior)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

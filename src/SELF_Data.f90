@@ -35,6 +35,8 @@ module SELF_Data
 
     integer :: nVar
     integer :: nElem
+    integer :: N
+    integer :: M
     type(Lagrange),pointer :: interp
     type(Metadata),allocatable :: meta(:)
     type(EquationParser),allocatable :: eqn(:)

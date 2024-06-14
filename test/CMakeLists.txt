@@ -19,6 +19,7 @@ function (add_fortran_tests)
                            
         target_include_directories(${TEST_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
+                        ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS})
 

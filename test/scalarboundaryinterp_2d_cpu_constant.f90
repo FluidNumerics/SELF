@@ -10,7 +10,7 @@ contains
   integer function scalarboundaryinterp_2d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Data
+    use SELF_Scalar_2D
 
     implicit none
 

@@ -10,9 +10,10 @@ contains
   integer function mappedscalardgderivative_1d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_MappedData
-    use SELF_Mesh
-    use SELF_Geometry
+    use SELF_MappedScalar_1D
+    use SELF_Mesh_1D
+    use SELF_Geometry_1D
+    use SELF_MPI
 
     implicit none
 
@@ -69,7 +70,7 @@ contains
 
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
-    call f%DGDerivative(geometry,df)
+    call f%DGDerivative(geometry,df%interior)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

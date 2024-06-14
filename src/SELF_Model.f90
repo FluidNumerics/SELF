@@ -8,8 +8,7 @@ module SELF_Model
 
   use SELF_SupportRoutines
   use SELF_Metadata
-  use SELF_Mesh
-  use SELF_MappedData
+  use SELF_MPI
   use SELF_HDF5
   use HDF5
   use FEQParse

@@ -11,9 +11,11 @@ contains
 
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Mesh
-    use SELF_Geometry
-    use SELF_MappedData
+    use SELF_Mesh_3D
+    use SELF_Geometry_3D
+    use SELF_MappedScalar_3D
+    use SELF_MappedVector_3D
+    use SELF_MPI
 
     implicit none
 
@@ -63,7 +65,7 @@ contains
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
     call f%ContravariantProjection(geometry)
-    call f%Divergence(geometry,df)
+    call f%Divergence(geometry,df%interior)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

@@ -11,9 +11,11 @@ contains
 
     use SELF_constants
     use SELF_Lagrange
-    use SELF_Mesh
-    use SELF_Geometry
-    use SELF_MappedData
+    use SELF_Mesh_2D
+    use SELF_Geometry_2D
+    use SELF_MappedScalar_2D
+    use SELF_MappedVector_2D
+    use SELF_MPI
 
     implicit none
 
@@ -62,7 +64,7 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%Gradient(geometry,df)
+    call f%Gradient(geometry,df%interior)
 
     call f%SetName(1,"f")
     call f%SetUnits(1,"[null]")

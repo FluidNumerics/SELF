@@ -10,7 +10,7 @@ contains
   integer function vectorboundaryinterp_2d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Data
+    use SELF_Vector_2D
 
     implicit none
 

@@ -1,4 +1,4 @@
-! SELF_MappedData.F90
+! SELF_MappedScalar.F90
 !
 ! Copyright 2020-2022 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
@@ -6,13 +6,14 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_MappedData_1D
+module SELF_MappedScalar_1D
 
   use SELF_Constants
   use SELF_Lagrange
-  use SELF_Data_1D
-  use SELF_Mesh
-  use SELF_Geometry
+  use SELF_Scalar_1D
+  use SELF_Mesh_1D
+  use SELF_Geometry_1D
+  use SELF_MPI
   use SELF_HDF5
   use HDF5
 
@@ -36,8 +37,6 @@ module SELF_MappedData_1D
     procedure,private :: DGDerivative_MappedScalar1D
     generic,public :: BRDerivative => BRDerivative_MappedScalar1D
     procedure,private :: BRDerivative_MappedScalar1D
-
-    procedure,public :: JacobianWeight => JacobianWeight_MappedScalar1D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar1D
 
@@ -147,29 +146,52 @@ contains
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
-    type(MappedScalar1D),intent(inout) :: dF
-
+    real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer :: iEl,iVar,i
+    
     call this%interp%Derivative_1D(this%interior, &
-                                   df%interior, &
+                                   df, &
                                    this%nVar, &
                                    this%nElem)
-    call df%JacobianWeight(geometry)
-
+    !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
+    !$omp teams distribute parallel do collapse(3)
+    do iEl = 1,this%nElem
+      do iVar = 1,this%nVar
+        do i = 1,this%interp%N+1
+          df(i,iEl,iVar) = df(i,iEl,iVar)/ &
+                                    geometry%dxds%interior(i,iEl,1)
+        enddo
+      enddo
+    enddo
+    !$omp end target
   endsubroutine Derivative_MappedScalar1D
 
   subroutine DGDerivative_MappedScalar1D(this,geometry,dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
-    type(MappedScalar1D),intent(inout) :: dF
+    real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer :: iEl,iVar,i
 
     call this%interp%DGDerivative_1D(this%interior, &
                                      this%boundary, &
-                                     df%interior, &
+                                     df, &
                                      this%nVar, &
                                      this%nElem)
 
-    call df%JacobianWeight(geometry)
+    !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
+    !$omp teams distribute parallel do collapse(3)
+    do iEl = 1,this%nElem
+      do iVar = 1,this%nVar
+        do i = 1,this%interp%N+1
+          df(i,iEl,iVar) = df(i,iEl,iVar)/ &
+                                    geometry%dxds%interior(i,iEl,1)
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine DGDerivative_MappedScalar1D
 
@@ -177,39 +199,30 @@ contains
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
-    type(MappedScalar1D),intent(inout) :: dF
-
-    call this%interp%DGDerivative_1D(this%interior, &
-                                     this%avgboundary, &
-                                     df%interior, &
-                                     this%nVar, &
-                                     this%nElem)
-    call df%JacobianWeight(geometry)
-
-  endsubroutine BRDerivative_MappedScalar1D
-
-  subroutine JacobianWeight_MappedScalar1D(this,geometry)
-#undef __FUNC__
-#define __FUNC__ "JacobianWeight_MappedScalar1D"
-    ! Applies the inverse jacobian
-    implicit none
-    class(MappedScalar1D),intent(inout) :: this
-    type(Geometry1D),intent(in) :: geometry
+    real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: iEl,iVar,i
 
-    !$omp target map(to:geometry % dxds % interior) map(tofrom:this % interior)
+    call this%interp%DGDerivative_1D(this%interior, &
+                                     this%avgboundary, &
+                                     df, &
+                                     this%nVar, &
+                                     this%nElem)
+
+
+    !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
     !$omp teams distribute parallel do collapse(3)
     do iEl = 1,this%nElem
       do iVar = 1,this%nVar
         do i = 1,this%interp%N+1
-          this%interior(i,iEl,iVar) = this%interior(i,iEl,iVar)/ &
+          df(i,iEl,iVar) = df(i,iEl,iVar)/ &
                                       geometry%dxds%interior(i,iEl,1)
         enddo
       enddo
     enddo
     !$omp end target
 
-  endsubroutine JacobianWeight_MappedScalar1D
+  endsubroutine BRDerivative_MappedScalar1D
 
-endmodule SELF_MappedData_1D
+
+endmodule SELF_MappedScalar_1D

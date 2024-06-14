@@ -10,9 +10,10 @@ contains
   integer function mappedscalarderivative_1d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_MappedData
-    use SELF_Mesh
-    use SELF_Geometry
+    use SELF_MappedScalar_1D
+    use SELF_Mesh_1D
+    use SELF_Geometry_1D
+    use SELF_MPI
 
     implicit none
 
@@ -54,7 +55,7 @@ contains
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
 
-    call f%Derivative(geometry,df)
+    call f%Derivative(geometry,df%interior)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

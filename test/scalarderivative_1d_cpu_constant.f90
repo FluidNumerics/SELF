@@ -9,7 +9,7 @@ contains
   integer function scalarderivative_1d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Data
+    use SELF_Scalar_1D
 
     implicit none
 
@@ -40,7 +40,7 @@ contains
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior(:,:,:) = 1.0_prec
 
-    call f%Derivative(df)
+    call f%Derivative(df%interior)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

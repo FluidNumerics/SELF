@@ -8,8 +8,10 @@ module SELF_DGModel3D
 
   use SELF_SupportRoutines
   use SELF_Metadata
-  use SELF_Mesh
-  use SELF_MappedData_3D
+  use SELF_Geometry_3D
+  use SELF_Mesh_3D
+  use SELF_MappedScalar_3D
+  use SELF_MappedVector_3D
   use SELF_HDF5
   use HDF5
   use FEQParse
@@ -83,8 +85,8 @@ contains
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%prevSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%dSdt%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%solutionGradient%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%flux%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%solutionGradient%Init_Vector3D(geometry%x%interp,nVar,this%mesh%nElem) ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
+    call this%flux%Init_Vector3D(geometry%x%interp,nVar,this%mesh%nElem) ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
     call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
 
@@ -106,8 +108,8 @@ contains
     call this%workSol%Free()
     call this%prevSol%Free()
     call this%dSdt%Free()
-    call this%solutionGradient%Free()
-    call this%flux%Free()
+    call this%solutionGradient%Free_Vector3D() ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
+    call this%flux%Free_Vector3D() ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
     call this%source%Free()
     call this%fluxDivergence%Free()
 
@@ -611,7 +613,7 @@ contains
     call this%SourceMethod()
     call this%RiemannSolver()
     call this%FluxMethod()
-    call this%flux%DGDivergence(this%geometry,this%fluxDivergence)
+    call this%flux%DGDivergence(this%geometry,this%fluxDivergence%interior)
 
     !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
     !$omp teams distribute parallel do collapse(5) num_threads(256)
@@ -860,7 +862,7 @@ contains
     call this%solution%GridInterp(solution)
 
     ! Map the solution to the target grid
-    call this%solutionGradient%GridInterp(solutionGradient)
+    call this%solutionGradient%GridInterp_Vector3D(solutionGradient) ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
 
     open(UNIT=NEWUNIT(fUnit), &
          FILE=trim(tecFile), &

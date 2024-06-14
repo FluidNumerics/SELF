@@ -11,8 +11,9 @@ contains
 
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Mesh
-    use SELF_Geometry
+    use SELF_Mesh_2D
+    use SELF_Geometry_2D
+    use SELF_MPI
 
     implicit none
 

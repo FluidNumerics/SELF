@@ -10,7 +10,8 @@ contains
   integer function vectordivergence_2d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Data
+    use SELF_Scalar_2D
+    use SELF_Vector_2D
 
     implicit none
 
@@ -41,7 +42,7 @@ contains
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
 
-    call f%Divergence(df)
+    call f%Divergence(df%interior)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

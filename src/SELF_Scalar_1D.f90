@@ -6,7 +6,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Data_1D
+module SELF_Scalar_1D
 
   use SELF_Constants
   use SELF_Lagrange
@@ -61,6 +61,8 @@ contains
     this%interp => interp
     this%nVar = nVar
     this%nElem = nElem
+    this%N = interp%N
+    this%M = interp%M
 
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
@@ -126,10 +128,10 @@ contains
   subroutine Derivative_Scalar1D(this,that)
     implicit none
     class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: that
+    real(prec),intent(out) :: that(1:this%N+1,1:this%nelem,1:this%nvar)
 
     call this%interp%Derivative_1D(this%interior, &
-                                   that%interior, &
+                                   that, &
                                    this%nVar, &
                                    this%nElem)
 
@@ -196,4 +198,4 @@ contains
 
   endsubroutine WriteHDF5_Scalar1D
 
-endmodule SELF_Data_1D
+endmodule SELF_Scalar_1D

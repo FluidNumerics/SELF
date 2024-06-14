@@ -8,8 +8,8 @@ module SELF_DGModel1D
 
   use SELF_SupportRoutines
   use SELF_Metadata
-  use SELF_Mesh
-  use SELF_MappedData_1D
+  use SELF_Mesh_1D
+  use SELF_MappedScalar_1D
   use SELF_HDF5
   use HDF5
   use FEQParse
@@ -49,7 +49,6 @@ module SELF_DGModel1D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D
     procedure :: CalculateTendency => CalculateTendency_DGModel1D
-    procedure :: CalculateFluxDivergence => CalculateFluxDivergence_DGModel1D
 
     generic :: SetSolution => SetSolutionFromChar_DGModel1D, &
       SetSolutionFromEqn_DGModel1D
@@ -522,14 +521,6 @@ contains
 
   endsubroutine UpdateGRK4_DGModel1D
 
-  subroutine CalculateFluxDivergence_DGModel1D(this)
-    implicit none
-    class(DGModel1D),intent(inout) :: this
-
-    call this%flux%DGDerivative(this%geometry,this%fluxDivergence)
-
-  endsubroutine CalculateFluxDivergence_DGModel1D
-
   subroutine CalculateTendency_DGModel1D(this)
     implicit none
     class(DGModel1D),intent(inout) :: this
@@ -543,7 +534,7 @@ contains
     call this%SourceMethod()
     call this%RiemannSolver()
     call this%FluxMethod()
-    call this%CalculateFluxDivergence()
+    call this%flux%DGDerivative(this%geometry,this%fluxDivergence%interior)
 
     !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
     !$omp teams distribute parallel do collapse(3) num_threads(256)

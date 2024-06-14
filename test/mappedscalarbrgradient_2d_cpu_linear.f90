@@ -11,9 +11,11 @@ contains
 
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Mesh
-    use SELF_Geometry
-    use SELF_MappedData
+    use SELF_Mesh_2D
+    use SELF_Geometry_2D
+    use SELF_MappedScalar_2D
+    use SELF_MappedVector_2D
+    use SELF_MPI
 
     implicit none
 
@@ -83,7 +85,7 @@ contains
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
 
-    call f%BRGradient(geometry,df)
+    call f%BRGradient(geometry,df%interior)
 
     print*,"min, max (df/dx)",minval(df%interior(:,:,:,1,1)),maxval(df%interior(:,:,:,1,1))
     print*,"min, max (df/dy)",minval(df%interior(:,:,:,1,2)),maxval(df%interior(:,:,:,1,2))

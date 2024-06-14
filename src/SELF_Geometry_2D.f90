@@ -1,0 +1,289 @@
+!
+! Copyright 2020 Fluid Numerics LLC
+! Author : Joseph Schoonover (joe@fluidnumerics.com)
+! Support : self@higherordermethods.org
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
+module SELF_Geometry_2D
+
+  use SELF_Constants
+  use SELF_Lagrange
+  use SELF_Data
+  use SELF_Scalar_2D
+  use SELF_Vector_2D
+  use SELF_Tensor_2D
+  use SELF_SupportRoutines
+  use SELF_Mesh_2D
+
+  implicit none
+
+#include "SELF_Macros.h"
+
+  type,public :: SEMQuad
+    type(Vector2D) :: x ! Physical positions
+    type(Tensor2D) :: dxds ! Covariant basis vectors
+    type(Tensor2D) :: dsdx ! Contavariant basis vectors
+    type(Vector2D) :: nHat ! Normal Vectors pointing across coordinate lines
+    type(Scalar2D) :: nScale ! Boundary scale
+    type(Scalar2D) :: J ! Jacobian of the transformation
+    integer :: nElem
+  contains
+
+    procedure,public :: Init => Init_SEMQuad
+    procedure,public :: Free => Free_SEMQuad
+    procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMQuad
+    procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
+    procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
+    procedure,public :: Write => Write_SEMQuad
+
+  endtype SEMQuad
+
+contains
+
+  subroutine Init_SEMQuad(myGeom,interp,nElem)
+    implicit none
+    class(SEMQuad),intent(out) :: myGeom
+    type(Lagrange),pointer,intent(in) :: interp
+    integer,intent(in) :: nElem
+
+    myGeom%nElem = nElem
+
+    call myGeom%x%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
+
+    call myGeom%dxds%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
+
+    call myGeom%dsdx%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
+
+    call myGeom%nHat%Init(interp=interp, &
+                          nVar=1, &
+                          nElem=nElem)
+
+    call myGeom%nScale%Init(interp=interp, &
+                            nVar=1, &
+                            nElem=nElem)
+
+    call myGeom%J%Init(interp=interp, &
+                       nVar=1, &
+                       nElem=nElem)
+
+  endsubroutine Init_SEMQuad
+
+  subroutine Free_SEMQuad(myGeom)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+
+    call myGeom%x%Free()
+    call myGeom%dxds%Free()
+    call myGeom%dsdx%Free()
+    call myGeom%nHat%Free()
+    call myGeom%nScale%Free()
+    call myGeom%J%Free()
+
+  endsubroutine Free_SEMQuad
+
+  subroutine GenerateFromMesh_SEMQuad(myGeom,mesh)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+    type(Mesh2D),intent(in) :: mesh
+    ! Local
+    integer :: iel
+    integer :: i,j,nid
+    type(Lagrange),target :: meshToModel
+    type(Vector2D) :: xMesh
+
+    call meshToModel%Init(mesh%nGeo, &
+                          mesh%quadrature, &
+                          myGeom%x%interp%N, &
+                          myGeom%x%interp%controlNodeType)
+
+    call xMesh%Init(meshToModel,1,mesh%nElem)
+
+    ! Set the element internal mesh locations
+    do iel = 1,mesh%nElem
+      do j = 1,mesh%nGeo+1
+        do i = 1,mesh%nGeo+1
+          xMesh%interior(i,j,iel,1,1:2) = mesh%nodeCoords(1:2,i,j,iel)
+        enddo
+      enddo
+    enddo
+
+    call xMesh%GridInterp(myGeom%x)
+    call myGeom%x%BoundaryInterp()
+    call myGeom%CalculateMetricTerms()
+
+    call xMesh%Free()
+    call meshToModel%Free()
+
+  endsubroutine GenerateFromMesh_SEMQuad
+
+  subroutine CalculateContravariantBasis_SEMQuad(myGeom)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+    ! Local
+    integer :: iEl,i,j,k
+    real(prec) :: fac
+    real(prec) :: mag
+
+    ! Now calculate the contravariant basis vectors
+    ! In this convention, dsdx(j,i) is contravariant vector i, component j
+    ! To project onto contravariant vector i, dot vector along the first dimension
+    do iEl = 1,myGeom%nElem
+      do j = 1,myGeom%dxds%interp%N+1
+        do i = 1,myGeom%dxds%interp%N+1
+
+          myGeom%dsdx%interior(i,j,iel,1,1,1) = myGeom%dxds%interior(i,j,iel,1,2,2)
+          myGeom%dsdx%interior(i,j,iel,1,2,1) = -myGeom%dxds%interior(i,j,iel,1,1,2)
+          myGeom%dsdx%interior(i,j,iel,1,1,2) = -myGeom%dxds%interior(i,j,iel,1,2,1)
+          myGeom%dsdx%interior(i,j,iel,1,2,2) = myGeom%dxds%interior(i,j,iel,1,1,1)
+
+        enddo
+      enddo
+    enddo
+
+    ! Interpolate the contravariant tensor to the boundaries
+    call myGeom%dsdx%BoundaryInterp()
+
+    ! Now, modify the sign of dsdx so that
+    ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
+    do iEl = 1,myGeom%nElem
+      do k = 1,4
+        do i = 1,myGeom%J%interp%N+1
+          if(k == selfSide2D_East .or. k == selfSide2D_North) then
+            fac = sign(1.0_prec,myGeom%J%boundary(i,k,iEl,1))
+          else
+            fac = -sign(1.0_prec,myGeom%J%boundary(i,k,iEl,1))
+          endif
+
+          if(k == 1) then ! South
+
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,2)**2)
+
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
+
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
+
+          elseif(k == 2) then ! East
+
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,1)**2)
+
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
+
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
+
+          elseif(k == 3) then ! North
+
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,2)**2)
+
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
+
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
+
+          elseif(k == 4) then ! West
+
+            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
+                       myGeom%dsdx%boundary(i,k,iEl,1,2,1)**2)
+
+            myGeom%nScale%boundary(i,k,iEl,1) = mag
+
+            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
+
+          endif
+
+          ! Set the directionality for dsdx on the boundaries
+          myGeom%dsdx%boundary(i,k,iEl,1,1:2,1:2) = &
+            myGeom%dsdx%boundary(i,k,iEl,1,1:2,1:2)*fac
+
+        enddo
+      enddo
+    enddo
+
+  endsubroutine CalculateContravariantBasis_SEMQuad
+
+  subroutine CalculateMetricTerms_SEMQuad(myGeom)
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+
+    call myGeom%x%Gradient(myGeom%dxds%interior)
+    call myGeom%dxds%BoundaryInterp()
+    call myGeom%dxds%Determinant(myGeom%J%interior)
+    call myGeom%J%BoundaryInterp()
+
+    call myGeom%CalculateContravariantBasis()
+
+  endsubroutine CalculateMetricTerms_SEMQuad
+
+  SUBROUTINE Write_SEMQuad(myGeom,fileName)
+    IMPLICIT NONE
+    CLASS(SEMQuad),INTENT(in) :: myGeom
+    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+    ! Local
+    INTEGER(HID_T) :: fileId
+    ! Local
+    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+
+    IF( PRESENT(filename) )THEN
+      pickupFile = filename
+    ELSE
+      pickupFile = 'mesh.h5'
+    ENDIF
+
+    CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+
+    CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                         myGeom % x % interp % controlPoints)
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                         myGeom % x % interp % qWeights)
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                         myGeom % x % interp % dgMatrix)
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                         myGeom % x % interp % dMatrix)
+
+    CALL CreateGroup_HDF5(fileId,'/mesh')
+
+    CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+    CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom % dsdx % interior)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom % J % interior)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom % dsdx % boundary)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom % nHat % boundary)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom % nScale % boundary)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom % J % boundary)
+
+    CALL Close_HDF5(fileId)
+
+  END SUBROUTINE Write_SEMQuad
+
+endmodule SELF_Geometry_2D

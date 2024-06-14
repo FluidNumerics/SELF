@@ -67,10 +67,10 @@ contains
     call this%solution%BassiRebaySides()
 
     ! calculate the derivative using the bassi-rebay form
-    call this%solution%BRGradient(this%geometry,this%solutionGradient)
+    call this%solution%BRGradient(this%geometry,this%solutionGradient%interior)
 
     ! interpolate the solutiongradient to the element boundaries
-    call this%solutionGradient%BoundaryInterp()
+    call this%solutionGradient%BoundaryInterp_Vector2D() ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
 
     ! perform the side exchange to populate the solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh,this%decomp)

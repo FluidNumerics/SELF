@@ -9,7 +9,7 @@ contains
   integer function scalargridinterp_1d_cpu_constant() result(r)
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Data
+    use SELF_Scalar_1D
 
     implicit none
 

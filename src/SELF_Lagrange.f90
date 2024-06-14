@@ -611,7 +611,7 @@ contains
     !! The number of spectral elements in the SEM grid
     real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars)
+    real(prec),intent(out) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,ii,jj,iel,ivar
@@ -666,7 +666,7 @@ contains
     !! The number of spectral elements in the SEM grid
     real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:this%M+1,1:nelems,1:nvars)
+    real(prec),intent(out) :: fTarget(1:this%M+1,1:this%M+1,1:this%M+1,1:nelems,1:nvars)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,k,ii,jj,kk,iel,ivar
@@ -729,7 +729,7 @@ contains
     !! The number of spectral elements in the SEM grid
     real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars,1:2)
+    real(prec),intent(out) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars,1:2)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,ii,jj,iel,ivar,idir
@@ -784,7 +784,7 @@ contains
     !! The number of spectral elements in the SEM grid
     real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:3)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this%M+1,1:this%M+1,1:this%M+1,1:nelems,1:nvars,1:3)
+    real(prec),intent(out) :: fTarget(1:this%M+1,1:this%M+1,1:this%M+1,1:nelems,1:nvars,1:3)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,k,ii,jj,kk,iel,ivar,idir
