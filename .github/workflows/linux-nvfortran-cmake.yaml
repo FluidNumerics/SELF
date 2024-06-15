@@ -69,20 +69,10 @@ jobs:
       - name: Build with Cmake
         shell: spack-bash {0}
         run: |
-          PATH=${PATH}:/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/extras/qd/bin
-          PATH=${PATH}:/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/comm_libs/mpi/bin
-          PATH=${PATH}:/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin
-          PATH=${PATH}:/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/cuda/bin
-          export PATH
-          export F90=/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/nvfortran
-          export FC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/nvfortran
-          export F77=/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/nvfortran
-          export CC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/nvc
-          export CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/nvc++
           spack env activate .
           mkdir build
           cd build
-          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          FC=${{ env.FC }} CC=${{ env.CC }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
           make VERBOSE=1
 
       - name: Run ctests
