@@ -69,7 +69,7 @@ contains
     call this%solution%BRGradient(this%geometry,this%solutionGradient%interior)
 
     ! interpolate the solutiongradient to the element boundaries
-    call this%solutionGradient%BoundaryInterp_Vector3D() ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
+    call this%solutionGradient%BoundaryInterp()
 
     ! perform the side exchange to populate the solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh,this%decomp)

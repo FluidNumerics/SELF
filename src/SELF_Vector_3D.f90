@@ -33,14 +33,10 @@ module SELF_Vector_3D
   contains
 
     procedure,public :: Init => Init_Vector3D
-    procedure,public :: Init_Vector3D ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
     procedure,public :: Free => Free_Vector3D
-    procedure,public :: Free_Vector3D ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
 
     procedure,public :: BoundaryInterp => BoundaryInterp_Vector3D
-    procedure,public :: BoundaryInterp_Vector3D ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
     procedure,public :: GridInterp => GridInterp_Vector3D
-    procedure,public :: GridInterp_Vector3D ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
     procedure,public :: Gradient => Gradient_Vector3D
     generic,public :: Divergence => Divergence_Vector3D
     procedure,private :: Divergence_Vector3D

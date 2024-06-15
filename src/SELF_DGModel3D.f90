@@ -85,8 +85,8 @@ contains
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%prevSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%dSdt%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%solutionGradient%Init_Vector3D(geometry%x%interp,nVar,this%mesh%nElem) ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
-    call this%flux%Init_Vector3D(geometry%x%interp,nVar,this%mesh%nElem) ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
+    call this%solutionGradient%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%flux%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
 
@@ -108,8 +108,8 @@ contains
     call this%workSol%Free()
     call this%prevSol%Free()
     call this%dSdt%Free()
-    call this%solutionGradient%Free_Vector3D() ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
-    call this%flux%Free_Vector3D() ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
+    call this%solutionGradient%Free()
+    call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
 
@@ -862,7 +862,7 @@ contains
     call this%solution%GridInterp(solution)
 
     ! Map the solution to the target grid
-    call this%solutionGradient%GridInterp_Vector3D(solutionGradient) ! Workaround for issue with flang compiler (6/13/2024 joe@fluidnumerics.com)
+    call this%solutionGradient%GridInterp(solutionGradient)
 
     open(UNIT=NEWUNIT(fUnit), &
          FILE=trim(tecFile), &
