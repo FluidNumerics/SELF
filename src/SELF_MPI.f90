@@ -254,11 +254,13 @@ contains
     class(MPILayer),intent(inout) :: mpiHandler
     ! Local
     integer :: ierror
+    integer :: msgCount
 
     if(mpiHandler%mpiEnabled) then
-      call MPI_WaitAll(mpiHandler%msgCount, &
-                       mpiHandler%requests(1:mpiHandler%msgCount), &
-                       mpiHandler%stats(1:MPI_STATUS_SIZE,1:mpiHandler%msgCount), &
+      msgCount = mpiHandler%msgCount
+      call MPI_WaitAll(msgCount, &
+                       mpiHandler%requests(1:msgCount), &
+                       mpiHandler%stats(1:MPI_STATUS_SIZE,1:msgCount), &
                        iError)
     endif
 
