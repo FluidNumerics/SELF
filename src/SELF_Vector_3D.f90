@@ -60,7 +60,7 @@ contains
     integer,intent(in) :: nElem
     ! local
     integer :: i
-    
+
     this%interp => interp
     this%nVar = nVar
     this%nElem = nElem
@@ -76,15 +76,14 @@ contains
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:3*nVar))
 
-
     ! Initialize equation parser
     ! This is done to prevent segmentation faults that arise
-    ! when building with amdflang that are traced back to 
+    ! when building with amdflang that are traced back to
     ! feqparse_functions.f90 : finalize routine
-    ! When the equation parser is not initialized, the 
-    ! functions are not allocated, which I think are the 
+    ! When the equation parser is not initialized, the
+    ! functions are not allocated, which I think are the
     ! source of the segfault - joe@fluidnumerics.com
-    do i = 1, 3*nvar
+    do i = 1,3*nvar
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
