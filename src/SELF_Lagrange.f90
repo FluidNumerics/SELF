@@ -182,6 +182,7 @@ contains
              this%dgMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
 
+    !$omp target enter data map(alloc: this)
     !$omp target enter data map(alloc: this % controlPoints)
     !$omp target enter data map(alloc: this % targetPoints)
     !$omp target enter data map(alloc: this % bWeights)
@@ -266,6 +267,7 @@ contains
     !$omp target exit data map(delete: this % dMatrix)
     !$omp target exit data map(delete: this % dgMatrix)
     !$omp target exit data map(delete: this % bMatrix)
+    !$omp target exit data map(delete: this)
 
   endsubroutine Free_Lagrange
 
@@ -580,13 +582,13 @@ contains
     !! The number of spectral elements in the SEM grid
     real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
     !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(out) :: fTarget(1:this%M+1,1:nelems,1:nvars)
+    real(prec),intent(inout) :: fTarget(1:this%M+1,1:nelems,1:nvars)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: iel,ivar,i,ii
     real(prec) :: floc
 
-    !$omp target map(to:f,this % iMatrix) map(from:fTarget)
+    !$omp target map(to:f,this%iMatrix) map(tofrom:fTarget)
     !$omp teams distribute parallel do collapse(3) num_threads(256)
     do ivar = 1,nvars
       do iel = 1,nelems

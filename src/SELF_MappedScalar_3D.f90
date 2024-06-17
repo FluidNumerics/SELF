@@ -442,7 +442,7 @@ contains
     integer    :: i,j,k,iEl,iVar,row,col
 
     ! Interior
-    !$omp target map(to: geometry % dsdx % interior, this % interior) map(from: this % JaScaalar % interior)
+    !$omp target map(to: geometry % dsdx % interior, this % interior) map(from: this % JaScalar % interior)
     !$omp teams distribute parallel do collapse(7) num_threads(256)
     do col = 1,3
       do row = 1,3
