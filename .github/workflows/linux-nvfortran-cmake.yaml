@@ -25,13 +25,13 @@ jobs:
       fail-fast: false
       matrix:
         toolchain:
-          - {compiler: nvidia-hpc, version: '23.11'}
+          - {compiler: nvidia-hpc, version: '24.5'}
         include:
             - os: ubuntu-22.04
               shell: bash
               build_type: debug
-              toolchain: {compiler: nvidia-hpc, version: '23.11'}
-              spack_compiler: nvhpc@=23.11
+              toolchain: {compiler: nvidia-hpc, version: '24.5'}
+              spack_compiler: nvhpc@=24.5
               spack_os: "ubuntu:22.04"
 
     defaults:
@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies in spack environment
         run: |
           spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
-          spack -e . compiler find /opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin
+          spack -e . compiler find /opt/nvidia/hpc_sdk/Linux_x86_64/24.5/compilers/bin
           spack -e . external find --not-buildable
           spack -e . config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
           spack -e . config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
