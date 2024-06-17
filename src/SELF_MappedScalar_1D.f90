@@ -156,7 +156,7 @@ contains
                                        this%extBoundary(2,iel,ivar))
       enddo
     enddo
-    !$omp end do
+    !$omp end target
 
   endsubroutine BassiRebaySides_MappedScalar1D
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bash -e
 
-GPU_TARGET=gfx90a
+OMP_TARGET=none
 #WORKSPACE_ROOT=$HOME/.local/workspace/
 WORKSPACE_ROOT=/scratch/joe/workspace
 BUILD_TYPE=coverage
@@ -9,7 +9,7 @@ SRC_DIR=$(pwd)
 BUILD_DIR=/scratch/joe/build
 
 module load gcc/13.2.0
-module load openmpi/5.0.1 hdf5/1.12.3 feq-parse/2.1.0
+module load openmpi/5.0.1 hdf5/1.12.3 feq-parse/2.2.2
 
 # Clean out any old builds
 rm -rf ${BUILD_DIR}
@@ -20,7 +20,7 @@ cd ${BUILD_DIR}
 
 FC=gfortran \
 cmake -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
-      -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
+      -DOMP_TARGET=${OMP_TARGET} \
       -DCMAKE_INSTALL_PREFIX=${WORKSPACE_ROOT}/opt/self \
       -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
       ${SRC_DIR}

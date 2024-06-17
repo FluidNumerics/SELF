@@ -293,6 +293,7 @@ contains
           enddo
         enddo
       enddo
+      !$omp end target
 
     elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
@@ -423,6 +424,7 @@ contains
           enddo
         enddo
       enddo
+      !$omp end target
 
     else ! Main looping section - nVar the previous solution, store the new solution, and
       ! create an interpolated solution to use for tendency calculation
