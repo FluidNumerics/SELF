@@ -23,8 +23,14 @@
 #  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # 
 #  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
-cmake_minimum_required(VERSION 3.21) # HIP language support requires 3.21 or gretater
+cmake_minimum_required(VERSION 3.21)
 cmake_policy(VERSION 3.21...3.27)
+
+# Defaults to "none", which disables OpenMP builds
+# Override with -DOMP_TARGET
+# - Set to "multicore" for multicore cpu
+set(OMP_TARGET "none" CACHE STRING "Target architecture for openmp.")
+
 
 if(NOT DEFINED ROCM_PATH)
     if(NOT DEFINED ENV{ROCM_PATH})
@@ -34,8 +40,8 @@ if(NOT DEFINED ROCM_PATH)
     endif()
 endif()
 
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
-
+#SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIS_D}/cmake/modules/")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/modules/OpenMPTargetOffloadFlags.cmake")
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
 project(self VERSION 1.0.0
@@ -96,23 +102,20 @@ elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NVHPC" )
     set( CMAKE_C_FLAGS_COVERAGE "-g -O0")
 endif()
 
-# check for openmp support
-# See https://cliutils.gitlab.io/modern-cmake/chapters/packages/OpenMP.html
-# Also see https://cmake.org/cmake/help/latest/module/FindOpenMP.html
-#find_package(OpenMP COMPONENTS Fortran)
-#
-# To get target offload flags
-# https://gitlab.kitware.com/cmake/cmake/-/issues/21784
-
-
-
-# ------ dependencies ------ #
-# # HIP
-# #find_package(hipfort REQUIRED COMPONENTS hip hipblas)
-# find_package(hip REQUIRED)
-# find_package(hipblas REQUIRED)
-# find_library(HIPFORT_LIBRARIES NAMES libhipfort-amdgcn.a HINTS ENV HIPFORT_ROOT REQUIRED)
-# find_path(HIPFORT_INCLUDE_DIRS hipfort.mod HINTS ENV HIPFORT_ROOT PATH_SUFFIXES include/hipfort/amdgcn/ REQUIRED)
+# Check for openmp support if offload target is provided
+if( NOT "${OMP_TARGET}" STREQUAL "none")
+    find_package(OpenMP COMPONENTS Fortran REQUIRED)
+    if( ${OpenMP_Fortran_FOUND} )
+        get_offload_flags(ARCH ${OMP_TARGET} RESULT OFFLOAD_FLAGS)
+        set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OFFLOAD_FLAGS}" )
+        set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${OFFLOAD_FLAGS}" )
+        set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} ${OFFLOAD_FLAGS}")
+        set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} ${OFFLOAD_FLAGS}")
+        set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ${OFFLOAD_FLAGS}" )
+    else()
+        message( WARNING "OpenMP target set to ${OMP_TARGET} but OpenMP_Fortran not found. GPU Offloading disabled.")
+    endif()
+endif()
 
 
 # MPI
