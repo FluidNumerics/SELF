@@ -587,7 +587,7 @@ contains
     real(prec) :: floc
 
     !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(3) num_threads(256)
+    !$omp teams distribute parallel do collapse(3)
     do ivar = 1,nvars
       do iel = 1,nelems
         do i = 1,this%M+1
@@ -634,7 +634,7 @@ contains
     real(prec) :: fi,fij
 
     !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    !$omp teams distribute parallel do collapse(4)
     do ivar = 1,nvars
       do iel = 1,nelems
         do j = 1,this%M+1
@@ -689,7 +689,7 @@ contains
     real(prec) :: fi,fij,fijk
 
     !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%M+1
@@ -752,7 +752,7 @@ contains
     real(prec) :: fi,fij
 
     !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams distribute parallel do collapse(5)
     do idir = 1,2
       do ivar = 1,nvars
         do iel = 1,nelems
@@ -807,7 +807,7 @@ contains
     real(prec) :: fi,fij,fijk
 
     !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(6) num_threads(256)
+    !$omp teams distribute parallel do collapse(6)
     do idir = 1,3
       do ivar = 1,nvars
         do iel = 1,nelems
@@ -893,7 +893,7 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(3) num_threads(256)
+    !$omp teams distribute parallel do collapse(3)
     do iel = 1,nelems
       do ivar = 1,nvars
         do i = 1,this%N+1
@@ -925,7 +925,7 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix, this % qWeights) map(from:df)
-    !$omp teams distribute parallel do collapse(3) num_threads(256)
+    !$omp teams distribute parallel do collapse(3)
     do iel = 1,nelems
       do ivar = 1,nvars
         do i = 1,this%N+1
@@ -1007,7 +1007,7 @@ contains
     real(prec) :: df1,df2
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    !$omp teams distribute parallel do collapse(4)
     do ivar = 1,nvars
       do iel = 1,nelems
         do j = 1,this%N+1
@@ -1047,7 +1047,7 @@ contains
     real(prec) :: df1,df2,df3
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1099,7 +1099,7 @@ contains
     real(prec) :: dfds1,dfds2
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams distribute parallel do collapse(5)
     do idir = 1,2
       do ivar = 1,nvars
         do iel = 1,nelems
@@ -1150,7 +1150,7 @@ contains
     real(prec) :: dfds1,dfds2,dfds3
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(6) num_threads(256)
+    !$omp teams distribute parallel do collapse(6)
     do idir = 1,3
       do ivar = 1,nvars
         do iel = 1,nelems
@@ -1202,7 +1202,8 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    !$omp teams
+    !$omp distribute parallel do collapse(4)
     do ivar = 1,nvars
       do iel = 1,nelems
         do j = 1,this%N+1
@@ -1219,7 +1220,7 @@ contains
       enddo
     enddo
 
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    !$omp distribute parallel do collapse(4)
     do ivar = 1,nvars
       do iel = 1,nelems
         do j = 1,this%N+1
@@ -1235,7 +1236,7 @@ contains
         enddo
       enddo
     enddo
-
+    !$omp end teams
     !$omp end target
 
     ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1)
@@ -1258,7 +1259,8 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix, this % qWeights) map(from:df)
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    !$omp teams
+    !$omp distribute parallel do collapse(4)
     do ivar = 1,nvars
       do iel = 1,nelems
         do j = 1,this%N+1
@@ -1277,7 +1279,7 @@ contains
       enddo
     enddo
 
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
+    !$omp distribute parallel do collapse(4)
     do ivar = 1,nvars
       do iel = 1,nelems
         do j = 1,this%N+1
@@ -1296,6 +1298,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
 
     ! ! Interior components of the vector divergence
@@ -1324,9 +1327,10 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
+    !$omp teams
     do idir = 1,2
 
-      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      !$omp distribute parallel do collapse(4)
       do ivar = 1,nvars
         do iel = 1,nelems
           do j = 1,this%N+1
@@ -1343,7 +1347,7 @@ contains
         enddo
       enddo
 
-      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      !$omp distribute parallel do collapse(4)
       do ivar = 1,nvars
         do iel = 1,nelems
           do j = 1,this%N+1
@@ -1360,6 +1364,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
 
     ! local
@@ -1394,9 +1399,10 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix, this % qWeights) map(from:df)
+    !$omp teams
     do idir = 1,2
 
-      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      !$omp distribute parallel do collapse(4)
       do ivar = 1,nvars
         do iel = 1,nelems
           do j = 1,this%N+1
@@ -1415,7 +1421,7 @@ contains
         enddo
       enddo
 
-      !$omp teams distribute parallel do collapse(4) num_threads(256)
+      !$omp distribute parallel do collapse(4)
       do ivar = 1,nvars
         do iel = 1,nelems
           do j = 1,this%N+1
@@ -1435,6 +1441,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
 
 ! ! local
@@ -1480,7 +1487,8 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams
+    !$omp distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1499,7 +1507,7 @@ contains
       enddo
     enddo
 
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1518,7 +1526,7 @@ contains
       enddo
     enddo
 
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1536,6 +1544,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
 
     ! ! local
@@ -1563,7 +1572,8 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix,this % qWeights) map(from:df)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams
+    !$omp distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1584,7 +1594,7 @@ contains
       enddo
     enddo
 
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1606,7 +1616,7 @@ contains
       enddo
     enddo
 
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp distribute parallel do collapse(5)
     do ivar = 1,nvars
       do iel = 1,nelems
         do k = 1,this%N+1
@@ -1627,6 +1637,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
 
     !     ! local
@@ -1658,8 +1669,9 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,this % dMatrix) map(from:df)
+    !$omp teams
     do idir = 1,3
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      !$omp distribute parallel do collapse(5)
       do ivar = 1,nvars
         do iel = 1,nelems
           do k = 1,this%N+1
@@ -1677,7 +1689,7 @@ contains
           enddo
         enddo
       enddo
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      !$omp distribute parallel do collapse(5)
       do ivar = 1,nvars
         do iel = 1,nelems
           do k = 1,this%N+1
@@ -1695,7 +1707,7 @@ contains
           enddo
         enddo
       enddo
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      !$omp distribute parallel do collapse(5)
       do ivar = 1,nvars
         do iel = 1,nelems
           do k = 1,this%N+1
@@ -1714,6 +1726,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
     ! ! local
     ! integer :: idir
@@ -1750,8 +1763,9 @@ contains
     real(prec) :: dfLoc
 
     !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix,this % qWeights) map(from:df)
+    !$omp teams
     do idir = 1,3
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      !$omp distribute parallel do collapse(5)
       do ivar = 1,nvars
         do iel = 1,nelems
           do k = 1,this%N+1
@@ -1771,7 +1785,7 @@ contains
           enddo
         enddo
       enddo
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      !$omp distribute parallel do collapse(5)
       do ivar = 1,nvars
         do iel = 1,nelems
           do k = 1,this%N+1
@@ -1792,7 +1806,7 @@ contains
           enddo
         enddo
       enddo
-      !$omp teams distribute parallel do collapse(5) num_threads(256)
+      !$omp distribute parallel do collapse(5)
       do ivar = 1,nvars
         do iel = 1,nelems
           do k = 1,this%N+1
@@ -1814,6 +1828,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
     !$omp end target
     ! local
     ! real(prec),pointer :: bfloc(:,:,:,:,:)
