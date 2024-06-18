@@ -71,7 +71,7 @@ contains
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior(:,:,:) = 1.0_prec
 
-    call f%GridInterp(fTarget)
+    fTarget%interior = f%GridInterp()
 
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)

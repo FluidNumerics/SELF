@@ -556,7 +556,7 @@ contains
     call this%SourceMethod()
     call this%RiemannSolver()
     call this%FluxMethod()
-    call this%flux%DGDerivative(this%geometry,this%fluxDivergence%interior)
+    this%fluxDivergence%interior = this%flux%DGDerivative(this%geometry)
 
     !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
     !$omp teams distribute parallel do collapse(3) num_threads(256)
@@ -635,10 +635,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x)
+      x%interior = this%geometry%x%GridInterp()
 
       ! Map the solution to the target grid
-      call this%solution%GridInterp(solution)
+      solution%interior = this%solution%GridInterp()
 
       ! Write the model state to file
       call CreateGroup_HDF5(fileId,'/targetgrid')
@@ -687,10 +687,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x)
+      x % interior = this%geometry%x%GridInterp()
 
       ! Map the solution to the target grid
-      call this%solution%GridInterp(solution)
+      solution % interior = this%solution%GridInterp()
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
@@ -788,10 +788,10 @@ contains
     call x%Init(interp,1,this%solution%nElem)
 
     ! Map the mesh positions to the target grid
-    call this%geometry%x%GridInterp(x)
+    x % interior = this%geometry%x%GridInterp()
 
     ! Map the solution to the target grid
-    call this%solution%GridInterp(solution)
+    solution % interior = this%solution%GridInterp()
 
     fmat = '(2(ES16.7E3,1x))'
     ! Let's write some tecplot!!

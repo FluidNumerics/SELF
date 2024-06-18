@@ -160,85 +160,100 @@ contains
 
   endsubroutine BassiRebaySides_MappedScalar1D
 
-  subroutine Derivative_MappedScalar1D(this,geometry,dF)
+  pure function Derivative_MappedScalar1D(this,geometry) result(dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
-    integer :: iEl,iVar,i
+    integer :: iEl,iVar,i,ii
+    real(prec) :: dfloc
 
-    call this%interp%Derivative_1D(this%interior, &
-                                   df, &
-                                   this%nVar, &
-                                   this%nElem)
-    !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
+    !$omp target map(to:this%interior,this%interp%dMatrix,geometry % dxds % interior) map(from:df)
     !$omp teams distribute parallel do collapse(3)
-    do iEl = 1,this%nElem
-      do iVar = 1,this%nVar
-        do i = 1,this%interp%N+1
-          df(i,iEl,iVar) = df(i,iEl,iVar)/ &
-                           geometry%dxds%interior(i,iEl,1)
-        enddo
-      enddo
-    enddo
-    !$omp end target
-  endsubroutine Derivative_MappedScalar1D
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do i = 1,this%N+1
 
-  subroutine DGDerivative_MappedScalar1D(this,geometry,dF)
-    implicit none
-    class(MappedScalar1D),intent(in) :: this
-    type(Geometry1D),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
-    ! Local
-    integer :: iEl,iVar,i
+          dfloc = 0.0_prec
+          do ii = 1,this%N+1
+            dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
+          enddo
+          df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
 
-    call this%interp%DGDerivative_1D(this%interior, &
-                                     this%boundary, &
-                                     df, &
-                                     this%nVar, &
-                                     this%nElem)
-
-    !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
-    !$omp teams distribute parallel do collapse(3)
-    do iEl = 1,this%nElem
-      do iVar = 1,this%nVar
-        do i = 1,this%interp%N+1
-          df(i,iEl,iVar) = df(i,iEl,iVar)/ &
-                           geometry%dxds%interior(i,iEl,1)
         enddo
       enddo
     enddo
     !$omp end target
 
-  endsubroutine DGDerivative_MappedScalar1D
+  endfunction Derivative_MappedScalar1D
 
-  subroutine BRDerivative_MappedScalar1D(this,geometry,dF)
+  pure function DGDerivative_MappedScalar1D(this,geometry) result(dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
-    integer :: iEl,iVar,i
+    integer :: iEl,iVar,i,ii
+    real(prec) :: dfloc
 
-    call this%interp%DGDerivative_1D(this%interior, &
-                                     this%avgboundary, &
-                                     df, &
-                                     this%nVar, &
-                                     this%nElem)
-
-    !$omp target map(to:geometry % dxds % interior) map(tofrom:df)
+    !$omp target map(to:this%interior,this%boundary,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qWeights,geometry%dxds%interior) map(from:df)
     !$omp teams distribute parallel do collapse(3)
-    do iEl = 1,this%nElem
-      do iVar = 1,this%nVar
-        do i = 1,this%interp%N+1
-          df(i,iEl,iVar) = df(i,iEl,iVar)/ &
-                           geometry%dxds%interior(i,iEl,1)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do i = 1,this%N+1
+
+          dfloc = 0.0_prec
+          do ii = 1,this%N+1
+            dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
+          enddo
+
+          dfloc = dfloc+(this%boundary(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
+                                  this%boundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
+                           this%interp%qWeights(i)
+
+          df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
+
+
         enddo
       enddo
     enddo
     !$omp end target
 
-  endsubroutine BRDerivative_MappedScalar1D
+  endfunction DGDerivative_MappedScalar1D
+
+  function BRDerivative_MappedScalar1D(this,geometry) result(dF)
+    implicit none
+    class(MappedScalar1D),intent(in) :: this
+    type(Geometry1D),intent(in) :: geometry
+    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer :: iEl,iVar,i,ii
+    real(prec) :: dfloc
+
+    !$omp target map(to:this%interior,this%avgboundary,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qWeights,geometry%dxds%interior) map(from:df)
+    !$omp teams distribute parallel do collapse(3)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do i = 1,this%N+1
+
+          dfloc = 0.0_prec
+          do ii = 1,this%N+1
+            dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
+          enddo
+
+          dfloc = dfloc+(this%avgboundary(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
+                                  this%avgboundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
+                           this%interp%qWeights(i)
+
+          df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
+
+
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+  endfunction BRDerivative_MappedScalar1D
 
 endmodule SELF_MappedScalar_1D

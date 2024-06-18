@@ -43,11 +43,11 @@ module SELF_Scalar_1D
 ! ---------------------- Scalars ---------------------- !
   type,extends(SELF_DataObj),public :: Scalar1D
 
-    real(prec),pointer,dimension(:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:) :: jumpBoundary
+    real(prec),allocatable,dimension(:,:,:) :: interior
+    real(prec),allocatable,dimension(:,:,:) :: boundary
+    real(prec),allocatable,dimension(:,:,:) :: extBoundary
+    real(prec),allocatable,dimension(:,:,:) :: avgBoundary
+    real(prec),allocatable,dimension(:,:,:) :: jumpBoundary
 
   contains
 
@@ -123,37 +123,81 @@ contains
   subroutine BoundaryInterp_Scalar1D(this)
     implicit none
     class(Scalar1D),intent(inout) :: this
+    ! Local
+    integer :: ii,iel,ivar
+    real(prec) :: fb(1:2)
 
-    call this%interp%ScalarBoundaryInterp_1D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(2)
+    do iel = 1,this%nelem
+      do ivar = 1,this%nvar
+        fb(1:2) = 0.0_prec
+        do ii = 1,this%N+1
+          fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(ii,iel,ivar) ! West
+          fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,iel,ivar) ! East
+        enddo
+        this%boundary(1:2,iel,ivar) = fb(1:2)
+      enddo
+    enddo
+    !$omp end target
+    !call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,handle)
 
   endsubroutine BoundaryInterp_Scalar1D
 
-  subroutine GridInterp_Scalar1D(this,that)
+  pure function GridInterp_Scalar1D(this) result(f)
     implicit none
     class(Scalar1D),intent(in) :: this
-    type(Scalar1D),intent(inout) :: that
+    real(prec) :: f(1:this%M+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer :: iel,ivar,i,ii
+    real(prec) :: floc
 
-    call this%interp%ScalarGridInterp_1D(this%interior, &
-                                         that%interior, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp teams distribute parallel do collapse(3)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do i = 1,this%M+1
+          floc = 0.0_prec
+          do ii = 1,this%N+1
+            floc = floc+this%interp%iMatrix(ii,i)*this%interior(ii,iel,ivar)
+          enddo
+          f(i,iel,ivar) = floc
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
-  endsubroutine GridInterp_Scalar1D
+  endfunction GridInterp_Scalar1D
 
-  subroutine Derivative_Scalar1D(this,that)
+  pure function Derivative_Scalar1D(this) result(df)
     implicit none
     class(Scalar1D),intent(in) :: this
-    real(prec),intent(out) :: that(1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
 
-    call this%interp%Derivative_1D(this%interior, &
-                                   that, &
-                                   this%nVar, &
-                                   this%nElem)
+    ! Local
+    integer :: i,ii,iel,ivar
+    real(prec) :: dfloc
 
-  endsubroutine Derivative_Scalar1D
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams distribute parallel do collapse(3)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do i = 1,this%N+1
+
+          dfloc = 0.0_prec
+          do ii = 1,this%N+1
+            dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
+          enddo
+          df(i,iel,ivar) = dfloc
+
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+    !call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
+
+  endfunction Derivative_Scalar1D
 
   subroutine WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
     implicit none

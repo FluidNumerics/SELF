@@ -110,7 +110,7 @@ contains
     enddo
 
     ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    call xMesh%GridInterp(myGeom%x)
+    myGeom%x%interior = xMesh%GridInterp()
 
     call myGeom%x%BoundaryInterp()
 
@@ -126,7 +126,7 @@ contains
     implicit none
     class(Geometry1D),intent(inout) :: myGeom
 
-    call myGeom%x%Derivative(myGeom%dxds%interior)
+    myGeom%dxds%interior = myGeom%x%Derivative()
     call myGeom%dxds%BoundaryInterp()
 
   endsubroutine CalculateMetricTerms_Geometry1D

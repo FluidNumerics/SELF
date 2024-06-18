@@ -97,7 +97,7 @@ contains
     call f%BassiRebaySides()
     print*,"min, max (avgboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
 
-    call f%BRDerivative(geometry,df%interior)
+    df%interior = f%BRDerivative(geometry)
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 

@@ -96,7 +96,7 @@ contains
 
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
-    call f%DGDerivative(geometry,df%interior)
+    df%interior = f%DGDerivative(geometry)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

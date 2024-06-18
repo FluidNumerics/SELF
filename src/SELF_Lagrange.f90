@@ -65,7 +65,7 @@ module SELF_Lagrange
     type(c_ptr) :: blas_handle = c_null_ptr
       !! A handle for working with hipblas
 
-    real(prec),pointer,dimension(:) :: controlPoints
+    real(prec),allocatable,dimension(:) :: controlPoints
       !! The set of nodes in one dimension where data is known.
       !! To create higher dimension interpolation and differentiation operators, structured grids in two and three
       !! dimensions are created by tensor products of the controlPoints. This design decision implies that all
@@ -75,33 +75,33 @@ module SELF_Lagrange
       !! the domain [-1,1] (computational space). The Init routine for this class restricts controlPoints to one of
       !! these quadrature types or uniform points on [-1,1].
 
-    real(prec),pointer,dimension(:) :: targetPoints
+    real(prec),allocatable,dimension(:) :: targetPoints
       !! The set of nodes in one dimension where data is to be interpolated to. To create higher dimension interpolation
       !! and differentiation operators, structured grids in two and three dimensions are created by tensor products of
       !! the targetPoints. In practice, the targetPoints are set to a uniformly distributed set of points between [-1,1]
       !! (computational space) to allow for interpolation from unevenly spaced quadrature points to a plotting grid.
 
-    real(prec),pointer,dimension(:) :: bWeights
+    real(prec),allocatable,dimension(:) :: bWeights
       !! The barycentric weights that are calculated from the controlPoints and used for interpolation.
 
-    real(prec),pointer,dimension(:) :: qWeights
+    real(prec),allocatable,dimension(:) :: qWeights
       !! The quadrature weights for discrete integration. The quadradture weights depend on the type of controlPoints
       !! provided; one of Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss,
       !! Chebyshev-Gauss-Lobatto, Chebyshev-Gauss Radau, or Uniform. If Uniform, the quadrature weights are constant
       !! $$dx = \frac{2.0}{N+1}$$.
 
-    real(prec),pointer,dimension(:,:) :: iMatrix
+    real(prec),allocatable,dimension(:,:) :: iMatrix
       !! The interpolation matrix (transpose) for mapping data from the control grid to the target grid.
 
-    real(prec),pointer,dimension(:,:) :: dMatrix
+    real(prec),allocatable,dimension(:,:) :: dMatrix
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The
       !! dMatrix is based on a strong form of the derivative.
 
-    real(prec),pointer,dimension(:,:) :: dgMatrix
+    real(prec),allocatable,dimension(:,:) :: dgMatrix
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The dgMatrix is based
       !! on a weak form of the derivative. It must be used with bMatrix to account for boundary contributions in the weak form.
 
-    real(prec),pointer,dimension(:,:) :: bMatrix
+    real(prec),allocatable,dimension(:,:) :: bMatrix
       !! The boundary interpolation matrix that is used to map a grid of nodal values at the control points to the element boundaries.
 
   contains
@@ -109,20 +109,16 @@ module SELF_Lagrange
     procedure,public :: Init => Init_Lagrange
     procedure,public :: Free => Free_Lagrange
 
-    procedure,public :: ScalarGridInterp_1D
     procedure,public :: ScalarGridInterp_2D
     procedure,public :: VectorGridInterp_2D
     procedure,public :: ScalarGridInterp_3D
     procedure,public :: VectorGridInterp_3D
-    procedure,public :: ScalarBoundaryInterp_1D
     procedure,public :: ScalarBoundaryInterp_2D
     procedure,public :: ScalarBoundaryInterp_3D
     procedure,public :: VectorBoundaryInterp_2D
     procedure,public :: VectorBoundaryInterp_3D
     procedure,public :: TensorBoundaryInterp_2D
     procedure,public :: TensorBoundaryInterp_3D
-    procedure,public :: Derivative_1D
-    procedure,public :: DGDerivative_1D
     procedure,public :: ScalarGradient_2D
     procedure,public :: ScalarGradient_3D
     procedure,public :: VectorGradient_2D
@@ -560,53 +556,6 @@ contains
 
 !   end subroutine self_hipblas_matrixop_dim3_3d
 
-  subroutine ScalarGridInterp_1D(this,f,fTarget,nvars,nelems)
-    !! Host (CPU) implementation of the ScalarGridInterp_1D interface.
-    !! In most cases, you should use the `ScalarGridInterp_1D` generic interface,
-    !! rather than calling this routine directly.
-    !! Interpolate a scalar-1D (real) array from the control grid to the target grid.
-    !! The control and target grids are the ones associated with an initialized
-    !! Lagrange instance.
-    !!
-    !! Interpolation is applied using a series of matrix-vector multiplications, using
-    !! the Lagrange class's interpolation matrix
-    !!
-    !! $$ \tilde{f}_{m,iel,ivar} = \sum_{i=0}^N f_{i,iel,ivar} I_{i,m} $$
-    !!
-    implicit none
-    class(Lagrange),intent(in) :: this
-    !! Lagrange class instance
-    integer,intent(in)     :: nvars
-    !! The number of variables/functions that are interpolated
-    integer,intent(in)     :: nelems
-    !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
-    !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(inout) :: fTarget(1:this%M+1,1:nelems,1:nvars)
-    !! (Output) Array of function values, defined on the target grid
-    ! Local
-    integer :: iel,ivar,i,ii
-    real(prec) :: floc
-
-    !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(3)
-    do ivar = 1,nvars
-      do iel = 1,nelems
-        do i = 1,this%M+1
-          floc = 0.0_prec
-          do ii = 1,this%N+1
-            floc = floc+this%iMatrix(ii,i)*f(ii,iel,ivar)
-          enddo
-          fTarget(i,iel,ivar) = floc
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-    !   call self_hipblas_matrixop_1d(this % iMatrix,f,fTarget,this % M + 1,this % N + 1,nvars*nelems,handle)
-
-  endsubroutine ScalarGridInterp_1D
-
   subroutine ScalarGridInterp_2D(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_2D interface.
     !! In most cases, you should use the `ScalarGridInterp_2D` generic interface,
@@ -884,74 +833,8 @@ contains
 !
 ! ================================================================================================ !
 
-  subroutine Derivative_1D(this,f,df,nvars,nelems)
-    implicit none
-    class(Lagrange),intent(in) :: this
-    integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this%N+1,1:nelems,1:nvars)
-    ! Local
-    integer :: i,ii,iel,ivar
-    real(prec) :: dfloc
 
-    !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(3)
-    do iel = 1,nelems
-      do ivar = 1,nvars
-        do i = 1,this%N+1
 
-          dfloc = 0.0_prec
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%dMatrix(ii,i)*f(ii,iel,ivar)
-          enddo
-          df(i,iel,ivar) = dfloc
-
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-    !call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
-
-  endsubroutine Derivative_1D
-
-  subroutine DGDerivative_1D(this,f,bf,df,nvars,nelems)
-    implicit none
-    class(Lagrange),intent(in) :: this
-    integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this%N+1,1:nelems,1:nvars)
-    real(prec),intent(in)  :: bf(1:2,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this%N+1,1:nelems,1:nvars)
-    ! Local
-    integer :: i,ii,iel,ivar
-    real(prec) :: dfloc
-
-    !$omp target map(to:f,bf,this % dgMatrix,this % bMatrix, this % qWeights) map(from:df)
-    !$omp teams distribute parallel do collapse(3)
-    do iel = 1,nelems
-      do ivar = 1,nvars
-        do i = 1,this%N+1
-
-          dfloc = 0.0_prec
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%dgMatrix(ii,i)*f(ii,iel,ivar)
-          enddo
-
-          df(i,iel,ivar) = dfloc+(bf(2,iel,ivar)*this%bMatrix(i,2)+ &
-                                  bf(1,iel,ivar)*this%bMatrix(i,1))/ &
-                           this%qWeights(i)
-
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-    ! call self_hipblas_matrixop_1d(this % dgMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
-
-    ! call DGDerivative_BoundaryContribution_1D_gpu(c_loc(this % bMatrix),c_loc(this % qWeights), &
-    !                     c_loc(bf), c_loc(df), this % N, nvars, nelems)
-
-  endsubroutine DGDerivative_1D
 
 ! ================================================================================================ !
 !
@@ -1874,33 +1757,6 @@ contains
 
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !
-
-  subroutine ScalarBoundaryInterp_1D(this,f,fTarget,nvars,nelems)
-    implicit none
-    class(Lagrange),intent(in) :: this
-    integer,intent(in)         :: nvars,nelems
-    real(prec),intent(in)      :: f(1:this%N+1,1:nelems,1:nvars)
-    real(prec),intent(inout)   :: fTarget(1:2,1:nelems,1:nvars)
-    ! Local
-    integer :: ii,iel,ivar
-    real(prec) :: fb(1:2)
-
-    !$omp target map(to:f,this % bMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(2)
-    do iel = 1,nelems
-      do ivar = 1,nvars
-        fb(1:2) = 0.0_prec
-        do ii = 1,this%N+1
-          fb(1) = fb(1)+this%bMatrix(ii,1)*f(ii,iel,ivar) ! West
-          fb(2) = fb(2)+this%bMatrix(ii,2)*f(ii,iel,ivar) ! East
-        enddo
-        fTarget(1:2,iel,ivar) = fb(1:2)
-      enddo
-    enddo
-    !$omp end target
-    !call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,handle)
-
-  endsubroutine ScalarBoundaryInterp_1D
 
   subroutine ScalarBoundaryInterp_2D(this,f,fTarget,nvars,nelems)
     implicit none

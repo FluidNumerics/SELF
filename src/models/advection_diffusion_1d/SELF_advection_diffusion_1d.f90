@@ -88,9 +88,8 @@ contains
     call this%solution%BassiRebaySides()
 
     ! calculate the derivative using the bassi-rebay form
-    call this%solution%BRDerivative(this%geometry, &
-                                    this%solutionGradient%interior)
-
+    this%solutionGradient%interior = this%solution%BRDerivative(this%geometry)
+                                    
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
 

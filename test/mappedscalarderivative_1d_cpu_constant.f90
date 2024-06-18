@@ -81,7 +81,7 @@ contains
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
 
-    call f%Derivative(geometry,df%interior)
+    df%interior = f%Derivative(geometry)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
