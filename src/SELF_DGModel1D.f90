@@ -281,8 +281,8 @@ contains
 
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       nVar = this%solution%nVar
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(3) num_threads(256)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -328,8 +328,8 @@ contains
     else ! Main looping section - nVar the previous solution, store the new solution, and
       ! create an interpolated solution to use for tendency calculation
 
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       nVar = this%solution%nVar
+      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       !$omp teams distribute parallel do collapse(3) num_threads(256)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -366,8 +366,8 @@ contains
 
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       nVar = this%solution%nVar
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(3) num_threads(256)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -382,8 +382,8 @@ contains
 
     elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       nVar = this%solution%nVar
+      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams distribute parallel do collapse(3) num_threads(256)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -429,8 +429,8 @@ contains
     else ! Main looping section - nVar the previous solution, store the new solution, and
       ! create an interpolated solution to use for tendency calculation
 
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       nVar = this%solution%nVar
+      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
       !$omp teams distribute parallel do collapse(3) num_threads(256)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
