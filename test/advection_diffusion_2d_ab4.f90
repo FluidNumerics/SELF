@@ -74,7 +74,7 @@ program advection_diffusion_2d_ab4
   modelobj%nu = nu
 
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = \exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
+  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
   print*,"min, max (interior)", &
