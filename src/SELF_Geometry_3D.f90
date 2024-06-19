@@ -115,7 +115,7 @@ contains
     type(Mesh3D),intent(in) :: mesh
     ! Local
     integer :: iel
-    integer :: i,j,k,nid
+    integer :: i,j,k
     type(Lagrange),target :: meshToModel
     type(Vector3D) :: xMesh
 
@@ -137,7 +137,7 @@ contains
       enddo
     enddo
 
-    call xMesh%GridInterp(myGeom%x)
+    myGeom%x%interior = xMesh%GridInterp()
     call myGeom%x%BoundaryInterp()
     call myGeom%CalculateMetricTerms()
 
@@ -263,77 +263,105 @@ contains
     integer :: iEl,i,j,k
     real(prec) :: fac
     real(prec) :: mag
+    type(Vector3D) :: xlgradxm, xmgradxl
+    type(Vector3D) :: curl_xlgradxm, curl_xmgradxl
 
-    ! Now calculate the contravariant basis vectors
-    ! In this convention, dsdx(j,i) is contravariant vector i, component j
-    ! To project onto contravariant vector i, dot vector along the first dimension
-    ! TO DO : Curl Invariant Form
+    ! Here we use the curl invariant form from Kopriva (2006)
+    ! to calculate the contravariant basis vectors
+    call xlgradxm%Init(myGeom%x%interp,1,myGeom%x%nElem)
+    call xmgradxl%Init(myGeom%x%interp,1,myGeom%x%nElem)
+
+    call curl_xlgradxm%Init(myGeom%x%interp,1,myGeom%x%nElem)
+    call curl_xmgradxl%Init(myGeom%x%interp,1,myGeom%x%nElem)
+
+    ! Ja^{1:3}_1 (n=1, m=2, l=3) First component of the contravariant basis vectors
     do iEl = 1,myGeom%nElem
       do k = 1,myGeom%dxds%interp%N+1
         do j = 1,myGeom%dxds%interp%N+1
           do i = 1,myGeom%dxds%interp%N+1
-
-            ! Ja1
-            myGeom%dsdx%interior(i,j,k,iel,1,1,1) = &
-              myGeom%dxds%interior(i,j,k,iel,1,2,2)* &
-              myGeom%dxds%interior(i,j,k,iel,1,3,3)- &
-              myGeom%dxds%interior(i,j,k,iel,1,3,2)* &
-              myGeom%dxds%interior(i,j,k,iel,1,2,3)
-
-            myGeom%dsdx%interior(i,j,k,iel,1,2,1) = &
-              myGeom%dxds%interior(i,j,k,iel,1,1,3)* &
-              myGeom%dxds%interior(i,j,k,iel,1,3,2)- &
-              myGeom%dxds%interior(i,j,k,iel,1,3,3)* &
-              myGeom%dxds%interior(i,j,k,iel,1,1,2)
-
-            myGeom%dsdx%interior(i,j,k,iel,1,3,1) = &
-              myGeom%dxds%interior(i,j,k,iel,1,1,2)* &
-              myGeom%dxds%interior(i,j,k,iel,1,2,3)- &
-              myGeom%dxds%interior(i,j,k,iel,1,2,2)* &
-              myGeom%dxds%interior(i,j,k,iel,1,1,3)
-
-            ! Ja2
-            myGeom%dsdx%interior(i,j,k,iel,1,1,2) = &
-              myGeom%dxds%interior(i,j,k,iel,1,2,3)* &
-              myGeom%dxds%interior(i,j,k,iel,1,3,1)- &
-              myGeom%dxds%interior(i,j,k,iel,1,3,3)* &
-              myGeom%dxds%interior(i,j,k,iel,1,2,1)
-
-            myGeom%dsdx%interior(i,j,k,iel,1,2,2) = &
-              myGeom%dxds%interior(i,j,k,iel,1,1,1)* &
-              myGeom%dxds%interior(i,j,k,iel,1,3,3)- &
-              myGeom%dxds%interior(i,j,k,iel,1,3,1)* &
-              myGeom%dxds%interior(i,j,k,iel,1,1,3)
-
-            myGeom%dsdx%interior(i,j,k,iel,1,3,2) = &
-              myGeom%dxds%interior(i,j,k,iel,1,1,3)* &
-              myGeom%dxds%interior(i,j,k,iel,1,2,1)- &
-              myGeom%dxds%interior(i,j,k,iel,1,2,3)* &
-              myGeom%dxds%interior(i,j,k,iel,1,1,1)
-
-            ! Ja3
-            myGeom%dsdx%interior(i,j,k,iel,1,1,3) = &
-              myGeom%dxds%interior(i,j,k,iel,1,2,1)* &
-              myGeom%dxds%interior(i,j,k,iel,1,3,2)- &
-              myGeom%dxds%interior(i,j,k,iel,1,3,1)* &
-              myGeom%dxds%interior(i,j,k,iel,1,2,2)
-
-            myGeom%dsdx%interior(i,j,k,iel,1,2,3) = &
-              myGeom%dxds%interior(i,j,k,iel,1,1,2)* &
-              myGeom%dxds%interior(i,j,k,iel,1,3,1)- &
-              myGeom%dxds%interior(i,j,k,iel,1,3,2)* &
-              myGeom%dxds%interior(i,j,k,iel,1,1,1)
-
-            myGeom%dsdx%interior(i,j,k,iel,1,3,3) = &
-              myGeom%dxds%interior(i,j,k,iel,1,1,1)* &
-              myGeom%dxds%interior(i,j,k,iel,1,2,2)- &
-              myGeom%dxds%interior(i,j,k,iel,1,2,1)* &
-              myGeom%dxds%interior(i,j,k,iel,1,1,2)
-
+            xlgradxm%interior(i,j,k,iel,1,1:3) = myGeom%x%interior(i,j,k,iel,1,3)*myGeom%dxds%interior(i,j,k,iel,1,2,1:3) ! x(...,l)*dxds(...,m,1:3) ; l=3,m=2
+            xmgradxl%interior(i,j,k,iel,1,1:3) = myGeom%x%interior(i,j,k,iel,1,2)*myGeom%dxds%interior(i,j,k,iel,1,3,1:3) ! x(...,m)*dxds(...,l,1:3) ; l=3,m=2
           enddo
         enddo
       enddo
     enddo
+
+    curl_xlgradxm%interior = xlgradxm%Curl()
+    curl_xmgradxl%interior = xmgradxl%Curl()
+
+    do iEl = 1,myGeom%nElem
+      do k = 1,myGeom%dxds%interp%N+1
+        do j = 1,myGeom%dxds%interp%N+1
+          do i = 1,myGeom%dxds%interp%N+1
+            ! In our convention, dsdx(i,j) is contravariant vector j, component i
+            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n; 
+            ! Here, i = 1:3, and n=1
+            myGeom%dsdx%interior(i,j,k,iel,1,1,1:3) = 0.5_prec*( curl_xmgradxl%interior(i,j,k,iel,1,1:3) - curl_xlgradxm%interior(i,j,k,iel,1,1:3) )
+          enddo
+        enddo
+      enddo
+    enddo
+
+    ! Ja^{1:3}_2 (n=2, m=3, l=1) Second component of the contravariant basis vectors
+    do iEl = 1,myGeom%nElem
+      do k = 1,myGeom%dxds%interp%N+1
+        do j = 1,myGeom%dxds%interp%N+1
+          do i = 1,myGeom%dxds%interp%N+1
+            xlgradxm%interior(i,j,k,iel,1,1:3) = myGeom%x%interior(i,j,k,iel,1,1)*myGeom%dxds%interior(i,j,k,iel,1,3,1:3) ! x(...,l)*dxds(...,m,1:3) ; l=1,m=3
+            xmgradxl%interior(i,j,k,iel,1,1:3) = myGeom%x%interior(i,j,k,iel,1,3)*myGeom%dxds%interior(i,j,k,iel,1,1,1:3) ! x(...,m)*dxds(...,l,1:3) ; l=1,m=3
+          enddo
+        enddo
+      enddo
+    enddo
+
+    curl_xlgradxm%interior = xlgradxm%Curl()
+    curl_xmgradxl%interior = xmgradxl%Curl()
+
+    do iEl = 1,myGeom%nElem
+      do k = 1,myGeom%dxds%interp%N+1
+        do j = 1,myGeom%dxds%interp%N+1
+          do i = 1,myGeom%dxds%interp%N+1
+            ! In our convention, dsdx(i,j) is contravariant vector j, component i
+            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n; 
+            ! Here, i = 1:3, and n=2
+            myGeom%dsdx%interior(i,j,k,iel,1,2,1:3) = 0.5_prec*( curl_xmgradxl%interior(i,j,k,iel,1,1:3) - curl_xlgradxm%interior(i,j,k,iel,1,1:3) )
+          enddo
+        enddo
+      enddo
+    enddo
+    
+    ! Ja^{1:3}_3 (n=3, m=1, l=2) Third component of the contravariant basis vectors
+    do iEl = 1,myGeom%nElem
+      do k = 1,myGeom%dxds%interp%N+1
+        do j = 1,myGeom%dxds%interp%N+1
+          do i = 1,myGeom%dxds%interp%N+1
+            xlgradxm%interior(i,j,k,iel,1,1:3) = myGeom%x%interior(i,j,k,iel,1,2)*myGeom%dxds%interior(i,j,k,iel,1,1,1:3) ! x(...,l)*dxds(...,m,1:3) ; l=2,m=1
+            xmgradxl%interior(i,j,k,iel,1,1:3) = myGeom%x%interior(i,j,k,iel,1,1)*myGeom%dxds%interior(i,j,k,iel,1,2,1:3) ! x(...,m)*dxds(...,l,1:3) ; l=2,m=1
+          enddo
+        enddo
+      enddo
+    enddo
+
+    curl_xlgradxm%interior = xlgradxm%Curl()
+    curl_xmgradxl%interior = xmgradxl%Curl()
+
+    do iEl = 1,myGeom%nElem
+      do k = 1,myGeom%dxds%interp%N+1
+        do j = 1,myGeom%dxds%interp%N+1
+          do i = 1,myGeom%dxds%interp%N+1
+            ! In our convention, dsdx(i,j) is contravariant vector j, component i
+            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n; 
+            ! Here, i = 1:3, and n=3
+            myGeom%dsdx%interior(i,j,k,iel,1,3,1:3) = 0.5_prec*( curl_xmgradxl%interior(i,j,k,iel,1,1:3) - curl_xlgradxm%interior(i,j,k,iel,1,1:3) )
+          enddo
+        enddo
+      enddo
+    enddo
+
+    call xlgradxm%Free()
+    call xmgradxl%Free()
+    call curl_xlgradxm%Free()
+    call curl_xmgradxl%Free()
 
     ! Interpolate the contravariant tensor to the boundaries
     call myGeom%dsdx%BoundaryInterp()
@@ -359,6 +387,11 @@ contains
 
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)/mag
+              ! Set the directionality for dsdx on the boundaries
+              ! This is primarily used for DG gradient calculations,
+              ! which do not use nHat for the boundary terms.
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3) = &
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)*fac
 
             elseif(k == 2) then ! South
 
@@ -371,6 +404,12 @@ contains
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)/mag
 
+              ! Set the directionality for dsdx on the boundaries
+              ! This is primarily used for DG gradient calculations,
+              ! which do not use nHat for the boundary terms.
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2) = &
+                  myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)*fac
+
             elseif(k == 3) then ! East
 
               mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,1)**2+ &
@@ -381,6 +420,11 @@ contains
 
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)/mag
+              ! Set the directionality for dsdx on the boundaries
+              ! This is primarily used for DG gradient calculations,
+              ! which do not use nHat for the boundary terms.
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1) = &
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)*fac
 
             elseif(k == 4) then ! North
 
@@ -392,6 +436,12 @@ contains
 
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)/mag
+              
+              ! Set the directionality for dsdx on the boundaries
+              ! This is primarily used for DG gradient calculations,
+              ! which do not use nHat for the boundary terms.
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2) = &
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)*fac
 
             elseif(k == 5) then ! West
 
@@ -404,6 +454,12 @@ contains
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)/mag
 
+              ! Set the directionality for dsdx on the boundaries
+              ! This is primarily used for DG gradient calculations,
+              ! which do not use nHat for the boundary terms.
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1) = &
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)*fac
+
             elseif(k == 6) then ! Top
 
               mag = sqrt(myGeom%dsdx%boundary(i,j,k,iEl,1,1,3)**2+ &
@@ -415,13 +471,15 @@ contains
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)/mag
 
+              ! Set the directionality for dsdx on the boundaries
+              ! This is primarily used for DG gradient calculations,
+              ! which do not use nHat for the boundary terms.
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3) = &
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)*fac
+
             endif
 
-            ! Set the directionality for dsdx on the boundaries
-            ! This is primarily used for DG gradient calculations,
-            ! which do not use nHat for the boundary terms.
-            myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1:3) = &
-              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1:3)*fac
+
 
           enddo
         enddo
@@ -434,7 +492,7 @@ contains
     implicit none
     class(SEMHex),intent(inout) :: myGeom
 
-    call myGeom%x%Gradient(myGeom%dxds%interior)
+    myGeom%dxds%interior = myGeom%x%Gradient()
     call myGeom%dxds%BoundaryInterp()
     call myGeom%dxds%Determinant(myGeom%J%interior)
     call myGeom%J%BoundaryInterp()

@@ -84,11 +84,11 @@ contains
     enddo
 
     ! calculate the averages of the solutions on the element
-    ! boundaries and store is this % solution % avgBoundary
-    call this%solution%BassiRebaySides()
+    ! boundaries and store is this % solution % boundary
+    call this%solution%AverageSides()
 
     ! calculate the derivative using the bassi-rebay form
-    this%solutionGradient%interior = this%solution%BRDerivative(this%geometry)
+    this%solutionGradient%interior = this%solution%DGDerivative(this%geometry)
                                     
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
@@ -98,7 +98,10 @@ contains
     call this%solutionGradient%SideExchange(this%mesh, &
                                             this%decomp)
 
-    call this%solutionGradient%BassiRebaySides()
+    call this%solutionGradient%AverageSides()
+
+    ! Re-compute the solution%boundary attribute so that we don't use the avgboundary in the hyperbolic flux
+    call this%solution%BoundaryInterp()
 
   endsubroutine pretendency_advection_diffusion_1d
 
@@ -176,7 +179,7 @@ contains
     integer :: iside
     real(prec) :: fin,fout,dfavg,un
 
-    call this%solutionGradient%BassiRebaySides()
+    call this%solutionGradient%AverageSides()
 
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem

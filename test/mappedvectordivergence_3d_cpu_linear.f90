@@ -26,68 +26,91 @@
 
 program test
 
-  implicit none
-  integer :: exit_code
+implicit none
+integer :: exit_code
 
-  exit_code = vectorgridinterp_3d_cpu_constant()
-  stop exit_code
+exit_code = mappedvectordivergence_3d_cpu_linear()
+stop exit_code
 
 contains
-  integer function vectorgridinterp_3d_cpu_constant() result(r)
+integer function mappedvectordivergence_3d_cpu_linear() result(r)
+
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Vector_3D
+    use SELF_Mesh_3D
+    use SELF_Geometry_3D
+    use SELF_MappedScalar_3D
+    use SELF_MappedVector_3D
+    use SELF_MPI
 
     implicit none
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
     integer,parameter :: nvar = 1
-    integer,parameter :: nelem = 100
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
     real(prec),parameter :: tolerance = 10.0_prec**(-3)
 #endif
-    type(Vector3D) :: f
-    type(Vector3D) :: fTarget
     type(Lagrange),target :: interp
-    type(Lagrange),target :: interpTarget
+    type(Mesh3D),target :: mesh
+    type(SEMHex),target :: geometry
+    type(MappedVector3D) :: f
+    type(MappedScalar3D) :: df
+    type(MPILayer),target :: decomp
+    character(LEN=255) :: WORKSPACE
+
+    ! Initialize a domain decomposition
+    ! Here MPI is disabled, since scaling is currently
+    ! atrocious with the uniform block mesh
+    call decomp%Init(enableMPI=.false.)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
-                     M=targetDegree, &
-                     targetNodeType=UNIFORM)
+                    controlNodeType=GAUSS, &
+                    M=targetDegree, &
+                    targetNodeType=UNIFORM)
 
-    call interpTarget%Init(N=targetDegree, &
-                           controlNodeType=UNIFORM, &
-                           M=targetDegree, &
-                           targetNodeType=UNIFORM)
+    ! Create a uniform block mesh
+    call get_environment_variable("WORKSPACE",WORKSPACE)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",decomp)
 
-    ! Initialize vectors
-    call f%Init(interp,nvar,nelem)
-    call fTarget%Init(interpTarget,nvar,nelem)
+    ! Generate geometry (metric terms) from the mesh elements
+    call geometry%Init(interp,mesh%nElem)
+    call geometry%GenerateFromMesh(mesh)
 
-    ! Set the source vector (on the control grid) to a non-zero constant
-    f%interior = 1.0_prec
+    call f%Init(interp,nvar,mesh%nelem)
+    call df%Init(interp,nvar,mesh%nelem)
 
-    ! Interpolate with gpuAccel = .FALSE.
-    fTarget%interior = f%GridInterp()
+    call f%SetEquation(1,1,'f = x') ! x-component
+    call f%SetEquation(2,1,'f = y') ! y-component
+    call f%SetEquation(3,1,'f = z') ! z-component
+
+    call f%SetInteriorFromEquation(geometry,0.0_prec)
+    print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
+
+    df%interior = f%Divergence(geometry)
 
     ! Calculate diff from exact
-    fTarget%interior = abs(fTarget%interior-1.0_prec)
+    df%interior = abs(df%interior-3.0_prec)
 
-    if(maxval(fTarget%interior) <= tolerance) then
-      r = 0
+    if(maxval(df%interior) <= tolerance) then
+    r = 0
     else
-      r = 1
+    print*, "max(error) : ",maxval(df%interior), tolerance
+    r = 1
     endif
 
+    ! Clean up
+    call decomp%Free()
+    call geometry%Free()
+    call mesh%Free()
+    call interp%Free()
     call f%free()
-    call fTarget%free()
-    call interp%free()
-    call interpTarget%free()
+    call df%free()
 
-  endfunction vectorgridinterp_3d_cpu_constant
+    r = 0
+
+endfunction mappedvectordivergence_3d_cpu_linear
 endprogram test

@@ -318,46 +318,6 @@ contains
 
   endsubroutine AverageSides_MappedVector2D
 
-  subroutine ContravariantProjection_MappedVector2D(this,geometry)
-    ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
-    ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
-    ! vectors are really the Jacobian weighted contravariant basis vectors
-    implicit none
-    class(MappedVector2D),intent(inout) :: this
-    type(SEMQuad),intent(in) :: geometry
-    ! Local
-    integer :: i,j,iEl,iVar
-    real(prec) :: Fx,Fy
-
-    ! Assume that tensor(j,i) is vector i, component j
-    ! => dot product is done along first dimension
-    ! to project onto computational space
-    !$omp target map(to:geometry % dsdx % interior) map(tofrom:this % interior)
-    !$omp teams distribute parallel do collapse(4) num_threads(256)
-    do iel = 1,this%nElem
-      do ivar = 1,this%nVar
-        do j = 1,this%interp%N+1
-          do i = 1,this%interp%N+1
-
-            Fx = this%interior(i,j,iEl,iVar,1)
-            Fy = this%interior(i,j,iEl,iVar,2)
-
-            this%interior(i,j,iEl,iVar,1) = &
-              geometry%dsdx%interior(i,j,iEl,1,1,1)*Fx+ &
-              geometry%dsdx%interior(i,j,iEl,1,2,1)*Fy
-
-            this%interior(i,j,iEl,iVar,2) = &
-              geometry%dsdx%interior(i,j,iEl,1,1,2)*Fx+ &
-              geometry%dsdx%interior(i,j,iEl,1,2,2)*Fy
-
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endsubroutine ContravariantProjection_MappedVector2D
-
   pure function Divergence_MappedVector2D(this,geometry) result(df)
     ! Strong Form Operator
     !    !

@@ -47,14 +47,12 @@ module SELF_MappedScalar_1D
 
   contains
     procedure,public :: SideExchange => SideExchange_MappedScalar1D
-    procedure,public :: BassiRebaySides => BassiRebaySides_MappedScalar1D
+    procedure,public :: AverageSides => AverageSides_MappedScalar1D
 
     generic,public :: Derivative => Derivative_MappedScalar1D
     procedure,private :: Derivative_MappedScalar1D
     generic,public :: DGDerivative => DGDerivative_MappedScalar1D
     procedure,private :: DGDerivative_MappedScalar1D
-    generic,public :: BRDerivative => BRDerivative_MappedScalar1D
-    procedure,private :: BRDerivative_MappedScalar1D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar1D
 
@@ -72,7 +70,7 @@ contains
     type(Geometry1D),intent(in) :: geometry
     real(prec),intent(in) :: time
     ! Local
-    integer :: i,iEl,iVar
+    integer :: iVar
 
     do ivar = 1,this%nvar
       this%interior(:,:,ivar) = this%eqn(ivar)%evaluate(geometry%x%interior)
@@ -86,11 +84,8 @@ contains
     type(Mesh1D),intent(in) :: mesh
     type(MPILayer),intent(inout) :: decomp
     ! Local
-    integer :: e1,e2,s1,s2,e2Global
-    integer :: flip,bcid
-    integer :: i1,i2,ivar
-    integer :: neighborRank
-    integer :: rankId,offset
+    integer :: e1,e2,s1,s2
+    integer :: ivar
 
     !$omp target map(to:decomp % offsetElem, this % boundary) map(tofrom:this % extBoundary)
     !$omp teams distribute parallel do collapse(2) num_threads(256)
@@ -131,14 +126,12 @@ contains
 
   endsubroutine SideExchange_MappedScalar1D
 
-  subroutine BassiRebaySides_MappedScalar1D(this)
+  subroutine AverageSides_MappedScalar1D(this)
     implicit none
     class(MappedScalar1D),intent(inout) :: this
     ! Local
     integer :: iel
-    integer :: iside
     integer :: ivar
-    integer :: i
 
     !$omp target map(to:this % boundary, this % extBoundary) map(from:this % avgBoundary)
     !$omp teams distribute parallel do collapse(2)
@@ -146,19 +139,19 @@ contains
       do ivar = 1,this%nVar
 
         ! Left side - we account for the -\hat{x} normal
-        this%avgBoundary(1,iel,ivar) = -0.5_prec*( &
+        this%boundary(1,iel,ivar) = -0.5_prec*( &
                                        this%boundary(1,iel,ivar)+ &
                                        this%extBoundary(1,iel,ivar))
 
         ! Right side - we account for the +\hat{x} normal
-        this%avgBoundary(2,iel,ivar) = 0.5_prec*( &
+        this%boundary(2,iel,ivar) = 0.5_prec*( &
                                        this%boundary(2,iel,ivar)+ &
                                        this%extBoundary(2,iel,ivar))
       enddo
     enddo
     !$omp end target
 
-  endsubroutine BassiRebaySides_MappedScalar1D
+  endsubroutine AverageSides_MappedScalar1D
 
   pure function Derivative_MappedScalar1D(this,geometry) result(dF)
     implicit none
@@ -221,39 +214,5 @@ contains
     !$omp end target
 
   endfunction DGDerivative_MappedScalar1D
-
-  function BRDerivative_MappedScalar1D(this,geometry) result(dF)
-    implicit none
-    class(MappedScalar1D),intent(in) :: this
-    type(Geometry1D),intent(in) :: geometry
-    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
-    ! Local
-    integer :: iEl,iVar,i,ii
-    real(prec) :: dfloc
-
-    !$omp target map(to:this%interior,this%avgboundary,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qWeights,geometry%dxds%interior) map(from:df)
-    !$omp teams distribute parallel do collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
-
-          dfloc = 0.0_prec
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
-
-          dfloc = dfloc+(this%avgboundary(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
-                                  this%avgboundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
-                           this%interp%qWeights(i)
-
-          df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
-
-
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endfunction BRDerivative_MappedScalar1D
 
 endmodule SELF_MappedScalar_1D

@@ -103,6 +103,9 @@ contains
     ! perform the side exchange to populate the solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh,this%decomp)
 
+    ! Re-compute the solution%boundary attribute so that we don't use the avgboundary in the hyperbolic flux
+    call this%solution%BoundaryInterp()
+
   endsubroutine pretendency_advection_diffusion_2d
 
   subroutine setboundarycondition_advection_diffusion_2d(this)

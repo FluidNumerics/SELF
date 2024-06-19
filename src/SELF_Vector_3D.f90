@@ -56,6 +56,7 @@ module SELF_Vector_3D
     procedure,public :: BoundaryInterp => BoundaryInterp_Vector3D
     procedure,public :: GridInterp => GridInterp_Vector3D
     procedure,public :: Gradient => Gradient_Vector3D
+    procedure,public :: Curl => Curl_Vector3D
     generic,public :: Divergence => Divergence_Vector3D
     procedure,private :: Divergence_Vector3D
 
@@ -150,52 +151,275 @@ contains
 
   endsubroutine SetEquation_Vector3D
 
-  subroutine GridInterp_Vector3D(this,that)
+  pure function GridInterp_Vector3D(this) result(f)
     implicit none
     class(Vector3D),intent(in) :: this
-    type(Vector3D),intent(inout) :: that
+    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
+    !! (Output) Array of function values, defined on the target grid
+    ! Local
+    integer :: i,j,k,ii,jj,kk,iel,ivar,idir
+    real(prec) :: fi,fij,fijk
 
-    call this%interp%VectorGridInterp_3D(this%interior, &
-                                         that%interior, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp teams distribute parallel do collapse(6)
+    do idir = 1,3
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do k = 1,this%M+1
+            do j = 1,this%M+1
+              do i = 1,this%M+1
 
-  endsubroutine GridInterp_Vector3D
+                fijk = 0.0_prec
+                do kk = 1,this%N+1
+                  fij = 0.0_prec
+                  do jj = 1,this%N+1
+                    fi = 0.0_prec
+                    do ii = 1,this%N+1
+                      fi = fi+this%interior(ii,jj,kk,iel,ivar,idir)*this%interp%iMatrix(ii,i)
+                    enddo
+                    fij = fij+fi*this%interp%iMatrix(jj,j)
+                  enddo
+                  fijk = fijk+fij*this%interp%iMatrix(kk,k)
+                enddo
+                f(i,j,k,iel,ivar,idir) = fijk
+
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+  endfunction GridInterp_Vector3D
 
   subroutine BoundaryInterp_Vector3D(this)
     implicit none
     class(Vector3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,ii,idir,iel,ivar
+    real(prec) :: fb(1:6)
 
-    call this%interp%VectorBoundaryInterp_3D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(5)
+    do idir = 1,3
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do j = 1,this%N+1
+            do i = 1,this%N+1
+
+              fb(1:6) = 0.0_prec
+              do ii = 1,this%N+1
+                fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir) ! Bottom
+                fb(2) = fb(2)+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir) ! South
+                fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir) ! East
+                fb(4) = fb(4)+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir) ! North
+                fb(5) = fb(5)+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir) ! West
+                fb(6) = fb(6)+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir) ! Bottom
+              enddo
+
+              this%boundary(i,j,1:6,iel,ivar,idir) = fb(1:6)
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine BoundaryInterp_Vector3D
 
-  subroutine Gradient_Vector3D(this,df)
+  pure function Gradient_Vector3D(this) result(df)
     implicit none
     class(Vector3D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
+    ! Local
+    integer    :: i,j,k,ii,idir,iel,ivar
+    real(prec) :: dfds1,dfds2,dfds3
 
-    call this%interp%VectorGradient_3D(this%interior, &
-                                       df, &
-                                       this%nVar, &
-                                       this%nElem)
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams distribute parallel do collapse(6)
+    do idir = 1,3
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
-  endsubroutine Gradient_Vector3D
+                dfds1 = 0.0_prec
+                dfds2 = 0.0_prec
+                dfds3 = 0.0_prec
+                do ii = 1,this%N+1
+                  dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,idir)
+                  dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,idir)
+                  dfds3 = dfds3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,idir)
+                enddo
+                df(i,j,k,iel,ivar,idir,1) = dfds1
+                df(i,j,k,iel,ivar,idir,2) = dfds2
+                df(i,j,k,iel,ivar,idir,3) = dfds3
 
-  subroutine Divergence_Vector3D(this,df)
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+    !   do idir = 1,3
+    !     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir)
+    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,1)
+    !     call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,2)
+    !     call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,3)
+    !     call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    !   end do
+    !   dfloc => null()
+
+  endfunction Gradient_Vector3D
+
+  pure function Curl_Vector3D(this) result(curlf)
     implicit none
     class(Vector3D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: curlf(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
+    ! Local
+    integer    :: i,j,k,ii,idir,iel,ivar
+    real(prec) :: dfds1,dfds2,dfds3
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
 
-    call this%interp%VectorDivergence_3D(this%interior, &
-                                         df, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams 
+    !$omp distribute parallel do collapse(6)
+    do idir = 1,3
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do k = 1,this%N+1
+            do j = 1,this%N+1
+              do i = 1,this%N+1
 
-  endsubroutine Divergence_Vector3D
+                dfds1 = 0.0_prec
+                dfds2 = 0.0_prec
+                dfds3 = 0.0_prec
+                do ii = 1,this%N+1
+                  dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,idir)
+                  dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,idir)
+                  dfds3 = dfds3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,idir)
+                enddo
+                df(i,j,k,iel,ivar,idir,1) = dfds1
+                df(i,j,k,iel,ivar,idir,2) = dfds2
+                df(i,j,k,iel,ivar,idir,3) = dfds3
+
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    !$omp distribute parallel do collapse(5)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
+
+              curlf(i,j,k,iel,ivar,1) = (df(i,j,k,iel,ivar,3,2) - df(i,j,k,iel,ivar,2,3))
+              curlf(i,j,k,iel,ivar,2) = (df(i,j,k,iel,ivar,1,3) - df(i,j,k,iel,ivar,3,1))
+              curlf(i,j,k,iel,ivar,3) = (df(i,j,k,iel,ivar,2,1) - df(i,j,k,iel,ivar,1,2))
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
+    !$omp end target
+
+  endfunction Curl_Vector3D
+
+  pure function Divergence_Vector3D(this) result(df)
+    implicit none
+    class(Vector3D),intent(in) :: this
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar
+    real(prec) :: dfLoc
+
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams
+    !$omp distribute parallel do collapse(5)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,1)
+              enddo
+              dF(i,j,k,iel,ivar) = dfLoc
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    !$omp distribute parallel do collapse(5)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,2)
+              enddo
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    !$omp distribute parallel do collapse(5)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
+
+              dfLoc = 0.0_prec
+              do ii = 1,this%N+1
+                dfLoc = dfLoc+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,3)
+              enddo
+              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
+    !$omp end target
+
+    ! ! local
+    ! real(prec),pointer :: floc(:,:,:,:,:)
+
+    ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,1)
+    ! call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
+    ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,2)
+    ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,3)
+    ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! floc => null()
+
+
+  endfunction Divergence_Vector3D
 
   subroutine WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
     implicit none

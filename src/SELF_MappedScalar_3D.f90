@@ -370,15 +370,15 @@ contains
     integer :: ivar
     integer :: i,j
 
-    !$omp target map(to:this % boundary, this % extBoundary) map(from:this % avgBoundary)
+    !$omp target map(to:this % boundary, this % extBoundary) map(from:this % boundary)
     !$omp teams distribute parallel do collapse(5) num_threads(256)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
         do iside = 1,6
           do j = 1,this%interp%N+1
             do i = 1,this%interp%N+1
-              this%avgBoundary(i,j,iside,iel,ivar) = 0.5_prec*( &
-                                                     this%boundary(i,j,iside,iel,ivar)+ &
+              this%boundary(i,j,iside,iel,ivar) = 0.5_prec*( &
+                                                    this%boundary(i,j,iside,iel,ivar)+ &
                                                      this%extBoundary(i,j,iside,iel,ivar))
             enddo
           enddo
@@ -489,7 +489,7 @@ contains
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
     ! Local
     integer :: iEl,iVar,i,j,k,ii,idir
-    real(prec) :: dfdx,ja,bfl,bfr
+    real(prec) :: dfdx,jaf,bfl,bfr
 
 
     !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dgMatrix,this%interp%bmatrix,this%interp%qweights) map(from:df)
@@ -505,10 +505,10 @@ contains
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
                   ! dsdx(j,i) is contravariant vector i, component j
-                  ja = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)
-                  dfdx = dfdx + this%interp%dgMatrix(ii,i)*&
-                  this%interior(ii,j,k,iel,ivar)*ja
+                  jaf = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)*&
+                    this%interior(ii,j,k,iel,ivar)
 
+                  dfdx = dfdx + this%interp%dgMatrix(ii,i)*jaf
                 enddo
                 bfl = this%boundary(j,k,5,iel,ivar)*&
                       geometry%dsdx%boundary(j,k,5,iel,1,idir,1) ! west
@@ -535,9 +535,10 @@ contains
 
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
-                  ja = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)
-                  dfdx = dfdx + this%interp%dgMatrix(ii,j)*&
-                  this%interior(i,ii,k,iel,ivar)*ja
+                  jaf = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)*&
+                    this%interior(i,ii,k,iel,ivar)
+
+                  dfdx = dfdx + this%interp%dgMatrix(ii,j)*jaf
                 enddo
                 bfl = this%boundary(i,k,2,iel,ivar)*&
                       geometry%dsdx%boundary(i,k,2,iel,1,idir,2) ! south
@@ -564,14 +565,14 @@ contains
 
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
-                  ja = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)
-                  dfdx = dfdx + this%interp%dgMatrix(ii,k)*&
-                  this%interior(i,j,ii,iel,ivar)*ja
+                  jaf = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)*&
+                   this%interior(i,j,ii,iel,ivar)
+                  dfdx = dfdx + this%interp%dgMatrix(ii,k)*jaf
                 enddo
                 bfl = this%boundary(i,j,1,iel,ivar)*&
-                      geometry%dsdx%boundary(i,j,1,iel,1,idir,2) ! bottom
+                      geometry%dsdx%boundary(i,j,1,iel,1,idir,3) ! bottom
                 bfr = this%boundary(i,j,6,iel,ivar)*&
-                      geometry%dsdx%boundary(i,j,6,iel,1,idir,2) ! top
+                      geometry%dsdx%boundary(i,j,6,iel,1,idir,3) ! top
                 dfdx = dfdx + (this%interp%bMatrix(k,1)*bfl+ &
                                 this%interp%bMatrix(k,2)*bfr)/this%interp%qweights(k)
   

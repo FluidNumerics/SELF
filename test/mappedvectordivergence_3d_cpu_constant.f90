@@ -90,8 +90,7 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%ContravariantProjection(geometry)
-    call f%Divergence(geometry,df%interior)
+    df%interior = f%Divergence(geometry)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

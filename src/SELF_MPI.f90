@@ -78,7 +78,6 @@ contains
     ! Local
     integer       :: ierror
     character(50) :: msg
-    integer :: nGPU,gpuID
     character(2) :: msg2
 
     this%mpiComm = 0
@@ -154,7 +153,6 @@ contains
     integer,intent(in) :: nGlobalElem
     integer,intent(in) :: maxMsg
     ! Local
-    integer :: maxMsgLoc
     character(50) :: msg
     character(5) :: msg2
 

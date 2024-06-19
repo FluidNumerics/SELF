@@ -1209,7 +1209,6 @@ contains
     integer(int32),dimension(:),intent(inout) :: hfArray
     ! Local
     integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
     integer(HID_T) :: dims(1)
     integer :: error
 

@@ -94,10 +94,10 @@ contains
     f%extBoundary(2,nelem,1) = 1.0_prec ! Right most
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
 
-    call f%BassiRebaySides()
+    call f%AverageSides()
     print*,"min, max (avgboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
 
-    df%interior = f%BRDerivative(geometry)
+    df%interior = f%DGDerivative(geometry)
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 

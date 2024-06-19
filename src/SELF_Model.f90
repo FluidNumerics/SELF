@@ -642,7 +642,6 @@ contains
     class(Model),intent(inout) :: this
     real(prec),intent(in) :: tn
     ! Local
-    integer :: m
     real(prec) :: tRemain
     real(prec) :: dtLim
     real(prec) :: t0
@@ -680,7 +679,6 @@ contains
     class(Model),intent(inout) :: this
     real(prec),intent(in) :: tn
     ! Local
-    integer :: m
     real(prec) :: tRemain
     real(prec) :: dtLim
     real(prec) :: t0
@@ -722,7 +720,6 @@ contains
     class(Model),intent(inout) :: this
     real(prec),intent(in) :: tn
     ! Local
-    integer :: m
     real(prec) :: tRemain
     real(prec) :: dtLim
     real(prec) :: t0

@@ -131,7 +131,10 @@ contains
       enddo
     enddo
 
-    call this%solutionGradient%BassiRebaySides()
+    call this%solutionGradient%AverageSides()
+
+    ! Re-compute the solution%boundary attribute so that we don't use the avgboundary in the hyperbolic flux
+    call this%solution%BoundaryInterp()
 
   endsubroutine setboundarycondition_advection_diffusion_3d
 
