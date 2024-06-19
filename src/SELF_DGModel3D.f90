@@ -719,7 +719,7 @@ contains
       call this%geometry%x%GridInterp(x)
 
       ! Map the solution to the target grid
-      call this%solution%GridInterp(solution)
+      solution%interior = this%solution%GridInterp()
 
       ! Write the model state to file
       call CreateGroup_HDF5(fileId,'/targetgrid')
@@ -771,7 +771,7 @@ contains
       call this%geometry%x%GridInterp(x)
 
       ! Map the solution to the target grid
-      call this%solution%GridInterp(solution)
+      solution%interior = this%solution%GridInterp()
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
@@ -879,7 +879,7 @@ contains
     call this%geometry%x%GridInterp(x)
 
     ! Map the solution to the target grid
-    call this%solution%GridInterp(solution)
+    solution%interior = this%solution%GridInterp()
 
     ! Map the solution to the target grid
     call this%solutionGradient%GridInterp(solutionGradient)

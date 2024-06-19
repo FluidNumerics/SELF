@@ -52,8 +52,6 @@ module SELF_Tensor_3D
     procedure,public :: Free => Free_Tensor3D
 
     procedure,public :: BoundaryInterp => BoundaryInterp_Tensor3D
-    procedure,public :: Divergence => Divergence_Tensor3D
-    procedure,public :: DGDivergence => DGDivergence_Tensor3D
     procedure,public :: Determinant => Determinant_Tensor3D
 
   endtype Tensor3D
@@ -123,38 +121,40 @@ contains
   subroutine BoundaryInterp_Tensor3D(this)
     implicit none
     class(Tensor3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,ii,idir,jdir,iel,ivar
+    real(prec) :: fb(1:6)
 
-    call this%interp%TensorBoundaryInterp_3D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(6)
+    do jdir = 1,3
+      do idir = 1,3
+        do ivar = 1,this%nvar
+          do iel = 1,this%nelem
+            do j = 1,this%N+1
+              do i = 1,this%N+1
+
+                fb(1:6) = 0.0_prec
+                do ii = 1,this%N+1
+                  fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fb(2) = fb(2)+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! South
+                  fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! East
+                  fb(4) = fb(4)+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! North
+                  fb(5) = fb(5)+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! West
+                  fb(6) = fb(6)+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                enddo
+
+                this%boundary(i,j,1:6,iel,ivar,idir,jdir) = fb(1:6)
+
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine BoundaryInterp_Tensor3D
-
-  subroutine Divergence_Tensor3D(this,df)
-    implicit none
-    class(Tensor3D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
-
-    call this%interp%TensorDivergence_3D(this%interior, &
-                                         df, &
-                                         this%nVar, &
-                                         this%nElem)
-
-  endsubroutine Divergence_Tensor3D
-
-  subroutine DGDivergence_Tensor3D(this,df)
-    implicit none
-    class(Tensor3D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
-
-    call this%interp%TensorDGDivergence_3D(this%interior, &
-                                           this%boundary, &
-                                           df, &
-                                           this%nVar, &
-                                           this%nElem)
-
-  endsubroutine DGDivergence_Tensor3D
 
   subroutine Determinant_Tensor3D(this,det)
     implicit none

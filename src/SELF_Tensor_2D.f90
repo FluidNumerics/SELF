@@ -121,11 +121,34 @@ contains
   subroutine BoundaryInterp_Tensor2D(this)
     implicit none
     class(Tensor2D),intent(inout) :: this
+! Local
+    integer :: i,ii,idir,jdir,iel,ivar
+    real(prec) :: fb(1:4)
 
-    call this%interp%TensorBoundaryInterp_2D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(5)
+    do jdir = 1,2
+      do idir = 1,2
+        do ivar = 1,this%nvar
+          do iel = 1,this%nelem
+            do i = 1,this%N+1
+
+              fb(1:4) = 0.0_prec
+              do ii = 1,this%N+1
+                fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir,jdir) ! South
+                fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir,jdir) ! East
+                fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir,jdir) ! North
+                fb(4) = fb(4)+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir,jdir) ! West
+              enddo
+
+              this%boundary(i,1:4,iel,ivar,idir,jdir) = fb(1:4)
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine BoundaryInterp_Tensor2D
 

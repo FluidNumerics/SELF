@@ -73,7 +73,7 @@ contains
     f%interior = 1.0_prec
 
     ! Interpolate with gpuAccel = .FALSE.
-    call f%GridInterp(fTarget)
+    fTarget%interior = f%GridInterp()
 
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)

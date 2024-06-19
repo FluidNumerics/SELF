@@ -133,37 +133,126 @@ contains
   subroutine BoundaryInterp_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,ii,iel,ivar
+    real(prec) :: fb(1:6)
 
-    call this%interp%ScalarBoundaryInterp_3D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(4)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do j = 1,this%N+1
+          do i = 1,this%N+1
+
+            fb(1:6) = 0.0_prec
+
+            do ii = 1,this%N+1
+              fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar) ! Bottom
+              fb(2) = fb(2)+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar) ! South
+              fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar) ! East
+              fb(4) = fb(4)+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar) ! North
+              fb(5) = fb(5)+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar) ! West
+              fb(6) = fb(6)+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar) ! Top
+            enddo
+
+            this%boundary(i,j,1:6,iel,ivar) = fb(1:6)
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine BoundaryInterp_Scalar3D
 
-  subroutine GridInterp_Scalar3D(this,that)
+  pure function GridInterp_Scalar3D(this) result(f)
     implicit none
     class(Scalar3D),intent(in) :: this
-    type(Scalar3D),intent(inout) :: that
+    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
+    !! (Output) Array of function values, defined on the target grid
+    ! Local
+    integer :: i,j,k,ii,jj,kk,iel,ivar
+    real(prec) :: fi,fij,fijk
 
-    call this%interp%ScalarGridInterp_3D(this%interior, &
-                                         that%interior, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp teams distribute parallel do collapse(5)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do k = 1,this%M+1
+          do j = 1,this%M+1
+            do i = 1,this%M+1
 
-  endsubroutine GridInterp_Scalar3D
+              fijk = 0.0_prec
+              do kk = 1,this%N+1
+                fij = 0.0_prec
+                do jj = 1,this%N+1
+                  fi = 0.0_prec
+                  do ii = 1,this%N+1
+                    fi = fi+this%interior(ii,jj,kk,iel,ivar)*this%interp%iMatrix(ii,i)
+                  enddo
+                  fij = fij+fi*this%interp%iMatrix(jj,j)
+                enddo
+                fijk = fijk+fij*this%interp%iMatrix(kk,k)
+              enddo
+              f(i,j,k,iel,ivar) = fijk
 
-  subroutine Gradient_Scalar3D(this,df)
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+    ! call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,handle)
+    ! call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
+    ! call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
+
+
+  endfunction GridInterp_Scalar3D
+
+  pure function Gradient_Scalar3D(this) result(df)
     implicit none
     class(Scalar3D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
+    ! Local
+    integer    :: i,j,k,ii,iel,ivar
+    real(prec) :: df1,df2,df3
 
-    call this%interp%ScalarGradient_3D(this%interior, &
-                                       df, &
-                                       this%nVar, &
-                                       this%nElem)
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams distribute parallel do collapse(5)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do k = 1,this%N+1
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
-  endsubroutine Gradient_Scalar3D
+              df1 = 0.0_prec
+              df2 = 0.0_prec
+              df3 = 0.0_prec
+              do ii = 1,this%N+1
+                df1 = df1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar)
+                df2 = df2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar)
+                df3 = df3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar)
+              enddo
+              df(i,j,k,iel,ivar,1) = df1
+              df(i,j,k,iel,ivar,2) = df2
+              df(i,j,k,iel,ivar,3) = df3
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+    ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,1)
+    ! call self_hipblas_matrixop_dim1_3d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
+    ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,2)
+    ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,3)
+    ! call self_hipblas_matrixop_dim3_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! dfloc => null()
+
+  endfunction Gradient_Scalar3D
 
   subroutine WriteHDF5_MPI_Scalar3D(this,fileId,group,elemoffset,nglobalelem)
     implicit none

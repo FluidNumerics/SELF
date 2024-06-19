@@ -116,8 +116,9 @@ contains
     enddo
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
-
-    call f%BRGradient(geometry,df%interior)
+    
+    call f%AverageSides()
+    df%interior = f%DGGradient(geometry)
 
     ! Calculate diff from exact
     do iel = 1,mesh%nelem

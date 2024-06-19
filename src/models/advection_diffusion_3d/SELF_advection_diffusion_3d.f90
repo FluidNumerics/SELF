@@ -89,10 +89,10 @@ contains
 
     ! calculate the averages of the solutions on the element
     ! boundaries and store is this % solution % avgBoundary
-    call this%solution%BassiRebaySides()
+    call this%solution%AverageSides()
 
     ! calculate the derivative using the bassi-rebay form
-    call this%solution%BRGradient(this%geometry,this%solutionGradient%interior)
+    this%solutionGradient%interior = this%solution%DGGradient(this%geometry)
 
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()

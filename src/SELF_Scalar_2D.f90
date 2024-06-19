@@ -133,8 +133,8 @@ contains
 
     !$omp target map(to:this%interior,this% bMatrix) map(from:this%boundary)
     !$omp teams distribute parallel do collapse(3)
-    do iel = 1,this%nelem
-      do ivar = 1,this%nvar
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
         do i = 1,this%N+1
 
           fb(1:4) = 0.0_prec

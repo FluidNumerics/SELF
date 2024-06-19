@@ -42,22 +42,16 @@ module SELF_MappedScalar_3D
 
   type,extends(Scalar3D),public :: MappedScalar3D
 
-    type(Tensor3D) :: JaScalar ! contravariant weighted scalar
   contains
 
-    procedure,public :: Init => Init_MappedScalar3D
-    procedure,public :: Free => Free_MappedScalar3D
     procedure,public :: SideExchange => SideExchange_MappedScalar3D
-    procedure,public :: BassiRebaySides => BassiRebaySides_MappedScalar3D
-
-    procedure,public :: ContravariantWeightInterior => ContravariantWeightInterior_MappedScalar3D
-    procedure,public :: ContravariantWeightAvgBoundary => ContravariantWeightAvgBoundary_MappedScalar3D
+    procedure,public :: AverageSides => AverageSides_MappedScalar3D
 
     generic,public :: Gradient => Gradient_MappedScalar3D
     procedure,private :: Gradient_MappedScalar3D
 
-    generic,public :: BRGradient => BRGradient_MappedScalar3D
-    procedure,private :: BRGradient_MappedScalar3D
+    generic,public :: DGGradient => DGGradient_MappedScalar3D
+    procedure,private :: DGGradient_MappedScalar3D
 
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar3D
     procedure,private :: ApplyFlip => ApplyFlip_MappedScalar3D
@@ -67,71 +61,6 @@ module SELF_MappedScalar_3D
   endtype MappedScalar3D
 
 contains
-
-  subroutine Init_MappedScalar3D(this,interp,nVar,nElem)
-    implicit none
-    class(MappedScalar3D),intent(out) :: this
-    type(Lagrange),intent(in),target :: interp
-    integer,intent(in) :: nVar
-    integer,intent(in) :: nElem
-
-    this%interp => interp
-    this%nVar = nVar
-    this%nElem = nElem
-    this%N = interp%N
-    this%M = interp%M
-
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%interpWork1(1:interp%M+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%interpWork2(1:interp%M+1,1:interp%M+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%jumpBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
-
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % interpWork1)
-    !$omp target enter data map(alloc: this % interpWork2)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-    !$omp target enter data map(alloc: this % avgBoundary)
-    !$omp target enter data map(alloc: this % jumpBoundary)
-
-    allocate(this%meta(1:nVar))
-    allocate(this%eqn(1:nVar))
-
-    call this%JaScalar%Init(interp,nVar,nElem)
-
-  endsubroutine Init_MappedScalar3D
-
-  subroutine Free_MappedScalar3D(this)
-    implicit none
-    class(MappedScalar3D),intent(inout) :: this
-
-    this%nVar = 0
-    this%nElem = 0
-    this%interp => null()
-    deallocate(this%interior)
-    deallocate(this%interpWork1)
-    deallocate(this%interpWork2)
-    deallocate(this%boundary)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-    deallocate(this%jumpBoundary)
-    deallocate(this%meta)
-    deallocate(this%eqn)
-
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % interpWork1)
-    !$omp target exit data map(delete: this % interpWork2)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % extBoundary)
-    !$omp target exit data map(delete: this % avgBoundary)
-    !$omp target exit data map(delete: this % jumpBoundary)
-
-    call this%JaScalar%Free()
-
-  endsubroutine Free_MappedScalar3D
 
   subroutine SetInteriorFromEquation_MappedScalar3D(this,geometry,time)
   !!  Sets the this % interior attribute using the eqn attribute,
@@ -432,73 +361,7 @@ contains
 
   endsubroutine SideExchange_MappedScalar3D
 
-  subroutine ContravariantWeightInterior_MappedScalar3D(this,geometry)
-    !! Computes the scalar multiplied by the contravariant basis vectors
-    !!
-    implicit none
-    class(MappedScalar3D),intent(inout) :: this
-    type(SEMHex),intent(in) :: geometry
-    ! Local
-    integer    :: i,j,k,iEl,iVar,row,col
-
-    ! Interior
-    !$omp target map(to: geometry % dsdx % interior, this % interior) map(from: this % JaScalar % interior)
-    !$omp teams distribute parallel do collapse(7) num_threads(256)
-    do col = 1,3
-      do row = 1,3
-        do iVar = 1,this%nVar
-          do iEl = 1,this%nElem
-            do k = 1,this%interp%N+1
-              do j = 1,this%interp%N+1
-                do i = 1,this%interp%N+1
-
-                  this%JaScalar%interior(i,j,k,iel,ivar,row,col) = geometry%dsdx%interior(i,j,k,iel,1,row,col)* &
-                                                                   this%interior(i,j,k,iel,ivar)
-                enddo
-              enddo
-            enddo
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endsubroutine ContravariantWeightInterior_MappedScalar3D
-
-  subroutine ContravariantWeightAvgBoundary_MappedScalar3D(this,geometry)
-    !! Computes the scalar multiplied by the contravariant basis vectors
-    !!
-    implicit none
-    class(MappedScalar3D),intent(inout) :: this
-    type(SEMHex),intent(in) :: geometry
-    ! Local
-    integer    :: i,j,k,iEl,iVar,row,col
-
-    ! Interior
-    !$omp target map(to:geometry % dsdx % boundary, this % avgBoundary) map(from: this % JaScalar % boundary)
-    !$omp teams distribute parallel do collapse(7) num_threads(256)
-    do col = 1,3
-      do row = 1,3
-        do iVar = 1,this%nVar
-          do iEl = 1,this%nElem
-            do k = 1,6
-              do j = 1,this%interp%N+1
-                do i = 1,this%interp%N+1
-
-                  this%JaScalar%boundary(i,j,k,iel,ivar,row,col) = geometry%dsdx%boundary(i,j,k,iel,1,row,col)* &
-                                                                   this%avgBoundary(i,j,k,iel,ivar)
-                enddo
-              enddo
-            enddo
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endsubroutine ContravariantWeightAvgBoundary_MappedScalar3D
-
-  subroutine BassiRebaySides_MappedScalar3D(this)
+  subroutine AverageSides_MappedScalar3D(this)
     implicit none
     class(MappedScalar3D),intent(inout) :: this
     ! Local
@@ -524,74 +387,206 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine BassiRebaySides_MappedScalar3D
+  endsubroutine AverageSides_MappedScalar3D
 
-  subroutine Gradient_MappedScalar3D(this,geometry,df)
+  pure function Gradient_MappedScalar3D(this,geometry) result(df)
   !! Calculates the gradient of a function using the strong form of the gradient
   !! in mapped coordinates.
     implicit none
-    class(MappedScalar3D),intent(inout) :: this
+    class(MappedScalar3D),intent(in) :: this
     type(SEMHex),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
     ! Local
-    integer :: iEl,iVar,i,j,k,idir
+    integer :: iEl,iVar,i,j,k,ii,idir
+    real(prec) :: dfdx,ja
 
-    call this%ContravariantWeightInterior(geometry)
-    call this%JaScalar%Divergence(df)
-
-    !$omp target map(to: geometry % J % interior) map(tofrom: df)
-    !$omp teams distribute parallel do collapse(6) num_threads(256)
+    !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams
+    !$omp distribute parallel do collapse(6) num_threads(256)
     do idir = 1,3
-      do iEl = 1,this%nElem
-        do iVar = 1,this%nVar
+      do iVar = 1,this%nVar
+        do iEl = 1,this%nElem
           do k = 1,this%interp%N+1
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
-                df(i,j,k,iEl,iVar,idir) = df(i,j,k,iEl,iVar,idir)/ &
-                                          geometry%J%interior(i,j,k,iEl,1)
+  
+                dfdx = 0.0_prec
+                do ii = 1,this%N+1
+                  ! dsdx(j,i) is contravariant vector i, component j
+                  ja = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)
+                  dfdx = dfdx + this%interp%dMatrix(ii,i)*&
+                  this%interior(ii,j,k,iel,ivar)*ja
+
+                enddo
+                df(i,j,k,iel,ivar,idir) = dfdx
+
               enddo
             enddo
           enddo
         enddo
       enddo
     enddo
+
+    !$omp distribute parallel do collapse(5) num_threads(256)
+    do idir = 1,3
+      do iVar = 1,this%nVar
+        do iEl = 1,this%nElem
+          do k = 1,this%interp%N+1
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+
+                dfdx = 0.0_prec
+                do ii = 1,this%N+1
+                  ja = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)
+                  dfdx = dfdx + this%interp%dMatrix(ii,j)*&
+                  this%interior(i,ii,k,iel,ivar)*ja
+                enddo
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir) + dfdx)
+
+              enddo
+            enddo 
+          enddo
+        enddo
+      enddo
+    enddo
+
+    !$omp distribute parallel do collapse(5) num_threads(256)
+    do idir = 1,3
+      do iVar = 1,this%nVar
+        do iEl = 1,this%nElem
+          do k = 1,this%interp%N+1
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+
+                dfdx = 0.0_prec
+                do ii = 1,this%N+1
+                  ja = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)
+                  dfdx = dfdx + this%interp%dMatrix(ii,k)*&
+                  this%interior(i,j,ii,iel,ivar)*ja
+                enddo
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir) + dfdx)/&
+                   geometry%J%interior(i,j,k,iEl,1)
+
+              enddo
+            enddo 
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
     !$omp end target
 
-  endsubroutine Gradient_MappedScalar3D
+  endfunction Gradient_MappedScalar3D
 
-  subroutine BRGradient_MappedScalar3D(this,geometry,df)
+  pure function DGGradient_MappedScalar3D(this,geometry) result(df)
     !! Calculates the gradient of a function using the weak form of the gradient
     !! and the average boundary state.
     !! This method will compute the average boundary state from the
     !! and  attributes of
     implicit none
-    class(MappedScalar3D),intent(inout) :: this
+    class(MappedScalar3D),intent(in) :: this
     type(SEMHex),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
     ! Local
-    integer :: iEl,iVar,i,j,k,idir
+    integer :: iEl,iVar,i,j,k,ii,idir
+    real(prec) :: dfdx,ja,bfl,bfr
 
-    call this%BassiRebaySides()
-    call this%ContravariantWeightInterior(geometry)
-    call this%ContravariantWeightAvgBoundary(geometry)
-    call this%JaScalar%DGDivergence(df)
-    !$omp target map(to: geometry % J % interior) map(tofrom: df)
-    !$omp teams distribute parallel do collapse(6) num_threads(256)
+
+    !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dgMatrix,this%interp%bmatrix,this%interp%qweights) map(from:df)
+    !$omp teams
+    !$omp distribute parallel do collapse(6) num_threads(256)
     do idir = 1,3
-      do iEl = 1,this%nElem
-        do iVar = 1,this%nVar
+      do iVar = 1,this%nVar
+        do iEl = 1,this%nElem
           do k = 1,this%interp%N+1
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
-                df(i,j,k,iEl,iVar,idir) = df(i,j,k,iEl,iVar,idir)/ &
-                                          geometry%J%interior(i,j,k,iEl,1)
+  
+                dfdx = 0.0_prec
+                do ii = 1,this%N+1
+                  ! dsdx(j,i) is contravariant vector i, component j
+                  ja = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)
+                  dfdx = dfdx + this%interp%dgMatrix(ii,i)*&
+                  this%interior(ii,j,k,iel,ivar)*ja
+
+                enddo
+                bfl = this%boundary(j,k,5,iel,ivar)*&
+                      geometry%dsdx%boundary(j,k,5,iel,1,idir,1) ! west
+                bfr = this%boundary(j,k,3,iel,ivar)*&
+                      geometry%dsdx%boundary(j,k,3,iel,1,idir,1) ! east
+                df(i,j,k,iel,ivar,idir) = dfdx + &
+                  (this%interp%bMatrix(i,1)*bfl+ &
+                   this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+
               enddo
             enddo
           enddo
         enddo
       enddo
     enddo
+
+    !$omp distribute parallel do collapse(5) num_threads(256)
+    do idir = 1,3
+      do iVar = 1,this%nVar
+        do iEl = 1,this%nElem
+          do k = 1,this%interp%N+1
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+
+                dfdx = 0.0_prec
+                do ii = 1,this%N+1
+                  ja = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)
+                  dfdx = dfdx + this%interp%dgMatrix(ii,j)*&
+                  this%interior(i,ii,k,iel,ivar)*ja
+                enddo
+                bfl = this%boundary(i,k,2,iel,ivar)*&
+                      geometry%dsdx%boundary(i,k,2,iel,1,idir,2) ! south
+                bfr = this%boundary(i,k,4,iel,ivar)*&
+                      geometry%dsdx%boundary(i,k,4,iel,1,idir,2) ! north
+                dfdx = dfdx + (this%interp%bMatrix(j,1)*bfl+ &
+                              this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+  
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
+              enddo
+            enddo 
+          enddo
+        enddo
+      enddo
+    enddo
+
+    !$omp distribute parallel do collapse(5) num_threads(256)
+    do idir = 1,3
+      do iVar = 1,this%nVar
+        do iEl = 1,this%nElem
+          do k = 1,this%interp%N+1
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+
+                dfdx = 0.0_prec
+                do ii = 1,this%N+1
+                  ja = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)
+                  dfdx = dfdx + this%interp%dgMatrix(ii,k)*&
+                  this%interior(i,j,ii,iel,ivar)*ja
+                enddo
+                bfl = this%boundary(i,j,1,iel,ivar)*&
+                      geometry%dsdx%boundary(i,j,1,iel,1,idir,2) ! bottom
+                bfr = this%boundary(i,j,6,iel,ivar)*&
+                      geometry%dsdx%boundary(i,j,6,iel,1,idir,2) ! top
+                dfdx = dfdx + (this%interp%bMatrix(k,1)*bfl+ &
+                                this%interp%bMatrix(k,2)*bfr)/this%interp%qweights(k)
+  
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/&
+                                geometry%J%interior(i,j,k,iEl,1)
+
+              enddo
+            enddo 
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
     !$omp end target
-  endsubroutine BRGradient_MappedScalar3D
+    
+  endfunction DGGradient_MappedScalar3D
 
 endmodule SELF_MappedScalar_3D

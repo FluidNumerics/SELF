@@ -89,7 +89,7 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%Gradient(geometry,df%interior)
+    df%interior = f%Gradient(geometry)
 
     ! Calculate diff from exact
     ! Calculate diff from exact
