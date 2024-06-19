@@ -113,7 +113,7 @@ contains
     type(Mesh2D),intent(in) :: mesh
     ! Local
     integer :: iel
-    integer :: i,j,nid
+    integer :: i,j
     type(Lagrange),target :: meshToModel
     type(Vector2D) :: xMesh
 
@@ -133,7 +133,7 @@ contains
       enddo
     enddo
 
-    call xMesh%GridInterp(myGeom%x)
+    myGeom%x%interior = xMesh%GridInterp()
     call myGeom%x%BoundaryInterp()
     call myGeom%CalculateMetricTerms()
 
@@ -236,7 +236,7 @@ contains
     implicit none
     class(SEMQuad),intent(inout) :: myGeom
 
-    call myGeom%x%Gradient(myGeom%dxds%interior)
+    myGeom%dxds%interior = myGeom%x%Gradient()
     call myGeom%dxds%BoundaryInterp()
     call myGeom%dxds%Determinant(myGeom%J%interior)
     call myGeom%J%BoundaryInterp()

@@ -35,7 +35,6 @@ program test
 contains
   integer function vectorgridinterp_2d_cpu_constant() result(r)
     use SELF_Constants
-    use SELF_Memory
     use SELF_Lagrange
     use SELF_Vector_2D
 
@@ -73,8 +72,7 @@ contains
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
 
-    ! Interpolate with gpuAccel = .FALSE.
-    call f%GridInterp(fTarget,.false.)
+    fTarget%interior = f%GridInterp()
 
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)

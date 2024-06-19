@@ -107,7 +107,7 @@ contains
       enddo
     enddo
 
-    call f%DGDivergence(geometry,df%interior)
+    df%interior = f%DGDivergence(geometry)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

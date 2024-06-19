@@ -600,7 +600,7 @@ contains
     call this%SourceMethod()
     call this%RiemannSolver()
     call this%FluxMethod()
-    call this%flux%DGDivergence(this%geometry,this%fluxDivergence%interior)
+    this%fluxDivergence%interior = this%flux%DGDivergence(this%geometry)
 
     !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
     !$omp teams distribute parallel do collapse(4) num_threads(256)
@@ -681,7 +681,7 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x)
+      x%interior = this%geometry%x%GridInterp()
 
       ! Map the solution to the target grid
       solution%interior = this%solution%GridInterp()
@@ -733,7 +733,7 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x)
+      x%interior = this%geometry%x%GridInterp()
 
       ! Map the solution to the target grid
       solution%interior = this%solution%GridInterp()
@@ -841,13 +841,13 @@ contains
     call x%Init(interp,1,this%solution%nElem)
 
     ! Map the mesh positions to the target grid
-    call this%geometry%x%GridInterp(x)
+    x%interior = this%geometry%x%GridInterp()
 
     ! Map the solution to the target grid
     solution%interior = this%solution%GridInterp()
 
     ! Map the solution to the target grid
-    call this%solutionGradient%GridInterp(solutionGradient)
+    solutionGradient%interior = this%solutionGradient%GridInterp()
 
     open(UNIT=NEWUNIT(fUnit), &
          FILE=trim(tecFile), &

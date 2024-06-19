@@ -138,7 +138,7 @@ contains
     enddo
     !$omp end target
 
-    call this%solutionGradient%BassiRebaySides()
+    call this%solutionGradient%AverageSides()
 
   endsubroutine setboundarycondition_advection_diffusion_2d
 

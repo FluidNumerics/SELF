@@ -150,52 +150,169 @@ contains
 
   endsubroutine SetEquation_Vector2D
 
-  subroutine GridInterp_Vector2D(this,that)
+  pure function GridInterp_Vector2D(this) result(f)
     implicit none
     class(Vector2D),intent(in) :: this
-    type(Vector2D),intent(inout) :: that
+    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:2)
+    ! Local
+    integer :: i,j,ii,jj,iel,ivar,idir
+    real(prec) :: fi,fij
 
-    call this%interp%VectorGridInterp_2D(this%interior, &
-                                         that%interior, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp teams distribute parallel do collapse(5)
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do j = 1,this%M+1
+            do i = 1,this%M+1
 
-  endsubroutine GridInterp_Vector2D
+              fij = 0.0_prec
+              do jj = 1,this%N+1
+                fi = 0.0_prec
+                do ii = 1,this%N+1
+                  fi = fi+this%interior(ii,jj,iel,ivar,idir)*this%interp%iMatrix(ii,i)
+                enddo
+                fij = fij+fi*this%interp%iMatrix(jj,j)
+              enddo
+              f(i,j,iel,ivar,idir) = fij
+
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+  endfunction GridInterp_Vector2D
 
   subroutine BoundaryInterp_Vector2D(this)
     implicit none
     class(Vector2D),intent(inout) :: this
+! Local
+    integer :: i,ii,idir,iel,ivar
+    real(prec) :: fb(1:4)
 
-    call this%interp%VectorBoundaryInterp_2D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(4)
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do i = 1,this%N+1
+
+            fb(1:4) = 0.0_prec
+            do ii = 1,this%N+1
+              fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir) ! South
+              fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir) ! East
+              fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir) ! North
+              fb(4) = fb(4)+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir) ! West
+            enddo
+            this%boundary(i,1:4,iel,ivar,idir) = fb(1:4)
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine BoundaryInterp_Vector2D
 
-  subroutine Gradient_Vector2D(this,df)
+  pure function Gradient_Vector2D(this) result(df)
     implicit none
     class(Vector2D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2,1:2)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2,1:2)
+    ! Local
+    integer :: i,j,ii,iEl,iVar,idir
+    real(prec) :: dfds1,dfds2
 
-    call this%interp%VectorGradient_2D(this%interior, &
-                                       df, &
-                                       this%nVar, &
-                                       this%nElem)
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams distribute parallel do collapse(5)
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do iel = 1,this%nelem
+          do j = 1,this%N+1
+            do i = 1,this%N+1
 
-  endsubroutine Gradient_Vector2D
+              dfds1 = 0.0_prec
+              dfds2 = 0.0_prec
+              do ii = 1,this%N+1
+                dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar,idir)
+                dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar,idir)
+              enddo
+              df(i,j,iel,ivar,idir,1) = dfds1
+              df(i,j,iel,ivar,idir,2) = dfds2
 
-  subroutine Divergence_Vector2D(this,df)
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+    ! do idir = 1,2
+    !   floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir)
+    !   dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,1)
+    !   call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
+    !   dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,2)
+    !   call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! end do
+    !dfloc => null()
+
+  endfunction Gradient_Vector2D
+
+  pure function Divergence_Vector2D(this) result(df)
     implicit none
     class(Vector2D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer    :: i,j,ii,iel,ivar
+    real(prec) :: dfLoc
 
-    call this%interp%VectorDivergence_2D(this%interior, &
-                                         df, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams
+    !$omp distribute parallel do collapse(4)
+    do ivar = 1 ,this%nvar  
+      do iel = 1,this%nelem
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
-  endsubroutine Divergence_Vector2D
+            dfLoc = 0.0_prec
+            do ii = 1,this%N+1
+              dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar,1)
+            enddo
+            dF(i,j,iel,ivar) = dfLoc
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    !$omp distribute parallel do collapse(4)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do j = 1,this%N+1
+          do i = 1,this%N+1
+
+            dfLoc = 0.0_prec
+            do ii = 1,this%N+1
+              dfLoc = dfLoc+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar,2)
+            enddo
+            dF(i,j,iel,ivar) = dF(i,j,iel,ivar)+dfLoc
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
+    !$omp end target
+
+    ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1)
+    ! call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
+    ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2)
+    ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! floc => null()
+
+
+  endfunction Divergence_Vector2D
 
   subroutine WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
     implicit none

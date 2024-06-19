@@ -68,7 +68,7 @@ contains
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
 
-    call f%Divergence(df%interior)
+    df%interior = f%Divergence()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

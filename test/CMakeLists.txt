@@ -69,6 +69,7 @@ add_fortran_tests (
     "scalargradient_3d_cpu_constant.f90"
     "scalarboundaryinterp_3d_cpu_constant.f90"
     "vectordivergence_3d_cpu_constant.f90"
+    "vectorgridinterp_2d_cpu_constant.f90"
     "vectorboundaryinterp_3d_cpu_constant.f90"
     "mesh2d_setup.f90"
     "mesh3d_setup.f90"

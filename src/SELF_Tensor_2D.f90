@@ -52,8 +52,6 @@ module SELF_Tensor_2D
     procedure,public :: Free => Free_Tensor2D
 
     procedure,public :: BoundaryInterp => BoundaryInterp_Tensor2D
-    procedure,public :: Divergence => Divergence_Tensor2D
-    procedure,public :: DGDivergence => DGDivergence_Tensor2D
     procedure,public :: Determinant => Determinant_Tensor2D
 
   endtype Tensor2D
@@ -130,31 +128,6 @@ contains
                                              this%nElem)
 
   endsubroutine BoundaryInterp_Tensor2D
-
-  subroutine Divergence_Tensor2D(this,df)
-    implicit none
-    class(Tensor2D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
-
-    call this%interp%TensorDivergence_2D(this%interior, &
-                                         df, &
-                                         this%nVar, &
-                                         this%nElem)
-
-  endsubroutine Divergence_Tensor2D
-
-  subroutine DGDivergence_Tensor2D(this,df)
-    implicit none
-    class(Tensor2D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
-
-    call this%interp%TensorDGDivergence_2D(this%interior, &
-                                           this%boundary, &
-                                           df, &
-                                           this%nVar, &
-                                           this%nElem)
-
-  endsubroutine DGDivergence_Tensor2D
 
   subroutine Determinant_Tensor2D(this,det)
     implicit none

@@ -46,9 +46,9 @@ module SELF_MappedVector_2D
   contains
 
     procedure,public :: SideExchange => SideExchange_MappedVector2D
-    procedure,public :: BassiRebaySides => BassiRebaySides_MappedVector2D
+    procedure,public :: AverageSides => AverageSides_MappedVector2D
 
-    procedure,public :: ContravariantProjection => ContravariantProjection_MappedVector2D
+    !procedure,public :: ContravariantProjection => ContravariantProjection_MappedVector2D
 
     generic,public :: Divergence => Divergence_MappedVector2D
     procedure,private :: Divergence_MappedVector2D
@@ -289,7 +289,7 @@ contains
 
   endsubroutine SideExchange_MappedVector2D
 
-  subroutine BassiRebaySides_MappedVector2D(this)
+  subroutine AverageSides_MappedVector2D(this)
     implicit none
     class(MappedVector2D),intent(inout) :: this
     ! Local
@@ -306,7 +306,7 @@ contains
         do iel = 1,this%nElem
           do iside = 1,4
             do i = 1,this%interp%N+1
-              this%avgBoundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
+              this%boundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
                                                         this%boundary(i,iside,iel,ivar,idir)+ &
                                                         this%extBoundary(i,iside,iel,ivar,idir))
             enddo
@@ -316,7 +316,7 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine BassiRebaySides_MappedVector2D
+  endsubroutine AverageSides_MappedVector2D
 
   subroutine ContravariantProjection_MappedVector2D(this,geometry)
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
@@ -358,79 +358,148 @@ contains
 
   endsubroutine ContravariantProjection_MappedVector2D
 
-  subroutine Divergence_MappedVector2D(this,geometry,df)
+  pure function Divergence_MappedVector2D(this,geometry) result(df)
     ! Strong Form Operator
     !    !
     implicit none
-    class(MappedVector2D),intent(inout) :: this
+    class(MappedVector2D),intent(in) :: this
     type(SEMQuad),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
-    integer :: iEl,iVar,i,j
+    integer :: iEl,iVar,i,j,ii
+    real(prec) :: dfLoc,Fx,Fy,Fc
 
-    ! Convert from physical to computational space
-    call this%ContravariantProjection(geometry)
-
-    ! Compute the divergence
-    call this%interp%VectorDivergence_2D(this%interior, &
-                                         df, &
-                                         this%nvar, &
-                                         this%nelem)
-
-    !$omp target map(to: geometry % J % interior) map(tofrom: df)
+    !$omp target map(to:geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams distribute parallel do collapse(4) num_threads(256)
-    do iVar = 1,this%nVar
-      do iEl = 1,this%nElem
+    do ivar = 1,this%nVar
+      do iel = 1,this%nElem
         do j = 1,this%interp%N+1
           do i = 1,this%interp%N+1
-            df(i,j,iEl,iVar) = df(i,j,iEl,iVar)/ &
-                               geometry%J%interior(i,j,iEl,1)
+
+            dfLoc = 0.0_prec
+            do ii = 1,this%N+1
+              ! Convert from physical to computational space
+              Fx = this%interior(ii,j,iEl,iVar,1)
+              Fy = this%interior(ii,j,iEl,iVar,2)
+              Fc = geometry%dsdx%interior(ii,j,iEl,1,1,1)*Fx+ &
+                   geometry%dsdx%interior(ii,j,iEl,1,2,1)*Fy
+              dfLoc = dfLoc+this%interp%dMatrix(ii,i)*Fc
+            enddo
+            dF(i,j,iel,ivar) = dfLoc
 
           enddo
         enddo
       enddo
     enddo
+
+    !$omp distribute parallel do collapse(4)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do j = 1,this%N+1
+          do i = 1,this%N+1
+
+            dfLoc = 0.0_prec
+            do ii = 1,this%N+1
+              ! Convert from physical to computational space
+              Fx = this%interior(i,ii,iEl,iVar,1)
+              Fy = this%interior(i,ii,iEl,iVar,2)
+              Fc = geometry%dsdx%interior(i,ii,iEl,1,1,2)*Fx+ &
+                   geometry%dsdx%interior(i,ii,iEl,1,2,2)*Fy
+              dfLoc = dfLoc+this%interp%dMatrix(ii,j)*Fc
+            enddo
+            dF(i,j,iel,ivar) = (dF(i,j,iel,ivar)+dfLoc)/geometry%J%interior(i,j,iEl,1)
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
     !$omp end target
 
-  endsubroutine Divergence_MappedVector2D
+  endfunction Divergence_MappedVector2D
 
-  subroutine DGDivergence_MappedVector2D(this,geometry,df)
+  pure function DGDivergence_MappedVector2D(this,geometry) result(df)
     !! Computes the divergence of a 2-D vector using the weak form
     !! On input, the  attribute of the vector
     !! is assigned and the  attribute is set to the physical
     !! directions of the vector. This method will project the vector
     !! onto the contravariant basis vectors.
     implicit none
-    class(MappedVector2D),intent(inout) :: this
+    class(MappedVector2D),intent(in) :: this
     type(SEMQuad),intent(in) :: geometry
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
-    integer :: iEl,iVar,i,j
+    integer :: iEl,iVar,i,j,ii
+    real(prec) :: dfLoc,Fx,Fy,Fc
 
-    ! Convert from physical to computational space
-    call this%ContravariantProjection(geometry)
-
-    ! Compute the divergence
-    call this%interp%VectorDGDivergence_2D(this%interior, &
-                                           this%boundaryNormal, &
-                                           df, &
-                                           this%nvar, &
-                                           this%nelem)
-    !$omp target map(to: geometry % J % interior) map(tofrom: df)
+    !$omp target map(to:geometry%dsdx%interior,this%interior,this%boundaryNormal,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qweights) map(from:df)
     !$omp teams distribute parallel do collapse(4) num_threads(256)
-    do iVar = 1,this%nVar
-      do iEl = 1,this%nElem
+    do ivar = 1,this%nVar
+      do iel = 1,this%nElem
         do j = 1,this%interp%N+1
           do i = 1,this%interp%N+1
-            df(i,j,iEl,iVar) = df(i,j,iEl,iVar)/ &
-                               geometry%J%interior(i,j,iEl,1)
+
+            dfLoc = 0.0_prec
+            do ii = 1,this%N+1
+              ! Convert from physical to computational space
+              Fx = this%interior(ii,j,iEl,iVar,1)
+              Fy = this%interior(ii,j,iEl,iVar,2)
+              Fc = geometry%dsdx%interior(ii,j,iEl,1,1,1)*Fx+ &
+                   geometry%dsdx%interior(ii,j,iEl,1,2,1)*Fy
+              dfLoc = dfLoc+this%interp%dgMatrix(ii,i)*Fc
+            enddo
+            dF(i,j,iel,ivar) = dfLoc+&
+            (this%interp%bMatrix(i,2)*this%boundaryNormal(j,2,iel,ivar)+ &
+              this%interp%bMatrix(i,1)*this%boundaryNormal(j,4,iel,ivar))/ &
+                               this%interp%qweights(i)
 
           enddo
         enddo
       enddo
     enddo
+
+    !$omp distribute parallel do collapse(4)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do j = 1,this%N+1
+          do i = 1,this%N+1
+
+            dfLoc = 0.0_prec
+            do ii = 1,this%N+1
+              ! Convert from physical to computational space
+              Fx = this%interior(i,ii,iEl,iVar,1)
+              Fy = this%interior(i,ii,iEl,iVar,2)
+              Fc = geometry%dsdx%interior(i,ii,iEl,1,1,2)*Fx+ &
+                   geometry%dsdx%interior(i,ii,iEl,1,2,2)*Fy
+              dfLoc = dfLoc+this%interp%dgMatrix(ii,j)*Fc
+            enddo
+            dfLoc = dfLoc+ &
+            (this%interp%bMatrix(j,2)*this%boundaryNormal(i,3,iel,ivar)+ &
+             this%interp%bMatrix(j,1)*this%boundaryNormal(i,1,iel,ivar))/ &
+            this%interp%qweights(j)
+
+            dF(i,j,iel,ivar) = (dF(i,j,iel,ivar)+dfLoc)/geometry%J%interior(i,j,iEl,1)
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end teams
     !$omp end target
 
-  endsubroutine DGDivergence_MappedVector2D
+    ! ! Interior components of the vector divergence
+    ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1)
+    ! call self_hipblas_matrixop_dim1_2d(this % dgMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
+    ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2)
+    ! call self_hipblas_matrixop_dim2_2d(this % dgMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! floc => null()
+
+    ! ! Add the boundary contributions
+    ! call VectorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
+    !                                                 c_loc(this % qWeights),&
+    !                                                 c_loc(bf), c_loc(df),&
+    !                                                 this % N, nvars, nelems)
+
+  endfunction DGDivergence_MappedVector2D
 
 endmodule SELF_MappedVector_2D
