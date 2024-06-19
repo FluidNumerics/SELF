@@ -109,17 +109,14 @@ module SELF_Lagrange
     procedure,public :: Init => Init_Lagrange
     procedure,public :: Free => Free_Lagrange
 
-    procedure,public :: ScalarGridInterp_2D
     procedure,public :: VectorGridInterp_2D
     procedure,public :: ScalarGridInterp_3D
     procedure,public :: VectorGridInterp_3D
-    procedure,public :: ScalarBoundaryInterp_2D
     procedure,public :: ScalarBoundaryInterp_3D
     procedure,public :: VectorBoundaryInterp_2D
     procedure,public :: VectorBoundaryInterp_3D
     procedure,public :: TensorBoundaryInterp_2D
     procedure,public :: TensorBoundaryInterp_3D
-    procedure,public :: ScalarGradient_2D
     procedure,public :: ScalarGradient_3D
     procedure,public :: VectorGradient_2D
     procedure,public :: VectorDivergence_2D
@@ -556,61 +553,6 @@ contains
 
 !   end subroutine self_hipblas_matrixop_dim3_3d
 
-  subroutine ScalarGridInterp_2D(this,f,fTarget,nvars,nelems)
-    !! Host (CPU) implementation of the ScalarGridInterp_2D interface.
-    !! In most cases, you should use the `ScalarGridInterp_2D` generic interface,
-    !! rather than calling this routine directly.
-    !! Interpolate a scalar-2D (real) array from the control grid to the target grid.
-    !! The control and target grids are the ones associated with an initialized
-    !! Lagrange instance.
-    !!
-    !! Interpolation is applied using a series of matrix-vector multiplications, using
-    !! the Lagrange class's interpolation matrix
-    !!
-    !! $$ \tilde{f}_{m,n,iel,ivar} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,iel,ivar} I_{i,m} I_{j,n} $$
-    !!
-    implicit none
-    class(Lagrange),intent(in) :: this
-    !! Lagrange class instance
-    integer,intent(in)     :: nvars
-    !! The number of variables/functions that are interpolated
-    integer,intent(in)     :: nelems
-    !! The number of spectral elements in the SEM grid
-    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
-    !! (Input) Array of function values, defined on the control grid
-    real(prec),intent(out) :: fTarget(1:this%M+1,1:this%M+1,1:nelems,1:nvars)
-    !! (Output) Array of function values, defined on the target grid
-    ! Local
-    integer :: i,j,ii,jj,iel,ivar
-    real(prec) :: fi,fij
-
-    !$omp target map(to:f,this % iMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(4)
-    do ivar = 1,nvars
-      do iel = 1,nelems
-        do j = 1,this%M+1
-          do i = 1,this%M+1
-
-            fij = 0.0_prec
-            do jj = 1,this%N+1
-              fi = 0.0_prec
-              do ii = 1,this%N+1
-                fi = fi+f(ii,jj,iel,ivar)*this%iMatrix(ii,i)
-              enddo
-              fij = fij+fi*this%iMatrix(jj,j)
-            enddo
-            fTarget(i,j,iel,ivar) = fij
-
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-    !call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
-    !call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
-  endsubroutine ScalarGridInterp_2D
-
   subroutine ScalarGridInterp_3D(this,f,fTarget,nvars,nelems)
     !! Host (CPU) implementation of the ScalarGridInterp_3D interface.
     !! In most cases, you should use the `ScalarGridInterp_3D` generic interface,
@@ -881,45 +823,6 @@ contains
 !
 ! ================================================================================================ !
 !
-  subroutine ScalarGradient_2D(this,f,df,nvars,nelems)
-    implicit none
-    class(Lagrange),intent(in) :: this
-    integer,intent(in)     :: nvars,nelems
-    real(prec),intent(in)  :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:nelems,1:nvars,1:2)
-    ! Local
-    integer    :: i,j,ii,iel,ivar
-    real(prec) :: df1,df2
-
-    !$omp target map(to:f,this % dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(4)
-    do ivar = 1,nvars
-      do iel = 1,nelems
-        do j = 1,this%N+1
-          do i = 1,this%N+1
-
-            df1 = 0.0_prec
-            df2 = 0.0_prec
-            do ii = 1,this%N+1
-              df1 = df1+this%dMatrix(ii,i)*f(ii,j,iel,ivar)
-              df2 = df2+this%dMatrix(ii,j)*f(i,ii,iel,ivar)
-            enddo
-            df(i,j,iel,ivar,1) = df1
-            df(i,j,iel,ivar,2) = df2
-
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-    ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
-    ! call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
-    ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
-    ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! dfloc => null()
-
-  endsubroutine ScalarGradient_2D
 
   subroutine ScalarGradient_3D(this,f,df,nvars,nelems)
     implicit none
@@ -1758,43 +1661,6 @@ contains
 !   ! /////////////////////////////// !
 !   ! Boundary Interpolation Routines !
 
-  subroutine ScalarBoundaryInterp_2D(this,f,fTarget,nvars,nelems)
-    implicit none
-    class(Lagrange),intent(in) :: this
-    integer,intent(in)         :: nvars,nelems
-    real(prec),intent(in)      :: f(1:this%N+1,1:this%N+1,1:nelems,1:nvars)
-    real(prec),intent(out)     :: fTarget(1:this%N+1,1:4,1:nelems,1:nvars)
-    ! Local
-    integer :: i,ii,iel,ivar
-    real(prec) :: fb(1:4)
-
-    !$omp target map(to:f,this % bMatrix) map(from:fTarget)
-    !$omp teams distribute parallel do collapse(3)
-    do iel = 1,nelems
-      do ivar = 1,nvars
-        do i = 1,this%N+1
-
-          fb(1:4) = 0.0_prec
-
-          do ii = 1,this%N+1
-            fb(1) = fb(1)+this%bMatrix(ii,1)*f(i,ii,iel,ivar) ! South
-            fb(2) = fb(2)+this%bMatrix(ii,2)*f(ii,i,iel,ivar) ! East
-            fb(3) = fb(3)+this%bMatrix(ii,2)*f(i,ii,iel,ivar) ! North
-            fb(4) = fb(4)+this%bMatrix(ii,1)*f(ii,i,iel,ivar) ! West
-          enddo
-
-          fTarget(i,1:4,iel,ivar) = fb(1:4)
-
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-    ! call ScalarBoundaryInterp_2D_gpu_wrapper(c_loc(this % bMatrix), &
-    ! c_loc(f),c_loc(fTarget), &
-    ! this % N,nvars,nelems)
-
-  endsubroutine ScalarBoundaryInterp_2D
 
   subroutine ScalarBoundaryInterp_3D(this,f,fTarget,nvars,nelems)
     implicit none

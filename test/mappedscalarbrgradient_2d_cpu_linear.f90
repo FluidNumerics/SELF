@@ -111,7 +111,8 @@ contains
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
 
-    call f%BRGradient(geometry,df%interior)
+    call f%AverageSides()
+    df%interior = f%DGGradient(geometry)
 
     print*,"min, max (df/dx)",minval(df%interior(:,:,:,1,1)),maxval(df%interior(:,:,:,1,1))
     print*,"min, max (df/dy)",minval(df%interior(:,:,:,1,2)),maxval(df%interior(:,:,:,1,2))

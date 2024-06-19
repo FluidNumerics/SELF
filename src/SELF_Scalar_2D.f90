@@ -127,37 +127,108 @@ contains
   subroutine BoundaryInterp_Scalar2D(this)
     implicit none
     class(Scalar2D),intent(inout) :: this
+    ! Local
+    integer :: i,ii,iel,ivar
+    real(prec) :: fb(1:4)
 
-    call this%interp%ScalarBoundaryInterp_2D(this%interior, &
-                                             this%boundary, &
-                                             this%nVar, &
-                                             this%nElem)
+    !$omp target map(to:this%interior,this% bMatrix) map(from:this%boundary)
+    !$omp teams distribute parallel do collapse(3)
+    do iel = 1,this%nelem
+      do ivar = 1,this%nvar
+        do i = 1,this%N+1
+
+          fb(1:4) = 0.0_prec
+
+          do ii = 1,this%N+1
+            fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar) ! South
+            fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar) ! East
+            fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar) ! North
+            fb(4) = fb(4)+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar) ! West
+          enddo
+
+          this%boundary(i,1:4,iel,ivar) = fb(1:4)
+
+        enddo
+      enddo
+    enddo
+    !$omp end target
 
   endsubroutine BoundaryInterp_Scalar2D
 
-  subroutine GridInterp_Scalar2D(this,that)
+  pure function GridInterp_Scalar2D(this) result(f)
     implicit none
     class(Scalar2D),intent(in) :: this
-    type(Scalar2D),intent(inout) :: that
+    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
+    ! Local
+    integer :: i,j,ii,jj,iel,ivar
+    real(prec) :: fi,fij
 
-    call this%interp%ScalarGridInterp_2D(this%interior, &
-                                         that%interior, &
-                                         this%nVar, &
-                                         this%nElem)
+    !$omp target map(to:f,this%interp%iMatrix) map(from:f)
+    !$omp teams distribute parallel do collapse(4)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do j = 1,this%M+1
+          do i = 1,this%M+1
 
-  endsubroutine GridInterp_Scalar2D
+            fij = 0.0_prec
+            do jj = 1,this%N+1
+              fi = 0.0_prec
+              do ii = 1,this%N+1
+                fi = fi+this%interior(ii,jj,iel,ivar)*this%interp%iMatrix(ii,i)
+              enddo
+              fij = fij+fi*this%interp%iMatrix(jj,j)
+            enddo
+            f(i,j,iel,ivar) = fij
 
-  subroutine Gradient_Scalar2D(this,df)
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+    !call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
+    !call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
+  
+
+  endfunction GridInterp_Scalar2D
+
+   pure function Gradient_Scalar2D(this) result(df)
     implicit none
     class(Scalar2D),intent(in) :: this
-    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
+    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
+    ! Local
+    integer    :: i,j,ii,iel,ivar
+    real(prec) :: df1,df2
 
-    call this%interp%ScalarGradient_2D(this%interior, &
-                                       df, &
-                                       this%nVar, &
-                                       this%nElem)
+    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp teams distribute parallel do collapse(4)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        do j = 1,this%N+1
+          do i = 1,this%N+1
 
-  endsubroutine Gradient_Scalar2D
+            df1 = 0.0_prec
+            df2 = 0.0_prec
+            do ii = 1,this%N+1
+              df1 = df1+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)
+              df2 = df2+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)
+            enddo
+            df(i,j,iel,ivar,1) = df1
+            df(i,j,iel,ivar,2) = df2
+
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+        ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
+    ! call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
+    ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
+    ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
+    ! dfloc => null()
+
+  endfunction Gradient_Scalar2D
 
   subroutine WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
     implicit none
