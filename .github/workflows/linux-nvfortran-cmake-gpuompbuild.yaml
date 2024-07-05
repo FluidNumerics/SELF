@@ -33,6 +33,7 @@ jobs:
               toolchain: {compiler: nvidia-hpc, version: '24.5'}
               spack_compiler: nvhpc@=24.5
               spack_os: "ubuntu:22.04"
+              omp_target: gpu
 
     defaults:
       run:
@@ -72,7 +73,7 @@ jobs:
           spack env activate .
           mkdir build
           cd build
-          FC=${{ env.FC }} CC=${{ env.CC }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DOMP_TARGET=sm_70 ../
+          FC=${{ env.FC }} CC=${{ env.CC }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DOMP_TARGET=${{ matrix.omp_target }} ../
           make VERBOSE=1
 
       - name: Push packages and update index
