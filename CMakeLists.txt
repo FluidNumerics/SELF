@@ -28,7 +28,14 @@ cmake_policy(VERSION 3.21...3.27)
 
 # Defaults to "none", which disables OpenMP builds
 # Override with -DOMP_TARGET
+# - Set to "none" to disable OpenMP
 # - Set to "multicore" for multicore cpu
+# - Set to the GPU target architecture code for gpu offloading
+#     > Nvidia V100 : sm_70
+#     > Nvidia A100 : sm_80
+#     > AMD MI50 : gfx906
+#     > AMD MI100 : gfx908
+#     > AMD MI210/MI250/MI250X : gfx90a
 set(OMP_TARGET "none" CACHE STRING "Target architecture for openmp.")
 
 
