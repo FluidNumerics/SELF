@@ -310,7 +310,6 @@ contains
     integer :: i,j,k,nVar,iVar,iEl
 
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
-      
       nVar = this%solution%nVar
       !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
       !$omp teams loop collapse(5)
