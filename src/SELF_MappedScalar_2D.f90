@@ -303,7 +303,7 @@ contains
           flip = mesh%sideInfo(4,s1,e1)-s2*10
           bcid = mesh%sideInfo(5,s1,e1)
 
-          if(s2 > 0 .or. bcid == 0) then
+          if(s2 /= 0) then
             neighborRank = decomp%elemToRank(e2Global)
 
             if(neighborRank == decomp%rankId) then
@@ -367,7 +367,7 @@ contains
 
   endsubroutine AverageSides_MappedScalar2D
 
-  pure function Gradient_MappedScalar2D(this,geometry) result(df)
+  function Gradient_MappedScalar2D(this,geometry) result(df)
   !! Calculates the gradient of a function using the strong form of the gradient
   !! in mapped coordinates.
     implicit none
@@ -429,7 +429,7 @@ contains
 
   endfunction Gradient_MappedScalar2D
 
-  pure function DGGradient_MappedScalar2D(this,geometry) result(df)
+  function DGGradient_MappedScalar2D(this,geometry) result(df)
     !! 
     implicit none
     class(MappedScalar2D),intent(in) :: this

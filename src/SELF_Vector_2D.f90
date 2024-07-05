@@ -150,7 +150,7 @@ contains
 
   endsubroutine SetEquation_Vector2D
 
-  pure function GridInterp_Vector2D(this) result(f)
+  function GridInterp_Vector2D(this) result(f)
     implicit none
     class(Vector2D),intent(in) :: this
     real(prec) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:2)
@@ -216,7 +216,7 @@ contains
 
   endsubroutine BoundaryInterp_Vector2D
 
-  pure function Gradient_Vector2D(this) result(df)
+  function Gradient_Vector2D(this) result(df)
     implicit none
     class(Vector2D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2,1:2)
@@ -259,7 +259,7 @@ contains
 
   endfunction Gradient_Vector2D
 
-  pure function Divergence_Vector2D(this) result(df)
+  function Divergence_Vector2D(this) result(df)
     implicit none
     class(Vector2D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)

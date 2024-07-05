@@ -141,7 +141,7 @@ contains
                   fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! East
                   fb(4) = fb(4)+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! North
                   fb(5) = fb(5)+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! West
-                  fb(6) = fb(6)+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fb(6) = fb(6)+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Top
                 enddo
 
                 this%boundary(i,j,1:6,iel,ivar,idir,jdir) = fb(1:6)

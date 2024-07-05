@@ -165,7 +165,7 @@ contains
 
   endsubroutine BoundaryInterp_Scalar3D
 
-  pure function GridInterp_Scalar3D(this) result(f)
+  function GridInterp_Scalar3D(this) result(f)
     implicit none
     class(Scalar3D),intent(in) :: this
     real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
@@ -210,7 +210,7 @@ contains
 
   endfunction GridInterp_Scalar3D
 
-  pure function Gradient_Scalar3D(this) result(df)
+  function Gradient_Scalar3D(this) result(df)
     implicit none
     class(Scalar3D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)

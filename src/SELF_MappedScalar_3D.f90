@@ -58,6 +58,8 @@ module SELF_MappedScalar_3D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar3D
 
+    procedure,public :: WriteTecplot => WriteTecplot_MappedScalar3D
+
   endtype MappedScalar3D
 
 contains
@@ -280,37 +282,44 @@ contains
           flip = mesh%sideInfo(4,s1,e1)-s2*10
           bcid = mesh%sideInfo(5,s1,e1)
 
-          ! If either s2 or e2 are equal to zero, then this is an exterior boundary and
-          ! the extBoundary attribute is assigned by a boundary condition
-          if(s2 > 0 .or. bcid == 0) then
+          if(s2 /= 0) then
 
             neighborRank = decomp%elemToRank(e2Global)
 
             if(neighborRank == decomp%rankId) then
+              !print*,"e1,s1,e2,s2,flip,bcid",e1,s1,e2,s2,flip,bcid
 
-              if(flip == 0) then
+              if (flip==0) then
+                do j1 = 1,this%interp%N+1
+                  do i1 = 1,this%interp%N+1
+                    this%extBoundary(i1,j1,s1,e1,ivar) = &
+                      this%boundary(i2,j2,s2,e2,ivar)
+                  enddo
+                enddo
+              
+              elseif(flip == 1) then
 
                 do j1 = 1,this%interp%N+1
                   do i1 = 1,this%interp%N+1
                     this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i1,j1,s2,e2,ivar)
+                      this%boundary(i2,j2,s2,e2,ivar)
                   enddo
                 enddo
 
-              else if(flip == 1) then
+              else if(flip == 2) then
 
                 do j1 = 1,this%interp%N+1
                   do i1 = 1,this%interp%N+1
 
-                    i2 = j1
-                    j2 = this%interp%N+2-i1
+                    i2 = this%interp%N+2-j1
+                    j2 = i1
                     this%extBoundary(i1,j1,s1,e1,ivar) = &
                       this%boundary(i2,j2,s2,e2,ivar)
 
                   enddo
                 enddo
 
-              else if(flip == 2) then
+              else if(flip == 3) then
 
                 do j1 = 1,this%interp%N+1
                   do i1 = 1,this%interp%N+1
@@ -321,10 +330,12 @@ contains
                   enddo
                 enddo
 
-              else if(flip == 3) then
+              else if(flip == 4) then
 
                 do j1 = 1,this%interp%N+1
                   do i1 = 1,this%interp%N+1
+                    ! i2 = j1
+                    ! j2 = this%interp%N+2-i1
                     i2 = this%interp%N+2-j1
                     j2 = i1
                     this%extBoundary(i1,j1,s1,e1,ivar) = &
@@ -332,16 +343,16 @@ contains
                   enddo
                 enddo
 
-              else if(flip == 4) then
+              ! else if(flip == 4) then
 
-                do j1 = 1,this%interp%N+1
-                  do i1 = 1,this%interp%N+1
-                    i2 = j1
-                    j2 = i1
-                    this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+              !   do j1 = 1,this%interp%N+1
+              !     do i1 = 1,this%interp%N+1
+              !       i2 = this%interp%N+2-i1
+              !       j2 = j1
+              !       this%extBoundary(i1,j1,s1,e1,ivar) = &
+              !         this%boundary(i2,j2,s2,e2,ivar)
+              !     enddo
+              !   enddo
 
               endif
 
@@ -389,7 +400,7 @@ contains
 
   endsubroutine AverageSides_MappedScalar3D
 
-  pure function Gradient_MappedScalar3D(this,geometry) result(df)
+  function Gradient_MappedScalar3D(this,geometry) result(df)
   !! Calculates the gradient of a function using the strong form of the gradient
   !! in mapped coordinates.
     implicit none
@@ -478,7 +489,7 @@ contains
 
   endfunction Gradient_MappedScalar3D
 
-  pure function DGGradient_MappedScalar3D(this,geometry) result(df)
+  function DGGradient_MappedScalar3D(this,geometry) result(df)
     !! Calculates the gradient of a function using the weak form of the gradient
     !! and the average boundary state.
     !! This method will compute the average boundary state from the
@@ -490,7 +501,6 @@ contains
     ! Local
     integer :: iEl,iVar,i,j,k,ii,idir
     real(prec) :: dfdx,jaf,bfl,bfr
-
 
     !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dgMatrix,this%interp%bmatrix,this%interp%qweights) map(from:df)
     !$omp teams
@@ -589,5 +599,75 @@ contains
     !$omp end target
     
   endfunction DGGradient_MappedScalar3D
+
+  subroutine WriteTecplot_MappedScalar3D(this,geometry,filename)
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(SEMHex),intent(in) :: geometry
+    character(*),intent(in),optional :: filename
+    ! Local
+    character(8) :: zoneID
+    integer :: fUnit
+    integer :: iEl,i,j,k,iVar
+    character(LEN=self_FileNameLength) :: tecFile
+    character(LEN=self_TecplotHeaderLength) :: tecHeader
+    character(LEN=self_FormatLength) :: fmat
+    character(13) :: timeStampString
+    character(5) :: rankString
+    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
+    real(prec) :: x(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
+
+    if(present(filename)) then
+      tecFile = filename
+    else
+      tecFile = "mappedscalar.tec"
+    endif
+
+    ! Map the mesh positions to the target grid
+    x = geometry%x%GridInterp()
+
+    ! Map the solution to the target grid
+    f = this%GridInterp()
+
+    open(UNIT=NEWUNIT(fUnit), &
+         FILE=trim(tecFile), &
+         FORM='formatted', &
+         STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y", "Z"'
+    do iVar = 1,this%nVar
+      tecHeader = trim(tecHeader)//', "'//trim(this%meta(iVar)%name)//'"'
+    enddo
+
+    write(fUnit,*) trim(tecHeader)
+
+    ! Create format statement
+    write(fmat,*) this%nvar+3
+    fmat = '('//trim(fmat)//'(ES16.7E3,1x))'
+
+    do iEl = 1,this%nElem
+
+      write(zoneID,'(I8.8)') iEl
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%interp%M+1, &
+        ', J=',this%interp%M+1,', K=',this%interp%M+1
+
+      do k = 1,this%interp%M+1
+        do j = 1,this%interp%M+1
+          do i = 1,this%interp%M+1
+
+            write(fUnit,fmat) x(i,j,k,iEl,1,1), &
+              x(i,j,k,iEl,1,2), &
+              x(i,j,k,iEl,1,3), &
+              f(i,j,k,iEl,1:this%nvar)
+
+          enddo
+        enddo
+      enddo
+
+    enddo
+
+    close(UNIT=fUnit)
+
+  endsubroutine WriteTecplot_MappedScalar3D
 
 endmodule SELF_MappedScalar_3D

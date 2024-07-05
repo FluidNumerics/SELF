@@ -151,7 +151,7 @@ contains
 
   endsubroutine SetEquation_Vector3D
 
-  pure function GridInterp_Vector3D(this) result(f)
+  function GridInterp_Vector3D(this) result(f)
     implicit none
     class(Vector3D),intent(in) :: this
     real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
@@ -161,7 +161,7 @@ contains
     real(prec) :: fi,fij,fijk
 
     !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
-    !$omp teams distribute parallel do collapse(6)
+    !$omp teams distribute parallel loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -201,7 +201,7 @@ contains
     real(prec) :: fb(1:6)
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
-    !$omp teams distribute parallel do collapse(5)
+    !$omp teams distribute parallel loop collapse(5)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -229,7 +229,7 @@ contains
 
   endsubroutine BoundaryInterp_Vector3D
 
-  pure function Gradient_Vector3D(this) result(df)
+  function Gradient_Vector3D(this) result(df)
     implicit none
     class(Vector3D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
@@ -238,7 +238,7 @@ contains
     real(prec) :: dfds1,dfds2,dfds3
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(6)
+    !$omp teams distribute parallel loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -279,7 +279,7 @@ contains
 
   endfunction Gradient_Vector3D
 
-  pure function Curl_Vector3D(this) result(curlf)
+  function Curl_Vector3D(this) result(curlf)
     implicit none
     class(Vector3D),intent(in) :: this
     real(prec) :: curlf(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
@@ -338,7 +338,7 @@ contains
 
   endfunction Curl_Vector3D
 
-  pure function Divergence_Vector3D(this) result(df)
+  function Divergence_Vector3D(this) result(df)
     implicit none
     class(Vector3D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)

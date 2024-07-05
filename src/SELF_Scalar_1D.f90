@@ -144,7 +144,7 @@ contains
 
   endsubroutine BoundaryInterp_Scalar1D
 
-  pure function GridInterp_Scalar1D(this) result(f)
+  function GridInterp_Scalar1D(this) result(f)
     implicit none
     class(Scalar1D),intent(in) :: this
     real(prec) :: f(1:this%M+1,1:this%nelem,1:this%nvar)
@@ -169,7 +169,7 @@ contains
 
   endfunction GridInterp_Scalar1D
 
-  pure function Derivative_Scalar1D(this) result(df)
+  function Derivative_Scalar1D(this) result(df)
     implicit none
     class(Scalar1D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)

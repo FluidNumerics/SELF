@@ -191,6 +191,12 @@ contains
     this%CGNSSideMap(1:4,5) = (/1,5,8,4/)
     this%CGNSSideMap(1:4,6) = (/5,6,7,8/)
 
+    ! Sidemap traverses each face so that the normal
+    ! formed by the right hand rule is the coordinate
+    ! positive pointing normal. For east,north,and top
+    ! this is an outward facing normal.
+    ! For bottom, south, and west, the normal is inward
+    ! facing.
     this%sideMap(1:4,1) = (/1,2,3,4/) ! Bottom
     this%sideMap(1:4,2) = (/1,2,6,5/) ! South
     this%sideMap(1:4,3) = (/2,3,7,6/) ! East
@@ -332,8 +338,8 @@ contains
 
           if(neighborRank == rankId) then
 
-            lnid1 = this%sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
-            lnid2 = this%sideMap(1:4,s2) ! local CGNS corner node ids for element 2 side
+            lnid1 = this%sideMap(1:4,s1) ! local corner node ids for element 1 side
+            lnid2 = this%sideMap(1:4,s2) ! local corner node ids for element 2 side
 
             do l = 1,4
 
@@ -404,7 +410,7 @@ contains
         nloc1(1:4) = nid1(1:4,s1,e1)
         nloc2(1:4) = nid2(1:4,s1,e1)
 
-        if(bcid == 0) then
+        if(s2 /= 0) then
           nShifts = 0
           theyMatch = .false.
 

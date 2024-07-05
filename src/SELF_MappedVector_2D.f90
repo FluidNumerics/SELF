@@ -318,7 +318,7 @@ contains
 
   endsubroutine AverageSides_MappedVector2D
 
-  pure function Divergence_MappedVector2D(this,geometry) result(df)
+  function Divergence_MappedVector2D(this,geometry) result(df)
     ! Strong Form Operator
     !    !
     implicit none
@@ -378,7 +378,7 @@ contains
 
   endfunction Divergence_MappedVector2D
 
-  pure function DGDivergence_MappedVector2D(this,geometry) result(df)
+  function DGDivergence_MappedVector2D(this,geometry) result(df)
     !! Computes the divergence of a 2-D vector using the weak form
     !! On input, the  attribute of the vector
     !! is assigned and the  attribute is set to the physical

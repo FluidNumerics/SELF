@@ -58,6 +58,8 @@ module SELF_MappedVector_3D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector3D
 
+    procedure,public :: WriteTecplot => WriteTecplot_MappedVector3D
+
   endtype MappedVector3D
 
 contains
@@ -404,7 +406,7 @@ contains
 
   endsubroutine AverageSides_MappedVector3D
 
-  pure function Divergence_MappedVector3D(this,geometry) result(df)
+  function Divergence_MappedVector3D(this,geometry) result(df)
     ! Strong Form Operator
     !    !
     implicit none
@@ -498,7 +500,7 @@ contains
 
   endfunction Divergence_MappedVector3D
 
-  pure function DGDivergence_MappedVector3D(this,geometry) result(df)
+  function DGDivergence_MappedVector3D(this,geometry) result(df)
       !! Computes the divergence of a 3-D vector using the weak form
       !! On input, the  attribute of the vector
       !! is assigned and the  attribute is set to the physical
@@ -606,5 +608,83 @@ contains
     !$omp end target
 
   endfunction DGDivergence_MappedVector3D
+
+  subroutine WriteTecplot_MappedVector3D(this,geometry,filename)
+    implicit none
+    class(MappedVector3D),intent(inout) :: this
+    type(SEMHex),intent(in) :: geometry
+    character(*),intent(in),optional :: filename
+    ! Local
+    character(8) :: zoneID
+    integer :: fUnit
+    integer :: iEl,i,j,k,iVar
+    character(LEN=self_FileNameLength) :: tecFile
+    character(LEN=self_TecplotHeaderLength) :: tecHeader
+    character(LEN=self_FormatLength) :: fmat
+    character(13) :: timeStampString
+    character(5) :: rankString
+    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
+    real(prec) :: x(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
+
+    if(present(filename)) then
+      tecFile = filename
+    else
+      tecFile = "mappedvector.tec"
+    endif
+
+    ! Map the mesh positions to the target grid
+    x = geometry%x%GridInterp()
+
+    ! Map the solution to the target grid
+    f = this%GridInterp()
+
+    open(UNIT=NEWUNIT(fUnit), &
+         FILE=trim(tecFile), &
+         FORM='formatted', &
+         STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y", "Z"'
+    do iVar = 1,this%nVar
+      tecHeader = trim(tecHeader)//', "'//trim(this%meta(iVar)%name)//'_x"'
+    enddo
+    do iVar = 1,this%nVar
+      tecHeader = trim(tecHeader)//', "'//trim(this%meta(iVar)%name)//'_y"'
+    enddo
+    do iVar = 1,this%nVar
+      tecHeader = trim(tecHeader)//', "'//trim(this%meta(iVar)%name)//'_z"'
+    enddo
+
+    write(fUnit,*) trim(tecHeader)
+
+    ! Create format statement
+    write(fmat,*) 3*this%nvar+3
+    fmat = '('//trim(fmat)//'(ES16.7E3,1x))'
+
+    do iEl = 1,this%nElem
+
+      write(zoneID,'(I8.8)') iEl
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%interp%M+1, &
+        ', J=',this%interp%M+1,', K=',this%interp%M+1
+
+      do k = 1,this%interp%M+1
+        do j = 1,this%interp%M+1
+          do i = 1,this%interp%M+1
+
+            write(fUnit,fmat) x(i,j,k,iEl,1,1), &
+              x(i,j,k,iEl,1,2), &
+              x(i,j,k,iEl,1,3), &
+              f(i,j,k,iEl,1:this%nvar,1), &
+              f(i,j,k,iEl,1:this%nvar,2), &
+              f(i,j,k,iEl,1:this%nvar,3)
+
+          enddo
+        enddo
+      enddo
+
+    enddo
+
+    close(UNIT=fUnit)
+
+  endsubroutine WriteTecplot_MappedVector3D
 
 endmodule SELF_MappedVector_3D

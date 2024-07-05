@@ -155,7 +155,7 @@ contains
 
   endsubroutine BoundaryInterp_Scalar2D
 
-  pure function GridInterp_Scalar2D(this) result(f)
+  function GridInterp_Scalar2D(this) result(f)
     implicit none
     class(Scalar2D),intent(in) :: this
     real(prec) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
@@ -192,7 +192,7 @@ contains
 
   endfunction GridInterp_Scalar2D
 
-   pure function Gradient_Scalar2D(this) result(df)
+   function Gradient_Scalar2D(this) result(df)
     implicit none
     class(Scalar2D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)

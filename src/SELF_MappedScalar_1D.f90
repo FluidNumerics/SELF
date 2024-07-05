@@ -153,7 +153,7 @@ contains
 
   endsubroutine AverageSides_MappedScalar1D
 
-  pure function Derivative_MappedScalar1D(this,geometry) result(dF)
+  function Derivative_MappedScalar1D(this,geometry) result(dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
@@ -181,7 +181,7 @@ contains
 
   endfunction Derivative_MappedScalar1D
 
-  pure function DGDerivative_MappedScalar1D(this,geometry) result(dF)
+  function DGDerivative_MappedScalar1D(this,geometry) result(dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(Geometry1D),intent(in) :: geometry
