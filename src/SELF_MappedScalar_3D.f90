@@ -289,14 +289,14 @@ contains
             if(neighborRank == decomp%rankId) then
               !print*,"e1,s1,e2,s2,flip,bcid",e1,s1,e2,s2,flip,bcid
 
-              if (flip==0) then
+              if(flip == 0) then
                 do j1 = 1,this%interp%N+1
                   do i1 = 1,this%interp%N+1
                     this%extBoundary(i1,j1,s1,e1,ivar) = &
                       this%boundary(i2,j2,s2,e2,ivar)
                   enddo
                 enddo
-              
+
               elseif(flip == 1) then
 
                 do j1 = 1,this%interp%N+1
@@ -343,16 +343,16 @@ contains
                   enddo
                 enddo
 
-              ! else if(flip == 4) then
+                ! else if(flip == 4) then
 
-              !   do j1 = 1,this%interp%N+1
-              !     do i1 = 1,this%interp%N+1
-              !       i2 = this%interp%N+2-i1
-              !       j2 = j1
-              !       this%extBoundary(i1,j1,s1,e1,ivar) = &
-              !         this%boundary(i2,j2,s2,e2,ivar)
-              !     enddo
-              !   enddo
+                !   do j1 = 1,this%interp%N+1
+                !     do i1 = 1,this%interp%N+1
+                !       i2 = this%interp%N+2-i1
+                !       j2 = j1
+                !       this%extBoundary(i1,j1,s1,e1,ivar) = &
+                !         this%boundary(i2,j2,s2,e2,ivar)
+                !     enddo
+                !   enddo
 
               endif
 
@@ -389,8 +389,8 @@ contains
           do j = 1,this%interp%N+1
             do i = 1,this%interp%N+1
               this%boundary(i,j,iside,iel,ivar) = 0.5_prec*( &
-                                                    this%boundary(i,j,iside,iel,ivar)+ &
-                                                     this%extBoundary(i,j,iside,iel,ivar))
+                                                  this%boundary(i,j,iside,iel,ivar)+ &
+                                                  this%extBoundary(i,j,iside,iel,ivar))
             enddo
           enddo
         enddo
@@ -420,13 +420,13 @@ contains
           do k = 1,this%interp%N+1
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
-  
+
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
                   ! dsdx(j,i) is contravariant vector i, component j
                   ja = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)
-                  dfdx = dfdx + this%interp%dMatrix(ii,i)*&
-                  this%interior(ii,j,k,iel,ivar)*ja
+                  dfdx = dfdx+this%interp%dMatrix(ii,i)* &
+                         this%interior(ii,j,k,iel,ivar)*ja
 
                 enddo
                 df(i,j,k,iel,ivar,idir) = dfdx
@@ -449,13 +449,13 @@ contains
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
                   ja = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)
-                  dfdx = dfdx + this%interp%dMatrix(ii,j)*&
-                  this%interior(i,ii,k,iel,ivar)*ja
+                  dfdx = dfdx+this%interp%dMatrix(ii,j)* &
+                         this%interior(i,ii,k,iel,ivar)*ja
                 enddo
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir) + dfdx)
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
 
               enddo
-            enddo 
+            enddo
           enddo
         enddo
       enddo
@@ -472,14 +472,14 @@ contains
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
                   ja = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)
-                  dfdx = dfdx + this%interp%dMatrix(ii,k)*&
-                  this%interior(i,j,ii,iel,ivar)*ja
+                  dfdx = dfdx+this%interp%dMatrix(ii,k)* &
+                         this%interior(i,j,ii,iel,ivar)*ja
                 enddo
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir) + dfdx)/&
-                   geometry%J%interior(i,j,k,iEl,1)
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/ &
+                                          geometry%J%interior(i,j,k,iEl,1)
 
               enddo
-            enddo 
+            enddo
           enddo
         enddo
       enddo
@@ -511,22 +511,22 @@ contains
           do k = 1,this%interp%N+1
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
-  
+
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
                   ! dsdx(j,i) is contravariant vector i, component j
-                  jaf = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)*&
-                    this%interior(ii,j,k,iel,ivar)
+                  jaf = geometry%dsdx%interior(ii,j,k,iel,1,idir,1)* &
+                        this%interior(ii,j,k,iel,ivar)
 
-                  dfdx = dfdx + this%interp%dgMatrix(ii,i)*jaf
+                  dfdx = dfdx+this%interp%dgMatrix(ii,i)*jaf
                 enddo
-                bfl = this%boundary(j,k,5,iel,ivar)*&
+                bfl = this%boundary(j,k,5,iel,ivar)* &
                       geometry%dsdx%boundary(j,k,5,iel,1,idir,1) ! west
-                bfr = this%boundary(j,k,3,iel,ivar)*&
+                bfr = this%boundary(j,k,3,iel,ivar)* &
                       geometry%dsdx%boundary(j,k,3,iel,1,idir,1) ! east
-                df(i,j,k,iel,ivar,idir) = dfdx + &
-                  (this%interp%bMatrix(i,1)*bfl+ &
-                   this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+                df(i,j,k,iel,ivar,idir) = dfdx+ &
+                                          (this%interp%bMatrix(i,1)*bfl+ &
+                                           this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
 
               enddo
             enddo
@@ -545,21 +545,21 @@ contains
 
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
-                  jaf = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)*&
-                    this%interior(i,ii,k,iel,ivar)
+                  jaf = geometry%dsdx%interior(i,ii,k,iel,1,idir,2)* &
+                        this%interior(i,ii,k,iel,ivar)
 
-                  dfdx = dfdx + this%interp%dgMatrix(ii,j)*jaf
+                  dfdx = dfdx+this%interp%dgMatrix(ii,j)*jaf
                 enddo
-                bfl = this%boundary(i,k,2,iel,ivar)*&
+                bfl = this%boundary(i,k,2,iel,ivar)* &
                       geometry%dsdx%boundary(i,k,2,iel,1,idir,2) ! south
-                bfr = this%boundary(i,k,4,iel,ivar)*&
+                bfr = this%boundary(i,k,4,iel,ivar)* &
                       geometry%dsdx%boundary(i,k,4,iel,1,idir,2) ! north
-                dfdx = dfdx + (this%interp%bMatrix(j,1)*bfl+ &
-                              this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
-  
+                dfdx = dfdx+(this%interp%bMatrix(j,1)*bfl+ &
+                             this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+
                 df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
               enddo
-            enddo 
+            enddo
           enddo
         enddo
       enddo
@@ -575,29 +575,29 @@ contains
 
                 dfdx = 0.0_prec
                 do ii = 1,this%N+1
-                  jaf = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)*&
-                   this%interior(i,j,ii,iel,ivar)
-                  dfdx = dfdx + this%interp%dgMatrix(ii,k)*jaf
+                  jaf = geometry%dsdx%interior(i,j,ii,iel,1,idir,3)* &
+                        this%interior(i,j,ii,iel,ivar)
+                  dfdx = dfdx+this%interp%dgMatrix(ii,k)*jaf
                 enddo
-                bfl = this%boundary(i,j,1,iel,ivar)*&
+                bfl = this%boundary(i,j,1,iel,ivar)* &
                       geometry%dsdx%boundary(i,j,1,iel,1,idir,3) ! bottom
-                bfr = this%boundary(i,j,6,iel,ivar)*&
+                bfr = this%boundary(i,j,6,iel,ivar)* &
                       geometry%dsdx%boundary(i,j,6,iel,1,idir,3) ! top
-                dfdx = dfdx + (this%interp%bMatrix(k,1)*bfl+ &
-                                this%interp%bMatrix(k,2)*bfr)/this%interp%qweights(k)
-  
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/&
-                                geometry%J%interior(i,j,k,iEl,1)
+                dfdx = dfdx+(this%interp%bMatrix(k,1)*bfl+ &
+                             this%interp%bMatrix(k,2)*bfr)/this%interp%qweights(k)
+
+                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/ &
+                                          geometry%J%interior(i,j,k,iEl,1)
 
               enddo
-            enddo 
+            enddo
           enddo
         enddo
       enddo
     enddo
     !$omp end teams
     !$omp end target
-    
+
   endfunction DGGradient_MappedScalar3D
 
   subroutine WriteTecplot_MappedScalar3D(this,geometry,filename)

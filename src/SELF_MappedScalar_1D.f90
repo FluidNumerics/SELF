@@ -140,13 +140,13 @@ contains
 
         ! Left side - we account for the -\hat{x} normal
         this%boundary(1,iel,ivar) = -0.5_prec*( &
-                                       this%boundary(1,iel,ivar)+ &
-                                       this%extBoundary(1,iel,ivar))
+                                    this%boundary(1,iel,ivar)+ &
+                                    this%extBoundary(1,iel,ivar))
 
         ! Right side - we account for the +\hat{x} normal
         this%boundary(2,iel,ivar) = 0.5_prec*( &
-                                       this%boundary(2,iel,ivar)+ &
-                                       this%extBoundary(2,iel,ivar))
+                                    this%boundary(2,iel,ivar)+ &
+                                    this%extBoundary(2,iel,ivar))
       enddo
     enddo
     !$omp end target
@@ -202,11 +202,10 @@ contains
           enddo
 
           dfloc = dfloc+(this%boundary(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
-                                  this%boundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
-                           this%interp%qWeights(i)
+                         this%boundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
+                  this%interp%qWeights(i)
 
           df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
-
 
         enddo
       enddo

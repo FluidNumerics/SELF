@@ -289,7 +289,7 @@ contains
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams 
+    !$omp teams
     !$omp loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
@@ -324,9 +324,9 @@ contains
           do j = 1,this%N+1
             do i = 1,this%N+1
 
-              curlf(i,j,k,iel,ivar,1) = (df(i,j,k,iel,ivar,3,2) - df(i,j,k,iel,ivar,2,3))
-              curlf(i,j,k,iel,ivar,2) = (df(i,j,k,iel,ivar,1,3) - df(i,j,k,iel,ivar,3,1))
-              curlf(i,j,k,iel,ivar,3) = (df(i,j,k,iel,ivar,2,1) - df(i,j,k,iel,ivar,1,2))
+              curlf(i,j,k,iel,ivar,1) = (df(i,j,k,iel,ivar,3,2)-df(i,j,k,iel,ivar,2,3))
+              curlf(i,j,k,iel,ivar,2) = (df(i,j,k,iel,ivar,1,3)-df(i,j,k,iel,ivar,3,1))
+              curlf(i,j,k,iel,ivar,3) = (df(i,j,k,iel,ivar,2,1)-df(i,j,k,iel,ivar,1,2))
 
             enddo
           enddo
@@ -417,7 +417,6 @@ contains
     ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,3)
     ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! floc => null()
-
 
   endfunction Divergence_Vector3D
 

@@ -188,11 +188,10 @@ contains
 
     !call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
     !call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
-  
 
   endfunction GridInterp_Scalar2D
 
-   function Gradient_Scalar2D(this) result(df)
+  function Gradient_Scalar2D(this) result(df)
     implicit none
     class(Scalar2D),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
@@ -222,7 +221,7 @@ contains
     enddo
     !$omp end target
 
-        ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
+    ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
     ! call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
     ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
     ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)

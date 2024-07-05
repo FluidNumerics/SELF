@@ -533,7 +533,6 @@ contains
 
 !   end subroutine self_hipblas_matrixop_dim3_3d
 
-
 ! ================================================================================================ !
 !
 ! CalculateBarycentricWeights (PRIVATE)

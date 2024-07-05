@@ -270,7 +270,7 @@ contains
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams
     !$omp loop collapse(4)
-    do ivar = 1 ,this%nvar  
+    do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do j = 1,this%N+1
           do i = 1,this%N+1
@@ -310,7 +310,6 @@ contains
     ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2)
     ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! floc => null()
-
 
   endfunction Divergence_Vector2D
 

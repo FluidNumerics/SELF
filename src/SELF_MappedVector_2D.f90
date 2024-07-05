@@ -307,8 +307,8 @@ contains
           do iside = 1,4
             do i = 1,this%interp%N+1
               this%boundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
-                                                        this%boundary(i,iside,iel,ivar,idir)+ &
-                                                        this%extBoundary(i,iside,iel,ivar,idir))
+                                                     this%boundary(i,iside,iel,ivar,idir)+ &
+                                                     this%extBoundary(i,iside,iel,ivar,idir))
             enddo
           enddo
         enddo
@@ -330,7 +330,7 @@ contains
     real(prec) :: dfLoc,Fx,Fy,Fc
 
     !$omp target map(to:geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams 
+    !$omp teams
     !$omp loop collapse(4)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
@@ -394,7 +394,7 @@ contains
     real(prec) :: dfLoc,Fx,Fy,Fc
 
     !$omp target map(to:geometry%dsdx%interior,this%interior,this%boundaryNormal,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qweights) map(from:df)
-    !$omp teams 
+    !$omp teams
     !$omp loop collapse(4)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
@@ -410,9 +410,9 @@ contains
                    geometry%dsdx%interior(ii,j,iEl,1,2,1)*Fy
               dfLoc = dfLoc+this%interp%dgMatrix(ii,i)*Fc
             enddo
-            dF(i,j,iel,ivar) = dfLoc+&
-            (this%interp%bMatrix(i,2)*this%boundaryNormal(j,2,iel,ivar)+ &
-              this%interp%bMatrix(i,1)*this%boundaryNormal(j,4,iel,ivar))/ &
+            dF(i,j,iel,ivar) = dfLoc+ &
+                               (this%interp%bMatrix(i,2)*this%boundaryNormal(j,2,iel,ivar)+ &
+                                this%interp%bMatrix(i,1)*this%boundaryNormal(j,4,iel,ivar))/ &
                                this%interp%qweights(i)
 
           enddo
@@ -437,9 +437,9 @@ contains
               dfLoc = dfLoc+this%interp%dgMatrix(ii,j)*Fc
             enddo
             dfLoc = dfLoc+ &
-            (this%interp%bMatrix(j,2)*this%boundaryNormal(i,3,iel,ivar)+ &
-             this%interp%bMatrix(j,1)*this%boundaryNormal(i,1,iel,ivar))/ &
-            this%interp%qweights(j)
+                    (this%interp%bMatrix(j,2)*this%boundaryNormal(i,3,iel,ivar)+ &
+                     this%interp%bMatrix(j,1)*this%boundaryNormal(i,1,iel,ivar))/ &
+                    this%interp%qweights(j)
 
             dF(i,j,iel,ivar) = (dF(i,j,iel,ivar)+dfLoc)/geometry%J%interior(i,j,iEl,1)
 

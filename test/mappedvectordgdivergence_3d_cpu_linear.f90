@@ -26,14 +26,14 @@
 
 program test
 
-implicit none
-integer :: exit_code
+  implicit none
+  integer :: exit_code
 
-exit_code = mappedvectordgdivergence_3d_cpu_linear()
-stop exit_code
+  exit_code = mappedvectordgdivergence_3d_cpu_linear()
+  stop exit_code
 
 contains
-integer function mappedvectordgdivergence_3d_cpu_linear() result(r)
+  integer function mappedvectordgdivergence_3d_cpu_linear() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
@@ -70,9 +70,9 @@ integer function mappedvectordgdivergence_3d_cpu_linear() result(r)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
-                    controlNodeType=GAUSS, &
-                    M=targetDegree, &
-                    targetNodeType=UNIFORM)
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
     ! Create a uniform block mesh
     call get_environment_variable("WORKSPACE",WORKSPACE)
@@ -94,20 +94,20 @@ integer function mappedvectordgdivergence_3d_cpu_linear() result(r)
     call f%boundaryInterp()
 
     do iEl = 1,f%nElem
-        do k = 1,6
+      do k = 1,6
         do j = 1,f%interp%N+1
-            do i = 1,f%interp%N+1
+          do i = 1,f%interp%N+1
 
             ! Get the boundary normals on cell edges from the mesh geometry
             nhat(1:3) = geometry%nHat%boundary(i,j,k,iEl,1,1:3)
             nmag = geometry%nScale%boundary(i,j,k,iEl,1)
 
             f%boundaryNormal(i,j,k,iEl,1) = (f%boundary(i,j,k,iEl,1,1)*nhat(1)+ &
-                                                f%boundary(i,j,k,iEl,1,2)*nhat(2)+ &
-                                                f%boundary(i,j,k,iEl,1,3)*nhat(3))*nmag
-            enddo
+                                             f%boundary(i,j,k,iEl,1,2)*nhat(2)+ &
+                                             f%boundary(i,j,k,iEl,1,3)*nhat(3))*nmag
+          enddo
         enddo
-        enddo
+      enddo
     enddo
 
     df%interior = f%DGDivergence(geometry)
@@ -116,9 +116,9 @@ integer function mappedvectordgdivergence_3d_cpu_linear() result(r)
     df%interior = abs(df%interior-3.0_prec)
 
     if(maxval(df%interior) <= tolerance) then
-    r = 0
+      r = 0
     else
-    r = 1
+      r = 1
     endif
 
     ! Clean up
@@ -131,5 +131,5 @@ integer function mappedvectordgdivergence_3d_cpu_linear() result(r)
 
     r = 0
 
-endfunction mappedvectordgdivergence_3d_cpu_linear
+  endfunction mappedvectordgdivergence_3d_cpu_linear
 endprogram test

@@ -357,8 +357,8 @@ contains
         do iside = 1,4
           do i = 1,this%interp%N+1
             this%boundary(i,iside,iel,ivar) = 0.5_prec*( &
-                                                 this%boundary(i,iside,iel,ivar)+ &
-                                                 this%extBoundary(i,iside,iel,ivar))
+                                              this%boundary(i,iside,iel,ivar)+ &
+                                              this%extBoundary(i,iside,iel,ivar))
           enddo
         enddo
       enddo
@@ -378,7 +378,6 @@ contains
     integer :: iEl,iVar,i,j,ii,idir
     real(prec) :: dfdx,ja
 
-
     !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams
     !$omp loop collapse(5)
@@ -387,12 +386,12 @@ contains
         do iEl = 1,this%nElem
           do j = 1,this%interp%N+1
             do i = 1,this%interp%N+1
-  
+
               dfdx = 0.0_prec
               do ii = 1,this%N+1
                 ! dsdx(j,i) is contravariant vector i, component j
                 ja = geometry%dsdx%interior(ii,j,iel,1,idir,1)
-                dfdx = dfdx + this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
+                dfdx = dfdx+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
 
               enddo
 
@@ -414,12 +413,12 @@ contains
               dfdx = 0.0_prec
               do ii = 1,this%N+1
                 ja = geometry%dsdx%interior(i,ii,iel,1,idir,2)
-                dfdx = dfdx + this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
+                dfdx = dfdx+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
               enddo
 
-              df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir) + dfdx)/geometry%J%interior(i,j,iEl,1)
+              df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx)/geometry%J%interior(i,j,iEl,1)
 
-            enddo 
+            enddo
           enddo
         enddo
       enddo
@@ -430,7 +429,7 @@ contains
   endfunction Gradient_MappedScalar2D
 
   function DGGradient_MappedScalar2D(this,geometry) result(df)
-    !! 
+    !!
     implicit none
     class(MappedScalar2D),intent(in) :: this
     type(SEMQuad),intent(in) :: geometry
@@ -452,14 +451,14 @@ contains
               do ii = 1,this%N+1
                 ! dsdx(j,i) is contravariant vector i, component j
                 ja = geometry%dsdx%interior(ii,j,iel,1,idir,1)
-                dfdx = dfdx + this%interp%dgMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
+                dfdx = dfdx+this%interp%dgMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
               enddo
 
               bfl = this%boundary(j,4,iel,ivar)*geometry%dsdx%boundary(j,4,iel,1,idir,1) ! west
               bfr = this%boundary(j,2,iel,ivar)*geometry%dsdx%boundary(j,2,iel,1,idir,1) ! east
-              df(i,j,iel,ivar,idir) = dfdx + (this%interp%bMatrix(i,1)*bfl+ &
-                                              this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
-            enddo                        
+              df(i,j,iel,ivar,idir) = dfdx+(this%interp%bMatrix(i,1)*bfl+ &
+                                            this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+            enddo
           enddo
         enddo
       enddo
@@ -476,16 +475,16 @@ contains
               do ii = 1,this%N+1
                 ! dsdx(j,i) is contravariant vector i, component j
                 ja = geometry%dsdx%interior(i,ii,iel,1,idir,2)
-                dfdx = dfdx + this%interp%dgMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
+                dfdx = dfdx+this%interp%dgMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
               enddo
 
               bfl = this%boundary(i,1,iel,ivar)*geometry%dsdx%boundary(i,1,iel,1,idir,2) ! south
               bfr = this%boundary(i,3,iel,ivar)*geometry%dsdx%boundary(i,3,iel,1,idir,2) ! north
-              dfdx = dfdx + (this%interp%bMatrix(j,1)*bfl+ &
-                              this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+              dfdx = dfdx+(this%interp%bMatrix(j,1)*bfl+ &
+                           this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
 
               df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx)/geometry%J%interior(i,j,iEl,1)
-            enddo   
+            enddo
           enddo
         enddo
       enddo

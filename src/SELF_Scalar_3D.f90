@@ -207,7 +207,6 @@ contains
     ! call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
     ! call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
 
-
   endfunction GridInterp_Scalar3D
 
   function Gradient_Scalar3D(this) result(df)

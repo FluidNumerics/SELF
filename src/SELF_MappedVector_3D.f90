@@ -394,8 +394,8 @@ contains
             do j = 1,this%interp%N+1
               do i = 1,this%interp%N+1
                 this%boundary(i,j,iside,iel,ivar,idir) = 0.5_prec*( &
-                                                            this%boundary(i,j,iside,iel,ivar,idir)+ &
-                                                            this%extBoundary(i,j,iside,iel,ivar,idir))
+                                                         this%boundary(i,j,iside,iel,ivar,idir)+ &
+                                                         this%extBoundary(i,j,iside,iel,ivar,idir))
               enddo
             enddo
           enddo
@@ -418,7 +418,7 @@ contains
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
     !$omp target map(to:geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams 
+    !$omp teams
     !$omp loop collapse(5)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
@@ -433,8 +433,8 @@ contains
                 Fy = this%interior(ii,j,k,iEl,iVar,2)
                 Fz = this%interior(ii,j,k,iEl,iVar,3)
                 Fc = geometry%dsdx%interior(ii,j,k,iEl,1,1,1)*Fx+ &
-                    geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
-                    geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
+                     geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
+                     geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
                 dfLoc = dfLoc+this%interp%dMatrix(ii,i)*Fc
               enddo
               dF(i,j,k,iel,ivar) = dfLoc
@@ -459,8 +459,8 @@ contains
                 Fy = this%interior(i,ii,k,iEl,iVar,2)
                 Fz = this%interior(i,ii,k,iEl,iVar,3)
                 Fc = geometry%dsdx%interior(i,ii,k,iEl,1,1,2)*Fx+ &
-                    geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
-                    geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
+                     geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
+                     geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
                 dfLoc = dfLoc+this%interp%dMatrix(ii,j)*Fc
               enddo
               dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)
@@ -516,7 +516,7 @@ contains
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
     !$omp target map(to:geometry%dsdx%interior,this%interior,this%boundaryNormal,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qweights) map(from:df)
-    !$omp teams 
+    !$omp teams
     !$omp loop collapse(5)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
@@ -531,14 +531,14 @@ contains
                 Fy = this%interior(ii,j,k,iEl,iVar,2)
                 Fz = this%interior(ii,j,k,iEl,iVar,3)
                 Fc = geometry%dsdx%interior(ii,j,k,iEl,1,1,1)*Fx+ &
-                    geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
-                    geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
+                     geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
+                     geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
                 dfLoc = dfLoc+this%interp%dgMatrix(ii,i)*Fc
               enddo
-              dfLoc = dfLoc+&
-               (this%interp%bMatrix(i,2)*this%boundaryNormal(j,k,3,iel,ivar)+ & ! east
-                this%interp%bMatrix(i,1)*this%boundaryNormal(j,k,5,iel,ivar))/ & ! west
-                                   this%interp%qweights(i)
+              dfLoc = dfLoc+ &
+                      (this%interp%bMatrix(i,2)*this%boundaryNormal(j,k,3,iel,ivar)+ & ! east
+                       this%interp%bMatrix(i,1)*this%boundaryNormal(j,k,5,iel,ivar))/ & ! west
+                      this%interp%qweights(i)
               dF(i,j,k,iel,ivar) = dfLoc
 
             enddo
@@ -561,14 +561,14 @@ contains
                 Fy = this%interior(i,ii,k,iEl,iVar,2)
                 Fz = this%interior(i,ii,k,iEl,iVar,3)
                 Fc = geometry%dsdx%interior(i,ii,k,iEl,1,1,2)*Fx+ &
-                    geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
-                    geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
+                     geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
+                     geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
                 dfLoc = dfLoc+this%interp%dgMatrix(ii,j)*Fc
               enddo
               dfLoc = +dfLoc+ &
-               (this%interp%bMatrix(j,2)*this%boundaryNormal(i,k,4,iel,ivar)+ & ! north
-                this%interp%bMatrix(j,1)*this%boundaryNormal(i,k,2,iel,ivar))/ & ! south
-                                   this%interp%qweights(j)
+                      (this%interp%bMatrix(j,2)*this%boundaryNormal(i,k,4,iel,ivar)+ & ! north
+                       this%interp%bMatrix(j,1)*this%boundaryNormal(i,k,2,iel,ivar))/ & ! south
+                      this%interp%qweights(j)
               dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)
 
             enddo
@@ -596,9 +596,9 @@ contains
                 dfLoc = dfLoc+this%interp%dgMatrix(ii,k)*Fc
               enddo
               dfLoc = dfLoc+ &
-               (this%interp%bMatrix(k,2)*this%boundaryNormal(i,j,6,iel,ivar)+ & ! top
-                this%interp%bMatrix(k,1)*this%boundaryNormal(i,j,1,iel,ivar))/ & ! bottom
-                                   this%interp%qweights(k)
+                      (this%interp%bMatrix(k,2)*this%boundaryNormal(i,j,6,iel,ivar)+ & ! top
+                       this%interp%bMatrix(k,1)*this%boundaryNormal(i,j,1,iel,ivar))/ & ! bottom
+                      this%interp%qweights(k)
               dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)/geometry%J%interior(i,j,k,iEl,1)
 
             enddo

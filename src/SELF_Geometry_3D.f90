@@ -263,8 +263,8 @@ contains
     integer :: iEl,i,j,k
     real(prec) :: fac
     real(prec) :: mag
-    type(Vector3D) :: xlgradxm, xmgradxl
-    type(Vector3D) :: curl_xlgradxm, curl_xmgradxl
+    type(Vector3D) :: xlgradxm,xmgradxl
+    type(Vector3D) :: curl_xlgradxm,curl_xmgradxl
 
     ! Here we use the curl invariant form from Kopriva (2006)
     ! to calculate the contravariant basis vectors
@@ -294,9 +294,11 @@ contains
         do j = 1,myGeom%dxds%interp%N+1
           do i = 1,myGeom%dxds%interp%N+1
             ! In our convention, dsdx(i,j) is contravariant vector j, component i
-            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n; 
+            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n;
             ! Here, i = 1:3, and n=1
-            myGeom%dsdx%interior(i,j,k,iel,1,1,1:3) = 0.5_prec*( curl_xmgradxl%interior(i,j,k,iel,1,1:3) - curl_xlgradxm%interior(i,j,k,iel,1,1:3) )
+            myGeom%dsdx%interior(i,j,k,iel,1,1,1:3) = 0.5_prec*( &
+                                                      curl_xmgradxl%interior(i,j,k,iel,1,1:3)- &
+                                                      curl_xlgradxm%interior(i,j,k,iel,1,1:3))
           enddo
         enddo
       enddo
@@ -322,14 +324,16 @@ contains
         do j = 1,myGeom%dxds%interp%N+1
           do i = 1,myGeom%dxds%interp%N+1
             ! In our convention, dsdx(i,j) is contravariant vector j, component i
-            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n; 
+            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n;
             ! Here, i = 1:3, and n=2
-            myGeom%dsdx%interior(i,j,k,iel,1,2,1:3) = 0.5_prec*( curl_xmgradxl%interior(i,j,k,iel,1,1:3) - curl_xlgradxm%interior(i,j,k,iel,1,1:3) )
+            myGeom%dsdx%interior(i,j,k,iel,1,2,1:3) = 0.5_prec*( &
+                                                      curl_xmgradxl%interior(i,j,k,iel,1,1:3)- &
+                                                      curl_xlgradxm%interior(i,j,k,iel,1,1:3))
           enddo
         enddo
       enddo
     enddo
-    
+
     ! Ja^{1:3}_3 (n=3, m=1, l=2) Third component of the contravariant basis vectors
     do iEl = 1,myGeom%nElem
       do k = 1,myGeom%dxds%interp%N+1
@@ -350,9 +354,11 @@ contains
         do j = 1,myGeom%dxds%interp%N+1
           do i = 1,myGeom%dxds%interp%N+1
             ! In our convention, dsdx(i,j) is contravariant vector j, component i
-            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n; 
+            ! dsdx(...,n,i) = Ja^{i}_{n} = contravariant vector i, component n;
             ! Here, i = 1:3, and n=3
-            myGeom%dsdx%interior(i,j,k,iel,1,3,1:3) = 0.5_prec*( curl_xmgradxl%interior(i,j,k,iel,1,1:3) - curl_xlgradxm%interior(i,j,k,iel,1,1:3) )
+            myGeom%dsdx%interior(i,j,k,iel,1,3,1:3) = 0.5_prec*( &
+                                                      curl_xmgradxl%interior(i,j,k,iel,1,1:3)- &
+                                                      curl_xlgradxm%interior(i,j,k,iel,1,1:3))
           enddo
         enddo
       enddo
@@ -407,8 +413,8 @@ contains
               ! Set the directionality for dsdx on the boundaries
               ! This is primarily used for DG gradient calculations,
               ! which do not use nHat for the boundary terms.
-                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2) = &
-                  myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)*fac
+              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2) = &
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)*fac
 
             elseif(k == 3) then ! East
 
@@ -436,12 +442,12 @@ contains
 
               myGeom%nHat%boundary(i,j,k,iEl,1,1:3) = &
                 fac*myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)/mag
-              
+
               ! Set the directionality for dsdx on the boundaries
               ! This is primarily used for DG gradient calculations,
               ! which do not use nHat for the boundary terms.
               myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2) = &
-              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)*fac
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,2)*fac
 
             elseif(k == 5) then ! West
 
@@ -458,7 +464,7 @@ contains
               ! This is primarily used for DG gradient calculations,
               ! which do not use nHat for the boundary terms.
               myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1) = &
-              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)*fac
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,1)*fac
 
             elseif(k == 6) then ! Top
 
@@ -475,11 +481,9 @@ contains
               ! This is primarily used for DG gradient calculations,
               ! which do not use nHat for the boundary terms.
               myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3) = &
-              myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)*fac
+                myGeom%dsdx%boundary(i,j,k,iEl,1,1:3,3)*fac
 
             endif
-
-
 
           enddo
         enddo

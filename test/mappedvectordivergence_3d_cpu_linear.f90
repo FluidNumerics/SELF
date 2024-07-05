@@ -26,14 +26,14 @@
 
 program test
 
-implicit none
-integer :: exit_code
+  implicit none
+  integer :: exit_code
 
-exit_code = mappedvectordivergence_3d_cpu_linear()
-stop exit_code
+  exit_code = mappedvectordivergence_3d_cpu_linear()
+  stop exit_code
 
 contains
-integer function mappedvectordivergence_3d_cpu_linear() result(r)
+  integer function mappedvectordivergence_3d_cpu_linear() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
@@ -68,9 +68,9 @@ integer function mappedvectordivergence_3d_cpu_linear() result(r)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
-                    controlNodeType=GAUSS, &
-                    M=targetDegree, &
-                    targetNodeType=UNIFORM)
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
     ! Create a uniform block mesh
     call get_environment_variable("WORKSPACE",WORKSPACE)
@@ -96,10 +96,10 @@ integer function mappedvectordivergence_3d_cpu_linear() result(r)
     df%interior = abs(df%interior-3.0_prec)
 
     if(maxval(df%interior) <= tolerance) then
-    r = 0
+      r = 0
     else
-    print*, "max(error) : ",maxval(df%interior), tolerance
-    r = 1
+      print*,"max(error) : ",maxval(df%interior),tolerance
+      r = 1
     endif
 
     ! Clean up
@@ -112,5 +112,5 @@ integer function mappedvectordivergence_3d_cpu_linear() result(r)
 
     r = 0
 
-endfunction mappedvectordivergence_3d_cpu_linear
+  endfunction mappedvectordivergence_3d_cpu_linear
 endprogram test

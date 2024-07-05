@@ -119,7 +119,7 @@ contains
     enddo
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
-    
+
     call f%AverageSides()
     !call f%WriteTecplot(geometry)
 
