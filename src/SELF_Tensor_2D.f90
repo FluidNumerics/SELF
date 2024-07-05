@@ -126,7 +126,7 @@ contains
     real(prec) :: fb(1:4)
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
-    !$omp teams distribute parallel do collapse(5)
+    !$omp teams loop collapse(5)
     do jdir = 1,2
       do idir = 1,2
         do ivar = 1,this%nvar

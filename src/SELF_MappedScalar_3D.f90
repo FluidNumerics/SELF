@@ -176,7 +176,7 @@ contains
 
     if(decomp%mpiEnabled) then
       !$omp target map(to:mesh % sideInfo, decomp % elemToRank) map(tofrom:this % extBoundary)
-      !$omp teams distribute parallel do collapse(3)
+      !$omp teams loop collapse(3)
       do ivar = 1,this%nvar
         do e1 = 1,this%nElem
           do s1 = 1,6
@@ -272,7 +272,7 @@ contains
     call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
     !$omp target map(to: mesh % sideInfo, decomp % elemToRank) map(from: this % boundary) map(tofrom: this % extBoundary)
-    !$omp teams distribute parallel do collapse(3)
+    !$omp teams loop collapse(3)
     do ivar = 1,this%nvar
       do e1 = 1,mesh%nElem
         do s1 = 1,6
@@ -382,7 +382,7 @@ contains
     integer :: i,j
 
     !$omp target map(to:this % boundary, this % extBoundary) map(from:this % boundary)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams loop collapse(5)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
         do iside = 1,6
@@ -413,7 +413,7 @@ contains
 
     !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams
-    !$omp distribute parallel do collapse(6) num_threads(256)
+    !$omp loop collapse(6)
     do idir = 1,3
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -438,7 +438,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5) num_threads(256)
+    !$omp loop collapse(5)
     do idir = 1,3
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -461,7 +461,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5) num_threads(256)
+    !$omp loop collapse(5)
     do idir = 1,3
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -504,7 +504,7 @@ contains
 
     !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dgMatrix,this%interp%bmatrix,this%interp%qweights) map(from:df)
     !$omp teams
-    !$omp distribute parallel do collapse(6) num_threads(256)
+    !$omp loop collapse(6)
     do idir = 1,3
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -535,7 +535,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5) num_threads(256)
+    !$omp loop collapse(5)
     do idir = 1,3
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -565,7 +565,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5) num_threads(256)
+    !$omp loop collapse(5)
     do idir = 1,3
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem

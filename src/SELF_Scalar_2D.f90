@@ -131,8 +131,8 @@ contains
     integer :: i,ii,iel,ivar
     real(prec) :: fb(1:4)
 
-    !$omp target map(to:this%interior,this% bMatrix) map(from:this%boundary)
-    !$omp teams distribute parallel do collapse(3)
+    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp teams loop collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1
@@ -164,7 +164,7 @@ contains
     real(prec) :: fi,fij
 
     !$omp target map(to:f,this%interp%iMatrix) map(from:f)
-    !$omp teams distribute parallel do collapse(4)
+    !$omp teams loop collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do j = 1,this%M+1
@@ -201,7 +201,7 @@ contains
     real(prec) :: df1,df2
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(4)
+    !$omp teams loop collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do j = 1,this%N+1

@@ -185,7 +185,7 @@ contains
     if(decomp%mpiEnabled) then
 
       !$omp target map(to:mesh % sideInfo, decomp % elemToRank) map(tofrom:this % extBoundary)
-      !$omp teams distribute parallel do collapse(4)
+      !$omp teams loop collapse(4)
       do idir = 1,3
         do ivar = 1,this%nvar
           do e1 = 1,this%nElem
@@ -284,7 +284,7 @@ contains
     call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
     !$omp target map(to: mesh % sideInfo, decomp % elemToRank) map(from: this % boundary) map(tofrom: this % extBoundary)
-    !$omp teams distribute parallel do collapse(4)
+    !$omp teams loop collapse(4)
     do idir = 1,3
       do ivar = 1,this%nvar
         do e1 = 1,mesh%nElem
@@ -386,7 +386,7 @@ contains
     integer :: idir
 
     !$omp target map(to:this % boundary, this % extBoundary) map(from:this%boundary)
-    !$omp teams distribute parallel do collapse(6) num_threads(256)
+    !$omp teams loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nVar
         do iel = 1,this%nElem
@@ -418,7 +418,8 @@ contains
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
     !$omp target map(to:geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams 
+    !$omp loop collapse(5)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
         do k = 1,this%interp%N+1
@@ -444,7 +445,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
@@ -470,7 +471,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
@@ -515,7 +516,8 @@ contains
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
     !$omp target map(to:geometry%dsdx%interior,this%interior,this%boundaryNormal,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qweights) map(from:df)
-    !$omp teams distribute parallel do collapse(5) num_threads(256)
+    !$omp teams 
+    !$omp loop collapse(5)
     do ivar = 1,this%nVar
       do iel = 1,this%nElem
         do k = 1,this%interp%N+1
@@ -545,7 +547,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
@@ -575,7 +577,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1

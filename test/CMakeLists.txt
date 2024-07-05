@@ -91,6 +91,8 @@ add_fortran_tests (
     "mappedvectordivergence_3d_cpu_constant.f90"
     "mappedvectordivergence_3d_cpu_linear.f90"
     "mappedvectordivergence_3d_cpu_gausslobatto_constant.f90"
+    "mappedvectordgdivergence_3d_cpu_constant.f90"
+    "mappedvectordgdivergence_3d_cpu_linear.f90"
     "advection_diffusion_1d_euler.f90"
     "advection_diffusion_1d_rk2.f90"
     "advection_diffusion_1d_rk3.f90"

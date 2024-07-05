@@ -88,7 +88,7 @@ contains
     integer :: ivar
 
     !$omp target map(to:decomp % offsetElem, this % boundary) map(tofrom:this % extBoundary)
-    !$omp teams distribute parallel do collapse(2) num_threads(256)
+    !$omp teams loop collapse(2)
     do ivar = 1,this%nvar
       do e1 = 1,mesh%nElem
 
@@ -134,7 +134,7 @@ contains
     integer :: ivar
 
     !$omp target map(to:this % boundary, this % extBoundary) map(from:this % avgBoundary)
-    !$omp teams distribute parallel do collapse(2)
+    !$omp teams loop collapse(2)
     do iel = 1,this%nElem
       do ivar = 1,this%nVar
 
@@ -163,7 +163,7 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:this%interior,this%interp%dMatrix,geometry % dxds % interior) map(from:df)
-    !$omp teams distribute parallel do collapse(3)
+    !$omp teams loop collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1
@@ -191,7 +191,7 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:this%interior,this%boundary,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qWeights,geometry%dxds%interior) map(from:df)
-    !$omp teams distribute parallel do collapse(3)
+    !$omp teams loop collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1

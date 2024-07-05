@@ -128,7 +128,7 @@ contains
     real(prec) :: fb(1:2)
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
-    !$omp teams distribute parallel do collapse(2)
+    !$omp teams loop collapse(2)
     do iel = 1,this%nelem
       do ivar = 1,this%nvar
         fb(1:2) = 0.0_prec
@@ -153,7 +153,7 @@ contains
     real(prec) :: floc
 
     !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
-    !$omp teams distribute parallel do collapse(3)
+    !$omp teams loop collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%M+1
@@ -179,7 +179,7 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams distribute parallel do collapse(3)
+    !$omp teams loop collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1

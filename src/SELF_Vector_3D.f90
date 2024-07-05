@@ -161,7 +161,7 @@ contains
     real(prec) :: fi,fij,fijk
 
     !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
-    !$omp teams distribute parallel loop collapse(6)
+    !$omp teams loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -201,7 +201,7 @@ contains
     real(prec) :: fb(1:6)
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
-    !$omp teams distribute parallel loop collapse(5)
+    !$omp teams loop collapse(5)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -238,7 +238,7 @@ contains
     real(prec) :: dfds1,dfds2,dfds3
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams distribute parallel loop collapse(6)
+    !$omp teams loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -290,7 +290,7 @@ contains
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams 
-    !$omp distribute parallel do collapse(6)
+    !$omp loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -317,7 +317,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
@@ -348,7 +348,7 @@ contains
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
@@ -367,7 +367,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
@@ -386,7 +386,7 @@ contains
       enddo
     enddo
 
-    !$omp distribute parallel do collapse(5)
+    !$omp loop collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do k = 1,this%N+1
