@@ -130,6 +130,49 @@ module SELF_Mesh_3D
 
   endtype Mesh3D
 
+  integer, private :: CGNStoSELFflip(1:6, 1:6, 1:4)
+  
+  ! This table maps the primary side, secondary side, and CGNS flip values
+  ! to indexing flips that are used in SELF.
+  ! This table is used after reading in HOPr mesh information in "RecalculateFlip"
+  ! SELF's flip indices correspond to the following scenarios
+  !
+  ! 0    i2 = i1     j2 = j1
+  ! 1    i2 = N-i1   j2 = j1
+  ! 2    i2 = N-i1   j2 = N-j1
+  ! 3    i2 = i1     j2 = N-j1
+  ! 4    i2 = j1     j2 = i1
+  ! 5    i2 = N-j1   j2 = i1
+  ! 6    i2 = N-j1   j2 = N-i1
+  ! 7    i2 = j1     j2 = N-i1
+  !
+  data CGNStoSELFflip/ &
+       4, 0, 0, 1, 4, 0, &
+       0, 4, 4, 5, 0, 4, &
+       0, 4, 4, 5, 0, 4, &
+       1, 7, 7, 6, 1, 7, &
+       4, 0, 0, 1, 4, 0, &
+       0, 4, 4, 5, 0, 4, &
+       3, 5, 5, 4, 3, 5, &
+       7, 1, 1, 0, 7, 1, &
+       7, 1, 1, 0, 7, 1, &
+       4, 0, 0, 1, 4, 0, &
+       3, 5, 5, 4, 3, 5, &
+       7, 1, 1, 0, 7, 1, &
+       6, 2, 2, 3, 6, 2, &
+       2, 6, 6, 7, 2, 6, &
+       2, 6, 6, 7, 2, 6, &
+       3, 5, 5, 4, 3, 5, &
+       6, 2, 2, 3, 6, 2, &
+       2, 6, 6, 7, 2, 6, &
+       1, 7, 7, 6, 1, 7, &
+       5, 3, 3, 2, 5, 3, &
+       5, 3, 3, 2, 5, 3, &
+       6, 2, 2, 3, 6, 2, &
+       1, 7, 7, 6, 1, 7, &
+       5, 3, 3, 2, 5, 3 /
+    
+
 contains
 
   subroutine Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
@@ -270,172 +313,33 @@ contains
 
   endsubroutine ResetBoundaryConditionType_Mesh3D
 
-  subroutine RecalculateFlip_Mesh3D(this,decomp)
+  subroutine RecalculateFlip_Mesh3D(this)
     implicit none
     class(Mesh3D),intent(inout) :: this
-    type(MPILayer),intent(inout),optional :: decomp
     ! Local
     integer :: e1
     integer :: s1
     integer :: e2
-    integer :: e2Global
     integer :: s2
-    integer :: flip
-    integer :: bcid
-    integer :: lnid1(1:4)
-    integer :: lnid2(1:4)
-    integer :: nid1(1:4,1:6,1:this%nElem)
-    integer :: nid2(1:4,1:6,1:this%nElem)
-    integer :: nloc1(1:4)
-    integer :: nloc2(1:4)
-    integer :: n1
-    integer :: n1Global
-    integer :: n2
-    integer :: n2Global
-    integer :: c1
-    integer :: c2
-    integer :: i,j,k
-    integer :: l
-    integer :: nShifts
-    integer :: neighborRank
-    integer :: rankId
-    integer :: offset
-    integer :: msgCount
-    integer :: globalSideId
-    integer,allocatable :: requests(:)
-    integer,allocatable :: stats(:,:)
-    integer :: iError
-    logical :: theyMatch
-
-    allocate(requests(1:this%nSides*2))
-    allocate(stats(MPI_STATUS_SIZE,1:this%nSides*2))
-
-    if(present(decomp)) then
-      rankId = decomp%rankId
-      offset = decomp%offsetElem(rankId+1)
-    else
-      rankId = 0
-      offset = 0
-    endif
-
-    msgCount = 0
-    do e1 = 1,this%nElem
-      do s1 = 1,6
-
-        e2Global = this%sideInfo(3,s1,e1)
-        e2 = e2Global-offset
-        s2 = this%sideInfo(4,s1,e1)/10
-        flip = this%sideInfo(4,s1,e1)-s2*10
-        bcid = this%sideInfo(5,s1,e1)
-
-        if(bcid == 0) then
-
-          if(present(decomp)) then
-            neighborRank = decomp%elemToRank(e2Global)
-          else
-            neighborRank = 0
-          endif
-
-          if(neighborRank == rankId) then
-
-            lnid1 = this%sideMap(1:4,s1) ! local corner node ids for element 1 side
-            lnid2 = this%sideMap(1:4,s2) ! local corner node ids for element 2 side
-
-            do l = 1,4
-
-              i = this%CGNSCornerMap(1,lnid1(l))
-              j = this%CGNSCornerMap(2,lnid1(l))
-              k = this%CGNSCornerMap(3,lnid1(l))
-              nid1(l,s1,e1) = this%globalNodeIDs(i,j,k,e1)
-
-              i = this%CGNSCornerMap(1,lnid2(l))
-              j = this%CGNSCornerMap(2,lnid2(l))
-              k = this%CGNSCornerMap(3,lnid2(l))
-              nid2(l,s1,e1) = this%globalNodeIDs(i,j,k,e1)
-
-            enddo
-
-          else ! In this case, we need to exchange
-
-            globalSideId = abs(this%sideInfo(2,s1,e1))
-
-            lnid1 = this%sideMap(1:4,s1) ! local CGNS corner node ids for element 1 side
-
-            do l = 1,4
-
-              i = this%CGNSCornerMap(1,lnid1(l))
-              j = this%CGNSCornerMap(2,lnid1(l))
-              k = this%CGNSCornerMap(3,lnid1(l))
-              nid1(l,s1,e1) = this%globalNodeIDs(i,j,k,e1)
-
-              ! Receive nid2(l) on this rank from  nid1(l) on the other rank
-              msgCount = msgCount+1
-              call MPI_IRECV(nid2(l,s1,e1), &
-                             1, &
-                             MPI_INTEGER, &
-                             neighborRank,globalSideId, &
-                             decomp%mpiComm, &
-                             requests(msgCount),iError)
-
-              ! Send nid1(l) from this rank to nid2(l) on the other rank
-              msgCount = msgCount+1
-              call MPI_ISEND(nid1(l,s1,e1), &
-                             1, &
-                             MPI_INTEGER, &
-                             neighborRank,globalSideId, &
-                             decomp%mpiComm, &
-                             requests(msgCount),iError)
-
-            enddo
-
-          endif ! MPI or not
-
-        endif ! If not physical boundary
-
-      enddo
-    enddo
-
-    if(present(decomp) .and. msgCount > 0) then
-      call MPI_WaitAll(msgCount, &
-                       requests(1:msgCount), &
-                       stats(1:MPI_STATUS_SIZE,1:msgCount), &
-                       iError)
-    endif
+    integer :: cgnsFlip, selfFlip
 
     do e1 = 1,this%nElem
       do s1 = 1,6
 
+        e2 = this%sideInfo(3,s1,e1)
         s2 = this%sideInfo(4,s1,e1)/10
-        bcid = this%sideInfo(5,s1,e1)
-        nloc1(1:4) = nid1(1:4,s1,e1)
-        nloc2(1:4) = nid2(1:4,s1,e1)
+        cgnsFlip = this%sideInfo(4,s1,e1) - s2*10
 
-        if(s2 /= 0) then
-          nShifts = 0
-          theyMatch = .false.
+        if(e2 /= 0) then
 
-          do i = 1,4
-
-            theyMatch = CompareArray(nloc1,nloc2,4)
-
-            if(theyMatch) then
-              exit
-            else
-              nShifts = nShifts+1
-              call ForwardShift(nloc1,4)
-            endif
-
-          enddo
-
-          this%sideInfo(4,s1,e1) = 10*s2+nShifts
+          selfFlip = CGNStoSELFflip(s2,s1,cgnsFlip)
+         ! print*, s1,s2,cgnsFlip,selfFlip
+          this%sideInfo(4,s1,e1) = 10*s2+selfFlip
 
         endif
 
       enddo
     enddo
-
-    deallocate(requests)
-    deallocate(stats)
 
   endsubroutine RecalculateFlip_Mesh3D
 

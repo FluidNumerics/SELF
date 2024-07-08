@@ -52,6 +52,7 @@ contains
     type(Scalar1D) :: fTarget
     type(Lagrange),target :: interp
     type(Lagrange),target :: interpTarget
+    real(prec) :: imat
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -68,17 +69,21 @@ contains
     call f%Init(interp,nvar,nelem)
     call fTarget%Init(interpTarget,nvar,nelem)
 
-    ! Set the source scalar (on the control grid) to a non-zero constant
+    ! ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior(:,:,:) = 1.0_prec
+    !$omp target update to(f%interior)
 
     fTarget%interior = f%GridInterp()
 
-    ! Calculate diff from exact
-    fTarget%interior = abs(fTarget%interior-1.0_prec)
+    !!$omp target update from(fTarget%interior)
+
+    ! ! Calculate diff from exact
+     fTarget%interior = abs(fTarget%interior-1.0_prec)
 
     if(maxval(fTarget%interior) <= tolerance) then
       r = 0
     else
+      print*,"max error : ",maxval(fTarget%interior)
       r = 1
     endif
 

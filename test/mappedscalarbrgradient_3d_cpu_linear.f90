@@ -92,7 +92,7 @@ contains
     call f%SetName(1,"f")
     call df%SetName(1,"df")
 
-    call f%SetEquation(1,'f = x*y*z')
+    call f%SetEquation(1,'f = x*y')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
@@ -132,14 +132,10 @@ contains
         do j = 1,controlDegree+1
           do i = 1,controlDegree+1
             df%interior(i,j,k,iel,1,1) = abs(df%interior(i,j,k,iel,1,1)- &
-                                             geometry%x%interior(i,j,k,iel,1,2)* &
-                                             geometry%x%interior(i,j,k,iel,1,3)) ! df/dx = y*z
+                                             geometry%x%interior(i,j,k,iel,1,2)) ! df/dx = y*z
             df%interior(i,j,k,iel,1,2) = abs(df%interior(i,j,k,iel,1,2)- &
-                                             geometry%x%interior(i,j,k,iel,1,1)* &
-                                             geometry%x%interior(i,j,k,iel,1,3)) ! df/dy = x*z
-            df%interior(i,j,k,iel,1,3) = abs(df%interior(i,j,k,iel,1,3)- &
-                                             geometry%x%interior(i,j,k,iel,1,1)* &
-                                             geometry%x%interior(i,j,k,iel,1,2)) ! df/dy = x*y
+                                             geometry%x%interior(i,j,k,iel,1,1)) ! df/dy = x*z
+            df%interior(i,j,k,iel,1,3) = abs(df%interior(i,j,k,iel,1,3)) ! df/dy = x*y
           enddo
         enddo
       enddo

@@ -170,7 +170,6 @@ contains
     integer :: e1,s1,e2,s2
     integer :: i,i2,j,j2
     integer :: r2,flip,ivar
-    integer :: globalSideId
     integer :: bcid
     real(prec) :: extBuff(1:this%interp%N+1,1:this%interp%N+1)
 
@@ -184,21 +183,28 @@ contains
             e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
             s2 = mesh%sideInfo(4,s1,e1)/10
             bcid = mesh%sideInfo(5,s1,e1)
-            if(s2 > 0 .or. bcid == 0) then ! Interior Element
+            if(e2 /= 0) then ! Interior Element
               r2 = decomp%elemToRank(e2) ! Neighbor Rank
 
               if(r2 /= decomp%rankId) then
 
                 flip = mesh%sideInfo(4,s1,e1)-s2*10
-                globalSideId = mesh%sideInfo(2,s1,e1)
 
                 ! Need to update extBoundary with flip applied
-                if(flip == 1) then
+                if(flip == 0) then
 
                   do j = 1,this%interp%N+1
                     do i = 1,this%interp%N+1
-                      i2 = j
-                      j2 = this%interp%N+2-i
+                      extBuff(i,j) = this%extBoundary(i,j,s1,e1,ivar)
+                    enddo
+                  enddo
+
+                else if(flip == 1) then
+
+                  do j = 1,this%interp%N+1
+                    do i = 1,this%interp%N+1
+                      i2 = this%interp%N+2-i
+                      j2 = j
                       extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
                     enddo
                   enddo
@@ -217,21 +223,49 @@ contains
 
                   do j = 1,this%interp%N+1
                     do i = 1,this%interp%N+1
-                      i2 = this%interp%N+2-j
-                      j2 = i
+                      i2 = i
+                      j2 = this%interp%N+2-j
                       extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
                     enddo
                   enddo
 
                 else if(flip == 4) then
 
-                  do j = 1,this%interp%N+1
-                    do i = 1,this%interp%N+1
-                      i2 = j
-                      j2 = i
-                      extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
+                    do j = 1,this%interp%N+1
+                      do i = 1,this%interp%N+1
+                        extBuff(i,j) = this%extBoundary(j,i,s1,e1,ivar)
+                      enddo
                     enddo
-                  enddo
+  
+                  else if(flip == 5) then
+  
+                    do j = 1,this%interp%N+1
+                      do i = 1,this%interp%N+1
+                        i2 = this%interp%N+2-j
+                        j2 = i
+                        extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
+                      enddo
+                    enddo
+  
+                  else if(flip == 6) then
+  
+                    do j = 1,this%interp%N+1
+                      do i = 1,this%interp%N+1
+                        i2 = this%interp%N+2-j
+                        j2 = this%interp%N+2-i
+                        extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
+                      enddo
+                    enddo
+  
+                  else if(flip == 7) then
+  
+                    do j = 1,this%interp%N+1
+                      do i = 1,this%interp%N+1
+                        i2 = j
+                        j2 = this%interp%N+2-i
+                        extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
+                      enddo
+                    enddo  
 
                 endif
 
@@ -261,13 +295,12 @@ contains
     type(MPILayer),intent(inout) :: decomp
     ! Local
     integer :: e1,e2,s1,s2,e2Global
-    integer :: flip,bcid
-    integer :: i1,i2,j1,j2,ivar
+    integer :: flip
+    integer :: i,i2,j,j2,ivar
     integer :: neighborRank
     integer :: rankId,offset
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+
 
     call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
@@ -277,89 +310,99 @@ contains
       do e1 = 1,mesh%nElem
         do s1 = 1,6
           e2Global = mesh%sideInfo(3,s1,e1)
-          e2 = e2Global-offset
           s2 = mesh%sideInfo(4,s1,e1)/10
           flip = mesh%sideInfo(4,s1,e1)-s2*10
-          bcid = mesh%sideInfo(5,s1,e1)
 
-          if(s2 /= 0) then
+          if(e2Global /= 0) then
 
             neighborRank = decomp%elemToRank(e2Global)
+            rankId = decomp%rankId
+            offset = decomp%offsetElem(rankId+1)
 
-            if(neighborRank == decomp%rankId) then
-              !print*,"e1,s1,e2,s2,flip,bcid",e1,s1,e2,s2,flip,bcid
+            if(neighborRank == rankId) then
+              e2 = e2Global-offset
 
               if(flip == 0) then
-                do j1 = 1,this%interp%N+1
-                  do i1 = 1,this%interp%N+1
-                    this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i2,j2,s2,e2,ivar)
+
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i,j,s2,e2,ivar)
                   enddo
                 enddo
 
-              elseif(flip == 1) then
+              else if(flip == 1) then
 
-                do j1 = 1,this%interp%N+1
-                  do i1 = 1,this%interp%N+1
-                    this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i2,j2,s2,e2,ivar)
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    i2 = this%interp%N+2-i
+                    j2 = j
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
                   enddo
                 enddo
 
               else if(flip == 2) then
 
-                do j1 = 1,this%interp%N+1
-                  do i1 = 1,this%interp%N+1
-
-                    i2 = this%interp%N+2-j1
-                    j2 = i1
-                    this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i2,j2,s2,e2,ivar)
-
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    i2 = this%interp%N+2-i
+                    j2 = this%interp%N+2-j
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
                   enddo
                 enddo
 
               else if(flip == 3) then
 
-                do j1 = 1,this%interp%N+1
-                  do i1 = 1,this%interp%N+1
-                    i2 = this%interp%N+2-i1
-                    j2 = this%interp%N+2-j1
-                    this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i2,j2,s2,e2,ivar)
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    i2 = i
+                    j2 = this%interp%N+2-j
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
                   enddo
                 enddo
 
               else if(flip == 4) then
 
-                do j1 = 1,this%interp%N+1
-                  do i1 = 1,this%interp%N+1
-                    ! i2 = j1
-                    ! j2 = this%interp%N+2-i1
-                    i2 = this%interp%N+2-j1
-                    j2 = i1
-                    this%extBoundary(i1,j1,s1,e1,ivar) = &
-                      this%boundary(i2,j2,s2,e2,ivar)
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(j,i,s2,e2,ivar)
                   enddo
                 enddo
 
-                ! else if(flip == 4) then
+              else if(flip == 5) then
 
-                !   do j1 = 1,this%interp%N+1
-                !     do i1 = 1,this%interp%N+1
-                !       i2 = this%interp%N+2-i1
-                !       j2 = j1
-                !       this%extBoundary(i1,j1,s1,e1,ivar) = &
-                !         this%boundary(i2,j2,s2,e2,ivar)
-                !     enddo
-                !   enddo
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    i2 = this%interp%N+2-j
+                    j2 = i
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+                  enddo
+                enddo
+
+              else if(flip == 6) then
+
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    i2 = this%interp%N+2-j
+                    j2 = this%interp%N+2-i
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+                  enddo
+                enddo
+
+              else if(flip == 7) then
+
+                do j = 1,this%interp%N+1
+                  do i = 1,this%interp%N+1
+                    i2 = j
+                    j2 = this%interp%N+2-i
+                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+                  enddo
+                enddo  
 
               endif
 
             endif
 
           endif
-
         enddo
       enddo
     enddo

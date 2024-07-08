@@ -242,7 +242,7 @@ contains
             e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
             s2 = mesh%sideInfo(4,s1,e1)/10
             bcid = mesh%sideInfo(5,s1,e1)
-            if(s2 > 0 .or. bcid == 0) then ! Interior Element
+            if(e2 /= 0) then ! Interior Element
               r2 = decomp%elemToRank(e2) ! Neighbor Rank
 
               if(r2 /= decomp%rankId) then
@@ -303,7 +303,7 @@ contains
           flip = mesh%sideInfo(4,s1,e1)-s2*10
           bcid = mesh%sideInfo(5,s1,e1)
 
-          if(s2 /= 0) then
+          if(e2Global /= 0) then
             neighborRank = decomp%elemToRank(e2Global)
 
             if(neighborRank == decomp%rankId) then

@@ -88,11 +88,13 @@ contains
              this%avgBoundary(2,1:nelem,1:nvar), &
              this%jumpBoundary(1:2,1:nelem,1:nvar))
 
+    !$omp target enter data map(alloc: this)
     !$omp target enter data map(alloc: this % interior)
     !$omp target enter data map(alloc: this % boundary)
     !$omp target enter data map(alloc: this % extBoundary)
     !$omp target enter data map(alloc: this % avgBoundary)
     !$omp target enter data map(alloc: this % jumpBoundary)
+    !$omp target enter data map(to: this % interp)
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
@@ -117,6 +119,8 @@ contains
     !$omp target exit data map(delete: this % extBoundary)
     !$omp target exit data map(delete: this % avgBoundary)
     !$omp target exit data map(delete: this % jumpBoundary)
+    !$omp target exit data map(release: this % interp)
+    !$omp target exit data map(delete: this)
 
   endsubroutine Free_Scalar1D
 
@@ -152,12 +156,13 @@ contains
     integer :: iel,ivar,i,ii
     real(prec) :: floc
 
-    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
-    !$omp teams loop collapse(3)
+    !$omp target map(to:this % interior, this % interp % iMatrix) map(from:f)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%M+1
           floc = 0.0_prec
+          !$omp loop bind(thread)
           do ii = 1,this%N+1
             floc = floc+this%interp%iMatrix(ii,i)*this%interior(ii,iel,ivar)
           enddo

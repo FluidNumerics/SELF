@@ -687,10 +687,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      x%interior = this%geometry%x%GridInterp()
+      x % interior = this%geometry%x%GridInterp()
 
       ! Map the solution to the target grid
-      solution%interior = this%solution%GridInterp()
+      solution % interior = this%solution%GridInterp()
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
@@ -788,10 +788,10 @@ contains
     call x%Init(interp,1,this%solution%nElem)
 
     ! Map the mesh positions to the target grid
-    x%interior = this%geometry%x%GridInterp()
+    x % interior = this%geometry%x%GridInterp()
 
     ! Map the solution to the target grid
-    solution%interior = this%solution%GridInterp()
+    solution % interior = this%solution%GridInterp()
 
     fmat = '(2(ES16.7E3,1x))'
     ! Let's write some tecplot!!

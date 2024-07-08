@@ -206,6 +206,7 @@ contains
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
 
+    !!$omp target update to(this)
     !$omp target update to(this % controlPoints)
     !$omp target update to(this % targetPoints)
     !$omp target update to(this % bWeights)
