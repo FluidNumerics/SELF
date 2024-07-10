@@ -55,7 +55,6 @@ function (add_fortran_tests)
 
 endfunction ()
 
-
 add_fortran_tests (
     "scalargridinterp_1d_cpu_constant.f90"
     "scalarderivative_1d_cpu_constant.f90"
@@ -116,6 +115,3 @@ add_fortran_tests (
     "advection_diffusion_3d_ab4.f90"
     )
     
-    #"mappedscalarbrgradient_3d_cpu_constant.f90"
-    #"mappedscalarbrgradient_3d_cpu_linear.f90"
-
