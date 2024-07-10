@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bash -e
 
-OMP_TARGET=sm_70
+OMP_TARGET=multicore
 WORKSPACE_ROOT=/tmp/$(whoami)/workspace
 BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
@@ -23,16 +23,17 @@ cmake -DOMP_TARGET=${OMP_TARGET} \
 
 make VERBOSE=1 || exit 1
 
-#make install
+make install
 
+export OMP_TARGET_OFFLOAD=DISABLED # Disable GPU offloading
+export OMP_NUM_THREADS=2
+# Set WORKSPACE for tests that require input mesh
+# We use WORKSPACE so that we are consistent with 
+# what we do for the superci tests
+export WORKSPACE=${SRC_DIR}
 
-# # Set WORKSPACE for tests that require input mesh
-# # We use WORKSPACE so that we are consistent with 
-# # what we do for the superci tests
-# export WORKSPACE=${SRC_DIR}
-
-# # Initialize coverage
-# mkdir -p ${WORKSPACE_ROOT}/tmp/
+# Initialize coverage
+mkdir -p ${WORKSPACE_ROOT}/tmp/
 # lcov --no-external \
 #       --capture \
 #       --initial \
@@ -41,10 +42,10 @@ make VERBOSE=1 || exit 1
 #       --exclude '*/example/*' \
 #       --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
 
-# # Run ctests
-# ctest --test-dir ${BUILD_DIR}
+# Run ctests
+ctest --test-dir ${BUILD_DIR}
 
-# # Compile coverage information
+# Compile coverage information
 # lcov --no-external \
 #     --capture \
 #     --directory ${SRC_DIR} \
