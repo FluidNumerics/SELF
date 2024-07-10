@@ -159,7 +159,7 @@ contains
     real(prec) :: fi,fij
 
     !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
-    !$omp teams loop collapse(5)
+    !$omp teams loop bind(teams) collapse(5)
     do idir = 1,2
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -167,8 +167,10 @@ contains
             do i = 1,this%M+1
 
               fij = 0.0_prec
+              !$omp loop bind(thread)
               do jj = 1,this%N+1
                 fi = 0.0_prec
+                !$omp loop bind(thread)
                 do ii = 1,this%N+1
                   fi = fi+this%interior(ii,jj,iel,ivar,idir)*this%interp%iMatrix(ii,i)
                 enddo
@@ -190,23 +192,30 @@ contains
     class(Vector2D),intent(inout) :: this
 ! Local
     integer :: i,ii,idir,iel,ivar
-    real(prec) :: fb(1:4)
+    real(prec) :: fbs,fbe,fbn,fbw
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
-    !$omp teams loop collapse(4)
+    !$omp teams loop bind(teams) collapse(4)
     do idir = 1,2
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
           do i = 1,this%N+1
 
-            fb(1:4) = 0.0_prec
+            fbs = 0.0_prec
+            fbe = 0.0_prec
+            fbn = 0.0_prec
+            fbw = 0.0_prec
+            !$omp loop bind(thread)
             do ii = 1,this%N+1
-              fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir) ! South
-              fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir) ! East
-              fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir) ! North
-              fb(4) = fb(4)+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir) ! West
+              fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir) ! South
+              fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir) ! East
+              fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir) ! North
+              fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir) ! West
             enddo
-            this%boundary(i,1:4,iel,ivar,idir) = fb(1:4)
+            this%boundary(i,1,iel,ivar,idir) = fbs
+            this%boundary(i,2,iel,ivar,idir) = fbe
+            this%boundary(i,3,iel,ivar,idir) = fbn
+            this%boundary(i,4,iel,ivar,idir) = fbw
 
           enddo
         enddo
@@ -225,7 +234,7 @@ contains
     real(prec) :: dfds1,dfds2
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams loop collapse(5)
+    !$omp teams loop bind(teams) collapse(5)
     do idir = 1,2
       do ivar = 1,this%nvar
         do iel = 1,this%nelem
@@ -234,6 +243,7 @@ contains
 
               dfds1 = 0.0_prec
               dfds2 = 0.0_prec
+              !$omp loop bind(thread)
               do ii = 1,this%N+1
                 dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar,idir)
                 dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar,idir)
@@ -269,13 +279,14 @@ contains
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams
-    !$omp loop collapse(4)
+    !$omp loop bind(teams) collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do j = 1,this%N+1
           do i = 1,this%N+1
 
             dfLoc = 0.0_prec
+            !$omp loop bind(thread)
             do ii = 1,this%N+1
               dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar,1)
             enddo
@@ -286,13 +297,14 @@ contains
       enddo
     enddo
 
-    !$omp loop collapse(4)
+    !$omp loop bind(teams) collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do j = 1,this%N+1
           do i = 1,this%N+1
 
             dfLoc = 0.0_prec
+            !$omp loop bind(thread)
             do ii = 1,this%N+1
               dfLoc = dfLoc+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar,2)
             enddo

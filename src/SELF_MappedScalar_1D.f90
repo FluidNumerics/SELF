@@ -163,12 +163,13 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:this%interior,this%interp%dMatrix,geometry % dxds % interior) map(from:df)
-    !$omp teams loop collapse(3)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1
 
           dfloc = 0.0_prec
+          !$omp loop bind(thread)
           do ii = 1,this%N+1
             dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
           enddo
@@ -191,12 +192,13 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:this%interior,this%boundary,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qWeights,geometry%dxds%interior) map(from:df)
-    !$omp teams loop collapse(3)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1
 
           dfloc = 0.0_prec
+          !$omp loop bind(thread)
           do ii = 1,this%N+1
             dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
           enddo

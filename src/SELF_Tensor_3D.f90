@@ -123,7 +123,7 @@ contains
     class(Tensor3D),intent(inout) :: this
     ! Local
     integer :: i,j,ii,idir,jdir,iel,ivar
-    real(prec) :: fb(1:6)
+    real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
     !$omp teams loop collapse(6)
@@ -134,17 +134,28 @@ contains
             do j = 1,this%N+1
               do i = 1,this%N+1
 
-                fb(1:6) = 0.0_prec
+                fbb = 0.0_prec
+                fbs = 0.0_prec
+                fbe = 0.0_prec
+                fbn = 0.0_prec
+                fbw = 0.0_prec
+                fbt = 0.0_prec
+    
                 do ii = 1,this%N+1
-                  fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
-                  fb(2) = fb(2)+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! South
-                  fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! East
-                  fb(4) = fb(4)+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! North
-                  fb(5) = fb(5)+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! West
-                  fb(6) = fb(6)+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Top
+                  fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+                  fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! South
+                  fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! East
+                  fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! North
+                  fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! West
+                  fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Top
                 enddo
 
-                this%boundary(i,j,1:6,iel,ivar,idir,jdir) = fb(1:6)
+                this%boundary(i,j,1,iel,ivar,idir,jdir) = fbb
+                this%boundary(i,j,2,iel,ivar,idir,jdir) = fbs
+                this%boundary(i,j,3,iel,ivar,idir,jdir) = fbe
+                this%boundary(i,j,4,iel,ivar,idir,jdir) = fbn
+                this%boundary(i,j,5,iel,ivar,idir,jdir) = fbw
+                this%boundary(i,j,6,iel,ivar,idir,jdir) = fbt
 
               enddo
             enddo

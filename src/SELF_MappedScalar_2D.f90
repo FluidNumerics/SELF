@@ -285,15 +285,16 @@ contains
     integer :: flip,bcid
     integer :: i1,i2,ivar
     integer :: neighborRank
-    integer :: rankId,offset
+    integer :: rankId,offset,N
 
     rankId = decomp%rankId
     offset = decomp%offsetElem(rankId+1)
+    N = this%interp%N
 
     call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
     !$omp target map(to: mesh % sideInfo, decomp % elemToRank) map(from: this % boundary) map(tofrom: this % extBoundary)
-    !$omp teams loop collapse(3)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do e1 = 1,mesh%nElem
         do s1 = 1,4
@@ -309,16 +310,16 @@ contains
             if(neighborRank == decomp%rankId) then
 
               if(flip == 0) then
-
-                do i1 = 1,this%interp%N+1
+                !$omp loop bind(parallel)
+                do i1 = 1,N+1
                   this%extBoundary(i1,s1,e1,ivar) = &
                     this%boundary(i1,s2,e2,ivar)
                 enddo
 
               elseif(flip == 1) then
-
-                do i1 = 1,this%interp%N+1
-                  i2 = this%interp%N+2-i1
+                !$omp loop bind(parallel)
+                do i1 = 1,N+1
+                  i2 = N+2-i1
                   this%extBoundary(i1,s1,e1,ivar) = &
                     this%boundary(i2,s2,e2,ivar)
                 enddo
@@ -380,7 +381,7 @@ contains
 
     !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
     !$omp teams
-    !$omp loop collapse(5)
+    !$omp loop bind(teams) collapse(5)
     do idir = 1,2
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -388,6 +389,7 @@ contains
             do i = 1,this%interp%N+1
 
               dfdx = 0.0_prec
+              !$omp loop bind(thread)
               do ii = 1,this%N+1
                 ! dsdx(j,i) is contravariant vector i, component j
                 ja = geometry%dsdx%interior(ii,j,iel,1,idir,1)
@@ -403,7 +405,7 @@ contains
       enddo
     enddo
 
-    !$omp loop collapse(5)
+    !$omp loop bind(teams) collapse(5)
     do idir = 1,2
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -411,6 +413,7 @@ contains
             do i = 1,this%interp%N+1
 
               dfdx = 0.0_prec
+              !$omp loop bind(thread)
               do ii = 1,this%N+1
                 ja = geometry%dsdx%interior(i,ii,iel,1,idir,2)
                 dfdx = dfdx+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
@@ -436,11 +439,10 @@ contains
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
     ! Local
     integer :: iEl,iVar,i,j,ii,idir
-    real(prec) :: dfdx,ja,bfl,bfr
+    real(prec) :: dfdx,dfdxb,ja,bfl,bfr
 
-    !$omp target map(to:geometry%J%interior,geometry%dsdx%interior,this%interior,this%interp%dgMatrix,this%interp%bmatrix,this%interp%qweights) map(from:df)
-    !$omp teams
-    !$omp loop collapse(5)
+    ! TO DO : Fix bug - this fails when OMP_NUM_THREADS > 1
+    !$omp target teams loop bind(teams) collapse(5) private(dfdx,dfdxb,bfl,bfr,ja)
     do idir = 1,2
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -448,23 +450,22 @@ contains
             do i = 1,this%interp%N+1
 
               dfdx = 0.0_prec
+              !$omp loop bind(thread)
               do ii = 1,this%N+1
-                ! dsdx(j,i) is contravariant vector i, component j
                 ja = geometry%dsdx%interior(ii,j,iel,1,idir,1)
                 dfdx = dfdx+this%interp%dgMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
               enddo
-
               bfl = this%boundary(j,4,iel,ivar)*geometry%dsdx%boundary(j,4,iel,1,idir,1) ! west
               bfr = this%boundary(j,2,iel,ivar)*geometry%dsdx%boundary(j,2,iel,1,idir,1) ! east
-              df(i,j,iel,ivar,idir) = dfdx+(this%interp%bMatrix(i,1)*bfl+ &
-                                            this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+              dfdxb = (this%interp%bMatrix(i,1)*bfl+ this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+              df(i,j,iel,ivar,idir) = dfdx+dfdxb
             enddo
           enddo
         enddo
       enddo
     enddo
-
-    !$omp loop collapse(5)
+    
+    !$omp target teams loop bind(teams) collapse(5) private(dfdx,dfdxb,bfl,bfr,ja)
     do idir = 1,2
       do iVar = 1,this%nVar
         do iEl = 1,this%nElem
@@ -472,25 +473,22 @@ contains
             do i = 1,this%interp%N+1
 
               dfdx = 0.0_prec
+              !$omp loop bind(thread)
               do ii = 1,this%N+1
-                ! dsdx(j,i) is contravariant vector i, component j
                 ja = geometry%dsdx%interior(i,ii,iel,1,idir,2)
                 dfdx = dfdx+this%interp%dgMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
               enddo
 
               bfl = this%boundary(i,1,iel,ivar)*geometry%dsdx%boundary(i,1,iel,1,idir,2) ! south
               bfr = this%boundary(i,3,iel,ivar)*geometry%dsdx%boundary(i,3,iel,1,idir,2) ! north
-              dfdx = dfdx+(this%interp%bMatrix(j,1)*bfl+ &
-                           this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+              dfdxb = (this%interp%bMatrix(j,1)*bfl + this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
 
-              df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx)/geometry%J%interior(i,j,iEl,1)
+              df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx+dfdxb)/geometry%J%interior(i,j,iEl,1)
             enddo
           enddo
         enddo
       enddo
     enddo
-    !$omp end teams
-    !$omp end target
 
   endfunction DGGradient_MappedScalar2D
 

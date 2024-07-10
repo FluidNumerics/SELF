@@ -129,18 +129,21 @@ contains
     class(Scalar1D),intent(inout) :: this
     ! Local
     integer :: ii,iel,ivar
-    real(prec) :: fb(1:2)
+    real(prec) :: fbl,fbr
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
-    !$omp teams loop collapse(2)
-    do iel = 1,this%nelem
-      do ivar = 1,this%nvar
-        fb(1:2) = 0.0_prec
+    !$omp teams loop bind(teams) collapse(2)
+    do ivar = 1,this%nvar
+      do iel = 1,this%nelem
+        fbl = 0.0_prec
+        fbr = 0.0_prec
+        !$omp loop bind(thread)
         do ii = 1,this%N+1
-          fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(ii,iel,ivar) ! West
-          fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,iel,ivar) ! East
+          fbl = fbl+this%interp%bMatrix(ii,1)*this%interior(ii,iel,ivar) ! West
+          fbr = fbr+this%interp%bMatrix(ii,2)*this%interior(ii,iel,ivar) ! East
         enddo
-        this%boundary(1:2,iel,ivar) = fb(1:2)
+        this%boundary(1,iel,ivar) = fbl
+        this%boundary(2,iel,ivar) = fbr
       enddo
     enddo
     !$omp end target
@@ -184,12 +187,13 @@ contains
     real(prec) :: dfloc
 
     !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
-    !$omp teams loop collapse(3)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
         do i = 1,this%N+1
 
           dfloc = 0.0_prec
+          !$omp loop bind(thread)
           do ii = 1,this%N+1
             dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
           enddo

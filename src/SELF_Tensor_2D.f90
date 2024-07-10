@@ -123,7 +123,7 @@ contains
     class(Tensor2D),intent(inout) :: this
 ! Local
     integer :: i,ii,idir,jdir,iel,ivar
-    real(prec) :: fb(1:4)
+    real(prec) :: fbs,fbe,fbn,fbw
 
     !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
     !$omp teams loop collapse(5)
@@ -133,15 +133,21 @@ contains
           do iel = 1,this%nelem
             do i = 1,this%N+1
 
-              fb(1:4) = 0.0_prec
+              fbs = 0.0_prec
+              fbe = 0.0_prec
+              fbn = 0.0_prec
+              fbw = 0.0_prec
               do ii = 1,this%N+1
-                fb(1) = fb(1)+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir,jdir) ! South
-                fb(2) = fb(2)+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir,jdir) ! East
-                fb(3) = fb(3)+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir,jdir) ! North
-                fb(4) = fb(4)+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir,jdir) ! West
+                fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir,jdir) ! South
+                fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir,jdir) ! East
+                fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir,jdir) ! North
+                fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir,jdir) ! West
               enddo
 
-              this%boundary(i,1:4,iel,ivar,idir,jdir) = fb(1:4)
+              this%boundary(i,1,iel,ivar,idir,jdir) = fbs
+              this%boundary(i,2,iel,ivar,idir,jdir) = fbe
+              this%boundary(i,3,iel,ivar,idir,jdir) = fbn
+              this%boundary(i,4,iel,ivar,idir,jdir) = fbw
 
             enddo
           enddo
