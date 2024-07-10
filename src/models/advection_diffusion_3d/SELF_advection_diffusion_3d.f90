@@ -69,6 +69,8 @@ contains
     ! local
     integer :: i,j,ivar,iEl,k,e2
 
+    !$omp target map(from: this % mesh % sideInfo) map(tofrom: this % solution % extBoundary)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
         do k = 1,6 ! Loop over all sides
@@ -77,6 +79,7 @@ contains
           e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
           if(e2 == 0) then
+            !$omp loop bind(parallel) collapse(2)
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature point
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
                 this%solution%extBoundary(i,j,k,iEl,iVar) = 0.0_prec
@@ -86,6 +89,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end target
 
     ! calculate the averages of the solutions on the element
     ! boundaries and store is this % solution % avgBoundary
@@ -113,6 +117,8 @@ contains
     ! local
     integer :: i,j,ivar,iEl,k,e2
 
+    !$omp target map(from: this % mesh % sideInfo) map(tofrom: this % solutionGradient % extBoundary)
+    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
         do k = 1,6 ! Loop over all sides
@@ -121,6 +127,7 @@ contains
           e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
           if(e2 == 0) then
+            !$omp loop bind(parallel) collapse(2)
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature point
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
                 this%solutionGradient%extBoundary(i,j,k,iEl,iVar,1:3) = 0.0_prec
@@ -130,6 +137,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end target
 
     call this%solutionGradient%AverageSides()
 
@@ -152,6 +160,8 @@ contains
     u = this%u
     v = this%v
     nu = this%nu
+    !$omp target map(to:this % solution % interior, this % solutionGradient % interior) map(from:this % flux % interior)
+    !$omp teams loop collapse(5)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do k = 1,this%solution%interp%N+1
@@ -172,6 +182,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end target
 
   endsubroutine fluxmethod_advection_diffusion_3d
 
@@ -187,8 +198,12 @@ contains
     integer :: k
     integer :: i,j
     real(prec) :: fin,fout,dfdn,un
-    real(prec) :: nhat(1:3),nmag
+    real(prec) :: nx,ny,nz,nmag
 
+    !$omp target map(to:this % geometry % nHat % boundary, this % solutionGradient % avgBoundary) &
+    !$omp& map(to:this % solution % boundary, this % solution % extBoundary) &
+    !$omp& map(to:this % geometry % nscale % boundary) map(from: this % flux % boundaryNormal)
+    !$omp teams loop collapse(4)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem
         do k = 1,6
@@ -196,12 +211,14 @@ contains
             do i = 1,this%solution%interp%N+1
 
               ! Get the boundary normals on cell edges from the mesh geometry
-              nhat(1:3) = this%geometry%nHat%boundary(i,j,k,iEl,1,1:3)
+              nx = this%geometry%nHat%boundary(i,j,k,iEl,1,1)
+              ny = this%geometry%nHat%boundary(i,j,k,iEl,1,2)
+              nz = this%geometry%nHat%boundary(i,j,k,iEl,1,3)
 
-              un = this%u*nhat(1)+this%v*nhat(2)+this%w*nhat(3)
-              dfdn = this%solutionGradient%avgBoundary(i,j,k,iEl,iVar,1)*nhat(1)+ &
-                     this%solutionGradient%avgBoundary(i,j,k,iEl,iVar,2)*nhat(2)+ &
-                     this%solutionGradient%avgBoundary(i,j,k,iEl,iVar,3)*nhat(3)
+              un = this%u*nx+this%v*ny+this%w*nz
+              dfdn = this%solutionGradient%avgBoundary(i,j,k,iEl,iVar,1)*nx+ &
+                     this%solutionGradient%avgBoundary(i,j,k,iEl,iVar,2)*ny+ &
+                     this%solutionGradient%avgBoundary(i,j,k,iEl,iVar,3)*nz
 
               fin = this%solution%boundary(i,j,k,iEl,iVar) ! interior solution
               fout = this%solution%extboundary(i,j,k,iEl,iVar) ! exterior solution
@@ -216,6 +233,7 @@ contains
         enddo
       enddo
     enddo
+    !$omp end target
 
   endsubroutine riemannsolver_advection_diffusion_3d
 

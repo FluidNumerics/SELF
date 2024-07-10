@@ -152,6 +152,10 @@ contains
 
     u = this%u
     nu = this%nu
+    !$omp target map(to:this%solution%interior,this%solutionGradient%interior) &
+    !$omp& map(from:this%flux%interior)
+    !$omp teams
+    !$omp loop collapse(3)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do i = 1,this%solution%interp%N+1
@@ -164,6 +168,8 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
+    !$omp end target
 
   endsubroutine fluxmethod_advection_diffusion_1d
 
@@ -177,24 +183,28 @@ contains
     integer :: iel
     integer :: ivar
     integer :: iside
-    real(prec) :: fin,fout,dfavg,un
+    real(prec) :: fin,fout,dfavg,un,u
 
     call this%solutionGradient%AverageSides()
-
+    u = this%u
+    !$omp target map(to:this%solution%boundary,this%solution%extboundary,this%solutionGradient%boundary) &
+    !$omp& map(from:this%flux%boundary)
+    !$omp teams
+    !$omp loop collapse(3)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do iside = 1,2
 
           ! set the normal velocity
           if(iside == 1) then
-            un = -this%u
+            un = -u
           else
-            un = this%u
+            un = u
           endif
 
           fin = this%solution%boundary(iside,iel,ivar) ! interior solution
           fout = this%solution%extboundary(iside,iel,ivar) ! exterior solution
-          dfavg = this%solutionGradient%avgboundary(iside,iel,ivar) ! average solution gradient (with direction taken into account)
+          dfavg = this%solutionGradient%boundary(iside,iel,ivar) ! average solution gradient (with direction taken into account)
 
           this%flux%boundary(iside,iel,ivar) = 0.5_prec*(un*(fin+fout)+abs(un)*(fin-fout))- & ! advective flux
                                                this%nu*dfavg ! diffusive flux
@@ -202,6 +212,8 @@ contains
         enddo
       enddo
     enddo
+    !$omp end teams
+    !$omp end target
 
   endsubroutine riemannsolver_advection_diffusion_1d
 
