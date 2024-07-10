@@ -111,6 +111,8 @@ contains
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
     call f%AverageSides()
+    print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
+
     df%interior = f%DGGradient(geometry)
 
     ! Calculate diff from exact

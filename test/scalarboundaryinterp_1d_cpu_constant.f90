@@ -72,6 +72,7 @@ contains
     if(maxval(f%boundary) <= tolerance) then
       r = 0
     else
+      print*,maxval(f%boundary),tolerance
       r = 1
     endif
 
