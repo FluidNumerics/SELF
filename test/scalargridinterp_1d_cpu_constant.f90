@@ -78,7 +78,7 @@ contains
     !!$omp target update from(fTarget%interior)
 
     ! ! Calculate diff from exact
-     fTarget%interior = abs(fTarget%interior-1.0_prec)
+    fTarget%interior = abs(fTarget%interior-1.0_prec)
 
     if(maxval(fTarget%interior) <= tolerance) then
       r = 0

@@ -130,8 +130,8 @@ module SELF_Mesh_3D
 
   endtype Mesh3D
 
-  integer, private :: CGNStoSELFflip(1:6, 1:6, 1:4)
-  
+  integer,private :: CGNStoSELFflip(1:6,1:6,1:4)
+
   ! This table maps the primary side, secondary side, and CGNS flip values
   ! to indexing flips that are used in SELF.
   ! This table is used after reading in HOPr mesh information in "RecalculateFlip"
@@ -147,31 +147,30 @@ module SELF_Mesh_3D
   ! 7    i2 = j1     j2 = N-i1
   !
   data CGNStoSELFflip/ &
-       4, 0, 0, 1, 4, 0, &
-       0, 4, 4, 5, 0, 4, &
-       0, 4, 4, 5, 0, 4, &
-       1, 7, 7, 6, 1, 7, &
-       4, 0, 0, 1, 4, 0, &
-       0, 4, 4, 5, 0, 4, &
-       3, 5, 5, 4, 3, 5, &
-       7, 1, 1, 0, 7, 1, &
-       7, 1, 1, 0, 7, 1, &
-       4, 0, 0, 1, 4, 0, &
-       3, 5, 5, 4, 3, 5, &
-       7, 1, 1, 0, 7, 1, &
-       6, 2, 2, 3, 6, 2, &
-       2, 6, 6, 7, 2, 6, &
-       2, 6, 6, 7, 2, 6, &
-       3, 5, 5, 4, 3, 5, &
-       6, 2, 2, 3, 6, 2, &
-       2, 6, 6, 7, 2, 6, &
-       1, 7, 7, 6, 1, 7, &
-       5, 3, 3, 2, 5, 3, &
-       5, 3, 3, 2, 5, 3, &
-       6, 2, 2, 3, 6, 2, &
-       1, 7, 7, 6, 1, 7, &
-       5, 3, 3, 2, 5, 3 /
-    
+    4,0,0,1,4,0, &
+    0,4,4,5,0,4, &
+    0,4,4,5,0,4, &
+    1,7,7,6,1,7, &
+    4,0,0,1,4,0, &
+    0,4,4,5,0,4, &
+    3,5,5,4,3,5, &
+    7,1,1,0,7,1, &
+    7,1,1,0,7,1, &
+    4,0,0,1,4,0, &
+    3,5,5,4,3,5, &
+    7,1,1,0,7,1, &
+    6,2,2,3,6,2, &
+    2,6,6,7,2,6, &
+    2,6,6,7,2,6, &
+    3,5,5,4,3,5, &
+    6,2,2,3,6,2, &
+    2,6,6,7,2,6, &
+    1,7,7,6,1,7, &
+    5,3,3,2,5,3, &
+    5,3,3,2,5,3, &
+    6,2,2,3,6,2, &
+    1,7,7,6,1,7, &
+    5,3,3,2,5,3/
 
 contains
 
@@ -321,19 +320,19 @@ contains
     integer :: s1
     integer :: e2
     integer :: s2
-    integer :: cgnsFlip, selfFlip
+    integer :: cgnsFlip,selfFlip
 
     do e1 = 1,this%nElem
       do s1 = 1,6
 
         e2 = this%sideInfo(3,s1,e1)
         s2 = this%sideInfo(4,s1,e1)/10
-        cgnsFlip = this%sideInfo(4,s1,e1) - s2*10
+        cgnsFlip = this%sideInfo(4,s1,e1)-s2*10
 
         if(e2 /= 0) then
 
           selfFlip = CGNStoSELFflip(s2,s1,cgnsFlip)
-         ! print*, s1,s2,cgnsFlip,selfFlip
+          ! print*, s1,s2,cgnsFlip,selfFlip
           this%sideInfo(4,s1,e1) = 10*s2+selfFlip
 
         endif

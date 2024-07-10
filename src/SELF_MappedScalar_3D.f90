@@ -231,41 +231,41 @@ contains
 
                 else if(flip == 4) then
 
-                    do j = 1,this%interp%N+1
-                      do i = 1,this%interp%N+1
-                        extBuff(i,j) = this%extBoundary(j,i,s1,e1,ivar)
-                      enddo
+                  do j = 1,this%interp%N+1
+                    do i = 1,this%interp%N+1
+                      extBuff(i,j) = this%extBoundary(j,i,s1,e1,ivar)
                     enddo
-  
-                  else if(flip == 5) then
-  
-                    do j = 1,this%interp%N+1
-                      do i = 1,this%interp%N+1
-                        i2 = this%interp%N+2-j
-                        j2 = i
-                        extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
-                      enddo
+                  enddo
+
+                else if(flip == 5) then
+
+                  do j = 1,this%interp%N+1
+                    do i = 1,this%interp%N+1
+                      i2 = this%interp%N+2-j
+                      j2 = i
+                      extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
                     enddo
-  
-                  else if(flip == 6) then
-  
-                    do j = 1,this%interp%N+1
-                      do i = 1,this%interp%N+1
-                        i2 = this%interp%N+2-j
-                        j2 = this%interp%N+2-i
-                        extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
-                      enddo
+                  enddo
+
+                else if(flip == 6) then
+
+                  do j = 1,this%interp%N+1
+                    do i = 1,this%interp%N+1
+                      i2 = this%interp%N+2-j
+                      j2 = this%interp%N+2-i
+                      extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
                     enddo
-  
-                  else if(flip == 7) then
-  
-                    do j = 1,this%interp%N+1
-                      do i = 1,this%interp%N+1
-                        i2 = j
-                        j2 = this%interp%N+2-i
-                        extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
-                      enddo
-                    enddo  
+                  enddo
+
+                else if(flip == 7) then
+
+                  do j = 1,this%interp%N+1
+                    do i = 1,this%interp%N+1
+                      i2 = j
+                      j2 = this%interp%N+2-i
+                      extBuff(i,j) = this%extBoundary(i2,j2,s1,e1,ivar)
+                    enddo
+                  enddo
 
                 endif
 
@@ -394,7 +394,7 @@ contains
                     j2 = this%interp%N+2-i
                     this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
                   enddo
-                enddo  
+                enddo
 
               endif
 

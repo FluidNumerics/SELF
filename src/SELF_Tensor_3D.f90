@@ -140,7 +140,7 @@ contains
                 fbn = 0.0_prec
                 fbw = 0.0_prec
                 fbt = 0.0_prec
-    
+
                 do ii = 1,this%N+1
                   fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
                   fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! South

@@ -457,14 +457,14 @@ contains
               enddo
               bfl = this%boundary(j,4,iel,ivar)*geometry%dsdx%boundary(j,4,iel,1,idir,1) ! west
               bfr = this%boundary(j,2,iel,ivar)*geometry%dsdx%boundary(j,2,iel,1,idir,1) ! east
-              dfdxb = (this%interp%bMatrix(i,1)*bfl+ this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+              dfdxb = (this%interp%bMatrix(i,1)*bfl+this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
               df(i,j,iel,ivar,idir) = dfdx+dfdxb
             enddo
           enddo
         enddo
       enddo
     enddo
-    
+
     !$omp target teams loop bind(teams) collapse(5) private(dfdx,dfdxb,bfl,bfr,ja)
     do idir = 1,2
       do iVar = 1,this%nVar
@@ -481,7 +481,7 @@ contains
 
               bfl = this%boundary(i,1,iel,ivar)*geometry%dsdx%boundary(i,1,iel,1,idir,2) ! south
               bfr = this%boundary(i,3,iel,ivar)*geometry%dsdx%boundary(i,3,iel,1,idir,2) ! north
-              dfdxb = (this%interp%bMatrix(j,1)*bfl + this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+              dfdxb = (this%interp%bMatrix(j,1)*bfl+this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
 
               df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx+dfdxb)/geometry%J%interior(i,j,iEl,1)
             enddo
