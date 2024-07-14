@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bash -e
 
-OMP_TARGET=multicore
+OMP_TARGET=sm_70
 WORKSPACE_ROOT=/tmp/$(whoami)/workspace
 BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
@@ -25,8 +25,7 @@ make VERBOSE=1 || exit 1
 
 make install
 
-export OMP_TARGET_OFFLOAD=DISABLED # Disable GPU offloading
-export OMP_NUM_THREADS=2
+export OMP_TARGET_OFFLOAD=MANDATORY # Require GPU offloading
 # Set WORKSPACE for tests that require input mesh
 # We use WORKSPACE so that we are consistent with 
 # what we do for the superci tests

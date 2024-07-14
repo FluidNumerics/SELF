@@ -79,13 +79,17 @@ contains
     ! Initialize scalars
     call f%Init(interp,nvar,nelem)
     call df%Init(interp,nvar,nelem)
+    call f%AssociateGeometry(geometry)
+    call df%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = 1.0')
 
-    call f%SetInteriorFromEquation(geometry,0.0_prec)
+    call f%SetInteriorFromEquation(0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
-
+ 
+    call f%UpdateDevice()
     call f%BoundaryInterp()
+    call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh,decomp)
@@ -95,9 +99,9 @@ contains
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
 
     call f%AverageSides()
-    print*,"min, max (avgboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
+    print*,"min, max (avgboundary)",minval(f%boundary),maxval(f%boundary)
 
-    df%interior = f%DGDerivative(geometry)
+    df%interior = f%MappedDGDerivative()
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 
@@ -108,6 +112,9 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
+    call df%DissociateGeometry()
+    
     call decomp%Free()
     call mesh%Free()
     call geometry%Free()

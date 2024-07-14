@@ -149,7 +149,7 @@ contains
       xLinear%interior(1:2,iel,1) = xU(iel:iel+1)
     enddo
 
-    xGeo%interior = xLinear%GridInterp()
+    call xLinear%GridInterp(xGeo%interior)
 
     ! Set the element information
     nid = 1

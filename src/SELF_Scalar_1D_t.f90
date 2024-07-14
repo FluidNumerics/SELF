@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Scalar_1D
+module SELF_Scalar_1D_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -41,37 +41,39 @@ module SELF_Scalar_1D
 #include "SELF_Macros.h"
 
 ! ---------------------- Scalars ---------------------- !
-  type,extends(SELF_DataObj),public :: Scalar1D
+  type,extends(SELF_DataObj),public :: Scalar1D_t
 
-    real(prec),allocatable,dimension(:,:,:) :: interior
-    real(prec),allocatable,dimension(:,:,:) :: boundary
-    real(prec),allocatable,dimension(:,:,:) :: extBoundary
-    real(prec),allocatable,dimension(:,:,:) :: avgBoundary
-    real(prec),allocatable,dimension(:,:,:) :: jumpBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:) :: interior
+    real(prec),pointer,contiguous,dimension(:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:) :: extBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:) :: avgBoundary
 
   contains
 
-    procedure,public :: Init => Init_Scalar1D
-    procedure,public :: Free => Free_Scalar1D
+    procedure,public :: Init => Init_Scalar1D_t
+    procedure,public :: Free => Free_Scalar1D_t
 
-    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D
-    procedure,public :: GridInterp => GridInterp_Scalar1D
-    generic,public :: Derivative => Derivative_Scalar1D
-    procedure,private :: Derivative_Scalar1D
+    procedure,public :: UpdateHost => UpdateHost_Scalar1D_t
+    procedure,public :: UpdateDevice => UpdateDevice_Scalar1D_t
 
-    generic,public :: WriteHDF5 => WriteHDF5_Scalar1D,WriteHDF5_MPI_Scalar1D
-    procedure,private :: WriteHDF5_Scalar1D
-    procedure,private :: WriteHDF5_MPI_Scalar1D
+    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D_t
+    generic,public :: GridInterp => GridInterp_Scalar1D_t
+    procedure,private :: GridInterp_Scalar1D_t
+    generic,public :: Derivative => Derivative_Scalar1D_t
+    procedure,private :: Derivative_Scalar1D_t
+    generic,public :: WriteHDF5 => WriteHDF5_Scalar1D_t,WriteHDF5_MPI_Scalar1D_t
+    procedure,private :: WriteHDF5_Scalar1D_t
+    procedure,private :: WriteHDF5_MPI_Scalar1D_t
 
-  endtype Scalar1D
+  endtype Scalar1D_t
 
 contains
 
-! -- Scalar1D -- !
+! -- Scalar1D_t -- !
 
-  subroutine Init_Scalar1D(this,interp,nVar,nElem)
+  subroutine Init_Scalar1D_t(this,interp,nVar,nElem)
     implicit none
-    class(Scalar1D),intent(out) :: this
+    class(Scalar1D_t),intent(out) :: this
     type(Lagrange),intent(in),target :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
@@ -84,54 +86,48 @@ contains
 
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
-             this%extBoundary(1:2,1:nelem,1:nvar), &
-             this%avgBoundary(2,1:nelem,1:nvar), &
-             this%jumpBoundary(1:2,1:nelem,1:nvar))
-
-    !$omp target enter data map(alloc: this)
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-    !$omp target enter data map(alloc: this % avgBoundary)
-    !$omp target enter data map(alloc: this % jumpBoundary)
-    !$omp target enter data map(to: this % interp)
+             this%extBoundary(1:2,1:nelem,1:nvar),&
+             this%avgBoundary(1:2,1:nelem,1:nvar))
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
 
-  endsubroutine Init_Scalar1D
+  endsubroutine Init_Scalar1D_t
 
-  subroutine Free_Scalar1D(this)
+  subroutine Free_Scalar1D_t(this)
     implicit none
-    class(Scalar1D),intent(inout) :: this
+    class(Scalar1D_t),intent(inout) :: this
 
     this%interp => null()
     deallocate(this%interior)
     deallocate(this%boundary)
     deallocate(this%extBoundary)
     deallocate(this%avgBoundary)
-    deallocate(this%jumpBoundary)
     deallocate(this%meta)
     deallocate(this%eqn)
 
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % extBoundary)
-    !$omp target exit data map(delete: this % avgBoundary)
-    !$omp target exit data map(delete: this % jumpBoundary)
-    !$omp target exit data map(release: this % interp)
-    !$omp target exit data map(delete: this)
+  endsubroutine Free_Scalar1D_t
 
-  endsubroutine Free_Scalar1D
-
-  subroutine BoundaryInterp_Scalar1D(this)
+  subroutine UpdateHost_Scalar1D_t(this)
     implicit none
-    class(Scalar1D),intent(inout) :: this
+    class(Scalar1D_t),intent(inout) :: this
+
+  end subroutine UpdateHost_Scalar1D_t
+
+  subroutine UpdateDevice_Scalar1D_t(this)
+    implicit none
+    class(Scalar1D_t),intent(inout) :: this
+    
+  end subroutine UpdateDevice_Scalar1D_t
+
+  subroutine BoundaryInterp_Scalar1D_t(this)
+    implicit none
+    class(Scalar1D_t),intent(inout) :: this
     ! Local
     integer :: ii,iel,ivar
     real(prec) :: fbl,fbr
 
-    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp target
     !$omp teams loop bind(teams) collapse(2)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -149,17 +145,17 @@ contains
     !$omp end target
     !call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,handle)
 
-  endsubroutine BoundaryInterp_Scalar1D
+  endsubroutine BoundaryInterp_Scalar1D_t
 
-  function GridInterp_Scalar1D(this) result(f)
+  subroutine GridInterp_Scalar1D_t(this,f)
     implicit none
-    class(Scalar1D),intent(in) :: this
-    real(prec) :: f(1:this%M+1,1:this%nelem,1:this%nvar)
+    class(Scalar1D_t),intent(in) :: this
+    real(prec),intent(inout) :: f(1:this%M+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: iel,ivar,i,ii
     real(prec) :: floc
 
-    !$omp target map(to:this % interior, this % interp % iMatrix) map(from:f)
+    !$omp target
     !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -175,18 +171,18 @@ contains
     enddo
     !$omp end target
 
-  endfunction GridInterp_Scalar1D
+  endsubroutine GridInterp_Scalar1D_t
 
-  function Derivative_Scalar1D(this) result(df)
+  subroutine Derivative_Scalar1D_t(this,df)
     implicit none
-    class(Scalar1D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    class(Scalar1D_t),intent(in) :: this
+    real(prec),intent(inout) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
 
     ! Local
     integer :: i,ii,iel,ivar
     real(prec) :: dfloc
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -206,11 +202,11 @@ contains
 
     !call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
 
-  endfunction Derivative_Scalar1D
+  endsubroutine Derivative_Scalar1D_t
 
-  subroutine WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
+  subroutine WriteHDF5_MPI_Scalar1D_t(this,fileId,group,elemoffset,nglobalelem)
     implicit none
-    class(Scalar1D),intent(in) :: this
+    class(Scalar1D_t),intent(in) :: this
     character(*),intent(in) :: group
     integer(HID_T),intent(in) :: fileId
     integer,intent(in) :: elemoffset
@@ -245,11 +241,11 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary,bOffset,bGlobalDims)
 
-  endsubroutine WriteHDF5_MPI_Scalar1D
+  endsubroutine WriteHDF5_MPI_Scalar1D_t
 
-  subroutine WriteHDF5_Scalar1D(this,fileId,group)
+  subroutine WriteHDF5_Scalar1D_t(this,fileId,group)
     implicit none
-    class(Scalar1D),intent(in) :: this
+    class(Scalar1D_t),intent(in) :: this
     integer(HID_T),intent(in) :: fileId
     character(*),intent(in) :: group
     ! Local
@@ -267,6 +263,6 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary)
 
-  endsubroutine WriteHDF5_Scalar1D
+  endsubroutine WriteHDF5_Scalar1D_t
 
-endmodule SELF_Scalar_1D
+endmodule SELF_Scalar_1D_t

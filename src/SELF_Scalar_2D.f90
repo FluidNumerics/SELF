@@ -42,12 +42,10 @@ module SELF_Scalar_2D
 
   type,extends(SELF_DataObj),public :: Scalar2D
 
-    real(prec),pointer,dimension(:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:) :: interpWork
-    real(prec),pointer,dimension(:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:,:) :: jumpBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:) :: interior
+    real(prec),pointer,contiguous,dimension(:,:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:) :: extBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:) :: avgBoundary
 
   contains
 
@@ -55,6 +53,7 @@ module SELF_Scalar_2D
     procedure,public :: Free => Free_Scalar2D
 
     procedure,public :: BoundaryInterp => BoundaryInterp_Scalar2D
+    procedure,public :: AverageSides => AverageSides_Scalar2D
     procedure,public :: GridInterp => GridInterp_Scalar2D
     generic,public :: Gradient => Gradient_Scalar2D
     procedure,private :: Gradient_Scalar2D
@@ -81,18 +80,9 @@ contains
     this%M = interp%M
 
     allocate(this%interior(1:interp%N+1,interp%N+1,nelem,nvar), &
-             this%interpWork(1:interp%M+1,1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%jumpBoundary(1:interp%N+1,1:4,1:nelem,1:nvar))
-
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % interpWork)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-    !$omp target enter data map(alloc: this % avgBoundary)
-    !$omp target enter data map(alloc: this % jumpBoundary)
+             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar),&
+             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar))
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
@@ -107,20 +97,11 @@ contains
     this%nElem = 0
     this%interp => null()
     deallocate(this%interior)
-    deallocate(this%interpWork)
     deallocate(this%boundary)
     deallocate(this%extBoundary)
     deallocate(this%avgBoundary)
-    deallocate(this%jumpBoundary)
     deallocate(this%meta)
     deallocate(this%eqn)
-
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % interpWork)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % extBoundary)
-    !$omp target exit data map(delete: this % avgBoundary)
-    !$omp target exit data map(delete: this % jumpBoundary)
 
   endsubroutine Free_Scalar2D
 
@@ -131,7 +112,7 @@ contains
     integer :: i,ii,iel,ivar
     real(prec) :: fbs,fbe,fbn,fbw
 
-    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp target
     !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -161,6 +142,32 @@ contains
 
   endsubroutine BoundaryInterp_Scalar2D
 
+  subroutine AverageSides_Scalar2D(this)
+    implicit none
+    class(Scalar2D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: iside
+    integer :: ivar
+    integer :: i
+
+    !$omp target
+    !$omp teams loop collapse(4)
+    do ivar = 1,this%nVar
+      do iel = 1,this%nElem
+        do iside = 1,4
+          do i = 1,this%interp%N+1
+            this%avgBoundary(i,iside,iel,ivar) = 0.5_prec*( &
+                                              this%boundary(i,iside,iel,ivar)+ &
+                                              this%extBoundary(i,iside,iel,ivar))
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+  endsubroutine AverageSides_Scalar2D
+
   function GridInterp_Scalar2D(this) result(f)
     implicit none
     class(Scalar2D),intent(in) :: this
@@ -169,7 +176,7 @@ contains
     integer :: i,j,ii,jj,iel,ivar
     real(prec) :: fi,fij
 
-    !$omp target map(to:f,this%interp%iMatrix) map(from:f)
+    !$omp target
     !$omp teams loop bind(teams) collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -207,7 +214,7 @@ contains
     integer    :: i,j,ii,iel,ivar
     real(prec) :: df1,df2
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem

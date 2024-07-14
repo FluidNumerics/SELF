@@ -42,11 +42,10 @@ module SELF_Vector_3D
 
   type,extends(SELF_DataObj),public :: Vector3D
 
-    real(prec),pointer,dimension(:,:,:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:,:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: boundaryNormal
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: interior
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: extBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: boundaryNormal
 
   contains
 
@@ -89,7 +88,6 @@ contains
     allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3), &
              this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
              this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
              this%boundaryNormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
 
     allocate(this%meta(1:nVar))
@@ -106,12 +104,6 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-    !$omp target enter data map(alloc: this % avgBoundary)
-    !$omp target enter data map(alloc: this % boundaryNormal)
-
   endsubroutine Init_Vector3D
 
   subroutine Free_Vector3D(this)
@@ -126,13 +118,6 @@ contains
     deallocate(this%boundary)
     deallocate(this%boundaryNormal)
     deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % extBoundary)
-    !$omp target exit data map(delete: this % avgBoundary)
-    !$omp target exit data map(delete: this % boundaryNormal)
 
     deallocate(this%meta)
     deallocate(this%eqn)
@@ -160,7 +145,7 @@ contains
     integer :: i,j,k,ii,jj,kk,iel,ivar,idir
     real(prec) :: fi,fij,fijk
 
-    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp target
     !$omp teams loop bind(teams) collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
@@ -203,7 +188,7 @@ contains
     integer :: i,j,ii,idir,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
-    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp target
     !$omp teams loop bind(teams) collapse(5)
     do idir = 1,3
       do ivar = 1,this%nvar
@@ -251,7 +236,7 @@ contains
     integer    :: i,j,k,ii,idir,iel,ivar
     real(prec) :: dfds1,dfds2,dfds3
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(6)
     do idir = 1,3
       do ivar = 1,this%nvar
@@ -303,7 +288,7 @@ contains
     real(prec) :: dfds1,dfds2,dfds3
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop bind(teams) collapse(6)
     do idir = 1,3
@@ -362,7 +347,7 @@ contains
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: dfLoc
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop bind(teams) collapse(5)
     do ivar = 1,this%nvar
@@ -427,7 +412,7 @@ contains
     !$omp end target
 
     ! ! local
-    ! real(prec),pointer :: floc(:,:,:,:,:)
+    ! real(prec),pointer,contiguous :: floc(:,:,:,:,:)
 
     ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,1)
     ! call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)

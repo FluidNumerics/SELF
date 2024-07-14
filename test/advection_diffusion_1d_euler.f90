@@ -78,7 +78,7 @@ program advection_diffusion_1d_euler
 
   ! Set the initial condition
   call modelobj%solution%SetEquation(1,'f = 1.0')
-  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+  call modelobj%solution%SetInteriorFromEquation(0.0_prec)
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &

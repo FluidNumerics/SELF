@@ -71,12 +71,13 @@ contains
 
     ! ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior(:,:,:) = 1.0_prec
-    !$omp target update to(f%interior)
-
-    fTarget%interior = f%GridInterp()
-
-    !!$omp target update from(fTarget%interior)
-
+    if(f%backend == 'cpu')then
+      call f%GridInterp(fTarget%interior)
+    else
+      call f%UpdateDevice()
+      call f%GridInterp(fTarget%interior_gpu)
+      call fTarget%UpdateHost()
+    endif
     ! ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)
 

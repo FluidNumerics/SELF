@@ -24,14 +24,10 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Lagrange
+module SELF_Lagrange_t
 
   use iso_fortran_env
   use iso_c_binding
-  ! use hipfort
-  ! use hipfort_check
-  ! use hipfort_hipmalloc
-  ! use hipfort_hipblas
 
   use SELF_Constants
   use SELF_SupportRoutines
@@ -43,7 +39,7 @@ module SELF_Lagrange
 
   implicit none
 
-  type,public :: Lagrange
+  type,public :: Lagrange_t
     !! A data structure for working with Lagrange Interpolating Polynomials in one, two, and three dimensions.
     !! The Lagrange data-structure stores the information necessary to interpolate between two
     !! sets of grid-points and to estimate the derivative of data at native grid points. Routines for
@@ -65,7 +61,7 @@ module SELF_Lagrange
     type(c_ptr) :: blas_handle = c_null_ptr
       !! A handle for working with hipblas
 
-    real(prec),allocatable,dimension(:) :: controlPoints
+    real(prec),pointer,contiguous,dimension(:) :: controlPoints
       !! The set of nodes in one dimension where data is known.
       !! To create higher dimension interpolation and differentiation operators, structured grids in two and three
       !! dimensions are created by tensor products of the controlPoints. This design decision implies that all
@@ -75,59 +71,59 @@ module SELF_Lagrange
       !! the domain [-1,1] (computational space). The Init routine for this class restricts controlPoints to one of
       !! these quadrature types or uniform points on [-1,1].
 
-    real(prec),allocatable,dimension(:) :: targetPoints
+    real(prec),pointer,contiguous,dimension(:) :: targetPoints
       !! The set of nodes in one dimension where data is to be interpolated to. To create higher dimension interpolation
       !! and differentiation operators, structured grids in two and three dimensions are created by tensor products of
       !! the targetPoints. In practice, the targetPoints are set to a uniformly distributed set of points between [-1,1]
       !! (computational space) to allow for interpolation from unevenly spaced quadrature points to a plotting grid.
 
-    real(prec),allocatable,dimension(:) :: bWeights
+    real(prec),pointer,contiguous,dimension(:) :: bWeights
       !! The barycentric weights that are calculated from the controlPoints and used for interpolation.
 
-    real(prec),allocatable,dimension(:) :: qWeights
+    real(prec),pointer,contiguous,dimension(:) :: qWeights
       !! The quadrature weights for discrete integration. The quadradture weights depend on the type of controlPoints
       !! provided; one of Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss,
       !! Chebyshev-Gauss-Lobatto, Chebyshev-Gauss Radau, or Uniform. If Uniform, the quadrature weights are constant
       !! $$dx = \frac{2.0}{N+1}$$.
 
-    real(prec),allocatable,dimension(:,:) :: iMatrix
+    real(prec),pointer,contiguous,dimension(:,:) :: iMatrix
       !! The interpolation matrix (transpose) for mapping data from the control grid to the target grid.
 
-    real(prec),allocatable,dimension(:,:) :: dMatrix
+    real(prec),pointer,contiguous,dimension(:,:) :: dMatrix
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The
       !! dMatrix is based on a strong form of the derivative.
 
-    real(prec),allocatable,dimension(:,:) :: dgMatrix
+    real(prec),pointer,contiguous,dimension(:,:) :: dgMatrix
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The dgMatrix is based
       !! on a weak form of the derivative. It must be used with bMatrix to account for boundary contributions in the weak form.
 
-    real(prec),allocatable,dimension(:,:) :: bMatrix
+    real(prec),pointer,contiguous,dimension(:,:) :: bMatrix
       !! The boundary interpolation matrix that is used to map a grid of nodal values at the control points to the element boundaries.
 
   contains
 
-    procedure,public :: Init => Init_Lagrange
-    procedure,public :: Free => Free_Lagrange
+    procedure,public :: Init => Init_Lagrange_t
+    procedure,public :: Free => Free_Lagrange_t
 
-    procedure,public :: WriteHDF5 => WriteHDF5_Lagrange
+    procedure,public :: WriteHDF5 => WriteHDF5_Lagrange_t
 
-    procedure,private :: CalculateBarycentricWeights
-    procedure,private :: CalculateInterpolationMatrix
-    procedure,private :: CalculateDerivativeMatrix
-    procedure,private :: CalculateLagrangePolynomials
+    procedure,public :: CalculateBarycentricWeights
+    procedure,public :: CalculateInterpolationMatrix
+    procedure,public :: CalculateDerivativeMatrix
+    procedure,public :: CalculateLagrangePolynomials
 
-  endtype Lagrange
+  endtype Lagrange_t
 
 contains
 
-  subroutine Init_Lagrange(this,N,controlNodeType,M,targetNodeType)
-    !! Initialize an instance of the Lagrange class
-    !! On output, all of the attributes for the Lagrange class are allocated and values are initialized according to the number of
+  subroutine Init_Lagrange_t(this,N,controlNodeType,M,targetNodeType)
+    !! Initialize an instance of the Lagrange_t class
+    !! On output, all of the attributes for the Lagrange_t class are allocated and values are initialized according to the number of
     !! control points, number of target points, and the types for the control and target nodes.
-    !! If a GPU is available, device pointers for the Lagrange attributes are allocated and initialized.
+    !! If a GPU is available, device pointers for the Lagrange_t attributes are allocated and initialized.
     implicit none
-    class(Lagrange),intent(out) :: this
-    !! Lagrange class instance
+    class(Lagrange_t),intent(out) :: this
+    !! Lagrange_t class instance
     integer,intent(in)          :: N
     !! The number of control points for interpolant
     integer,intent(in)          :: M
@@ -155,15 +151,6 @@ contains
              this%dgMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
 
-    !$omp target enter data map(alloc: this)
-    !$omp target enter data map(alloc: this % controlPoints)
-    !$omp target enter data map(alloc: this % targetPoints)
-    !$omp target enter data map(alloc: this % bWeights)
-    !$omp target enter data map(alloc: this % qWeights)
-    !$omp target enter data map(alloc: this % iMatrix)
-    !$omp target enter data map(alloc: this % dMatrix)
-    !$omp target enter data map(alloc: this % dgMatrix)
-    !$omp target enter data map(alloc: this % bMatrix)
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
@@ -205,24 +192,14 @@ contains
     call this%CalculateDerivativeMatrix()
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
+    
+  endsubroutine Init_Lagrange_t
 
-    !!$omp target update to(this)
-    !$omp target update to(this % controlPoints)
-    !$omp target update to(this % targetPoints)
-    !$omp target update to(this % bWeights)
-    !$omp target update to(this % qWeights)
-    !$omp target update to(this % iMatrix)
-    !$omp target update to(this % dMatrix)
-    !$omp target update to(this % dgMatrix)
-    !$omp target update to(this % bMatrix)
-
-  endsubroutine Init_Lagrange
-
-  subroutine Free_Lagrange(this)
-    !! Frees all memory (host and device) associated with an instance of the Lagrange class
+  subroutine Free_Lagrange_t(this)
+    !! Frees all memory (host and device) associated with an instance of the Lagrange_t class
     implicit none
-    class(Lagrange),intent(inout) :: this
-    !! Lagrange class instance
+    class(Lagrange_t),intent(inout) :: this
+    !! Lagrange_t class instance
 
     deallocate(this%controlPoints)
     deallocate(this%targetPoints)
@@ -233,17 +210,7 @@ contains
     deallocate(this%dgMatrix)
     deallocate(this%bMatrix)
 
-    !$omp target exit data map(delete: this % controlPoints)
-    !$omp target exit data map(delete: this % targetPoints)
-    !$omp target exit data map(delete: this % bWeights)
-    !$omp target exit data map(delete: this % qWeights)
-    !$omp target exit data map(delete: this % iMatrix)
-    !$omp target exit data map(delete: this % dMatrix)
-    !$omp target exit data map(delete: this % dgMatrix)
-    !$omp target exit data map(delete: this % bMatrix)
-    !$omp target exit data map(delete: this)
-
-  endsubroutine Free_Lagrange
+  endsubroutine Free_Lagrange_t
 
 !   subroutine self_hipblas_matrixop_1d(A,f,Af,opArows,opAcols,bcols,handle)
 !     real(prec),pointer,intent(in) :: A(:,:)
@@ -538,7 +505,7 @@ contains
 !
 ! CalculateBarycentricWeights (PRIVATE)
 !
-!   A PRIVATE routine that calculates and stores the barycentric weights for the Lagrange
+!   A PRIVATE routine that calculates and stores the barycentric weights for the Lagrange_t
 !   data-structure.
 !
 !   This routine is from Alg. 30 on pg. 75 of D.A. Kopriva, 2009.
@@ -547,7 +514,7 @@ contains
 
   subroutine CalculateBarycentricWeights(this)
     implicit none
-    class(Lagrange),intent(inout) :: this
+    class(Lagrange_t),intent(inout) :: this
     ! Local
     integer :: i,j
     real(real64) :: bWeights(0:this%N)
@@ -579,7 +546,7 @@ contains
 !
 ! CalculateInterpolationMatrix (PRIVATE)
 !
-!   A PRIVATE routine that fills in the interpolation matrix for the Lagrange data structure.
+!   A PRIVATE routine that fills in the interpolation matrix for the Lagrange_t data structure.
 !
 !   This function is from Alg. 32 on pg. 76 of D.A. Kopriva, 2009.
 !
@@ -587,7 +554,7 @@ contains
 
   subroutine CalculateInterpolationMatrix(this)
     implicit none
-    class(Lagrange),intent(inout) :: this
+    class(Lagrange_t),intent(inout) :: this
     ! Local
     integer    :: row,col
     logical    :: rowHasMatch
@@ -661,7 +628,7 @@ contains
 
   subroutine CalculateDerivativeMatrix(this)
     implicit none
-    class(Lagrange),intent(inout) :: this
+    class(Lagrange_t),intent(inout) :: this
     ! Local
     integer      :: row,col
     real(real64) :: dmat(0:this%N,0:this%N)
@@ -726,7 +693,7 @@ contains
 
   function CalculateLagrangePolynomials(this,sE) result(lAtS)
     implicit none
-    class(Lagrange) :: this
+    class(Lagrange_t) :: this
     real(prec)      :: sE
     real(prec)      :: lAtS(0:this%N)
     ! Local
@@ -779,9 +746,9 @@ contains
 
   endfunction CalculateLagrangePolynomials
 
-  subroutine WriteHDF5_Lagrange(this,fileId)
+  subroutine WriteHDF5_Lagrange_t(this,fileId)
     implicit none
-    class(Lagrange),intent(in) :: this
+    class(Lagrange_t),intent(in) :: this
     integer(HID_T),intent(in) :: fileId
 
     call CreateGroup_HDF5(fileId,'/interp')
@@ -804,6 +771,6 @@ contains
     call WriteArray_HDF5(fileId,'/interp/imatrix', &
                          this%iMatrix)
 
-  endsubroutine WriteHDF5_Lagrange
+  endsubroutine WriteHDF5_Lagrange_t
 
-endmodule SELF_Lagrange
+endmodule SELF_Lagrange_t

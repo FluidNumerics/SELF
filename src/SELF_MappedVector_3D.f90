@@ -184,7 +184,7 @@ contains
 
     if(decomp%mpiEnabled) then
 
-      !$omp target map(to:mesh % sideInfo, decomp % elemToRank) map(tofrom:this % extBoundary)
+      !$omp target
       !$omp teams loop collapse(4)
       do idir = 1,3
         do ivar = 1,this%nvar
@@ -283,7 +283,7 @@ contains
 
     call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
-    !$omp target map(to: mesh % sideInfo, decomp % elemToRank) map(from: this % boundary) map(tofrom: this % extBoundary)
+    !$omp target
     !$omp teams loop collapse(4)
     do idir = 1,3
       do ivar = 1,this%nvar
@@ -385,7 +385,7 @@ contains
     integer :: i,j
     integer :: idir
 
-    !$omp target map(to:this % boundary, this % extBoundary) map(from:this%boundary)
+    !$omp target
     !$omp teams loop collapse(6)
     do idir = 1,3
       do ivar = 1,this%nVar
@@ -417,7 +417,7 @@ contains
     integer :: iEl,iVar,i,j,k,ii
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
-    !$omp target map(to:geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop collapse(5)
     do ivar = 1,this%nVar
@@ -515,7 +515,7 @@ contains
     integer :: iEl,iVar,i,j,k,ii
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
-    !$omp target map(to:geometry%dsdx%interior,this%interior,this%boundaryNormal,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qweights) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop collapse(5)
     do ivar = 1,this%nVar

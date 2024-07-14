@@ -42,11 +42,11 @@ module SELF_Vector_2D
 
   type,extends(SELF_DataObj),public :: Vector2D
 
-    real(prec),pointer,dimension(:,:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:,:) :: boundaryNormal
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: interior
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: extBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: avgBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:) :: boundaryNormal
 
   contains
 
@@ -54,6 +54,8 @@ module SELF_Vector_2D
     procedure,public :: Free => Free_Vector2D
 
     procedure,public :: BoundaryInterp => BoundaryInterp_Vector2D
+    procedure,public :: AverageSides => AverageSides_Vector2D
+
     procedure,public :: GridInterp => GridInterp_Vector2D
     procedure,public :: Gradient => Gradient_Vector2D
     generic,public :: Divergence => Divergence_Vector2D
@@ -105,12 +107,6 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-    !$omp target enter data map(alloc: this % avgBoundary)
-    !$omp target enter data map(alloc: this % boundaryNormal)
-
   endsubroutine Init_Vector2D
 
   subroutine Free_Vector2D(this)
@@ -126,12 +122,6 @@ contains
     deallocate(this%boundaryNormal)
     deallocate(this%extBoundary)
     deallocate(this%avgBoundary)
-
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % boundaryNormal)
-    !$omp target exit data map(delete: this % extBoundary)
-    !$omp target exit data map(delete: this % avgBoundary)
 
     deallocate(this%meta)
     deallocate(this%eqn)
@@ -158,7 +148,7 @@ contains
     integer :: i,j,ii,jj,iel,ivar,idir
     real(prec) :: fi,fij
 
-    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp target
     !$omp teams loop bind(teams) collapse(5)
     do idir = 1,2
       do ivar = 1,this%nvar
@@ -187,6 +177,35 @@ contains
 
   endfunction GridInterp_Vector2D
 
+  subroutine AverageSides_Vector2D(this)
+    implicit none
+    class(Vector2D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: iside
+    integer :: ivar
+    integer :: i
+    integer :: idir
+
+    !$omp target
+    !$omp teams loop collapse(5)
+    do idir = 1,2
+      do ivar = 1,this%nVar
+        do iel = 1,this%nElem
+          do iside = 1,4
+            do i = 1,this%interp%N+1
+              this%avgboundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
+                                                     this%boundary(i,iside,iel,ivar,idir)+ &
+                                                     this%extBoundary(i,iside,iel,ivar,idir))
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+  endsubroutine AverageSides_Vector2D
+  
   subroutine BoundaryInterp_Vector2D(this)
     implicit none
     class(Vector2D),intent(inout) :: this
@@ -194,7 +213,7 @@ contains
     integer :: i,ii,idir,iel,ivar
     real(prec) :: fbs,fbe,fbn,fbw
 
-    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp target
     !$omp teams loop bind(teams) collapse(4)
     do idir = 1,2
       do ivar = 1,this%nvar
@@ -233,7 +252,7 @@ contains
     integer :: i,j,ii,iEl,iVar,idir
     real(prec) :: dfds1,dfds2
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(5)
     do idir = 1,2
       do ivar = 1,this%nvar
@@ -277,7 +296,7 @@ contains
     integer    :: i,j,ii,iel,ivar
     real(prec) :: dfLoc
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop bind(teams) collapse(4)
     do ivar = 1,this%nvar

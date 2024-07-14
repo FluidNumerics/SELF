@@ -42,7 +42,6 @@ module SELF_DGModel1D
   type,extends(Model) :: DGModel1D
     type(MappedScalar1D) :: solution
     type(MappedScalar1D) :: solutionGradient
-    type(MappedScalar1D) :: velocity
     type(MappedScalar1D) :: flux
     type(MappedScalar1D) :: source
     type(MappedScalar1D) :: fluxDivergence
@@ -98,12 +97,16 @@ contains
     call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%prevSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%velocity%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%dSdt%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%solutionGradient%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%flux%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
+
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
 
   endsubroutine Init_DGModel1D
 
@@ -111,10 +114,14 @@ contains
     implicit none
     class(DGModel1D),intent(inout) :: this
 
+    call this%solution%DissociateGeometry()
+    call this%solutionGradient%DissociateGeometry()
+    call this%flux%DissociateGeometry()
+    call this%fluxDivergence%DissociateGeometry()
+
     call this%solution%Free()
     call this%workSol%Free()
     call this%prevSol%Free()
-    call this%velocity%Free()
     call this%dSdt%Free()
     call this%solutionGradient%Free()
     call this%flux%Free()
@@ -152,7 +159,7 @@ contains
       call this%solution%SetEquation(ivar,eqn(iVar)%equation)
     enddo
 
-    call this%solution%SetInteriorFromEquation(this%geometry,this%t)
+    call this%solution%SetInteriorFromEquation(this%t)
     call this%solution%BoundaryInterp()
 
   endsubroutine SetSolutionFromEqn_DGModel1D
@@ -169,7 +176,7 @@ contains
       call this%solution%SetEquation(ivar,eqnChar(iVar))
     enddo
 
-    call this%solution%SetInteriorFromEquation(this%geometry,this%t)
+    call this%solution%SetInteriorFromEquation(this%t)
     call this%solution%BoundaryInterp()
 
   endsubroutine SetSolutionFromChar_DGModel1D
@@ -190,7 +197,7 @@ contains
       dtLoc = this%dt
     endif
 
-    !$omp target map(to:this % dsdt % interior) map(tofrom:this % solution)
+    !$omp target
     !$omp teams loop collapse(3)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -217,7 +224,7 @@ contains
     ! ab2_weight
     if(m == 0) then ! Initialization step - store the solution in the prevSol
 
-      !$omp target map(tofrom: this % solution % interior) map(from:this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -232,7 +239,7 @@ contains
 
     elseif(m == 1) then ! Copy the solution back from prevsol
 
-      !$omp target map(from: this % solution % interior) map(to:this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -249,7 +256,7 @@ contains
       ! create an interpolated solution to use for tendency calculation
 
       nVar = this%solution%nVar
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -282,7 +289,7 @@ contains
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
       nVar = this%solution%nVar
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -297,7 +304,7 @@ contains
 
     elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -312,7 +319,7 @@ contains
 
     elseif(m == 2) then ! Copy the solution back from the most recent prevsol
 
-      !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -329,7 +336,7 @@ contains
       ! create an interpolated solution to use for tendency calculation
 
       nVar = this%solution%nVar
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -367,7 +374,7 @@ contains
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
       nVar = this%solution%nVar
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -383,7 +390,7 @@ contains
     elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
       nVar = this%solution%nVar
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -398,7 +405,7 @@ contains
 
     elseif(m == 2) then ! Initialization step - store the solution in the prevSol at ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -413,7 +420,7 @@ contains
 
     elseif(m == 3) then ! Copy the solution back from the most recent prevsol
 
-      !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -430,7 +437,7 @@ contains
       ! create an interpolated solution to use for tendency calculation
 
       nVar = this%solution%nVar
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(3)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -466,7 +473,7 @@ contains
     ! Local
     integer :: i,iEl,iVar
 
-    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp target
     !$omp teams loop collapse(3)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -494,7 +501,7 @@ contains
     ! Local
     integer :: i,iEl,iVar
 
-    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp target
     !$omp teams loop collapse(3)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -522,7 +529,7 @@ contains
     ! Local
     integer :: i,iEl,iVar
 
-    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp target
     !$omp teams loop collapse(3)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -556,9 +563,9 @@ contains
     call this%SourceMethod()
     call this%RiemannSolver()
     call this%FluxMethod()
-    this%fluxDivergence%interior = this%flux%DGDerivative(this%geometry)
+    this%fluxDivergence%interior = this%flux%MappedDGDerivative()
 
-    !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
+    !$omp target
     !$omp teams loop collapse(3)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -635,10 +642,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      x%interior = this%geometry%x%GridInterp()
+      call this%geometry%x%GridInterp(x%interior)
 
       ! Map the solution to the target grid
-      solution%interior = this%solution%GridInterp()
+      call this%solution%GridInterp(solution%interior)
 
       ! Write the model state to file
       call CreateGroup_HDF5(fileId,'/targetgrid')
@@ -687,10 +694,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      x%interior = this%geometry%x%GridInterp()
+      call this%geometry%x%GridInterp(x%interior)
 
       ! Map the solution to the target grid
-      solution%interior = this%solution%GridInterp()
+      call this%solution%GridInterp(solution%interior)
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
@@ -788,10 +795,10 @@ contains
     call x%Init(interp,1,this%solution%nElem)
 
     ! Map the mesh positions to the target grid
-    x%interior = this%geometry%x%GridInterp()
+    call this%geometry%x%GridInterp(x%Interior)
 
     ! Map the solution to the target grid
-    solution%interior = this%solution%GridInterp()
+    call this%solution%GridInterp(solution%interior)
 
     fmat = '(2(ES16.7E3,1x))'
     ! Let's write some tecplot!!

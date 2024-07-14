@@ -68,7 +68,7 @@ contains
     ! local
     integer :: i,ivar,iEl,j,e2
 
-    !$omp target map(from: this % mesh % sideInfo) map(tofrom: this % solution % extBoundary)
+    !$omp target
     !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
@@ -104,9 +104,6 @@ contains
     ! perform the side exchange to populate the solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh,this%decomp)
 
-    ! Re-compute the solution%boundary attribute so that we don't use the avgboundary in the hyperbolic flux
-    call this%solution%BoundaryInterp()
-
   endsubroutine pretendency_advection_diffusion_2d
 
   subroutine setboundarycondition_advection_diffusion_2d(this)
@@ -120,7 +117,7 @@ contains
     ! local
     integer :: i,ivar,iEl,j,e2
 
-    !$omp target map(from: this % mesh % sideInfo) map(tofrom: this % solutionGradient % extBoundary)
+    !$omp target
     !$omp teams loop collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
@@ -132,7 +129,8 @@ contains
           if(e2 == 0) then
 
             do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              this%solutionGradient%extBoundary(i,j,iEl,ivar,1:2) = 0.0_prec
+              this%solutionGradient%extBoundary(i,j,iEl,ivar,1:2) = &
+                this%solutionGradient%boundary(i,j,iEl,ivar,1:2)
             enddo
 
           endif
@@ -159,7 +157,7 @@ contains
     u = this%u
     v = this%v
     nu = this%nu
-    !$omp target map(to:this % solution % interior, this % solutionGradient % interior) map(from:this % flux % interior)
+    !$omp target
     !$omp teams loop collapse(4)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
@@ -195,9 +193,7 @@ contains
     real(prec) :: fin,fout,dfdn,un
     real(prec) :: nx,ny,nmag
 
-    !$omp target map(to:this % geometry % nHat % boundary, this % solutionGradient % avgBoundary) &
-    !$omp& map(to:this % solution % boundary, this % solution % extBoundary) &
-    !$omp& map(to:this % geometry % nscale % boundary) map(from: this % flux % boundaryNormal)
+    !$omp target
     !$omp teams loop collapse(4)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem
@@ -209,8 +205,8 @@ contains
             ny = this%geometry%nHat%boundary(i,j,iEl,1,2)
 
             un = this%u*nx+this%v*ny
-            dfdn = this%solutionGradient%avgBoundary(i,j,iEl,ivar,1)*nx+ &
-                   this%solutionGradient%avgBoundary(i,j,iEl,ivar,2)*ny
+            dfdn = this%solutionGradient%avgboundary(i,j,iEl,ivar,1)*nx+ &
+                   this%solutionGradient%avgboundary(i,j,iEl,ivar,2)*ny
 
             fin = this%solution%boundary(i,j,iel,ivar) ! interior solution
             fout = this%solution%extboundary(i,j,iel,ivar) ! exterior solution

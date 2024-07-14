@@ -42,9 +42,9 @@ module SELF_Tensor_3D
 
   type,extends(SELF_DataObj),public :: Tensor3D
 
-    real(prec),pointer,dimension(:,:,:,:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:,:,:,:) :: extBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: interior
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: extBoundary
 
   contains
 
@@ -91,10 +91,6 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-
   endsubroutine Init_Tensor3D
 
   subroutine Free_Tensor3D(this)
@@ -109,10 +105,6 @@ contains
     deallocate(this%boundary)
     deallocate(this%extBoundary)
 
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % extBoundary)
-
     deallocate(this%meta)
     deallocate(this%eqn)
 
@@ -125,7 +117,7 @@ contains
     integer :: i,j,ii,idir,jdir,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
-    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp target
     !$omp teams loop collapse(6)
     do jdir = 1,3
       do idir = 1,3

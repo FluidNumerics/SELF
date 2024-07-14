@@ -76,12 +76,14 @@ contains
     ! Initialize scalars
     call f%Init(interp,nvar,nelem)
     call df%Init(interp,nvar,nelem)
+    call f%AssociateGeometry(geometry)
+    call df%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = 1.0')
 
-    call f%SetInteriorFromEquation(geometry,0.0_prec)
+    call f%SetInteriorFromEquation(0.0_prec)
 
-    df%interior = f%Derivative(geometry)
+    df%interior = f%MappedDerivative()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
@@ -93,6 +95,9 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
+    call df%DissociateGeometry()
+
     call mesh%Free()
     call geometry%Free()
     call interp%free()

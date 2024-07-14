@@ -88,7 +88,7 @@ contains
     call this%solution%AverageSides()
 
     ! calculate the derivative using the bassi-rebay form
-    this%solutionGradient%interior = this%solution%DGDerivative(this%geometry)
+    this%solutionGradient%interior = this%solution%MappedDGDerivative()
 
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
@@ -126,7 +126,7 @@ contains
       this%solutionGradient%extBoundary(1,1,ivar) = &
         this%solutionGradient%boundary(2,nelem,ivar)
 
-      this%solutionGradient%avgBoundary(1,1,ivar) = &
+      this%solutionGradient%boundary(1,1,ivar) = &
         -0.5_prec*(this%solutionGradient%extBoundary(1,1,ivar)+ &
                    this%solutionGradient%boundary(ivar,1,1))
 
@@ -134,7 +134,7 @@ contains
       this%solutionGradient%extBoundary(2,nelem,ivar) = &
         this%solutionGradient%boundary(1,1,ivar)
 
-      this%solutionGradient%avgBoundary(2,nelem,ivar) = &
+      this%solutionGradient%boundary(2,nelem,ivar) = &
         0.5_prec*(this%solutionGradient%extBoundary(2,nelem,ivar)+ &
                   this%solutionGradient%boundary(2,nelem,ivar))
     enddo
@@ -152,8 +152,7 @@ contains
 
     u = this%u
     nu = this%nu
-    !$omp target map(to:this%solution%interior,this%solutionGradient%interior) &
-    !$omp& map(from:this%flux%interior)
+    !$omp target
     !$omp teams
     !$omp loop collapse(3)
     do ivar = 1,this%solution%nvar
@@ -187,8 +186,7 @@ contains
 
     call this%solutionGradient%AverageSides()
     u = this%u
-    !$omp target map(to:this%solution%boundary,this%solution%extboundary,this%solutionGradient%boundary) &
-    !$omp& map(from:this%flux%boundary)
+    !$omp target
     !$omp teams
     !$omp loop collapse(3)
     do ivar = 1,this%solution%nvar

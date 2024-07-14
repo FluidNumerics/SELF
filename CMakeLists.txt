@@ -30,13 +30,15 @@ cmake_policy(VERSION 3.21...3.27)
 # Override with -DOMP_TARGET
 # - Set to "none" to disable OpenMP
 # - Set to "multicore" for multicore cpu
-# - Set to the GPU target architecture code for gpu offloading
-#     > Nvidia V100 : sm_70
-#     > Nvidia A100 : sm_80
-#     > AMD MI50 : gfx906
-#     > AMD MI100 : gfx908
-#     > AMD MI210/MI250/MI250X : gfx90a
-set(OMP_TARGET "none" CACHE STRING "Target architecture for openmp.")
+# - GPU offloading via openmp not supported (not by our own choice)
+option(SELF_ENABLE_OPENMP "Option to enable OpenMP. (Default Off)"  OFF)
+option(SELF_ENABLE_TESTING "Option to enable build of tests. (Default On)"  ON)
+option(SELF_ENABLE_GPU "Option to enable GPU backends. Requires either CUDA or HIP. (Default Off)"  OFF)
+option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default Off)"  OFF)
+
+if(SELF_ENABLE_OPENMP)
+    set(OMP_TARGET "multicore" CACHE STRING "Target architecture for openmp.")
+endif()
 
 
 if(NOT DEFINED ROCM_PATH)
@@ -53,7 +55,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/cmake/modules/OpenMPTargetOffloadFlags.cmake"
 # CXX language is needed to properly find "hip" package
 project(self VERSION 1.0.0
 	DESCRIPTION "Spectral Element Library in Fortran"
-	LANGUAGES Fortran C)
+	LANGUAGES Fortran C CXX)
 
 # Fortran compiler requirements
 INCLUDE(FortranCInterface)
@@ -110,7 +112,7 @@ elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NVHPC" )
 endif()
 
 # Check for openmp support if offload target is provided
-if( NOT "${OMP_TARGET}" STREQUAL "none" )
+if( SELF_ENABLE_OPENMP )
     find_package(OpenMP COMPONENTS Fortran REQUIRED)
     if( ${OpenMP_Fortran_FOUND} )
         if( "${OMP_TARGET}" STREQUAL "multicore" )
@@ -152,15 +154,60 @@ find_library(FEQPARSE_LIBRARIES NAMES feqparse REQUIRED)
 find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 
 
+if(SELF_ENABLE_GPU)
+    message("Enabling GPU Support")
+    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DENABLE_GPU" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DENABLE_GPU" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DENABLE_GPU")
+    set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DENABLE_GPU")
+    set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DENABLE_GPU" )
+
+    # HIP (Optional)
+    # IF HIP is found, we prefer HIP. IF HIP is not found, then we fall back to look for CUDA
+    # only. If neither HIP nor CUDA are found, Cmake will error out.
+    find_package(hip)
+    if(hip_FOUND)
+        find_package(hipblas REQUIRED)
+        message("HIP found. Enabling HIP language.")
+        enable_language(HIP)
+        set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DHAVE_HIP" )
+        set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DHAVE_HIP" )
+        set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_HIP")
+        set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_HIP")
+        set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_HIP" )
+        set( BACKEND_LIBRARIES hip::device roc::hipblas)
+    else()
+        # CUDA (Optional)
+        find_package(cuda)
+        if(cuda_FOUND)
+            message("CUDA found. Enabling CUDA language.")
+            enable_language(CUDA)
+            set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DHAVE_CUDA" )
+            set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DHAVE_CUDA" )
+            set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_CUDA")
+            set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_CUDA")
+            set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_CUDA" )
+            # TO DO - need cuda libraries and hipblas libraries
+        else()
+            message( FATAL_ERROR "Enabling GPU support requires either HIP or CUDA." )
+        endif()
+    endif()
+endif()
+# get_cmake_property(_variableNames VARIABLES)
+# list (SORT _variableNames)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
 # ----- end dependencies ----- #
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
-enable_testing()
 
-# Tests
-add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+if(SELF_ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+endif()
 
 # Examples (additional tests; standalone models)
 #add_subdirectory(${CMAKE_SOURCE_DIR}/example)

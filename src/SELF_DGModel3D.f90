@@ -203,7 +203,7 @@ contains
       dtLoc = this%dt
     endif
 
-    !$omp target map(to:this % dsdt % interior) map(tofrom:this % solution)
+    !$omp target
     !$omp teams loop collapse(4)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -234,7 +234,7 @@ contains
     ! ab2_weight
     if(m == 0) then ! Initialization step - store the solution in the prevSol
 
-      !$omp target map(tofrom: this % solution % interior) map(from:this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -253,7 +253,7 @@ contains
 
     elseif(m == 1) then ! Reset solution
 
-      !$omp target map(from: this % solution % interior) map(to:this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -274,7 +274,7 @@ contains
       ! create an interpolated solution to use for tendency calculation
 
       nVar = this%solution%nVar
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -311,7 +311,7 @@ contains
 
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
       nVar = this%solution%nVar
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -330,7 +330,7 @@ contains
 
     elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -349,7 +349,7 @@ contains
 
     elseif(m == 2) then ! Copy the solution back from the most recent prevsol
 
-      !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -370,7 +370,7 @@ contains
       ! create an interpolated solution to use for tendency calculation
 
       nVar = this%solution%nVar
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -411,7 +411,7 @@ contains
     if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
 
       nVar = this%solution%nVar
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -431,7 +431,7 @@ contains
     elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
 
       nVar = this%solution%nVar
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -450,7 +450,7 @@ contains
 
     elseif(m == 2) then ! Initialization step - store the solution in the prevSol at ivar
 
-      !$omp target map(to: this % solution % interior) map(from: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -469,7 +469,7 @@ contains
 
     elseif(m == 3) then ! Copy the solution back from the most recent prevsol
 
-      !$omp target map(from: this % solution % interior) map(to: this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -490,7 +490,7 @@ contains
       ! create an interpolated solution to use for tendency calculation
 
       nVar = this%solution%nVar
-      !$omp target map(tofrom: this % solution % interior, this % prevSol % interior)
+      !$omp target
       !$omp teams loop collapse(5)
       do iEl = 1,this%solution%nElem
         do iVar = 1,this%solution%nVar
@@ -530,7 +530,7 @@ contains
     ! Local
     integer :: i,j,k,iVar,iEl
 
-    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp target
     !$omp teams loop collapse(5)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -562,7 +562,7 @@ contains
     ! Local
     integer :: i,j,k,iVar,iEl
 
-    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp target
     !$omp teams loop collapse(5)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -594,7 +594,7 @@ contains
     ! Local
     integer :: i,j,k,iVar,iEl
 
-    !$omp target map(tofrom: this % solution % interior, this % workSol % interior) map(to:this % dsdt % interior)
+    !$omp target
     !$omp teams loop collapse(5)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar
@@ -634,7 +634,7 @@ contains
     call this%FluxMethod()
     this%fluxDivergence%interior = this%flux%DGDivergence(this%geometry)
 
-    !$omp target map(to: this % source, this % fluxDivergence) map(from:this % dSdt)
+    !$omp target
     !$omp teams loop collapse(5)
     do iEl = 1,this%solution%nElem
       do iVar = 1,this%solution%nVar

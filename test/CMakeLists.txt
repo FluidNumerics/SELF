@@ -41,7 +41,8 @@ function (add_fortran_tests)
                     ${CMAKE_BINARY_DIR}/src/libself-static.a
                     ${FEQPARSE_LIBRARIES}
                     ${HDF5_LIBRARIES}
-                    ${MPI_Fortran_LIBRARIES})
+                    ${MPI_Fortran_LIBRARIES}
+                    ${BACKEND_LIBRARIES})
                            
         target_include_directories(${TEST_NAME} PRIVATE 
                         ${CMAKE_BINARY_DIR}/include
@@ -55,6 +56,7 @@ function (add_fortran_tests)
 
 endfunction ()
 
+#add_fortran_tests("scalargridinterp_1d_cpu_constant.f90")
 add_fortran_tests (
     "scalargridinterp_1d_cpu_constant.f90"
     "scalarderivative_1d_cpu_constant.f90"
@@ -114,4 +116,3 @@ add_fortran_tests (
     "advection_diffusion_3d_ab3.f90"
     "advection_diffusion_3d_ab4.f90"
     )
-    

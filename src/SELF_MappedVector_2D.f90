@@ -46,7 +46,6 @@ module SELF_MappedVector_2D
   contains
 
     procedure,public :: SideExchange => SideExchange_MappedVector2D
-    procedure,public :: AverageSides => AverageSides_MappedVector2D
 
     !procedure,public :: ContravariantProjection => ContravariantProjection_MappedVector2D
 
@@ -177,7 +176,7 @@ contains
     real(prec) :: extBuff(1:this%interp%N+1)
 
     if(decomp%mpiEnabled) then
-      !$omp target map(to:mesh % sideInfo, decomp % elemToRank) map(tofrom:this % extBoundary)
+      !$omp target
       !$omp teams loop collapse(4)
       do idir = 1,2
         do ivar = 1,this%nvar
@@ -237,7 +236,7 @@ contains
     offset = decomp%offsetElem(rankId+1)
 
     call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
-    !$omp target map(to: mesh % sideInfo, decomp % elemToRank) map(from: this % boundary) map(tofrom: this % extBoundary)
+    !$omp target
     !$omp teams loop collapse(4)
     do idir = 1,2
       do ivar = 1,this%nvar
@@ -289,35 +288,6 @@ contains
 
   endsubroutine SideExchange_MappedVector2D
 
-  subroutine AverageSides_MappedVector2D(this)
-    implicit none
-    class(MappedVector2D),intent(inout) :: this
-    ! Local
-    integer :: iel
-    integer :: iside
-    integer :: ivar
-    integer :: i
-    integer :: idir
-
-    !$omp target map(to:this % boundary, this % extBoundary) map(from:this % avgBoundary)
-    !$omp teams loop collapse(5)
-    do idir = 1,2
-      do ivar = 1,this%nVar
-        do iel = 1,this%nElem
-          do iside = 1,4
-            do i = 1,this%interp%N+1
-              this%boundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
-                                                     this%boundary(i,iside,iel,ivar,idir)+ &
-                                                     this%extBoundary(i,iside,iel,ivar,idir))
-            enddo
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endsubroutine AverageSides_MappedVector2D
-
   function Divergence_MappedVector2D(this,geometry) result(df)
     ! Strong Form Operator
     !    !
@@ -329,7 +299,7 @@ contains
     integer :: iEl,iVar,i,j,ii
     real(prec) :: dfLoc,Fx,Fy,Fc
 
-    !$omp target map(to:geometry%dsdx%interior,this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop collapse(4)
     do ivar = 1,this%nVar
@@ -393,7 +363,7 @@ contains
     integer :: iEl,iVar,i,j,ii
     real(prec) :: dfLoc,Fx,Fy,Fc
 
-    !$omp target map(to:geometry%dsdx%interior,this%interior,this%boundaryNormal,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qweights) map(from:df)
+    !$omp target
     !$omp teams
     !$omp loop collapse(4)
     do ivar = 1,this%nVar

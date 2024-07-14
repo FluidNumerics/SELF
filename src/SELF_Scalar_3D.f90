@@ -42,14 +42,9 @@ module SELF_Scalar_3D
 
   type,extends(SELF_DataObj),public :: Scalar3D
 
-    real(prec),pointer,dimension(:,:,:,:,:) :: interior
-    real(prec),pointer,dimension(:,:,:,:,:) :: boundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: extBoundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: avgBoundary
-    real(prec),pointer,dimension(:,:,:,:,:) :: jumpBoundary
-
-    real(prec),pointer,dimension(:,:,:,:,:) :: interpWork1
-    real(prec),pointer,dimension(:,:,:,:,:) :: interpWork2
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: interior
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: extBoundary
 
   contains
 
@@ -83,20 +78,8 @@ contains
     this%M = interp%M
 
     allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%interpWork1(1:interp%M+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar), &
-             this%interpWork2(1:interp%M+1,1:interp%M+1,1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar), &
-             this%jumpBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
-
-    !$omp target enter data map(alloc: this % interior)
-    !$omp target enter data map(alloc: this % interpWork1)
-    !$omp target enter data map(alloc: this % interpWork2)
-    !$omp target enter data map(alloc: this % boundary)
-    !$omp target enter data map(alloc: this % extBoundary)
-    !$omp target enter data map(alloc: this % avgBoundary)
-    !$omp target enter data map(alloc: this % jumpBoundary)
+             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
@@ -111,22 +94,10 @@ contains
     this%nElem = 0
     this%interp => null()
     deallocate(this%interior)
-    deallocate(this%interpWork1)
-    deallocate(this%interpWork2)
     deallocate(this%boundary)
     deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-    deallocate(this%jumpBoundary)
     deallocate(this%meta)
     deallocate(this%eqn)
-
-    !$omp target exit data map(delete: this % interior)
-    !$omp target exit data map(delete: this % interpWork1)
-    !$omp target exit data map(delete: this % interpWork2)
-    !$omp target exit data map(delete: this % boundary)
-    !$omp target exit data map(delete: this % extBoundary)
-    !$omp target exit data map(delete: this % avgBoundary)
-    !$omp target exit data map(delete: this % jumpBoundary)
 
   endsubroutine Free_Scalar3D
 
@@ -137,7 +108,7 @@ contains
     integer :: i,j,ii,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
-    !$omp target map(to:this%interior,this%interp%bMatrix) map(from:this%boundary)
+    !$omp target
     !$omp teams loop bind(teams) collapse(4)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -185,7 +156,7 @@ contains
     integer :: i,j,k,ii,jj,kk,iel,ivar
     real(prec) :: fi,fij,fijk
 
-    !$omp target map(to:this%interior,this%interp%iMatrix) map(from:f)
+    !$omp target
     !$omp teams loop bind(teams) collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -231,7 +202,7 @@ contains
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: df1,df2,df3
 
-    !$omp target map(to:this%interior,this%interp%dMatrix) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(5)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem

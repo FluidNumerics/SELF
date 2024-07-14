@@ -44,15 +44,17 @@ module SELF_MappedScalar_1D
 #include "SELF_Macros.h"
 
   type,extends(Scalar1D),public :: MappedScalar1D
+    logical :: geometry_associated = .false.
+    type(Geometry1D), pointer :: geometry => null()
 
   contains
+    procedure,public :: AssociateGeometry => AssociateGeometry_MappedScalar1D
+    procedure,public :: DissociateGeometry => DissociateGeometry_MappedScalar1D
     procedure,public :: SideExchange => SideExchange_MappedScalar1D
     procedure,public :: AverageSides => AverageSides_MappedScalar1D
 
-    generic,public :: Derivative => Derivative_MappedScalar1D
-    procedure,private :: Derivative_MappedScalar1D
-    generic,public :: DGDerivative => DGDerivative_MappedScalar1D
-    procedure,private :: DGDerivative_MappedScalar1D
+    procedure,public :: MappedDerivative => MappedDerivative_MappedScalar1D
+    procedure,public :: MappedDGDerivative => MappedDGDerivative_MappedScalar1D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar1D
 
@@ -62,18 +64,40 @@ contains
 
 ! ---------------------- Scalars ---------------------- !
 
-  subroutine SetInteriorFromEquation_MappedScalar1D(this,geometry,time)
+  subroutine AssociateGeometry_MappedScalar1D(this,geometry)
+    implicit none
+    class(MappedScalar1D),intent(inout) :: this
+    type(Geometry1D),target,intent(in) :: geometry
+
+      if(.not. associated(this%geometry))then
+        this%geometry => geometry
+        this%geometry_associated = .true.
+      endif
+
+  endsubroutine AssociateGeometry_MappedScalar1D
+
+  subroutine DissociateGeometry_MappedScalar1D(this)
+    implicit none
+    class(MappedScalar1D),intent(inout) :: this
+
+      if(associated(this%geometry))then
+        this%geometry => null()
+        this%geometry_associated = .false.
+      endif
+
+  endsubroutine DissociateGeometry_MappedScalar1D
+
+  subroutine SetInteriorFromEquation_MappedScalar1D(this,time)
     !!  Sets the this % interior attribute using the eqn attribute,
     !!  geometry (for physical positions), and provided simulation time.
     implicit none
     class(MappedScalar1D),intent(inout) :: this
-    type(Geometry1D),intent(in) :: geometry
     real(prec),intent(in) :: time
     ! Local
     integer :: iVar
 
     do ivar = 1,this%nvar
-      this%interior(:,:,ivar) = this%eqn(ivar)%evaluate(geometry%x%interior)
+      this%interior(:,:,ivar) = this%eqn(ivar)%evaluate(this%geometry%x%interior)
     enddo
 
   endsubroutine SetInteriorFromEquation_MappedScalar1D
@@ -87,7 +111,7 @@ contains
     integer :: e1,e2,s1,s2
     integer :: ivar
 
-    !$omp target map(to:decomp % offsetElem, this % boundary) map(tofrom:this % extBoundary)
+    !$omp target
     !$omp teams loop collapse(2)
     do ivar = 1,this%nvar
       do e1 = 1,mesh%nElem
@@ -133,7 +157,7 @@ contains
     integer :: iel
     integer :: ivar
 
-    !$omp target map(to:this % boundary, this % extBoundary) map(from:this % avgBoundary)
+    !$omp target
     !$omp teams loop collapse(2)
     do iel = 1,this%nElem
       do ivar = 1,this%nVar
@@ -153,16 +177,15 @@ contains
 
   endsubroutine AverageSides_MappedScalar1D
 
-  function Derivative_MappedScalar1D(this,geometry) result(dF)
+  function MappedDerivative_MappedScalar1D(this) result(dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
-    type(Geometry1D),intent(in) :: geometry
     real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    !$omp target map(to:this%interior,this%interp%dMatrix,geometry % dxds % interior) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -173,25 +196,24 @@ contains
           do ii = 1,this%N+1
             dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
           enddo
-          df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
+          df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
 
         enddo
       enddo
     enddo
     !$omp end target
 
-  endfunction Derivative_MappedScalar1D
+  endfunction MappedDerivative_MappedScalar1D
 
-  function DGDerivative_MappedScalar1D(this,geometry) result(dF)
+  function MappedDGDerivative_MappedScalar1D(this) result(dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
-    type(Geometry1D),intent(in) :: geometry
     real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    !$omp target map(to:this%interior,this%boundary,this%interp%dgMatrix,this%interp%bMatrix,this%interp%qWeights,geometry%dxds%interior) map(from:df)
+    !$omp target
     !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%nvar
       do iel = 1,this%nelem
@@ -207,13 +229,13 @@ contains
                          this%boundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
                   this%interp%qWeights(i)
 
-          df(i,iel,ivar) = dfloc/geometry%dxds%interior(i,iEl,1)
+          df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
 
         enddo
       enddo
     enddo
     !$omp end target
 
-  endfunction DGDerivative_MappedScalar1D
+  endfunction MappedDGDerivative_MappedScalar1D
 
 endmodule SELF_MappedScalar_1D

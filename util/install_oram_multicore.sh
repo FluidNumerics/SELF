@@ -1,18 +1,13 @@
 #!/usr/bin/env -S bash -e
 
-WORKSPACE_ROOT=/scratch/$(whoami)/workspace
+OMP_TARGET=multicore
+WORKSPACE_ROOT=/tmp/$(whoami)/workspace
 BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
-BUILD_DIR=/scratch/$(whoami)/build
-ENABLE_GPU=ON
-GPU_ARCH=gfx90a
+BUILD_DIR=/tmp/$(whoami)/build
 
-module purge
-module load gcc/12.3.0
-module load openmpi/5.0.3 
-module load hdf5/1.14.3 feq-parse/2.2.2
-module load rocm/6.0.2
-module list
+module load cuda/12.5.0 cmake/3.29.6
+module load openmpi/5.0.3 hdf5/1.12.3 feq-parse/2.2.2
 
 # Clean out any old builds
 rm -rf ${BUILD_DIR}
@@ -21,25 +16,24 @@ rm -rf ${WORKSPACE_ROOT}/*
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 
-FC=gfortran \
-cmake -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
+cmake -DOMP_TARGET=${OMP_TARGET} \
       -DCMAKE_INSTALL_PREFIX=${WORKSPACE_ROOT}/opt/self \
       -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-      -DSELF_ENABLE_GPU=${ENABLE_GPU} \
-      -DCMAKE_HIP_ARCHITECTURE=${GPU_ARCH} \
       ${SRC_DIR}
 
 make VERBOSE=1 || exit 1
+
 make install
 
-
-# # Set WORKSPACE for tests that require input mesh
-# # We use WORKSPACE so that we are consistent with 
-# # what we do for the superci tests
+export OMP_TARGET_OFFLOAD=DISABLED # Disable GPU offloading
+export OMP_NUM_THREADS=2
+# Set WORKSPACE for tests that require input mesh
+# We use WORKSPACE so that we are consistent with 
+# what we do for the superci tests
 export WORKSPACE=${SRC_DIR}
 
-# # Initialize coverage
-# mkdir -p ${WORKSPACE_ROOT}/tmp/
+# Initialize coverage
+mkdir -p ${WORKSPACE_ROOT}/tmp/
 # lcov --no-external \
 #       --capture \
 #       --initial \
@@ -48,10 +42,10 @@ export WORKSPACE=${SRC_DIR}
 #       --exclude '*/example/*' \
 #       --output-file ${WORKSPACE_ROOT}/tmp/lcov_base.info
 
-# # Run ctests
+# Run ctests
 ctest --test-dir ${BUILD_DIR}
 
-# # Compile coverage information
+# Compile coverage information
 # lcov --no-external \
 #     --capture \
 #     --directory ${SRC_DIR} \
