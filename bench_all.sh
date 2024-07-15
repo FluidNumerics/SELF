@@ -116,7 +116,7 @@ for PREC in 32 64; do
     export PRECISION=$PREC
     export STEPSIZE=8
     export START=$STEPSIZE
-    export STOP=16
+    export STOP=4096
     for ROWS in $(seq $START $STEPSIZE $STOP); do
         export PROFILE_DIR=blas_results/${SUBROUTINE}_${PRECISION}/${ROWS}
         export FILENAME=build/blas/${SUBROUTINE}_${PRECISION}
@@ -130,7 +130,7 @@ for PREC in 32 64; do
                 source /etc/profile.d/z11_lmod.sh
                 module --default avail
                 module load gcc/13.2.0
-                module load hip/5.7.3
+                module load hip/6.1.2
             fi
             if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_flat_flag" = true ]) ; then
                 # Flat profile
@@ -165,6 +165,70 @@ for PREC in 32 64; do
     done
 done
 
+########
+# gemv #
+########
+
+export SUBROUTINE="gemv"
+
+for OP in "op_n" "op_t"; do
+    export OPERATION=$OP
+    for PREC in 32 64; do 
+        export PRECISION=$PREC
+        export STEPSIZE=8
+        export START=$STEPSIZE
+        export STOP=256
+        for ROWS in $(seq $START $STEPSIZE $STOP); do
+            for COLUMNS in $(seq $START $STEPSIZE $STOP); do
+                export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}
+                export FILENAME=build/blas/${SUBROUTINE}_${OPERATION}_${PRECISION}
+
+                get_file_number $PROFILE_DIR
+                if [ $FILENUMBER = $EXPECTEDFILES ]; then
+                    mkdir -p $PROFILE_DIR
+
+                    if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_flat_flag" = true ] || [ "$rocprof_hotspot_flag" = true ] || [ "$rocprof_trace_flag" = true ] || [ "$rocprof_events_flag" = true ]) ; then
+                        source ~/.bashrc
+                        source /etc/profile.d/z11_lmod.sh
+                        module --default avail
+                        module load gcc/13.2.0
+                        module load hip/6.1.2
+                    fi
+                    if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_flat_flag" = true ]) ; then
+                        # Flat profile
+                        rocprof --timestamp on $FILENAME $ROWS $COLUMNS
+                        mv results.csv $PROFILE_DIR/
+                    fi
+                    if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_hotspot_flag" = true ]) ; then
+                        # Hotspot profile
+                        rocprof --stats $FILENAME $ROWS $COLUMNS
+                        mv results.stats.csv $PROFILE_DIR/
+                    fi
+                    if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_trace_flag" = true ]) ; then
+                        # Trace Profile
+                        rocprof --sys-trace $FILENAME $ROWS $COLUMNS
+                        mv results.json $PROFILE_DIR/
+                    fi
+                    if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_events_flag" = true ]) ; then
+                        # Hardware events profile (for bandwidth estimates and L2 Cache hit)
+                        rocprof -i events_gemvsb.txt $FILENAME $ROWS $COLUMNS
+                        mv events_gemvsb.csv $PROFILE_DIR/events.csv
+                        # mv $PROFILE_DIR/events_gemvsb.csv $PROFILE_DIR/events.csv
+                    fi
+                    if ([ "$all_flag" = true ] || [ "$omniperf_flag" = true]) ; then
+                        module load omniperf
+                        omniperf profile --name ${SUBROUTINE}_${OPERATION}_${PRECISION} -- .${FILENAME} $ROWS $COLUMNS
+                    fi
+                    if ([ "$all_flag" = true ] || [ "$valgrind_flag" = true]) ; then
+                        valgrind --tool=callgrind $FILENAME $ROWS $COLUMNS
+                        mv callgrind.out.* $PROFILE_DIR/callgrind.out.*
+                    fi
+                fi
+            done
+        done
+    done
+done
+
 ######################
 # gemvstridedbatched #
 ######################
@@ -179,7 +243,7 @@ for OP in "op_n" "op_t"; do
         export PRECISION=$PREC
         export STEPSIZE=8
         export START=$STEPSIZE
-        export STOP=16
+        export STOP=256
         for ROWS in $(seq $START $STEPSIZE $STOP); do
             for COLUMNS in $(seq $START $STEPSIZE $STOP); do
                 export PROFILE_DIR=blas_results/${SUBROUTINE}_${OPERATION}_${PRECISION}/${ROWS}_${COLUMNS}_${BATCHCOUNT}
@@ -194,7 +258,7 @@ for OP in "op_n" "op_t"; do
                         source /etc/profile.d/z11_lmod.sh
                         module --default avail
                         module load gcc/13.2.0
-                        module load hip/5.7.3
+                        module load hip/6.1.2
                     fi
                     if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_flat_flag" = true ]) ; then
                         # Flat profile
@@ -243,7 +307,7 @@ for OP in "op_n" "op_t"; do
         export PRECISION=$PREC
         export STEPSIZE=4
         export START=$STEPSIZE
-        export STOP=8
+        export STOP=16
         for ROWS in $(seq $START $STEPSIZE $STOP); do
             for COLUMNS_FACTOR in 1000 10000 100000; do
                 let COLUMNS=ROWS*COLUMNS_FACTOR
@@ -260,7 +324,7 @@ for OP in "op_n" "op_t"; do
                         source /etc/profile.d/z11_lmod.sh
                         module --default avail
                         module load gcc/13.2.0
-                        module load hip/5.7.3
+                        module load hip/6.1.2
                     fi
                     if ([ "$all_flag" = true ] || [ "$rocprof_all_flag" = true ] || [ "$rocprof_flat_flag" = true ]) ; then
                         # Flat profile
