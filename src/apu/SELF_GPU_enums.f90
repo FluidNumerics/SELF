@@ -24,74 +24,50 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program test
+module SELF_GPU_enums
+
+  use iso_c_binding
+
   implicit none
-  integer :: exit_code
 
-  exit_code = scalargridinterp_1d_cpu_constant()
-  stop exit_code
+  enum,bind(c)
+    enumerator :: hipSuccess = 0
+  endenum
 
-contains
-  integer function scalargridinterp_1d_cpu_constant() result(r)
-    use SELF_Constants
-    use SELF_Lagrange
-    use SELF_Scalar_1D
+  enum,bind(c)
+    enumerator :: hipMemcpyHostToHost = 0
+    enumerator :: hipMemcpyHostToDevice = 1
+    enumerator :: hipMemcpyDeviceToHost = 2
+    enumerator :: hipMemcpyDeviceToDevice = 3
+    enumerator :: hipMemcpyDefault = 4
+  endenum
 
-    implicit none
+  enum, bind(c)
+    enumerator :: HIPBLAS_STATUS_SUCCESS = 0
+    enumerator :: HIPBLAS_STATUS_NOT_INITIALIZED = 1
+    enumerator :: HIPBLAS_STATUS_ALLOC_FAILED = 2
+    enumerator :: HIPBLAS_STATUS_INVALID_VALUE = 3
+    enumerator :: HIPBLAS_STATUS_MAPPING_ERROR = 4
+    enumerator :: HIPBLAS_STATUS_EXECUTION_FAILED = 5
+    enumerator :: HIPBLAS_STATUS_INTERNAL_ERROR = 6
+    enumerator :: HIPBLAS_STATUS_NOT_SUPPORTED = 7
+    enumerator :: HIPBLAS_STATUS_ARCH_MISMATCH = 8
+    enumerator :: HIPBLAS_STATUS_HANDLE_IS_NULLPTR = 9
+    enumerator :: HIPBLAS_STATUS_INVALID_ENUM = 10
+    enumerator :: HIPBLAS_STATUS_UNKNOWN = 11
+  endenum
 
-    integer,parameter :: controlDegree = 7
-    integer,parameter :: targetDegree = 16
-    integer,parameter :: nvar = 1
-    integer,parameter :: nelem = 100
-#ifdef DOUBLE_PRECISION
-    real(prec),parameter :: tolerance = 10.0_prec**(-7)
+  enum, bind(c)
+#ifdef HAVE_CUDA
+    enumerator :: HIPBLAS_OP_N = 0
 #else
-    real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    enumerator :: HIPBLAS_OP_N = 111
 #endif
-    type(Scalar1D) :: f
-    type(Scalar1D) :: fTarget
-    type(Lagrange),target :: interp
-    type(Lagrange),target :: interpTarget
-    real(prec) :: imat
-
-    ! Create an interpolant
-    call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
-                     M=targetDegree, &
-                     targetNodeType=UNIFORM)
-
-    call interpTarget%Init(N=targetDegree, &
-                           controlNodeType=UNIFORM, &
-                           M=targetDegree, &
-                           targetNodeType=UNIFORM)
-
-    ! Initialize scalars
-    call f%Init(interp,nvar,nelem)
-    call fTarget%Init(interpTarget,nvar,nelem)
-
-    ! ! Set the source scalar (on the control grid) to a non-zero constant
-    f%interior(:,:,:) = 1.0_prec
-    call f%UpdateDevice()
-#ifdef ENABLE_GPU
-    call f%GridInterp(fTarget%interior_gpu)
+#ifdef HAVE_CUDA
+    enumerator :: HIPBLAS_OP_T = 1
 #else
-    call f%GridInterp(fTarget%interior)
+    enumerator :: HIPBLAS_OP_T = 112
 #endif
-    call fTarget%UpdateHost()
-    ! ! Calculate diff from exact
-    fTarget%interior = abs(fTarget%interior-1.0_prec)
+  end enum
 
-    if(maxval(fTarget%interior) <= tolerance) then
-      r = 0
-    else
-      print*,"max error : ",maxval(fTarget%interior)
-      r = 1
-    endif
-
-    call f%free()
-    call fTarget%free()
-    call interp%free()
-    call interpTarget%free()
-
-  endfunction scalargridinterp_1d_cpu_constant
-endprogram test
+endmodule SELF_GPU_enums

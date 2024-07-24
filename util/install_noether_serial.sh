@@ -4,7 +4,7 @@ WORKSPACE_ROOT=/scratch/$(whoami)/workspace
 BUILD_TYPE=coverage
 SRC_DIR=$(pwd)
 BUILD_DIR=/scratch/$(whoami)/build
-ENABLE_GPU=ON
+ENABLE_GPU=OFF
 GPU_ARCH=gfx90a
 
 module purge

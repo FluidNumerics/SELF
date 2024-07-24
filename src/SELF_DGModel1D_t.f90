@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_DGModel1D
+module SELF_DGModel1D_t
 
   use SELF_SupportRoutines
   use SELF_Metadata
@@ -39,7 +39,7 @@ module SELF_DGModel1D
 
 #include "SELF_Macros.h"
 
-  type,extends(Model) :: DGModel1D
+  type,extends(Model) :: DGModel1D_t
     type(MappedScalar1D) :: solution
     type(MappedScalar1D) :: solutionGradient
     type(MappedScalar1D) :: flux
@@ -53,38 +53,40 @@ module SELF_DGModel1D
 
   contains
 
-    procedure :: Init => Init_DGModel1D
-    procedure :: Free => Free_DGModel1D
+    procedure :: Init => Init_DGModel1D_t
+    procedure :: Free => Free_DGModel1D_t
 
-    procedure :: UpdateSolution => UpdateSolution_DGModel1D
+    procedure :: UpdateSolution => UpdateSolution_DGModel1D_t
 
-    procedure :: ResizePrevSol => ResizePrevSol_DGModel1D
+    procedure :: ResizePrevSol => ResizePrevSol_DGModel1D_t
 
-    procedure :: UpdateGAB2 => UpdateGAB2_DGModel1D
-    procedure :: UpdateGAB3 => UpdateGAB3_DGModel1D
-    procedure :: UpdateGAB4 => UpdateGAB4_DGModel1D
+    procedure :: UpdateGAB2 => UpdateGAB2_DGModel1D_t
+    procedure :: UpdateGAB3 => UpdateGAB3_DGModel1D_t
+    procedure :: UpdateGAB4 => UpdateGAB4_DGModel1D_t
 
-    procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D
-    procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D
-    procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D
-    procedure :: CalculateTendency => CalculateTendency_DGModel1D
+    procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D_t
+    procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D_t
+    procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D_t
 
-    generic :: SetSolution => SetSolutionFromChar_DGModel1D, &
-      SetSolutionFromEqn_DGModel1D
-    procedure,private :: SetSolutionFromChar_DGModel1D
-    procedure,private :: SetSolutionFromEqn_DGModel1D
+    procedure :: CalculateSolutionGradient => CalculateSolutionGradient_DGModel1D_t
+    procedure :: CalculateTendency => CalculateTendency_DGModel1D_t
 
-    procedure :: ReadModel => Read_DGModel1D
-    procedure :: WriteModel => Write_DGModel1D
-    procedure :: WriteTecplot => WriteTecplot_DGModel1D
+    generic :: SetSolution => SetSolutionFromChar_DGModel1D_t, &
+      SetSolutionFromEqn_DGModel1D_t
+    procedure,private :: SetSolutionFromChar_DGModel1D_t
+    procedure,private :: SetSolutionFromEqn_DGModel1D_t
 
-  endtype DGModel1D
+    procedure :: ReadModel => Read_DGModel1D_t
+    procedure :: WriteModel => Write_DGModel1D_t
+    procedure :: WriteTecplot => WriteTecplot_DGModel1D_t
+
+  endtype DGModel1D_t
 
 contains
 
-  subroutine Init_DGModel1D(this,nvar,mesh,geometry,decomp)
+  subroutine Init_DGModel1D_t(this,nvar,mesh,geometry,decomp)
     implicit none
-    class(DGModel1D),intent(out) :: this
+    class(DGModel1D_t),intent(out) :: this
     integer,intent(in) :: nvar
     type(Mesh1D),intent(in),target :: mesh
     type(Geometry1D),intent(in),target :: geometry
@@ -108,11 +110,11 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
-  endsubroutine Init_DGModel1D
+  endsubroutine Init_DGModel1D_t
 
-  subroutine Free_DGModel1D(this)
+  subroutine Free_DGModel1D_t(this)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
 
     call this%solution%DissociateGeometry()
     call this%solutionGradient%DissociateGeometry()
@@ -128,11 +130,11 @@ contains
     call this%source%Free()
     call this%fluxDivergence%Free()
 
-  endsubroutine Free_DGModel1D
+  endsubroutine Free_DGModel1D_t
 
-  subroutine ResizePrevSol_DGModel1D(this,m)
+  subroutine ResizePrevSol_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: nVar
@@ -145,11 +147,11 @@ contains
     nVar = this%solution%nVar
     call this%prevSol%Init(this%geometry%x%interp,m*nVar,this%mesh%nElem)
 
-  endsubroutine ResizePrevSol_DGModel1D
+  endsubroutine ResizePrevSol_DGModel1D_t
 
-  subroutine SetSolutionFromEqn_DGModel1D(this,eqn)
+  subroutine SetSolutionFromEqn_DGModel1D_t(this,eqn)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     type(EquationParser),intent(in) :: eqn(1:this%solution%nVar)
     ! Local
     integer :: iVar
@@ -162,11 +164,11 @@ contains
     call this%solution%SetInteriorFromEquation(this%t)
     call this%solution%BoundaryInterp()
 
-  endsubroutine SetSolutionFromEqn_DGModel1D
+  endsubroutine SetSolutionFromEqn_DGModel1D_t
 
-  subroutine SetSolutionFromChar_DGModel1D(this,eqnChar)
+  subroutine SetSolutionFromChar_DGModel1D_t(this,eqnChar)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     character(LEN=SELF_EQUATION_LENGTH),intent(in) :: eqnChar(1:this%solution%nVar)
     ! Local
     integer :: iVar
@@ -179,13 +181,13 @@ contains
     call this%solution%SetInteriorFromEquation(this%t)
     call this%solution%BoundaryInterp()
 
-  endsubroutine SetSolutionFromChar_DGModel1D
+  endsubroutine SetSolutionFromChar_DGModel1D_t
 
-  subroutine UpdateSolution_DGModel1D(this,dt)
+  subroutine UpdateSolution_DGModel1D_t(this,dt)
     !! Computes a solution update as , where dt is either provided through the interface
     !! or taken as the Model's stored time step size (model % dt)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     real(prec),optional,intent(in) :: dt
     ! Local
     real(prec) :: dtLoc
@@ -212,11 +214,11 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine UpdateSolution_DGModel1D
+  endsubroutine UpdateSolution_DGModel1D_t
 
-  subroutine UpdateGAB2_DGModel1D(this,m)
+  subroutine UpdateGAB2_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: i,nVar,iEl,iVar
@@ -277,11 +279,11 @@ contains
       !$omp end target
     endif
 
-  endsubroutine UpdateGAB2_DGModel1D
+  endsubroutine UpdateGAB2_DGModel1D_t
 
-  subroutine UpdateGAB3_DGModel1D(this,m)
+  subroutine UpdateGAB3_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: i,nVar,iEl,iVar
@@ -362,11 +364,11 @@ contains
 
     endif
 
-  endsubroutine UpdateGAB3_DGModel1D
+  endsubroutine UpdateGAB3_DGModel1D_t
 
-  subroutine UpdateGAB4_DGModel1D(this,m)
+  subroutine UpdateGAB4_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: i,nVar,iEl,iVar
@@ -464,11 +466,11 @@ contains
 
     endif
 
-  endsubroutine UpdateGAB4_DGModel1D
+  endsubroutine UpdateGAB4_DGModel1D_t
 
-  subroutine UpdateGRK2_DGModel1D(this,m)
+  subroutine UpdateGRK2_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: i,iEl,iVar
@@ -492,11 +494,11 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine UpdateGRK2_DGModel1D
+  endsubroutine UpdateGRK2_DGModel1D_t
 
-  subroutine UpdateGRK3_DGModel1D(this,m)
+  subroutine UpdateGRK3_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: i,iEl,iVar
@@ -520,11 +522,11 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine UpdateGRK3_DGModel1D
+  endsubroutine UpdateGRK3_DGModel1D_t
 
-  subroutine UpdateGRK4_DGModel1D(this,m)
+  subroutine UpdateGRK4_DGModel1D_t(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: i,iEl,iVar
@@ -548,23 +550,53 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine UpdateGRK4_DGModel1D
+  endsubroutine UpdateGRK4_DGModel1D_t
 
-  subroutine CalculateTendency_DGModel1D(this)
+  subroutine CalculateSolutionGradient_DGModel1D_t(this)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
+
+    call this%solution%AverageSides()
+    
+    this%solution%boundarynormal(1,:,:) = -this%solution%avgBoundary(1,:,:) ! Account for left facing normal
+    this%solution%boundarynormal(2,:,:) = this%solution%avgBoundary(2,:,:) ! Account for right facing normal
+
+    call this%solution%MappedDGDerivative(this%solutionGradient%interior)
+   
+    ! interpolate the solutiongradient to the element boundaries
+    call this%solutionGradient%BoundaryInterp()
+
+    ! perform the side exchange to populate the
+    ! solutionGradient % extBoundary attribute
+    call this%solutionGradient%SideExchange(this%mesh, &
+                                            this%decomp)
+                                            
+  endsubroutine CalculateSolutionGradient_DGModel1D_t
+
+  subroutine CalculateTendency_DGModel1D_t(this)
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
     ! Local
     integer :: i,iEl,iVar
 
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh,this%decomp)
-    call this%PreTendency()
-    call this%SetBoundaryCondition()
-    call this%SourceMethod()
-    call this%RiemannSolver()
-    call this%FluxMethod()
-    this%fluxDivergence%interior = this%flux%MappedDGDerivative()
+    
+    call this%PreTendency()           ! User-supplied 
+    call this%SetBoundaryCondition()  ! User-supplied
 
+    if( this % gradient_enabled )then
+      call this%solution%AverageSides()
+      call this%CalculateSolutionGradient()
+      call this%SetGradientBoundaryCondition() ! User-supplied
+      call this%solutionGradient%AverageSides()
+    endif
+    
+    call this%SourceMethod() ! User supplied
+    call this%RiemannSolver() ! User supplied
+    call this%FluxMethod()    ! User supplied
+
+    call this%flux%MappedDGDerivative(this%fluxDivergence%interior)
     !$omp target
     !$omp teams loop collapse(3)
     do iEl = 1,this%solution%nElem
@@ -580,13 +612,13 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine CalculateTendency_DGModel1D
+  endsubroutine CalculateTendency_DGModel1D_t
 
-  subroutine Write_DGModel1D(this,fileName)
+  subroutine Write_DGModel1D_t(this,fileName)
 #undef __FUNC__
-#define __FUNC__ "Write_DGModel1D"
+#define __FUNC__ "Write_DGModel1D_t"
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     character(*),optional,intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
@@ -604,7 +636,7 @@ contains
     endif
 
     INFO("Writing pickup file : "//trim(pickupFile))
-
+    call this%solution%UpdateHost()
     if(this%decomp%mpiEnabled) then
 
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%decomp%mpiComm)
@@ -717,11 +749,11 @@ contains
     call solution%Free()
     call interp%Free()
 
-  endsubroutine Write_DGModel1D
+  endsubroutine Write_DGModel1D_t
 
-  subroutine Read_DGModel1D(this,fileName)
+  subroutine Read_DGModel1D_t(this,fileName)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     character(*),intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
@@ -752,12 +784,13 @@ contains
     endif
 
     call Close_HDF5(fileId)
+    call this%solution%UpdateDevice()
 
-  endsubroutine Read_DGModel1D
+  endsubroutine Read_DGModel1D_t
 
-  subroutine WriteTecplot_DGModel1D(this,filename)
+  subroutine WriteTecplot_DGModel1D_t(this,filename)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel1D_t),intent(inout) :: this
     character(*),intent(in),optional :: filename
     ! Local
     character(8) :: zoneID
@@ -782,7 +815,7 @@ contains
       tecFile = 'solution.'//timeStampString//'.curve'
 
     endif
-
+    call this%solution%UpdateHost()
     ! Create an interpolant for the uniform grid
     call interp%Init(this%solution%interp%M, &
                      this%solution%interp%targetNodeType, &
@@ -835,6 +868,6 @@ contains
     call solution%Free()
     call interp%Free()
 
-  endsubroutine WriteTecplot_DGModel1D
+  endsubroutine WriteTecplot_DGModel1D_t
 
-endmodule SELF_DGModel1D
+endmodule SELF_DGModel1D_t

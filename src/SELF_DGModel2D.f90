@@ -599,7 +599,7 @@ contains
     call this%SourceMethod()
     call this%RiemannSolver()
     call this%FluxMethod()
-    this%fluxDivergence%interior = this%flux%DGDivergence(this%geometry)
+    this%fluxDivergence%interior = this%flux%MappedDGDivergence(this%geometry)
 
     !$omp target
     !$omp teams loop collapse(4)
@@ -680,10 +680,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      x%interior = this%geometry%x%GridInterp()
+      call this%geometry%x%GridInterp(x%interior)
 
       ! Map the solution to the target grid
-      solution%interior = this%solution%GridInterp()
+      call this%solution%GridInterp(solution%interior)
 
       ! Write the model state to file
       call CreateGroup_HDF5(fileId,'/targetgrid')
@@ -732,10 +732,10 @@ contains
       call x%Init(interp,1,this%solution%nElem)
 
       ! Map the mesh positions to the target grid
-      x%interior = this%geometry%x%GridInterp()
+      call this%geometry%x%GridInterp(x%interior)
 
       ! Map the solution to the target grid
-      solution%interior = this%solution%GridInterp()
+      call this%solution%GridInterp(solution%interior)
 
       ! Write the model state to file
       INFO("Writing target grid solution to file")
@@ -840,13 +840,13 @@ contains
     call x%Init(interp,1,this%solution%nElem)
 
     ! Map the mesh positions to the target grid
-    x%interior = this%geometry%x%GridInterp()
+    call this%geometry%x%GridInterp(x%interior)
 
     ! Map the solution to the target grid
-    solution%interior = this%solution%GridInterp()
+    call this%solution%GridInterp(solution%interior)
 
     ! Map the solution to the target grid
-    solutionGradient%interior = this%solutionGradient%GridInterp()
+    call this%solutionGradient%GridInterp(solutionGradient%interior)
 
     open(UNIT=NEWUNIT(fUnit), &
          FILE=trim(tecFile), &

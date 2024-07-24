@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Scalar_2D
+module SELF_Scalar_2D_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -40,7 +40,7 @@ module SELF_Scalar_2D
 
 #include "SELF_Macros.h"
 
-  type,extends(SELF_DataObj),public :: Scalar2D
+  type,extends(SELF_DataObj),public :: Scalar2D_t
 
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: interior
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: boundary
@@ -49,26 +49,30 @@ module SELF_Scalar_2D
 
   contains
 
-    procedure,public :: Init => Init_Scalar2D
-    procedure,public :: Free => Free_Scalar2D
+    procedure,public :: Init => Init_Scalar2D_t
+    procedure,public :: Free => Free_Scalar2D_t
 
-    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar2D
-    procedure,public :: AverageSides => AverageSides_Scalar2D
-    procedure,public :: GridInterp => GridInterp_Scalar2D
-    generic,public :: Gradient => Gradient_Scalar2D
-    procedure,private :: Gradient_Scalar2D
+    procedure,public :: UpdateHost => UpdateHost_Scalar2D_t
+    procedure,public :: UpdateDevice => UpdateDevice_Scalar2D_t
 
-    generic,public :: WriteHDF5 => WriteHDF5_MPI_Scalar2D,WriteHDF5_Scalar2D
-    procedure,private :: WriteHDF5_MPI_Scalar2D
-    procedure,private :: WriteHDF5_Scalar2D
+    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar2D_t
+    procedure,public :: AverageSides => AverageSides_Scalar2D_t
+    generic,public :: GridInterp => GridInterp_Scalar2D_t
+    procedure,private :: GridInterp_Scalar2D_t
+    generic,public :: Gradient => Gradient_Scalar2D_t
+    procedure,private :: Gradient_Scalar2D_t
 
-  endtype Scalar2D
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Scalar2D_t,WriteHDF5_Scalar2D_t
+    procedure,private :: WriteHDF5_MPI_Scalar2D_t
+    procedure,private :: WriteHDF5_Scalar2D_t
+
+  endtype Scalar2D_t
 
 contains
 
-  subroutine Init_Scalar2D(this,interp,nVar,nElem)
+  subroutine Init_Scalar2D_t(this,interp,nVar,nElem)
     implicit none
-    class(Scalar2D),intent(out) :: this
+    class(Scalar2D_t),intent(out) :: this
     type(Lagrange),intent(in),target :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
@@ -87,11 +91,11 @@ contains
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
 
-  endsubroutine Init_Scalar2D
+  endsubroutine Init_Scalar2D_t
 
-  subroutine Free_Scalar2D(this)
+  subroutine Free_Scalar2D_t(this)
     implicit none
-    class(Scalar2D),intent(inout) :: this
+    class(Scalar2D_t),intent(inout) :: this
 
     this%nVar = 0
     this%nElem = 0
@@ -103,11 +107,23 @@ contains
     deallocate(this%meta)
     deallocate(this%eqn)
 
-  endsubroutine Free_Scalar2D
+  endsubroutine Free_Scalar2D_t
 
-  subroutine BoundaryInterp_Scalar2D(this)
+  subroutine UpdateHost_Scalar2D_t(this)
     implicit none
-    class(Scalar2D),intent(inout) :: this
+    class(Scalar2D_t),intent(inout) :: this
+
+  end subroutine UpdateHost_Scalar2D_t
+
+  subroutine UpdateDevice_Scalar2D_t(this)
+    implicit none
+    class(Scalar2D_t),intent(inout) :: this
+    
+  end subroutine UpdateDevice_Scalar2D_t
+
+  subroutine BoundaryInterp_Scalar2D_t(this)
+    implicit none
+    class(Scalar2D_t),intent(inout) :: this
     ! Local
     integer :: i,ii,iel,ivar
     real(prec) :: fbs,fbe,fbn,fbw
@@ -140,11 +156,11 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine BoundaryInterp_Scalar2D
+  endsubroutine BoundaryInterp_Scalar2D_t
 
-  subroutine AverageSides_Scalar2D(this)
+  subroutine AverageSides_Scalar2D_t(this)
     implicit none
-    class(Scalar2D),intent(inout) :: this
+    class(Scalar2D_t),intent(inout) :: this
     ! Local
     integer :: iel
     integer :: iside
@@ -166,12 +182,12 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine AverageSides_Scalar2D
+  endsubroutine AverageSides_Scalar2D_t
 
-  function GridInterp_Scalar2D(this) result(f)
+  subroutine GridInterp_Scalar2D_t(this,f)
     implicit none
-    class(Scalar2D),intent(in) :: this
-    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
+    class(Scalar2D_t),intent(in) :: this
+    real(prec),intent(inout) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: i,j,ii,jj,iel,ivar
     real(prec) :: fi,fij
@@ -204,12 +220,12 @@ contains
     !call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
     !call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
 
-  endfunction GridInterp_Scalar2D
+  endsubroutine GridInterp_Scalar2D_t
 
-  function Gradient_Scalar2D(this) result(df)
+  subroutine Gradient_Scalar2D_t(this,df)
     implicit none
-    class(Scalar2D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
+    class(Scalar2D_t),intent(in) :: this
+    real(prec),intent(inout) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)
     ! Local
     integer    :: i,j,ii,iel,ivar
     real(prec) :: df1,df2
@@ -243,11 +259,11 @@ contains
     ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
     ! dfloc => null()
 
-  endfunction Gradient_Scalar2D
+  endsubroutine Gradient_Scalar2D_t
 
-  subroutine WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
+  subroutine WriteHDF5_MPI_Scalar2D_t(this,fileId,group,elemoffset,nglobalelem)
     implicit none
-    class(Scalar2D),intent(in) :: this
+    class(Scalar2D_t),intent(in) :: this
     character(*),intent(in) :: group
     integer(HID_T),intent(in) :: fileId
     integer,intent(in) :: elemoffset
@@ -284,11 +300,11 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary,bOffset,bGlobalDims)
 
-  endsubroutine WriteHDF5_MPI_Scalar2D
+  endsubroutine WriteHDF5_MPI_Scalar2D_t
 
-  subroutine WriteHDF5_Scalar2D(this,fileId,group)
+  subroutine WriteHDF5_Scalar2D_t(this,fileId,group)
     implicit none
-    class(Scalar2D),intent(in) :: this
+    class(Scalar2D_t),intent(in) :: this
     integer(HID_T),intent(in) :: fileId
     character(*),intent(in) :: group
     ! Local
@@ -306,6 +322,6 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary)
 
-  endsubroutine WriteHDF5_Scalar2D
+  endsubroutine WriteHDF5_Scalar2D_t
 
-endmodule SELF_Scalar_2D
+endmodule SELF_Scalar_2D_t

@@ -30,39 +30,25 @@ module SELF_Scalar_1D
   use SELF_Scalar_1D_t
   use SELF_GPU
   use SELF_GPUBLAS
-  use SELF_GPUInterfaces
   use iso_c_binding
 
   implicit none
 
 ! ---------------------- Scalars ---------------------- !
   type,extends(Scalar1D_t),public :: Scalar1D
-    character(3) :: backend="gpu"
+    character(3) :: backend="apu"
     type(c_ptr) :: blas_handle
-    type(c_ptr) :: interior_gpu
-    type(c_ptr) :: boundary_gpu
-    type(c_ptr) :: extBoundary_gpu
-    type(c_ptr) :: avgBoundary_gpu
-    type(c_ptr) :: boundarynormal_gpu
 
   contains
 
-    procedure,public :: Init => Init_Scalar1D
-    procedure,public :: Free => Free_Scalar1D
+  procedure,public :: Init => Init_Scalar1D
+  procedure,public :: Free => Free_Scalar1D
 
-    procedure,public :: UpdateHost => UpdateHost_Scalar1D
-    procedure,public :: UpdateDevice => UpdateDevice_Scalar1D
-
-    procedure,public :: AverageSides => AverageSides_Scalar1D
-    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D
-    generic,public   :: GridInterp => GridInterp_Scalar1D
-    procedure,private :: GridInterp_Scalar1D
-    generic,public :: Derivative => Derivative_Scalar1D
-    procedure,private :: Derivative_Scalar1D
-
+  procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D
+  !procedure,public :: GridInterp => GridInterp_Scalar1D
+  !procedure,public :: Derivative => Derivative_Scalar1D
 
   endtype Scalar1D
-
 
 contains
 
@@ -88,26 +74,16 @@ contains
 
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
-             this%boundarynormal(1:2,1:nelem,1:nvar), &
              this%extBoundary(1:2,1:nelem,1:nvar),&
              this%avgBoundary(1:2,1:nelem,1:nvar))
-    
-    this%interior = 0.0_prec
-    this%boundary = 0.0_prec
-    this%boundarynormal = 0.0_prec
-    this%extBoundary = 0.0_prec
-    this%avgBoundary = 0.0_prec
-    
+
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
 
-    call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
-    call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
-    call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
-    call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
-
-    call this%UpdateDevice()
+    call gpuCheck(hipMalloc(c_loc(this%interior_gpu),sizeof(this%interior)))
+    call gpuCheck(hipMalloc(c_loc(this%boundary_gpu),sizeof(this%boundary)))
+    call gpuCheck(hipMalloc(c_loc(this%extBoundary_gpu),sizeof(this%extBoundary)))
+    call gpuCheck(hipMalloc(c_loc(this%avgBoundary_gpu),sizeof(this%avgBoundary)))
 
     call hipblasCheck(hipblasCreate(this%blas_handle))
 
@@ -124,11 +100,10 @@ contains
     deallocate(this%meta)
     deallocate(this%eqn)
 
-    call gpuCheck(hipFree(this%interior_gpu))
-    call gpuCheck(hipFree(this%boundary_gpu))
-    call gpuCheck(hipFree(this%boundarynormal_gpu))
-    call gpuCheck(hipFree(this%extBoundary_gpu))
-    call gpuCheck(hipFree(this%avgBoundary_gpu))
+    call gpuCheck(hipFree(c_loc(this%interior_gpu)))
+    call gpuCheck(hipFree(c_loc(this%boundary_gpu)))
+    call gpuCheck(hipFree(c_loc(this%extBoundary_gpu)))
+    call gpuCheck(hipFree(c_loc(this%avgBoundary_gpu)))
     call hipblasCheck(hipblasDestroy(this%blas_handle))
 
   endsubroutine Free_Scalar1D
@@ -137,11 +112,10 @@ contains
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call gpuCheck(hipMemcpy(c_loc(this%interior),this%interior_gpu,sizeof(this%interior),hipMemcpyDeviceToHost))
-    call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
-    call gpuCheck(hipMemcpy(c_loc(this%boundarynormal),this%boundarynormal_gpu,sizeof(this%boundarynormal),hipMemcpyDeviceToHost))
-    call gpuCheck(hipMemcpy(c_loc(this%extboundary),this%extboundary_gpu,sizeof(this%extboundary),hipMemcpyDeviceToHost))
-    call gpuCheck(hipMemcpy(c_loc(this%avgboundary),this%avgboundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%interior),c_loc(this%interior_gpu),sizeof(this%interior),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%boundary),c_loc(this%boundary_gpu),sizeof(this%boundary),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%extboundary),c_loc(this%extboundary_gpu),sizeof(this%extboundary),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%avgboundary),c_loc(this%avgboundary_gpu),sizeof(this%boundary),hipMemcpyDeviceToHost))
 
   end subroutine UpdateHost_Scalar1D
 
@@ -149,21 +123,12 @@ contains
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call gpuCheck(hipMemcpy(this%interior_gpu,c_loc(this%interior),sizeof(this%interior),hipMemcpyHostToDevice))
-    call gpuCheck(hipMemcpy(this%boundary_gpu,c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
-    call gpuCheck(hipMemcpy(this%boundarynormal_gpu,c_loc(this%boundarynormal),sizeof(this%boundarynormal),hipMemcpyHostToDevice))
-    call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
-    call gpuCheck(hipMemcpy(this%avgboundary_gpu,c_loc(this%avgboundary),sizeof(this%boundary),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(c_loc(this%interior_gpu),c_loc(this%interior),sizeof(this%interior),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(c_loc(this%boundary_gpu),c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(c_loc(this%extboundary_gpu),c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(c_loc(this%avgboundary_gpu),c_loc(this%avgboundary),sizeof(this%boundary),hipMemcpyHostToDevice))
 
   end subroutine UpdateDevice_Scalar1D
-
-  subroutine AverageSides_Scalar1D(this)
-    implicit none
-    class(Scalar1D),intent(inout) :: this
-
-    call Average_gpu(this%avgBoundary_gpu,this%boundary_gpu,this%extBoundary_gpu,size(this%avgBoundary))
-
-  endsubroutine AverageSides_Scalar1D
 
   subroutine BoundaryInterp_Scalar1D(this)
     implicit none
@@ -177,28 +142,61 @@ contains
 
   end subroutine BoundaryInterp_Scalar1D
 
-  subroutine GridInterp_Scalar1D(this,f)
-    implicit none
-    class(Scalar1D),intent(in) :: this
-    type(c_ptr),intent(inout) :: f
+  ! function GridInterp_Scalar1D(this) result(f)
+  !   implicit none
+  !   class(Scalar1D),intent(in) :: this
+  !   real(prec) :: f(1:this%M+1,1:this%nelem,1:this%nvar)
+  !   ! Local
+  !   integer :: iel,ivar,i,ii
+  !   real(prec) :: floc
 
-    call self_blas_matrixop_1d(this%interp%iMatrix_gpu,&
-                               this%interior_gpu,&
-                               f,this%M+1,this%N+1,&
-                               this%nvar*this%nelem,this%blas_handle)
+  !   !$omp target
+  !   !$omp teams loop bind(teams) collapse(3)
+  !   do ivar = 1,this%nvar
+  !     do iel = 1,this%nelem
+  !       do i = 1,this%M+1
+  !         floc = 0.0_prec
+  !         !$omp loop bind(thread)
+  !         do ii = 1,this%N+1
+  !           floc = floc+this%interp%iMatrix(ii,i)*this%interior(ii,iel,ivar)
+  !         enddo
+  !         f(i,iel,ivar) = floc
+  !       enddo
+  !     enddo
+  !   enddo
+  !   !$omp end target
 
-  endsubroutine GridInterp_Scalar1D
+  ! endfunction GridInterp_Scalar1D
 
-  subroutine Derivative_Scalar1D(this,df)
-    implicit none
-    class(Scalar1D),intent(in) :: this
-    type(c_ptr),intent(inout) :: df
+  ! function Derivative_Scalar1D(this) result(df)
+  !   implicit none
+  !   class(Scalar1D),intent(in) :: this
+  !   real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
 
-    call self_blas_matrixop_1d(this%interp%dMatrix_gpu,&
-                               this%interior_gpu,&
-                               df,this%N+1,this%N+1,&
-                               this%nvar*this%nelem,this%blas_handle)
+  !   ! Local
+  !   integer :: i,ii,iel,ivar
+  !   real(prec) :: dfloc
 
-  endsubroutine Derivative_Scalar1D
-  
+  !   !$omp target
+  !   !$omp teams loop bind(teams) collapse(3)
+  !   do ivar = 1,this%nvar
+  !     do iel = 1,this%nelem
+  !       do i = 1,this%N+1
+
+  !         dfloc = 0.0_prec
+  !         !$omp loop bind(thread)
+  !         do ii = 1,this%N+1
+  !           dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
+  !         enddo
+  !         df(i,iel,ivar) = dfloc
+
+  !       enddo
+  !     enddo
+  !   enddo
+  !   !$omp end target
+
+  !   !call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
+
+  ! endfunction Derivative_Scalar1D
+
 endmodule SELF_Scalar_1D

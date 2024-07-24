@@ -65,14 +65,13 @@ contains
 
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior(:,:,:) = 1.0_prec
-
-    if( f%backend == 'cpu' )then
-      call f%Derivative(df%interior)
-    else
-      call f%UpdateDevice()
-      call f%Derivative(df%interior_gpu)
-      call df%UpdateHost()
-    endif
+#ifdef ENABLE_GPU
+    call f%UpdateDevice()
+    call f%Derivative(df%interior_gpu)
+    call df%UpdateHost()
+#else
+    call f%Derivative(df%interior)
+#endif
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

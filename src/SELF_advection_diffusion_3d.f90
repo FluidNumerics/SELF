@@ -157,6 +157,7 @@ contains
 
     u = this%u
     v = this%v
+    w = this%w
     nu = this%nu
     !$omp target
     !$omp teams loop collapse(5)

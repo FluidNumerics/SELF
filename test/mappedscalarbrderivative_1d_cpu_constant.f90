@@ -83,11 +83,9 @@ contains
     call df%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = 1.0')
-
     call f%SetInteriorFromEquation(0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
  
-    call f%UpdateDevice()
     call f%BoundaryInterp()
     call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
@@ -98,16 +96,30 @@ contains
     f%extBoundary(2,nelem,1) = 1.0_prec ! Right most
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
 
+    call f%UpdateDevice()
     call f%AverageSides()
-    print*,"min, max (avgboundary)",minval(f%boundary),maxval(f%boundary)
+    call f%UpdateHost()
+    print*,"min, max (avgboundary)",minval(f%avgboundary),maxval(f%avgboundary)
 
-    df%interior = f%MappedDGDerivative()
+    ! Compute "fluxes"
+    f%boundarynormal(1,:,:) = -f%avgBoundary(1,:,:) ! Account for left facing normal
+    f%boundarynormal(2,:,:) = f%avgBoundary(2,:,:) ! Account for right facing normal
+
+    call f%UpdateDevice()
+#ifdef ENABLE_GPU
+    call f%MappedDGDerivative(df%interior_gpu)
+#else
+    call f%MappedDGDerivative(df%interior)
+#endif
+    call df%UpdateHost()
+
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
+      print*, "Max error : ", maxval(df%interior)
       r = 1
     endif
 

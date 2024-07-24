@@ -70,8 +70,15 @@ contains
 
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
+    call f%UpdateDevice()
 
-    fTarget%interior = f%GridInterp()
+#ifdef ENABLE_GPU
+    call f%GridInterp(fTarget%interior_gpu)
+#else
+    call f%GridInterp(fTarget%interior)
+#endif
+
+    call fTarget%UpdateHost()
 
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)

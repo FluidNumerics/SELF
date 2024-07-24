@@ -64,9 +64,10 @@ contains
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
 
-    ! Interpolate with gpuAccel = .FALSE.
+    call f%UpdateDevice()
     call f%BoundaryInterp()
-
+    call f%UpdateHost()
+    
     ! Calculate diff from exact
     f%boundary = abs(f%boundary-1.0_prec)
 

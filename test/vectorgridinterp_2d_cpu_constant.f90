@@ -71,8 +71,14 @@ contains
 
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
+    call f%UpdateDevice()
+#ifdef ENABLE_GPU
+    call f%GridInterp(fTarget%interior_gpu)
+#else
+    call f%Gridinterp(fTarget%interior)
+#endif
 
-    fTarget%interior = f%GridInterp()
+    call fTarget%UpdateHost()
 
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)

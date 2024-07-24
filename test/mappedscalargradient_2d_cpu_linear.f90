@@ -90,7 +90,7 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    df%interior = f%Gradient(geometry)
+    df%interior = f%MappedGradient(geometry)
 
     call f%SetName(1,"f")
     call f%SetUnits(1,"[null]")

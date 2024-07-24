@@ -38,7 +38,6 @@ else()
     file(GLOB SELF_BACKEND_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/cpu/*.f*")
 endif()
 
-file(GLOB_RECURSE SELF_MODEL_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/models/*.f*")
 file(GLOB SELF_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
 # Enable pre-processing for source code
@@ -64,7 +63,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 # target_include_directories(self PRIVATE ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
 # target_compile_options(self PRIVATE -fPIC)
 
-add_library(self-static STATIC ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC} ${SELF_MODEL_FSRC})
+add_library(self-static STATIC ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC})
 
 target_link_libraries(self-static PRIVATE 
                         ${FEQPARSE_LIBRARIES}

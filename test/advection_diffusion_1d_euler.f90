@@ -40,6 +40,7 @@ program advection_diffusion_1d_euler
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec),parameter :: endtime = 0.01_prec
   real(prec),parameter :: iointerval = 0.01_prec
+  real(prec) :: e0, ef ! Initial and final entropy
   type(advection_diffusion_1d) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh1D),target :: mesh
@@ -70,7 +71,7 @@ program advection_diffusion_1d_euler
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry,decomp)
-
+  modelobj%gradient_enabled = .true.
   ! Set the velocity
   modelobj%u = u
   !Set the diffusivity
@@ -84,6 +85,10 @@ program advection_diffusion_1d_euler
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
 
+  call modelobj%CalculateEntropy()
+  call modelobj%ReportEntropy()
+  e0 = modelobj%entropy ! Save the initial entropy
+
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
@@ -94,6 +99,13 @@ program advection_diffusion_1d_euler
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+
+  ef = modelobj%entropy
+
+  if( ef > e0 )then
+    print*, "Error: Final entropy greater than initial entropy! ", e0,ef
+    stop 1
+  endif
 
   ! Clean up
   call modelobj%free()

@@ -67,8 +67,15 @@ contains
 
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
+    call f%UpdateDevice()
 
-    df%interior = f%Divergence()
+#ifdef ENABLE_GPU
+    call f%Divergence(df%interior_gpu)
+#else
+    call f%Divergence(df%interior)
+#endif
+
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

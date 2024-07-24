@@ -56,7 +56,7 @@ static void check(const cudaError_t err, const char *const file, const int line)
 #define INDEX3(i,j,k,Ni,Nj) i+Ni*(j+Nj*k)
 
 #define SC_1D_INDEX(i,iel,iVar,N,nEl) i+(N+1)*(iEl + nEl*iVar)
-#define SCB_1D_INDEX(j,iel,iVar,N,nEl) j + 2*(iel + nEl*iVar)
+#define SCB_1D_INDEX(j,iel,iVar,nEl) j + 2*(iel + nEl*iVar)
 
 #define SC_2D_INDEX(i,j,iel,iVar,N,nEl) i+(N+1)*(j + (N+1)*(iel + nEl*iVar)) 
 #define SCB_2D_INDEX(i,j,iel,iVar,N,nEl) i+(N+1)*(j + 4*(iel + nEl*iVar))

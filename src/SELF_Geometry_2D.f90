@@ -133,8 +133,10 @@ contains
       enddo
     enddo
 
-    myGeom%x%interior = xMesh%GridInterp()
-    call myGeom%x%BoundaryInterp()
+    call xMesh%GridInterp(myGeom%x%interior)
+    call myGeom%x%UpdateDevice()
+    call myGeom%x%BoundaryInterp() ! Boundary interp will run on GPU if enabled, hence why we close in update host/device
+    call myGeom%x%UpdateHost()
     call myGeom%CalculateMetricTerms()
 
     call xMesh%Free()
@@ -236,10 +238,14 @@ contains
     implicit none
     class(SEMQuad),intent(inout) :: myGeom
 
-    myGeom%dxds%interior = myGeom%x%Gradient()
+    call myGeom%x%Gradient(myGeom%dxds%interior)
+
     call myGeom%dxds%BoundaryInterp()
+
     call myGeom%dxds%Determinant(myGeom%J%interior)
+    call myGeom%J%UpdateDevice()
     call myGeom%J%BoundaryInterp()
+    call myGeom%J%UpdateHost()
 
     call myGeom%CalculateContravariantBasis()
 

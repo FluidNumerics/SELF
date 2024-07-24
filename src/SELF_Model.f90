@@ -117,6 +117,7 @@ module SELF_Model
     real(prec) :: dt
     real(prec) :: t
     integer :: ioIterate = 0
+    logical :: gradient_enabled = .false.
 
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
@@ -165,6 +166,7 @@ module SELF_Model
     procedure :: RiemannSolver => RiemannSolver_Model
     procedure :: UpdateBoundary => UpdateBoundary_Model
     procedure :: SetBoundaryCondition => SetBoundaryCondition_Model
+    procedure :: SetGradientBoundaryCondition => SetGradientBoundaryCondition_Model
 
     procedure :: ReportEntropy => ReportEntropy_Model
     procedure :: CalculateEntropy => CalculateEntropy_Model
@@ -391,6 +393,14 @@ contains
     return
 
   endsubroutine SetBoundaryCondition_Model
+
+  subroutine SetGradientBoundaryCondition_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
+
+    return
+
+  endsubroutine SetGradientBoundaryCondition_Model
 
   subroutine SetTimeIntegrator_withInt(this,integrator)
     !! Sets the time integrator method, using an integer flag

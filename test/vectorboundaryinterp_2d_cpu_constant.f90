@@ -63,16 +63,22 @@ contains
 
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
-
+    f%boundary = 0.0_prec
+    print*,"Backend : "//f%backend
+    print*,"Max interior : ", maxval(f%interior)
     ! Interpolate with gpuAccel = .FALSE.
+    call f%UpdateDevice()
     call f%BoundaryInterp()
+    call f%UpdateHost()
 
+    print*,"Max boundary : ",maxval(f%boundary)
     ! Calculate diff from exact
     f%boundary = abs(f%boundary-1.0_prec)
 
     if(maxval(f%boundary) <= tolerance) then
       r = 0
     else
+      print*, "Max error : ", maxval(f%boundary)
       r = 1
     endif
 

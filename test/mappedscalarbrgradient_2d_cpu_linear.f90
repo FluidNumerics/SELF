@@ -92,7 +92,9 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
+    call f%UpdateDevice()
     call f%BoundaryInterp()
+    call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh,decomp)
@@ -110,8 +112,11 @@ contains
     enddo
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
-
+    call f%UpdateDevice()
     call f%AverageSides()
+    call f%UpdateHost()
+    print*,"min, max (extboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
+    
     df%interior = f%DGGradient(geometry)
 
     print*,"min, max (df/dx)",minval(df%interior(:,:,:,1,1)),maxval(df%interior(:,:,:,1,1))

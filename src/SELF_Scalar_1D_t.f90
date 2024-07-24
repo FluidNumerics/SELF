@@ -45,6 +45,7 @@ module SELF_Scalar_1D_t
 
     real(prec),pointer,contiguous,dimension(:,:,:) :: interior
     real(prec),pointer,contiguous,dimension(:,:,:) :: boundary
+    real(prec),pointer,contiguous,dimension(:,:,:) :: boundarynormal
     real(prec),pointer,contiguous,dimension(:,:,:) :: extBoundary
     real(prec),pointer,contiguous,dimension(:,:,:) :: avgBoundary
 
@@ -56,6 +57,7 @@ module SELF_Scalar_1D_t
     procedure,public :: UpdateHost => UpdateHost_Scalar1D_t
     procedure,public :: UpdateDevice => UpdateDevice_Scalar1D_t
 
+    procedure,public :: AverageSides => AverageSides_Scalar1D_t
     procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D_t
     generic,public :: GridInterp => GridInterp_Scalar1D_t
     procedure,private :: GridInterp_Scalar1D_t
@@ -86,8 +88,15 @@ contains
 
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
+             this%boundarynormal(1:2,1:nelem,1:nvar), &
              this%extBoundary(1:2,1:nelem,1:nvar),&
              this%avgBoundary(1:2,1:nelem,1:nvar))
+
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
@@ -101,6 +110,7 @@ contains
     this%interp => null()
     deallocate(this%interior)
     deallocate(this%boundary)
+    deallocate(this%boundarynormal)
     deallocate(this%extBoundary)
     deallocate(this%avgBoundary)
     deallocate(this%meta)
@@ -119,6 +129,33 @@ contains
     class(Scalar1D_t),intent(inout) :: this
     
   end subroutine UpdateDevice_Scalar1D_t
+
+  subroutine AverageSides_Scalar1D_t(this)
+    implicit none
+    class(Scalar1D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: ivar
+
+    !$omp target
+    !$omp teams loop collapse(2)
+    do iel = 1,this%nElem
+      do ivar = 1,this%nVar
+
+        ! Left side - we account for the -\hat{x} normal
+        this%avgboundary(1,iel,ivar) = 0.5_prec*( &
+                                    this%boundary(1,iel,ivar)+ &
+                                    this%extBoundary(1,iel,ivar))
+
+        ! Right side - we account for the +\hat{x} normal
+        this%avgboundary(2,iel,ivar) = 0.5_prec*( &
+                                    this%boundary(2,iel,ivar)+ &
+                                    this%extBoundary(2,iel,ivar))
+      enddo
+    enddo
+    !$omp end target
+
+  endsubroutine AverageSides_Scalar1D_t
 
   subroutine BoundaryInterp_Scalar1D_t(this)
     implicit none

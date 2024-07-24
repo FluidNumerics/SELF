@@ -49,8 +49,8 @@ module SELF_MappedScalar_2D
     !procedure,public :: Free => Free_MappedScalar2D
     procedure,public :: SideExchange => SideExchange_MappedScalar2D
 
-    generic,public :: Gradient => Gradient_MappedScalar2D
-    procedure,private :: Gradient_MappedScalar2D
+    generic,public :: MappedGradient => MappedGradient_MappedScalar2D
+    procedure,private :: MappedGradient_MappedScalar2D
 
     generic,public :: DGGradient => DGGradient_MappedScalar2D
     procedure,private :: DGGradient_MappedScalar2D
@@ -280,7 +280,7 @@ contains
 
   endsubroutine SideExchange_MappedScalar2D
 
-  function Gradient_MappedScalar2D(this,geometry) result(df)
+  function MappedGradient_MappedScalar2D(this,geometry) result(df)
   !! Calculates the gradient of a function using the strong form of the gradient
   !! in mapped coordinates.
     implicit none
@@ -341,7 +341,7 @@ contains
     !$omp end teams
     !$omp end target
 
-  endfunction Gradient_MappedScalar2D
+  endfunction MappedGradient_MappedScalar2D
 
   function DGGradient_MappedScalar2D(this,geometry) result(df)
     !!

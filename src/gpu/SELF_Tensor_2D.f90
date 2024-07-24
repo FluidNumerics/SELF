@@ -27,32 +27,29 @@
 module SELF_Tensor_2D
 
   use SELF_Constants
-  use SELF_Lagrange
-  use SELF_Metadata
-  use FEQParse
-  use SELF_HDF5
-  use SELF_Data
-
-  use HDF5
+  use SELF_Tensor_2D_t
+  use SELF_GPU
+  use SELF_GPUBLAS
   use iso_c_binding
+  use iso_fortran_env
 
   implicit none
 
-#include "SELF_Macros.h"
 
-  type,extends(SELF_DataObj),public :: Tensor2D
-
-    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: interior
-    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: boundary
-    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: extBoundary
+  type,extends(Tensor2D_t),public :: Tensor2D
+    character(3) :: backend="gpu"
+    type(c_ptr) :: blas_handle  
+    type(c_ptr) :: interior_gpu
+    type(c_ptr) :: boundary_gpu
+    type(c_ptr) :: extBoundary_gpu
 
   contains
 
     procedure,public :: Init => Init_Tensor2D
     procedure,public :: Free => Free_Tensor2D
 
-    procedure,public :: BoundaryInterp => BoundaryInterp_Tensor2D
-    procedure,public :: Determinant => Determinant_Tensor2D
+    procedure,public :: UpdateHost => UpdateHost_Tensor2D
+    procedure,public :: UpdateDevice => UpdateDevice_Tensor2D
 
   endtype Tensor2D
 
@@ -91,6 +88,12 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
+    call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
+    call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
+    call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
+
+    call hipblasCheck(hipblasCreate(this%blas_handle))
+
   endsubroutine Init_Tensor2D
 
   subroutine Free_Tensor2D(this)
@@ -108,70 +111,31 @@ contains
     deallocate(this%meta)
     deallocate(this%eqn)
 
+    call gpuCheck(hipFree(this%interior_gpu))
+    call gpuCheck(hipFree(this%boundary_gpu))
+    call gpuCheck(hipFree(this%extBoundary_gpu))
+    call hipblasCheck(hipblasDestroy(this%blas_handle))
+
   endsubroutine Free_Tensor2D
 
-  subroutine BoundaryInterp_Tensor2D(this)
+  subroutine UpdateHost_Tensor2D(this)
     implicit none
     class(Tensor2D),intent(inout) :: this
-! Local
-    integer :: i,ii,idir,jdir,iel,ivar
-    real(prec) :: fbs,fbe,fbn,fbw
 
-    !$omp target
-    !$omp teams loop collapse(5)
-    do jdir = 1,2
-      do idir = 1,2
-        do ivar = 1,this%nvar
-          do iel = 1,this%nelem
-            do i = 1,this%N+1
+    call gpuCheck(hipMemcpy(c_loc(this%interior),this%interior_gpu,sizeof(this%interior),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%extboundary),this%extboundary_gpu,sizeof(this%extboundary),hipMemcpyDeviceToHost))
 
-              fbs = 0.0_prec
-              fbe = 0.0_prec
-              fbn = 0.0_prec
-              fbw = 0.0_prec
-              do ii = 1,this%N+1
-                fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir,jdir) ! South
-                fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir,jdir) ! East
-                fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir,jdir) ! North
-                fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir,jdir) ! West
-              enddo
+  end subroutine UpdateHost_Tensor2D
 
-              this%boundary(i,1,iel,ivar,idir,jdir) = fbs
-              this%boundary(i,2,iel,ivar,idir,jdir) = fbe
-              this%boundary(i,3,iel,ivar,idir,jdir) = fbn
-              this%boundary(i,4,iel,ivar,idir,jdir) = fbw
-
-            enddo
-          enddo
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endsubroutine BoundaryInterp_Tensor2D
-
-  subroutine Determinant_Tensor2D(this,det)
+  subroutine UpdateDevice_Tensor2D(this)
     implicit none
-    class(Tensor2D),intent(in) :: this
-    real(prec),intent(out) :: det(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
-    ! Local
-    integer :: iEl,iVar,i,j
+    class(Tensor2D),intent(inout) :: this
 
-    do iVar = 1,this%nVar
-      do iEl = 1,this%nElem
-        do j = 1,this%interp%N+1
-          do i = 1,this%interp%N+1
+    call gpuCheck(hipMemcpy(this%interior_gpu,c_loc(this%interior),sizeof(this%interior),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%boundary_gpu,c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
 
-            det(i,j,iEl,iVar) = this%interior(i,j,iEl,iVar,1,1)* &
-                                this%interior(i,j,iEl,iVar,2,2)- &
-                                this%interior(i,j,iEl,iVar,1,2)* &
-                                this%interior(i,j,iEl,iVar,2,1)
-
-          enddo
-        enddo
-      enddo
-    enddo
-
-  endsubroutine Determinant_Tensor2D
+  end subroutine UpdateDevice_Tensor2D
 
 endmodule SELF_Tensor_2D

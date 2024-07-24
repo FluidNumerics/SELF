@@ -49,11 +49,11 @@ module SELF_MappedVector_2D
 
     !procedure,public :: ContravariantProjection => ContravariantProjection_MappedVector2D
 
-    generic,public :: Divergence => Divergence_MappedVector2D
-    procedure,private :: Divergence_MappedVector2D
+    generic,public :: MappedDivergence => MappedDivergence_MappedVector2D
+    procedure,private :: MappedDivergence_MappedVector2D
 
-    generic,public :: DGDivergence => DGDivergence_MappedVector2D
-    procedure,private :: DGDivergence_MappedVector2D
+    generic,public :: MappedDGDivergence => MappedDGDivergence_MappedVector2D
+    procedure,private :: MappedDGDivergence_MappedVector2D
 
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
     procedure,private :: ApplyFlip => ApplyFlip_MappedVector2D
@@ -288,7 +288,7 @@ contains
 
   endsubroutine SideExchange_MappedVector2D
 
-  function Divergence_MappedVector2D(this,geometry) result(df)
+  function MappedDivergence_MappedVector2D(this,geometry) result(df)
     ! Strong Form Operator
     !    !
     implicit none
@@ -347,9 +347,9 @@ contains
     !$omp end teams
     !$omp end target
 
-  endfunction Divergence_MappedVector2D
+  endfunction MappedDivergence_MappedVector2D
 
-  function DGDivergence_MappedVector2D(this,geometry) result(df)
+  function MappedDGDivergence_MappedVector2D(this,geometry) result(df)
     !! Computes the divergence of a 2-D vector using the weak form
     !! On input, the  attribute of the vector
     !! is assigned and the  attribute is set to the physical
@@ -428,11 +428,11 @@ contains
     ! floc => null()
 
     ! ! Add the boundary contributions
-    ! call VectorDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
+    ! call VectorMappedDGDivergence_BoundaryContribution_2D(c_loc(this % bMatrix),&
     !                                                 c_loc(this % qWeights),&
     !                                                 c_loc(bf), c_loc(df),&
     !                                                 this % N, nvars, nelems)
 
-  endfunction DGDivergence_MappedVector2D
+  endfunction MappedDGDivergence_MappedVector2D
 
 endmodule SELF_MappedVector_2D

@@ -31,9 +31,11 @@ cmake_policy(VERSION 3.21...3.27)
 # - Set to "none" to disable OpenMP
 # - Set to "multicore" for multicore cpu
 # - GPU offloading via openmp not supported (not by our own choice)
-option(SELF_ENABLE_OPENMP "Option to enable OpenMP. (Default Off)"  OFF)
+option(SELF_ENABLE_OPENMP "Option to enable OpenMP multicore target. Currently only tested with nvfortran (Default Off)"  OFF)
 option(SELF_ENABLE_TESTING "Option to enable build of tests. (Default On)"  ON)
-option(SELF_ENABLE_GPU "Option to enable GPU backends. Requires either CUDA or HIP. (Default Off)"  OFF)
+option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
+option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
+option(SELF_ENABLE_MPI "Option to enable MPI for distributed memory parallelism (domain decomposition). (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default Off)"  OFF)
 
 if(SELF_ENABLE_OPENMP)
@@ -162,6 +164,12 @@ if(SELF_ENABLE_GPU)
     set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DENABLE_GPU")
     set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DENABLE_GPU" )
 
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_GPU" )
+    set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_GPU" )
+    set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DENABLE_GPU")
+    set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DENABLE_GPU")
+    set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DENABLE_GPU" )
+
     # HIP (Optional)
     # IF HIP is found, we prefer HIP. IF HIP is not found, then we fall back to look for CUDA
     # only. If neither HIP nor CUDA are found, Cmake will error out.
@@ -175,6 +183,13 @@ if(SELF_ENABLE_GPU)
         set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_HIP")
         set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_HIP")
         set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_HIP" )
+
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_HIP" )
+        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DHAVE_HIP" )
+        set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DHAVE_HIP")
+        set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DHAVE_HIP")
+        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DHAVE_HIP" )
+
         set( BACKEND_LIBRARIES hip::device roc::hipblas)
     else()
         # CUDA (Optional)
@@ -187,6 +202,13 @@ if(SELF_ENABLE_GPU)
             set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_CUDA")
             set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_CUDA")
             set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_CUDA" )
+            
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUDA" )
+            set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DHAVE_CUDA" )
+            set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DHAVE_CUDA")
+            set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DHAVE_CUDA")
+            set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DHAVE_CUDA" )
+            
             # TO DO - need cuda libraries and hipblas libraries
         else()
             message( FATAL_ERROR "Enabling GPU support requires either HIP or CUDA." )

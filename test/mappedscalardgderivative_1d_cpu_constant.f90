@@ -58,6 +58,7 @@ contains
     type(Mesh1D),target :: mesh
     type(Geometry1D),target :: geometry
     type(MPILayer),target :: decomp
+    integer :: ndof
 
     call decomp%Init(enableMPI=.false.)
     call mesh%UniformBlockMesh(nGeo=1, &
@@ -87,19 +88,26 @@ contains
     call f%SetInteriorFromEquation(0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%UpdateDevice()
     call f%BoundaryInterp()
     call f%UpdateHost()
-    ! Set boundary conditions
-    f%boundary(1,1,1) = 1.0_prec ! Left most
-    f%boundary(2,nelem,1) = 1.0_prec ! Right most
-
-    ! Adjust for -\hat{x} direction on left element boundaries
-    f%boundary(1,:,1) = -f%boundary(1,:,1)
 
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
-    df%interior = f%MappedDGDerivative()
+#ifdef ENABLE_GPU
+    ndof = f%nvar*f%nelem*2
+    call GradientNormal_1D_gpu(f%boundarynormal_gpu,&
+       f%boundary_gpu,ndof)
+    call f%UpdateHost()
+    print*,"min, max (boundary)",minval(f%boundarynormal),maxval(f%boundary)
+    call f%MappedDGDerivative(df%interior_gpu)
+#else
+    ! Compute "fluxes"
+    f%boundarynormal(1,:,:) = -f%boundary(1,:,:) ! Account for left facing normal
+    f%boundarynormal(2,:,:) = f%boundary(2,:,:) ! Account for right facing normal
+
+    call f%MappedDGDerivative(df%interior)
+#endif
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
@@ -107,6 +115,7 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
+      print*, "Max error (tolerance) : ", maxval(df%interior), tolerance
       r = 1
     endif
 

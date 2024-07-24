@@ -83,7 +83,13 @@ contains
 
     call f%SetInteriorFromEquation(0.0_prec)
 
-    df%interior = f%MappedDerivative()
+#ifdef ENABLE_GPU
+    call f%MappedDerivative(df%interior_gpu)
+#else
+    call f%MappedDerivative(df%interior)
+#endif
+
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

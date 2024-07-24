@@ -90,7 +90,9 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
+    call f%UpdateDevice()
     call f%boundaryInterp()
+    call f%UpdateHost()
 
     do iEl = 1,f%nElem
       do j = 1,4
@@ -107,7 +109,7 @@ contains
       enddo
     enddo
 
-    df%interior = f%DGDivergence(geometry)
+    df%interior = f%MappedDGDivergence(geometry)
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)

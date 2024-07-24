@@ -26,66 +26,48 @@
 
 module SELF_MappedScalar_1D
 
-  use SELF_Constants
-  use SELF_Lagrange
-  use SELF_Scalar_1D
-  use SELF_Mesh_1D
-  use SELF_Geometry_1D
-  use SELF_MPI
-  use SELF_HDF5
-  use HDF5
-
-  use FEQParse
-
+  use SELF_MappedScalar_1D_t
+  use SELF_GPU
   use iso_c_binding
 
   implicit none
 
-#include "SELF_Macros.h"
-
-  type,extends(Scalar1D),public :: MappedScalar1D
-    logical :: geometry_associated = .false.
-    type(Geometry1D), pointer :: geometry => null()
+  type,extends(MappedScalar1D_t),public :: MappedScalar1D
 
   contains
-    procedure,public :: AssociateGeometry => AssociateGeometry_MappedScalar1D
-    procedure,public :: DissociateGeometry => DissociateGeometry_MappedScalar1D
-    procedure,public :: SideExchange => SideExchange_MappedScalar1D
-    procedure,public :: AverageSides => AverageSides_MappedScalar1D
-
-    procedure,public :: MappedDerivative => MappedDerivative_MappedScalar1D
-    procedure,public :: MappedDGDerivative => MappedDGDerivative_MappedScalar1D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar1D
 
+    procedure,public :: SideExchange => SideExchange_MappedScalar1D
+    generic,public :: MappedDerivative => MappedDerivative_MappedScalar1D
+    procedure,private :: MappedDerivative_MappedScalar1D
+
+    generic,public :: MappedDGDerivative => MappedDGDerivative_MappedScalar1D
+    procedure,private :: MappedDGDerivative_MappedScalar1D
+
   endtype MappedScalar1D
 
+  interface
+    subroutine JacobianWeight_1D_gpu(scalar,dxds,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_1D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: scalar,dxds
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine JacobianWeight_1D_gpu
+  end interface
+
+  interface
+  subroutine DGDerivative_BoundaryContribution_1D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+    bind(c,name="DGDerivative_BoundaryContribution_1D_gpu")
+    use iso_c_binding
+    implicit none
+    type(c_ptr),value :: bMatrix,qWeights,bf,df
+    integer(c_int),value :: N,nVar,nEl
+  end subroutine DGDerivative_BoundaryContribution_1D_gpu
+  end interface
+
 contains
-
-! ---------------------- Scalars ---------------------- !
-
-  subroutine AssociateGeometry_MappedScalar1D(this,geometry)
-    implicit none
-    class(MappedScalar1D),intent(inout) :: this
-    type(Geometry1D),target,intent(in) :: geometry
-
-      if(.not. associated(this%geometry))then
-        this%geometry => geometry
-        this%geometry_associated = .true.
-      endif
-
-  endsubroutine AssociateGeometry_MappedScalar1D
-
-  subroutine DissociateGeometry_MappedScalar1D(this)
-    implicit none
-    class(MappedScalar1D),intent(inout) :: this
-
-      if(associated(this%geometry))then
-        this%geometry => null()
-        this%geometry_associated = .false.
-      endif
-
-  endsubroutine DissociateGeometry_MappedScalar1D
 
   subroutine SetInteriorFromEquation_MappedScalar1D(this,time)
     !!  Sets the this % interior attribute using the eqn attribute,
@@ -99,6 +81,7 @@ contains
     do ivar = 1,this%nvar
       this%interior(:,:,ivar) = this%eqn(ivar)%evaluate(this%geometry%x%interior)
     enddo
+    call gpuCheck(hipMemcpy(this%interior_gpu,c_loc(this%interior),sizeof(this%interior),hipMemcpyHostToDevice))
 
   endsubroutine SetInteriorFromEquation_MappedScalar1D
 
@@ -110,6 +93,8 @@ contains
     ! Local
     integer :: e1,e2,s1,s2
     integer :: ivar
+
+    call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
 
     !$omp target
     !$omp teams loop collapse(2)
@@ -147,95 +132,44 @@ contains
       enddo
     enddo
     !$omp end target
+    call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
+
 
   endsubroutine SideExchange_MappedScalar1D
 
-  subroutine AverageSides_MappedScalar1D(this)
-    implicit none
-    class(MappedScalar1D),intent(inout) :: this
-    ! Local
-    integer :: iel
-    integer :: ivar
-
-    !$omp target
-    !$omp teams loop collapse(2)
-    do iel = 1,this%nElem
-      do ivar = 1,this%nVar
-
-        ! Left side - we account for the -\hat{x} normal
-        this%boundary(1,iel,ivar) = -0.5_prec*( &
-                                    this%boundary(1,iel,ivar)+ &
-                                    this%extBoundary(1,iel,ivar))
-
-        ! Right side - we account for the +\hat{x} normal
-        this%boundary(2,iel,ivar) = 0.5_prec*( &
-                                    this%boundary(2,iel,ivar)+ &
-                                    this%extBoundary(2,iel,ivar))
-      enddo
-    enddo
-    !$omp end target
-
-  endsubroutine AverageSides_MappedScalar1D
-
-  function MappedDerivative_MappedScalar1D(this) result(dF)
+  subroutine MappedDerivative_MappedScalar1D(this,dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    type(c_ptr), intent(inout) :: df
     ! Local
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
+      call this%Derivative(df)
+      call JacobianWeight_1D_gpu(df,this%geometry%dxds%interior_gpu,this%N,this%nVar,this%nelem)
 
-          dfloc = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
-          df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
+  endsubroutine MappedDerivative_MappedScalar1D
 
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endfunction MappedDerivative_MappedScalar1D
-
-  function MappedDGDerivative_MappedScalar1D(this) result(dF)
+  subroutine MappedDGDerivative_MappedScalar1D(this,dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%nelem,1:this%nvar)
+    type(c_ptr), intent(inout) :: df
     ! Local
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
+    call self_blas_matrixop_1d(this%interp%dgMatrix_gpu,&
+                               this%interior_gpu,&
+                               df,this%N+1,this%N+1,&
+                               this%nvar*this%nelem,this%blas_handle)
 
-          dfloc = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
+    call DGDerivative_BoundaryContribution_1D_gpu(this%interp%bMatrix_gpu,&
+                                                  this%interp%qWeights_gpu,&
+                                                  this%boundarynormal_gpu,df,&
+                                                  this%N,this%nVar,this%nelem) 
 
-          dfloc = dfloc+(this%boundary(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
-                         this%boundary(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
-                  this%interp%qWeights(i)
+    call JacobianWeight_1D_gpu(df,this%geometry%dxds%interior_gpu,this%N,this%nVar,this%nelem)
 
-          df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
-
-        enddo
-      enddo
-    enddo
-    !$omp end target
-
-  endfunction MappedDGDerivative_MappedScalar1D
+  endsubroutine MappedDGDerivative_MappedScalar1D
 
 endmodule SELF_MappedScalar_1D

@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Vector_2D
+module SELF_Vector_2D_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -38,9 +38,7 @@ module SELF_Vector_2D
 
   implicit none
 
-#include "SELF_Macros.h"
-
-  type,extends(SELF_DataObj),public :: Vector2D
+  type,extends(SELF_DataObj),public :: Vector2D_t
 
     real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: interior
     real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: boundary
@@ -50,31 +48,38 @@ module SELF_Vector_2D
 
   contains
 
-    procedure,public :: Init => Init_Vector2D
-    procedure,public :: Free => Free_Vector2D
+    procedure,public :: Init => Init_Vector2D_t
+    procedure,public :: Free => Free_Vector2D_t
 
-    procedure,public :: BoundaryInterp => BoundaryInterp_Vector2D
-    procedure,public :: AverageSides => AverageSides_Vector2D
+    procedure,public :: UpdateHost => UpdateHost_Vector2D_t
+    procedure,public :: UpdateDevice => UpdateDevice_Vector2D_t
 
-    procedure,public :: GridInterp => GridInterp_Vector2D
-    procedure,public :: Gradient => Gradient_Vector2D
-    generic,public :: Divergence => Divergence_Vector2D
-    procedure,private :: Divergence_Vector2D
+    procedure,public :: BoundaryInterp => BoundaryInterp_Vector2D_t
+    procedure,public :: AverageSides => AverageSides_Vector2D_t
 
-    generic,public :: SetEquation => SetEquation_Vector2D
-    procedure,private :: SetEquation_Vector2D
+    generic,public :: GridInterp => GridInterp_Vector2D_t
+    procedure,private :: GridInterp_Vector2D_t
 
-    generic,public :: WriteHDF5 => WriteHDF5_MPI_Vector2D,WriteHDF5_Vector2D
-    procedure,private :: WriteHDF5_MPI_Vector2D
-    procedure,private :: WriteHDF5_Vector2D
+    generic,public :: Gradient => Gradient_Vector2D_t
+    procedure,private :: Gradient_Vector2D_t
 
-  endtype Vector2D
+    generic,public :: Divergence => Divergence_Vector2D_t
+    procedure,private :: Divergence_Vector2D_t
+
+    generic,public :: SetEquation => SetEquation_Vector2D_t
+    procedure,private :: SetEquation_Vector2D_t
+
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Vector2D_t,WriteHDF5_Vector2D_t
+    procedure,private :: WriteHDF5_MPI_Vector2D_t
+    procedure,private :: WriteHDF5_Vector2D_t
+
+  endtype Vector2D_t
 
 contains
 
-  subroutine Init_Vector2D(this,interp,nVar,nElem)
+  subroutine Init_Vector2D_t(this,interp,nVar,nElem)
     implicit none
-    class(Vector2D),intent(out) :: this
+    class(Vector2D_t),intent(out) :: this
     type(Lagrange),target,intent(in) :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
@@ -107,11 +112,11 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
-  endsubroutine Init_Vector2D
+  endsubroutine Init_Vector2D_t
 
-  subroutine Free_Vector2D(this)
+  subroutine Free_Vector2D_t(this)
     implicit none
-    class(Vector2D),intent(inout) :: this
+    class(Vector2D_t),intent(inout) :: this
 
     this%interp => null()
     this%nVar = 0
@@ -126,24 +131,36 @@ contains
     deallocate(this%meta)
     deallocate(this%eqn)
 
-  endsubroutine Free_Vector2D
+  endsubroutine Free_Vector2D_t
+  
+  subroutine UpdateHost_Vector2D_t(this)
+    implicit none
+    class(Vector2D_t),intent(inout) :: this
 
-  subroutine SetEquation_Vector2D(this,idir,ivar,eqnChar)
+  end subroutine UpdateHost_Vector2D_t
+
+  subroutine UpdateDevice_Vector2D_t(this)
+    implicit none
+    class(Vector2D_t),intent(inout) :: this
+    
+  end subroutine UpdateDevice_Vector2D_t
+
+  subroutine SetEquation_Vector2D_t(this,idir,ivar,eqnChar)
     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
     implicit none
-    class(Vector2D),intent(inout) :: this
+    class(Vector2D_t),intent(inout) :: this
     integer,intent(in) :: idir,ivar
     character(*),intent(in) :: eqnChar
 
     this%eqn(idir+2*(ivar-1)) = EquationParser(trim(eqnChar), &
                                                (/'x','y','z','t'/))
 
-  endsubroutine SetEquation_Vector2D
+  endsubroutine SetEquation_Vector2D_t
 
-  function GridInterp_Vector2D(this) result(f)
+  subroutine GridInterp_Vector2D_t(this,f)
     implicit none
-    class(Vector2D),intent(in) :: this
-    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:2)
+    class(Vector2D_t),intent(in) :: this
+    real(prec),intent(out) :: f(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:2)
     ! Local
     integer :: i,j,ii,jj,iel,ivar,idir
     real(prec) :: fi,fij
@@ -175,11 +192,11 @@ contains
     enddo
     !$omp end target
 
-  endfunction GridInterp_Vector2D
+  endsubroutine GridInterp_Vector2D_t
 
-  subroutine AverageSides_Vector2D(this)
+  subroutine AverageSides_Vector2D_t(this)
     implicit none
-    class(Vector2D),intent(inout) :: this
+    class(Vector2D_t),intent(inout) :: this
     ! Local
     integer :: iel
     integer :: iside
@@ -204,11 +221,11 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine AverageSides_Vector2D
+  endsubroutine AverageSides_Vector2D_t
   
-  subroutine BoundaryInterp_Vector2D(this)
+  subroutine BoundaryInterp_Vector2D_t(this)
     implicit none
-    class(Vector2D),intent(inout) :: this
+    class(Vector2D_t),intent(inout) :: this
 ! Local
     integer :: i,ii,idir,iel,ivar
     real(prec) :: fbs,fbe,fbn,fbw
@@ -242,12 +259,12 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine BoundaryInterp_Vector2D
+  endsubroutine BoundaryInterp_Vector2D_t
 
-  function Gradient_Vector2D(this) result(df)
+  subroutine Gradient_Vector2D_t(this,df)
     implicit none
-    class(Vector2D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2,1:2)
+    class(Vector2D_t),intent(in) :: this
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2,1:2)
     ! Local
     integer :: i,j,ii,iEl,iVar,idir
     real(prec) :: dfds1,dfds2
@@ -277,20 +294,11 @@ contains
     enddo
     !$omp end target
 
-    ! do idir = 1,2
-    !   floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,idir)
-    !   dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,1)
-    !   call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-    !   dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,idir,2)
-    !   call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! end do
-    !dfloc => null()
+  endsubroutine Gradient_Vector2D_t
 
-  endfunction Gradient_Vector2D
-
-  function Divergence_Vector2D(this) result(df)
+  subroutine Divergence_Vector2D_t(this,df)
     implicit none
-    class(Vector2D),intent(in) :: this
+    class(Vector2D_t),intent(in) :: this
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer    :: i,j,ii,iel,ivar
@@ -336,17 +344,11 @@ contains
     !$omp end teams
     !$omp end target
 
-    ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,1)
-    ! call self_hipblas_matrixop_dim1_2d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
-    ! floc(1:,1:,1:,1:) => f(1:,1:,1:,1:,2)
-    ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! floc => null()
+  endsubroutine Divergence_Vector2D_t
 
-  endfunction Divergence_Vector2D
-
-  subroutine WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
+  subroutine WriteHDF5_MPI_Vector2D_t(this,fileId,group,elemoffset,nglobalelem)
     implicit none
-    class(Vector2D),intent(in) :: this
+    class(Vector2D_t),intent(in) :: this
     character(*),intent(in) :: group
     integer(HID_T),intent(in) :: fileId
     integer,intent(in) :: elemoffset
@@ -385,11 +387,11 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary,bOffset,bGlobalDims)
 
-  endsubroutine WriteHDF5_MPI_Vector2D
+  endsubroutine WriteHDF5_MPI_Vector2D_t
 
-  subroutine WriteHDF5_Vector2D(this,fileId,group)
+  subroutine WriteHDF5_Vector2D_t(this,fileId,group)
     implicit none
-    class(Vector2D),intent(in) :: this
+    class(Vector2D_t),intent(in) :: this
     integer(HID_T),intent(in) :: fileId
     character(*),intent(in) :: group
     ! Local
@@ -407,6 +409,6 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary)
 
-  endsubroutine WriteHDF5_Vector2D
+  endsubroutine WriteHDF5_Vector2D_t
 
-endmodule SELF_Vector_2D
+endmodule SELF_Vector_2D_t
