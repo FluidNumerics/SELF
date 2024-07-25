@@ -86,19 +86,19 @@ contains
 
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = x*y')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%UpdateDevice()
     call f%BoundaryInterp()
     call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh,decomp)
-
+    call f%UpdateHost()
     ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
     do iel = 1,f%nElem
       do iside = 1,4
@@ -113,11 +113,18 @@ contains
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
     call f%UpdateDevice()
+
     call f%AverageSides()
+
     call f%UpdateHost()
-    print*,"min, max (extboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
-    
-    df%interior = f%DGGradient(geometry)
+    print*,"min, max (avgboundary)",minval(f%avgboundary),maxval(f%avgboundary)
+
+#ifdef ENABLE_GPU
+    call f%MappedDGGradient(df%interior_gpu)
+#else
+    call f%MappedDGGradient(df%interior)
+#endif
+    call df%UpdateHost()
 
     print*,"min, max (df/dx)",minval(df%interior(:,:,:,1,1)),maxval(df%interior(:,:,:,1,1))
     print*,"min, max (df/dy)",minval(df%interior(:,:,:,1,2)),maxval(df%interior(:,:,:,1,2))
@@ -167,6 +174,7 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
     call decomp%Free()
     call geometry%Free()
     call mesh%Free()

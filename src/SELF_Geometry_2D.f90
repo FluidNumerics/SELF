@@ -232,6 +232,10 @@ contains
       enddo
     enddo
 
+    call myGeom%dsdx%UpdateDevice()
+    call myGeom%nHat%UpdateDevice()
+    call myGeom%nScale%UpdateDevice()
+
   endsubroutine CalculateContravariantBasis_SEMQuad
 
   subroutine CalculateMetricTerms_SEMQuad(myGeom)
@@ -239,10 +243,11 @@ contains
     class(SEMQuad),intent(inout) :: myGeom
 
     call myGeom%x%Gradient(myGeom%dxds%interior)
-
     call myGeom%dxds%BoundaryInterp()
+    call myGeom%dxds%UpdateDevice()
 
     call myGeom%dxds%Determinant(myGeom%J%interior)
+
     call myGeom%J%UpdateDevice()
     call myGeom%J%BoundaryInterp()
     call myGeom%J%UpdateHost()

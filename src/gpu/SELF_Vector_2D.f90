@@ -107,6 +107,12 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
+
     call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
     call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
@@ -115,6 +121,8 @@ contains
     workSize=(interp%N+1)*(interp%M+1)*nelem*nvar*2*prec
     call gpuCheck(hipMalloc(this%interpWork,workSize))
 
+    call this%UpdateDevice()
+    
     call hipblasCheck(hipblasCreate(this%blas_handle))
 
   endsubroutine Init_Vector2D

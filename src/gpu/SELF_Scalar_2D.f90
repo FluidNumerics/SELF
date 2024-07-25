@@ -40,6 +40,7 @@ module SELF_Scalar_2D
     type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
+    type(c_ptr) :: boundarynormal_gpu
     type(c_ptr) :: extBoundary_gpu
     type(c_ptr) :: avgBoundary_gpu
     type(c_ptr) :: interpWork
@@ -81,19 +82,29 @@ contains
 
     allocate(this%interior(1:interp%N+1,interp%N+1,nelem,nvar), &
              this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar),&
-             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar))
+             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%boundarynormal(1:interp%N+1,1:4,1:nelem,1:2*nvar))
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
+
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
 
     call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
     call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
+    call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
     workSize=(interp%N+1)*(interp%M+1)*nelem*nvar*prec
     call gpuCheck(hipMalloc(this%interpWork,workSize))
 
+    call this%UpdateDevice()
+    
     call hipblasCheck(hipblasCreate(this%blas_handle))
 
   endsubroutine Init_Scalar2D
@@ -109,6 +120,7 @@ contains
     deallocate(this%boundary)
     deallocate(this%extBoundary)
     deallocate(this%avgBoundary)
+    deallocate(this%boundarynormal)
     deallocate(this%meta)
     deallocate(this%eqn)
     
@@ -116,6 +128,7 @@ contains
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
+    call gpuCheck(hipFree(this%boundarynormal_gpu))
     call gpuCheck(hipFree(this%interpWork))
     call hipblasCheck(hipblasDestroy(this%blas_handle))
 
@@ -129,6 +142,7 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%extboundary),this%extboundary_gpu,sizeof(this%extboundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%avgboundary),this%avgboundary_gpu,sizeof(this%avgboundary),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%boundarynormal),this%boundarynormal_gpu,sizeof(this%boundarynormal),hipMemcpyDeviceToHost))
 
   end subroutine UpdateHost_Scalar2D
 
@@ -140,6 +154,7 @@ contains
     call gpuCheck(hipMemcpy(this%boundary_gpu,c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%avgboundary_gpu,c_loc(this%avgboundary),sizeof(this%avgboundary),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%boundarynormal_gpu,c_loc(this%boundarynormal),sizeof(this%boundarynormal),hipMemcpyHostToDevice))
 
   end subroutine UpdateDevice_Scalar2D
 

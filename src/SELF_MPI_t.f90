@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_MPI
+module SELF_MPI_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -34,9 +34,7 @@ module SELF_MPI
 
   implicit none
 
-#include "SELF_Macros.h"
-
-  type MPILayer
+  type MPILayer_t
     logical :: mpiEnabled
     integer :: mpiComm
     integer :: mpiPrec
@@ -52,12 +50,12 @@ module SELF_MPI
 
   contains
 
-    procedure :: Init => Init_MPILayer
-    procedure :: Free => Free_MPILayer
-    procedure :: Finalize => Finalize_MPILayer
+    procedure :: Init => Init_MPILayer_t
+    procedure :: Free => Free_MPILayer_t
+    procedure :: Finalize => Finalize_MPILayer_t
 
-    procedure :: GenerateDecomposition => GenerateDecomposition_MPILayer
-    procedure :: SetElemToRank
+    procedure :: GenerateDecomposition => GenerateDecomposition_MPILayer_t
+    procedure :: SetElemToRank => SetElemToRank_MPILayer_t
     procedure :: SetMaxMsg
 
     procedure,public :: FinalizeMPIExchangeAsync
@@ -65,15 +63,15 @@ module SELF_MPI
     generic,public :: GlobalReduce => GlobalReduce_RealScalar
     procedure,private :: GlobalReduce_RealScalar
 
-  endtype MPILayer
+  endtype MPILayer_t
 
 contains
 
-  subroutine Init_MPILayer(this,enableMPI)
+  subroutine Init_MPILayer_t(this,enableMPI)
 #undef __FUNC__
-#define __FUNC__ "Init_MPILayer"
+#define __FUNC__ "Init_MPILayer_t"
     implicit none
-    class(MPILayer),intent(out) :: this
+    class(MPILayer_t),intent(out) :: this
     logical,intent(in) :: enableMPI
     ! Local
     integer       :: ierror
@@ -101,37 +99,34 @@ contains
     endif
 
     allocate(this%offsetElem(1:this%nRanks+1))
-    !$omp target enter data map(alloc: this % offsetElem)
 
     write(msg,'(I5)') this%rankId
     msg = "Greetings from rank "//trim(msg)//"."
-    INFO(trim(msg))
+    print*, trim(msg)
 
-  endsubroutine Init_MPILayer
+  endsubroutine Init_MPILayer_t
 
-  subroutine Free_MPILayer(this)
+  subroutine Free_MPILayer_t(this)
     implicit none
-    class(MPILayer),intent(inout) :: this
+    class(MPILayer_t),intent(inout) :: this
 
     if(associated(this%offSetElem)) then
       deallocate(this%offSetElem)
-      !$omp target exit data map(delete: this % offsetElem)
     endif
     if(associated(this%elemToRank)) then
       deallocate(this%elemToRank)
-      !$omp target exit data map(delete: this % elemToRank)
     endif
 
     deallocate(this%requests)
     deallocate(this%stats)
 
-  endsubroutine Free_MPILayer
+  endsubroutine Free_MPILayer_t
 
-  subroutine Finalize_MPILayer(this)
+  subroutine Finalize_MPILayer_t(this)
 #undef __FUNC__
-#define __FUNC__ "Finalize_MPILayer"
+#define __FUNC__ "Finalize_MPILayer_t"
     implicit none
-    class(MPILayer),intent(inout) :: this
+    class(MPILayer_t),intent(inout) :: this
     ! Local
     integer       :: ierror
     character(30) :: msg
@@ -139,17 +134,17 @@ contains
     if(this%mpiEnabled) then
       write(msg,'(I5)') this%rankId
       msg = "Goodbye from rank "//trim(msg)//"."
-      INFO(trim(msg))
+      print*,trim(msg)
       call MPI_FINALIZE(ierror)
     endif
 
-  endsubroutine Finalize_MPILayer
+  endsubroutine Finalize_MPILayer_t
 
-  subroutine GenerateDecomposition_MPILayer(this,nGlobalElem,maxMsg)
+  subroutine GenerateDecomposition_MPILayer_t(this,nGlobalElem,maxMsg)
 #undef __FUNC__
-#define __FUNC__ "GenerateDecomposition_MPILayer"
+#define __FUNC__ "GenerateDecomposition_MPILayer_t"
     implicit none
-    class(MPILayer),intent(inout) :: this
+    class(MPILayer_t),intent(inout) :: this
     integer,intent(in) :: nGlobalElem
     integer,intent(in) :: maxMsg
     ! Local
@@ -163,13 +158,13 @@ contains
     write(msg2,'(I5)') this%offSetElem(this%rankId+2)- &
       this%offSetElem(this%rankId+1)
     msg = "Rank "//trim(msg)//": nElem = "//trim(msg2)
-    INFO(trim(msg))
+    print*,trim(msg)
 
-  endsubroutine GenerateDecomposition_MPILayer
+  endsubroutine GenerateDecomposition_MPILayer_t
 
   subroutine SetMaxMsg(this,maxMsg)
     implicit none
-    class(MPILayer),intent(inout) :: this
+    class(MPILayer_t),intent(inout) :: this
     integer,intent(in) :: maxMsg
 
     if(allocated(this%requests)) deallocate(this%requests)
@@ -181,9 +176,9 @@ contains
 
   endsubroutine SetMaxMsg
 
-  subroutine SetElemToRank(this,nElem)
+  subroutine SetElemToRank_MPILayer_t(this,nElem)
     implicit none
-    class(MPILayer),intent(inout) :: this
+    class(MPILayer_t),intent(inout) :: this
     integer,intent(in) :: nElem
     ! Local
     integer :: iel
@@ -191,7 +186,6 @@ contains
     this%nElem = nElem
 
     allocate(this%elemToRank(1:nelem))
-    !$omp target enter data map(alloc:this % elemToRank)
 
     call DomainDecomp(nElem, &
                       this%nRanks, &
@@ -204,10 +198,7 @@ contains
                       this%elemToRank(iel))
     enddo
 
-    !$omp target update to(this % offsetElem)
-    !$omp target update to(this % elemToRank)
-
-  endsubroutine SetElemToRank
+  endsubroutine SetElemToRank_MPILayer_t
 
   subroutine DomainDecomp(nElems,nDomains,offSetElem)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 4
@@ -269,7 +260,7 @@ contains
   endsubroutine ElemToRank
 
   subroutine FinalizeMPIExchangeAsync(mpiHandler)
-    class(MPILayer),intent(inout) :: mpiHandler
+    class(MPILayer_t),intent(inout) :: mpiHandler
     ! Local
     integer :: ierror
     integer :: msgCount
@@ -285,7 +276,7 @@ contains
   endsubroutine FinalizeMPIExchangeAsync
 
   subroutine GlobalReduce_RealScalar(mpiHandler,sendBuf,recvBuf)
-    class(MPILayer),intent(in) :: mpiHandler
+    class(MPILayer_t),intent(in) :: mpiHandler
     real(prec),intent(in) :: sendBuf
     real(prec),intent(out) :: recvBuf
     ! Local
@@ -305,4 +296,4 @@ contains
 
   endsubroutine GlobalReduce_RealScalar
 
-endmodule SELF_MPI
+endmodule SELF_MPI_t

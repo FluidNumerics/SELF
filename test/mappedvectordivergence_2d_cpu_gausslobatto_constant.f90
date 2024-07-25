@@ -82,6 +82,7 @@ contains
 
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
     call f%SetEquation(1,1,'f = 1.0') ! x-component
     call f%SetEquation(2,1,'f = 1.0') ! y-component
@@ -89,7 +90,12 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    df%interior = f%MappedDivergence(geometry)
+#ifdef ENABLE_GPU
+    call f%MappedDivergence(df%interior_gpu)
+#else
+    call f%MappedDivergence(df%interior)
+#endif
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
@@ -101,6 +107,7 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
     call decomp%Free()
     call geometry%Free()
     call mesh%Free()

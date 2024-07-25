@@ -40,6 +40,7 @@ program advection_diffusion_2d_rk4
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec),parameter :: endtime = 0.2_prec
   real(prec),parameter :: iointerval = 0.1_prec
+  real(prec) :: e0, ef ! Initial and final entropy
   type(advection_diffusion_2d) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
@@ -81,6 +82,9 @@ program advection_diffusion_2d_rk4
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
 
+  call modelobj%CalculateEntropy()
+  call modelobj%ReportEntropy()
+  e0 = modelobj%entropy ! Save the initial entropys
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
@@ -91,7 +95,12 @@ program advection_diffusion_2d_rk4
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+  ef = modelobj%entropy
 
+  if( ef > e0 )then
+    print*, "Error: Final entropy greater than initial entropy! ", e0,ef
+    stop 1
+  endif
   ! Clean up
   call modelobj%free()
   call decomp%free()

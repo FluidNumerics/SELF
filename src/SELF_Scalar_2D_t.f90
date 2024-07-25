@@ -46,6 +46,7 @@ module SELF_Scalar_2D_t
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: boundary
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: extBoundary
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: avgBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:) :: boundarynormal
 
   contains
 
@@ -85,8 +86,15 @@ contains
 
     allocate(this%interior(1:interp%N+1,interp%N+1,nelem,nvar), &
              this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar),&
-             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar))
+             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
+             this%boundarynormal(1:interp%N+1,1:4,1:nelem,1:2*nvar))
+
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
@@ -104,6 +112,7 @@ contains
     deallocate(this%boundary)
     deallocate(this%extBoundary)
     deallocate(this%avgBoundary)
+    deallocate(this%boundarynormal)
     deallocate(this%meta)
     deallocate(this%eqn)
 

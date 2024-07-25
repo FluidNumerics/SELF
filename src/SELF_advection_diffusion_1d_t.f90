@@ -58,7 +58,7 @@ contains
     e = 0.0_prec
     do ivar = 1,this%solution%nvar
       do iel = 1,this%geometry%nelem
-        do i = 1,this%solution%interp%N
+        do i = 1,this%solution%interp%N+1
           J = this%geometry%dxds%interior(i,iel,1)
           s = this%solution%interior(i,iel,ivar)
           e = e + 0.5_prec*s*s*J

@@ -40,6 +40,7 @@ program advection_diffusion_2d_ab4
   real(prec),parameter :: dt = 5.0_prec*10.0_prec**(-5) ! time-step size
   real(prec),parameter :: endtime = 0.01_prec
   real(prec),parameter :: iointerval = 0.01_prec
+  real(prec) :: e0, ef ! Initial and final entropy
   type(advection_diffusion_2d) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
@@ -88,10 +89,18 @@ program advection_diffusion_2d_ab4
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
 
+  call modelobj%CalculateEntropy()
+  call modelobj%ReportEntropy()
+  e0 = modelobj%entropy ! Save the initial entropy
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+  ef = modelobj%entropy
 
+  if( ef > e0 )then
+    print*, "Error: Final entropy greater than initial entropy! ", e0,ef
+    stop 1
+  endif
   ! Clean up
   call modelobj%free()
   call decomp%free()

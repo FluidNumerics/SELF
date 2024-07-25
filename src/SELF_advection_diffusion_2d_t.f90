@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module self_advection_diffusion_2d
+module self_advection_diffusion_2d_t
 
   use self_model
   use self_dgmodel2d
@@ -32,39 +32,53 @@ module self_advection_diffusion_2d
 
   implicit none
 
-  type,extends(dgmodel2d) :: advection_diffusion_2d
+  type,extends(dgmodel2d) :: advection_diffusion_2d_t
     real(prec) :: nu ! diffusion coefficient
     real(prec) :: u ! constant x-component of velocity
     real(prec) :: v ! constant y-component of velocity
 
   contains
-    procedure :: pretendency => pretendency_advection_diffusion_2d
-    procedure :: setboundarycondition => setboundarycondition_advection_diffusion_2d
-    procedure :: riemannsolver => riemannsolver_advection_diffusion_2d
-    procedure :: fluxmethod => fluxmethod_advection_diffusion_2d
+    procedure :: setboundarycondition => setboundarycondition_advection_diffusion_2d_t
+    procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_2d_t
+    procedure :: riemannsolver => riemannsolver_advection_diffusion_2d_t
+    procedure :: fluxmethod => fluxmethod_advection_diffusion_2d_t
+    procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_2d_t
 
-  endtype advection_diffusion_2d
 
-  ! Remember, the order of operations for the tendency calculation is
-  !
-  !    solution % BoundaryInterp(this % gpuAccel)
-  !    solution % SideExchange(this % mesh,this % decomp,this % gpuAccel)
-  !    PreTendency()
-  !    SetBoundaryCondition()
-  !    SourceMethod()
-  !    RiemannSolver()
-  !    FluxMethod()
-  !    CalculateFluxDivergence()
+  endtype advection_diffusion_2d_t
 
 contains
 
-  subroutine pretendency_advection_diffusion_2d(this)
-    ! Here, we use the pre-tendency method to calculate the
-    ! derivative of the solution using a bassi-rebay method
-    ! We then do a boundary interpolation and side exchange
-    ! on the gradient field
+  subroutine CalculateEntropy_advection_diffusion_2d_t(this)
     implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
+    class(advection_diffusion_2d_t),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,ivar
+    real(prec) :: e,s,jac
+
+    e = 0.0_prec
+    do ivar = 1,this%solution%nvar
+      do iel = 1,this%geometry%nelem
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            jac = this%geometry%J%interior(i,j,iel,1)
+            s = this%solution%interior(i,j,iel,ivar)
+            e = e + 0.5_prec*s*s*jac
+          enddo
+        enddo
+      enddo
+    enddo
+
+    this%entropy = e
+
+  endsubroutine CalculateEntropy_advection_diffusion_2d_t
+
+  subroutine setboundarycondition_advection_diffusion_2d_t(this)
+    !! Boundary conditions for the solution are set to 
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(advection_diffusion_2d_t),intent(inout) :: this
     ! local
     integer :: i,ivar,iEl,j,e2
 
@@ -89,31 +103,13 @@ contains
     enddo
     !$omp end target
 
-    ! calculate the averages of the solutions on the element
-    ! boundaries and store is this % solution % avgBoundary
-    call this%solution%AverageSides()
+  endsubroutine setboundarycondition_advection_diffusion_2d_t
 
-    ! calculate the derivative using the weak form
-    ! With the boundary attribute now storing the side average, this
-    ! amounts to a bassi-rebay method for the gradient.
-    this%solutionGradient%interior = this%solution%DGGradient(this%geometry)
-
-    ! interpolate the solutiongradient to the element boundaries
-    call this%solutionGradient%BoundaryInterp()
-
-    ! perform the side exchange to populate the solutionGradient % extBoundary attribute
-    call this%solutionGradient%SideExchange(this%mesh,this%decomp)
-
-  endsubroutine pretendency_advection_diffusion_2d
-
-  subroutine setboundarycondition_advection_diffusion_2d(this)
-    ! Here, we set the boundary conditions for the
-    ! solution and the solution gradient at the left
-    ! and right most boundaries.
-    !
-    ! Here, we use periodic boundary conditions
+  subroutine setgradientboundarycondition_advection_diffusion_2d_t(this)
+    !! Boundary conditions on the solution gradient are set
+    !! to prolong the solution gradient through the boundaries
     implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
+    class(advection_diffusion_2d_t),intent(inout) :: this
     ! local
     integer :: i,ivar,iEl,j,e2
 
@@ -140,13 +136,11 @@ contains
     enddo
     !$omp end target
 
-    call this%solutionGradient%AverageSides()
+  endsubroutine setgradientboundarycondition_advection_diffusion_2d_t
 
-  endsubroutine setboundarycondition_advection_diffusion_2d
-
-  subroutine fluxmethod_advection_diffusion_2d(this)
+  subroutine fluxmethod_advection_diffusion_2d_t(this)
     implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
+    class(advection_diffusion_2d_t),intent(inout) :: this
     ! Local
     integer :: iel
     integer :: ivar
@@ -177,14 +171,14 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine fluxmethod_advection_diffusion_2d
+  endsubroutine fluxmethod_advection_diffusion_2d_t
 
-  subroutine riemannsolver_advection_diffusion_2d(this)
+  subroutine riemannsolver_advection_diffusion_2d_t(this)
     ! this method uses an linear upwind solver for the
     ! advective flux and the bassi-rebay method for the
     ! diffusive fluxes
     implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
+    class(advection_diffusion_2d_t),intent(inout) :: this
     ! Local
     integer :: iel
     integer :: ivar
@@ -223,6 +217,6 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine riemannsolver_advection_diffusion_2d
+  endsubroutine riemannsolver_advection_diffusion_2d_t
 
-endmodule self_advection_diffusion_2d
+endmodule self_advection_diffusion_2d_t

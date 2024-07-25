@@ -86,19 +86,19 @@ contains
 
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = 1.0')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%UpdateDevice()
     call f%BoundaryInterp()
     call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh,decomp)
-
+    call f%UpdateHost()
     ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
     do iel = 1,f%nElem
       do iside = 1,4
@@ -113,11 +113,18 @@ contains
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
     call f%UpdateDevice()
-    call f%AverageSides()
-    call f%UpdateHost()
-    print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
-    df%interior = f%DGGradient(geometry)
+    call f%AverageSides()
+
+    call f%UpdateHost()
+    print*,"min, max (avgboundary)",minval(f%avgboundary),maxval(f%avgboundary)
+
+#ifdef ENABLE_GPU
+    call f%MappedDGGradient(df%interior_gpu)
+#else
+    call f%MappedDGGradient(df%interior)
+#endif
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
@@ -130,6 +137,7 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
     call decomp%Free()
     call geometry%Free()
     call mesh%Free()

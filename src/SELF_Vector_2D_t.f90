@@ -112,6 +112,12 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
+
   endsubroutine Init_Vector2D_t
 
   subroutine Free_Vector2D_t(this)

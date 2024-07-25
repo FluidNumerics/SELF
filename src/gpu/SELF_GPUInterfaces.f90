@@ -116,5 +116,34 @@ module SELF_GPUInterfaces
       integer(c_int),value :: ndof
     endsubroutine GradientNormal_1D_gpu
   endinterface
+
+  interface
+    subroutine SideExchange_2D_gpu(extboundary,boundary,sideinfo,elemToRank,rankid,offset,n,nvar,nel) &
+       bind(c,name="SideExchange_2D_gpu")
+       use iso_c_binding
+       type(c_ptr),value :: extboundary,boundary,sideinfo,elemToRank
+       integer(c_int),value :: rankId,offset,N,nVar,nEl
+    endsubroutine SideExchange_2D_gpu
+  endinterface
+
+  interface
+    subroutine DG_BoundaryContribution_2D_gpu(bmatrix,qweights,bf,df,N,nvar,nel) &
+       bind(c,name="DG_BoundaryContribution_2D_gpu")
+       use iso_c_binding
+       implicit none
+       type(c_ptr),value :: bmatrix,qweights,bf,df
+       integer(c_int),value :: N,nvar,nel
+    endsubroutine DG_BoundaryContribution_2D_gpu
+  endinterface
+
+  interface
+    subroutine JacobianWeight_2D_gpu(scalar,J,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: scalar,J
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine JacobianWeight_2D_gpu
+  end interface
   
 end module SELF_GPUInterfaces

@@ -147,10 +147,10 @@ contains
 
   endsubroutine BoundaryInterp_Scalar3D
 
-  function GridInterp_Scalar3D(this) result(f)
+  subroutine GridInterp_Scalar3D(this,f)
     implicit none
     class(Scalar3D),intent(in) :: this
-    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
+    real(prec),intent(out) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,k,ii,jj,kk,iel,ivar

@@ -84,14 +84,19 @@ contains
 
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = x*y')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    df%interior = f%MappedGradient(geometry)
-
+#ifdef ENABLE_GPU
+    call f%MappedGradient(df%interior_gpu)
+#else
+    call f%MappedGradient(df%interior)
+#endif
+    call df%UpdateHost()
     call f%SetName(1,"f")
     call f%SetUnits(1,"[null]")
 
@@ -135,6 +140,7 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
     call decomp%Free()
     call geometry%Free()
     call mesh%Free()
