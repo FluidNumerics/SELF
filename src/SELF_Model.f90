@@ -85,9 +85,9 @@ module SELF_Model
   integer,parameter :: SELF_RK2 = 200
   integer,parameter :: SELF_RK3 = 300
   integer,parameter :: SELF_RK4 = 400
-  integer,parameter :: SELF_AB2 = 201
-  integer,parameter :: SELF_AB3 = 301
-  integer,parameter :: SELF_AB4 = 401
+  ! integer,parameter :: SELF_AB2 = 201
+  ! integer,parameter :: SELF_AB3 = 301
+  ! integer,parameter :: SELF_AB4 = 401
 
   integer,parameter :: SELF_INTEGRATOR_LENGTH = 10 ! max length of integrator methods when specified as char
   integer,parameter :: SELF_EQUATION_LENGTH = 500
@@ -139,15 +139,6 @@ module SELF_Model
 
     ! Adams-Bashforth Methods
     procedure(ResizePrevSol),deferred :: ResizePrevSol
-
-    procedure :: AdamsBashforth2_timeIntegrator
-    procedure(UpdateGAB),deferred :: UpdateGAB2
-
-    procedure :: AdamsBashforth3_timeIntegrator
-    procedure(UpdateGAB),deferred :: UpdateGAB3
-
-    procedure :: AdamsBashforth4_timeIntegrator
-    procedure(UpdateGAB),deferred :: UpdateGAB4
 
     ! Runge-Kutta methods
     procedure :: LowStorageRK2_timeIntegrator
@@ -204,15 +195,6 @@ module SELF_Model
       class(Model),intent(inout) :: this
       integer,intent(in) :: m
     endsubroutine ResizePrevSol
-  endinterface
-
-  interface
-    subroutine UpdateGAB(this,m)
-      import Model
-      implicit none
-      class(Model),intent(inout) :: this
-      integer,intent(in) :: m
-    endsubroutine UpdateGAB
   endinterface
 
   interface
@@ -419,15 +401,6 @@ contains
 
     case(SELF_EULER)
       this%timeIntegrator => Euler_timeIntegrator
-    case(SELF_AB2)
-      this%timeIntegrator => AdamsBashforth2_timeIntegrator
-      call this%ResizePrevSol(2)
-    case(SELF_AB3)
-      this%timeIntegrator => AdamsBashforth3_timeIntegrator
-      call this%ResizePrevSol(3)
-    case(SELF_AB4)
-      this%timeIntegrator => AdamsBashforth4_timeIntegrator
-      call this%ResizePrevSol(4)
     case(SELF_RK2)
       this%timeIntegrator => LowStorageRK2_timeIntegrator
     case(SELF_RK3)
@@ -464,18 +437,6 @@ contains
 
     case("EULER")
       this%timeIntegrator => Euler_timeIntegrator
-
-    case("AB2")
-      this%timeIntegrator => AdamsBashforth2_timeIntegrator
-      call this%ResizePrevSol(2)
-
-    case("AB3")
-      this%timeIntegrator => AdamsBashforth3_timeIntegrator
-      call this%ResizePrevSol(3)
-
-    case("AB4")
-      this%timeIntegrator => AdamsBashforth4_timeIntegrator
-      call this%ResizePrevSol(4)
 
     case("RK2")
       this%timeIntegrator => LowStorageRK2_timeIntegrator
@@ -610,6 +571,7 @@ contains
         call this%timeIntegrator(tNext)
         this%t = tNext
         call this%WriteModel()
+        call this%WriteTecplot()
         call this%IncrementIOCounter()
         call this%CalculateEntropy()
         call this%ReportEntropy()
@@ -646,129 +608,6 @@ contains
     this%dt = dtLim
 
   endsubroutine Euler_timeIntegrator
-
-  subroutine AdamsBashforth2_timeIntegrator(this,tn)
-    implicit none
-    class(Model),intent(inout) :: this
-    real(prec),intent(in) :: tn
-    ! Local
-    real(prec) :: tRemain
-    real(prec) :: dtLim
-    real(prec) :: t0
-
-    dtLim = this%dt ! Get the max time step size from the dt attribute
-    t0 = this%t
-
-    ! Do a single step with RK2
-    ! Initialize the PrevSol attribute
-    call this%UpdateGAB2(0)
-    call this%LowStorageRK2_timeIntegrator(t0+this%dt)
-
-    do while(this%t < tn)
-
-      t0 = this%t
-      tRemain = tn-this%t
-      this%dt = min(dtLim,tRemain)
-
-      call this%UpdateGAB2(2) ! Store the solution in PrevSol and store the interpolated
-      ! solution in the solution attribute for tendency calculation
-      call this%CalculateTendency()
-      call this%UpdateGAB2(1) ! Reset the solution from the PrevSol
-      call this%UpdateSolution()
-
-      this%t = t0+this%dt
-
-    enddo
-
-    this%dt = dtLim
-
-  endsubroutine AdamsBashforth2_timeIntegrator
-
-  subroutine AdamsBashforth3_timeIntegrator(this,tn)
-    implicit none
-    class(Model),intent(inout) :: this
-    real(prec),intent(in) :: tn
-    ! Local
-    real(prec) :: tRemain
-    real(prec) :: dtLim
-    real(prec) :: t0
-
-    dtLim = this%dt ! Get the max time step size from the dt attribute
-
-    ! Do two time steps with RK3
-    ! Initialize the PrevSol attribute
-    t0 = this%t
-    call this%UpdateGAB3(0)
-    call this%LowStorageRK3_timeIntegrator(t0+this%dt)
-
-    t0 = this%t
-    call this%UpdateGAB3(1)
-    call this%LowStorageRK3_timeIntegrator(t0+this%dt)
-
-    do while(this%t < tn)
-
-      t0 = this%t
-      tRemain = tn-this%t
-      this%dt = min(dtLim,tRemain)
-
-      call this%UpdateGAB3(3) ! Store the solution in PrevSol and store the interpolated
-      ! solution in the solution attribute for tendency calculation
-      call this%CalculateTendency()
-      call this%UpdateGAB3(2) ! Reset the solution from the PrevSol
-      call this%UpdateSolution()
-
-      this%t = t0+this%dt
-
-    enddo
-
-    this%dt = dtLim
-
-  endsubroutine AdamsBashforth3_timeIntegrator
-
-  subroutine AdamsBashforth4_timeIntegrator(this,tn)
-    implicit none
-    class(Model),intent(inout) :: this
-    real(prec),intent(in) :: tn
-    ! Local
-    real(prec) :: tRemain
-    real(prec) :: dtLim
-    real(prec) :: t0
-
-    dtLim = this%dt ! Get the max time step size from the dt attribute
-
-    ! Do three time steps with RK4
-    ! Initialize the PrevSol attribute
-    t0 = this%t
-    call this%UpdateGAB4(0)
-    call this%LowStorageRK4_timeIntegrator(t0+this%dt)
-
-    t0 = this%t
-    call this%UpdateGAB4(1)
-    call this%LowStorageRK4_timeIntegrator(t0+this%dt)
-
-    t0 = this%t
-    call this%UpdateGAB4(2)
-    call this%LowStorageRK4_timeIntegrator(t0+this%dt)
-
-    do while(this%t < tn)
-
-      t0 = this%t
-      tRemain = tn-this%t
-      this%dt = min(dtLim,tRemain)
-
-      call this%UpdateGAB4(4) ! Store the solution in PrevSol and store the interpolated
-      ! solution in the solution attribute for tendency calculation
-      call this%CalculateTendency()
-      call this%UpdateGAB4(3) ! Reset the solution from the PrevSol
-      call this%UpdateSolution()
-
-      this%t = t0+this%dt
-
-    enddo
-
-    this%dt = dtLim
-
-  endsubroutine AdamsBashforth4_timeIntegrator
 
   subroutine LowStorageRK2_timeIntegrator(this,tn)
     implicit none

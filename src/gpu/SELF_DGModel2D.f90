@@ -35,15 +35,10 @@ module SELF_DGModel2D
 
   type,extends(DGModel2D_t) :: DGModel2D
 
-
   contains
 
 
     procedure :: UpdateSolution => UpdateSolution_DGModel2D
-
-    procedure :: UpdateGAB2 => UpdateGAB2_DGModel2D
-    procedure :: UpdateGAB3 => UpdateGAB3_DGModel2D
-    procedure :: UpdateGAB4 => UpdateGAB4_DGModel2D
 
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel2D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel2D
@@ -79,51 +74,6 @@ contains
     call UpdateSolution_gpu(this%solution%interior_gpu,this%dsdt%interior_gpu,dtLoc,ndof)
 
   endsubroutine UpdateSolution_DGModel2D
-
-  subroutine UpdateGAB2_DGModel2D(this,m)
-    implicit none
-    class(DGModel2D),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: ndof
-
-    ndof = this%solution%nvar*&
-           this%solution%nelem*&
-           (this%solution%interp%N+1)*&
-           (this%solution%interp%N+1)
-    call UpdateGAB2_gpu(this%prevsol%interior_gpu,this%solution%interior_gpu,m,ndof) 
-
-  endsubroutine UpdateGAB2_DGModel2D
-
-  subroutine UpdateGAB3_DGModel2D(this,m)
-    implicit none
-    class(DGModel2D),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: ndof
-
-    ndof = this%solution%nvar*&
-           this%solution%nelem*&
-           (this%solution%interp%N+1)*&
-           (this%solution%interp%N+1)
-    call UpdateGAB3_gpu(this%prevsol%interior_gpu,this%solution%interior_gpu,m,ndof) 
-
-  endsubroutine UpdateGAB3_DGModel2D
-
-  subroutine UpdateGAB4_DGModel2D(this,m)
-    implicit none
-    class(DGModel2D),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: ndof
-
-    ndof = this%solution%nvar*&
-           this%solution%nelem*&
-           (this%solution%interp%N+1)*&
-           (this%solution%interp%N+1)
-    call UpdateGAB4_gpu(this%prevsol%interior_gpu,this%solution%interior_gpu,m,ndof) 
-
-  endsubroutine UpdateGAB4_DGModel2D
 
   subroutine UpdateGRK2_DGModel2D(this,m)
     implicit none
@@ -207,7 +157,6 @@ contains
     call this%SetBoundaryCondition()  ! User-supplied
 
     if( this % gradient_enabled )then
-      call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
@@ -217,7 +166,7 @@ contains
     call this%RiemannSolver() ! User supplied
     call this%FluxMethod()    ! User supplied
     
-    call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
+    call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)
 
     ndof = this%solution%nvar*&
            this%solution%nelem*&

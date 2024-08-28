@@ -71,13 +71,19 @@ contains
 
     ! Set the source vector (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
+    call f%UpdateDevice()
 
-    ! Interpolate with gpuAccel = .FALSE.
-    fTarget%interior = f%GridInterp()
+#ifdef ENABLE_GPU
+    call f%GridInterp(fTarget%interior_gpu)
+#else
+    call f%GridInterp(fTarget%interior)
+#endif
+    call fTarget%UpdateHost()
 
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)
 
+    print*, "absmax error",maxval(fTarget%interior)
     if(maxval(fTarget%interior) <= tolerance) then
       r = 0
     else

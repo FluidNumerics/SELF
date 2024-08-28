@@ -23,7 +23,7 @@ extern "C"
   }
 }
 
-__global__ void BoundaryInterp_2D(real *bMatrix, real *f, real *fBound, int N, int nEl){
+__global__ void BoundaryInterp_2D_gpukernel(real *bMatrix, real *f, real *fBound, int N, int nEl){
 
   int iq = threadIdx.x + blockIdx.x*blockDim.x;
   int i = iq % (N+1);
@@ -58,8 +58,42 @@ extern "C"
     int ndof = (N+1)*nEl*nVar;
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block +1;
-	BoundaryInterp_2D<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(bMatrix, f, fBound, N, nEl);
+	  BoundaryInterp_2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(bMatrix, f, fBound, N, nEl);
   } 
 }
 
+__global__ void BoundaryInterp_3D_gpukernel(real *bMatrix, real *f, real *fBound, int N, int nEl){
+  
+  int iq = threadIdx.x + blockIdx.x*blockDim.x;
+  int i = iq % (N+1);
+  int j = (iq/(N+1))%(N+1);
+  int iEl = (iq/(N+1)/(N+1)) % (nEl);
+  int iVar = iq/(N+1)/(N+1)/(nEl);
 
+  real fb[6] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    fb[0] += f[SC_3D_INDEX(i,j,ii,iEl,iVar,N,nEl)]*bMatrix[ii]; // Bottom
+    fb[1] += f[SC_3D_INDEX(i,ii,j,iEl,iVar,N,nEl)]*bMatrix[ii]; // South
+    fb[2] += f[SC_3D_INDEX(ii,i,j,iEl,iVar,N,nEl)]*bMatrix[ii+(N+1)]; // East
+    fb[3] += f[SC_3D_INDEX(i,ii,j,iEl,iVar,N,nEl)]*bMatrix[ii+(N+1)]; // North
+    fb[4] += f[SC_3D_INDEX(ii,i,j,iEl,iVar,N,nEl)]*bMatrix[ii]; // West
+    fb[5] += f[SC_3D_INDEX(i,j,ii,iEl,iVar,N,nEl)]*bMatrix[ii+(N+1)]; // Top
+  }
+  fBound[SCB_3D_INDEX(i,j,0,iEl,iVar,N,nEl)] = fb[0];
+  fBound[SCB_3D_INDEX(i,j,1,iEl,iVar,N,nEl)] = fb[1];
+  fBound[SCB_3D_INDEX(i,j,2,iEl,iVar,N,nEl)] = fb[2];
+  fBound[SCB_3D_INDEX(i,j,3,iEl,iVar,N,nEl)] = fb[3];
+  fBound[SCB_3D_INDEX(i,j,4,iEl,iVar,N,nEl)] = fb[4];
+  fBound[SCB_3D_INDEX(i,j,5,iEl,iVar,N,nEl)] = fb[5];
+}
+
+extern "C"
+{
+  void BoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar, int nEl)
+  {
+    int ndof = (N+1)*(N+1)*nEl*nVar;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block +1;
+	  BoundaryInterp_3D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(bMatrix, f, fBound, N, nEl);
+  } 
+}

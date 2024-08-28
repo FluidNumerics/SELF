@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Mesh_3D
+module SELF_Mesh_3D_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -104,7 +104,7 @@ module SELF_Mesh_3D
   integer,parameter :: selfSide3D_West = 5
   integer,parameter :: selfSide3D_Top = 6
 
-  type,extends(SEMMesh) :: Mesh3D
+  type,extends(SEMMesh) :: Mesh3D_t
     integer,pointer,dimension(:,:,:) :: sideInfo
     real(prec),pointer,dimension(:,:,:,:,:) :: nodeCoords
     integer,pointer,dimension(:,:) :: elemInfo
@@ -117,18 +117,18 @@ module SELF_Mesh_3D
 
   contains
 
-    procedure,public :: Init => Init_Mesh3D
-    procedure,public :: Free => Free_Mesh3D
+    procedure,public :: Init => Init_Mesh3D_t
+    procedure,public :: Free => Free_Mesh3D_t
 
-    procedure,public :: Read_HOPr => Read_HOPr_Mesh3D
+    procedure,public :: Read_HOPr => Read_HOPr_Mesh3D_t
 
-    procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh3D
+    procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh3D_t
 
-    procedure,public :: Write_Mesh => Write_Mesh3D
+    procedure,public :: Write_Mesh => Write_Mesh3D_t
 
-    procedure,private :: RecalculateFlip => RecalculateFlip_Mesh3D
+    procedure,public :: RecalculateFlip => RecalculateFlip_Mesh3D_t
 
-  endtype Mesh3D
+  endtype Mesh3D_t
 
   integer,private :: CGNStoSELFflip(1:6,1:6,1:4)
 
@@ -174,9 +174,9 @@ module SELF_Mesh_3D
 
 contains
 
-  subroutine Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
+  subroutine Init_Mesh3D_t(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
-    class(Mesh3D),intent(out) :: this
+    class(Mesh3D_t),intent(out) :: this
     integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     integer,intent(in) :: nSides
@@ -203,15 +203,6 @@ contains
     allocate(this%CGNSSideMap(1:4,1:6))
     allocate(this%sideMap(1:4,1:6))
     allocate(this%BCType(1:4,1:nBCs))
-
-    !$omp target enter data map(alloc: this % elemInfo)
-    !$omp target enter data map(alloc: this % sideInfo)
-    !$omp target enter data map(alloc: this % nodeCoords)
-    !$omp target enter data map(alloc: this % globalNodeIDs)
-    !$omp target enter data map(alloc: this % CGNSCornerMap)
-    !$omp target enter data map(alloc: this % CGNSSideMap)
-    !$omp target enter data map(alloc: this % sideMap)
-    !$omp target enter data map(alloc: this % BCType)
 
     allocate(this%BCNames(1:nBCs))
 
@@ -246,15 +237,11 @@ contains
     this%sideMap(1:4,5) = (/1,4,8,5/) ! West
     this%sideMap(1:4,6) = (/5,6,7,8/) ! Top
 
-    !$omp target update to(this % CGNSCornerMap)
-    !$omp target update to(this % CGNSSideMap)
-    !$omp target update to(this % sideMap)
+  endsubroutine Init_Mesh3D_t
 
-  endsubroutine Init_Mesh3D
-
-  subroutine Free_Mesh3D(this)
+  subroutine Free_Mesh3D_t(this)
     implicit none
-    class(Mesh3D),intent(inout) :: this
+    class(Mesh3D_t),intent(inout) :: this
 
     this%nElem = 0
     this%nSides = 0
@@ -273,27 +260,18 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
 
-    !$omp target exit data map(delete: this % elemInfo)
-    !$omp target exit data map(delete: this % sideInfo)
-    !$omp target exit data map(delete: this % nodeCoords)
-    !$omp target exit data map(delete: this % globalNodeIDs)
-    !$omp target exit data map(delete: this % CGNSCornerMap)
-    !$omp target exit data map(delete: this % CGNSSideMap)
-    !$omp target exit data map(delete: this % sideMap)
-    !$omp target exit data map(delete: this % BCType)
-
     deallocate(this%BCNames)
 
-  endsubroutine Free_Mesh3D
+  endsubroutine Free_Mesh3D_t
 
-  subroutine ResetBoundaryConditionType_Mesh3D(this,bcid)
+  subroutine ResetBoundaryConditionType_Mesh3D_t(this,bcid)
     !! This method can be used to reset all of the boundary elements
     !! boundary condition type to the desired value.
     !!
     !! Note that ALL physical boundaries will be set to have this boundary
     !! condition
     implicit none
-    class(Mesh3D),intent(inout) :: this
+    class(Mesh3D_t),intent(inout) :: this
     integer,intent(in) :: bcid
     ! Local
     integer :: iSide,iEl,e2
@@ -310,11 +288,11 @@ contains
       enddo
     enddo
 
-  endsubroutine ResetBoundaryConditionType_Mesh3D
+  endsubroutine ResetBoundaryConditionType_Mesh3D_t
 
-  subroutine RecalculateFlip_Mesh3D(this)
+  subroutine RecalculateFlip_Mesh3D_t(this)
     implicit none
-    class(Mesh3D),intent(inout) :: this
+    class(Mesh3D_t),intent(inout) :: this
     ! Local
     integer :: e1
     integer :: s1
@@ -340,12 +318,12 @@ contains
       enddo
     enddo
 
-  endsubroutine RecalculateFlip_Mesh3D
+  endsubroutine RecalculateFlip_Mesh3D_t
 
-  subroutine Read_HOPr_Mesh3D(this,meshFile,decomp)
+  subroutine Read_HOPr_Mesh3D_t(this,meshFile,decomp)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     implicit none
-    class(Mesh3D),intent(out) :: this
+    class(Mesh3D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
     type(MPILayer),intent(inout) :: decomp
     ! Local
@@ -471,12 +449,12 @@ contains
 
     deallocate(hopr_elemInfo,hopr_nodeCoords,hopr_globalNodeIDs,hopr_sideInfo)
 
-  endsubroutine Read_HOPr_Mesh3D
+  endsubroutine Read_HOPr_Mesh3D_t
 
-  subroutine Write_Mesh3D(this,meshFile)
+  subroutine Write_Mesh3D_t(this,meshFile)
     ! Writes mesh output in HOPR format (serial only)
     implicit none
-    class(Mesh3D),intent(inout) :: this
+    class(Mesh3D_t),intent(inout) :: this
     character(*),intent(in) :: meshFile
     ! Local
     integer(HID_T) :: fileId
@@ -499,6 +477,6 @@ contains
 
     call Close_HDF5(fileID)
 
-  endsubroutine Write_Mesh3D
+  endsubroutine Write_Mesh3D_t
 
-endmodule SELF_Mesh_3D
+endmodule SELF_Mesh_3D_t

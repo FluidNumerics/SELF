@@ -54,7 +54,6 @@ module SELF_Geometry_2D
     procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMQuad
     procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
-    procedure,public :: write => Write_SEMQuad
 
   endtype SEMQuad
 
@@ -169,7 +168,7 @@ contains
     enddo
 
     ! Interpolate the contravariant tensor to the boundaries
-    call myGeom%dsdx%BoundaryInterp()
+    call myGeom%dsdx%BoundaryInterp() ! Tensor boundary interp is not offloaded
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
@@ -243,7 +242,7 @@ contains
     class(SEMQuad),intent(inout) :: myGeom
 
     call myGeom%x%Gradient(myGeom%dxds%interior)
-    call myGeom%dxds%BoundaryInterp()
+    call myGeom%dxds%BoundaryInterp() ! Tensor boundary interp is not offloaded to GPU
     call myGeom%dxds%UpdateDevice()
 
     call myGeom%dxds%Determinant(myGeom%J%interior)
@@ -255,66 +254,5 @@ contains
     call myGeom%CalculateContravariantBasis()
 
   endsubroutine CalculateMetricTerms_SEMQuad
-
-  subroutine Write_SEMQuad(myGeom,fileName)
-    implicit none
-    class(SEMQuad),intent(in) :: myGeom
-    character(*),optional,intent(in) :: fileName
-    ! Local
-    integer(HID_T) :: fileId
-    ! Local
-    character(LEN=self_FileNameLength) :: pickupFile
-
-    if(present(filename)) then
-      pickupFile = filename
-    else
-      pickupFile = 'mesh.h5'
-    endif
-
-    call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
-
-    call CreateGroup_HDF5(fileId,'/quadrature')
-
-    call WriteArray_HDF5(fileId,'/quadrature/xi', &
-                         myGeom%x%interp%controlPoints)
-
-    call WriteArray_HDF5(fileId,'/quadrature/weights', &
-                         myGeom%x%interp%qWeights)
-
-    call WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                         myGeom%x%interp%dgMatrix)
-
-    call WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                         myGeom%x%interp%dMatrix)
-
-    call CreateGroup_HDF5(fileId,'/mesh')
-
-    call CreateGroup_HDF5(fileId,'/mesh/interior')
-
-    call CreateGroup_HDF5(fileId,'/mesh/boundary')
-
-    call WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom%x%interior)
-
-    call WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom%dxds%interior)
-
-    call WriteArray_HDF5(fileId,'/mesh/interior/dsdx',myGeom%dsdx%interior)
-
-    call WriteArray_HDF5(fileId,'/mesh/interior/J',myGeom%J%interior)
-
-    call WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom%x%boundary)
-
-    call WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom%dxds%boundary)
-
-    call WriteArray_HDF5(fileId,'/mesh/boundary/dsdx',myGeom%dsdx%boundary)
-
-    call WriteArray_HDF5(fileId,'/mesh/boundary/nHat',myGeom%nHat%boundary)
-
-    call WriteArray_HDF5(fileId,'/mesh/boundary/nScale',myGeom%nScale%boundary)
-
-    call WriteArray_HDF5(fileId,'/mesh/boundary/J',myGeom%J%boundary)
-
-    call Close_HDF5(fileId)
-
-  endsubroutine Write_SEMQuad
 
 endmodule SELF_Geometry_2D

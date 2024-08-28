@@ -38,8 +38,8 @@ program advection_diffusion_1d_euler
   real(prec),parameter :: u = 1.0_prec ! velocity
   real(prec),parameter :: nu = 0.001_prec ! diffusivity
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec),parameter :: endtime = 0.01_prec
-  real(prec),parameter :: iointerval = 0.01_prec
+  real(prec),parameter :: endtime = 0.2_prec
+  real(prec),parameter :: iointerval = 0.1_prec
   real(prec) :: e0, ef ! Initial and final entropy
   type(advection_diffusion_1d) :: modelobj
   type(Lagrange),target :: interp
@@ -78,7 +78,7 @@ program advection_diffusion_1d_euler
   modelobj%nu = nu
 
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = 1.0')
+  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 )/0.01 )')
   call modelobj%solution%SetInteriorFromEquation(0.0_prec)
 
   print*,"min, max (interior)", &
@@ -88,7 +88,10 @@ program advection_diffusion_1d_euler
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
   e0 = modelobj%entropy ! Save the initial entropy
-
+  !Write the initial condition
+  call modelobj%WriteModel()
+  call modelobj%WriteTecplot()
+  call modelobj%IncrementIOCounter()
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 

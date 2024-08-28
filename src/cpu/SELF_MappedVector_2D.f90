@@ -26,11 +26,11 @@
 
 module SELF_MappedVector_2D
 
-    use SELF_MappedVector_2D_t
+  use SELF_MappedVector_2D_t
+
+  implicit none
+
+  type,extends(MappedVector2D_t),public :: MappedVector2D
+  endtype MappedVector2D
   
-    implicit none
-  
-    type,extends(MappedVector2D_t),public :: MappedVector2D
-    endtype MappedVector2D
-  
-  endmodule SELF_MappedVector_2D
+endmodule SELF_MappedVector_2D

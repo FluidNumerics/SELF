@@ -24,10 +24,10 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Tensor_2D
+module SELF_Tensor_3D
 
   use SELF_Constants
-  use SELF_Tensor_2D_t
+  use SELF_Tensor_3D_t
   use SELF_GPU
   use SELF_GPUBLAS
   use iso_c_binding
@@ -36,7 +36,7 @@ module SELF_Tensor_2D
   implicit none
 
 
-  type,extends(Tensor2D_t),public :: Tensor2D
+  type,extends(Tensor3D_t),public :: Tensor3D
     character(3) :: backend="gpu"
     type(c_ptr) :: blas_handle  
     type(c_ptr) :: interior_gpu
@@ -45,19 +45,19 @@ module SELF_Tensor_2D
 
   contains
 
-    procedure,public :: Init => Init_Tensor2D
-    procedure,public :: Free => Free_Tensor2D
+    procedure,public :: Init => Init_Tensor3D
+    procedure,public :: Free => Free_Tensor3D
 
-    procedure,public :: UpdateHost => UpdateHost_Tensor2D
-    procedure,public :: UpdateDevice => UpdateDevice_Tensor2D
+    procedure,public :: UpdateHost => UpdateHost_Tensor3D
+    procedure,public :: UpdateDevice => UpdateDevice_Tensor3D
 
-  endtype Tensor2D
+  endtype Tensor3D
 
 contains
 
-  subroutine Init_Tensor2D(this,interp,nVar,nElem)
+  subroutine Init_Tensor3D(this,interp,nVar,nElem)
     implicit none
-    class(Tensor2D),intent(out) :: this
+    class(Tensor3D),intent(out) :: this
     type(Lagrange),target,intent(in) :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
@@ -70,12 +70,12 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:2,1:2), &
-             this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2,1:2), &
-             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2,1:2))
+    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3,1:3), &
+             this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3,1:3), &
+             this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3,1:3))
 
     allocate(this%meta(1:nVar))
-    allocate(this%eqn(1:4*nVar))
+    allocate(this%eqn(1:9*nVar))
 
     this%interior = 0.0_prec
     this%boundary = 0.0_prec
@@ -100,11 +100,11 @@ contains
 
     call this%UpdateDevice()
 
-  endsubroutine Init_Tensor2D
+  endsubroutine Init_Tensor3D
 
-  subroutine Free_Tensor2D(this)
+  subroutine Free_Tensor3D(this)
     implicit none
-    class(Tensor2D),intent(inout) :: this
+    class(Tensor3D),intent(inout) :: this
 
     this%interp => null()
     this%nVar = 0
@@ -122,26 +122,26 @@ contains
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call hipblasCheck(hipblasDestroy(this%blas_handle))
 
-  endsubroutine Free_Tensor2D
+  endsubroutine Free_Tensor3D
 
-  subroutine UpdateHost_Tensor2D(this)
+  subroutine UpdateHost_Tensor3D(this)
     implicit none
-    class(Tensor2D),intent(inout) :: this
+    class(Tensor3D),intent(inout) :: this
 
     call gpuCheck(hipMemcpy(c_loc(this%interior),this%interior_gpu,sizeof(this%interior),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%extboundary),this%extboundary_gpu,sizeof(this%extboundary),hipMemcpyDeviceToHost))
 
-  end subroutine UpdateHost_Tensor2D
+  end subroutine UpdateHost_Tensor3D
 
-  subroutine UpdateDevice_Tensor2D(this)
+  subroutine UpdateDevice_Tensor3D(this)
     implicit none
-    class(Tensor2D),intent(inout) :: this
+    class(Tensor3D),intent(inout) :: this
 
     call gpuCheck(hipMemcpy(this%interior_gpu,c_loc(this%interior),sizeof(this%interior),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%boundary_gpu,c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
 
-  end subroutine UpdateDevice_Tensor2D
+  end subroutine UpdateDevice_Tensor3D
 
-endmodule SELF_Tensor_2D
+endmodule SELF_Tensor_3D

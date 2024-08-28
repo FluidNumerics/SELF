@@ -83,13 +83,19 @@ contains
 
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
-
+    call f%AssociateGeometry(geometry)
+    
     call f%SetEquation(1,'f = x*y*z')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    df%interior = f%Gradient(geometry)
+#ifdef ENABLE_GPU
+    call f%MappedGradient(df%interior_gpu)
+#else
+    call f%MappedGradient(df%interior)
+#endif
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     ! Calculate diff from exact
@@ -117,6 +123,7 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
     call decomp%Free()
     call geometry%Free()
     call mesh%Free()

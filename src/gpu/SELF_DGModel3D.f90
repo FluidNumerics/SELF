@@ -24,48 +24,39 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_DGModel1D
+module SELF_DGModel3D
 
-  use SELF_SupportRoutines
-  use SELF_Metadata
-  use SELF_Mesh_1D
-  use SELF_MappedScalar_1D
-  use SELF_HDF5
-  use HDF5
-  use FEQParse
-  use SELF_Model
-  use SELF_DGModel1D_t
+  use SELF_DGModel3D_t
   use SELF_GPU
   use SELF_GPUInterfaces
 
   implicit none
 
-  type,extends(DGModel1D_t) :: DGModel1D
+
+  type,extends(DGModel3D_t) :: DGModel3D
 
   contains
 
+    procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
-    procedure :: UpdateSolution => UpdateSolution_DGModel1D
+    procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D
+    procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D
+    procedure :: UpdateGRK4 => UpdateGRK4_DGModel3D
 
-    procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D
-    procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D
-    procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D
+    procedure :: CalculateSolutionGradient => CalculateSolutionGradient_DGModel3D
+    procedure :: CalculateTendency => CalculateTendency_DGModel3D
 
-    procedure :: CalculateSolutionGradient => CalculateSolutionGradient_DGModel1D
-    procedure :: CalculateTendency => CalculateTendency_DGModel1D
-
-  endtype DGModel1D
+  endtype DGModel3D
 
 contains
 
-
-  subroutine UpdateSolution_DGModel1D(this,dt)
+  subroutine UpdateSolution_DGModel3D(this,dt)
     !! Computes a solution update as , where dt is either provided through the interface
     !! or taken as the Model's stored time step size (model % dt)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel3D),intent(inout) :: this
     real(prec),optional,intent(in) :: dt
-    ! Local
+     ! Local
     real(prec) :: dtLoc
     integer :: ndof
 
@@ -74,65 +65,77 @@ contains
     else
       dtLoc = this%dt
     endif
-    ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
+    ndof = this%solution%nvar*&
+           this%solution%nelem*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)
 
     call UpdateSolution_gpu(this%solution%interior_gpu,this%dsdt%interior_gpu,dtLoc,ndof)
 
-  endsubroutine UpdateSolution_DGModel1D
+  endsubroutine UpdateSolution_DGModel3D
 
-  subroutine UpdateGRK2_DGModel1D(this,m)
+  subroutine UpdateGRK2_DGModel3D(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel3D),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
+    ndof = this%solution%nvar*&
+           this%solution%nelem*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)
+
     call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu,&
           rk2_a(m),rk2_g(m),this%dt,ndof)
 
-  endsubroutine UpdateGRK2_DGModel1D
+  endsubroutine UpdateGRK2_DGModel3D
 
-  subroutine UpdateGRK3_DGModel1D(this,m)
+  subroutine UpdateGRK3_DGModel3D(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel3D),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
+    ndof = this%solution%nvar*&
+           this%solution%nelem*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)
+
     call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu,&
           rk3_a(m),rk3_g(m),this%dt,ndof)
 
-  endsubroutine UpdateGRK3_DGModel1D
+  endsubroutine UpdateGRK3_DGModel3D
 
-  subroutine UpdateGRK4_DGModel1D(this,m)
+  subroutine UpdateGRK4_DGModel3D(this,m)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel3D),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
+    ndof = this%solution%nvar*&
+           this%solution%nelem*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)
+
     call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu,&
           rk4_a(m),rk4_g(m),this%dt,ndof)
 
-  endsubroutine UpdateGRK4_DGModel1D
+  endsubroutine UpdateGRK4_DGModel3D
 
-  subroutine CalculateSolutionGradient_DGModel1D(this)
+  subroutine CalculateSolutionGradient_DGModel3D(this)
     implicit none
-    class(DGModel1D),intent(inout) :: this
-    ! Local
-    integer :: ndof
+    class(DGModel3D),intent(inout) :: this
 
     call this%solution%AverageSides()
-
-    ! Account for the outward pointing normal before computing dg derivative
-    ndof = this%solution%nvar*this%solution%nelem*2
-    call GradientNormal_1D_gpu(this%solution%boundarynormal_gpu,&
-        this%solution%avgBoundary_gpu,ndof)
-
-    call this%solution%MappedDGDerivative(this%solutionGradient%interior_gpu)
+ 
+    call this%solution%MappedDGGradient(this%solutionGradient%interior_gpu)
    
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
@@ -141,13 +144,12 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh, &
                                             this%decomp)
- 
+                                            
+  endsubroutine CalculateSolutionGradient_DGModel3D
 
-  endsubroutine CalculateSolutionGradient_DGModel1D
-
-  subroutine CalculateTendency_DGModel1D(this)
+  subroutine CalculateTendency_DGModel3D(this)
     implicit none
-    class(DGModel1D),intent(inout) :: this
+    class(DGModel3D),intent(inout) :: this
     ! Local
     integer :: ndof
 
@@ -156,24 +158,29 @@ contains
     
     call this%PreTendency()           ! User-supplied 
     call this%SetBoundaryCondition()  ! User-supplied
-  
+
     if( this % gradient_enabled )then
       call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
     endif
-
-    call this%SourceMethod() ! User supplied
+    
+    call this%SourceMethod()  ! User supplied
     call this%RiemannSolver() ! User supplied
     call this%FluxMethod()    ! User supplied
+    
+    call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)
 
-    call this%flux%MappedDGDerivative(this%fluxDivergence%interior_gpu)
-
-    ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
+    ndof = this%solution%nvar*&
+           this%solution%nelem*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)*&
+           (this%solution%interp%N+1)
+           
     call CalculateDSDt_gpu(this%fluxDivergence%interior_gpu,this%source%interior_gpu,&
           this%dsdt%interior_gpu,ndof)
 
-  endsubroutine CalculateTendency_DGModel1D
+  endsubroutine CalculateTendency_DGModel3D
 
-endmodule SELF_DGModel1D
+endmodule SELF_DGModel3D

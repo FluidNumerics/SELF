@@ -83,6 +83,10 @@ contains
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:4*nVar))
 
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%extBoundary = 0.0_prec
+    
     ! Initialize equation parser
     ! This is done to prevent segmentation faults that arise
     ! when building with amdflang that are traced back to

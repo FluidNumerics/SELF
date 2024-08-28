@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Tensor_3D
+module SELF_Tensor_3D_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -38,9 +38,7 @@ module SELF_Tensor_3D
 
   implicit none
 
-#include "SELF_Macros.h"
-
-  type,extends(SELF_DataObj),public :: Tensor3D
+  type,extends(SELF_DataObj),public :: Tensor3D_t
 
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: interior
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:,:) :: boundary
@@ -48,19 +46,24 @@ module SELF_Tensor_3D
 
   contains
 
-    procedure,public :: Init => Init_Tensor3D
-    procedure,public :: Free => Free_Tensor3D
+    procedure,public :: Init => Init_Tensor3D_t
+    procedure,public :: Free => Free_Tensor3D_t
 
-    procedure,public :: BoundaryInterp => BoundaryInterp_Tensor3D
-    procedure,public :: Determinant => Determinant_Tensor3D
+    procedure,public :: BoundaryInterp => BoundaryInterp_Tensor3D_t
 
-  endtype Tensor3D
+    procedure,public :: UpdateHost => UpdateHost_Tensor3D_t
+    procedure,public :: UpdateDevice => UpdateDevice_Tensor3D_t
+
+    generic,public :: Determinant => Determinant_Tensor3D_t
+    procedure,private :: Determinant_Tensor3D_t
+
+  endtype Tensor3D_t
 
 contains
 
-  subroutine Init_Tensor3D(this,interp,nVar,nElem)
+  subroutine Init_Tensor3D_t(this,interp,nVar,nElem)
     implicit none
-    class(Tensor3D),intent(out) :: this
+    class(Tensor3D_t),intent(out) :: this
     type(Lagrange),target,intent(in) :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
@@ -80,6 +83,10 @@ contains
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:9*nVar))
 
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%extBoundary = 0.0_prec
+
     ! Initialize equation parser
     ! This is done to prevent segmentation faults that arise
     ! when building with amdflang that are traced back to
@@ -91,11 +98,11 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
-  endsubroutine Init_Tensor3D
+  endsubroutine Init_Tensor3D_t
 
-  subroutine Free_Tensor3D(this)
+  subroutine Free_Tensor3D_t(this)
     implicit none
-    class(Tensor3D),intent(inout) :: this
+    class(Tensor3D_t),intent(inout) :: this
 
     this%interp => null()
     this%nVar = 0
@@ -108,11 +115,23 @@ contains
     deallocate(this%meta)
     deallocate(this%eqn)
 
-  endsubroutine Free_Tensor3D
+  endsubroutine Free_Tensor3D_t
 
-  subroutine BoundaryInterp_Tensor3D(this)
+  subroutine UpdateHost_Tensor3D_t(this)
     implicit none
-    class(Tensor3D),intent(inout) :: this
+    class(Tensor3D_t),intent(inout) :: this
+
+  end subroutine UpdateHost_Tensor3D_t
+
+  subroutine UpdateDevice_Tensor3D_t(this)
+    implicit none
+    class(Tensor3D_t),intent(inout) :: this
+    
+  end subroutine UpdateDevice_Tensor3D_t
+
+  subroutine BoundaryInterp_Tensor3D_t(this)
+    implicit none
+    class(Tensor3D_t),intent(inout) :: this
     ! Local
     integer :: i,j,ii,idir,jdir,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
@@ -157,11 +176,11 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine BoundaryInterp_Tensor3D
+  endsubroutine BoundaryInterp_Tensor3D_t
 
-  subroutine Determinant_Tensor3D(this,det)
+  subroutine Determinant_Tensor3D_t(this,det)
     implicit none
-    class(Tensor3D),intent(in) :: this
+    class(Tensor3D_t),intent(in) :: this
     real(prec),intent(out) :: det(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer :: iEl,iVar,i,j,k
@@ -195,6 +214,6 @@ contains
       enddo
     enddo
 
-  endsubroutine Determinant_Tensor3D
+  endsubroutine Determinant_Tensor3D_t
 
-endmodule SELF_Tensor_3D
+endmodule SELF_Tensor_3D_t

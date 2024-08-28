@@ -26,11 +26,8 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.21)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 set(make_env SELF_HOME=${CMAKE_BINARY_DIR} SELF_COMPILER=${SELF_COMPILER})
-
 
 function (add_fortran_tests)
 
@@ -51,7 +48,7 @@ function (add_fortran_tests)
                         ${MPI_Fortran_INCLUDE_DIRS})
 
         add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-        install(TARGETS ${TEST_NAME} DESTINATION example)
+        install(TARGETS ${TEST_NAME} DESTINATION test)
     endforeach ()
 
 endfunction ()
@@ -85,6 +82,7 @@ add_fortran_tests (
     "mappedvectordivergence_2d_cpu_constant.f90"
     "mappedvectordivergence_2d_cpu_gausslobatto_constant.f90"
     "mappedvectordgdivergence_2d_cpu_constant.f90"
+    "mappedvectordgdivergence_2d_cpu_linear.f90"
     "mappedscalargradient_3d_cpu_constant.f90"
     "mappedscalargradient_3d_cpu_linear.f90"
     "mappedscalarbrgradient_3d_cpu_constant.f90"
@@ -98,21 +96,12 @@ add_fortran_tests (
     "advection_diffusion_1d_rk2.f90"
     "advection_diffusion_1d_rk3.f90"
     "advection_diffusion_1d_rk4.f90"
-    "advection_diffusion_1d_ab2.f90"
-    "advection_diffusion_1d_ab3.f90"
-    "advection_diffusion_1d_ab4.f90"
     "advection_diffusion_2d_euler.f90"
     "advection_diffusion_2d_rk2.f90"
     "advection_diffusion_2d_rk3.f90"
-    "advection_diffusion_2d_rk4.f90"
-    "advection_diffusion_2d_ab2.f90"
-    "advection_diffusion_2d_ab3.f90"
-    "advection_diffusion_2d_ab4.f90")
+    "advection_diffusion_2d_rk4.f90")
     # "advection_diffusion_3d_euler.f90"
     # "advection_diffusion_3d_rk2.f90"
     # "advection_diffusion_3d_rk3.f90"
     # "advection_diffusion_3d_rk4.f90"
-    # "advection_diffusion_3d_ab2.f90"
-    # "advection_diffusion_3d_ab3.f90"
-    # "advection_diffusion_3d_ab4.f90"
     # )

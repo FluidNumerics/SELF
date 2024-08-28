@@ -59,11 +59,7 @@ module SELF_DGModel1D_t
     procedure :: UpdateSolution => UpdateSolution_DGModel1D_t
 
     procedure :: ResizePrevSol => ResizePrevSol_DGModel1D_t
-
-    procedure :: UpdateGAB2 => UpdateGAB2_DGModel1D_t
-    procedure :: UpdateGAB3 => UpdateGAB3_DGModel1D_t
-    procedure :: UpdateGAB4 => UpdateGAB4_DGModel1D_t
-
+    
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D_t
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D_t
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D_t
@@ -91,6 +87,10 @@ contains
     type(Mesh1D),intent(in),target :: mesh
     type(Geometry1D),intent(in),target :: geometry
     type(MPILayer),intent(in),target :: decomp
+    ! Local
+    integer :: ivar
+    character(LEN=3) :: ivarChar
+    character(LEN=25) :: varname
 
     this%decomp => decomp
     this%mesh => mesh
@@ -110,6 +110,13 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
+    ! set default metadata
+    do ivar = 1,nvar
+      write(ivarChar,'(I3.3)') ivar
+      varname = "solution"//trim(ivarChar)
+      call this%solution%SetName(ivar,varname)
+      call this%solution%SetUnits(ivar,"[null]")
+    enddo
   endsubroutine Init_DGModel1D_t
 
   subroutine Free_DGModel1D_t(this)
@@ -215,258 +222,6 @@ contains
     !$omp end target
 
   endsubroutine UpdateSolution_DGModel1D_t
-
-  subroutine UpdateGAB2_DGModel1D_t(this,m)
-    implicit none
-    class(DGModel1D_t),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: i,nVar,iEl,iVar
-
-    ! ab2_weight
-    if(m == 0) then ! Initialization step - store the solution in the prevSol
-
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%prevSol%interior(i,iEl,iVar) = this%solution%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    elseif(m == 1) then ! Copy the solution back from prevsol
-
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%solution%interior(i,iEl,iVar) = this%prevSol%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    else ! Main looping section - nVar the previous solution, store the new solution, and
-      ! create an interpolated solution to use for tendency calculation
-
-      nVar = this%solution%nVar
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            ! Bump the last solution
-            this%prevSol%interior(i,iEl,nVar+iVar) = this%prevSol%interior(i,iEl,iVar)
-
-            ! Store the new solution
-            this%prevSol%interior(i,iEl,iVar) = this%solution%interior(i,iEl,iVar)
-
-            this%solution%interior(i,iEl,iVar) = &
-              1.5_prec*this%prevSol%interior(i,iEl,iVar)- &
-              0.5_prec*this%prevSol%interior(i,iEl,nVar+iVar)
-          enddo
-        enddo
-      enddo
-      !$omp end target
-    endif
-
-  endsubroutine UpdateGAB2_DGModel1D_t
-
-  subroutine UpdateGAB3_DGModel1D_t(this,m)
-    implicit none
-    class(DGModel1D_t),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: i,nVar,iEl,iVar
-
-    if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
-
-      nVar = this%solution%nVar
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%prevSol%interior(i,iEl,nVar+iVar) = this%solution%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
-
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%prevSol%interior(i,iEl,iVar) = this%solution%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    elseif(m == 2) then ! Copy the solution back from the most recent prevsol
-
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%solution%interior(i,iEl,iVar) = this%prevSol%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    else ! Main looping section - nVar the previous solution, store the new solution, and
-      ! create an interpolated solution to use for tendency calculation
-
-      nVar = this%solution%nVar
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            ! Bump the last two stored solutions
-            nVar = this%solution%nVar
-            this%prevSol%interior(i,iEl,2*nVar+iVar) = this%prevSol%interior(i,iEl,nVar+iVar)
-            this%prevSol%interior(i,iEl,nVar+iVar) = this%prevSol%interior(i,iEl,iVar)
-
-            ! Store the new solution
-            this%prevSol%interior(i,iEl,iVar) = this%solution%interior(i,iEl,iVar)
-
-            this%solution%interior(i,iEl,iVar) = &
-              (23.0_prec*this%prevSol%interior(i,iEl,iVar)- &
-               16.0_prec*this%prevSol%interior(i,iEl,nVar+iVar)+ &
-               5.0_prec*this%prevSol%interior(i,iEl,2*nVar+iVar))/12.0_prec
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    endif
-
-  endsubroutine UpdateGAB3_DGModel1D_t
-
-  subroutine UpdateGAB4_DGModel1D_t(this,m)
-    implicit none
-    class(DGModel1D_t),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: i,nVar,iEl,iVar
-
-    if(m == 0) then ! Initialization step - store the solution in the prevSol at nvar+ivar
-
-      nVar = this%solution%nVar
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%prevSol%interior(i,iEl,2*nVar+iVar) = this%solution%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    elseif(m == 1) then ! Initialization step - store the solution in the prevSol at ivar
-
-      nVar = this%solution%nVar
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%prevSol%interior(i,iEl,nVar+iVar) = this%solution%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    elseif(m == 2) then ! Initialization step - store the solution in the prevSol at ivar
-
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%prevSol%interior(i,iEl,iVar) = this%solution%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    elseif(m == 3) then ! Copy the solution back from the most recent prevsol
-
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            this%solution%interior(i,iEl,iVar) = this%prevSol%interior(i,iEl,iVar)
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    else ! Main looping section - nVar the previous solution, store the new solution, and
-      ! create an interpolated solution to use for tendency calculation
-
-      nVar = this%solution%nVar
-      !$omp target
-      !$omp teams loop collapse(3)
-      do iEl = 1,this%solution%nElem
-        do iVar = 1,this%solution%nVar
-          do i = 1,this%solution%interp%N+1
-
-            ! Bump the last two stored solutions
-            this%prevSol%interior(i,iEl,3*nVar+iVar) = this%prevSol%interior(i,iEl,2*nVar+iVar)
-            this%prevSol%interior(i,iEl,2*nVar+iVar) = this%prevSol%interior(i,iEl,nVar+iVar)
-            this%prevSol%interior(i,iEl,nVar+iVar) = this%prevSol%interior(i,iEl,iVar)
-
-            ! Store the new solution
-            this%prevSol%interior(i,iEl,iVar) = this%solution%interior(i,iEl,iVar)
-
-            this%solution%interior(i,iEl,iVar) = &
-              (55.0_prec*this%prevSol%interior(i,iEl,iVar)- &
-               59.0_prec*this%prevSol%interior(i,iEl,nVar+iVar)+ &
-               37.0_prec*this%prevSol%interior(i,iEl,2*nVar+iVar)- &
-               9.0_prec*this%prevSol%interior(i,iEl,3*nVar+iVar))/24.0_prec
-
-          enddo
-        enddo
-      enddo
-      !$omp end target
-
-    endif
-
-  endsubroutine UpdateGAB4_DGModel1D_t
 
   subroutine UpdateGRK2_DGModel1D_t(this,m)
     implicit none
@@ -586,7 +341,6 @@ contains
     call this%SetBoundaryCondition()  ! User-supplied
 
     if( this % gradient_enabled )then
-      call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
@@ -849,12 +603,9 @@ contains
       write(fUnit,*) trim(tecHeader)
       do iEl = 1,this%solution%nElem
 
-        !WRITE (zoneID,'(I8.8)') iEl
-        !WRITE (fUnit,*) 'ZONE T="el'//TRIM(zoneID)//'", I=',this % solution % interp % M + 1
+        do i = 1,this%solution%interp%M+1
 
-        do i = 0,this%solution%interp%M
-
-          write(fUnit,fmat) x%interior(i,1,iEl), &
+          write(fUnit,fmat) x%interior(i,iEl,1), &
             solution%interior(i,iEl,iVar)
 
         enddo

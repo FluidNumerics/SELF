@@ -141,36 +141,6 @@ extern "C"
 
 extern "C"
 {
-  void UpdateGAB2_gpu(real *prevsol, real *solution, int m, int ndof)
-  {
-    uint32_t nthreads = 256;
-    uint32_t nblocks_x = ndof/nthreads + 1;
-    UpdateGAB2_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(prevsol, solution, m, ndof);
-  }
-}
-
-extern "C"
-{
-  void UpdateGAB3_gpu(real *prevsol, real *solution, int m, int ndof)
-  {
-    uint32_t nthreads = 256;
-    uint32_t nblocks_x = ndof/nthreads + 1;
-    UpdateGAB3_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(prevsol, solution, m, ndof);
-  }
-}
-
-extern "C"
-{
-  void UpdateGAB4_gpu(real *prevsol, real *solution, int m, int ndof)
-  {
-    uint32_t nthreads = 256;
-    uint32_t nblocks_x = ndof/nthreads + 1;
-    UpdateGAB4_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(prevsol, solution, m, ndof);
-  }
-}
-
-extern "C"
-{
   void UpdateGRK_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int ndof)
   {
     uint32_t nthreads = 256;

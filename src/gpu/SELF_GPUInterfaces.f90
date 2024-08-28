@@ -49,6 +49,15 @@ module SELF_GPUInterfaces
     end subroutine BoundaryInterp_2D_gpu
   end interface
   
+  interface
+    subroutine BoundaryInterp_3D_gpu(bMatrix_dev,f_dev,bf_dev,N,nVar,nEl) &
+        bind(c,name="BoundaryInterp_3D_gpu")
+        use iso_c_binding
+        implicit none
+        type(c_ptr),value :: bMatrix_dev,f_dev,bf_dev
+        integer(c_int),value :: N,nVar,nEl
+    end subroutine BoundaryInterp_3D_gpu
+  end interface
 
   ! MappedData
 
@@ -61,33 +70,6 @@ module SELF_GPUInterfaces
       real(c_prec),value :: dt
       integer(c_int),value :: ndof
     endsubroutine UpdateSolution_gpu
-  endinterface
-
-  interface
-    subroutine UpdateGAB2_gpu(prevsol,solution,m,ndof) bind(c,name="UpdateGAB2_gpu")
-      use iso_c_binding
-      use SELF_Constants
-      type(c_ptr),value :: solution,prevsol
-      integer(c_int),value :: m,ndof
-    endsubroutine UpdateGAB2_gpu
-  endinterface
-
-  interface
-    subroutine UpdateGAB3_gpu(prevsol,solution,m,ndof) bind(c,name="UpdateGAB3_gpu")
-      use iso_c_binding
-      use SELF_Constants
-      type(c_ptr),value :: solution,prevsol
-      integer(c_int),value :: m,ndof
-    endsubroutine UpdateGAB3_gpu
-  endinterface
-
-  interface
-    subroutine UpdateGAB4_gpu(prevsol,solution,m,ndof) bind(c,name="UpdateGAB4_gpu")
-      use iso_c_binding
-      use SELF_Constants
-      type(c_ptr),value :: solution,prevsol
-      integer(c_int),value :: m,ndof
-    endsubroutine UpdateGAB4_gpu
   endinterface
 
   interface
@@ -144,6 +126,35 @@ module SELF_GPUInterfaces
       type(c_ptr),value :: scalar,J
       integer(c_int),value :: N,nVar,nEl
     end subroutine JacobianWeight_2D_gpu
+  end interface
+
+  interface
+    subroutine SideExchange_3D_gpu(extboundary,boundary,sideinfo,elemToRank,rankid,offset,n,nvar,nel) &
+       bind(c,name="SideExchange_3D_gpu")
+       use iso_c_binding
+       type(c_ptr),value :: extboundary,boundary,sideinfo,elemToRank
+       integer(c_int),value :: rankId,offset,N,nVar,nEl
+    endsubroutine SideExchange_3D_gpu
+  endinterface
+
+  interface
+    subroutine DG_BoundaryContribution_3D_gpu(bmatrix,qweights,bf,df,N,nvar,nel) &
+       bind(c,name="DG_BoundaryContribution_3D_gpu")
+       use iso_c_binding
+       implicit none
+       type(c_ptr),value :: bmatrix,qweights,bf,df
+       integer(c_int),value :: N,nvar,nel
+    endsubroutine DG_BoundaryContribution_3D_gpu
+  endinterface
+
+  interface
+    subroutine JacobianWeight_3D_gpu(scalar,J,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: scalar,J
+      integer(c_int),value :: N,nVar,nEl
+    end subroutine JacobianWeight_3D_gpu
   end interface
   
 end module SELF_GPUInterfaces

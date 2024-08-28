@@ -36,7 +36,6 @@ module SELF_MappedScalar_2D
   type,extends(MappedScalar2D_t),public :: MappedScalar2D
 
     type(c_ptr) :: jas_gpu  ! jacobian weighted scalar for gradient calculation
-    !type(c_ptr) :: jasb_gpu ! boundary jacobian weighted scalar for dg gradient calculation
 
   contains
     procedure,public :: Init => Init_MappedScalar2D
@@ -77,6 +76,7 @@ module SELF_MappedScalar_2D
 
 
 contains
+
 subroutine Init_MappedScalar2D(this,interp,nVar,nElem)
   implicit none
   class(MappedScalar2D),intent(out) :: this
@@ -116,8 +116,7 @@ subroutine Init_MappedScalar2D(this,interp,nVar,nElem)
   call gpuCheck(hipMalloc(this%interpWork,workSize))
   workSize=(interp%N+1)*(interp%N+1)*nelem*nvar*4*prec
   call gpuCheck(hipMalloc(this%jas_gpu,workSize))
-  ! workSize=(interp%N+1)*4*nelem*nvar*4*prec
-  ! call gpuCheck(hipMalloc(this%jasb_gpu,workSize))
+
 
   call hipblasCheck(hipblasCreate(this%blas_handle))
 
@@ -144,7 +143,6 @@ subroutine Free_MappedScalar2D(this)
   call gpuCheck(hipFree(this%avgBoundary_gpu))
   call gpuCheck(hipFree(this%interpWork))
   call gpuCheck(hipFree(this%jas_gpu))
-  ! call gpuCheck(hipFree(this%jasb_gpu))
   call hipblasCheck(hipblasDestroy(this%blas_handle))
 
   endsubroutine Free_MappedScalar2D
@@ -188,15 +186,9 @@ subroutine Free_MappedScalar2D(this)
     type(Mesh2D),intent(in) :: mesh
     type(MPILayer),intent(inout) :: decomp
     ! Local
-    integer :: e1,e2,s1,s2,e2Global
-    integer :: flip,bcid
-    integer :: i1,i2,ivar
-    integer :: neighborRank
-    integer :: rankId,offset,N
+    integer :: offset
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
-    N = this%interp%N
+    offset = decomp%offsetElem(decomp%rankId+1)
 
     ! call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
     ! Do the side exchange internal to this mpi process
@@ -247,7 +239,7 @@ subroutine Free_MappedScalar2D(this)
     !!
     implicit none
     class(MappedScalar2D),intent(inout) :: this
-    type(c_ptr) :: df
+    type(c_ptr),intent(inout) :: df
     ! Local
     real(prec),pointer :: f_p(:,:,:,:,:)
     type(c_ptr) :: fc

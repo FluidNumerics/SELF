@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_Vector_3D
+module SELF_Vector_3D_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -38,41 +38,51 @@ module SELF_Vector_3D
 
   implicit none
 
-#include "SELF_Macros.h"
-
-  type,extends(SELF_DataObj),public :: Vector3D
+  type,extends(SELF_DataObj),public :: Vector3D_t
 
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: interior
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: boundary
     real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: extBoundary
+    real(prec),pointer,contiguous,dimension(:,:,:,:,:,:) :: avgBoundary
     real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: boundaryNormal
 
   contains
 
-    procedure,public :: Init => Init_Vector3D
-    procedure,public :: Free => Free_Vector3D
+    procedure,public :: Init => Init_Vector3D_t
+    procedure,public :: Free => Free_Vector3D_t
 
-    procedure,public :: BoundaryInterp => BoundaryInterp_Vector3D
-    procedure,public :: GridInterp => GridInterp_Vector3D
-    procedure,public :: Gradient => Gradient_Vector3D
-    procedure,public :: Curl => Curl_Vector3D
-    generic,public :: Divergence => Divergence_Vector3D
-    procedure,private :: Divergence_Vector3D
+    procedure,public :: UpdateHost => UpdateHost_Vector3D_t
+    procedure,public :: UpdateDevice => UpdateDevice_Vector3D_t
 
-    generic,public :: SetEquation => SetEquation_Vector3D
-    procedure,private :: SetEquation_Vector3D
+    procedure,public :: BoundaryInterp => BoundaryInterp_Vector3D_t
+    procedure,public :: AverageSides => AverageSides_Vector3D_t
 
-    generic,public :: WriteHDF5 => WriteHDF5_MPI_Vector3D,WriteHDF5_Vector3D
-    procedure,private :: WriteHDF5_MPI_Vector3D
-    procedure,private :: WriteHDF5_Vector3D
+    generic,public :: GridInterp => GridInterp_Vector3D_t
+    procedure,private :: GridInterp_Vector3D_t
 
-  endtype Vector3D
+    generic,public :: Gradient => Gradient_Vector3D_t
+    procedure,private :: Gradient_Vector3D_t
+
+    generic,public :: Curl => Curl_Vector3D_t
+    procedure,private :: Curl_Vector3D_t
+
+    generic,public :: Divergence => Divergence_Vector3D_t
+    procedure,private :: Divergence_Vector3D_t
+
+    generic,public :: SetEquation => SetEquation_Vector3D_t
+    procedure,private :: SetEquation_Vector3D_t
+
+    generic,public :: WriteHDF5 => WriteHDF5_MPI_Vector3D_t,WriteHDF5_Vector3D_t
+    procedure,private :: WriteHDF5_MPI_Vector3D_t
+    procedure,private :: WriteHDF5_Vector3D_t
+
+  endtype Vector3D_t
 
 contains
 
-  subroutine Init_Vector3D(this,interp,nVar,nElem)
+  subroutine Init_Vector3D_t(this,interp,nVar,nElem)
     implicit none
-    class(Vector3D),intent(out) :: this
+    class(Vector3D_t),intent(out) :: this
     type(Lagrange),target,intent(in) :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
@@ -88,6 +98,7 @@ contains
     allocate(this%interior(1:interp%N+1,1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:3), &
              this%boundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
              this%extBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
+             this%avgBoundary(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar,1:3), &
              this%boundaryNormal(1:interp%N+1,1:interp%N+1,1:6,1:nelem,1:nvar))
 
     allocate(this%meta(1:nVar))
@@ -104,11 +115,17 @@ contains
       this%eqn(i) = EquationParser('f=0',(/'x','y','z','t'/))
     enddo
 
-  endsubroutine Init_Vector3D
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
 
-  subroutine Free_Vector3D(this)
+  endsubroutine Init_Vector3D_t
+
+  subroutine Free_Vector3D_t(this)
     implicit none
-    class(Vector3D),intent(inout) :: this
+    class(Vector3D_t),intent(inout) :: this
 
     this%interp => null()
     this%nVar = 0
@@ -118,28 +135,41 @@ contains
     deallocate(this%boundary)
     deallocate(this%boundaryNormal)
     deallocate(this%extBoundary)
+    deallocate(this%avgBoundary)
 
     deallocate(this%meta)
     deallocate(this%eqn)
 
-  endsubroutine Free_Vector3D
+  endsubroutine Free_Vector3D_t
 
-  subroutine SetEquation_Vector3D(this,idir,ivar,eqnChar)
+  subroutine UpdateHost_Vector3D_t(this)
+    implicit none
+    class(Vector3D_t),intent(inout) :: this
+
+  end subroutine UpdateHost_Vector3D_t
+
+  subroutine UpdateDevice_Vector3D_t(this)
+    implicit none
+    class(Vector3D_t),intent(inout) :: this
+    
+  end subroutine UpdateDevice_Vector3D_t
+
+  subroutine SetEquation_Vector3D_t(this,idir,ivar,eqnChar)
     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
     implicit none
-    class(Vector3D),intent(inout) :: this
+    class(Vector3D_t),intent(inout) :: this
     integer,intent(in) :: idir,ivar
     character(*),intent(in) :: eqnChar
 
     this%eqn(idir+3*(ivar-1)) = EquationParser(trim(eqnChar), &
                                                (/'x','y','z','t'/))
 
-  endsubroutine SetEquation_Vector3D
+  endsubroutine SetEquation_Vector3D_t
 
-  function GridInterp_Vector3D(this) result(f)
+  subroutine GridInterp_Vector3D_t(this,f)
     implicit none
-    class(Vector3D),intent(in) :: this
-    real(prec) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
+    class(Vector3D_t),intent(in) :: this
+    real(prec),intent(out) :: f(1:this%M+1,1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar,1:3)
     !! (Output) Array of function values, defined on the target grid
     ! Local
     integer :: i,j,k,ii,jj,kk,iel,ivar,idir
@@ -179,11 +209,42 @@ contains
     enddo
     !$omp end target
 
-  endfunction GridInterp_Vector3D
+  endsubroutine GridInterp_Vector3D_t
 
-  subroutine BoundaryInterp_Vector3D(this)
+  subroutine AverageSides_Vector3D_t(this)
     implicit none
-    class(Vector3D),intent(inout) :: this
+    class(Vector3D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: iside
+    integer :: ivar
+    integer :: i,j
+    integer :: idir
+
+    !$omp target
+    !$omp teams loop collapse(6)
+    do idir = 1,3
+      do ivar = 1,this%nVar
+        do iel = 1,this%nElem
+          do iside = 1,6
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                this%boundary(i,j,iside,iel,ivar,idir) = 0.5_prec*( &
+                                                         this%boundary(i,j,iside,iel,ivar,idir)+ &
+                                                         this%extBoundary(i,j,iside,iel,ivar,idir))
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+    !$omp end target
+
+  endsubroutine AverageSides_Vector3D_t
+
+  subroutine BoundaryInterp_Vector3D_t(this)
+    implicit none
+    class(Vector3D_t),intent(inout) :: this
     ! Local
     integer :: i,j,ii,idir,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
@@ -226,12 +287,12 @@ contains
     enddo
     !$omp end target
 
-  endsubroutine BoundaryInterp_Vector3D
+  endsubroutine BoundaryInterp_Vector3D_t
 
-  function Gradient_Vector3D(this) result(df)
+  subroutine Gradient_Vector3D_t(this,df)
     implicit none
-    class(Vector3D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
+    class(Vector3D_t),intent(in) :: this
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
     ! Local
     integer    :: i,j,k,ii,idir,iel,ivar
     real(prec) :: dfds1,dfds2,dfds3
@@ -266,23 +327,12 @@ contains
     enddo
     !$omp end target
 
-    !   do idir = 1,3
-    !     floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,idir)
-    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,1)
-    !     call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,dfloc,this % N,this % N,nvars,nelems,handle)
-    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,2)
-    !     call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    !     dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,idir,3)
-    !     call self_hipblas_matrixop_dim3_3d(this % dMatrix,floc,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    !   end do
-    !   dfloc => null()
+  endsubroutine Gradient_Vector3D_t
 
-  endfunction Gradient_Vector3D
-
-  function Curl_Vector3D(this) result(curlf)
+  subroutine Curl_Vector3D_t(this,curlf)
     implicit none
-    class(Vector3D),intent(in) :: this
-    real(prec) :: curlf(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
+    class(Vector3D_t),intent(in) :: this
+    real(prec),intent(out) :: curlf(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3)
     ! Local
     integer    :: i,j,k,ii,idir,iel,ivar
     real(prec) :: dfds1,dfds2,dfds3
@@ -337,12 +387,12 @@ contains
     !$omp end teams
     !$omp end target
 
-  endfunction Curl_Vector3D
+  endsubroutine Curl_Vector3D_t
 
-  function Divergence_Vector3D(this) result(df)
+  subroutine Divergence_Vector3D_t(this,df)
     implicit none
-    class(Vector3D),intent(in) :: this
-    real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
+    class(Vector3D_t),intent(in) :: this
+    real(prec),intent(out) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar)
     ! Local
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: dfLoc
@@ -411,22 +461,11 @@ contains
     !$omp end teams
     !$omp end target
 
-    ! ! local
-    ! real(prec),pointer,contiguous :: floc(:,:,:,:,:)
+  endsubroutine Divergence_Vector3D_t
 
-    ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,1)
-    ! call self_hipblas_matrixop_dim1_3d(this % dMatrix,floc,df,this % N,this % N,nvars,nelems,handle)
-    ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,2)
-    ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! floc(1:,1:,1:,1:,1:) => f(1:,1:,1:,1:,1:,3)
-    ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,floc,df,1.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! floc => null()
-
-  endfunction Divergence_Vector3D
-
-  subroutine WriteHDF5_MPI_Vector3D(this,fileId,group,elemoffset,nglobalelem)
+  subroutine WriteHDF5_MPI_Vector3D_t(this,fileId,group,elemoffset,nglobalelem)
     implicit none
-    class(Vector3D),intent(in) :: this
+    class(Vector3D_t),intent(in) :: this
     character(*),intent(in) :: group
     integer(HID_T),intent(in) :: fileId
     integer,intent(in) :: elemoffset
@@ -467,11 +506,11 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary,bOffset,bGlobalDims)
 
-  endsubroutine WriteHDF5_MPI_Vector3D
+  endsubroutine WriteHDF5_MPI_Vector3D_t
 
-  subroutine WriteHDF5_Vector3D(this,fileId,group)
+  subroutine WriteHDF5_Vector3D_t(this,fileId,group)
     implicit none
-    class(Vector3D),intent(in) :: this
+    class(Vector3D_t),intent(in) :: this
     integer(HID_T),intent(in) :: fileId
     character(*),intent(in) :: group
     ! Local
@@ -489,6 +528,6 @@ contains
     call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
                          this%boundary)
 
-  endsubroutine WriteHDF5_Vector3D
+  endsubroutine WriteHDF5_Vector3D_t
 
-endmodule SELF_Vector_3D
+endmodule SELF_Vector_3D_t

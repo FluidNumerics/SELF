@@ -26,11 +26,11 @@
 
 module SELF_MappedScalar_2D
 
-    use SELF_MappedScalar_2D_t
-  
-    implicit none
-  
-    type,extends(MappedScalar2D_t),public :: MappedScalar2D
-    endtype MappedScalar2D
-  
-  endmodule SELF_MappedScalar_2D
+  use SELF_MappedScalar_2D_t
+
+  implicit none
+
+  type,extends(MappedScalar2D_t),public :: MappedScalar2D
+  endtype MappedScalar2D
+
+endmodule SELF_MappedScalar_2D

@@ -64,11 +64,14 @@ contains
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
 
+    call f%UpdateDevice()
     call f%BoundaryInterp()
+    call f%UpdateHost()
 
     ! Calculate diff from exact
     f%boundary = abs(f%boundary-1.0_prec)
 
+    print*, "absmax error : ",maxval(f%boundary)
     if(maxval(f%boundary) <= tolerance) then
       r = 0
     else

@@ -36,7 +36,7 @@ program advection_diffusion_2d_euler
   integer,parameter :: targetDegree = 16
   real(prec),parameter :: u = 0.25_prec ! velocity
   real(prec),parameter :: v = 0.25_prec
-  real(prec),parameter :: nu = 0.001_prec ! diffusivity
+  real(prec),parameter :: nu = 0.005_prec ! diffusivity
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec),parameter :: endtime = 0.2_prec
   real(prec),parameter :: iointerval = 0.1_prec
@@ -76,16 +76,21 @@ program advection_diffusion_2d_euler
   modelobj%nu = nu
 
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
+  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.01 )')
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
+  call modelobj%CalculateTendency()
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
 
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
-  e0 = modelobj%entropy ! Save the initial entropy
+  e0 = modelobj%entropy
+  !Write the initial condition
+  call modelobj%WriteModel()
+  call modelobj%WriteTecplot()
+  call modelobj%IncrementIOCounter()
 
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
@@ -101,7 +106,7 @@ program advection_diffusion_2d_euler
   ef = modelobj%entropy
 
   if( ef > e0 )then
-    print*, "Error: Final entropy greater than initial entropy! ", e0,ef
+    print*, "Error: Final absmax greater than initial absmax! ", e0,ef
     stop 1
   endif
   ! Clean up

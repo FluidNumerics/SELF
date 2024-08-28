@@ -68,8 +68,14 @@ contains
     ! Set the source scalar (on the control grid) to a non-zero constant
     f%interior = 1.0_prec
 
-    df%interior = f%Gradient()
-
+    call f%UpdateDevice()
+#ifdef ENABLE_GPU
+    call f%Gradient(df%interior_gpu)
+#else
+    call f%Gradient(df%interior)
+#endif
+    call df%UpdateHost()
+    
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 

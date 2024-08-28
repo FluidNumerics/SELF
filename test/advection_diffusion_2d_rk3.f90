@@ -36,7 +36,7 @@ program advection_diffusion_2d_rk3
   integer,parameter :: targetDegree = 16
   real(prec),parameter :: u = 0.25_prec ! velocity
   real(prec),parameter :: v = 0.25_prec
-  real(prec),parameter :: nu = 0.001_prec ! diffusivity
+  real(prec),parameter :: nu = 0.005_prec ! diffusivity
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec),parameter :: endtime = 0.2_prec
   real(prec),parameter :: iointerval = 0.1_prec
@@ -67,6 +67,7 @@ program advection_diffusion_2d_rk3
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry,decomp)
+  modelobj%gradient_enabled = .true.
 
   ! Set the velocity
   modelobj%u = u
@@ -84,7 +85,7 @@ program advection_diffusion_2d_rk3
 
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
-  e0 = modelobj%entropy ! Save the initial entropy
+  e0 = maxval(abs(modelobj%solution%interior))
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
@@ -95,10 +96,10 @@ program advection_diffusion_2d_rk3
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
-  ef = modelobj%entropy
+  ef = maxval(abs(modelobj%solution%interior))
 
   if( ef > e0 )then
-    print*, "Error: Final entropy greater than initial entropy! ", e0,ef
+    print*, "Error: Final absmax greater than initial absmax! ", e0,ef
     stop 1
   endif
   ! Clean up

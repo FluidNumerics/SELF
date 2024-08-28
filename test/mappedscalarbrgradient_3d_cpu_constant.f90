@@ -87,6 +87,7 @@ contains
 
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = 1.0')
 
@@ -94,9 +95,11 @@ contains
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
     call f%BoundaryInterp()
+    call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh,decomp)
+    call f%UpdateHost()
 
     ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
     do iel = 1,f%nElem
@@ -104,7 +107,7 @@ contains
         e2 = mesh%sideInfo(3,iside,iel) ! Neighboring Element ID
         s2 = mesh%sideInfo(4,iside,iel)/10
         bcid = mesh%sideInfo(5,iside,iel)
-        if(s2 == 0 .or. bcid /= 0) then
+        if(e2 == 0) then
           do j = 1,f%interp%N+1
             do i = 1,f%interp%N+1
               f%extBoundary(i,j,iside,iel,1) = f%boundary(i,j,iside,iel,1)
@@ -113,15 +116,23 @@ contains
         endif
 
         if(minval(f%extBoundary(:,:,iside,iel,1)) < 1.0_prec) then
-          print*,"wrong extBoundary at (iside,iel, e2) ",iside,iel,e2
+          print*,"wrong extBoundary at (iside,iel, e2,s2,bcid) ",iside,iel,e2,s2,bcid
         endif
       enddo
     enddo
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
-
+    call f%UpdateDevice()
     call f%AverageSides()
-    df%interior = f%DGGradient(geometry)
+    call f%UpdateHost()
+    print*,"min, max (avgboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
+
+#ifdef ENABLE_GPU
+    call f%MappedDGGradient(df%interior_gpu)
+#else
+    call f%MappedDGGradient(df%interior)
+#endif
+    call df%UpdateHost()
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
@@ -134,6 +145,7 @@ contains
     endif
 
     ! Clean up
+    call f%DissociateGeometry()
     call decomp%Free()
     call geometry%Free()
     call mesh%Free()

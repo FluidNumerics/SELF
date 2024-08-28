@@ -60,13 +60,13 @@ module self_advection_diffusion_2d
   endinterface
 
   interface 
-    subroutine fluxmethod_advection_diffusion_2d_gpu(solution,solutiongradient,flux,u,v,nu,ndof)&
+    subroutine fluxmethod_advection_diffusion_2d_gpu(solution,solutiongradient,flux,u,v,nu,N,nel,nvar)&
       bind(c,name="fluxmethod_advection_diffusion_2d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: solution,solutiongradient,flux
       real(c_prec),value :: u,v,nu
-      integer(c_int),value :: ndof
+      integer(c_int),value :: N,nel,nvar
     endsubroutine fluxmethod_advection_diffusion_2d_gpu
   endinterface
 
@@ -124,23 +124,21 @@ contains
     implicit none
     class(advection_diffusion_2d),intent(inout) :: this
 
-    call setgradientboundarycondition_advection_diffusion_2d_gpu(this%solutiongradient%extboundary_gpu,&
-      this%solutiongradient%boundary_gpu,this%mesh%sideInfo_gpu,this%solution%interp%N,&
-      this%solution%nelem,this%solution%nvar)
+    call setgradientboundarycondition_advection_diffusion_2d_gpu(&
+      this%solutiongradient%extboundary_gpu,&
+      this%solutiongradient%boundary_gpu,this%mesh%sideInfo_gpu,&
+      this%solution%interp%N,this%solution%nelem,this%solution%nvar)
 
   endsubroutine setgradientboundarycondition_advection_diffusion_2d
 
   subroutine fluxmethod_advection_diffusion_2d(this)
     implicit none
     class(advection_diffusion_2d),intent(inout) :: this
-    ! Local
-    integer :: ndof
-
-    ndof = this%solution%nelem*this%solution%nvar*(this%solution%interp%N+1)
 
     call fluxmethod_advection_diffusion_2d_gpu(this%solution%interior_gpu,&
       this%solutiongradient%interior_gpu,this%flux%interior_gpu,&
-      this%u,this%v,this%nu,ndof)
+      this%u,this%v,this%nu,this%solution%interp%N,this%solution%nelem,&
+      this%solution%nvar)
 
   endsubroutine fluxmethod_advection_diffusion_2d
 
@@ -150,7 +148,6 @@ contains
     ! diffusive fluxes
     implicit none
     class(advection_diffusion_2d),intent(inout) :: this
-    ! Local
 
     call riemannsolver_advection_diffusion_2d_gpu(this%solution%boundary_gpu,&
       this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu,&

@@ -121,6 +121,7 @@ contains
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 
+    print*, "absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
@@ -135,8 +136,6 @@ contains
     call interp%Free()
     call f%free()
     call df%free()
-
-    r = 0
 
   endfunction mappedvectordgdivergence_2d_cpu_constant
 endprogram test
