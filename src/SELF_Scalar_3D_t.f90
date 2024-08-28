@@ -122,13 +122,13 @@ contains
     implicit none
     class(Scalar3D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Scalar3D_t
+  endsubroutine UpdateHost_Scalar3D_t
 
   subroutine UpdateDevice_Scalar3D_t(this)
     implicit none
     class(Scalar3D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Scalar3D_t
+
+  endsubroutine UpdateDevice_Scalar3D_t
 
   subroutine BoundaryInterp_Scalar3D_t(this)
     implicit none
@@ -193,8 +193,8 @@ contains
           do j = 1,this%interp%N+1
             do i = 1,this%interp%N+1
               this%avgboundary(i,j,iside,iel,ivar) = 0.5_prec*( &
-                                                  this%boundary(i,j,iside,iel,ivar)+ &
-                                                  this%extBoundary(i,j,iside,iel,ivar))
+                                                     this%boundary(i,j,iside,iel,ivar)+ &
+                                                     this%extBoundary(i,j,iside,iel,ivar))
             enddo
           enddo
         enddo

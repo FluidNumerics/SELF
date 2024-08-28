@@ -36,7 +36,7 @@ module SELF_Scalar_3D
   implicit none
 
   type,extends(Scalar3D_t),public :: Scalar3D
-    character(3) :: backend="gpu"
+    character(3) :: backend = "gpu"
     type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
@@ -73,7 +73,7 @@ contains
     integer,intent(in) :: nElem
     ! Local
     integer(c_size_t) :: workSize
-    
+
     this%interp => interp
     this%nVar = nVar
     this%nElem = nElem
@@ -100,9 +100,9 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize=(interp%N+1)*(interp%N+1)*(interp%M+1)*nelem*nvar*prec
+    workSize = (interp%N+1)*(interp%N+1)*(interp%M+1)*nelem*nvar*prec
     call gpuCheck(hipMalloc(this%interpWork1,workSize))
-    workSize=(interp%N+1)*(interp%M+1)*(interp%M+1)*nelem*nvar*prec
+    workSize = (interp%N+1)*(interp%M+1)*(interp%M+1)*nelem*nvar*prec
     call gpuCheck(hipMalloc(this%interpWork2,workSize))
 
     call this%UpdateDevice()
@@ -125,7 +125,7 @@ contains
     deallocate(this%boundarynormal)
     deallocate(this%meta)
     deallocate(this%eqn)
-    
+
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
@@ -147,26 +147,26 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%avgboundary),this%avgboundary_gpu,sizeof(this%avgboundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%boundarynormal),this%boundarynormal_gpu,sizeof(this%boundarynormal),hipMemcpyDeviceToHost))
 
-  end subroutine UpdateHost_Scalar3D
+  endsubroutine UpdateHost_Scalar3D
 
   subroutine UpdateDevice_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
-    
+
     call gpuCheck(hipMemcpy(this%interior_gpu,c_loc(this%interior),sizeof(this%interior),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%boundary_gpu,c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%avgboundary_gpu,c_loc(this%avgboundary),sizeof(this%avgboundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%boundarynormal_gpu,c_loc(this%boundarynormal),sizeof(this%boundarynormal),hipMemcpyHostToDevice))
 
-  end subroutine UpdateDevice_Scalar3D
+  endsubroutine UpdateDevice_Scalar3D
 
   subroutine BoundaryInterp_Scalar3D(this)
     implicit none
     class(Scalar3D),intent(inout) :: this
 
-    call BoundaryInterp_3D_gpu(this%interp%bMatrix_gpu,this%interior_gpu,this%boundary_gpu,&
-        this%interp%N,this%nvar,this%nelem)
+    call BoundaryInterp_3D_gpu(this%interp%bMatrix_gpu,this%interior_gpu,this%boundary_gpu, &
+                               this%interp%N,this%nvar,this%nelem)
 
   endsubroutine BoundaryInterp_Scalar3D
 
@@ -183,45 +183,45 @@ contains
     class(Scalar3D),intent(inout) :: this
     type(c_ptr),intent(inout) :: f
 
-    call self_blas_matrixop_dim1_3d(this%interp%iMatrix_gpu,this%interior_gpu,&
-                                       this%interpWork1,this%N,this%M,this%nvar,this%nelem,&
-                                       this%blas_handle)
+    call self_blas_matrixop_dim1_3d(this%interp%iMatrix_gpu,this%interior_gpu, &
+                                    this%interpWork1,this%N,this%M,this%nvar,this%nelem, &
+                                    this%blas_handle)
 
-    call self_blas_matrixop_dim2_3d(this%interp%iMatrix_gpu,this%interpWork1,this%interpWork2,&
-                                       0.0_c_prec,this%N,this%M,this%nvar,this%nelem,&
-                                       this%blas_handle)
+    call self_blas_matrixop_dim2_3d(this%interp%iMatrix_gpu,this%interpWork1,this%interpWork2, &
+                                    0.0_c_prec,this%N,this%M,this%nvar,this%nelem, &
+                                    this%blas_handle)
 
-    call self_blas_matrixop_dim3_3d(this%interp%iMatrix_gpu,this%interpWork2,f,&
-                                       0.0_c_prec,this%N,this%M,this%nvar,this%nelem,&
-                                       this%blas_handle)
-  
+    call self_blas_matrixop_dim3_3d(this%interp%iMatrix_gpu,this%interpWork2,f, &
+                                    0.0_c_prec,this%N,this%M,this%nvar,this%nelem, &
+                                    this%blas_handle)
+
   endsubroutine GridInterp_Scalar3D
 
   subroutine Gradient_Scalar3D(this,df)
     implicit none
     class(Scalar3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
-      !Local
+    !Local
     real(prec),pointer :: df_p(:,:,:,:,:,:)
     real(prec),pointer :: dfloc(:,:,:,:,:)
     type(c_ptr) :: dfc
- 
+
     call c_f_pointer(df,df_p,[this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,3])
 
     dfloc(1:,1:,1:,1:,1:) => df_p(1:,1:,1:,1:,1:,1)
     dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim1_3d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,&
-          this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_3d(this%interp%dMatrix_gpu,this%interior_gpu,dfc, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
 
     dfloc(1:,1:,1:,1:,1:) => df_p(1:,1:,1:,1:,1:,2)
     dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim2_3d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec,&
-          this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_3d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
 
     dfloc(1:,1:,1:,1:,1:) => df_p(1:,1:,1:,1:,1:,3)
     dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim3_3d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec,&
-          this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim3_3d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
     dfloc => null()
     df_p => null()
 

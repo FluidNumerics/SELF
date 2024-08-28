@@ -42,7 +42,7 @@ module SELF_Mesh_3D
 
   endtype Mesh3D
 
-  contains
+contains
 
   subroutine Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
@@ -269,5 +269,5 @@ module SELF_Mesh_3D
     call gpuCheck(hipMemcpy(this%sideInfo_gpu,c_loc(this%sideInfo),sizeof(this%sideInfo),hipMemcpyHostToDevice))
 
   endsubroutine Read_HOPr_Mesh3D
-  
+
 endmodule SELF_Mesh_3D

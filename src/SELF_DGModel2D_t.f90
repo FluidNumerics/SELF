@@ -318,9 +318,9 @@ contains
     class(DGModel2D_t),intent(inout) :: this
 
     call this%solution%AverageSides()
- 
+
     call this%solution%MappedDGGradient(this%solutionGradient%interior)
-   
+
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
 
@@ -328,7 +328,7 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh, &
                                             this%decomp)
-                                            
+
   endsubroutine CalculateSolutionGradient_DGModel2D_t
 
   subroutine CalculateTendency_DGModel2D_t(this)
@@ -339,21 +339,21 @@ contains
 
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh,this%decomp)
-    
-    call this%PreTendency()           ! User-supplied 
-    call this%SetBoundaryCondition()  ! User-supplied
 
-    if( this % gradient_enabled )then
+    call this%PreTendency() ! User-supplied
+    call this%SetBoundaryCondition() ! User-supplied
+
+    if(this%gradient_enabled) then
       call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
     endif
-    
+
     call this%SourceMethod() ! User supplied
     call this%RiemannSolver() ! User supplied
-    call this%FluxMethod()    ! User supplied
-    
+    call this%FluxMethod() ! User supplied
+
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
 
     !$omp target
@@ -586,7 +586,7 @@ contains
                        this%solution%nVar,this%solution%nElem)
 
     call dsdt%Init(interp, &
-                       this%solution%nVar,this%solution%nElem)
+                   this%solution%nVar,this%solution%nElem)
 
     call solutionGradient%Init(interp, &
                                this%solution%nVar,this%solution%nElem)

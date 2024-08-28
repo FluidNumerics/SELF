@@ -26,12 +26,11 @@
 
 module SELF_DGModel3D
 
-    use SELF_DGModel3D_t
-  
-    implicit none
-  
-    type,extends(DGModel3D_t) :: DGModel3D
-    endtype DGModel3D
-  
-  endmodule SELF_DGModel3D
-  
+  use SELF_DGModel3D_t
+
+  implicit none
+
+  type,extends(DGModel3D_t) :: DGModel3D
+  endtype DGModel3D
+
+endmodule SELF_DGModel3D

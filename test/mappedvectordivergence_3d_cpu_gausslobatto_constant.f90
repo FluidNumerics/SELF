@@ -83,7 +83,7 @@ contains
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
-    
+
     call f%SetEquation(1,1,'f = 1.0') ! x-component
     call f%SetEquation(2,1,'f = 1.0') ! y-component
     call f%SetEquation(3,1,'f = 1.0') ! z-component
@@ -104,7 +104,7 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*, "max error (tolerance)", maxval(df%interior), tolerance
+      print*,"max error (tolerance)",maxval(df%interior),tolerance
       r = 1
     endif
 

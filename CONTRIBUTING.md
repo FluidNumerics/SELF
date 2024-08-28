@@ -28,9 +28,9 @@ If you are interested in making a code contribution and would like to learn more
 8. Open a pull request with the upstream SELF repository. In the title, reference the issue number that you worked on. Include a detailed description of the changes you made and why. If you have recommendations for updates to documentation as a result of your changes, please indicate so. If you've added a new routine, you will need to work with the maintainers to develop tests when integrating your new feature in. 
 
 ### Code formatting
-Each pull request is checked for formatting before running other tests. The `feq-parse` project uses [`fprettify`](https://pypi.org/project/fprettify/) for formatting fortran source code. We have included a configuration file in the `feq-parse` repository (`fprettify.config`) that can be used for ensuring formatting correctness. 
+Each pull request is checked for formatting before running other tests. The `self` project uses [`fprettify`](https://pypi.org/project/fprettify/) for formatting fortran source code. We have included a configuration file in the `self` repository (`fprettify.config`) that can be used for ensuring formatting correctness. 
 
-You can run the following to format code to conform to the expected format for `feq-parse`.
+You can run the following to format code to conform to the expected format for `self`.
 
 ```
 fprettify  './src/' --config-file ./fprettify.config --recursive --case 1 1 1 1

@@ -37,7 +37,7 @@ module SELF_Scalar_1D
 
 ! ---------------------- Scalars ---------------------- !
   type,extends(Scalar1D_t),public :: Scalar1D
-    character(3) :: backend="gpu"
+    character(3) :: backend = "gpu"
     type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
@@ -60,9 +60,7 @@ module SELF_Scalar_1D
     generic,public :: Derivative => Derivative_Scalar1D
     procedure,private :: Derivative_Scalar1D
 
-
   endtype Scalar1D
-
 
 contains
 
@@ -75,8 +73,8 @@ contains
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
 
-    if( .not. GPUAvailable() )then
-      print*, __FILE__,':', __LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
+    if(.not. GPUAvailable()) then
+      print*,__FILE__,':',__LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
       stop 1
     endif
 
@@ -89,15 +87,15 @@ contains
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
              this%boundarynormal(1:2,1:nelem,1:nvar), &
-             this%extBoundary(1:2,1:nelem,1:nvar),&
+             this%extBoundary(1:2,1:nelem,1:nvar), &
              this%avgBoundary(1:2,1:nelem,1:nvar))
-    
+
     this%interior = 0.0_prec
     this%boundary = 0.0_prec
     this%boundarynormal = 0.0_prec
     this%extBoundary = 0.0_prec
     this%avgBoundary = 0.0_prec
-    
+
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
 
@@ -143,7 +141,7 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%extboundary),this%extboundary_gpu,sizeof(this%extboundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%avgboundary),this%avgboundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
 
-  end subroutine UpdateHost_Scalar1D
+  endsubroutine UpdateHost_Scalar1D
 
   subroutine UpdateDevice_Scalar1D(this)
     implicit none
@@ -155,7 +153,7 @@ contains
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%avgboundary_gpu,c_loc(this%avgboundary),sizeof(this%boundary),hipMemcpyHostToDevice))
 
-  end subroutine UpdateDevice_Scalar1D
+  endsubroutine UpdateDevice_Scalar1D
 
   subroutine AverageSides_Scalar1D(this)
     implicit none
@@ -169,22 +167,22 @@ contains
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call self_blas_matrixop_1d(this%interp%bMatrix_gpu,&
-                                  this%interior_gpu,&
-                                  this%boundary_gpu,&
-                                  2,this % N + 1,&
-                                  this%nvar*this%nelem,this%blas_handle)
+    call self_blas_matrixop_1d(this%interp%bMatrix_gpu, &
+                               this%interior_gpu, &
+                               this%boundary_gpu, &
+                               2,this%N+1, &
+                               this%nvar*this%nelem,this%blas_handle)
 
-  end subroutine BoundaryInterp_Scalar1D
+  endsubroutine BoundaryInterp_Scalar1D
 
   subroutine GridInterp_Scalar1D(this,f)
     implicit none
     class(Scalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: f
 
-    call self_blas_matrixop_1d(this%interp%iMatrix_gpu,&
-                               this%interior_gpu,&
-                               f,this%M+1,this%N+1,&
+    call self_blas_matrixop_1d(this%interp%iMatrix_gpu, &
+                               this%interior_gpu, &
+                               f,this%M+1,this%N+1, &
                                this%nvar*this%nelem,this%blas_handle)
 
   endsubroutine GridInterp_Scalar1D
@@ -194,11 +192,11 @@ contains
     class(Scalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    call self_blas_matrixop_1d(this%interp%dMatrix_gpu,&
-                               this%interior_gpu,&
-                               df,this%N+1,this%N+1,&
+    call self_blas_matrixop_1d(this%interp%dMatrix_gpu, &
+                               this%interior_gpu, &
+                               df,this%N+1,this%N+1, &
                                this%nvar*this%nelem,this%blas_handle)
 
   endsubroutine Derivative_Scalar1D
-  
+
 endmodule SELF_Scalar_1D

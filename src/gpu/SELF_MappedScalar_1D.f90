@@ -54,18 +54,18 @@ module SELF_MappedScalar_1D
       implicit none
       type(c_ptr),value :: scalar,dxds
       integer(c_int),value :: N,nVar,nEl
-    end subroutine JacobianWeight_1D_gpu
-  end interface
+    endsubroutine JacobianWeight_1D_gpu
+  endinterface
 
   interface
-  subroutine DGDerivative_BoundaryContribution_1D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
-    bind(c,name="DGDerivative_BoundaryContribution_1D_gpu")
-    use iso_c_binding
-    implicit none
-    type(c_ptr),value :: bMatrix,qWeights,bf,df
-    integer(c_int),value :: N,nVar,nEl
-  end subroutine DGDerivative_BoundaryContribution_1D_gpu
-  end interface
+    subroutine DGDerivative_BoundaryContribution_1D_gpu(bMatrix,qWeights,bf,df,N,nVar,nEl) &
+      bind(c,name="DGDerivative_BoundaryContribution_1D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bMatrix,qWeights,bf,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine DGDerivative_BoundaryContribution_1D_gpu
+  endinterface
 
 contains
 
@@ -134,39 +134,38 @@ contains
     !$omp end target
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
 
-
   endsubroutine SideExchange_MappedScalar1D
 
   subroutine MappedDerivative_MappedScalar1D(this,dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
-    type(c_ptr), intent(inout) :: df
+    type(c_ptr),intent(inout) :: df
     ! Local
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-      call this%Derivative(df)
-      call JacobianWeight_1D_gpu(df,this%geometry%dxds%interior_gpu,this%N,this%nVar,this%nelem)
+    call this%Derivative(df)
+    call JacobianWeight_1D_gpu(df,this%geometry%dxds%interior_gpu,this%N,this%nVar,this%nelem)
 
   endsubroutine MappedDerivative_MappedScalar1D
 
   subroutine MappedDGDerivative_MappedScalar1D(this,dF)
     implicit none
     class(MappedScalar1D),intent(in) :: this
-    type(c_ptr), intent(inout) :: df
+    type(c_ptr),intent(inout) :: df
     ! Local
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    call self_blas_matrixop_1d(this%interp%dgMatrix_gpu,&
-                               this%interior_gpu,&
-                               df,this%N+1,this%N+1,&
+    call self_blas_matrixop_1d(this%interp%dgMatrix_gpu, &
+                               this%interior_gpu, &
+                               df,this%N+1,this%N+1, &
                                this%nvar*this%nelem,this%blas_handle)
 
-    call DGDerivative_BoundaryContribution_1D_gpu(this%interp%bMatrix_gpu,&
-                                                  this%interp%qWeights_gpu,&
-                                                  this%boundarynormal_gpu,df,&
-                                                  this%N,this%nVar,this%nelem) 
+    call DGDerivative_BoundaryContribution_1D_gpu(this%interp%bMatrix_gpu, &
+                                                  this%interp%qWeights_gpu, &
+                                                  this%boundarynormal_gpu,df, &
+                                                  this%N,this%nVar,this%nelem)
 
     call JacobianWeight_1D_gpu(df,this%geometry%dxds%interior_gpu,this%N,this%nVar,this%nelem)
 

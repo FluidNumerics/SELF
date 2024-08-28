@@ -67,7 +67,7 @@ contains
     call f%UpdateDevice()
     call f%BoundaryInterp()
     call f%UpdateHost()
-    
+
     ! Calculate diff from exact
     f%boundary = abs(f%boundary-1.0_prec)
 

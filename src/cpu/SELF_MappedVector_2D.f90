@@ -32,5 +32,5 @@ module SELF_MappedVector_2D
 
   type,extends(MappedVector2D_t),public :: MappedVector2D
   endtype MappedVector2D
-  
+
 endmodule SELF_MappedVector_2D

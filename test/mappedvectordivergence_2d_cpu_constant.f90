@@ -99,8 +99,8 @@ contains
 
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
-    
-    print*, "absmax error :",maxval(df%interior)
+
+    print*,"absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else

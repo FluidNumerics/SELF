@@ -84,7 +84,7 @@ contains
     call f%Init(interp,nvar,mesh%nelem)
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
-    
+
     call f%SetEquation(1,'f = x*y*z')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)

@@ -35,10 +35,9 @@ module SELF_Tensor_2D
 
   implicit none
 
-
   type,extends(Tensor2D_t),public :: Tensor2D
-    character(3) :: backend="gpu"
-    type(c_ptr) :: blas_handle  
+    character(3) :: backend = "gpu"
+    type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
     type(c_ptr) :: extBoundary_gpu
@@ -132,7 +131,7 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%extboundary),this%extboundary_gpu,sizeof(this%extboundary),hipMemcpyDeviceToHost))
 
-  end subroutine UpdateHost_Tensor2D
+  endsubroutine UpdateHost_Tensor2D
 
   subroutine UpdateDevice_Tensor2D(this)
     implicit none
@@ -142,6 +141,6 @@ contains
     call gpuCheck(hipMemcpy(this%boundary_gpu,c_loc(this%boundary),sizeof(this%boundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
 
-  end subroutine UpdateDevice_Tensor2D
+  endsubroutine UpdateDevice_Tensor2D
 
 endmodule SELF_Tensor_2D

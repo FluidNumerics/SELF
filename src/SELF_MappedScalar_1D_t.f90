@@ -45,7 +45,7 @@ module SELF_MappedScalar_1D_t
 
   type,extends(Scalar1D),public :: MappedScalar1D_t
     logical :: geometry_associated = .false.
-    type(Geometry1D), pointer :: geometry => null()
+    type(Geometry1D),pointer :: geometry => null()
 
   contains
     procedure,public :: AssociateGeometry => AssociateGeometry_MappedScalar1D_t
@@ -71,10 +71,10 @@ contains
     class(MappedScalar1D_t),intent(inout) :: this
     type(Geometry1D),target,intent(in) :: geometry
 
-      if(.not. associated(this%geometry))then
-        this%geometry => geometry
-        this%geometry_associated = .true.
-      endif
+    if(.not. associated(this%geometry)) then
+      this%geometry => geometry
+      this%geometry_associated = .true.
+    endif
 
   endsubroutine AssociateGeometry_MappedScalar1D_t
 
@@ -82,10 +82,10 @@ contains
     implicit none
     class(MappedScalar1D_t),intent(inout) :: this
 
-      if(associated(this%geometry))then
-        this%geometry => null()
-        this%geometry_associated = .false.
-      endif
+    if(associated(this%geometry)) then
+      this%geometry => null()
+      this%geometry_associated = .false.
+    endif
 
   endsubroutine DissociateGeometry_MappedScalar1D_t
 

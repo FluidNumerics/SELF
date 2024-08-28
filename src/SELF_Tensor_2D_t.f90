@@ -51,7 +51,7 @@ module SELF_Tensor_2D_t
 
     procedure,public :: UpdateHost => UpdateHost_Tensor2D_t
     procedure,public :: UpdateDevice => UpdateDevice_Tensor2D_t
-    
+
     procedure,public :: BoundaryInterp => BoundaryInterp_Tensor2D_t
 
     generic,public :: Determinant => Determinant_Tensor2D_t
@@ -86,7 +86,7 @@ contains
     this%interior = 0.0_prec
     this%boundary = 0.0_prec
     this%extBoundary = 0.0_prec
-    
+
     ! Initialize equation parser
     ! This is done to prevent segmentation faults that arise
     ! when building with amdflang that are traced back to
@@ -121,13 +121,13 @@ contains
     implicit none
     class(Tensor2D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Tensor2D_t
+  endsubroutine UpdateHost_Tensor2D_t
 
   subroutine UpdateDevice_Tensor2D_t(this)
     implicit none
     class(Tensor2D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Tensor2D_t
+
+  endsubroutine UpdateDevice_Tensor2D_t
 
   subroutine BoundaryInterp_Tensor2D_t(this)
     implicit none

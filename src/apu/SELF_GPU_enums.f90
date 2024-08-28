@@ -42,7 +42,7 @@ module SELF_GPU_enums
     enumerator :: hipMemcpyDefault = 4
   endenum
 
-  enum, bind(c)
+  enum,bind(c)
     enumerator :: HIPBLAS_STATUS_SUCCESS = 0
     enumerator :: HIPBLAS_STATUS_NOT_INITIALIZED = 1
     enumerator :: HIPBLAS_STATUS_ALLOC_FAILED = 2
@@ -57,7 +57,7 @@ module SELF_GPU_enums
     enumerator :: HIPBLAS_STATUS_UNKNOWN = 11
   endenum
 
-  enum, bind(c)
+  enum,bind(c)
 #ifdef HAVE_CUDA
     enumerator :: HIPBLAS_OP_N = 0
 #else
@@ -68,6 +68,6 @@ module SELF_GPU_enums
 #else
     enumerator :: HIPBLAS_OP_T = 112
 #endif
-  end enum
+  endenum
 
 endmodule SELF_GPU_enums

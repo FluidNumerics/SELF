@@ -26,12 +26,11 @@
 
 module self_advection_diffusion_3d
 
-    use self_advection_diffusion_3d_t
-  
-    implicit none
-  
-    type,extends(advection_diffusion_3d_t) :: advection_diffusion_3d
-    endtype advection_diffusion_3d
-  
-  endmodule self_advection_diffusion_3d
-  
+  use self_advection_diffusion_3d_t
+
+  implicit none
+
+  type,extends(advection_diffusion_3d_t) :: advection_diffusion_3d
+  endtype advection_diffusion_3d
+
+endmodule self_advection_diffusion_3d

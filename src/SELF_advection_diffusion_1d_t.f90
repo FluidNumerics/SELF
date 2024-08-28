@@ -43,7 +43,6 @@ module self_advection_diffusion_1d_t
     procedure :: fluxmethod => fluxmethod_advection_diffusion_1d_t
     procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_1d_t
 
-
   endtype advection_diffusion_1d_t
 
 contains
@@ -52,7 +51,7 @@ contains
     implicit none
     class(advection_diffusion_1d_t),intent(inout) :: this
     ! Local
-    integer :: iel, i, ivar
+    integer :: iel,i,ivar
     real(prec) :: e,s,J
 
     e = 0.0_prec
@@ -61,7 +60,7 @@ contains
         do i = 1,this%solution%interp%N+1
           J = this%geometry%dxds%interior(i,iel,1)
           s = this%solution%interior(i,iel,ivar)
-          e = e + 0.5_prec*s*s*J
+          e = e+0.5_prec*s*s*J
         enddo
       enddo
     enddo
@@ -95,7 +94,7 @@ contains
         this%solution%boundary(1,1,ivar)
 
     enddo
- 
+
   endsubroutine setboundarycondition_advection_diffusion_1d_t
 
   subroutine setgradientboundarycondition_advection_diffusion_1d_t(this)
@@ -123,7 +122,6 @@ contains
         this%solutionGradient%boundary(1,1,ivar)
 
     enddo
-
 
   endsubroutine setgradientboundarycondition_advection_diffusion_1d_t
 
@@ -190,7 +188,7 @@ contains
           dfavg = this%solutionGradient%avgboundary(iside,iel,ivar) ! average solution gradient (with direction taken into account)
 
           this%flux%boundarynormal(iside,iel,ivar) = 0.5_prec*(u*nhat*(fin+fout)+abs(u*nhat)*(fin-fout))- & ! advective flux
-                                               this%nu*dfavg*nhat ! diffusive flux
+                                                     this%nu*dfavg*nhat ! diffusive flux
 
         enddo
       enddo

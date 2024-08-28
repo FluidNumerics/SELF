@@ -104,7 +104,7 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*, "max error (tolerance)", maxval(df%interior), tolerance
+      print*,"max error (tolerance)",maxval(df%interior),tolerance
       r = 1
     endif
 

@@ -34,4 +34,4 @@ module SELF_Vector_3D
     character(3) :: backend = "cpu"
   endtype Vector3D
 
-end module SELF_Vector_3D
+endmodule SELF_Vector_3D

@@ -40,7 +40,6 @@ module SELF_Mesh_2D
     procedure,public :: Free => Free_Mesh2D
     procedure,public :: Read_HOPr => Read_HOPr_Mesh2D
 
-
   endtype Mesh2D
 
 contains

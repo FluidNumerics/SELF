@@ -34,4 +34,4 @@ module SELF_Vector_2D
     character(3) :: backend = "cpu"
   endtype Vector2D
 
-end module SELF_Vector_2D
+endmodule SELF_Vector_2D

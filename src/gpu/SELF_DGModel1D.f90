@@ -44,7 +44,6 @@ module SELF_DGModel1D
 
   contains
 
-
     procedure :: UpdateSolution => UpdateSolution_DGModel1D
 
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D
@@ -57,7 +56,6 @@ module SELF_DGModel1D
   endtype DGModel1D
 
 contains
-
 
   subroutine UpdateSolution_DGModel1D(this,dt)
     !! Computes a solution update as , where dt is either provided through the interface
@@ -88,8 +86,8 @@ contains
     integer :: ndof
 
     ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu,&
-          rk2_a(m),rk2_g(m),this%dt,ndof)
+    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
+                       rk2_a(m),rk2_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK2_DGModel1D
 
@@ -101,8 +99,8 @@ contains
     integer :: ndof
 
     ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu,&
-          rk3_a(m),rk3_g(m),this%dt,ndof)
+    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
+                       rk3_a(m),rk3_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK3_DGModel1D
 
@@ -114,8 +112,8 @@ contains
     integer :: ndof
 
     ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu,&
-          rk4_a(m),rk4_g(m),this%dt,ndof)
+    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
+                       rk4_a(m),rk4_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK4_DGModel1D
 
@@ -129,11 +127,11 @@ contains
 
     ! Account for the outward pointing normal before computing dg derivative
     ndof = this%solution%nvar*this%solution%nelem*2
-    call GradientNormal_1D_gpu(this%solution%boundarynormal_gpu,&
-        this%solution%avgBoundary_gpu,ndof)
+    call GradientNormal_1D_gpu(this%solution%boundarynormal_gpu, &
+                               this%solution%avgBoundary_gpu,ndof)
 
     call this%solution%MappedDGDerivative(this%solutionGradient%interior_gpu)
-   
+
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
 
@@ -141,7 +139,6 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh, &
                                             this%decomp)
- 
 
   endsubroutine CalculateSolutionGradient_DGModel1D
 
@@ -153,11 +150,11 @@ contains
 
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh,this%decomp)
-    
-    call this%PreTendency()           ! User-supplied 
-    call this%SetBoundaryCondition()  ! User-supplied
-  
-    if( this % gradient_enabled )then
+
+    call this%PreTendency() ! User-supplied
+    call this%SetBoundaryCondition() ! User-supplied
+
+    if(this%gradient_enabled) then
       call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
@@ -166,13 +163,13 @@ contains
 
     call this%SourceMethod() ! User supplied
     call this%RiemannSolver() ! User supplied
-    call this%FluxMethod()    ! User supplied
+    call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDerivative(this%fluxDivergence%interior_gpu)
 
     ndof = this%solution%nvar*this%solution%nelem*(this%solution%interp%N+1)
-    call CalculateDSDt_gpu(this%fluxDivergence%interior_gpu,this%source%interior_gpu,&
-          this%dsdt%interior_gpu,ndof)
+    call CalculateDSDt_gpu(this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                           this%dsdt%interior_gpu,ndof)
 
   endsubroutine CalculateTendency_DGModel1D
 

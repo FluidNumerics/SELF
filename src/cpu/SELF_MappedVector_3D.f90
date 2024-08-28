@@ -32,5 +32,5 @@ module SELF_MappedVector_3D
 
   type,extends(MappedVector3D_t),public :: MappedVector3D
   endtype MappedVector3D
-  
+
 endmodule SELF_MappedVector_3D

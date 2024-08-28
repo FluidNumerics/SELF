@@ -74,8 +74,8 @@ contains
     ! Local
     real(prec) :: q(0:M)
 
-    if( .not. GPUAvailable() )then
-      print*, __FILE__,':', __LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
+    if(.not. GPUAvailable()) then
+      print*,__FILE__,':',__LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
       stop 1
     endif
 
@@ -91,7 +91,6 @@ contains
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
-
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
@@ -134,39 +133,39 @@ contains
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
 
-    print*, "Lagrange malloc"
+    print*,"Lagrange malloc"
     call gpuCheck(hipMalloc(this%iMatrix_gpu,sizeof(this%iMatrix)))
     call gpuCheck(hipMalloc(this%dMatrix_gpu,sizeof(this%dMatrix)))
     call gpuCheck(hipMalloc(this%dgMatrix_gpu,sizeof(this%dgMatrix)))
     call gpuCheck(hipMalloc(this%bMatrix_gpu,sizeof(this%bMatrix)))
     call gpuCheck(hipMalloc(this%qWeights_gpu,sizeof(this%qWeights)))
 
-    print*, "Lagrange memcpy"
-    
+    print*,"Lagrange memcpy"
+
     print*,c_loc(this%iMatrix)
     call gpuCheck(hipMemcpy(this%iMatrix_gpu, &
                             c_loc(this%iMatrix), &
                             sizeof(this%iMatrix), &
                             hipMemcpyHostToDevice))
-    print*, "Lagrange memcpy"
+    print*,"Lagrange memcpy"
 
     call gpuCheck(hipMemcpy(this%dMatrix_gpu, &
                             c_loc(this%dMatrix), &
                             sizeof(this%dMatrix), &
                             hipMemcpyHostToDevice))
-    print*, "Lagrange memcpy"
+    print*,"Lagrange memcpy"
 
     call gpuCheck(hipMemcpy(this%dgMatrix_gpu, &
                             c_loc(this%dgMatrix), &
                             sizeof(this%dgMatrix), &
                             hipMemcpyHostToDevice))
-    print*, "Lagrange memcpy"
+    print*,"Lagrange memcpy"
 
     call gpuCheck(hipMemcpy(this%bMatrix_gpu, &
                             c_loc(this%bMatrix), &
                             sizeof(this%bMatrix), &
                             hipMemcpyHostToDevice))
-    print*, "Lagrange memcpy"
+    print*,"Lagrange memcpy"
 
     call gpuCheck(hipMemcpy(this%qWeights_gpu, &
                             c_loc(this%qWeights), &

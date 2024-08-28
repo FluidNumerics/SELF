@@ -40,7 +40,7 @@ program advection_diffusion_1d_rk4
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec),parameter :: endtime = 0.01_prec
   real(prec),parameter :: iointerval = 0.01_prec
-  real(prec) :: e0, ef ! Initial and final entropy
+  real(prec) :: e0,ef ! Initial and final entropy
   type(advection_diffusion_1d) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh1D),target :: mesh
@@ -101,8 +101,8 @@ program advection_diffusion_1d_rk4
     maxval(modelobj%solution%interior)
   ef = modelobj%entropy
 
-  if( ef > e0 )then
-    print*, "Error: Final entropy greater than initial entropy! ", e0,ef
+  if(ef > e0) then
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
   ! Clean up

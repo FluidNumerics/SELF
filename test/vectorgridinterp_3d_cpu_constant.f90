@@ -83,7 +83,7 @@ contains
     ! Calculate diff from exact
     fTarget%interior = abs(fTarget%interior-1.0_prec)
 
-    print*, "absmax error",maxval(fTarget%interior)
+    print*,"absmax error",maxval(fTarget%interior)
     if(maxval(fTarget%interior) <= tolerance) then
       r = 0
     else

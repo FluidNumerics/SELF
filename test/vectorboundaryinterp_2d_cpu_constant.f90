@@ -65,7 +65,7 @@ contains
     f%interior = 1.0_prec
     f%boundary = 0.0_prec
     print*,"Backend : "//f%backend
-    print*,"Max interior : ", maxval(f%interior)
+    print*,"Max interior : ",maxval(f%interior)
     ! Interpolate with gpuAccel = .FALSE.
     call f%UpdateDevice()
     call f%BoundaryInterp()
@@ -78,7 +78,7 @@ contains
     if(maxval(f%boundary) <= tolerance) then
       r = 0
     else
-      print*, "Max error : ", maxval(f%boundary)
+      print*,"Max error : ",maxval(f%boundary)
       r = 1
     endif
 

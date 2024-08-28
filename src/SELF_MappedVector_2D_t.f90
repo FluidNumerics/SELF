@@ -40,7 +40,7 @@ module SELF_MappedVector_2D_t
 
   type,extends(Vector2D),public :: MappedVector2D_t
     logical :: geometry_associated = .false.
-    type(SEMQuad), pointer :: geometry => null()
+    type(SEMQuad),pointer :: geometry => null()
   contains
 
     procedure,public :: AssociateGeometry => AssociateGeometry_MappedVector2D_t
@@ -68,10 +68,10 @@ contains
     class(MappedVector2D_t),intent(inout) :: this
     type(SEMQuad),target,intent(in) :: geometry
 
-      if(.not. associated(this%geometry))then
-        this%geometry => geometry
-        this%geometry_associated = .true.
-      endif
+    if(.not. associated(this%geometry)) then
+      this%geometry => geometry
+      this%geometry_associated = .true.
+    endif
 
   endsubroutine AssociateGeometry_MappedVector2D_t
 
@@ -79,10 +79,10 @@ contains
     implicit none
     class(MappedVector2D_t),intent(inout) :: this
 
-      if(associated(this%geometry))then
-        this%geometry => null()
-        this%geometry_associated = .false.
-      endif
+    if(associated(this%geometry)) then
+      this%geometry => null()
+      this%geometry_associated = .false.
+    endif
 
   endsubroutine DissociateGeometry_MappedVector2D_t
 
@@ -257,7 +257,7 @@ contains
     rankId = decomp%rankId
     offset = decomp%offsetElem(rankId+1)
 
- !   call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+    !   call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
     !$omp target
     !$omp teams loop collapse(4)
     do idir = 1,2

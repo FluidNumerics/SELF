@@ -122,13 +122,13 @@ contains
     implicit none
     class(Scalar2D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Scalar2D_t
+  endsubroutine UpdateHost_Scalar2D_t
 
   subroutine UpdateDevice_Scalar2D_t(this)
     implicit none
     class(Scalar2D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Scalar2D_t
+
+  endsubroutine UpdateDevice_Scalar2D_t
 
   subroutine BoundaryInterp_Scalar2D_t(this)
     implicit none
@@ -183,8 +183,8 @@ contains
         do iside = 1,4
           do i = 1,this%interp%N+1
             this%avgBoundary(i,iside,iel,ivar) = 0.5_prec*( &
-                                              this%boundary(i,iside,iel,ivar)+ &
-                                              this%extBoundary(i,iside,iel,ivar))
+                                                 this%boundary(i,iside,iel,ivar)+ &
+                                                 this%extBoundary(i,iside,iel,ivar))
           enddo
         enddo
       enddo

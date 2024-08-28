@@ -44,7 +44,6 @@ module self_advection_diffusion_2d_t
     procedure :: fluxmethod => fluxmethod_advection_diffusion_2d_t
     procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_2d_t
 
-
   endtype advection_diffusion_2d_t
 
 contains
@@ -63,7 +62,7 @@ contains
           do i = 1,this%solution%interp%N+1
             jac = this%geometry%J%interior(i,j,iel,1)
             s = this%solution%interior(i,j,iel,ivar)
-            e = e + 0.5_prec*s*s*jac
+            e = e+0.5_prec*s*s*jac
           enddo
         enddo
       enddo
@@ -74,7 +73,7 @@ contains
   endsubroutine CalculateEntropy_advection_diffusion_2d_t
 
   subroutine setboundarycondition_advection_diffusion_2d_t(this)
-    !! Boundary conditions for the solution are set to 
+    !! Boundary conditions for the solution are set to
     !! 0 for the external state to provide radiation type
     !! boundary conditions.
     implicit none

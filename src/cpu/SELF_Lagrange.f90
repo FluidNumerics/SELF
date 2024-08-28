@@ -38,4 +38,4 @@ module SELF_Lagrange
     character(3) :: backend = 'cpu'
   endtype Lagrange
 
-end module SELF_Lagrange
+endmodule SELF_Lagrange

@@ -38,7 +38,7 @@ module SELF_MappedVector_3D_t
 
   type,extends(Vector3D),public :: MappedVector3D_t
     logical :: geometry_associated = .false.
-    type(SEMHex), pointer :: geometry => null()
+    type(SEMHex),pointer :: geometry => null()
   contains
 
     procedure,public :: AssociateGeometry => AssociateGeometry_MappedVector3D_t
@@ -68,10 +68,10 @@ contains
     class(MappedVector3D_t),intent(inout) :: this
     type(SEMHex),target,intent(in) :: geometry
 
-      if(.not. associated(this%geometry))then
-        this%geometry => geometry
-        this%geometry_associated = .true.
-      endif
+    if(.not. associated(this%geometry)) then
+      this%geometry => geometry
+      this%geometry_associated = .true.
+    endif
 
   endsubroutine AssociateGeometry_MappedVector3D_t
 
@@ -79,10 +79,10 @@ contains
     implicit none
     class(MappedVector3D_t),intent(inout) :: this
 
-      if(associated(this%geometry))then
-        this%geometry => null()
-        this%geometry_associated = .false.
-      endif
+    if(associated(this%geometry)) then
+      this%geometry => null()
+      this%geometry_associated = .false.
+    endif
 
   endsubroutine DissociateGeometry_MappedVector3D_t
 

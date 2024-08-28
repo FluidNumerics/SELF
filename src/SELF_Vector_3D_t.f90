@@ -146,13 +146,13 @@ contains
     implicit none
     class(Vector3D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Vector3D_t
+  endsubroutine UpdateHost_Vector3D_t
 
   subroutine UpdateDevice_Vector3D_t(this)
     implicit none
     class(Vector3D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Vector3D_t
+
+  endsubroutine UpdateDevice_Vector3D_t
 
   subroutine SetEquation_Vector3D_t(this,idir,ivar,eqnChar)
     !! Sets the equation parser for the `idir` direction and `ivar-th` variable

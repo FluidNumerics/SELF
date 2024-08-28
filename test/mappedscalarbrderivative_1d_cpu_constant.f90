@@ -85,7 +85,7 @@ contains
     call f%SetEquation(1,'f = 1.0')
     call f%SetInteriorFromEquation(0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
- 
+
     call f%BoundaryInterp()
     call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
@@ -119,14 +119,14 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*, "Max error : ", maxval(df%interior)
+      print*,"Max error : ",maxval(df%interior)
       r = 1
     endif
 
     ! Clean up
     call f%DissociateGeometry()
     call df%DissociateGeometry()
-    
+
     call decomp%Free()
     call mesh%Free()
     call geometry%Free()

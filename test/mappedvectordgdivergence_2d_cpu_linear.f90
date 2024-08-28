@@ -26,14 +26,14 @@
 
 program test
 
-implicit none
-integer :: exit_code
+  implicit none
+  integer :: exit_code
 
-exit_code = mappedvectordgdivergence_2d_cpu_linear()
-stop exit_code
+  exit_code = mappedvectordgdivergence_2d_cpu_linear()
+  stop exit_code
 
 contains
-integer function mappedvectordgdivergence_2d_cpu_linear() result(r)
+  integer function mappedvectordgdivergence_2d_cpu_linear() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
@@ -69,9 +69,9 @@ integer function mappedvectordgdivergence_2d_cpu_linear() result(r)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
-                    controlNodeType=GAUSS, &
-                    M=targetDegree, &
-                    targetNodeType=UNIFORM)
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
     ! Create a uniform block mesh
     call get_environment_variable("WORKSPACE",WORKSPACE)
@@ -95,22 +95,22 @@ integer function mappedvectordgdivergence_2d_cpu_linear() result(r)
     call f%UpdateHost()
 
     do iEl = 1,f%nElem
-    do j = 1,4
+      do j = 1,4
         do i = 1,f%interp%N+1
 
-        ! Get the boundary normals on cell edges from the mesh geometry
-        nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
-        nmag = geometry%nScale%boundary(i,j,iEl,1)
+          ! Get the boundary normals on cell edges from the mesh geometry
+          nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
+          nmag = geometry%nScale%boundary(i,j,iEl,1)
 
-        f%boundaryNormal(i,j,iEl,1) = (f%boundary(i,j,iEl,1,1)*nhat(1)+ &
-                                        f%boundary(i,j,iEl,1,2)*nhat(2))*nmag
+          f%boundaryNormal(i,j,iEl,1) = (f%boundary(i,j,iEl,1,1)*nhat(1)+ &
+                                         f%boundary(i,j,iEl,1,2)*nhat(2))*nmag
 
         enddo
-    enddo
+      enddo
     enddo
 
     call f%UpdateDevice()
-    
+
 #ifdef ENABLE_GPU
     call f%MappedDGDivergence(df%interior_gpu)
 #else
@@ -121,11 +121,11 @@ integer function mappedvectordgdivergence_2d_cpu_linear() result(r)
     ! Calculate diff from exact
     df%interior = abs(df%interior-2.0_prec)
 
-    print*, "absmax error :",maxval(df%interior)
+    print*,"absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
-    r = 0
+      r = 0
     else
-    r = 1
+      r = 1
     endif
 
     ! Clean up
@@ -137,5 +137,5 @@ integer function mappedvectordgdivergence_2d_cpu_linear() result(r)
     call f%free()
     call df%free()
 
-endfunction mappedvectordgdivergence_2d_cpu_linear
+  endfunction mappedvectordgdivergence_2d_cpu_linear
 endprogram test

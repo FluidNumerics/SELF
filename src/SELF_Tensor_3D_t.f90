@@ -121,13 +121,13 @@ contains
     implicit none
     class(Tensor3D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Tensor3D_t
+  endsubroutine UpdateHost_Tensor3D_t
 
   subroutine UpdateDevice_Tensor3D_t(this)
     implicit none
     class(Tensor3D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Tensor3D_t
+
+  endsubroutine UpdateDevice_Tensor3D_t
 
   subroutine BoundaryInterp_Tensor3D_t(this)
     implicit none

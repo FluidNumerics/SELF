@@ -36,17 +36,17 @@ module SELF_Scalar_1D
 
 ! ---------------------- Scalars ---------------------- !
   type,extends(Scalar1D_t),public :: Scalar1D
-    character(3) :: backend="apu"
+    character(3) :: backend = "apu"
     type(c_ptr) :: blas_handle
 
   contains
 
-  procedure,public :: Init => Init_Scalar1D
-  procedure,public :: Free => Free_Scalar1D
+    procedure,public :: Init => Init_Scalar1D
+    procedure,public :: Free => Free_Scalar1D
 
-  procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D
-  !procedure,public :: GridInterp => GridInterp_Scalar1D
-  !procedure,public :: Derivative => Derivative_Scalar1D
+    procedure,public :: BoundaryInterp => BoundaryInterp_Scalar1D
+    !procedure,public :: GridInterp => GridInterp_Scalar1D
+    !procedure,public :: Derivative => Derivative_Scalar1D
 
   endtype Scalar1D
 
@@ -61,8 +61,8 @@ contains
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
 
-    if( .not. GPUAvailable() )then
-      print*, __FILE__,':', __LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
+    if(.not. GPUAvailable()) then
+      print*,__FILE__,':',__LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
       stop 1
     endif
 
@@ -74,7 +74,7 @@ contains
 
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
-             this%extBoundary(1:2,1:nelem,1:nvar),&
+             this%extBoundary(1:2,1:nelem,1:nvar), &
              this%avgBoundary(1:2,1:nelem,1:nvar))
 
     allocate(this%meta(1:nVar))
@@ -117,7 +117,7 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%extboundary),c_loc(this%extboundary_gpu),sizeof(this%extboundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%avgboundary),c_loc(this%avgboundary_gpu),sizeof(this%boundary),hipMemcpyDeviceToHost))
 
-  end subroutine UpdateHost_Scalar1D
+  endsubroutine UpdateHost_Scalar1D
 
   subroutine UpdateDevice_Scalar1D(this)
     implicit none
@@ -128,19 +128,19 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%extboundary_gpu),c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(c_loc(this%avgboundary_gpu),c_loc(this%avgboundary),sizeof(this%boundary),hipMemcpyHostToDevice))
 
-  end subroutine UpdateDevice_Scalar1D
+  endsubroutine UpdateDevice_Scalar1D
 
   subroutine BoundaryInterp_Scalar1D(this)
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call self_blas_matrixop_1d(this%interp%bMatrix_gpu,&
-                                  this%interior_gpu,&
-                                  this%boundary_gpu,&
-                                  2,this % N + 1,&
-                                  this%nvar*this%nelem,this%blas_handle)
+    call self_blas_matrixop_1d(this%interp%bMatrix_gpu, &
+                               this%interior_gpu, &
+                               this%boundary_gpu, &
+                               2,this%N+1, &
+                               this%nvar*this%nelem,this%blas_handle)
 
-  end subroutine BoundaryInterp_Scalar1D
+  endsubroutine BoundaryInterp_Scalar1D
 
   ! function GridInterp_Scalar1D(this) result(f)
   !   implicit none

@@ -35,7 +35,7 @@ module SELF_MappedScalar_3D
 
   type,extends(MappedScalar3D_t),public :: MappedScalar3D
 
-    type(c_ptr) :: jas_gpu  ! jacobian weighted scalar for gradient calculation
+    type(c_ptr) :: jas_gpu ! jacobian weighted scalar for gradient calculation
 
   contains
     procedure,public :: Init => Init_MappedScalar3D
@@ -55,7 +55,7 @@ module SELF_MappedScalar_3D
 
   interface
     subroutine ContravariantWeight_3D_gpu(f,dsdx,jaf,N,nvar,nel) &
-       bind(c,name="ContravariantWeight_3D_gpu")
+      bind(c,name="ContravariantWeight_3D_gpu")
       use iso_c_binding
       implicit none
       type(c_ptr),value :: f,dsdx,jaf
@@ -65,7 +65,7 @@ module SELF_MappedScalar_3D
 
   interface
     subroutine NormalWeight_3D_gpu(fb,nhat,nscale,fbn,N,nvar,nel) &
-       bind(c,name="NormalWeight_3D_gpu")
+      bind(c,name="NormalWeight_3D_gpu")
       use iso_c_binding
       implicit none
       type(c_ptr),value :: fb,nhat,nscale,fbn
@@ -110,11 +110,11 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize=(interp%N+1)*(interp%N+1)*(interp%M+1)*nelem*nvar*prec
+    workSize = (interp%N+1)*(interp%N+1)*(interp%M+1)*nelem*nvar*prec
     call gpuCheck(hipMalloc(this%interpWork1,workSize))
-    workSize=(interp%N+1)*(interp%M+1)*(interp%M+1)*nelem*nvar*prec
+    workSize = (interp%N+1)*(interp%M+1)*(interp%M+1)*nelem*nvar*prec
     call gpuCheck(hipMalloc(this%interpWork2,workSize))
-    workSize=(interp%N+1)*(interp%N+1)*(interp%N+1)*nelem*nvar*9*prec
+    workSize = (interp%N+1)*(interp%N+1)*(interp%N+1)*nelem*nvar*9*prec
     call gpuCheck(hipMalloc(this%jas_gpu,workSize))
 
     call this%UpdateDevice()
@@ -137,7 +137,7 @@ contains
     deallocate(this%boundarynormal)
     deallocate(this%meta)
     deallocate(this%eqn)
-    
+
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
@@ -199,9 +199,9 @@ contains
 
     !call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
-    call SideExchange_3D_gpu(this%extboundary_gpu,&
-      this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu,&
-      decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
+    call SideExchange_3D_gpu(this%extboundary_gpu, &
+                             this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu, &
+                             decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
 
     !call decomp%FinalizeMPIExchangeAsync()
 
@@ -220,25 +220,25 @@ contains
     real(prec),pointer :: f_p(:,:,:,:,:,:)
     type(c_ptr) :: fc
 
-    call ContravariantWeight_3D_gpu(this%interior_gpu,&
-      this%geometry%dsdx%interior_gpu,this%jas_gpu,&
-      this%interp%N,this%nvar,this%nelem)
+    call ContravariantWeight_3D_gpu(this%interior_gpu, &
+                                    this%geometry%dsdx%interior_gpu,this%jas_gpu, &
+                                    this%interp%N,this%nvar,this%nelem)
 
     ! From Vector divergence
-    call c_f_pointer(this%jas_gpu,f_p,&
-      [this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,3*this%nvar,3])
+    call c_f_pointer(this%jas_gpu,f_p, &
+                     [this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,3*this%nvar,3])
 
     fc = c_loc(f_p(1,1,1,1,1,1))
-    call self_blas_matrixop_dim1_3d(this%interp%dMatrix_gpu,fc,df,&
-          this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_3d(this%interp%dMatrix_gpu,fc,df, &
+                                    this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
 
     fc = c_loc(f_p(1,1,1,1,1,2))
-    call self_blas_matrixop_dim2_3d(this%interp%dMatrix_gpu,fc,df,&
-          1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_3d(this%interp%dMatrix_gpu,fc,df, &
+                                    1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
 
     fc = c_loc(f_p(1,1,1,1,1,3))
-    call self_blas_matrixop_dim3_3d(this%interp%dMatrix_gpu,fc,df,&
-          1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim3_3d(this%interp%dMatrix_gpu,fc,df, &
+                                    1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
 
     f_p => null()
 
@@ -258,39 +258,38 @@ contains
     real(prec),pointer :: f_p(:,:,:,:,:,:)
     type(c_ptr) :: fc
 
-    call ContravariantWeight_3D_gpu(this%interior_gpu,&
-      this%geometry%dsdx%interior_gpu,this%jas_gpu,&
-      this%interp%N,this%nvar,this%nelem)
+    call ContravariantWeight_3D_gpu(this%interior_gpu, &
+                                    this%geometry%dsdx%interior_gpu,this%jas_gpu, &
+                                    this%interp%N,this%nvar,this%nelem)
 
     ! From Vector divergence
-    call c_f_pointer(this%jas_gpu,f_p,&
-      [this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,3*this%nvar,3])
+    call c_f_pointer(this%jas_gpu,f_p, &
+                     [this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,3*this%nvar,3])
 
     fc = c_loc(f_p(1,1,1,1,1,1))
-    call self_blas_matrixop_dim1_3d(this%interp%dgMatrix_gpu,fc,df,&
-          this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_3d(this%interp%dgMatrix_gpu,fc,df, &
+                                    this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
 
     fc = c_loc(f_p(1,1,1,1,1,2))
-    call self_blas_matrixop_dim2_3d(this%interp%dgMatrix_gpu,fc,df,&
-          1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_3d(this%interp%dgMatrix_gpu,fc,df, &
+                                    1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
 
     fc = c_loc(f_p(1,1,1,1,1,3))
-    call self_blas_matrixop_dim3_3d(this%interp%dgMatrix_gpu,fc,df,&
-          1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim3_3d(this%interp%dgMatrix_gpu,fc,df, &
+                                    1.0_c_prec,this%interp%N,this%interp%N,3*this%nvar,this%nelem,this%blas_handle)
 
     f_p => null()
 
     ! Do the boundary terms
-    call NormalWeight_3D_gpu(this%avgBoundary_gpu,&
-      this%geometry%nhat%boundary_gpu,this%geometry%nscale%boundary_gpu,&
-      this%boundarynormal_gpu,&
-      this%interp%N,this%nvar,this%nelem)
-    
-    call DG_BoundaryContribution_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu,&
-      this%boundarynormal_gpu,df,this%interp%N,3*this%nvar,this%nelem)
+    call NormalWeight_3D_gpu(this%avgBoundary_gpu, &
+                             this%geometry%nhat%boundary_gpu,this%geometry%nscale%boundary_gpu, &
+                             this%boundarynormal_gpu, &
+                             this%interp%N,this%nvar,this%nelem)
+
+    call DG_BoundaryContribution_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
+                                        this%boundarynormal_gpu,df,this%interp%N,3*this%nvar,this%nelem)
 
     call JacobianWeight_3D_gpu(df,this%geometry%J%interior_gpu,this%N,3*this%nVar,this%nelem)
-
 
   endsubroutine MappedDGGradient_MappedScalar3D
 

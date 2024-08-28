@@ -151,7 +151,6 @@ contains
              this%dgMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
 
-
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
       call LegendreQuadrature(N, &
@@ -192,7 +191,7 @@ contains
     call this%CalculateDerivativeMatrix()
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
-    
+
   endsubroutine Init_Lagrange_t
 
   subroutine Free_Lagrange_t(this)

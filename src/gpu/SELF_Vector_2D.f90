@@ -35,10 +35,9 @@ module SELF_Vector_2D
 
   implicit none
 
-
   type,extends(Vector2D_t),public :: Vector2D
-    character(3) :: backend="gpu"
-    type(c_ptr) :: blas_handle  
+    character(3) :: backend = "gpu"
+    type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
     type(c_ptr) :: extBoundary_gpu
@@ -59,7 +58,7 @@ module SELF_Vector_2D
 
     generic,public :: GridInterp => GridInterp_Vector2D
     procedure,private :: GridInterp_Vector2D
-    
+
     generic,public :: Gradient => Gradient_Vector2D
     procedure,private :: Gradient_Vector2D
 
@@ -67,7 +66,6 @@ module SELF_Vector_2D
     procedure,private :: Divergence_Vector2D
 
   endtype Vector2D
-
 
 contains
 
@@ -118,11 +116,11 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundaryNormal_gpu,sizeof(this%boundaryNormal)))
-    workSize=(interp%N+1)*(interp%M+1)*nelem*nvar*2*prec
+    workSize = (interp%N+1)*(interp%M+1)*nelem*nvar*2*prec
     call gpuCheck(hipMalloc(this%interpWork,workSize))
 
     call this%UpdateDevice()
-    
+
     call hipblasCheck(hipblasCreate(this%blas_handle))
 
   endsubroutine Init_Vector2D
@@ -164,7 +162,7 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%avgboundary),this%avgboundary_gpu,sizeof(this%avgboundary),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%boundaryNormal),this%boundaryNormal_gpu,sizeof(this%boundaryNormal),hipMemcpyDeviceToHost))
 
-  end subroutine UpdateHost_Vector2D
+  endsubroutine UpdateHost_Vector2D
 
   subroutine UpdateDevice_Vector2D(this)
     implicit none
@@ -176,20 +174,20 @@ contains
     call gpuCheck(hipMemcpy(this%avgboundary_gpu,c_loc(this%avgboundary),sizeof(this%avgboundary),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%boundaryNormal_gpu,c_loc(this%boundaryNormal),sizeof(this%boundaryNormal),hipMemcpyHostToDevice))
 
-  end subroutine UpdateDevice_Vector2D
+  endsubroutine UpdateDevice_Vector2D
 
   subroutine GridInterp_Vector2D(this,f)
     implicit none
     class(Vector2D),intent(inout) :: this
     type(c_ptr),intent(inout) :: f
 
-    call self_blas_matrixop_dim1_2d(this%interp%iMatrix_gpu,this%interior_gpu,&
-                    this%interpWork,this%N,this%M,2*this%nvar,this%nelem,&
-                    this%blas_handle)
+    call self_blas_matrixop_dim1_2d(this%interp%iMatrix_gpu,this%interior_gpu, &
+                                    this%interpWork,this%N,this%M,2*this%nvar,this%nelem, &
+                                    this%blas_handle)
 
-    call self_blas_matrixop_dim2_2d(this%interp%iMatrix_gpu,this%interpWork,f,&
-                    0.0_c_prec,this%N,this%M,2*this%nvar,this%nelem,&
-                    this%blas_handle)
+    call self_blas_matrixop_dim2_2d(this%interp%iMatrix_gpu,this%interpWork,f, &
+                                    0.0_c_prec,this%N,this%M,2*this%nvar,this%nelem, &
+                                    this%blas_handle)
 
   endsubroutine GridInterp_Vector2D
 
@@ -200,17 +198,17 @@ contains
     call Average_gpu(this%avgBoundary_gpu,this%boundary_gpu,this%extBoundary_gpu,size(this%boundary))
 
   endsubroutine AverageSides_Vector2D
-  
+
   subroutine BoundaryInterp_Vector2D(this)
     implicit none
     class(Vector2D),intent(inout) :: this
-    
-    call BoundaryInterp_2D_gpu(this%interp%bMatrix_gpu,this%interior_gpu,this%boundary_gpu,&
-    this%interp%N,2*this%nvar,this%nelem)
+
+    call BoundaryInterp_2D_gpu(this%interp%bMatrix_gpu,this%interior_gpu,this%boundary_gpu, &
+                               this%interp%N,2*this%nvar,this%nelem)
 
   endsubroutine BoundaryInterp_Vector2D
 
-  subroutine Gradient_Vector2D(this, df)
+  subroutine Gradient_Vector2D(this,df)
     implicit none
     class(Vector2D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
@@ -218,41 +216,41 @@ contains
     real(prec),pointer :: df_p(:,:,:,:,:,:)
     real(prec),pointer :: dfloc(:,:,:,:)
     type(c_ptr) :: dfc
- 
+
     call c_f_pointer(df,df_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2,2])
 
     dfloc(1:,1:,1:,1:) => df_p(1:,1:,1:,1:,1,1)
     dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,&
-          this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,this%interior_gpu,dfc, &
+                                    this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
 
     dfloc(1:,1:,1:,1:) => df_p(1:,1:,1:,1:,1,2)
     dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec,&
-          this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec, &
+                                    this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
 
     dfloc => null()
     df_p => null()
 
   endsubroutine Gradient_Vector2D
 
-  subroutine Divergence_Vector2D(this, df)
+  subroutine Divergence_Vector2D(this,df)
     implicit none
     class(Vector2D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
     !Local
     real(prec),pointer :: f_p(:,:,:,:,:)
     type(c_ptr) :: fc
- 
+
     call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
 
     fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df,&
-          this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
 
     fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df,&
-          1.0_c_prec,this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df, &
+                                    1.0_c_prec,this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
 
     f_p => null()
 

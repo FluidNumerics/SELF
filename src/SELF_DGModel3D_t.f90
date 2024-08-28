@@ -325,9 +325,9 @@ contains
     class(DGModel3D_t),intent(inout) :: this
 
     call this%solution%AverageSides()
- 
+
     call this%solution%MappedDGGradient(this%solutionGradient%interior)
-   
+
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
 
@@ -335,7 +335,7 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh, &
                                             this%decomp)
-                                            
+
   endsubroutine CalculateSolutionGradient_DGModel3D_t
 
   subroutine CalculateTendency_DGModel3D_t(this)
@@ -346,21 +346,21 @@ contains
 
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh,this%decomp)
-    
-    call this%PreTendency()           ! User-supplied 
-    call this%SetBoundaryCondition()  ! User-supplied
 
-    if( this % gradient_enabled )then
+    call this%PreTendency() ! User-supplied
+    call this%SetBoundaryCondition() ! User-supplied
+
+    if(this%gradient_enabled) then
       call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
     endif
-    
-    call this%SourceMethod()  ! User supplied
+
+    call this%SourceMethod() ! User supplied
     call this%RiemannSolver() ! User supplied
-    call this%FluxMethod()    ! User supplied
-    
+    call this%FluxMethod() ! User supplied
+
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
 
     !$omp target
@@ -405,26 +405,26 @@ contains
       pickupFile = 'solution.'//timeStampString//'.h5'
     endif
 
-    print*, "Writing pickup file : "//trim(pickupFile)
+    print*,"Writing pickup file : "//trim(pickupFile)
 
     if(this%decomp%mpiEnabled) then
 
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%decomp%mpiComm)
 
       ! Write the interpolant to the file
-      print*, "Writing interpolant data to file"
+      print*,"Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
       ! Write the model state to file
-      print*, "Writing control grid solution to file"
+      print*,"Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
                                    this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
 
       ! Write the geometry to file
-      print*, "Writing control grid geometry to file"
+      print*,"Writing control grid geometry to file"
       call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x', &
                                      this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
@@ -466,19 +466,19 @@ contains
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
       ! Write the interpolant to the file
-      print*, "Writing interpolant data to file"
+      print*,"Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
 
       ! Write the model state to file
-      print*, "Writing control grid solution to file"
+      print*,"Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
       ! Write the geometry to file
-      print*, "Writing control grid  geometry to file"
+      print*,"Writing control grid  geometry to file"
       call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
       ! -- END : writing solution on control grid -- !

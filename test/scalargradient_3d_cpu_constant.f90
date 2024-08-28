@@ -75,7 +75,7 @@ contains
     call f%Gradient(df%interior)
 #endif
     call df%UpdateHost()
-    
+
     ! Calculate diff from exact
     df%interior = abs(df%interior-0.0_prec)
 

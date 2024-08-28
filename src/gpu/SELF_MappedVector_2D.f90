@@ -36,7 +36,7 @@ module SELF_MappedVector_2D
 
   type,extends(MappedVector2D_t),public :: MappedVector2D
 
-   contains
+  contains
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
     procedure,public :: SideExchange => SideExchange_MappedVector2D
@@ -47,21 +47,19 @@ module SELF_MappedVector_2D
     generic,public :: MappedDGDivergence => MappedDGDivergence_MappedVector2D
     procedure,private :: MappedDGDivergence_MappedVector2D
 
-
   endtype MappedVector2D
 
   interface
     subroutine ContravariantProjection_2D_gpu(f,dsdx,N,nvar,nel) &
-       bind(c,name="ContravariantProjection_2D_gpu")
-       use iso_c_binding
-       implicit none
-       type(c_ptr),value :: f,dsdx
-       integer(c_int),value :: N,nvar,nel
+      bind(c,name="ContravariantProjection_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,dsdx
+      integer(c_int),value :: N,nvar,nel
     endsubroutine ContravariantProjection_2D_gpu
   endinterface
 
-
- contains
+contains
 
   subroutine SetInteriorFromEquation_MappedVector2D(this,geometry,time)
   !!  Sets the this % interior attribute using the eqn attribute,
@@ -116,9 +114,9 @@ module SELF_MappedVector_2D
 
     ! call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
     ! Do the side exchange internal to this mpi process
-    call SideExchange_2D_gpu(this%extboundary_gpu,&
-      this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu,&
-      decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
+    call SideExchange_2D_gpu(this%extboundary_gpu, &
+                             this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu, &
+                             decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
 
     ! call decomp%FinalizeMPIExchangeAsync()
 
@@ -136,17 +134,17 @@ module SELF_MappedVector_2D
     type(c_ptr) :: fc
 
     ! Contravariant projection
-    call ContravariantProjection_2D_gpu(this%interior_gpu,&
-      this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
+    call ContravariantProjection_2D_gpu(this%interior_gpu, &
+                                        this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
     call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
 
     fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df,&
-      this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
     fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df,1.0_c_prec,&
-      this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df,1.0_c_prec, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
     f_p => null()
 
     call JacobianWeight_2D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
@@ -162,22 +160,22 @@ module SELF_MappedVector_2D
     type(c_ptr) :: fc
 
     ! Contravariant projection
-    call ContravariantProjection_2D_gpu(this%interior_gpu,&
-      this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
+    call ContravariantProjection_2D_gpu(this%interior_gpu, &
+                                        this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
     call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
 
     fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dgMatrix_gpu,fc,df,&
-      this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim1_2d(this%interp%dgMatrix_gpu,fc,df, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
     fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dgMatrix_gpu,fc,df,1.0_c_prec,&
-      this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    call self_blas_matrixop_dim2_2d(this%interp%dgMatrix_gpu,fc,df,1.0_c_prec, &
+                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
     f_p => null()
 
     ! Boundary terms
-    call DG_BoundaryContribution_2D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu,&
-      this%boundarynormal_gpu,df,this%interp%N,this%nvar,this%nelem)
+    call DG_BoundaryContribution_2D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
+                                        this%boundarynormal_gpu,df,this%interp%N,this%nvar,this%nelem)
 
     call JacobianWeight_2D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
 

@@ -95,8 +95,8 @@ contains
 
 #ifdef ENABLE_GPU
     ndof = f%nvar*f%nelem*2
-    call GradientNormal_1D_gpu(f%boundarynormal_gpu,&
-       f%boundary_gpu,ndof)
+    call GradientNormal_1D_gpu(f%boundarynormal_gpu, &
+                               f%boundary_gpu,ndof)
     call f%UpdateHost()
     print*,"min, max (boundary)",minval(f%boundarynormal),maxval(f%boundary)
     call f%MappedDGDerivative(df%interior_gpu)
@@ -115,7 +115,7 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*, "Max error (tolerance) : ", maxval(df%interior), tolerance
+      print*,"Max error (tolerance) : ",maxval(df%interior),tolerance
       r = 1
     endif
 

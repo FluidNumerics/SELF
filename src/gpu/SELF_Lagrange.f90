@@ -74,8 +74,8 @@ contains
     ! Local
     real(prec) :: q(0:M)
 
-    if( .not. GPUAvailable() )then
-      print*, __FILE__,':', __LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
+    if(.not. GPUAvailable()) then
+      print*,__FILE__,':',__LINE__,' : Error : Attempt to use GPU extension, but GPU is not available.'
       stop 1
     endif
 
@@ -91,7 +91,6 @@ contains
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
-
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
@@ -139,7 +138,7 @@ contains
     call gpuCheck(hipMalloc(this%dgMatrix_gpu,sizeof(this%dgMatrix)))
     call gpuCheck(hipMalloc(this%bMatrix_gpu,sizeof(this%bMatrix)))
     call gpuCheck(hipMalloc(this%qWeights_gpu,sizeof(this%qWeights)))
-    
+
     call gpuCheck(hipMemcpy(this%iMatrix_gpu, &
                             c_loc(this%iMatrix), &
                             sizeof(this%iMatrix), &

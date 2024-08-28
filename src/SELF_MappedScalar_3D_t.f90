@@ -40,7 +40,7 @@ module SELF_MappedScalar_3D_t
 
   type,extends(Scalar3D),public :: MappedScalar3D_t
     logical :: geometry_associated = .false.
-    type(SEMHex), pointer :: geometry => null()
+    type(SEMHex),pointer :: geometry => null()
   contains
 
     procedure,public :: AssociateGeometry => AssociateGeometry_MappedScalar3D_t
@@ -59,34 +59,34 @@ module SELF_MappedScalar_3D_t
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar3D_t
 
-   ! procedure,public :: WriteTecplot => WriteTecplot_MappedScalar3D_t
+    ! procedure,public :: WriteTecplot => WriteTecplot_MappedScalar3D_t
 
   endtype MappedScalar3D_t
 
 contains
 
-subroutine AssociateGeometry_MappedScalar3D_t(this,geometry)
-  implicit none
-  class(MappedScalar3D_t),intent(inout) :: this
-  type(SEMHex),target,intent(in) :: geometry
+  subroutine AssociateGeometry_MappedScalar3D_t(this,geometry)
+    implicit none
+    class(MappedScalar3D_t),intent(inout) :: this
+    type(SEMHex),target,intent(in) :: geometry
 
-    if(.not. associated(this%geometry))then
+    if(.not. associated(this%geometry)) then
       this%geometry => geometry
       this%geometry_associated = .true.
     endif
 
-endsubroutine AssociateGeometry_MappedScalar3D_t
+  endsubroutine AssociateGeometry_MappedScalar3D_t
 
-subroutine DissociateGeometry_MappedScalar3D_t(this)
-  implicit none
-  class(MappedScalar3D_t),intent(inout) :: this
+  subroutine DissociateGeometry_MappedScalar3D_t(this)
+    implicit none
+    class(MappedScalar3D_t),intent(inout) :: this
 
-    if(associated(this%geometry))then
+    if(associated(this%geometry)) then
       this%geometry => null()
       this%geometry_associated = .false.
     endif
 
-endsubroutine DissociateGeometry_MappedScalar3D_t
+  endsubroutine DissociateGeometry_MappedScalar3D_t
 
   subroutine SetInteriorFromEquation_MappedScalar3D_t(this,geometry,time)
   !!  Sets the this % interior attribute using the eqn attribute,
@@ -336,14 +336,14 @@ endsubroutine DissociateGeometry_MappedScalar3D_t
           e2Global = mesh%sideInfo(3,s1,e1)
           s2 = mesh%sideInfo(4,s1,e1)/10
           flip = mesh%sideInfo(4,s1,e1)-s2*10
-          
+
           if(e2Global /= 0) then
 
             neighborRank = decomp%elemToRank(e2Global)
 
             if(neighborRank == rankId) then
               e2 = e2Global-offset
-              if(flip == 0)then
+              if(flip == 0) then
 
                 do j = 1,this%interp%N+1
                   do i = 1,this%interp%N+1

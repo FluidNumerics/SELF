@@ -30,7 +30,6 @@ module SELF_Mesh_2D
 
   implicit none
 
-
   type,extends(Mesh2D_t) :: Mesh2D
   endtype Mesh2D
 

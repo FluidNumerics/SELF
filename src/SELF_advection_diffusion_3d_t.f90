@@ -50,7 +50,7 @@ module self_advection_diffusion_3d_t
 
 contains
 
-subroutine CalculateEntropy_advection_diffusion_3d_t(this)
+  subroutine CalculateEntropy_advection_diffusion_3d_t(this)
     implicit none
     class(advection_diffusion_3d_t),intent(inout) :: this
     ! Local
@@ -65,7 +65,7 @@ subroutine CalculateEntropy_advection_diffusion_3d_t(this)
             do i = 1,this%solution%interp%N+1
               jac = this%geometry%J%interior(i,j,k,iel,1)
               s = this%solution%interior(i,j,k,iel,ivar)
-              e = e + 0.5_prec*s*s*jac
+              e = e+0.5_prec*s*s*jac
             enddo
           enddo
         enddo

@@ -59,7 +59,7 @@ module SELF_DGModel1D_t
     procedure :: UpdateSolution => UpdateSolution_DGModel1D_t
 
     procedure :: ResizePrevSol => ResizePrevSol_DGModel1D_t
-    
+
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D_t
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D_t
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D_t
@@ -312,12 +312,12 @@ contains
     class(DGModel1D_t),intent(inout) :: this
 
     call this%solution%AverageSides()
-    
+
     this%solution%boundarynormal(1,:,:) = -this%solution%avgBoundary(1,:,:) ! Account for left facing normal
     this%solution%boundarynormal(2,:,:) = this%solution%avgBoundary(2,:,:) ! Account for right facing normal
 
     call this%solution%MappedDGDerivative(this%solutionGradient%interior)
-   
+
     ! interpolate the solutiongradient to the element boundaries
     call this%solutionGradient%BoundaryInterp()
 
@@ -325,7 +325,7 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh, &
                                             this%decomp)
-                                            
+
   endsubroutine CalculateSolutionGradient_DGModel1D_t
 
   subroutine CalculateTendency_DGModel1D_t(this)
@@ -336,19 +336,19 @@ contains
 
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh,this%decomp)
-    
-    call this%PreTendency()           ! User-supplied 
-    call this%SetBoundaryCondition()  ! User-supplied
 
-    if( this % gradient_enabled )then
+    call this%PreTendency() ! User-supplied
+    call this%SetBoundaryCondition() ! User-supplied
+
+    if(this%gradient_enabled) then
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
     endif
-    
+
     call this%SourceMethod() ! User supplied
     call this%RiemannSolver() ! User supplied
-    call this%FluxMethod()    ! User supplied
+    call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDerivative(this%fluxDivergence%interior)
     !$omp target

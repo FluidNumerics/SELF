@@ -138,18 +138,18 @@ contains
     deallocate(this%eqn)
 
   endsubroutine Free_Vector2D_t
-  
+
   subroutine UpdateHost_Vector2D_t(this)
     implicit none
     class(Vector2D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Vector2D_t
+  endsubroutine UpdateHost_Vector2D_t
 
   subroutine UpdateDevice_Vector2D_t(this)
     implicit none
     class(Vector2D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Vector2D_t
+
+  endsubroutine UpdateDevice_Vector2D_t
 
   subroutine SetEquation_Vector2D_t(this,idir,ivar,eqnChar)
     !! Sets the equation parser for the `idir` direction and `ivar-th` variable
@@ -218,8 +218,8 @@ contains
           do iside = 1,4
             do i = 1,this%interp%N+1
               this%avgboundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
-                                                     this%boundary(i,iside,iel,ivar,idir)+ &
-                                                     this%extBoundary(i,iside,iel,ivar,idir))
+                                                        this%boundary(i,iside,iel,ivar,idir)+ &
+                                                        this%extBoundary(i,iside,iel,ivar,idir))
             enddo
           enddo
         enddo
@@ -228,7 +228,7 @@ contains
     !$omp end target
 
   endsubroutine AverageSides_Vector2D_t
-  
+
   subroutine BoundaryInterp_Vector2D_t(this)
     implicit none
     class(Vector2D_t),intent(inout) :: this

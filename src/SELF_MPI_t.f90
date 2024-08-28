@@ -102,7 +102,7 @@ contains
 
     write(msg,'(I5)') this%rankId
     msg = "Greetings from rank "//trim(msg)//"."
-    print*, trim(msg)
+    print*,trim(msg)
 
   endsubroutine Init_MPILayer_t
 

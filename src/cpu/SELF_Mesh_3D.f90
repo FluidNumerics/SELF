@@ -26,12 +26,11 @@
 
 module SELF_Mesh_3D
 
-    use SELF_Mesh_3D_t
-  
-    implicit none
-  
-    type,extends(Mesh3D_t) :: Mesh3D
-    endtype Mesh3D
-  
-  endmodule SELF_Mesh_3D
-  
+  use SELF_Mesh_3D_t
+
+  implicit none
+
+  type,extends(Mesh3D_t) :: Mesh3D
+  endtype Mesh3D
+
+endmodule SELF_Mesh_3D

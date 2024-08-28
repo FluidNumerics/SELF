@@ -89,7 +89,7 @@ contains
     allocate(this%interior(1:interp%N+1,1:nelem,1:nvar), &
              this%boundary(1:2,1:nelem,1:nvar), &
              this%boundarynormal(1:2,1:nelem,1:nvar), &
-             this%extBoundary(1:2,1:nelem,1:nvar),&
+             this%extBoundary(1:2,1:nelem,1:nvar), &
              this%avgBoundary(1:2,1:nelem,1:nvar))
 
     this%interior = 0.0_prec
@@ -122,13 +122,13 @@ contains
     implicit none
     class(Scalar1D_t),intent(inout) :: this
 
-  end subroutine UpdateHost_Scalar1D_t
+  endsubroutine UpdateHost_Scalar1D_t
 
   subroutine UpdateDevice_Scalar1D_t(this)
     implicit none
     class(Scalar1D_t),intent(inout) :: this
-    
-  end subroutine UpdateDevice_Scalar1D_t
+
+  endsubroutine UpdateDevice_Scalar1D_t
 
   subroutine AverageSides_Scalar1D_t(this)
     implicit none
@@ -144,13 +144,13 @@ contains
 
         ! Left side - we account for the -\hat{x} normal
         this%avgboundary(1,iel,ivar) = 0.5_prec*( &
-                                    this%boundary(1,iel,ivar)+ &
-                                    this%extBoundary(1,iel,ivar))
+                                       this%boundary(1,iel,ivar)+ &
+                                       this%extBoundary(1,iel,ivar))
 
         ! Right side - we account for the +\hat{x} normal
         this%avgboundary(2,iel,ivar) = 0.5_prec*( &
-                                    this%boundary(2,iel,ivar)+ &
-                                    this%extBoundary(2,iel,ivar))
+                                       this%boundary(2,iel,ivar)+ &
+                                       this%extBoundary(2,iel,ivar))
       enddo
     enddo
     !$omp end target

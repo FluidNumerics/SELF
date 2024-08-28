@@ -44,17 +44,17 @@ module self_advection_diffusion_1d
   endtype advection_diffusion_1d
 
   interface
-    subroutine setboundarycondition_advection_diffusion_1d_gpu(extboundary,boundary,nel,nvar)&
-       bind(c,name="setboundarycondition_advection_diffusion_1d_gpu")
+    subroutine setboundarycondition_advection_diffusion_1d_gpu(extboundary,boundary,nel,nvar) &
+      bind(c,name="setboundarycondition_advection_diffusion_1d_gpu")
       use iso_c_binding
       type(c_ptr),value :: extboundary,boundary
       integer(c_int),value :: nel,nvar
     endsubroutine setboundarycondition_advection_diffusion_1d_gpu
   endinterface
 
-  interface 
-    subroutine fluxmethod_advection_diffusion_1d_gpu(solution,solutiongradient,flux,u,nu,ndof)&
-       bind(c,name="fluxmethod_advection_diffusion_1d_gpu")
+  interface
+    subroutine fluxmethod_advection_diffusion_1d_gpu(solution,solutiongradient,flux,u,nu,ndof) &
+      bind(c,name="fluxmethod_advection_diffusion_1d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: solution,solutiongradient,flux
@@ -64,8 +64,8 @@ module self_advection_diffusion_1d
   endinterface
 
   interface
-    subroutine riemannsolver_advection_diffusion_1d_gpu(fb,fextb,dfavg,flux,u,nu,ndof)&
-       bind(c,name="riemannsolver_advection_diffusion_1d_gpu")
+    subroutine riemannsolver_advection_diffusion_1d_gpu(fb,fextb,dfavg,flux,u,nu,ndof) &
+      bind(c,name="riemannsolver_advection_diffusion_1d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fb,fextb,dfavg,flux
@@ -73,7 +73,6 @@ module self_advection_diffusion_1d
       integer(c_int),value :: ndof
     endsubroutine riemannsolver_advection_diffusion_1d_gpu
   endinterface
-  
 
 contains
 
@@ -81,10 +80,12 @@ contains
     implicit none
     class(advection_diffusion_1d),intent(inout) :: this
     ! Local
-    integer :: iel, i, ivar
+    integer :: iel,i,ivar
     real(prec) :: e,s,J
 
-    call gpuCheck(hipMemcpy(c_loc(this%solution%interior),this%solution%interior_gpu,sizeof(this%solution%interior),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
 
     e = 0.0_prec
     do ivar = 1,this%solution%nvar
@@ -92,7 +93,7 @@ contains
         do i = 1,this%solution%interp%N
           J = this%geometry%dxds%interior(i,iel,1)
           s = this%solution%interior(i,iel,ivar)
-          e = e + 0.5_prec*s*s*J
+          e = e+0.5_prec*s*s*J
         enddo
       enddo
     enddo
@@ -106,8 +107,8 @@ contains
     implicit none
     class(advection_diffusion_1d),intent(inout) :: this
 
-    call setboundarycondition_advection_diffusion_1d_gpu(this%solution%extboundary_gpu,&
-      this%solution%boundary_gpu,this%solution%nelem,this%solution%nvar)
+    call setboundarycondition_advection_diffusion_1d_gpu(this%solution%extboundary_gpu, &
+                                                         this%solution%boundary_gpu,this%solution%nelem,this%solution%nvar)
 
   endsubroutine setboundarycondition_advection_diffusion_1d
 
@@ -116,8 +117,8 @@ contains
     implicit none
     class(advection_diffusion_1d),intent(inout) :: this
 
-    call setboundarycondition_advection_diffusion_1d_gpu(this%solutiongradient%extboundary_gpu,&
-      this%solutiongradient%boundary_gpu,this%solution%nelem,this%solution%nvar)
+    call setboundarycondition_advection_diffusion_1d_gpu(this%solutiongradient%extboundary_gpu, &
+                                                         this%solutiongradient%boundary_gpu,this%solution%nelem,this%solution%nvar)
 
   endsubroutine setgradientboundarycondition_advection_diffusion_1d
 
@@ -129,9 +130,9 @@ contains
 
     ndof = this%solution%nelem*this%solution%nvar*(this%solution%interp%N+1)
 
-    call fluxmethod_advection_diffusion_1d_gpu(this%solution%interior_gpu,&
-      this%solutiongradient%interior_gpu,this%flux%interior_gpu,&
-      this%u,this%nu,ndof)
+    call fluxmethod_advection_diffusion_1d_gpu(this%solution%interior_gpu, &
+                                               this%solutiongradient%interior_gpu,this%flux%interior_gpu, &
+                                               this%u,this%nu,ndof)
 
   endsubroutine fluxmethod_advection_diffusion_1d
 
@@ -145,9 +146,9 @@ contains
     integer :: ndof
 
     ndof = this%solution%nelem*this%solution%nvar*2
-    call riemannsolver_advection_diffusion_1d_gpu(this%solution%boundary_gpu,&
-      this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu,&
-      this%flux%boundarynormal_gpu,this%u,this%nu,ndof)
+    call riemannsolver_advection_diffusion_1d_gpu(this%solution%boundary_gpu, &
+                                                  this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
+                                                  this%flux%boundarynormal_gpu,this%u,this%nu,ndof)
 
   endsubroutine riemannsolver_advection_diffusion_1d
 

@@ -31,6 +31,6 @@ module SELF_DGModel1D
   implicit none
 
   type,extends(DGModel1D_t) :: DGModel1D
-  end type DGModel1D
+  endtype DGModel1D
 
 endmodule SELF_DGModel1D

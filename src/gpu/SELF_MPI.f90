@@ -38,11 +38,9 @@ module SELF_MPI
     procedure :: Free => Free_MPILayer
     procedure :: SetElemToRank => SetElemToRank_MPILayer
 
-
   endtype MPILayer
 
 contains
-
 
   subroutine Free_MPILayer(this)
     implicit none
@@ -85,7 +83,6 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%elemToRank_gpu,c_loc(this%elemToRank),sizeof(this%elemToRank),hipMemcpyHostToDevice))
-
 
   endsubroutine SetElemToRank_MPILayer
 
