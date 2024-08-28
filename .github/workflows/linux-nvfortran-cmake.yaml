@@ -66,19 +66,19 @@ jobs:
 
       - name: Install dependencies in spack environment
         run: |
-          spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
-          spack -e . compiler find /opt/nvidia/hpc_sdk/Linux_x86_64/24.5/compilers/bin
-          spack -e . external find --not-buildable
-          spack -e . config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
-          spack -e . config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
-          spack -e . config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
-          spack -e . concretize -f
-          spack -e . install --no-check-signature
+          spack -e ./share/spack-env/ mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e ./share/spack-env/ compiler find /opt/nvidia/hpc_sdk/Linux_x86_64/24.5/compilers/bin
+          spack -e ./share/spack-env/ external find --not-buildable
+          spack -e ./share/spack-env/ config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ concretize -f
+          spack -e ./share/spack-env/ install --no-check-signature
 
       - name: Build with Cmake
         shell: spack-bash {0}
         run: |
-          spack env activate .
+          spack env activate ./share/spack-env/
           mkdir build
           cd build
           FC=${{ env.FC }} CC=${{ env.CC }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DOMP_TARGET=${{ matrix.omp_target }}  ../
@@ -93,6 +93,6 @@ jobs:
 
       - name: Push packages and update index
         run: |
-          spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
-          spack -e . buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
+          spack -e ./share/spack-env/ mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e ./share/spack-env/ buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
         if: ${{ !cancelled() }}

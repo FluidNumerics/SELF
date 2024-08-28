@@ -60,22 +60,22 @@ jobs:
       - name: Install dependencies in spack environment
         run: |
           export PATH=${PATH}:/opt/rocm/bin
-          spack -e . mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
-          spack -e . compiler find /opt/rocm/bin
-          spack -e . external find --not-buildable
-          spack -e . config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
-          spack -e . config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
-          spack -e . config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e ./share/spack-env/ compiler find /opt/rocm/bin
+          spack -e ./share/spack-env/ external find --not-buildable
+          spack -e ./share/spack-env/ config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
           sed -i 's/fc: null/fc: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
           sed -i 's/f77: null/f77: \/opt\/rocm\/bin\/amdflang/g' ./spack.yaml
-          spack -e . concretize -f
-          spack -e . install --no-check-signature
+          spack -e ./share/spack-env/ concretize -f
+          spack -e ./share/spack-env/ install --no-check-signature
 
       - name: Build with Cmake
         shell: spack-bash {0}
         run: |
           export PATH=${PATH}:/opt/rocm/bin
-          spack env activate .
+          spack env activate ./share/spack-env/
           mkdir build
           cd build
           FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
@@ -88,6 +88,6 @@ jobs:
 
       - name: Push packages and update index
         run: |
-          spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
-          spack -e . buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
+          spack -e ./share/spack-env/ mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e ./share/spack-env/ buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
         if: ${{ !cancelled() }}
