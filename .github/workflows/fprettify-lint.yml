@@ -1,0 +1,61 @@
+name: fprettify-lint
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+jobs:
+    fprettify:
+        name: fprettify-check
+        runs-on: ubuntu-22.04
+        strategy:
+            fail-fast: false
+        defaults:
+            run:
+              shell: bash
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Install fprettify
+              run: |
+                pip3 install fprettify
+           
+            - name: Check for formatting differences (src/)
+              run: |
+                if [[ $(fprettify  './src/' --config-file ./fprettify.config -d --recursive --case 1 1 1 1) ]]; then
+                    fprettify  './src/' --config-file ./fprettify.config -d --recursive --case 1 1 1 1
+                    exit 1
+                else
+                    echo "src/ linting passed!"
+                fi    
+
+            - name: Check for formatting differences (test/)
+              run: |
+                if [[ $(fprettify  './test/' --config-file ./fprettify.config -d --recursive --case 1 1 1 1) ]]; then
+                    fprettify  './test/' --config-file ./fprettify.config -d --recursive --case 1 1 1 1
+                    exit 1
+                else
+                    echo "test/ linting passed!"
+                fi   
+
+            - name: Check for formatting differences (example/)
+              run: |
+                if [[ $(fprettify  './example/' --config-file ./fprettify.config -d --recursive --case 1 1 1 1) ]]; then
+                    fprettify  './example/' --config-file ./fprettify.config -d --recursive --case 1 1 1 1
+                    exit 1
+                else
+                    echo "example/ linting passed!"
+                fi   
+

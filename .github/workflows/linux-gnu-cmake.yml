@@ -1,0 +1,153 @@
+name: linux-gnu-cmake
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+jobs:
+  linux-tests:
+    timeout-minutes: 30
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+            # Linux
+            - os: ubuntu-22.04
+              fcompiler: gfortran-12
+              ccompiler: gcc-12
+              gcov: gcov-12
+              spack_compiler: gcc@=12.3.0
+              spack_os: "ubuntu:22.04"
+              shell: bash
+              build_type: coverage
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-9
+              ccompiler: gcc-9
+              gcov: gcov-9
+              spack_compiler: gcc@=9.5.0
+              spack_os: "ubuntu:22.04"
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-10
+              ccompiler: gcc-10
+              gcov: gcov-10
+              spack_compiler: gcc@=10.5.0
+              spack_os: "ubuntu:22.04"
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+            - os: ubuntu-22.04
+              fcompiler: gfortran-11
+              ccompiler: gcc-11
+              gcov: gcov-11
+              spack_compiler: gcc@=11.4.0
+              spack_os: "ubuntu:22.04"
+              shell: bash
+              build_type: debug
+              memcheck: false
+
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Show version information
+        run: |
+          ${{ matrix.fcompiler }} --version
+          ${{ matrix.ccompiler }} --version
+
+      - name: Set up Spack
+        uses: spack/setup-spack@v2
+
+      - name: Install dependencies in spack environment
+        run: |
+          spack -e ./share/spack-env/ mirror set --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e ./share/spack-env/ compiler find
+          spack -e ./share/spack-env/ external find --not-buildable
+          spack -e ./share/spack-env/ config add packages:feq-parse:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ config add packages:hdf5:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ config add packages:openmpi:require:["'%${{ matrix.spack_compiler }}'"]
+          spack -e ./share/spack-env/ concretize -f
+          spack -e ./share/spack-env/ install --no-check-signature
+
+      - name: Build with Cmake
+        shell: spack-bash {0}
+        run: |
+          spack env activate ./share/spack-env/
+          mkdir build
+          cd build
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          make VERBOSE=1
+
+      - name: Run ctests
+        run: |
+          cd build/test
+          ctest || ctest --rerun-failed --output-on-failure
+
+      - name: Create coverage report
+        if: ${{ matrix.build_type == 'coverage' }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install lcov
+          mkdir -p ${WORKSPACE_ROOT}/tmp/
+          lcov --no-external \
+                --zerocounters \
+                --directory /home/runner/work/SELF \
+                --exclude '*/test/*' \
+                --gcov=${{ matrix.gcov }} 
+
+          lcov --no-external \
+              --capture \
+              --gcov=${{ matrix.gcov }} \
+              --directory /home/runner/work/SELF \
+              --exclude '*/test/*' \
+              --output-file /home/runner/work/lcov.info
+
+      - name: codecov
+        if: ${{ matrix.build_type == 'coverage' }}
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: /home/runner/work/lcov.info
+          flags: github-serial-ctests
+
+      - name: Run memory checks with Valgrind (only Linux and GNU compilers)
+        if: ${{ matrix.memcheck }}
+        run: |
+          sudo apt-get install -y valgrind
+          for f in $(find ./build/test/ -executable -type f)
+          do
+                  echo $f
+                  valgrind --undef-value-errors=no --error-exitcode=1 -s $f -A
+          done
+
+      - name: Push packages and update index
+        run: |
+          spack -e ./share/spack-env/ mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+          spack -e ./share/spack-env/ buildcache push --base-image ${{ matrix.spack_os }} --update-index local-buildcache
+        if: ${{ !cancelled() }}
+    
+          

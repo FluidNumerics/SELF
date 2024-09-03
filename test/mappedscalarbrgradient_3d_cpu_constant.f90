@@ -1,102 +1,157 @@
-integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-  use SELF_Constants
-  use SELF_Lagrange
-  use SELF_Mesh
-  use SELF_Geometry
-  use SELF_MappedData
+program test
 
   implicit none
+  integer :: exit_code
 
-  integer,parameter :: controlDegree = 7
-  integer,parameter :: targetDegree = 16
-  integer,parameter :: nvar = 1
-#ifdef doUBLE_PRECISION
-  real(prec),parameter :: tolerance = 10.0_prec**(-7)
+  exit_code = mappedscalarbrgradient_3d_cpu_constant()
+  stop exit_code
+
+contains
+  integer function mappedscalarbrgradient_3d_cpu_constant() result(r)
+
+    use SELF_Constants
+    use SELF_Lagrange
+    use SELF_Mesh_3D
+    use SELF_Geometry_3D
+    use SELF_MappedScalar_3D
+    use SELF_MappedVector_3D
+    use SELF_MPI
+
+    implicit none
+
+    integer,parameter :: controlDegree = 7
+    integer,parameter :: targetDegree = 16
+    integer,parameter :: nvar = 1
+#ifdef DOUBLE_PRECISION
+    real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-  real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 10.0_prec**(-2)
 #endif
-  type(Lagrange),target :: interp
-  type(Mesh3D),TARGET :: mesh
-  type(SEMHex),TARGET :: geometry
-  type(MappedScalar3D) :: f
-  type(MappedVector3D) :: df
-  type(MPILayer),TARGET :: decomp
-  integer :: iel
-  integer :: iside
-  integer :: i
-  integer :: j
-  integer :: e2
-  CHARACTER(LEN=255) :: WORKSPACE
+    type(Lagrange),target :: interp
+    type(Mesh3D),target :: mesh
+    type(SEMHex),target :: geometry
+    type(MappedScalar3D) :: f
+    type(MappedVector3D) :: df
+    type(MPILayer),target :: decomp
+    integer :: iel
+    integer :: iside
+    integer :: i
+    integer :: j
+    integer :: e2,s2,bcid
+    character(LEN=255) :: WORKSPACE
 
+    ! Initialize a domain decomposition
+    ! Here MPI is disabled, since scaling is currently
+    ! atrocious with the uniform block mesh
+    call decomp%Init(enableMPI=.false.)
 
-  ! Initialize a domain decomposition
-  ! Here MPI is disabled, since scaling is currently
-  ! atrocious with the uniform block mesh
-  call decomp % Init(enableMPI=.false.)
-
-  ! Create an interpolant
-  call interp % Init(N=controlDegree, &
+    ! Create an interpolant
+    call interp%Init(N=controlDegree, &
                      controlNodeType=GAUSS, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
-  ! Create a uniform block mesh
-  call get_environment_variable("WORKSPACE",WORKSPACE)
-  call mesh % Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",decomp)
+    ! Create a uniform block mesh
+    call get_environment_variable("WORKSPACE",WORKSPACE)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",decomp)
 
-  ! Generate geometry (metric terms) from the mesh elements
-  call geometry % Init(interp,mesh % nElem)
-  call geometry % GenerateFromMesh(mesh)
-  
-  call f % Init(interp,nvar,mesh % nelem)
-  call df % Init(interp,nvar,mesh % nelem)
+    ! Generate geometry (metric terms) from the mesh elements
+    call geometry%Init(interp,mesh%nElem)
+    call geometry%GenerateFromMesh(mesh)
 
-  call f % SetEquation( 1, 'f = 1.0')
+    call f%Init(interp,nvar,mesh%nelem)
+    call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
-  call f % SetInteriorFromEquation( geometry, 0.0_prec ) 
-  print*, "min, max (interior)", minval(f % interior % hostdata), maxval(f % interior % hostdata)
+    call f%SetEquation(1,'f = 1.0')
 
-  call f % BoundaryInterp(.false.)
-  print*, "min, max (boundary)", minval(f % boundary % hostdata), maxval(f % boundary % hostdata)
+    call f%SetInteriorFromEquation(geometry,0.0_prec)
+    print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-  call f % SideExchange( mesh, decomp, .false.)
+    call f%BoundaryInterp()
+    call f%UpdateHost()
+    print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
-  ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
-  do iel = 1,f % nElem
-    do iside = 1,4
-      e2 = mesh % sideInfo % hostData(3,iside,iel) ! Neighboring Element ID
-      if (e2 == 0)then
-        do j = 0,f % interp % N
-          do i = 0,f % interp % N
-            f % extBoundary % hostData(i,j,1,iside,iel) = f % boundary % hostdata(i,j,1,iside,iel) 
-          end do
-        end do
-      end if
-    end do
-  end do
+    call f%SideExchange(mesh,decomp)
+    call f%UpdateHost()
 
-  print*, "min, max (extboundary)", minval(f % extBoundary % hostdata), maxval(f % extBoundary % hostdata)
+    ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
+    do iel = 1,f%nElem
+      do iside = 1,6
+        e2 = mesh%sideInfo(3,iside,iel) ! Neighboring Element ID
+        s2 = mesh%sideInfo(4,iside,iel)/10
+        bcid = mesh%sideInfo(5,iside,iel)
+        if(e2 == 0) then
+          do j = 1,f%interp%N+1
+            do i = 1,f%interp%N+1
+              f%extBoundary(i,j,iside,iel,1) = f%boundary(i,j,iside,iel,1)
+            enddo
+          enddo
+        endif
 
-  call f % Gradient( geometry, df, selfWeakBRForm, .false. ) 
+        if(minval(f%extBoundary(:,:,iside,iel,1)) < 1.0_prec) then
+          print*,"wrong extBoundary at (iside,iel, e2,s2,bcid) ",iside,iel,e2,s2,bcid
+        endif
+      enddo
+    enddo
 
-  ! Calculate diff from exact
-  df % interior % hostdata = abs(df % interior % hostdata - 0.0_prec)
+    print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
+    call f%UpdateDevice()
+    call f%AverageSides()
+    call f%UpdateHost()
+    print*,"min, max (avgboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
 
-  if (maxval(df % interior % hostdata) <= tolerance) then
-    r = 0
-  else
-    r = 1
-  end if
+#ifdef ENABLE_GPU
+    call f%MappedDGGradient(df%interior_gpu)
+#else
+    call f%MappedDGGradient(df%interior)
+#endif
+    call df%UpdateHost()
 
-  ! Clean up
-  call decomp % Free()
-  call geometry % Free()
-  call mesh % Free()
-  call interp % Free()
-  call f % free()
-  call df % free()
-    
-  r = 0
+    ! Calculate diff from exact
+    df%interior = abs(df%interior-0.0_prec)
+    print*,"maxval(df_error)",maxval(df%interior),tolerance
 
-end function mappedscalarbrgradient_3d_cpu_constant
+    if(maxval(df%interior) <= tolerance) then
+      r = 0
+    else
+      r = 1
+    endif
+
+    ! Clean up
+    call f%DissociateGeometry()
+    call decomp%Free()
+    call geometry%Free()
+    call mesh%Free()
+    call interp%Free()
+    call f%free()
+    call df%free()
+
+  endfunction mappedscalarbrgradient_3d_cpu_constant
+endprogram test

@@ -1,28 +1,81 @@
 # Install SELF
+
+
+## Quick start
+The easiest way to get started is to use the spack package manager. On a Linux platform, set up spack
+
+```
+git clone https://github.com/spack/spack ~/spack
+source ~/spack/share/spack/setup-env.sh
+```
+
+Allow spack to locate your compilers (make sure you have C, C++, and Fortran compilers installed!)
+
+```
+spack compiler find
+```
+
+SELF comes with a spack environment file that defines the dependencies that are required for SELF. The versions listed in this environment file are the specific versions we regularly test against. To get this environment file, clone the SELF repository
+
+```
+git clone https://github.com/fluidnumerics/SELF/ ~/SELF/
+```
+
+If you have a preferred compiler you would like for spack to use, you can use `spack config add`, e.g.
+
+```
+spack -e ~/SELF/share/spack-env config add packages:all:require:['%gcc@12.2.0']
+```
+
+The example above will force packages to be built with version 12.2.0 of gfortran from the `gcc` compiler set.
+
+To reduce build time, import existing packages on your system
+```
+spack external find --not-buildable
+```
+
+Next, install SELF's dependencies (OpenMPI, HDF5, and feq-parse)
+```
+spack -e ~/SELF/share/spack-env install --no-check-signature
+```
+
+Then, install SELF
+```
+cd ~/SELF
+spack env activate ~/SELF/share/spack-env
+mkdir ~/SELF/build
+cd ~/SELF/build
+cmake -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self ../
+make
+make install
+```
+
+If you'd like to run the tests included with SELF, to verify your installation, you can use `ctest`.
+
+```
+cd ${HOME}/opt/self/test
+ctest
+```
+
+
+
+## Dependencies
 The Spectral Element Library in Fortran can be built provided the following dependencies are met
 
-* Fortran 2008 compliant compiler ( `gfortran` recommended )
 * [Cmake (v3.21 or greater)](https://cmake.org/resources/)
+* Fortran 2008 compliant compiler ( `gfortran` recommended )
 * MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
-* [ROCm v5.7.0 or greater](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/)
+* [MAGMA](https://icl.utk.edu/magma/)
 * [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 * [FluidNumerics/feq-parse](https://github.com/FluidNumerics/feq-parse)
-* (Optional) [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit), if you are building for Nvidia GPU hardware.
+* (Optional, AMD GPU Support) [ROCm v5.7.0 or greater](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/)
+* (Optional, Nvidia GPU Support) [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 
 
-!!! note
-    Since HIP is officially supported only on CentOS, RHEL, Ubuntu, SLES, and Windows operating systems, SELF currently can only be built on these operating systems. Further, testing is only being carried out on Ubuntu at this time. 
+## Installation Notes
 
-You can install SELF in two possible ways
-
-1. Bare Metal Installation
-2. Docker image
-
-A bare metal installation will require that you have a CentOS/RHEL 7 or 8, SLES, Ubuntu 20.04 (focal) or 22.04 (jammy), or Windows operating system. You will also need to ensure that all of the dependencies are installed on your system before installing SELF.
-
-A Docker image installation uses the Ubuntu 22.04 Docker image as a base and takes care of installing all of the dependencies for you. The resulting Docker image can be run using Docker or Singularity/Apptainer. 
-
-This documentation will walk through steps to install SELF using bare metal installation and the Docker image approaches.
+### GPU Support 
+SELF uses OpenMP for GPU offloading. Some of our "heavy-lifting" kernels, such as divergence, gradient, and grid interpolation operations are expressed using the BLAS API. For these, we use MAGMA.
 
 
 ## Bare Metal Install
@@ -45,8 +98,6 @@ This part of the documentation will provide you with an overview of the environm
 #### Build Variables
 There are a number of environment variables you can use to control the behavior of the build and installation process. Importantly, some of these environment variables are necessary to tell the build system where dependencies can be found.
 
-
-* `CMAKE_HIP_ARCHITECTURES`   The target GPU architecture to build for (e.g. gfx906, gfx90a, sm_72)
 * `CMAKE_INSTALL_PREFIX`      The installation path for SELF
 * `CMAKE_BUILD_TYPE`          Type of build, one of `Release`, `Debug`, or `Coverage`
 
@@ -65,7 +116,7 @@ Pascal (P100) | Volta (V100) | Ampere (A100) | Hopper (H100) |
 sm_60, sm_61, sm_62 | sm_70, sm_72 | sm_80, sm_86, sm_87 | sm_90, sm_90a |
 
 
-#### Install SELF
+#### Install SELF (Detailed)
 First, clone the SELF repository (if you haven't already)
 ```
 git clone https://github.com/fluidnumerics/SELF ~/SELF
@@ -111,24 +162,3 @@ make install
 At the end of this process, the `self` application is installed under `${HOME}/opt/self/bin`. Additionally, the SELF static library can be found under `${HOME}/opt/self/lib` and the `.mod` files for all of the SELF modules are under `${HOME}/opt/self/include`.
 
 [If you encounter any problems, feel free to open an new issue](https://github.com/FluidNumerics/SELF/issues/new/choose)
-
-## Build a Docker Container
-SELF comes with Docker files defined under the `docker/` subdirectory. Currently, there are recipes for building container images for AMD GPUs (`Dockerfile.rocm`) and Nvidia GPUs (`Dockerfile.cuda`). The recipes will install all of SELF's dependencies and SELF in a container image based on the Ubuntu 22.04 image. To bake a SELF image, first clone the SELF repository and navigate to the source code directory
-
-```
-git clone https://github.com/fluidnumerics/SELF ${HOME}/SELF
-cd ${HOME}/SELF
-```
-
-In this example, SELF is cloned to `${HOME}/SELF`. From the main directory of the SELF repository, you can use `docker build` to build a container image.
-
-```
-docker build -f docker/rocm-5.7/amd/Dockerfile -t self:latest .
-```
-
-This command will create a Docker image for running SELF on AMD MI50 GPUs and the image is tagged `self:latest`; this is the name of the image that you will reference when running SELF.
-
-        
-By default, this will build SELF with double precision floating point arithmetic, no optimizations (debug build), and with GPU kernels offloaded to a AMD MI50 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available
-
-* `_GPU_TARGET`: GPU microarchitecture code to build for. Defaults to `gfx906` (AMD MI50)
