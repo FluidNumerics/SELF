@@ -244,6 +244,3 @@ if(SELF_ENABLE_TESTING)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 endif()
-
-# Examples (additional tests; standalone models)
-#add_subdirectory(${CMAKE_SOURCE_DIR}/example)
