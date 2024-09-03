@@ -29,6 +29,7 @@ jobs:
             - os: ubuntu-22.04
               fcompiler: gfortran-12
               ccompiler: gcc-12
+              gcov: gcov-12
               spack_compiler: gcc@=12.3.0
               spack_os: "ubuntu:22.04"
               shell: bash
@@ -38,6 +39,7 @@ jobs:
             - os: ubuntu-22.04
               fcompiler: gfortran-9
               ccompiler: gcc-9
+              gcov: gcov-9
               spack_compiler: gcc@=9.5.0
               spack_os: "ubuntu:22.04"
               shell: bash
@@ -47,6 +49,7 @@ jobs:
             - os: ubuntu-22.04
               fcompiler: gfortran-10
               ccompiler: gcc-10
+              gcov: gcov-10
               spack_compiler: gcc@=10.5.0
               spack_os: "ubuntu:22.04"
               shell: bash
@@ -56,20 +59,13 @@ jobs:
             - os: ubuntu-22.04
               fcompiler: gfortran-11
               ccompiler: gcc-11
+              gcov: gcov-11
               spack_compiler: gcc@=11.4.0
               spack_os: "ubuntu:22.04"
               shell: bash
               build_type: debug
               memcheck: false
 
-            - os: ubuntu-22.04
-              fcompiler: gfortran-12
-              ccompiler: gcc-12
-              spack_compiler: gcc@=12.3.0
-              spack_os: "ubuntu:22.04"
-              shell: bash
-              build_type: debug
-              memcheck: false
 
     defaults:
       run:
@@ -106,14 +102,6 @@ jobs:
           FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
           make VERBOSE=1
 
-      - name: Initialize coverage counters
-        if: ${{ matrix.build_type == 'coverage' }}
-        run: |
-          sudo apt-get update -y && sudo apt-get install lcov
-          lcov --no-external \
-               --directory /home/runner/work/SELF\
-               --zerocounters
-
       - name: Run ctests
         run: |
           cd build/test
@@ -125,6 +113,8 @@ jobs:
           
           lcov --no-external \
               --capture \
+              --all \
+              --gcov=${{ matrix.gcov }} \
               --directory /home/runner/work/SELF\
               --exclude '*/test/*' \
               --output-file /home/runner/work/lcov.info
@@ -136,7 +126,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: /home/runner/work/lcov.info
-          flags: ctests
+          flags: github-serial-ctests
 
       - name: Run memory checks with Valgrind (only Linux and GNU compilers)
         if: ${{ matrix.memcheck }}
