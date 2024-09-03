@@ -643,13 +643,13 @@ contains
         do j = 1,this%solution%interp%M+1
           do i = 1,this%solution%interp%M+1
 
-            write(fUnit,fmat) x%interior(1,i,j,k,iEl,1), &
-              x%interior(2,i,j,k,iEl,1), &
-              x%interior(3,i,j,k,iEl,1), &
+            write(fUnit,fmat) x%interior(i,j,k,iEl,1,1), &
+              x%interior(i,j,k,iEl,1,2), &
+              x%interior(i,j,k,iEl,1,3), &
               solution%interior(i,j,k,iEl,1:this%solution%nvar), &
-              solutionGradient%interior(1,i,j,k,iEl,1:this%solution%nvar), &
-              solutionGradient%interior(2,i,j,k,iEl,1:this%solution%nvar), &
-              solutionGradient%interior(3,i,j,k,iEl,1:this%solution%nvar)
+              solutionGradient%interior(i,j,k,iEl,1:this%solution%nvar,1), &
+              solutionGradient%interior(i,j,k,iEl,1:this%solution%nvar,2), &
+              solutionGradient%interior(i,j,k,iEl,1:this%solution%nvar,3)
 
           enddo
         enddo

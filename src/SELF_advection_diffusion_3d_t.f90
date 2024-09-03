@@ -215,9 +215,9 @@ contains
               nz = this%geometry%nHat%boundary(i,j,k,iEl,1,3)
 
               un = this%u*nx+this%v*ny+this%w*nz
-              dfdn = this%solutionGradient%boundary(i,j,k,iEl,iVar,1)*nx+ &
-                     this%solutionGradient%boundary(i,j,k,iEl,iVar,2)*ny+ &
-                     this%solutionGradient%boundary(i,j,k,iEl,iVar,3)*nz
+              dfdn = this%solutionGradient%avgboundary(i,j,k,iEl,iVar,1)*nx+ &
+                     this%solutionGradient%avgboundary(i,j,k,iEl,iVar,2)*ny+ &
+                     this%solutionGradient%avgboundary(i,j,k,iEl,iVar,3)*nz
 
               fin = this%solution%boundary(i,j,k,iEl,iVar) ! interior solution
               fout = this%solution%extboundary(i,j,k,iEl,iVar) ! exterior solution

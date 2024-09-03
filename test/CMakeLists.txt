@@ -99,9 +99,9 @@ add_fortran_tests (
     "advection_diffusion_2d_euler.f90"
     "advection_diffusion_2d_rk2.f90"
     "advection_diffusion_2d_rk3.f90"
-    "advection_diffusion_2d_rk4.f90")
-    # "advection_diffusion_3d_euler.f90"
-    # "advection_diffusion_3d_rk2.f90"
-    # "advection_diffusion_3d_rk3.f90"
-    # "advection_diffusion_3d_rk4.f90"
-    # )
+    "advection_diffusion_2d_rk4.f90"
+    "advection_diffusion_3d_euler.f90"
+    "advection_diffusion_3d_rk2.f90"
+    "advection_diffusion_3d_rk3.f90"
+    "advection_diffusion_3d_rk4.f90"
+    )
