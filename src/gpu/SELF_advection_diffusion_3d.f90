@@ -31,7 +31,7 @@ module self_advection_diffusion_3d
   implicit none
 
   type,extends(advection_diffusion_3d_t) :: advection_diffusion_3d
-contains
+  contains
     procedure :: setboundarycondition => setboundarycondition_advection_diffusion_3d
     procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_3d
     procedure :: riemannsolver => riemannsolver_advection_diffusion_3d
@@ -81,16 +81,16 @@ contains
   endinterface
 
 contains
-subroutine CalculateEntropy_advection_diffusion_3d(this)
-  implicit none
-  class(advection_diffusion_3d),intent(inout) :: this
-  ! Local
-  integer :: iel,i,j,k,ivar
-  real(prec) :: e,s,jac
+  subroutine CalculateEntropy_advection_diffusion_3d(this)
+    implicit none
+    class(advection_diffusion_3d),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,k,ivar
+    real(prec) :: e,s,jac
 
-  call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-                          this%solution%interior_gpu,sizeof(this%solution%interior), &
-                          hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
 
     e = 0.0_prec
     do ivar = 1,this%solution%nvar
@@ -109,57 +109,57 @@ subroutine CalculateEntropy_advection_diffusion_3d(this)
 
     this%entropy = e
 
-endsubroutine CalculateEntropy_advection_diffusion_3d
+  endsubroutine CalculateEntropy_advection_diffusion_3d
 
-subroutine setboundarycondition_advection_diffusion_3d(this)
+  subroutine setboundarycondition_advection_diffusion_3d(this)
   !! Boundary conditions are set to periodic boundary conditions
-  implicit none
-  class(advection_diffusion_3d),intent(inout) :: this
+    implicit none
+    class(advection_diffusion_3d),intent(inout) :: this
 
-  call setboundarycondition_advection_diffusion_3d_gpu(this%solution%extboundary_gpu, &
-                                                       this%solution%boundary_gpu,this%mesh%sideInfo_gpu,this%solution%interp%N, &
-                                                       this%solution%nelem,this%solution%nvar)
+    call setboundarycondition_advection_diffusion_3d_gpu(this%solution%extboundary_gpu, &
+                                                         this%solution%boundary_gpu,this%mesh%sideInfo_gpu,this%solution%interp%N, &
+                                                         this%solution%nelem,this%solution%nvar)
 
-endsubroutine setboundarycondition_advection_diffusion_3d
+  endsubroutine setboundarycondition_advection_diffusion_3d
 
-subroutine setgradientboundarycondition_advection_diffusion_3d(this)
+  subroutine setgradientboundarycondition_advection_diffusion_3d(this)
   !! Gradient boundary conditions are set to periodic boundary conditions
-  implicit none
-  class(advection_diffusion_3d),intent(inout) :: this
+    implicit none
+    class(advection_diffusion_3d),intent(inout) :: this
 
-  call setgradientboundarycondition_advection_diffusion_3d_gpu( &
-    this%solutiongradient%extboundary_gpu, &
-    this%solutiongradient%boundary_gpu,this%mesh%sideInfo_gpu, &
-    this%solution%interp%N,this%solution%nelem,this%solution%nvar)
+    call setgradientboundarycondition_advection_diffusion_3d_gpu( &
+      this%solutiongradient%extboundary_gpu, &
+      this%solutiongradient%boundary_gpu,this%mesh%sideInfo_gpu, &
+      this%solution%interp%N,this%solution%nelem,this%solution%nvar)
 
-endsubroutine setgradientboundarycondition_advection_diffusion_3d
+  endsubroutine setgradientboundarycondition_advection_diffusion_3d
 
-subroutine fluxmethod_advection_diffusion_3d(this)
-  implicit none
-  class(advection_diffusion_3d),intent(inout) :: this
+  subroutine fluxmethod_advection_diffusion_3d(this)
+    implicit none
+    class(advection_diffusion_3d),intent(inout) :: this
 
-  call fluxmethod_advection_diffusion_3d_gpu(this%solution%interior_gpu, &
-                                             this%solutiongradient%interior_gpu,this%flux%interior_gpu, &
-                                             this%u,this%v,this%w,this%nu,this%solution%interp%N,&
-                                             this%solution%nelem, &
-                                             this%solution%nvar)
+    call fluxmethod_advection_diffusion_3d_gpu(this%solution%interior_gpu, &
+                                               this%solutiongradient%interior_gpu,this%flux%interior_gpu, &
+                                               this%u,this%v,this%w,this%nu,this%solution%interp%N, &
+                                               this%solution%nelem, &
+                                               this%solution%nvar)
 
-endsubroutine fluxmethod_advection_diffusion_3d
+  endsubroutine fluxmethod_advection_diffusion_3d
 
-subroutine riemannsolver_advection_diffusion_3d(this)
-  ! this method uses an linear upwind solver for the
-  ! advective flux and the bassi-rebay method for the
-  ! diffusive fluxes
-  implicit none
-  class(advection_diffusion_3d),intent(inout) :: this
+  subroutine riemannsolver_advection_diffusion_3d(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(advection_diffusion_3d),intent(inout) :: this
 
-  call riemannsolver_advection_diffusion_3d_gpu(this%solution%boundary_gpu, &
-                                                this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
-                                                this%geometry%nhat%boundary_gpu,this%geometry%nscale%boundary_gpu, &
-                                                this%flux%boundarynormal_gpu,this%u,this%v,this%w,&
-                                                this%nu,this%solution%interp%N, &
-                                                this%solution%nelem,this%solution%nvar)
+    call riemannsolver_advection_diffusion_3d_gpu(this%solution%boundary_gpu, &
+                                                  this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
+                                                  this%geometry%nhat%boundary_gpu,this%geometry%nscale%boundary_gpu, &
+                                                  this%flux%boundarynormal_gpu,this%u,this%v,this%w, &
+                                                  this%nu,this%solution%interp%N, &
+                                                  this%solution%nelem,this%solution%nvar)
 
-endsubroutine riemannsolver_advection_diffusion_3d
+  endsubroutine riemannsolver_advection_diffusion_3d
 
 endmodule self_advection_diffusion_3d
