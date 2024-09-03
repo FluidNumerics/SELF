@@ -110,12 +110,18 @@ jobs:
       - name: Create coverage report
         if: ${{ matrix.build_type == 'coverage' }}
         run: |
-          
+          sudo apt-get update -y && sudo apt-get install lcov
+          mkdir -p ${WORKSPACE_ROOT}/tmp/
+          lcov --no-external \
+                --zerocounters \
+                --directory /home/runner/work/SELF \
+                --exclude '*/test/*' \
+                --gcov=${{ matrix.gcov }} 
+
           lcov --no-external \
               --capture \
-              --all \
               --gcov=${{ matrix.gcov }} \
-              --directory /home/runner/work/SELF\
+              --directory /home/runner/work/SELF \
               --exclude '*/test/*' \
               --output-file /home/runner/work/lcov.info
 
