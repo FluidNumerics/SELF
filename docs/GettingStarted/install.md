@@ -15,39 +15,46 @@ Allow spack to locate your compilers (make sure you have C, C++, and Fortran com
 spack compiler find
 ```
 
-If you have a preferred compiler you would like for spack to use, you can use `spack -e . config add`, e.g.
+SELF comes with a spack environment file that defines the dependencies that are required for SELF. The versions listed in this environment file are the specific versions we regularly test against. To get this environment file, clone the SELF repository
+
 ```
-spack -e . config add packages:all:require:['%rocmcc@6.1.1']
+git clone https://github.com/fluidnumerics/SELF/ ~/SELF/
 ```
 
-The example above will force packages to be built with version 6.1.1 of amdflang from the `rocmcc` compiler set.
+If you have a preferred compiler you would like for spack to use, you can use `spack config add`, e.g.
+
+```
+spack -e ~/SELF/share/spack-env config add packages:all:require:['%gcc@12.2.0']
+```
+
+The example above will force packages to be built with version 12.2.0 of gfortran from the `gcc` compiler set.
 
 To reduce build time, import existing packages on your system
 ```
-spack external find
+spack external find --not-buildable
 ```
 
-Then, clone SELF
+Next, install SELF's dependencies (OpenMPI, HDF5, and feq-parse)
 ```
-git clone https://github.com/fluidnumerics/SELF ~/SELF
-cd ~/SELF
-```
-
-Install SELF's dependencies (OpenMPI, HDF5, and feq-parse)
-```
-sudo -i spack -e . install --no-check-signature
+spack -e ~/SELF/share/spack-env install --no-check-signature
 ```
 
 Then, install SELF
 ```
 cd ~/SELF
-spack env activate .
+spack env activate ~/SELF/share/spack-env
 mkdir ~/SELF/build
 cd ~/SELF/build
-cmake -DCMAKE_INSTALL_PREFIX=/opt/view ../
+cmake -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self ../
 make
-make test
-sudo make install
+make install
+```
+
+If you'd like to run the tests included with SELF, to verify your installation, you can use `ctest`.
+
+```
+cd ${HOME}/opt/self/test
+ctest
 ```
 
 
