@@ -113,8 +113,7 @@ jobs:
 
       - name: Run ctests
         run: |
-          cd build/test
-          ctest || ctest --rerun-failed --output-on-failure
+          ctest --test-dir ./build/
 
       - name: Create coverage report
         if: ${{ matrix.build_type == 'coverage' }}
