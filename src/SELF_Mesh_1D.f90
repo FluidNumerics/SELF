@@ -82,11 +82,6 @@ contains
     allocate(this%globalNodeIDs(1:nNodes))
     allocate(this%BCType(1:4,1:nBCs))
 
-    !$omp target enter data map(alloc: this % elemInfo)
-    !$omp target enter data map(alloc: this % nodeCoords)
-    !$omp target enter data map(alloc: this % globalNodeIDs)
-    !$omp target enter data map(alloc: this % BCType)
-
     allocate(this%BCNames(1:nBCs))
 
   endsubroutine Init_Mesh1D
@@ -104,10 +99,6 @@ contains
     deallocate(this%nodeCoords)
     deallocate(this%globalNodeIDs)
     deallocate(this%BCType)
-    !$omp target exit data map(delete: this % elemInfo)
-    !$omp target exit data map(delete: this % nodeCoords)
-    !$omp target exit data map(delete: this % globalNodeIDs)
-    !$omp target exit data map(delete: this % BCType)
     deallocate(this%BCNames)
 
   endsubroutine Free_Mesh1D

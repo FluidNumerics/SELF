@@ -81,8 +81,6 @@ contains
     ! local
     integer :: i,ivar,iEl,j,e2
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
         do j = 1,4 ! Loop over all sides
@@ -91,7 +89,6 @@ contains
           e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
 
           if(e2 == 0) then
-            !$omp loop bind(parallel)
             do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
               this%solution%extBoundary(i,j,iEl,ivar) = 0.0_prec
             enddo
@@ -100,7 +97,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine setboundarycondition_advection_diffusion_2d_t
 
@@ -112,8 +108,6 @@ contains
     ! local
     integer :: i,ivar,iEl,j,e2
 
-    !$omp target
-    !$omp teams loop collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
         do j = 1,4 ! Loop over all sides
@@ -133,7 +127,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine setgradientboundarycondition_advection_diffusion_2d_t
 
@@ -150,8 +143,6 @@ contains
     u = this%u
     v = this%v
     nu = this%nu
-    !$omp target
-    !$omp teams loop collapse(4)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do j = 1,this%solution%interp%N+1
@@ -168,7 +159,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine fluxmethod_advection_diffusion_2d_t
 
@@ -186,8 +176,6 @@ contains
     real(prec) :: fin,fout,dfdn,un
     real(prec) :: nx,ny,nmag
 
-    !$omp target
-    !$omp teams loop collapse(4)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem
         do j = 1,4
@@ -214,7 +202,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine riemannsolver_advection_diffusion_2d_t
 

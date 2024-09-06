@@ -136,36 +136,27 @@ contains
     integer :: i,ii,idir,jdir,iel,ivar
     real(prec) :: fbs,fbe,fbn,fbw
 
-    !$omp target
-    !$omp teams loop collapse(5)
-    do jdir = 1,2
-      do idir = 1,2
-        do ivar = 1,this%nvar
-          do iel = 1,this%nelem
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1, &
+                  iel=1:this%nelem,ivar=1:this%nvar, &
+                  idir=1:2,jdir=1:2)
 
-              fbs = 0.0_prec
-              fbe = 0.0_prec
-              fbn = 0.0_prec
-              fbw = 0.0_prec
-              do ii = 1,this%N+1
-                fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir,jdir) ! South
-                fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir,jdir) ! East
-                fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir,jdir) ! North
-                fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir,jdir) ! West
-              enddo
-
-              this%boundary(i,1,iel,ivar,idir,jdir) = fbs
-              this%boundary(i,2,iel,ivar,idir,jdir) = fbe
-              this%boundary(i,3,iel,ivar,idir,jdir) = fbn
-              this%boundary(i,4,iel,ivar,idir,jdir) = fbw
-
-            enddo
-          enddo
-        enddo
+      fbs = 0.0_prec
+      fbe = 0.0_prec
+      fbn = 0.0_prec
+      fbw = 0.0_prec
+      do ii = 1,this%N+1
+        fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar,idir,jdir) ! South
+        fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar,idir,jdir) ! East
+        fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar,idir,jdir) ! North
+        fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar,idir,jdir) ! West
       enddo
+
+      this%boundary(i,1,iel,ivar,idir,jdir) = fbs
+      this%boundary(i,2,iel,ivar,idir,jdir) = fbe
+      this%boundary(i,3,iel,ivar,idir,jdir) = fbn
+      this%boundary(i,4,iel,ivar,idir,jdir) = fbw
+
     enddo
-    !$omp end target
 
   endsubroutine BoundaryInterp_Tensor2D_t
 
@@ -176,19 +167,14 @@ contains
     ! Local
     integer :: iEl,iVar,i,j
 
-    do iVar = 1,this%nVar
-      do iEl = 1,this%nElem
-        do j = 1,this%interp%N+1
-          do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  iel=1:this%nelem,ivar=1:this%nvar)
 
-            det(i,j,iEl,iVar) = this%interior(i,j,iEl,iVar,1,1)* &
-                                this%interior(i,j,iEl,iVar,2,2)- &
-                                this%interior(i,j,iEl,iVar,1,2)* &
-                                this%interior(i,j,iEl,iVar,2,1)
+      det(i,j,iEl,iVar) = this%interior(i,j,iEl,iVar,1,1)* &
+                          this%interior(i,j,iEl,iVar,2,2)- &
+                          this%interior(i,j,iEl,iVar,1,2)* &
+                          this%interior(i,j,iEl,iVar,2,1)
 
-          enddo
-        enddo
-      enddo
     enddo
 
   endsubroutine Determinant_Tensor2D_t

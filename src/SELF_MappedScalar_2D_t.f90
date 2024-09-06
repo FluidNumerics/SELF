@@ -194,8 +194,6 @@ contains
   !   real(prec) :: extBuff(1:this%interp%N+1)
 
   !   if(decomp%mpiEnabled) then
-  !     !$omp target
-  !     !$omp teams loop collapse(3)
   !     do ivar = 1,this%nvar
   !       do e1 = 1,this%nElem
   !         do s1 = 1,4
@@ -230,7 +228,6 @@ contains
   !         enddo
   !       enddo
   !     enddo
-  !     !$omp end target
 
   !   endif
 
@@ -253,48 +250,37 @@ contains
     N = this%interp%N
 
     ! call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+    do concurrent(s1=1:4,e1=1:mesh%nElem,ivar=1:this%nvar)
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do e1 = 1,mesh%nElem
-        do s1 = 1,4
-          e2Global = mesh%sideInfo(3,s1,e1)
-          e2 = e2Global-offset
-          s2 = mesh%sideInfo(4,s1,e1)/10
-          flip = mesh%sideInfo(4,s1,e1)-s2*10
-          bcid = mesh%sideInfo(5,s1,e1)
+      e2Global = mesh%sideInfo(3,s1,e1)
+      e2 = e2Global-offset
+      s2 = mesh%sideInfo(4,s1,e1)/10
+      flip = mesh%sideInfo(4,s1,e1)-s2*10
+      bcid = mesh%sideInfo(5,s1,e1)
 
-          if(e2Global /= 0) then
-            neighborRank = decomp%elemToRank(e2Global)
+      if(e2Global /= 0) then
+        !neighborRank = decomp%elemToRank(e2Global)
 
-            if(neighborRank == decomp%rankId) then
+        !if(neighborRank == decomp%rankId) then
 
-              if(flip == 0) then
-                !$omp loop bind(parallel)
-                do i1 = 1,N+1
-                  this%extBoundary(i1,s1,e1,ivar) = &
-                    this%boundary(i1,s2,e2,ivar)
-                enddo
+        if(flip == 0) then
+          do i1 = 1,N+1
+            this%extBoundary(i1,s1,e1,ivar) = &
+              this%boundary(i1,s2,e2,ivar)
+          enddo
 
-              elseif(flip == 1) then
-                !$omp loop bind(parallel)
-                do i1 = 1,N+1
-                  i2 = N+2-i1
-                  this%extBoundary(i1,s1,e1,ivar) = &
-                    this%boundary(i2,s2,e2,ivar)
-                enddo
+        elseif(flip == 1) then
+          do i1 = 1,N+1
+            i2 = N+2-i1
+            this%extBoundary(i1,s1,e1,ivar) = &
+              this%boundary(i2,s2,e2,ivar)
+          enddo
 
-              endif
+        endif
 
-            endif
-
-          endif
-
-        enddo
-      enddo
+        !endif
+      endif
     enddo
-    !$omp end target
 
     !call decomp%FinalizeMPIExchangeAsync()
 
@@ -313,55 +299,31 @@ contains
     integer :: iEl,iVar,i,j,ii,idir
     real(prec) :: dfdx,ja
 
-    !$omp target
-    !$omp teams
-    !$omp loop bind(teams) collapse(5)
-    do idir = 1,2
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar,idir=1:2)
 
-              dfdx = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                ! dsdx(j,i) is contravariant vector i, component j
-                ja = this%geometry%dsdx%interior(ii,j,iel,1,idir,1)
-                dfdx = dfdx+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ! dsdx(j,i) is contravariant vector i, component j
+        ja = this%geometry%dsdx%interior(ii,j,iel,1,idir,1)
+        dfdx = dfdx+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
 
-              enddo
-
-              df(i,j,iel,ivar,idir) = dfdx
-
-            enddo
-          enddo
-        enddo
       enddo
+
+      df(i,j,iel,ivar,idir) = dfdx
+
     enddo
 
-    !$omp loop bind(teams) collapse(5)
-    do idir = 1,2
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar,idir=1:2)
 
-              dfdx = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                ja = this%geometry%dsdx%interior(i,ii,iel,1,idir,2)
-                dfdx = dfdx+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
-              enddo
-
-              df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx)/this%geometry%J%interior(i,j,iEl,1)
-
-            enddo
-          enddo
-        enddo
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ja = this%geometry%dsdx%interior(i,ii,iel,1,idir,2)
+        dfdx = dfdx+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
       enddo
+
+      df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx)/this%geometry%J%interior(i,j,iEl,1)
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine MappedGradient_MappedScalar2D_t
 
@@ -374,57 +336,35 @@ contains
     integer :: iEl,iVar,i,j,ii,idir
     real(prec) :: dfdx,dfdxb,ja,bfl,bfr
 
-    !$omp target
-    !$omp teams
-    !$omp loop bind(teams) collapse(5)
-    do idir = 1,2
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar,idir=1:2)
 
-              dfdx = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                ja = this%geometry%dsdx%interior(ii,j,iel,1,idir,1)
-                dfdx = dfdx+this%interp%dgMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
-              enddo
-              bfl = this%avgboundary(j,4,iel,ivar)*this%geometry%dsdx%boundary(j,4,iel,1,idir,1) ! west
-              bfr = this%avgboundary(j,2,iel,ivar)*this%geometry%dsdx%boundary(j,2,iel,1,idir,1) ! east
-              dfdxb = (this%interp%bMatrix(i,1)*bfl+this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
-              df(i,j,iel,ivar,idir) = dfdx+dfdxb
-            enddo
-          enddo
-        enddo
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ja = this%geometry%dsdx%interior(ii,j,iel,1,idir,1)
+        dfdx = dfdx+this%interp%dgMatrix(ii,i)*this%interior(ii,j,iel,ivar)*ja
       enddo
+      bfl = this%avgboundary(j,4,iel,ivar)*this%geometry%dsdx%boundary(j,4,iel,1,idir,1) ! west
+      bfr = this%avgboundary(j,2,iel,ivar)*this%geometry%dsdx%boundary(j,2,iel,1,idir,1) ! east
+      dfdxb = (this%interp%bMatrix(i,1)*bfl+this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+      df(i,j,iel,ivar,idir) = dfdx+dfdxb
+
     enddo
 
-    !$omp loop bind(teams) collapse(5)
-    do idir = 1,2
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar,idir=1:2)
 
-              dfdx = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                ja = this%geometry%dsdx%interior(i,ii,iel,1,idir,2)
-                dfdx = dfdx+this%interp%dgMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
-              enddo
-
-              bfl = this%avgboundary(i,1,iel,ivar)*this%geometry%dsdx%boundary(i,1,iel,1,idir,2) ! south
-              bfr = this%avgboundary(i,3,iel,ivar)*this%geometry%dsdx%boundary(i,3,iel,1,idir,2) ! north
-              dfdxb = (this%interp%bMatrix(j,1)*bfl+this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
-
-              df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx+dfdxb)/this%geometry%J%interior(i,j,iEl,1)
-            enddo
-          enddo
-        enddo
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ja = this%geometry%dsdx%interior(i,ii,iel,1,idir,2)
+        dfdx = dfdx+this%interp%dgMatrix(ii,j)*this%interior(i,ii,iel,ivar)*ja
       enddo
+
+      bfl = this%avgboundary(i,1,iel,ivar)*this%geometry%dsdx%boundary(i,1,iel,1,idir,2) ! south
+      bfr = this%avgboundary(i,3,iel,ivar)*this%geometry%dsdx%boundary(i,3,iel,1,idir,2) ! north
+      dfdxb = (this%interp%bMatrix(j,1)*bfl+this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+
+      df(i,j,iel,ivar,idir) = (df(i,j,iel,ivar,idir)+dfdx+dfdxb)/this%geometry%J%interior(i,j,iEl,1)
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine MappedDGGradient_MappedScalar2D_t
 

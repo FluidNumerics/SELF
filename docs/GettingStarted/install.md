@@ -74,6 +74,26 @@ The Spectral Element Library in Fortran can be built provided the following depe
 
 ## Installation Notes
 
+### Multithreading CPU support
+Computationally heavy methods in SELF are expressed using Fortran's `do concurrent` loop blocks, which gives compilers the freedom to parallelize operations. Every Fortran compiler has their own set of compiler flags to enable parallelization of `do concurrent` blocks (see [this post on the Fortran-Lang discourse](https://fortran-lang.discourse.group/t/do-concurrent-compiler-flags-to-enable-parallelization/4300/6)). We have provided a single option in the CMake build system that allow you to enable parallelization. At the `cmake` stage of the build process, you can set `SELF_ENABLE_MULTITHREADING=ON`, e.g.
+
+```shell
+cmake -DSELF_ENABLE_MULTITHREADING=ON \
+      -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self \
+       ../
+```
+
+If you are building with the GNU compilers (`gfortran`), the number of threads used for parallelization is determined at build time. By default, the SELF build system will set the number of threads to 4. You can override this setting at the `cmake` stage of the build process using the `SELF_MULTITHREADING_NTHREADS` build variable, e.g. to set the number of threads to 8 with `gfortran`,
+
+```shell
+cmake -DSELF_ENABLE_MULTITHREADING=ON \
+      -DSELF_MULTITHREADING_NTHREADS=8 \
+      -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self \
+       ../
+```
+
+The CMake build system will set the appropriate flags for multithreading for GNU, Intel (`ifort` and `ifx`), LLVM, and Nvidia HPC Compilers. If you are not using `gfortran`, you can set the number of threads for parallelism at runtime using the `OMP_NUM_THREADS` environment variable
+
 ### GPU Support 
 SELF uses OpenMP for GPU offloading. Some of our "heavy-lifting" kernels, such as divergence, gradient, and grid interpolation operations are expressed using the BLAS API. For these, we use MAGMA.
 

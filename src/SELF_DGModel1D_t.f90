@@ -47,7 +47,6 @@ module SELF_DGModel1D_t
     type(MappedScalar1D) :: fluxDivergence
     type(MappedScalar1D) :: dSdt
     type(MappedScalar1D) :: workSol
-    type(MappedScalar1D) :: prevSol
     type(Mesh1D),pointer :: mesh
     type(Geometry1D),pointer :: geometry
 
@@ -57,8 +56,6 @@ module SELF_DGModel1D_t
     procedure :: Free => Free_DGModel1D_t
 
     procedure :: UpdateSolution => UpdateSolution_DGModel1D_t
-
-    procedure :: ResizePrevSol => ResizePrevSol_DGModel1D_t
 
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D_t
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D_t
@@ -98,7 +95,6 @@ contains
 
     call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%prevSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%dSdt%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%solutionGradient%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%flux%Init(geometry%x%interp,nVar,this%mesh%nElem)
@@ -130,7 +126,6 @@ contains
 
     call this%solution%Free()
     call this%workSol%Free()
-    call this%prevSol%Free()
     call this%dSdt%Free()
     call this%solutionGradient%Free()
     call this%flux%Free()
@@ -138,23 +133,6 @@ contains
     call this%fluxDivergence%Free()
 
   endsubroutine Free_DGModel1D_t
-
-  subroutine ResizePrevSol_DGModel1D_t(this,m)
-    implicit none
-    class(DGModel1D_t),intent(inout) :: this
-    integer,intent(in) :: m
-    ! Local
-    integer :: nVar
-
-    ! Free space, if necessary
-    call this%prevSol%Free()
-
-    ! Reallocate with increased variable dimension for
-    ! storing "m" copies of solution data
-    nVar = this%solution%nVar
-    call this%prevSol%Init(this%geometry%x%interp,m*nVar,this%mesh%nElem)
-
-  endsubroutine ResizePrevSol_DGModel1D_t
 
   subroutine SetSolutionFromEqn_DGModel1D_t(this,eqn)
     implicit none
@@ -206,20 +184,13 @@ contains
       dtLoc = this%dt
     endif
 
-    !$omp target
-    !$omp teams loop collapse(3)
-    do iEl = 1,this%solution%nElem
-      do iVar = 1,this%solution%nVar
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
 
-          this%solution%interior(i,iEl,iVar) = &
-            this%solution%interior(i,iEl,iVar)+ &
-            dtLoc*this%dSdt%interior(i,iEl,iVar)
+      this%solution%interior(i,iEl,iVar) = &
+        this%solution%interior(i,iEl,iVar)+ &
+        dtLoc*this%dSdt%interior(i,iEl,iVar)
 
-        enddo
-      enddo
     enddo
-    !$omp end target
 
   endsubroutine UpdateSolution_DGModel1D_t
 
@@ -230,24 +201,18 @@ contains
     ! Local
     integer :: i,iEl,iVar
 
-    !$omp target
-    !$omp teams loop collapse(3)
-    do iEl = 1,this%solution%nElem
-      do iVar = 1,this%solution%nVar
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
 
-          this%workSol%interior(i,iEl,iVar) = rk2_a(m)* &
-                                              this%workSol%interior(i,iEl,iVar)+ &
-                                              this%dSdt%interior(i,iEl,iVar)
+      this%workSol%interior(i,iEl,iVar) = rk2_a(m)* &
+                                          this%workSol%interior(i,iEl,iVar)+ &
+                                          this%dSdt%interior(i,iEl,iVar)
 
-          this%solution%interior(i,iEl,iVar) = &
-            this%solution%interior(i,iEl,iVar)+ &
-            rk2_g(m)*this%dt*this%workSol%interior(i,iEl,iVar)
+      this%solution%interior(i,iEl,iVar) = &
+        this%solution%interior(i,iEl,iVar)+ &
+        rk2_g(m)*this%dt*this%workSol%interior(i,iEl,iVar)
 
-        enddo
-      enddo
     enddo
-    !$omp end target
 
   endsubroutine UpdateGRK2_DGModel1D_t
 
@@ -258,24 +223,18 @@ contains
     ! Local
     integer :: i,iEl,iVar
 
-    !$omp target
-    !$omp teams loop collapse(3)
-    do iEl = 1,this%solution%nElem
-      do iVar = 1,this%solution%nVar
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
 
-          this%workSol%interior(i,iEl,iVar) = rk3_a(m)* &
-                                              this%workSol%interior(i,iEl,iVar)+ &
-                                              this%dSdt%interior(i,iEl,iVar)
+      this%workSol%interior(i,iEl,iVar) = rk3_a(m)* &
+                                          this%workSol%interior(i,iEl,iVar)+ &
+                                          this%dSdt%interior(i,iEl,iVar)
 
-          this%solution%interior(i,iEl,iVar) = &
-            this%solution%interior(i,iEl,iVar)+ &
-            rk3_g(m)*this%dt*this%workSol%interior(i,iEl,iVar)
+      this%solution%interior(i,iEl,iVar) = &
+        this%solution%interior(i,iEl,iVar)+ &
+        rk3_g(m)*this%dt*this%workSol%interior(i,iEl,iVar)
 
-        enddo
-      enddo
     enddo
-    !$omp end target
 
   endsubroutine UpdateGRK3_DGModel1D_t
 
@@ -286,24 +245,18 @@ contains
     ! Local
     integer :: i,iEl,iVar
 
-    !$omp target
-    !$omp teams loop collapse(3)
-    do iEl = 1,this%solution%nElem
-      do iVar = 1,this%solution%nVar
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
 
-          this%workSol%interior(i,iEl,iVar) = rk4_a(m)* &
-                                              this%workSol%interior(i,iEl,iVar)+ &
-                                              this%dSdt%interior(i,iEl,iVar)
+      this%workSol%interior(i,iEl,iVar) = rk4_a(m)* &
+                                          this%workSol%interior(i,iEl,iVar)+ &
+                                          this%dSdt%interior(i,iEl,iVar)
 
-          this%solution%interior(i,iEl,iVar) = &
-            this%solution%interior(i,iEl,iVar)+ &
-            rk4_g(m)*this%dt*this%workSol%interior(i,iEl,iVar)
+      this%solution%interior(i,iEl,iVar) = &
+        this%solution%interior(i,iEl,iVar)+ &
+        rk4_g(m)*this%dt*this%workSol%interior(i,iEl,iVar)
 
-        enddo
-      enddo
     enddo
-    !$omp end target
 
   endsubroutine UpdateGRK4_DGModel1D_t
 
@@ -351,20 +304,14 @@ contains
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDerivative(this%fluxDivergence%interior)
-    !$omp target
-    !$omp teams loop collapse(3)
-    do iEl = 1,this%solution%nElem
-      do iVar = 1,this%solution%nVar
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
 
-          this%dSdt%interior(i,iEl,iVar) = &
-            this%source%interior(i,iEl,iVar)- &
-            this%fluxDivergence%interior(i,iEl,iVar)
+      this%dSdt%interior(i,iEl,iVar) = &
+        this%source%interior(i,iEl,iVar)- &
+        this%fluxDivergence%interior(i,iEl,iVar)
 
-        enddo
-      enddo
     enddo
-    !$omp end target
 
   endsubroutine CalculateTendency_DGModel1D_t
 

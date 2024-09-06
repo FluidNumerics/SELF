@@ -66,7 +66,6 @@ jobs:
               build_type: debug
               memcheck: false
 
-
     defaults:
       run:
         shell: ${{ matrix.shell }}
@@ -102,28 +101,36 @@ jobs:
           FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
           make VERBOSE=1
 
+      - name: Initialize coverage counters
+        if: ${{ matrix.build_type == 'coverage' }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install lcov
+          lcov --capture \
+          --initial \
+          --directory ./build/src/ \
+          --gcov=${{ matrix.gcov }}  \
+          --output-file /home/runner/work/initial.info
+
       - name: Run ctests
         run: |
-          cd build/test
-          ctest || ctest --rerun-failed --output-on-failure
+          export WORKSPACE=/home/runner/work/SELF/SELF/
+          ctest --verbose \
+                --output-on-failure \
+                --test-dir ./build/
 
       - name: Create coverage report
         if: ${{ matrix.build_type == 'coverage' }}
         run: |
-          sudo apt-get update -y && sudo apt-get install lcov
-          mkdir -p ${WORKSPACE_ROOT}/tmp/
-          lcov --no-external \
-                --zerocounters \
-                --directory /home/runner/work/SELF \
-                --exclude '*/test/*' \
-                --gcov=${{ matrix.gcov }} 
+          lcov --capture \
+               --directory ./build/src/ \
+               --gcov=${{ matrix.gcov }} \
+               --output-file /home/runner/work/ctest-capture.info
 
-          lcov --no-external \
-              --capture \
-              --gcov=${{ matrix.gcov }} \
-              --directory /home/runner/work/SELF \
-              --exclude '*/test/*' \
-              --output-file /home/runner/work/lcov.info
+          lcov --add-tracefile /home/runner/work/initial.info \
+               --add-tracefile /home/runner/work/ctest-capture.info \
+               --gcov=${{ matrix.gcov }}  \
+               --output-file /home/runner/work/coverage.info
+
 
       - name: codecov
         if: ${{ matrix.build_type == 'coverage' }}
@@ -131,7 +138,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          files: /home/runner/work/lcov.info
+          files: /home/runner/work/coverage.info
           flags: github-serial-ctests
 
       - name: Run memory checks with Valgrind (only Linux and GNU compilers)

@@ -206,8 +206,6 @@ contains
 
   !   if(decomp%mpiEnabled) then
 
-  !     !$omp target
-  !     !$omp teams loop collapse(4)
   !     do idir = 1,3
   !       do ivar = 1,this%nvar
   !         do e1 = 1,this%nElem
@@ -281,7 +279,6 @@ contains
   !         enddo
   !       enddo
   !     enddo
-  !     !$omp end target
 
   !   endif
 
@@ -305,90 +302,82 @@ contains
 
     !call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 
-    !$omp target
-    !$omp teams loop collapse(4)
-    do idir = 1,3
-      do ivar = 1,this%nvar
-        do e1 = 1,mesh%nElem
-          do s1 = 1,6
-            e2Global = mesh%sideInfo(3,s1,e1)
-            e2 = e2Global-offset
-            s2 = mesh%sideInfo(4,s1,e1)/10
-            flip = mesh%sideInfo(4,s1,e1)-s2*10
-            bcid = mesh%sideInfo(5,s1,e1)
+    do concurrent(s1=1:6,e1=1:mesh%nElem,ivar=1:this%nvar,idir=1:3)
 
-            if(e2Global /= 0) then
+      e2Global = mesh%sideInfo(3,s1,e1)
+      e2 = e2Global-offset
+      s2 = mesh%sideInfo(4,s1,e1)/10
+      flip = mesh%sideInfo(4,s1,e1)-s2*10
+      bcid = mesh%sideInfo(5,s1,e1)
 
-              neighborRank = decomp%elemToRank(e2Global)
+      if(e2Global /= 0) then
 
-              if(neighborRank == decomp%rankId) then
+        !neighborRank = decomp%elemToRank(e2Global)
 
-                if(flip == 0) then
+        !if(neighborRank == decomp%rankId) then
 
-                  do j1 = 1,this%interp%N+1
-                    do i1 = 1,this%interp%N+1
-                      this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                        this%boundary(i1,j1,s2,e2,ivar,idir)
-                    enddo
-                  enddo
+        if(flip == 0) then
 
-                else if(flip == 1) then
-
-                  do j1 = 1,this%interp%N+1
-                    do i1 = 1,this%interp%N+1
-
-                      i2 = j1
-                      j2 = this%interp%N+2-i1
-                      this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                        this%boundary(i2,j2,s2,e2,ivar,idir)
-
-                    enddo
-                  enddo
-
-                else if(flip == 2) then
-
-                  do j1 = 1,this%interp%N+1
-                    do i1 = 1,this%interp%N+1
-                      i2 = this%interp%N+2-i1
-                      j2 = this%interp%N+2-j1
-                      this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                        this%boundary(i2,j2,s2,e2,ivar,idir)
-                    enddo
-                  enddo
-
-                else if(flip == 3) then
-
-                  do j1 = 1,this%interp%N+1
-                    do i1 = 1,this%interp%N+1
-                      i2 = this%interp%N+2-j1
-                      j2 = i1
-                      this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                        this%boundary(i2,j2,s2,e2,ivar,idir)
-                    enddo
-                  enddo
-
-                else if(flip == 4) then
-
-                  do j1 = 1,this%interp%N+1
-                    do i1 = 1,this%interp%N+1
-                      i2 = j1
-                      j2 = i1
-                      this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                        this%boundary(i2,j2,s2,e2,ivar,idir)
-                    enddo
-                  enddo
-
-                endif
-
-              endif
-
-            endif
-
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i1,j1,s2,e2,ivar,idir)
+            enddo
           enddo
-        enddo
-      enddo
+
+        else if(flip == 1) then
+
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+
+              i2 = j1
+              j2 = this%interp%N+2-i1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
+
+            enddo
+          enddo
+
+        else if(flip == 2) then
+
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              i2 = this%interp%N+2-i1
+              j2 = this%interp%N+2-j1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
+            enddo
+          enddo
+
+        else if(flip == 3) then
+
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              i2 = this%interp%N+2-j1
+              j2 = i1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
+            enddo
+          enddo
+
+        else if(flip == 4) then
+
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              i2 = j1
+              j2 = i1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
+            enddo
+          enddo
+
+        endif
+
+      endif
+
+      !endif
+
     enddo
-    !$omp end target
 
     !call decomp%FinalizeMPIExchangeAsync()
 
@@ -407,87 +396,59 @@ contains
     integer :: iEl,iVar,i,j,k,ii
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
-    !$omp target
-    !$omp teams
-    !$omp loop collapse(5)
-    do ivar = 1,this%nVar
-      do iel = 1,this%nElem
-        do k = 1,this%interp%N+1
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              do ii = 1,this%N+1
-                ! Convert from physical to computational space
-                Fx = this%interior(ii,j,k,iEl,iVar,1)
-                Fy = this%interior(ii,j,k,iEl,iVar,2)
-                Fz = this%interior(ii,j,k,iEl,iVar,3)
-                Fc = this%geometry%dsdx%interior(ii,j,k,iEl,1,1,1)*Fx+ &
-                     this%geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
-                     this%geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
-                dfLoc = dfLoc+this%interp%dMatrix(ii,i)*Fc
-              enddo
-              dF(i,j,k,iel,ivar) = dfLoc
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        ! Convert from physical to computational space
+        Fx = this%interior(ii,j,k,iEl,iVar,1)
+        Fy = this%interior(ii,j,k,iEl,iVar,2)
+        Fz = this%interior(ii,j,k,iEl,iVar,3)
+        Fc = this%geometry%dsdx%interior(ii,j,k,iEl,1,1,1)*Fx+ &
+             this%geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
+             this%geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
+        dfLoc = dfLoc+this%interp%dMatrix(ii,i)*Fc
       enddo
+      dF(i,j,k,iel,ivar) = dfLoc
+
     enddo
 
-    !$omp loop collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              do ii = 1,this%N+1
-                ! Convert from physical to computational space
-                Fx = this%interior(i,ii,k,iEl,iVar,1)
-                Fy = this%interior(i,ii,k,iEl,iVar,2)
-                Fz = this%interior(i,ii,k,iEl,iVar,3)
-                Fc = this%geometry%dsdx%interior(i,ii,k,iEl,1,1,2)*Fx+ &
-                     this%geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
-                     this%geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
-                dfLoc = dfLoc+this%interp%dMatrix(ii,j)*Fc
-              enddo
-              dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        ! Convert from physical to computational space
+        Fx = this%interior(i,ii,k,iEl,iVar,1)
+        Fy = this%interior(i,ii,k,iEl,iVar,2)
+        Fz = this%interior(i,ii,k,iEl,iVar,3)
+        Fc = this%geometry%dsdx%interior(i,ii,k,iEl,1,1,2)*Fx+ &
+             this%geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
+             this%geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
+        dfLoc = dfLoc+this%interp%dMatrix(ii,j)*Fc
       enddo
+      dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)
+
     enddo
 
-    !$omp loop collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              do ii = 1,this%N+1
-                ! Convert from physical to computational space
-                Fx = this%interior(i,j,ii,iEl,iVar,1)
-                Fy = this%interior(i,j,ii,iEl,iVar,2)
-                Fz = this%interior(i,j,ii,iEl,iVar,3)
-                Fc = this%geometry%dsdx%interior(i,j,ii,iEl,1,1,3)*Fx+ &
-                     this%geometry%dsdx%interior(i,j,ii,iEl,1,2,3)*Fy+ &
-                     this%geometry%dsdx%interior(i,j,ii,iEl,1,3,3)*Fz
-                dfLoc = dfLoc+this%interp%dMatrix(ii,k)*Fc
-              enddo
-              dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)/this%geometry%J%interior(i,j,k,iEl,1)
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        ! Convert from physical to computational space
+        Fx = this%interior(i,j,ii,iEl,iVar,1)
+        Fy = this%interior(i,j,ii,iEl,iVar,2)
+        Fz = this%interior(i,j,ii,iEl,iVar,3)
+        Fc = this%geometry%dsdx%interior(i,j,ii,iEl,1,1,3)*Fx+ &
+             this%geometry%dsdx%interior(i,j,ii,iEl,1,2,3)*Fy+ &
+             this%geometry%dsdx%interior(i,j,ii,iEl,1,3,3)*Fz
+        dfLoc = dfLoc+this%interp%dMatrix(ii,k)*Fc
       enddo
+      dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)/this%geometry%J%interior(i,j,k,iEl,1)
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine MappedDivergence_MappedVector3D_t
 
@@ -504,99 +465,71 @@ contains
     integer :: iEl,iVar,i,j,k,ii
     real(prec) :: dfLoc,Fx,Fy,Fz,Fc
 
-    !$omp target
-    !$omp teams
-    !$omp loop collapse(5)
-    do ivar = 1,this%nVar
-      do iel = 1,this%nElem
-        do k = 1,this%interp%N+1
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              do ii = 1,this%N+1
-                ! Convert from physical to computational space
-                Fx = this%interior(ii,j,k,iEl,iVar,1)
-                Fy = this%interior(ii,j,k,iEl,iVar,2)
-                Fz = this%interior(ii,j,k,iEl,iVar,3)
-                Fc = this%geometry%dsdx%interior(ii,j,k,iEl,1,1,1)*Fx+ &
-                     this%geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
-                     this%geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
-                dfLoc = dfLoc+this%interp%dgMatrix(ii,i)*Fc
-              enddo
-              dfLoc = dfLoc+ &
-                      (this%interp%bMatrix(i,2)*this%boundaryNormal(j,k,3,iel,ivar)+ & ! east
-                       this%interp%bMatrix(i,1)*this%boundaryNormal(j,k,5,iel,ivar))/ & ! west
-                      this%interp%qweights(i)
-              dF(i,j,k,iel,ivar) = dfLoc
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        ! Convert from physical to computational space
+        Fx = this%interior(ii,j,k,iEl,iVar,1)
+        Fy = this%interior(ii,j,k,iEl,iVar,2)
+        Fz = this%interior(ii,j,k,iEl,iVar,3)
+        Fc = this%geometry%dsdx%interior(ii,j,k,iEl,1,1,1)*Fx+ &
+             this%geometry%dsdx%interior(ii,j,k,iEl,1,2,1)*Fy+ &
+             this%geometry%dsdx%interior(ii,j,k,iEl,1,3,1)*Fz
+        dfLoc = dfLoc+this%interp%dgMatrix(ii,i)*Fc
       enddo
+      dfLoc = dfLoc+ &
+              (this%interp%bMatrix(i,2)*this%boundaryNormal(j,k,3,iel,ivar)+ & ! east
+               this%interp%bMatrix(i,1)*this%boundaryNormal(j,k,5,iel,ivar))/ & ! west
+              this%interp%qweights(i)
+      dF(i,j,k,iel,ivar) = dfLoc
+
     enddo
 
-    !$omp loop collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              do ii = 1,this%N+1
-                ! Convert from physical to computational space
-                Fx = this%interior(i,ii,k,iEl,iVar,1)
-                Fy = this%interior(i,ii,k,iEl,iVar,2)
-                Fz = this%interior(i,ii,k,iEl,iVar,3)
-                Fc = this%geometry%dsdx%interior(i,ii,k,iEl,1,1,2)*Fx+ &
-                     this%geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
-                     this%geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
-                dfLoc = dfLoc+this%interp%dgMatrix(ii,j)*Fc
-              enddo
-              dfLoc = +dfLoc+ &
-                      (this%interp%bMatrix(j,2)*this%boundaryNormal(i,k,4,iel,ivar)+ & ! north
-                       this%interp%bMatrix(j,1)*this%boundaryNormal(i,k,2,iel,ivar))/ & ! south
-                      this%interp%qweights(j)
-              dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        ! Convert from physical to computational space
+        Fx = this%interior(i,ii,k,iEl,iVar,1)
+        Fy = this%interior(i,ii,k,iEl,iVar,2)
+        Fz = this%interior(i,ii,k,iEl,iVar,3)
+        Fc = this%geometry%dsdx%interior(i,ii,k,iEl,1,1,2)*Fx+ &
+             this%geometry%dsdx%interior(i,ii,k,iEl,1,2,2)*Fy+ &
+             this%geometry%dsdx%interior(i,ii,k,iEl,1,3,2)*Fz
+        dfLoc = dfLoc+this%interp%dgMatrix(ii,j)*Fc
       enddo
+      dfLoc = +dfLoc+ &
+              (this%interp%bMatrix(j,2)*this%boundaryNormal(i,k,4,iel,ivar)+ & ! north
+               this%interp%bMatrix(j,1)*this%boundaryNormal(i,k,2,iel,ivar))/ & ! south
+              this%interp%qweights(j)
+      dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)
+
     enddo
 
-    !$omp loop collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              do ii = 1,this%N+1
-                ! Convert from physical to computational space
-                Fx = this%interior(i,j,ii,iEl,iVar,1)
-                Fy = this%interior(i,j,ii,iEl,iVar,2)
-                Fz = this%interior(i,j,ii,iEl,iVar,3)
-                Fc = this%geometry%dsdx%interior(i,j,ii,iEl,1,1,3)*Fx+ &
-                     this%geometry%dsdx%interior(i,j,ii,iEl,1,2,3)*Fy+ &
-                     this%geometry%dsdx%interior(i,j,ii,iEl,1,3,3)*Fz
-                dfLoc = dfLoc+this%interp%dgMatrix(ii,k)*Fc
-              enddo
-              dfLoc = dfLoc+ &
-                      (this%interp%bMatrix(k,2)*this%boundaryNormal(i,j,6,iel,ivar)+ & ! top
-                       this%interp%bMatrix(k,1)*this%boundaryNormal(i,j,1,iel,ivar))/ & ! bottom
-                      this%interp%qweights(k)
-              dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)/this%geometry%J%interior(i,j,k,iEl,1)
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        ! Convert from physical to computational space
+        Fx = this%interior(i,j,ii,iEl,iVar,1)
+        Fy = this%interior(i,j,ii,iEl,iVar,2)
+        Fz = this%interior(i,j,ii,iEl,iVar,3)
+        Fc = this%geometry%dsdx%interior(i,j,ii,iEl,1,1,3)*Fx+ &
+             this%geometry%dsdx%interior(i,j,ii,iEl,1,2,3)*Fy+ &
+             this%geometry%dsdx%interior(i,j,ii,iEl,1,3,3)*Fz
+        dfLoc = dfLoc+this%interp%dgMatrix(ii,k)*Fc
       enddo
+      dfLoc = dfLoc+ &
+              (this%interp%bMatrix(k,2)*this%boundaryNormal(i,j,6,iel,ivar)+ & ! top
+               this%interp%bMatrix(k,1)*this%boundaryNormal(i,j,1,iel,ivar))/ & ! bottom
+              this%interp%qweights(k)
+      dF(i,j,k,iel,ivar) = (dF(i,j,k,iel,ivar)+dfLoc)/this%geometry%J%interior(i,j,k,iEl,1)
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine MappedDGDivergence_MappedVector3D_t
 

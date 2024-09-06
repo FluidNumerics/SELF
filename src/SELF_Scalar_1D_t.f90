@@ -137,23 +137,17 @@ contains
     integer :: iel
     integer :: ivar
 
-    !$omp target
-    !$omp teams loop collapse(2)
-    do iel = 1,this%nElem
-      do ivar = 1,this%nVar
+    do concurrent(iel=1:this%nElem,ivar=1:this%nVar)
+      ! Left side - we account for the -\hat{x} normal
+      this%avgboundary(1,iel,ivar) = 0.5_prec*( &
+                                     this%boundary(1,iel,ivar)+ &
+                                     this%extBoundary(1,iel,ivar))
 
-        ! Left side - we account for the -\hat{x} normal
-        this%avgboundary(1,iel,ivar) = 0.5_prec*( &
-                                       this%boundary(1,iel,ivar)+ &
-                                       this%extBoundary(1,iel,ivar))
-
-        ! Right side - we account for the +\hat{x} normal
-        this%avgboundary(2,iel,ivar) = 0.5_prec*( &
-                                       this%boundary(2,iel,ivar)+ &
-                                       this%extBoundary(2,iel,ivar))
-      enddo
+      ! Right side - we account for the +\hat{x} normal
+      this%avgboundary(2,iel,ivar) = 0.5_prec*( &
+                                     this%boundary(2,iel,ivar)+ &
+                                     this%extBoundary(2,iel,ivar))
     enddo
-    !$omp end target
 
   endsubroutine AverageSides_Scalar1D_t
 
@@ -164,23 +158,16 @@ contains
     integer :: ii,iel,ivar
     real(prec) :: fbl,fbr
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(2)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        fbl = 0.0_prec
-        fbr = 0.0_prec
-        !$omp loop bind(thread)
-        do ii = 1,this%N+1
-          fbl = fbl+this%interp%bMatrix(ii,1)*this%interior(ii,iel,ivar) ! West
-          fbr = fbr+this%interp%bMatrix(ii,2)*this%interior(ii,iel,ivar) ! East
-        enddo
-        this%boundary(1,iel,ivar) = fbl
-        this%boundary(2,iel,ivar) = fbr
+    do concurrent(iel=1:this%nElem,ivar=1:this%nVar)
+      fbl = 0.0_prec
+      fbr = 0.0_prec
+      do ii = 1,this%N+1
+        fbl = fbl+this%interp%bMatrix(ii,1)*this%interior(ii,iel,ivar) ! West
+        fbr = fbr+this%interp%bMatrix(ii,2)*this%interior(ii,iel,ivar) ! East
       enddo
+      this%boundary(1,iel,ivar) = fbl
+      this%boundary(2,iel,ivar) = fbr
     enddo
-    !$omp end target
-    !call self_hipblas_matrixop_1d(this % bMatrix,f,fTarget,2,this % N + 1,nvars*nelems,handle)
 
   endsubroutine BoundaryInterp_Scalar1D_t
 
@@ -192,21 +179,13 @@ contains
     integer :: iel,ivar,i,ii
     real(prec) :: floc
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%M+1
-          floc = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            floc = floc+this%interp%iMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
-          f(i,iel,ivar) = floc
-        enddo
+    do concurrent(i=1:this%M+1,iel=1:this%nElem,ivar=1:this%nVar)
+      floc = 0.0_prec
+      do ii = 1,this%N+1
+        floc = floc+this%interp%iMatrix(ii,i)*this%interior(ii,iel,ivar)
       enddo
+      f(i,iel,ivar) = floc
     enddo
-    !$omp end target
 
   endsubroutine GridInterp_Scalar1D_t
 
@@ -219,25 +198,13 @@ contains
     integer :: i,ii,iel,ivar
     real(prec) :: dfloc
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
-
-          dfloc = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
-          df(i,iel,ivar) = dfloc
-
-        enddo
+    do concurrent(i=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar)
+      dfloc = 0.0_prec
+      do ii = 1,this%N+1
+        dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
       enddo
+      df(i,iel,ivar) = dfloc
     enddo
-    !$omp end target
-
-    !call self_hipblas_matrixop_1d(this % dMatrix,f,df,this % N + 1,this % N + 1,nvars*nelems,handle)
 
   endsubroutine Derivative_Scalar1D_t
 

@@ -96,8 +96,6 @@ contains
 
     call gpuCheck(hipMemcpy(c_loc(this%boundary),this%boundary_gpu,sizeof(this%boundary),hipMemcpyDeviceToHost))
 
-    !$omp target
-    !$omp teams loop collapse(2)
     do ivar = 1,this%nvar
       do e1 = 1,mesh%nElem
 
@@ -131,7 +129,6 @@ contains
 
       enddo
     enddo
-    !$omp end target
     call gpuCheck(hipMemcpy(this%extboundary_gpu,c_loc(this%extboundary),sizeof(this%extboundary),hipMemcpyHostToDevice))
 
   endsubroutine SideExchange_MappedScalar1D

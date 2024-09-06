@@ -136,45 +136,34 @@ contains
     integer :: i,j,ii,idir,jdir,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
-    !$omp target
-    !$omp teams loop collapse(6)
-    do jdir = 1,3
-      do idir = 1,3
-        do ivar = 1,this%nvar
-          do iel = 1,this%nelem
-            do j = 1,this%N+1
-              do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  iel=1:this%nelem,ivar=1:this%nvar, &
+                  idir=1:3,jdir=1:3)
 
-                fbb = 0.0_prec
-                fbs = 0.0_prec
-                fbe = 0.0_prec
-                fbn = 0.0_prec
-                fbw = 0.0_prec
-                fbt = 0.0_prec
+      fbb = 0.0_prec
+      fbs = 0.0_prec
+      fbe = 0.0_prec
+      fbn = 0.0_prec
+      fbw = 0.0_prec
+      fbt = 0.0_prec
 
-                do ii = 1,this%N+1
-                  fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
-                  fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! South
-                  fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! East
-                  fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! North
-                  fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! West
-                  fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Top
-                enddo
-
-                this%boundary(i,j,1,iel,ivar,idir,jdir) = fbb
-                this%boundary(i,j,2,iel,ivar,idir,jdir) = fbs
-                this%boundary(i,j,3,iel,ivar,idir,jdir) = fbe
-                this%boundary(i,j,4,iel,ivar,idir,jdir) = fbn
-                this%boundary(i,j,5,iel,ivar,idir,jdir) = fbw
-                this%boundary(i,j,6,iel,ivar,idir,jdir) = fbt
-
-              enddo
-            enddo
-          enddo
-        enddo
+      do ii = 1,this%N+1
+        fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Bottom
+        fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! South
+        fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! East
+        fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir,jdir) ! North
+        fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir,jdir) ! West
+        fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir,jdir) ! Top
       enddo
+
+      this%boundary(i,j,1,iel,ivar,idir,jdir) = fbb
+      this%boundary(i,j,2,iel,ivar,idir,jdir) = fbs
+      this%boundary(i,j,3,iel,ivar,idir,jdir) = fbe
+      this%boundary(i,j,4,iel,ivar,idir,jdir) = fbn
+      this%boundary(i,j,5,iel,ivar,idir,jdir) = fbw
+      this%boundary(i,j,6,iel,ivar,idir,jdir) = fbt
+
     enddo
-    !$omp end target
 
   endsubroutine BoundaryInterp_Tensor3D_t
 
@@ -185,33 +174,26 @@ contains
     ! Local
     integer :: iEl,iVar,i,j,k
 
-    do iEl = 1,this%nElem
-      do iVar = 1,this%nVar
-        do k = 1,this%interp%N+1
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              det(i,j,k,iEl,iVar) = &
-                this%interior(i,j,k,iEl,iVar,1,1)* &
-                (this%interior(i,j,k,iEl,iVar,2,2)* &
-                 this%interior(i,j,k,iEl,iVar,3,3)- &
-                 this%interior(i,j,k,iEl,iVar,2,3)* &
-                 this%interior(i,j,k,iEl,iVar,3,2))- &
-                this%interior(i,j,k,iEl,iVar,2,1)* &
-                (this%interior(i,j,k,iEl,iVar,1,2)* &
-                 this%interior(i,j,k,iEl,iVar,3,3)- &
-                 this%interior(i,j,k,iEl,iVar,1,3)* &
-                 this%interior(i,j,k,iEl,iVar,3,2))+ &
-                this%interior(i,j,k,iEl,iVar,3,1)* &
-                (this%interior(i,j,k,iEl,iVar,1,2)* &
-                 this%interior(i,j,k,iEl,iVar,2,3)- &
-                 this%interior(i,j,k,iEl,iVar,1,3)* &
-                 this%interior(i,j,k,iEl,iVar,2,2))
+      det(i,j,k,iEl,iVar) = &
+        this%interior(i,j,k,iEl,iVar,1,1)* &
+        (this%interior(i,j,k,iEl,iVar,2,2)* &
+         this%interior(i,j,k,iEl,iVar,3,3)- &
+         this%interior(i,j,k,iEl,iVar,2,3)* &
+         this%interior(i,j,k,iEl,iVar,3,2))- &
+        this%interior(i,j,k,iEl,iVar,2,1)* &
+        (this%interior(i,j,k,iEl,iVar,1,2)* &
+         this%interior(i,j,k,iEl,iVar,3,3)- &
+         this%interior(i,j,k,iEl,iVar,1,3)* &
+         this%interior(i,j,k,iEl,iVar,3,2))+ &
+        this%interior(i,j,k,iEl,iVar,3,1)* &
+        (this%interior(i,j,k,iEl,iVar,1,2)* &
+         this%interior(i,j,k,iEl,iVar,2,3)- &
+         this%interior(i,j,k,iEl,iVar,1,3)* &
+         this%interior(i,j,k,iEl,iVar,2,2))
 
-            enddo
-          enddo
-        enddo
-      enddo
     enddo
 
   endsubroutine Determinant_Tensor3D_t
