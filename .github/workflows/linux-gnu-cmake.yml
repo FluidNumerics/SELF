@@ -107,7 +107,7 @@ jobs:
           sudo apt-get update -y && sudo apt-get install lcov
           lcov --capture \
           --initial \
-          --directory /home/runner/work/SELF \
+          --directory ./build/src/ \
           --gcov=${{ matrix.gcov }}  \
           --output-file /home/runner/work/initial.info
 
@@ -120,7 +120,7 @@ jobs:
         if: ${{ matrix.build_type == 'coverage' }}
         run: |
           lcov --capture \
-               --directory /home/runner/work/SELF \
+               --directory ./build/src/ \
                --gcov=${{ matrix.gcov }} \
                --output-file /home/runner/work/ctest-capture.info
 
