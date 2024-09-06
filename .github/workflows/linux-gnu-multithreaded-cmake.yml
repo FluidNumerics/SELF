@@ -107,8 +107,10 @@ jobs:
 
       - name: Run ctests
         run: |
-          cd build/test
-          ctest || ctest --rerun-failed --output-on-failure
+          export WORKSPACE=/home/runner/work/SELF/
+          ctest --verbose \
+                --output-on-failure \
+                --test-dir ./build/
 
       - name: codecov
         if: ${{ matrix.build_type == 'coverage' }}
