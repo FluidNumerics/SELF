@@ -269,24 +269,24 @@ contains
 
         !if(neighborRank == decomp%rankId) then
 
-          if(flip == 0) then
+        if(flip == 0) then
 
-            do i1 = 1,this%interp%N+1
-              this%extBoundary(i1,s1,e1,ivar,idir) = &
-                this%boundary(i1,s2,e2,ivar,idir)
-            enddo
+          do i1 = 1,this%interp%N+1
+            this%extBoundary(i1,s1,e1,ivar,idir) = &
+              this%boundary(i1,s2,e2,ivar,idir)
+          enddo
 
-          elseif(flip == 1) then
+        elseif(flip == 1) then
 
-            do i1 = 1,this%interp%N+1
-              i2 = this%interp%N+2-i1
-              this%extBoundary(i1,s1,e1,ivar,idir) = &
-                this%boundary(i2,s2,e2,ivar,idir)
-            enddo
-
-          endif
+          do i1 = 1,this%interp%N+1
+            i2 = this%interp%N+2-i1
+            this%extBoundary(i1,s1,e1,ivar,idir) = &
+              this%boundary(i2,s2,e2,ivar,idir)
+          enddo
 
         endif
+
+      endif
 
       !endif
 

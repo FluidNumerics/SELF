@@ -316,64 +316,64 @@ contains
 
         !if(neighborRank == decomp%rankId) then
 
-          if(flip == 0) then
+        if(flip == 0) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i1,j1,s2,e2,ivar,idir)
-              enddo
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i1,j1,s2,e2,ivar,idir)
             enddo
+          enddo
 
-          else if(flip == 1) then
+        else if(flip == 1) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
 
-                i2 = j1
-                j2 = this%interp%N+2-i1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i2,j2,s2,e2,ivar,idir)
+              i2 = j1
+              j2 = this%interp%N+2-i1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
 
-              enddo
             enddo
+          enddo
 
-          else if(flip == 2) then
+        else if(flip == 2) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                i2 = this%interp%N+2-i1
-                j2 = this%interp%N+2-j1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i2,j2,s2,e2,ivar,idir)
-              enddo
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              i2 = this%interp%N+2-i1
+              j2 = this%interp%N+2-j1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
             enddo
+          enddo
 
-          else if(flip == 3) then
+        else if(flip == 3) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                i2 = this%interp%N+2-j1
-                j2 = i1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i2,j2,s2,e2,ivar,idir)
-              enddo
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              i2 = this%interp%N+2-j1
+              j2 = i1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
             enddo
+          enddo
 
-          else if(flip == 4) then
+        else if(flip == 4) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                i2 = j1
-                j2 = i1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i2,j2,s2,e2,ivar,idir)
-              enddo
+          do j1 = 1,this%interp%N+1
+            do i1 = 1,this%interp%N+1
+              i2 = j1
+              j2 = i1
+              this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+                this%boundary(i2,j2,s2,e2,ivar,idir)
             enddo
-
-          endif
+          enddo
 
         endif
+
+      endif
 
       !endif
 

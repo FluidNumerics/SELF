@@ -336,86 +336,86 @@ contains
         !neighborRank = decomp%elemToRank(e2Global)
 
         !if(neighborRank == rankId) then
-          e2 = e2Global-offset
-          if(flip == 0) then
+        e2 = e2Global-offset
+        if(flip == 0) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i,j,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i,j,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 1) then
+        else if(flip == 1) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                i2 = this%interp%N+2-i
-                j2 = j
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              i2 = this%interp%N+2-i
+              j2 = j
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 2) then
+        else if(flip == 2) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                i2 = this%interp%N+2-i
-                j2 = this%interp%N+2-j
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              i2 = this%interp%N+2-i
+              j2 = this%interp%N+2-j
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 3) then
+        else if(flip == 3) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                i2 = i
-                j2 = this%interp%N+2-j
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              i2 = i
+              j2 = this%interp%N+2-j
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 4) then
+        else if(flip == 4) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(j,i,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(j,i,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 5) then
+        else if(flip == 5) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                i2 = this%interp%N+2-j
-                j2 = i
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              i2 = this%interp%N+2-j
+              j2 = i
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 6) then
+        else if(flip == 6) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                i2 = this%interp%N+2-j
-                j2 = this%interp%N+2-i
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              i2 = this%interp%N+2-j
+              j2 = this%interp%N+2-i
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
             enddo
+          enddo
 
-          else if(flip == 7) then
+        else if(flip == 7) then
 
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                i2 = j
-                j2 = this%interp%N+2-i
-                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-              enddo
+          do j = 1,this%interp%N+1
+            do i = 1,this%interp%N+1
+              i2 = j
+              j2 = this%interp%N+2-i
+              this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
             enddo
-
-          endif
+          enddo
 
         endif
+
+      endif
 
       !endif
 
