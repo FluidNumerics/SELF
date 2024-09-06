@@ -333,9 +333,9 @@ contains
 
       if(e2Global /= 0) then
 
-        neighborRank = decomp%elemToRank(e2Global)
+        !neighborRank = decomp%elemToRank(e2Global)
 
-        if(neighborRank == rankId) then
+        !if(neighborRank == rankId) then
           e2 = e2Global-offset
           if(flip == 0) then
 
@@ -417,7 +417,7 @@ contains
 
         endif
 
-      endif
+      !endif
 
     enddo
 

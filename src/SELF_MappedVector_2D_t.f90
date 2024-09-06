@@ -265,9 +265,9 @@ contains
 
       if(s2 > 0 .or. bcid == 0) then
 
-        neighborRank = decomp%elemToRank(e2Global)
+        !neighborRank = decomp%elemToRank(e2Global)
 
-        if(neighborRank == decomp%rankId) then
+        !if(neighborRank == decomp%rankId) then
 
           if(flip == 0) then
 
@@ -288,7 +288,7 @@ contains
 
         endif
 
-      endif
+      !endif
 
     enddo
 

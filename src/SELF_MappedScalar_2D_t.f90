@@ -259,9 +259,9 @@ contains
       bcid = mesh%sideInfo(5,s1,e1)
 
       if(e2Global /= 0) then
-        neighborRank = decomp%elemToRank(e2Global)
+        !neighborRank = decomp%elemToRank(e2Global)
 
-        if(neighborRank == decomp%rankId) then
+        !if(neighborRank == decomp%rankId) then
 
           if(flip == 0) then
             do i1 = 1,N+1
@@ -278,7 +278,7 @@ contains
 
           endif
 
-        endif
+        !endif
       endif
     enddo
 
