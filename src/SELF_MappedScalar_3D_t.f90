@@ -198,8 +198,6 @@ contains
   !   real(prec) :: extBuff(1:this%interp%N+1,1:this%interp%N+1)
 
   !   if(decomp%mpiEnabled) then
-  !     !$omp target
-  !     !$omp teams loop collapse(3)
   !     do ivar = 1,this%nvar
   !       do e1 = 1,this%nElem
   !         do s1 = 1,6
@@ -306,7 +304,6 @@ contains
   !         enddo
   !       enddo
   !     enddo
-  !     !$omp end target
 
   !   endif
 
@@ -328,106 +325,101 @@ contains
     rankId = decomp%rankId
     offset = decomp%offsetElem(rankId+1)
 
-    !$omp target
-    !$omp teams loop collapse(3)
-    do ivar = 1,this%nvar
-      do e1 = 1,mesh%nElem
-        do s1 = 1,6
-          e2Global = mesh%sideInfo(3,s1,e1)
-          s2 = mesh%sideInfo(4,s1,e1)/10
-          flip = mesh%sideInfo(4,s1,e1)-s2*10
+    do concurrent(s1=1:6,e1=1:mesh%nElem,ivar=1:this%nvar)
 
-          if(e2Global /= 0) then
+      e2Global = mesh%sideInfo(3,s1,e1)
+      s2 = mesh%sideInfo(4,s1,e1)/10
+      flip = mesh%sideInfo(4,s1,e1)-s2*10
 
-            neighborRank = decomp%elemToRank(e2Global)
+      if(e2Global /= 0) then
 
-            if(neighborRank == rankId) then
-              e2 = e2Global-offset
-              if(flip == 0) then
+        neighborRank = decomp%elemToRank(e2Global)
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i,j,s2,e2,ivar)
-                  enddo
-                enddo
+        if(neighborRank == rankId) then
+          e2 = e2Global-offset
+          if(flip == 0) then
 
-              else if(flip == 1) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i,j,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    i2 = this%interp%N+2-i
-                    j2 = j
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 1) then
 
-              else if(flip == 2) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-i
+                j2 = j
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    i2 = this%interp%N+2-i
-                    j2 = this%interp%N+2-j
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 2) then
 
-              else if(flip == 3) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-i
+                j2 = this%interp%N+2-j
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    i2 = i
-                    j2 = this%interp%N+2-j
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 3) then
 
-              else if(flip == 4) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = i
+                j2 = this%interp%N+2-j
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(j,i,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 4) then
 
-              else if(flip == 5) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(j,i,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    i2 = this%interp%N+2-j
-                    j2 = i
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 5) then
 
-              else if(flip == 6) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-j
+                j2 = i
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    i2 = this%interp%N+2-j
-                    j2 = this%interp%N+2-i
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 6) then
 
-              else if(flip == 7) then
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-j
+                j2 = this%interp%N+2-i
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+              enddo
+            enddo
 
-                do j = 1,this%interp%N+1
-                  do i = 1,this%interp%N+1
-                    i2 = j
-                    j2 = this%interp%N+2-i
-                    this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
-                  enddo
-                enddo
+          else if(flip == 7) then
 
-              endif
-
-            endif
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = j
+                j2 = this%interp%N+2-i
+                this%extBoundary(i,j,s1,e1,ivar) = this%boundary(i2,j2,s2,e2,ivar)
+              enddo
+            enddo
 
           endif
-        enddo
-      enddo
+
+        endif
+
+      endif
+
     enddo
-    !$omp end target
 
     !call decomp%FinalizeMPIExchangeAsync()
 
@@ -446,84 +438,47 @@ contains
     integer :: iEl,iVar,i,j,k,ii,idir
     real(prec) :: dfdx,ja
 
-    !$omp target
-    !$omp teams
-    !$omp loop bind(teams) collapse(6)
-    do idir = 1,3
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do k = 1,this%interp%N+1
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                dfdx = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  ! dsdx(j,i) is contravariant vector i, component j
-                  ja = this%geometry%dsdx%interior(ii,j,k,iel,1,idir,1)
-                  dfdx = dfdx+this%interp%dMatrix(ii,i)* &
-                         this%interior(ii,j,k,iel,ivar)*ja
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ! dsdx(j,i) is contravariant vector i, component j
+        ja = this%geometry%dsdx%interior(ii,j,k,iel,1,idir,1)
+        dfdx = dfdx+this%interp%dMatrix(ii,i)* &
+               this%interior(ii,j,k,iel,ivar)*ja
 
-                enddo
-                df(i,j,k,iel,ivar,idir) = dfdx
-
-              enddo
-            enddo
-          enddo
-        enddo
       enddo
+      df(i,j,k,iel,ivar,idir) = dfdx
+
     enddo
 
-    !$omp loop bind(teams) collapse(5)
-    do idir = 1,3
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do k = 1,this%interp%N+1
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                dfdx = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  ja = this%geometry%dsdx%interior(i,ii,k,iel,1,idir,2)
-                  dfdx = dfdx+this%interp%dMatrix(ii,j)* &
-                         this%interior(i,ii,k,iel,ivar)*ja
-                enddo
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
-
-              enddo
-            enddo
-          enddo
-        enddo
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ja = this%geometry%dsdx%interior(i,ii,k,iel,1,idir,2)
+        dfdx = dfdx+this%interp%dMatrix(ii,j)* &
+               this%interior(i,ii,k,iel,ivar)*ja
       enddo
+      df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
+
     enddo
 
-    !$omp loop bind(teams) collapse(5)
-    do idir = 1,3
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do k = 1,this%interp%N+1
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                dfdx = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  ja = this%geometry%dsdx%interior(i,j,ii,iel,1,idir,3)
-                  dfdx = dfdx+this%interp%dMatrix(ii,k)* &
-                         this%interior(i,j,ii,iel,ivar)*ja
-                enddo
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/ &
-                                          this%geometry%J%interior(i,j,k,iEl,1)
-
-              enddo
-            enddo
-          enddo
-        enddo
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ja = this%geometry%dsdx%interior(i,j,ii,iel,1,idir,3)
+        dfdx = dfdx+this%interp%dMatrix(ii,k)* &
+               this%interior(i,j,ii,iel,ivar)*ja
       enddo
+      df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/ &
+                                this%geometry%J%interior(i,j,k,iEl,1)
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine MappedGradient_MappedScalar3D_t
 
@@ -539,104 +494,68 @@ contains
     integer :: iEl,iVar,i,j,k,ii,idir
     real(prec) :: dfdx,jaf,bfl,bfr
 
-    !$omp target
-    !$omp teams
-    !$omp loop bind(teams) collapse(6)
-    do idir = 1,3
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do k = 1,this%interp%N+1
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                dfdx = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  ! dsdx(j,i) is contravariant vector i, component j
-                  jaf = this%geometry%dsdx%interior(ii,j,k,iel,1,idir,1)* &
-                        this%interior(ii,j,k,iel,ivar)
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        ! dsdx(j,i) is contravariant vector i, component j
+        jaf = this%geometry%dsdx%interior(ii,j,k,iel,1,idir,1)* &
+              this%interior(ii,j,k,iel,ivar)
 
-                  dfdx = dfdx+this%interp%dgMatrix(ii,i)*jaf
-                enddo
-                bfl = this%avgboundary(j,k,5,iel,ivar)* &
-                      this%geometry%dsdx%boundary(j,k,5,iel,1,idir,1) ! west
-                bfr = this%avgboundary(j,k,3,iel,ivar)* &
-                      this%geometry%dsdx%boundary(j,k,3,iel,1,idir,1) ! east
-                df(i,j,k,iel,ivar,idir) = dfdx+ &
-                                          (this%interp%bMatrix(i,1)*bfl+ &
-                                           this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
-
-              enddo
-            enddo
-          enddo
-        enddo
+        dfdx = dfdx+this%interp%dgMatrix(ii,i)*jaf
       enddo
+      bfl = this%avgboundary(j,k,5,iel,ivar)* &
+            this%geometry%dsdx%boundary(j,k,5,iel,1,idir,1) ! west
+      bfr = this%avgboundary(j,k,3,iel,ivar)* &
+            this%geometry%dsdx%boundary(j,k,3,iel,1,idir,1) ! east
+      df(i,j,k,iel,ivar,idir) = dfdx+ &
+                                (this%interp%bMatrix(i,1)*bfl+ &
+                                 this%interp%bMatrix(i,2)*bfr)/this%interp%qweights(i)
+
     enddo
 
-    !$omp loop bind(teams) collapse(6)
-    do idir = 1,3
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do k = 1,this%interp%N+1
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                dfdx = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  jaf = this%geometry%dsdx%interior(i,ii,k,iel,1,idir,2)* &
-                        this%interior(i,ii,k,iel,ivar)
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        jaf = this%geometry%dsdx%interior(i,ii,k,iel,1,idir,2)* &
+              this%interior(i,ii,k,iel,ivar)
 
-                  dfdx = dfdx+this%interp%dgMatrix(ii,j)*jaf
-                enddo
-                bfl = this%avgboundary(i,k,2,iel,ivar)* &
-                      this%geometry%dsdx%boundary(i,k,2,iel,1,idir,2) ! south
-                bfr = this%avgboundary(i,k,4,iel,ivar)* &
-                      this%geometry%dsdx%boundary(i,k,4,iel,1,idir,2) ! north
-                dfdx = dfdx+(this%interp%bMatrix(j,1)*bfl+ &
-                             this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
-
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
-              enddo
-            enddo
-          enddo
-        enddo
+        dfdx = dfdx+this%interp%dgMatrix(ii,j)*jaf
       enddo
+      bfl = this%avgboundary(i,k,2,iel,ivar)* &
+            this%geometry%dsdx%boundary(i,k,2,iel,1,idir,2) ! south
+      bfr = this%avgboundary(i,k,4,iel,ivar)* &
+            this%geometry%dsdx%boundary(i,k,4,iel,1,idir,2) ! north
+      dfdx = dfdx+(this%interp%bMatrix(j,1)*bfl+ &
+                   this%interp%bMatrix(j,2)*bfr)/this%interp%qweights(j)
+
+      df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)
+
     enddo
 
-    !$omp loop bind(teams) collapse(6)
-    do idir = 1,3
-      do iVar = 1,this%nVar
-        do iEl = 1,this%nElem
-          do k = 1,this%interp%N+1
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                dfdx = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  jaf = this%geometry%dsdx%interior(i,j,ii,iel,1,idir,3)* &
-                        this%interior(i,j,ii,iel,ivar)
-                  dfdx = dfdx+this%interp%dgMatrix(ii,k)*jaf
-                enddo
-                bfl = this%avgboundary(i,j,1,iel,ivar)* &
-                      this%geometry%dsdx%boundary(i,j,1,iel,1,idir,3) ! bottom
-                bfr = this%avgboundary(i,j,6,iel,ivar)* &
-                      this%geometry%dsdx%boundary(i,j,6,iel,1,idir,3) ! top
-                dfdx = dfdx+(this%interp%bMatrix(k,1)*bfl+ &
-                             this%interp%bMatrix(k,2)*bfr)/this%interp%qweights(k)
-
-                df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/ &
-                                          this%geometry%J%interior(i,j,k,iEl,1)
-
-              enddo
-            enddo
-          enddo
-        enddo
+      dfdx = 0.0_prec
+      do ii = 1,this%N+1
+        jaf = this%geometry%dsdx%interior(i,j,ii,iel,1,idir,3)* &
+              this%interior(i,j,ii,iel,ivar)
+        dfdx = dfdx+this%interp%dgMatrix(ii,k)*jaf
       enddo
+      bfl = this%avgboundary(i,j,1,iel,ivar)* &
+            this%geometry%dsdx%boundary(i,j,1,iel,1,idir,3) ! bottom
+      bfr = this%avgboundary(i,j,6,iel,ivar)* &
+            this%geometry%dsdx%boundary(i,j,6,iel,1,idir,3) ! top
+      dfdx = dfdx+(this%interp%bMatrix(k,1)*bfl+ &
+                   this%interp%bMatrix(k,2)*bfr)/this%interp%qweights(k)
+
+      df(i,j,k,iel,ivar,idir) = (df(i,j,k,iel,ivar,idir)+dfdx)/ &
+                                this%geometry%J%interior(i,j,k,iEl,1)
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine MappedDGGradient_MappedScalar3D_t
 

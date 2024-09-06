@@ -175,39 +175,24 @@ contains
     integer :: i,j,k,ii,jj,kk,iel,ivar,idir
     real(prec) :: fi,fij,fijk
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(6)
-    do idir = 1,3
-      do ivar = 1,this%nvar
-        do iel = 1,this%nelem
-          do k = 1,this%M+1
-            do j = 1,this%M+1
-              do i = 1,this%M+1
+    do concurrent(i=1:this%M+1,j=1:this%M+1, &
+                  k=1:this%M+1,iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-                fijk = 0.0_prec
-                !$omp loop bind(thread)
-                do kk = 1,this%N+1
-                  fij = 0.0_prec
-                  !$omp loop bind(thread)
-                  do jj = 1,this%N+1
-                    fi = 0.0_prec
-                    !$omp loop bind(thread)
-                    do ii = 1,this%N+1
-                      fi = fi+this%interior(ii,jj,kk,iel,ivar,idir)*this%interp%iMatrix(ii,i)
-                    enddo
-                    fij = fij+fi*this%interp%iMatrix(jj,j)
-                  enddo
-                  fijk = fijk+fij*this%interp%iMatrix(kk,k)
-                enddo
-                f(i,j,k,iel,ivar,idir) = fijk
-
-              enddo
-            enddo
+      fijk = 0.0_prec
+      do kk = 1,this%N+1
+        fij = 0.0_prec
+        do jj = 1,this%N+1
+          fi = 0.0_prec
+          do ii = 1,this%N+1
+            fi = fi+this%interior(ii,jj,kk,iel,ivar,idir)*this%interp%iMatrix(ii,i)
           enddo
+          fij = fij+fi*this%interp%iMatrix(jj,j)
         enddo
+        fijk = fijk+fij*this%interp%iMatrix(kk,k)
       enddo
+      f(i,j,k,iel,ivar,idir) = fijk
+
     enddo
-    !$omp end target
 
   endsubroutine GridInterp_Vector3D_t
 
@@ -221,24 +206,13 @@ contains
     integer :: i,j
     integer :: idir
 
-    !$omp target
-    !$omp teams loop collapse(6)
-    do idir = 1,3
-      do ivar = 1,this%nVar
-        do iel = 1,this%nElem
-          do iside = 1,6
-            do j = 1,this%interp%N+1
-              do i = 1,this%interp%N+1
-                this%boundary(i,j,iside,iel,ivar,idir) = 0.5_prec*( &
-                                                         this%boundary(i,j,iside,iel,ivar,idir)+ &
-                                                         this%extBoundary(i,j,iside,iel,ivar,idir))
-              enddo
-            enddo
-          enddo
-        enddo
-      enddo
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  iside=1:6,iel=1:this%nelem,ivar=1:this%nvar, &
+                  idir=1:3)
+      this%boundary(i,j,iside,iel,ivar,idir) = 0.5_prec*( &
+                                               this%boundary(i,j,iside,iel,ivar,idir)+ &
+                                               this%extBoundary(i,j,iside,iel,ivar,idir))
     enddo
-    !$omp end target
 
   endsubroutine AverageSides_Vector3D_t
 
@@ -249,43 +223,32 @@ contains
     integer :: i,j,ii,idir,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(5)
-    do idir = 1,3
-      do ivar = 1,this%nvar
-        do iel = 1,this%nelem
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  iel=1:this%nelem,ivar=1:this%nvar,idir=1:3)
 
-              fbb = 0.0_prec
-              fbs = 0.0_prec
-              fbe = 0.0_prec
-              fbn = 0.0_prec
-              fbw = 0.0_prec
-              fbt = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir) ! Bottom
-                fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir) ! South
-                fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir) ! East
-                fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir) ! North
-                fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir) ! West
-                fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir) ! Top
-              enddo
-
-              this%boundary(i,j,1,iel,ivar,idir) = fbb
-              this%boundary(i,j,2,iel,ivar,idir) = fbs
-              this%boundary(i,j,3,iel,ivar,idir) = fbe
-              this%boundary(i,j,4,iel,ivar,idir) = fbn
-              this%boundary(i,j,5,iel,ivar,idir) = fbw
-              this%boundary(i,j,6,iel,ivar,idir) = fbt
-
-            enddo
-          enddo
-        enddo
+      fbb = 0.0_prec
+      fbs = 0.0_prec
+      fbe = 0.0_prec
+      fbn = 0.0_prec
+      fbw = 0.0_prec
+      fbt = 0.0_prec
+      do ii = 1,this%N+1
+        fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar,idir) ! Bottom
+        fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar,idir) ! South
+        fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar,idir) ! East
+        fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar,idir) ! North
+        fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar,idir) ! West
+        fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar,idir) ! Top
       enddo
+
+      this%boundary(i,j,1,iel,ivar,idir) = fbb
+      this%boundary(i,j,2,iel,ivar,idir) = fbs
+      this%boundary(i,j,3,iel,ivar,idir) = fbe
+      this%boundary(i,j,4,iel,ivar,idir) = fbn
+      this%boundary(i,j,5,iel,ivar,idir) = fbw
+      this%boundary(i,j,6,iel,ivar,idir) = fbt
+
     enddo
-    !$omp end target
 
   endsubroutine BoundaryInterp_Vector3D_t
 
@@ -297,35 +260,23 @@ contains
     integer    :: i,j,k,ii,idir,iel,ivar
     real(prec) :: dfds1,dfds2,dfds3
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(6)
-    do idir = 1,3
-      do ivar = 1,this%nvar
-        do iel = 1,this%nelem
-          do k = 1,this%N+1
-            do j = 1,this%N+1
-              do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar, &
+                  idir=1:3)
 
-                dfds1 = 0.0_prec
-                dfds2 = 0.0_prec
-                dfds3 = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,idir)
-                  dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,idir)
-                  dfds3 = dfds3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,idir)
-                enddo
-                df(i,j,k,iel,ivar,idir,1) = dfds1
-                df(i,j,k,iel,ivar,idir,2) = dfds2
-                df(i,j,k,iel,ivar,idir,3) = dfds3
-
-              enddo
-            enddo
-          enddo
-        enddo
+      dfds1 = 0.0_prec
+      dfds2 = 0.0_prec
+      dfds3 = 0.0_prec
+      do ii = 1,this%N+1
+        dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,idir)
+        dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,idir)
+        dfds3 = dfds3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,idir)
       enddo
+      df(i,j,k,iel,ivar,idir,1) = dfds1
+      df(i,j,k,iel,ivar,idir,2) = dfds2
+      df(i,j,k,iel,ivar,idir,3) = dfds3
+
     enddo
-    !$omp end target
 
   endsubroutine Gradient_Vector3D_t
 
@@ -338,54 +289,32 @@ contains
     real(prec) :: dfds1,dfds2,dfds3
     real(prec) :: df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:3,1:3)
 
-    !$omp target
-    !$omp teams
-    !$omp loop bind(teams) collapse(6)
-    do idir = 1,3
-      do ivar = 1,this%nvar
-        do iel = 1,this%nelem
-          do k = 1,this%N+1
-            do j = 1,this%N+1
-              do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar, &
+                  idir=1:3)
 
-                dfds1 = 0.0_prec
-                dfds2 = 0.0_prec
-                dfds3 = 0.0_prec
-                !$omp loop bind(thread)
-                do ii = 1,this%N+1
-                  dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,idir)
-                  dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,idir)
-                  dfds3 = dfds3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,idir)
-                enddo
-                df(i,j,k,iel,ivar,idir,1) = dfds1
-                df(i,j,k,iel,ivar,idir,2) = dfds2
-                df(i,j,k,iel,ivar,idir,3) = dfds3
-
-              enddo
-            enddo
-          enddo
-        enddo
+      dfds1 = 0.0_prec
+      dfds2 = 0.0_prec
+      dfds3 = 0.0_prec
+      do ii = 1,this%N+1
+        dfds1 = dfds1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,idir)
+        dfds2 = dfds2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,idir)
+        dfds3 = dfds3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,idir)
       enddo
+      df(i,j,k,iel,ivar,idir,1) = dfds1
+      df(i,j,k,iel,ivar,idir,2) = dfds2
+      df(i,j,k,iel,ivar,idir,3) = dfds3
+
     enddo
 
-    !$omp loop collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              curlf(i,j,k,iel,ivar,1) = (df(i,j,k,iel,ivar,3,2)-df(i,j,k,iel,ivar,2,3))
-              curlf(i,j,k,iel,ivar,2) = (df(i,j,k,iel,ivar,1,3)-df(i,j,k,iel,ivar,3,1))
-              curlf(i,j,k,iel,ivar,3) = (df(i,j,k,iel,ivar,2,1)-df(i,j,k,iel,ivar,1,2))
+      curlf(i,j,k,iel,ivar,1) = (df(i,j,k,iel,ivar,3,2)-df(i,j,k,iel,ivar,2,3))
+      curlf(i,j,k,iel,ivar,2) = (df(i,j,k,iel,ivar,1,3)-df(i,j,k,iel,ivar,3,1))
+      curlf(i,j,k,iel,ivar,3) = (df(i,j,k,iel,ivar,2,1)-df(i,j,k,iel,ivar,1,2))
 
-            enddo
-          enddo
-        enddo
-      enddo
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine Curl_Vector3D_t
 
@@ -397,69 +326,38 @@ contains
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: dfLoc
 
-    !$omp target
-    !$omp teams
-    !$omp loop bind(teams) collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,1)
-              enddo
-              dF(i,j,k,iel,ivar) = dfLoc
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar,1)
       enddo
+      dF(i,j,k,iel,ivar) = dfLoc
+
     enddo
 
-    !$omp loop bind(teams) collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                dfLoc = dfLoc+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,2)
-              enddo
-              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        dfLoc = dfLoc+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar,2)
       enddo
+      dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
+
     enddo
 
-    !$omp loop bind(teams) collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              dfLoc = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                dfLoc = dfLoc+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,3)
-              enddo
-              dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
-
-            enddo
-          enddo
-        enddo
+      dfLoc = 0.0_prec
+      do ii = 1,this%N+1
+        dfLoc = dfLoc+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar,3)
       enddo
+      dF(i,j,k,iel,ivar) = dF(i,j,k,iel,ivar)+dfLoc
+
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine Divergence_Vector3D_t
 

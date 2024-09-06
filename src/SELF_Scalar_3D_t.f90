@@ -137,42 +137,33 @@ contains
     integer :: i,j,ii,iel,ivar
     real(prec) :: fbb,fbs,fbe,fbn,fbw,fbt
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(4)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do j = 1,this%N+1
-          do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  iel=1:this%nelem,ivar=1:this%nvar)
 
-            fbb = 0.0_prec
-            fbs = 0.0_prec
-            fbe = 0.0_prec
-            fbn = 0.0_prec
-            fbw = 0.0_prec
-            fbt = 0.0_prec
+      fbb = 0.0_prec
+      fbs = 0.0_prec
+      fbe = 0.0_prec
+      fbn = 0.0_prec
+      fbw = 0.0_prec
+      fbt = 0.0_prec
 
-            !$omp loop bind(thread)
-            do ii = 1,this%N+1
-              fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar) ! Bottom
-              fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar) ! South
-              fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar) ! East
-              fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar) ! North
-              fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar) ! West
-              fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar) ! Top
-            enddo
-
-            this%boundary(i,j,1,iel,ivar) = fbb
-            this%boundary(i,j,2,iel,ivar) = fbs
-            this%boundary(i,j,3,iel,ivar) = fbe
-            this%boundary(i,j,4,iel,ivar) = fbn
-            this%boundary(i,j,5,iel,ivar) = fbw
-            this%boundary(i,j,6,iel,ivar) = fbt
-
-          enddo
-        enddo
+      do ii = 1,this%N+1
+        fbb = fbb+this%interp%bMatrix(ii,1)*this%interior(i,j,ii,iel,ivar) ! Bottom
+        fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,j,iel,ivar) ! South
+        fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,j,iel,ivar) ! East
+        fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,j,iel,ivar) ! North
+        fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,j,iel,ivar) ! West
+        fbt = fbt+this%interp%bMatrix(ii,2)*this%interior(i,j,ii,iel,ivar) ! Top
       enddo
+
+      this%boundary(i,j,1,iel,ivar) = fbb
+      this%boundary(i,j,2,iel,ivar) = fbs
+      this%boundary(i,j,3,iel,ivar) = fbe
+      this%boundary(i,j,4,iel,ivar) = fbn
+      this%boundary(i,j,5,iel,ivar) = fbw
+      this%boundary(i,j,6,iel,ivar) = fbt
+
     enddo
-    !$omp end target
 
   endsubroutine BoundaryInterp_Scalar3D_t
 
@@ -185,22 +176,12 @@ contains
     integer :: ivar
     integer :: i,j
 
-    !$omp target
-    !$omp teams loop collapse(5)
-    do ivar = 1,this%nVar
-      do iel = 1,this%nElem
-        do iside = 1,6
-          do j = 1,this%interp%N+1
-            do i = 1,this%interp%N+1
-              this%avgboundary(i,j,iside,iel,ivar) = 0.5_prec*( &
-                                                     this%boundary(i,j,iside,iel,ivar)+ &
-                                                     this%extBoundary(i,j,iside,iel,ivar))
-            enddo
-          enddo
-        enddo
-      enddo
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  iside=1:6,iel=1:this%nelem,ivar=1:this%nvar)
+      this%avgboundary(i,j,iside,iel,ivar) = 0.5_prec*( &
+                                             this%boundary(i,j,iside,iel,ivar)+ &
+                                             this%extBoundary(i,j,iside,iel,ivar))
     enddo
-    !$omp end target
 
   endsubroutine AverageSides_Scalar3D_t
 
@@ -213,41 +194,24 @@ contains
     integer :: i,j,k,ii,jj,kk,iel,ivar
     real(prec) :: fi,fij,fijk
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%M+1
-          do j = 1,this%M+1
-            do i = 1,this%M+1
+    do concurrent(i=1:this%M+1,j=1:this%M+1, &
+                  k=1:this%M+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              fijk = 0.0_prec
-              !$omp loop bind(thread)
-              do kk = 1,this%N+1
-                fij = 0.0_prec
-                !$omp loop bind(thread)
-                do jj = 1,this%N+1
-                  fi = 0.0_prec
-                  !$omp loop bind(thread)
-                  do ii = 1,this%N+1
-                    fi = fi+this%interior(ii,jj,kk,iel,ivar)*this%interp%iMatrix(ii,i)
-                  enddo
-                  fij = fij+fi*this%interp%iMatrix(jj,j)
-                enddo
-                fijk = fijk+fij*this%interp%iMatrix(kk,k)
-              enddo
-              f(i,j,k,iel,ivar) = fijk
-
-            enddo
+      fijk = 0.0_prec
+      do kk = 1,this%N+1
+        fij = 0.0_prec
+        do jj = 1,this%N+1
+          fi = 0.0_prec
+          do ii = 1,this%N+1
+            fi = fi+this%interior(ii,jj,kk,iel,ivar)*this%interp%iMatrix(ii,i)
           enddo
+          fij = fij+fi*this%interp%iMatrix(jj,j)
         enddo
+        fijk = fijk+fij*this%interp%iMatrix(kk,k)
       enddo
-    enddo
-    !$omp end target
+      f(i,j,k,iel,ivar) = fijk
 
-    ! call self_hipblas_matrixop_dim1_3d(this % iMatrix,f,fInt1,this % N,this % M,nvars,nelems,handle)
-    ! call self_hipblas_matrixop_dim2_3d(this % iMatrix,fInt1,fInt2,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
-    ! call self_hipblas_matrixop_dim3_3d(this % iMatrix,fInt2,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
+    enddo
 
   endsubroutine GridInterp_Scalar3D_t
 
@@ -259,40 +223,22 @@ contains
     integer    :: i,j,k,ii,iel,ivar
     real(prec) :: df1,df2,df3
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(5)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do k = 1,this%N+1
-          do j = 1,this%N+1
-            do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,j=1:this%N+1, &
+                  k=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
 
-              df1 = 0.0_prec
-              df2 = 0.0_prec
-              df3 = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                df1 = df1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar)
-                df2 = df2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar)
-                df3 = df3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar)
-              enddo
-              df(i,j,k,iel,ivar,1) = df1
-              df(i,j,k,iel,ivar,2) = df2
-              df(i,j,k,iel,ivar,3) = df3
-            enddo
-          enddo
-        enddo
+      df1 = 0.0_prec
+      df2 = 0.0_prec
+      df3 = 0.0_prec
+      do ii = 1,this%N+1
+        df1 = df1+this%interp%dMatrix(ii,i)*this%interior(ii,j,k,iel,ivar)
+        df2 = df2+this%interp%dMatrix(ii,j)*this%interior(i,ii,k,iel,ivar)
+        df3 = df3+this%interp%dMatrix(ii,k)*this%interior(i,j,ii,iel,ivar)
       enddo
-    enddo
-    !$omp end target
+      df(i,j,k,iel,ivar,1) = df1
+      df(i,j,k,iel,ivar,2) = df2
+      df(i,j,k,iel,ivar,3) = df3
 
-    ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,1)
-    ! call self_hipblas_matrixop_dim1_3d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
-    ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,2)
-    ! call self_hipblas_matrixop_dim2_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! dfloc(1:,1:,1:,1:,1:) => df(1:,1:,1:,1:,1:,3)
-    ! call self_hipblas_matrixop_dim3_3d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! dfloc => null()
+    enddo
 
   endsubroutine Gradient_Scalar3D_t
 

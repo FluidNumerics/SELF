@@ -136,9 +136,6 @@ contains
 
     u = this%u
     nu = this%nu
-    !$omp target
-    !$omp teams
-    !$omp loop collapse(3)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do i = 1,this%solution%interp%N+1
@@ -151,8 +148,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine fluxmethod_advection_diffusion_1d_t
 
@@ -169,9 +164,6 @@ contains
     real(prec) :: fin,fout,dfavg,u,nhat
 
     u = this%u
-    !$omp target
-    !$omp teams
-    !$omp loop collapse(3)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do iside = 1,2
@@ -193,8 +185,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end teams
-    !$omp end target
 
   endsubroutine riemannsolver_advection_diffusion_1d_t
 

@@ -137,9 +137,6 @@ module SELF_Model
 
     procedure :: Euler_timeIntegrator
 
-    ! Adams-Bashforth Methods
-    procedure(ResizePrevSol),deferred :: ResizePrevSol
-
     ! Runge-Kutta methods
     procedure :: LowStorageRK2_timeIntegrator
     procedure(UpdateGRK),deferred :: UpdateGRK2
@@ -186,15 +183,6 @@ module SELF_Model
       class(Model),intent(inout) :: this
       real(prec),intent(in) :: tn
     endsubroutine SELF_timeIntegrator
-  endinterface
-
-  interface
-    subroutine ResizePrevSol(this,m)
-      import Model
-      implicit none
-      class(Model),intent(inout) :: this
-      integer,intent(in) :: m
-    endsubroutine ResizePrevSol
   endinterface
 
   interface
@@ -698,57 +686,5 @@ contains
     this%dt = dtLim
 
   endsubroutine LowStorageRK4_timeIntegrator
-
-!  SUBROUTINE CrankNicholson_timeIntegrator(this,tn)
-!    !! Solves the equation formed by the Crank Nicholson method
-!    !! using JFNK, where the Krylov solver is chosen to be
-!    !! BiCG-Stabilized.
-!    IMPLICIT NONE
-!    CLASS(Model),INTENT(inout) :: this
-!    REAL(prec), INTENT(in) :: tn
-!    ! Local
-!    INTEGER :: m
-!    REAL(prec) :: tRemain
-!    REAL(prec) :: dtLim
-!    REAL(prec) :: t0
-!
-!    dtLim = this % dt ! Get the max time step size from the dt attribute
-!    DO WHILE (this % t < tn)
-!
-!      t0 = this % t
-!      tRemain = tn - this % t
-!      this % dt = MIN( dtLim, tRemain )
-!      ! Copy existing solution to old solution
-!
-!      ! Evaluate tendency with old solution
-!
-!      ! Calculate r_k (fixed) -> Store in PrevSol
-!
-!      ! Calculate Fk(m-1)
-!
-!      DO m = 1, SELF_maxJFNKiterations
-!
-!
-!        ! Linear iterations on Jk(m-1) dS(m) = -Fk(m-1)
-!        CALL this % JFNKLinearSolver(t0+dt) ! Use PrevSol to store Fk(m-1), sk(m-1), dSm, rk
-!                                            ! Linear solver updates
-!                                            ! dSm, sk(m), and Fk(m)
-!
-!        ! Check for convergence
-!        !  >> global reduction on dSm (either l2 or lmax)
-!        !  >> global reduction on Fkm1 (either l2 or lmax)
-!        !
-!        !    -> Both done as reduction on PrevSol attribute - reduction over grid, not variables
-!        !
-!
-!      ENDDO
-!
-!      this % t = t0 + this % dt
-!
-!    ENDDO
-!
-!    this % dt = dtLim
-!
-!  END SUBROUTINE CrankNicholson_timeIntegrator
 
 endmodule SELF_Model

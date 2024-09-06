@@ -86,8 +86,6 @@ contains
     ! local
     integer :: i,j,ivar,iEl,k,e2
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
         do k = 1,6 ! Loop over all sides
@@ -96,7 +94,6 @@ contains
           e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
           if(e2 == 0) then
-            !$omp loop bind(parallel) collapse(2)
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature point
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
                 this%solution%extBoundary(i,j,k,iEl,iVar) = 0.0_prec
@@ -106,7 +103,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine setboundarycondition_advection_diffusion_3d_t
 
@@ -121,8 +117,6 @@ contains
     ! local
     integer :: i,j,ivar,iEl,k,e2
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem ! Loop over all elements
         do k = 1,6 ! Loop over all sides
@@ -131,7 +125,6 @@ contains
           e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
           if(e2 == 0) then
-            !$omp loop bind(parallel) collapse(2)
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature point
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
                 this%solutionGradient%extBoundary(i,j,k,iEl,iVar,1:3) = &
@@ -142,7 +135,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine setgradientboundarycondition_advection_diffusion_3d_t
 
@@ -161,8 +153,6 @@ contains
     v = this%v
     w = this%w
     nu = this%nu
-    !$omp target
-    !$omp teams loop collapse(5)
     do ivar = 1,this%solution%nvar
       do iel = 1,this%mesh%nelem
         do k = 1,this%solution%interp%N+1
@@ -183,7 +173,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine fluxmethod_advection_diffusion_3d_t
 
@@ -201,8 +190,6 @@ contains
     real(prec) :: fin,fout,dfdn,un
     real(prec) :: nx,ny,nz,nmag
 
-    !$omp target
-    !$omp teams loop collapse(4)
     do ivar = 1,this%solution%nvar
       do iEl = 1,this%solution%nElem
         do k = 1,6
@@ -232,7 +219,6 @@ contains
         enddo
       enddo
     enddo
-    !$omp end target
 
   endsubroutine riemannsolver_advection_diffusion_3d_t
 

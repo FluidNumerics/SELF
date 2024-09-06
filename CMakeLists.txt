@@ -26,22 +26,16 @@
 cmake_minimum_required(VERSION 3.21)
 cmake_policy(VERSION 3.21...3.27)
 
-# Defaults to "none", which disables OpenMP builds
-# Override with -DOMP_TARGET
-# - Set to "none" to disable OpenMP
-# - Set to "multicore" for multicore cpu
-# - GPU offloading via openmp not supported (not by our own choice)
-option(SELF_ENABLE_OPENMP "Option to enable OpenMP multicore target. Currently only tested with nvfortran (Default Off)"  OFF)
+option(SELF_ENABLE_MULTITHREADING "Option to enable CPU multithreading for `do concurrent` loop blocks."  OFF)
 option(SELF_ENABLE_TESTING "Option to enable build of tests. (Default On)"  ON)
 option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_MPI "Option to enable MPI for distributed memory parallelism (domain decomposition). (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
 
-if(SELF_ENABLE_OPENMP)
-    set(OMP_TARGET "multicore" CACHE STRING "Target architecture for openmp.")
+if(SELF_ENABLE_MULTITHREADING)
+    set(SELF_MULITHREADING_NTHREADS "4" CACHE STRING "Number of threads to use for `do concurrent` loop blocks. This option is only used with GNU compilers. Other compilers use OMP_NUM_THREADS environment variable at runtime.")
 endif()
-
 
 if(NOT DEFINED ROCM_PATH)
     if(NOT DEFINED ENV{ROCM_PATH})
@@ -51,8 +45,6 @@ if(NOT DEFINED ROCM_PATH)
     endif()
 endif()
 
-#SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIS_D}/cmake/modules/")
-include("${CMAKE_CURRENT_LIST_DIR}/cmake/modules/OpenMPTargetOffloadFlags.cmake")
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 # CXX language is needed to properly find "hip" package
 project(self VERSION 1.0.0
@@ -114,29 +106,25 @@ elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NVHPC" )
 endif()
 
 # Check for openmp support if offload target is provided
-if( SELF_ENABLE_OPENMP )
-    find_package(OpenMP COMPONENTS Fortran REQUIRED)
-    if( ${OpenMP_Fortran_FOUND} )
-        if( "${OMP_TARGET}" STREQUAL "multicore" )
-            get_offload_flags(RESULT OFFLOAD_FLAGS)
-        else()
-            get_offload_flags(ARCH ${OMP_TARGET} RESULT OFFLOAD_FLAGS)
-        endif()
-        set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OFFLOAD_FLAGS}" )
-        set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${OFFLOAD_FLAGS}" )
-        set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} ${OFFLOAD_FLAGS}")
-        set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} ${OFFLOAD_FLAGS}")
-        set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ${OFFLOAD_FLAGS}" )
-        if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NVHPC" )
-            set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Minfo=mp" )
-            set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -Minfo=mp" )
-            set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -Minfo=mp")
-            set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -Minfo=mp")
-            set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -Minfo=mp" )
-        endif()
-    else()
-        message( WARNING "OpenMP target set to ${OMP_TARGET} but OpenMP_Fortran not found. GPU Offloading disabled.")
+if( SELF_ENABLE_MULTITHREADING )
+    if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
+        set( OFFLOAD_FLAGS "-ftree-parallelize-loops=${SELF_MULTITHREADING_NTHREADS} -fopt-info-loop" )
+    elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel" )
+        set( OFFLOAD_FLAGS "-parallel -qopt-report -qopt-report-phase=par" )
+    elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "IntelLLVM" )
+        set( OFFLOAD_FLAGS "-qopenmp -qopt-report" )
+    elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Flang" )
+        set( OFFLOAD_FLAGS "-fopenmp" )
+    elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "NVHPC" )
+        set( OFFLOAD_FLAGS "-stdpar=multicore -Minfo=stdpar,accel" )
     endif()
+
+    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OFFLOAD_FLAGS}" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${OFFLOAD_FLAGS}" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} ${OFFLOAD_FLAGS}")
+    set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} ${OFFLOAD_FLAGS}")
+    set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ${OFFLOAD_FLAGS}" )
+
 endif()
 
 

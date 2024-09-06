@@ -113,42 +113,37 @@ contains
     integer :: e1,e2,s1,s2
     integer :: ivar
 
-    !$omp target
-    !$omp teams loop collapse(2)
-    do ivar = 1,this%nvar
-      do e1 = 1,mesh%nElem
+    do concurrent(e1=1:mesh%nElem,ivar=1:this%nvar)
 
-        if(e1 == 1) then
+      if(e1 == 1) then
 
-          s1 = 2
-          e2 = e1+1
-          s2 = 1
-          this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
+        s1 = 2
+        e2 = e1+1
+        s2 = 1
+        this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
 
-        elseif(e1 == mesh%nElem) then
+      elseif(e1 == mesh%nElem) then
 
-          s1 = 1
-          e2 = e1-1
-          s2 = 2
-          this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
+        s1 = 1
+        e2 = e1-1
+        s2 = 2
+        this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
 
-        else
+      else
 
-          s1 = 1
-          e2 = e1-1
-          s2 = 2
-          this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
+        s1 = 1
+        e2 = e1-1
+        s2 = 2
+        this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
 
-          s1 = 2
-          e2 = e1+1
-          s2 = 1
-          this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
+        s1 = 2
+        e2 = e1+1
+        s2 = 1
+        this%extBoundary(s1,e1,ivar) = this%boundary(s2,e2,ivar)
 
-        endif
+      endif
 
-      enddo
     enddo
-    !$omp end target
 
   endsubroutine SideExchange_MappedScalar1D_t
 
@@ -160,23 +155,15 @@ contains
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar)
 
-          dfloc = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
-          df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
-
-        enddo
+      dfloc = 0.0_prec
+      do ii = 1,this%N+1
+        dfloc = dfloc+this%interp%dMatrix(ii,i)*this%interior(ii,iel,ivar)
       enddo
+      df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
+
     enddo
-    !$omp end target
 
   endsubroutine MappedDerivative_MappedScalar1D_t
 
@@ -188,28 +175,20 @@ contains
     integer :: iEl,iVar,i,ii
     real(prec) :: dfloc
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
+    do concurrent(i=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar)
 
-          dfloc = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
-          enddo
-
-          dfloc = dfloc+(this%boundarynormal(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
-                         this%boundarynormal(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
-                  this%interp%qWeights(i)
-
-          df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
-
-        enddo
+      dfloc = 0.0_prec
+      do ii = 1,this%N+1
+        dfloc = dfloc+this%interp%dgMatrix(ii,i)*this%interior(ii,iel,ivar)
       enddo
+
+      dfloc = dfloc+(this%boundarynormal(2,iel,ivar)*this%interp%bMatrix(i,2)+ &
+                     this%boundarynormal(1,iel,ivar)*this%interp%bMatrix(i,1))/ &
+              this%interp%qWeights(i)
+
+      df(i,iel,ivar) = dfloc/this%geometry%dxds%interior(i,iEl,1)
+
     enddo
-    !$omp end target
 
   endsubroutine MappedDGDerivative_MappedScalar1D_t
 

@@ -137,33 +137,24 @@ contains
     integer :: i,ii,iel,ivar
     real(prec) :: fbs,fbe,fbn,fbw
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(3)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do i = 1,this%N+1
-
-          fbs = 0.0_prec
-          fbe = 0.0_prec
-          fbn = 0.0_prec
-          fbw = 0.0_prec
-          !$omp loop bind(thread)
-          do ii = 1,this%N+1
-            fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar) ! South
-            fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar) ! East
-            fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar) ! North
-            fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar) ! West
-          enddo
-
-          this%boundary(i,1,iel,ivar) = fbs
-          this%boundary(i,2,iel,ivar) = fbe
-          this%boundary(i,3,iel,ivar) = fbn
-          this%boundary(i,4,iel,ivar) = fbw
-
-        enddo
+    do concurrent(i=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
+      fbs = 0.0_prec
+      fbe = 0.0_prec
+      fbn = 0.0_prec
+      fbw = 0.0_prec
+      do ii = 1,this%N+1
+        fbs = fbs+this%interp%bMatrix(ii,1)*this%interior(i,ii,iel,ivar) ! South
+        fbe = fbe+this%interp%bMatrix(ii,2)*this%interior(ii,i,iel,ivar) ! East
+        fbn = fbn+this%interp%bMatrix(ii,2)*this%interior(i,ii,iel,ivar) ! North
+        fbw = fbw+this%interp%bMatrix(ii,1)*this%interior(ii,i,iel,ivar) ! West
       enddo
+
+      this%boundary(i,1,iel,ivar) = fbs
+      this%boundary(i,2,iel,ivar) = fbe
+      this%boundary(i,3,iel,ivar) = fbn
+      this%boundary(i,4,iel,ivar) = fbw
+
     enddo
-    !$omp end target
 
   endsubroutine BoundaryInterp_Scalar2D_t
 
@@ -176,20 +167,11 @@ contains
     integer :: ivar
     integer :: i
 
-    !$omp target
-    !$omp teams loop collapse(4)
-    do ivar = 1,this%nVar
-      do iel = 1,this%nElem
-        do iside = 1,4
-          do i = 1,this%interp%N+1
-            this%avgBoundary(i,iside,iel,ivar) = 0.5_prec*( &
-                                                 this%boundary(i,iside,iel,ivar)+ &
-                                                 this%extBoundary(i,iside,iel,ivar))
-          enddo
-        enddo
-      enddo
+    do concurrent(i=1:this%interp%N+1,iside=1:4,iel=1:this%nElem,ivar=1:this%nVar)
+      this%avgBoundary(i,iside,iel,ivar) = 0.5_prec*( &
+                                           this%boundary(i,iside,iel,ivar)+ &
+                                           this%extBoundary(i,iside,iel,ivar))
     enddo
-    !$omp end target
 
   endsubroutine AverageSides_Scalar2D_t
 
@@ -201,33 +183,19 @@ contains
     integer :: i,j,ii,jj,iel,ivar
     real(prec) :: fi,fij
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(4)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do j = 1,this%M+1
-          do i = 1,this%M+1
+    do concurrent(i=1:this%M+1,j=1:this%M+1,iel=1:this%nElem,ivar=1:this%nVar)
 
-            fij = 0.0_prec
-            !$omp loop bind(thread)
-            do jj = 1,this%N+1
-              fi = 0.0_prec
-              !$omp loop bind(thread)
-              do ii = 1,this%N+1
-                fi = fi+this%interior(ii,jj,iel,ivar)*this%interp%iMatrix(ii,i)
-              enddo
-              fij = fij+fi*this%interp%iMatrix(jj,j)
-            enddo
-            f(i,j,iel,ivar) = fij
-
-          enddo
+      fij = 0.0_prec
+      do jj = 1,this%N+1
+        fi = 0.0_prec
+        do ii = 1,this%N+1
+          fi = fi+this%interior(ii,jj,iel,ivar)*this%interp%iMatrix(ii,i)
         enddo
+        fij = fij+fi*this%interp%iMatrix(jj,j)
       enddo
-    enddo
-    !$omp end target
+      f(i,j,iel,ivar) = fij
 
-    !call self_hipblas_matrixop_dim1_2d(this % iMatrix,f,fInt,this % N,this % M,nvars,nelems,handle)
-    !call self_hipblas_matrixop_dim2_2d(this % iMatrix,fInt,fTarget,0.0_c_prec,this % N,this % M,nvars,nelems,handle)
+    enddo
 
   endsubroutine GridInterp_Scalar2D_t
 
@@ -239,34 +207,16 @@ contains
     integer    :: i,j,ii,iel,ivar
     real(prec) :: df1,df2
 
-    !$omp target
-    !$omp teams loop bind(teams) collapse(4)
-    do ivar = 1,this%nvar
-      do iel = 1,this%nelem
-        do j = 1,this%N+1
-          do i = 1,this%N+1
-
-            df1 = 0.0_prec
-            df2 = 0.0_prec
-            !$omp loop bind(thread)
-            do ii = 1,this%N+1
-              df1 = df1+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)
-              df2 = df2+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)
-            enddo
-            df(i,j,iel,ivar,1) = df1
-            df(i,j,iel,ivar,2) = df2
-
-          enddo
-        enddo
+    do concurrent(i=1:this%N+1,j=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar)
+      df1 = 0.0_prec
+      df2 = 0.0_prec
+      do ii = 1,this%N+1
+        df1 = df1+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar)
+        df2 = df2+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar)
       enddo
+      df(i,j,iel,ivar,1) = df1
+      df(i,j,iel,ivar,2) = df2
     enddo
-    !$omp end target
-
-    ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,1)
-    ! call self_hipblas_matrixop_dim1_2d(this % dMatrix,f,dfloc,this % N,this % N,nvars,nelems,handle)
-    ! dfloc(1:,1:,1:,1:) => df(1:,1:,1:,1:,2)
-    ! call self_hipblas_matrixop_dim2_2d(this % dMatrix,f,dfloc,0.0_c_prec,this % N,this % N,nvars,nelems,handle)
-    ! dfloc => null()
 
   endsubroutine Gradient_Scalar2D_t
 
