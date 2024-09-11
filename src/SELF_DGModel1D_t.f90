@@ -77,19 +77,17 @@ module SELF_DGModel1D_t
 
 contains
 
-  subroutine Init_DGModel1D_t(this,nvar,mesh,geometry,decomp)
+  subroutine Init_DGModel1D_t(this,nvar,mesh,geometry)
     implicit none
     class(DGModel1D_t),intent(out) :: this
     integer,intent(in) :: nvar
     type(Mesh1D),intent(in),target :: mesh
     type(Geometry1D),intent(in),target :: geometry
-    type(MPILayer),intent(in),target :: decomp
     ! Local
     integer :: ivar
     character(LEN=3) :: ivarChar
     character(LEN=25) :: varname
 
-    this%decomp => decomp
     this%mesh => mesh
     this%geometry => geometry
 
@@ -276,8 +274,7 @@ contains
 
     ! perform the side exchange to populate the
     ! solutionGradient % extBoundary attribute
-    call this%solutionGradient%SideExchange(this%mesh, &
-                                            this%decomp)
+    call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel1D_t
 
@@ -288,7 +285,7 @@ contains
     integer :: i,iEl,iVar
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh,this%decomp)
+    call this%solution%SideExchange(this%mesh)
 
     call this%PreTendency() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
@@ -338,9 +335,9 @@ contains
 
     INFO("Writing pickup file : "//trim(pickupFile))
     call this%solution%UpdateHost()
-    if(this%decomp%mpiEnabled) then
+    if(this%mesh%decomp%mpiEnabled) then
 
-      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%decomp%mpiComm)
+      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%mesh%decomp%mpiComm)
 
       ! Write the interpolant to the file
       INFO("Writing interpolant data to file")
@@ -352,13 +349,13 @@ contains
       INFO("Writing control grid solution to file")
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
-                                   this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
+                                   this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
 
       ! Write the geometry to file
       INFO("Writing control grid geometry to file")
       call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x', &
-                                     this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
+                                     this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
 
       ! -- END : writing solution on control grid -- !
 
@@ -383,12 +380,12 @@ contains
       ! Write the model state to file
       call CreateGroup_HDF5(fileId,'/targetgrid')
       call solution%WriteHDF5(fileId,'/targetgrid/solution', &
-                              this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
+                              this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
 
       ! Write the geometry to file
       call CreateGroup_HDF5(fileId,'/targetgrid/mesh')
       call x%WriteHDF5(fileId,'/targetgrid/mesh/coords', &
-                       this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
+                       this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
 
       call Close_HDF5(fileId)
 
@@ -462,9 +459,9 @@ contains
     integer :: firstElem
     integer :: N
 
-    if(this%decomp%mpiEnabled) then
+    if(this%mesh%decomp%mpiEnabled) then
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
-                     this%decomp%mpiComm)
+                     this%mesh%decomp%mpiComm)
     else
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
     endif
@@ -475,8 +472,8 @@ contains
     !   STOP 'Error : Solution polynomial degree does not match input file'
     ! END IF
 
-    if(this%decomp%mpiEnabled) then
-      firstElem = this%decomp%offsetElem(this%decomp%rankId)+1
+    if(this%mesh%decomp%mpiEnabled) then
+      firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId)+1
       solOffset(1:3) = (/0,1,firstElem/)
       call ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
                           this%solution%interior,solOffset)

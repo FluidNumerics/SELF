@@ -27,7 +27,7 @@
 module SELF_Mesh
 
   use SELF_Constants
-
+  use SELF_DomainDecomposition
   use iso_c_binding
 
   implicit none
@@ -45,6 +45,7 @@ module SELF_Mesh
     integer :: nUniqueSides
     integer :: nBCs
     integer :: quadrature
+    type(DomainDecomposition) :: decomp
   endtype SEMMesh
 
   ! Element Types - From Table 4.1 of https://www.hopr-project.org/externals/Meshformat.pdf

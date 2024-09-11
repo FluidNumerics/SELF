@@ -141,8 +141,7 @@ contains
 
     ! perform the side exchange to populate the
     ! solutionGradient % extBoundary attribute
-    call this%solutionGradient%SideExchange(this%mesh, &
-                                            this%decomp)
+    call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel3D
 
@@ -153,7 +152,7 @@ contains
     integer :: ndof
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh,this%decomp)
+    call this%solution%SideExchange(this%mesh)
 
     call this%PreTendency() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied

@@ -29,6 +29,7 @@ module SELF_HDF5
   use SELF_Constants
   use iso_fortran_env
   use HDF5
+  use mpi
 
 #ifdef DOUBLE_PRECISION
 #define HDF5_IO_PREC H5T_IEEE_F64LE

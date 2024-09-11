@@ -31,7 +31,7 @@ module SELF_Mesh_2D_t
   use SELF_SupportRoutines
   use SELF_HDF5
   use SELF_Mesh
-  use SELF_MPI
+  use SELF_DomainDecomposition
 
   ! External Libs !
   use HDF5
@@ -123,7 +123,7 @@ contains
 
   subroutine Init_Mesh2D_t(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
-    class(Mesh2D_t),intent(out) :: this
+    class(Mesh2D_t),intent(inout) :: this
     integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     integer,intent(in) :: nSides
@@ -186,6 +186,7 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    call this%decomp%Free()
 
   endsubroutine Free_Mesh2D_t
 
@@ -215,13 +216,13 @@ contains
 
   endsubroutine ResetBoundaryConditionType_Mesh2D_t
 
-  subroutine Read_HOPr_Mesh2D_t(this,meshFile,decomp)
+  subroutine Read_HOPr_Mesh2D_t(this,meshFile,enableDomainDecomposition)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
     implicit none
     class(Mesh2D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
-    type(MPILayer),intent(inout) :: decomp
+    logical,intent(in),optional :: enableDomainDecomposition
     ! Local
     integer(HID_T) :: fileId
     integer(HID_T) :: offset(1:2),gOffset(1)
@@ -245,8 +246,15 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    if(decomp%mpiEnabled) then
-      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp%mpiComm)
+    print*,__FILE__//' : Reading HOPr mesh from'//trim(meshfile)
+    if(present(enableDomainDecomposition))then
+      call this%decomp%init(enableDomainDecomposition)
+    else
+      call this%decomp%init(.false.)
+    endif
+    
+    if(this%decomp%mpiEnabled) then
+      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)
     else
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
     endif
@@ -259,7 +267,7 @@ contains
     ! Read BCType
     allocate(bcType(1:4,1:nBCS))
 
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset(:) = 0
       call ReadArray_HDF5(fileId,'BCType',bcType,offset)
     else
@@ -267,16 +275,16 @@ contains
     endif
 
     ! Read local subarray of ElemInfo
-    call decomp%GenerateDecomposition(nGlobalElem,nUniqueSides3D)
+    call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides3D)
 
-    firstElem = decomp%offsetElem(decomp%rankId+1)+1
-    nLocalElems = decomp%offsetElem(decomp%rankId+2)- &
-                  decomp%offsetElem(decomp%rankId+1)
+    firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    nLocalElems = this%decomp%offsetElem(this%decomp%rankId+2)- &
+                  this%decomp%offsetElem(this%decomp%rankId+1)
 
     ! Allocate Space for hopr_elemInfo!
     allocate(hopr_elemInfo(1:6,1:nLocalElems))
 
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset = (/0,firstElem-1/)
       call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
     else
@@ -290,7 +298,7 @@ contains
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     allocate(hopr_nodeCoords(1:3,nLocalNodes3D),hopr_globalNodeIDs(1:nLocalNodes3D))
 
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset = (/0,firstNode-1/)
       call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
       gOffset = (/firstNode-1/)
@@ -306,7 +314,7 @@ contains
 
     ! Allocate space for hopr_sideInfo
     allocate(hopr_sideInfo(1:5,1:nLocalSides3D))
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset = (/0,firstSide-1/)
       call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
     else
@@ -369,10 +377,9 @@ contains
 
   endsubroutine Read_HOPr_Mesh2D_t
 
-  subroutine RecalculateFlip_Mesh2D_t(this,decomp)
+  subroutine RecalculateFlip_Mesh2D_t(this)
     implicit none
     class(Mesh2D_t),intent(inout) :: this
-    type(MPILayer),intent(inout),optional :: decomp
     ! Local
     integer :: e1
     integer :: s1
@@ -409,9 +416,9 @@ contains
     allocate(requests(1:this%nSides*2))
     allocate(stats(MPI_STATUS_SIZE,1:this%nSides*2))
 
-    if(present(decomp)) then
-      rankId = decomp%rankId
-      offset = decomp%offsetElem(rankId+1)
+    if(this%decomp%mpiEnabled) then
+      rankId = this%decomp%rankId
+      offset = this%decomp%offsetElem(rankId+1)
     else
       rankId = 0
       offset = 0
@@ -429,8 +436,8 @@ contains
 
         if(bcid == 0) then
 
-          if(present(decomp)) then
-            neighborRank = decomp%elemToRank(e2Global)
+          if(this%decomp%mpiEnabled) then
+            neighborRank = this%decomp%elemToRank(e2Global)
           else
             neighborRank = 0
           endif
@@ -469,7 +476,7 @@ contains
                              1, &
                              MPI_INTEGER, &
                              neighborRank,globalSideId, &
-                             decomp%mpiComm, &
+                             this%decomp%mpiComm, &
                              requests(msgCount),iError)
 
               ! Send nid1(l) from this rank to nid2(l) on the other rank
@@ -478,7 +485,7 @@ contains
                              1, &
                              MPI_INTEGER, &
                              neighborRank,globalSideId, &
-                             decomp%mpiComm, &
+                             this%decomp%mpiComm, &
                              requests(msgCount),iError)
 
             enddo
@@ -490,7 +497,7 @@ contains
       enddo
     enddo
 
-    if(present(decomp) .and. msgCount > 0) then
+    if(this%decomp%mpiEnabled .and. msgCount > 0) then
       call MPI_WaitAll(msgCount, &
                        requests(1:msgCount), &
                        stats(1:MPI_STATUS_SIZE,1:msgCount), &

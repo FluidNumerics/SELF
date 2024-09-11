@@ -187,21 +187,20 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedScalar3D
 
-  subroutine SideExchange_MappedScalar3D(this,mesh,decomp)
+  subroutine SideExchange_MappedScalar3D(this,mesh)
     implicit none
     class(MappedScalar3D),intent(inout) :: this
-    type(Mesh3D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh3D),intent(inout) :: mesh
     ! Local
     integer :: offset
 
-    offset = decomp%offsetElem(decomp%rankId+1)
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
-    !call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+    !call this%MPIExchangeAsync(mesh%decomp,mesh,resetCount=.true.)
 
     call SideExchange_3D_gpu(this%extboundary_gpu, &
-                             this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu, &
-                             decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
+                             this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
 
     !call decomp%FinalizeMPIExchangeAsync()
 

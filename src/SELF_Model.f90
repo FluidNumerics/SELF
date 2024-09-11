@@ -28,7 +28,6 @@ module SELF_Model
 
   use SELF_SupportRoutines
   use SELF_Metadata
-  use SELF_MPI
   use SELF_HDF5
   use HDF5
   use FEQParse
@@ -121,9 +120,6 @@ module SELF_Model
 
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
-
-    ! Domain Decomposition
-    type(MPILayer),pointer :: decomp
 
   contains
 
@@ -503,7 +499,6 @@ contains
     character(len=20) :: entropy
     character(len=:),allocatable :: str
 
-    if(this%decomp%rankId == 0) then
       ! Copy the time and entropy to a string
       write(modelTime,"(ES16.7E3)") this%t
       write(entropy,"(ES16.7E3)") this%entropy
@@ -515,7 +510,6 @@ contains
       write(output_unit,'(A)',ADVANCE='no') str
       str = '  |  eᵢ ='//trim(entropy)
       write(output_unit,'(A)',ADVANCE='yes') str
-    endif
 
   endsubroutine ReportEntropy_Model
 

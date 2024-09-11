@@ -83,6 +83,7 @@ contains
     allocate(this%BCType(1:4,1:nBCs))
 
     allocate(this%BCNames(1:nBCs))
+    call this%decomp%Init(.false.)
 
   endsubroutine Init_Mesh1D
 
@@ -100,6 +101,7 @@ contains
     deallocate(this%globalNodeIDs)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    call this%decomp%Free()
 
   endsubroutine Free_Mesh1D
 

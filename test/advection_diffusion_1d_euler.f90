@@ -45,7 +45,6 @@ program advection_diffusion_1d_euler
   type(Lagrange),target :: interp
   type(Mesh1D),target :: mesh
   type(Geometry1D),target :: geometry
-  type(MPILayer),target :: decomp
 
   ! Create a mesh using the built-in
   ! uniform mesh generator.
@@ -55,9 +54,6 @@ program advection_diffusion_1d_euler
                              nElem=nelem, &
                              x=(/0.0_prec,1.0_prec/))
 
-  ! We create a domain decomposition.
-  call decomp%Init(enableMPI=.false.)
-  call decomp%GenerateDecomposition(nelem,nelem+1)
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -70,7 +66,7 @@ program advection_diffusion_1d_euler
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry,decomp)
+  call modelobj%Init(nvar,mesh,geometry)
   modelobj%gradient_enabled = .true.
   ! Set the velocity
   modelobj%u = u
@@ -112,7 +108,6 @@ program advection_diffusion_1d_euler
 
   ! Clean up
   call modelobj%free()
-  call decomp%free()
   call mesh%free()
   call geometry%free()
   call interp%free()

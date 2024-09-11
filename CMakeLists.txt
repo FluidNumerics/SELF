@@ -30,7 +30,6 @@ option(SELF_ENABLE_MULTITHREADING "Option to enable CPU multithreading for `do c
 option(SELF_ENABLE_TESTING "Option to enable build of tests. (Default On)"  ON)
 option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
-option(SELF_ENABLE_MPI "Option to enable MPI for distributed memory parallelism (domain decomposition). (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
 
 if(SELF_ENABLE_MULTITHREADING)
@@ -144,7 +143,7 @@ find_library(FEQPARSE_LIBRARIES NAMES feqparse REQUIRED)
 find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
 
 if(SELF_ENABLE_DOUBLE_PRECISION)
-    message("Enabling Double Precision")
+    message("-- SELF Build System : Enabling Double Precision")
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DDOUBLE_PRECISION" )
     set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DDOUBLE_PRECISION" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DDOUBLE_PRECISION")

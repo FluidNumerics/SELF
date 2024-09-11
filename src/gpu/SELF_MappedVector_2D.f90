@@ -97,11 +97,10 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector2D
 
-  subroutine SideExchange_MappedVector2D(this,mesh,decomp)
+  subroutine SideExchange_MappedVector2D(this,mesh)
     implicit none
     class(MappedVector2D),intent(inout) :: this
-    type(Mesh2D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh2D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip,bcid
@@ -109,14 +108,14 @@ contains
     integer :: neighborRank
     integer :: rankId,offset
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
 
-    ! call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+    ! call this%MPIExchangeAsync(mesh%decomp,mesh,resetCount=.true.)
     ! Do the side exchange internal to this mpi process
     call SideExchange_2D_gpu(this%extboundary_gpu, &
-                             this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu, &
-                             decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
+                             this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
 
     ! call decomp%FinalizeMPIExchangeAsync()
 

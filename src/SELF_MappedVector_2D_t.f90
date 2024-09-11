@@ -32,7 +32,7 @@ module SELF_MappedVector_2D_t
   use SELF_Tensor_2D
   use SELF_Mesh_2D
   use SELF_Geometry_2D
-  use SELF_MPI
+  use SELF_DomainDecomposition
   use FEQParse
   use iso_c_binding
 
@@ -123,7 +123,7 @@ contains
   ! subroutine MPIExchangeAsync_MappedVector2D_t(this,decomp,mesh,resetCount)
   !   implicit none
   !   class(MappedVector2D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
+  !   type(DomainDecomposition),intent(inout) :: decomp
   !   type(Mesh2D),intent(in) :: mesh
   !   logical,intent(in) :: resetCount
   !   ! Local
@@ -187,7 +187,7 @@ contains
   !   ! Apply side flips to sides where MPI exchanges took place.
   !   implicit none
   !   class(MappedVector2D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
+  !   type(DomainDecomposition),intent(inout) :: decomp
   !   type(Mesh2D),intent(in) :: mesh
   !   ! Local
   !   integer :: e1,s1,e2,s2
@@ -239,11 +239,10 @@ contains
 
   ! endsubroutine ApplyFlip_MappedVector2D_t
 
-  subroutine SideExchange_MappedVector2D_t(this,mesh,decomp)
+  subroutine SideExchange_MappedVector2D_t(this,mesh)
     implicit none
     class(MappedVector2D_t),intent(inout) :: this
-    type(Mesh2D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh2D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip,bcid
@@ -251,8 +250,8 @@ contains
     integer :: neighborRank
     integer :: rankId,offset
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
 
     !   call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
     do concurrent(s1=1:4,e1=1:mesh%nElem,ivar=1:this%nvar,idir=1:2)

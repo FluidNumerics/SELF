@@ -85,11 +85,10 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedScalar1D
 
-  subroutine SideExchange_MappedScalar1D(this,mesh,decomp)
+  subroutine SideExchange_MappedScalar1D(this,mesh)
     implicit none
     class(MappedScalar1D),intent(inout) :: this
-    type(Mesh1D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh1D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2
     integer :: ivar

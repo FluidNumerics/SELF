@@ -30,7 +30,7 @@ module SELF_MappedVector_3D_t
   use SELF_Lagrange
   use SELF_Mesh_3D
   use SELF_Geometry_3D
-  use SELF_MPI
+  use SELF_DomainDecomposition
   use FEQParse
   use iso_c_binding
 
@@ -130,7 +130,7 @@ contains
   ! subroutine MPIExchangeAsync_MappedVector3D_t(this,decomp,mesh,resetCount)
   !   implicit none
   !   class(MappedVector3D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
+  !   type(DomainDecomposition),intent(inout) :: decomp
   !   type(Mesh3D),intent(in) :: mesh
   !   logical,intent(in) :: resetCount
   !   ! Local
@@ -194,7 +194,7 @@ contains
   !   ! Apply side flips to sides where MPI exchanges took place.
   !   implicit none
   !   class(MappedVector3D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
+  !   type(DomainDecomposition),intent(inout) :: decomp
   !   type(Mesh3D),intent(in) :: mesh
   !   ! Local
   !   integer :: e1,s1,e2,s2
@@ -284,11 +284,10 @@ contains
 
   ! endsubroutine ApplyFlip_MappedVector3D_t
 
-  subroutine SideExchange_MappedVector3D_t(this,mesh,decomp)
+  subroutine SideExchange_MappedVector3D_t(this,mesh)
     implicit none
     class(MappedVector3D_t),intent(inout) :: this
-    type(Mesh3D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh3D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip,bcid
@@ -297,8 +296,8 @@ contains
     integer :: rankId,offset
     integer :: idir
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
 
     !call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
 

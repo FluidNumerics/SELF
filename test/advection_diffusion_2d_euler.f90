@@ -45,15 +45,13 @@ program advection_diffusion_2d_euler
   type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
   type(SEMQuad),target :: geometry
-  type(MPILayer),target :: decomp
   character(LEN=255) :: WORKSPACE
 
   ! We create a domain decomposition.
-  call decomp%Init(enableMPI=.false.)
 
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
-  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",decomp)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -66,7 +64,7 @@ program advection_diffusion_2d_euler
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry,decomp)
+  call modelobj%Init(nvar,mesh,geometry)
   modelobj%gradient_enabled = .true.
 
   ! Set the velocity
@@ -111,7 +109,6 @@ program advection_diffusion_2d_euler
   endif
   ! Clean up
   call modelobj%free()
-  call decomp%free()
   call mesh%free()
   call geometry%free()
   call interp%free()

@@ -32,7 +32,7 @@ module SELF_MappedScalar_3D_t
   use SELF_Tensor_3D
   use SELF_Mesh_3D
   use SELF_Geometry_3D
-  use SELF_MPI
+  use SELF_DomainDecomposition
   use FEQParse
   use iso_c_binding
 
@@ -126,7 +126,7 @@ contains
   ! subroutine MPIExchangeAsync_MappedScalar3D_t(this,decomp,mesh,resetCount)
   !   implicit none
   !   class(MappedScalar3D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
+  !   type(DomainDecomposition),intent(inout) :: decomp
   !   type(Mesh3D),intent(in) :: mesh
   !   logical,intent(in) :: resetCount
   !   ! Local
@@ -188,7 +188,7 @@ contains
   !   ! Apply side flips to sides where MPI exchanges took place.
   !   implicit none
   !   class(MappedScalar3D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
+  !   type(DomainDecomposition),intent(inout) :: decomp
   !   type(Mesh3D),intent(in) :: mesh
   !   ! Local
   !   integer :: e1,s1,e2,s2
@@ -309,11 +309,10 @@ contains
 
   ! endsubroutine ApplyFlip_MappedScalar3D_t
 
-  subroutine SideExchange_MappedScalar3D_t(this,mesh,decomp)
+  subroutine SideExchange_MappedScalar3D_t(this,mesh)
     implicit none
     class(MappedScalar3D_t),intent(inout) :: this
-    type(Mesh3D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh3D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip
@@ -322,8 +321,8 @@ contains
     integer :: rankId,offset
 
     !call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
 
     do concurrent(s1=1:6,e1=1:mesh%nElem,ivar=1:this%nvar)
 
