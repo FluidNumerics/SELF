@@ -32,6 +32,8 @@ option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HI
 option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
 
+set(SELF_MPIEXEC_NUMPROCS "4" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
+
 if(SELF_ENABLE_MULTITHREADING)
     set(SELF_MULITHREADING_NTHREADS "4" CACHE STRING "Number of threads to use for `do concurrent` loop blocks. This option is only used with GNU compilers. Other compilers use OMP_NUM_THREADS environment variable at runtime.")
 endif()

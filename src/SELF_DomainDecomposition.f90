@@ -56,7 +56,7 @@ module SELF_DomainDecomposition
     procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
 
-    ! procedure,public :: FinalizeMPIExchangeAsync
+    procedure,public :: FinalizeMPIExchangeAsync
 
   endtype DomainDecomposition
 
@@ -224,21 +224,21 @@ contains
 
   endsubroutine ElemToRank
 
-  ! subroutine FinalizeMPIExchangeAsync(mpiHandler)
-  !   class(DomainDecomposition),intent(inout) :: mpiHandler
-  !   ! Local
-  !   integer :: ierror
-  !   integer :: msgCount
+  subroutine FinalizeMPIExchangeAsync(mpiHandler)
+    class(DomainDecomposition),intent(inout) :: mpiHandler
+    ! Local
+    integer :: ierror
+    integer :: msgCount
 
-  !   if(mpiHandler%mpiEnabled) then
-  !     msgCount = mpiHandler%msgCount
-  !     call MPI_WaitAll(msgCount, &
-  !                      mpiHandler%requests(1:msgCount), &
-  !                      mpiHandler%stats(1:MPI_STATUS_SIZE,1:msgCount), &
-  !                      iError)
-  !   endif
+    if(mpiHandler%mpiEnabled) then
+      msgCount = mpiHandler%msgCount
+      call MPI_WaitAll(msgCount, &
+                       mpiHandler%requests(1:msgCount), &
+                       mpiHandler%stats(1:MPI_STATUS_SIZE,1:msgCount), &
+                       iError)
+    endif
 
-  ! endsubroutine FinalizeMPIExchangeAsync
+  endsubroutine FinalizeMPIExchangeAsync
 
   ! subroutine GlobalReduce_RealScalar(mpiHandler,sendBuf,recvBuf)
   !   class(DomainDecomposition),intent(in) :: mpiHandler

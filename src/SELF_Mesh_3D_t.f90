@@ -311,7 +311,6 @@ contains
         if(e2 /= 0) then
 
           selfFlip = CGNStoSELFflip(s2,s1,cgnsFlip)
-          ! print*, s1,s2,cgnsFlip,selfFlip
           this%sideInfo(4,s1,e1) = 10*s2+selfFlip
 
         endif

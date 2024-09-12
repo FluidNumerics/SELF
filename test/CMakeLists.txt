@@ -53,7 +53,31 @@ function (add_fortran_tests)
 
 endfunction ()
 
-#add_fortran_tests("scalargridinterp_1d_constant.f90")
+function (add_mpi_fortran_tests)
+
+    foreach (TFILE ${ARGN})
+        string (REGEX REPLACE ".f90$" "" TEST_NAME ${TFILE})
+        add_executable (${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${TFILE})
+        target_link_libraries(${TEST_NAME}
+                    ${CMAKE_BINARY_DIR}/src/libself-static.a
+                    ${FEQPARSE_LIBRARIES}
+                    ${HDF5_LIBRARIES}
+                    ${MPI_Fortran_LIBRARIES}
+                    ${BACKEND_LIBRARIES})
+                           
+        target_include_directories(${TEST_NAME} PRIVATE 
+                        ${CMAKE_BINARY_DIR}/include
+                        ${FEQPARSE_INCLUDE_DIRS}
+                        ${HDF5_INCLUDE_DIRS}
+                        ${MPI_Fortran_INCLUDE_DIRS})
+
+        add_test(NAME ${TEST_NAME} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS} ${TEST_NAME})
+
+        install(TARGETS ${TEST_NAME} DESTINATION test)
+    endforeach ()
+
+endfunction ()
+
 add_fortran_tests (
     "scalargridinterp_1d_constant.f90"
     "scalarderivative_1d_constant.f90"
@@ -105,3 +129,8 @@ add_fortran_tests (
     "advection_diffusion_3d_rk3.f90"
     "advection_diffusion_3d_rk4.f90"
     )
+
+add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
+                       "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
+                       "mappedscalarbrgradient_2d_linear_mpi.f90"
+                       "mappedvectordgdivergence_3d_linear_mpi.f90" )
