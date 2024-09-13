@@ -32,7 +32,7 @@ option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HI
 option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
 
-set(SELF_MPIEXEC_NUMPROCS "4" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
+set(SELF_MPIEXEC_NUMPROCS "2" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
 set(SELF_MPIEXEC_OPTIONS "" CACHE STRING "Any additional options, such as binding options, to use for MPI tests.Only used when launching test programs via ctest. Defaults to nothing")
 
 if(SELF_ENABLE_MULTITHREADING)

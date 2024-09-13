@@ -82,9 +82,7 @@ jobs:
           mkdir build
           cd build
           FC=${{ env.FC }} CC=${{ env.CC }} \
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-                -DSELF_MPIEXEC_NUMPROCS=2 \ 
-                ../
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ../
           make VERBOSE=1
 
       - name: Run ctests
