@@ -234,7 +234,13 @@ contains
     integer :: i1,i2,ivar
     integer :: r2
     integer :: rankId,offset,N
+    integer,pointer :: elemtorank(:)
 
+    ! This mapping is needed to resolve a build error with
+    ! amdflang that appears to be caused by referencing
+    ! the elemToRank attribute within the do concurrent
+    ! https://github.com/FluidNumerics/SELF/issues/54
+    elemtorank => mesh%decomp%elemToRank(:)
     rankId = mesh%decomp%rankId
     offset = mesh%decomp%offsetElem(rankId+1)
     N = this%interp%N
@@ -253,7 +259,7 @@ contains
 
       if(e2Global > 0) then
 
-        r2 = mesh%decomp%elemToRank(e2Global)
+        r2 = elemToRank(e2Global)
         if(r2 == mesh%decomp%rankId) then
 
           if(flip == 0) then
