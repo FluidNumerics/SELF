@@ -163,7 +163,7 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    if(present(enableDomainDecomposition))then
+    if(present(enableDomainDecomposition)) then
       call this%decomp%init(enableDomainDecomposition)
     else
       call this%decomp%init(.false.)
