@@ -54,7 +54,6 @@ program advection_diffusion_1d_euler
                              nElem=nelem, &
                              x=(/0.0_prec,1.0_prec/))
 
-
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
                    controlNodeType=GAUSS, &

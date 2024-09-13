@@ -62,7 +62,7 @@ contains
     integer :: i
     integer :: j
     integer :: e2,s2,bcid
-    character(LEN=255) :: WORKSPACE 
+    character(LEN=255) :: WORKSPACE
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

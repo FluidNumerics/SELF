@@ -84,7 +84,7 @@ contains
       call MPI_INIT(ierror)
       call MPI_COMM_RANK(this%mpiComm,this%rankId,ierror)
       call MPI_COMM_SIZE(this%mpiComm,this%nRanks,ierror)
-      print*,__FILE__," : Rank ", this%rankId+1, "/",this%nRanks," checking in."
+      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
     else
       print*,__FILE__," : MPI not initialized. No domain decomposition used."
     endif
@@ -116,7 +116,7 @@ contains
     if(allocated(this%stats)) deallocate(this%stats)
 
     if(this%mpiEnabled) then
-      print*,__FILE__," : Rank ", this%rankId+1, "/",this%nRanks," checking out."
+      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
       call MPI_FINALIZE(ierror)
     endif
 
@@ -136,7 +136,7 @@ contains
     allocate(this%stats(MPI_STATUS_SIZE,1:maxMsg))
     this%maxMsg = maxMsg
 
-    print*,__FILE__//" : Rank ",this%rankId+1," : n_elements = ",&
+    print*,__FILE__//" : Rank ",this%rankId+1," : n_elements = ", &
       this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
 
   endsubroutine GenerateDecomposition_DomainDecomposition

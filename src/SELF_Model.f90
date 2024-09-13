@@ -499,17 +499,17 @@ contains
     character(len=20) :: entropy
     character(len=:),allocatable :: str
 
-      ! Copy the time and entropy to a string
-      write(modelTime,"(ES16.7E3)") this%t
-      write(entropy,"(ES16.7E3)") this%entropy
+    ! Copy the time and entropy to a string
+    write(modelTime,"(ES16.7E3)") this%t
+    write(entropy,"(ES16.7E3)") this%entropy
 
-      ! Write the output to STDOUT
-      open(output_unit,ENCODING='utf-8')
-      write(output_unit,'("INFO : [",A,"] : ")',ADVANCE='no') __FUNC__
-      str = 'tᵢ ='//trim(modelTime)
-      write(output_unit,'(A)',ADVANCE='no') str
-      str = '  |  eᵢ ='//trim(entropy)
-      write(output_unit,'(A)',ADVANCE='yes') str
+    ! Write the output to STDOUT
+    open(output_unit,ENCODING='utf-8')
+    write(output_unit,'("INFO : [",A,"] : ")',ADVANCE='no') __FUNC__
+    str = 'tᵢ ='//trim(modelTime)
+    write(output_unit,'(A)',ADVANCE='no') str
+    str = '  |  eᵢ ='//trim(entropy)
+    write(output_unit,'(A)',ADVANCE='yes') str
 
   endsubroutine ReportEntropy_Model
 

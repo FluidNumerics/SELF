@@ -47,7 +47,6 @@ program advection_diffusion_2d_rk2
   type(SEMQuad),target :: geometry
   character(LEN=255) :: WORKSPACE
 
-
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
   call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")

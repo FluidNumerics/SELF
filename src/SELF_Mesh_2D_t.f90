@@ -246,7 +246,7 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    if(present(enableDomainDecomposition))then
+    if(present(enableDomainDecomposition)) then
       call this%decomp%init(enableDomainDecomposition)
     else
       call this%decomp%init(.false.)
@@ -287,8 +287,8 @@ contains
     nLocalElems = this%decomp%offsetElem(this%decomp%rankId+2)- &
                   this%decomp%offsetElem(this%decomp%rankId+1)
 
-    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : element offset = ', firstElem
-    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : n_elements = ', nLocalElems
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : element offset = ',firstElem
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : n_elements = ',nLocalElems
 
     ! Allocate Space for hopr_elemInfo!
     allocate(hopr_elemInfo(1:6,1:nLocalElems))
@@ -336,11 +336,11 @@ contains
 
     ! Now we need to convert from 3-D to 2-D !
     nLocalSides2D = nLocalSides3D-2*nLocalElems
-    nUniqueSides2D = nUniqueSides3D-2*nGlobalElem! Remove the "top" and "bottom" faces
+    nUniqueSides2D = nUniqueSides3D-2*nGlobalElem ! Remove the "top" and "bottom" faces
     nLocalNodes2D = nLocalNodes2D-nLocalElems*nGeo*(nGeo+1)**2 ! Remove the third dimension
 
     print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Allocating memory for mesh'
-    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' n local sides  : ', nLocalSides2D
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' n local sides  : ',nLocalSides2D
     call this%Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
     this%nUniqueSides = nUniqueSides2D ! Store the number of sides in the global mesh
 
@@ -484,7 +484,7 @@ contains
               j = this%CGNSCornerMap(2,lnid1(l))
               nid1(l,s1,e1) = this%globalNodeIDs(i,j,e1)
 
-              tag = l + 2*globalSideId
+              tag = l+2*globalSideId
               msgCount = msgCount+1
               call MPI_IRECV(nid2(l,s1,e1), &
                              1, &
@@ -525,7 +525,7 @@ contains
         nloc1(1:2) = nid1(1:2,s1,e1)
         nloc2(1:2) = nid2(1:2,s1,e1)
 
-        if(e2Global>0) then
+        if(e2Global > 0) then
           theyMatch = CompareArray(nloc1,nloc2,2)
 
           if(theyMatch) then

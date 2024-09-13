@@ -112,15 +112,15 @@ contains
           ! Get the boundary normals on cell edges from the mesh geometry
           nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
           nmag = geometry%nScale%boundary(i,j,iEl,1)
-          diff = diff + abs(f%boundary(i,j,iEl,1,1) - f%extboundary(i,j,iEl,1,1))
-          fx = 0.5*(f%boundary(i,j,iEl,1,1) + f%extboundary(i,j,iEl,1,1))
-          fy = 0.5*(f%boundary(i,j,iEl,1,2) + f%extboundary(i,j,iEl,1,2))
+          diff = diff+abs(f%boundary(i,j,iEl,1,1)-f%extboundary(i,j,iEl,1,1))
+          fx = 0.5*(f%boundary(i,j,iEl,1,1)+f%extboundary(i,j,iEl,1,1))
+          fy = 0.5*(f%boundary(i,j,iEl,1,2)+f%extboundary(i,j,iEl,1,2))
 
-          f%boundaryNormal(i,j,iEl,1) = (fx*nhat(1)+ fy*nhat(2))*nmag
+          f%boundaryNormal(i,j,iEl,1) = (fx*nhat(1)+fy*nhat(2))*nmag
 
         enddo
-        if (diff > tolerance)then
-          print*,'rank ', mesh%decomp%rankId, ' : mismatched edge iel, s (diff)= ', iel,j,diff
+        if(diff > tolerance) then
+          print*,'rank ',mesh%decomp%rankId,' : mismatched edge iel, s (diff)= ',iel,j,diff
         endif
       enddo
     enddo
