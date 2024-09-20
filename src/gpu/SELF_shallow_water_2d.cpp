@@ -59,14 +59,14 @@ __global__ void fluxmethod_shallow_water_2d_gpukernel(real *solution, real *flux
     flux[i+2*ndof] = H*u; // x-component of eta
     flux[i+3*ndof] = 0.0; // y-component of u
     flux[i+4*ndof] = g*eta; // y-component of v
-    // flux[i+5*ndof] = H*v; // y-component of eta
+    flux[i+5*ndof] = H*v; // y-component of eta
 
     // flux[i] = 0.0; // x-component of u
     // flux[i+ndof] = 0.0; // x-component of v
     // flux[i+2*ndof] = 0.0; // x-component of eta
     // flux[i+3*ndof] = 0.0; // y-component of u
     // flux[i+4*ndof] = 0.0; // y-component of v
-    flux[i+5*ndof] = 0.0; // y-component of eta
+    // flux[i+5*ndof] = 0.0; // y-component of eta
   }
 
 }
@@ -108,10 +108,10 @@ __global__ void riemannsolver_shallow_water_2d_gpukernel(real *fb, real *fextb, 
 
     flux[idof]          = 0.5 * (g * (etaL + etaR) + c * (unL - unR)) * nx * nmag;
     flux[idof + ndof]   = 0.5 * (g * (etaL + etaR) + c * (unL - unR)) * ny * nmag;
-    // flux[idof + 2*ndof] = 0.5 * (H * (unL + unR) + c * (etaL - etaR)) * nmag;
+    flux[idof + 2*ndof] = 0.5 * (H * (unL + unR) + c * (etaL - etaR)) * nmag;
     // flux[idof] = 0.0;
     // flux[idof + ndof] = 0.0;
-    flux[idof + 2*ndof] = 0.0;
+    // flux[idof + 2*ndof] = 0.0;
   }
 
 }
