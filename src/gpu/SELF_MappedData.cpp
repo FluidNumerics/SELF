@@ -116,6 +116,53 @@ extern "C"
   }
 }
 
+__global__ void ApplyFlip_2D(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar, int nEl){
+
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t ndof = nVar*nEl*4;
+  uint32_t s1 = (idof) % 4;
+  uint32_t e1 = (idof/4) % nEl;
+  uint32_t ivar = idof/4/nEl;
+  
+  if(idof < ndof){
+    int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)];
+    int e2 = e2Global - offset;
+    int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+    int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
+    real buff[24]; // warning : set fixed buffer size for applying flip. This limits the polynomial degree to 23 
+
+    if(e2Global != 0){
+      int neighborRank = elemToRank[e2Global-1];
+      if( neighborRank != rankId ){
+        if(flip == 1){
+          for( int i1 = 0; i1<N+1; i1++){
+            int i2 = N-i1;
+            buff[i1] = extBoundary[SCB_2D_INDEX(i2,s1-1,e1-1,ivar,N,nEl)];
+          }
+          for( int i1 = 0; i1<N+1; i1++){
+            extBoundary[SCB_2D_INDEX(i1,s1-1,e1-1,ivar,N,nEl)] = buff[i1];
+          }
+        }
+      }
+    }
+  }
+  
+}
+
+extern "C"
+{
+  void ApplyFlip_2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar, int nEl)
+  {
+    int ndof = 4*nEl*nVar;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,1,1);
+    dim3 nthreads(threads_per_block,1,1);
+    ApplyFlip_2D<<<nblocks,nthreads>>>(extBoundary, sideInfo, elemToRank, rankId, offset, N, nVar, nEl);
+  }
+}
+
 __global__ void SideExchange_3D(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nEl){
 
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;

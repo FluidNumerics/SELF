@@ -46,7 +46,7 @@ contains
 
   subroutine Init_Mesh3D(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
-    class(Mesh3D),intent(out) :: this
+    class(Mesh3D),intent(inout) :: this
     integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     integer,intent(in) :: nSides

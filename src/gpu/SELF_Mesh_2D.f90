@@ -46,7 +46,7 @@ contains
 
   subroutine Init_Mesh2D(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
-    class(Mesh2D),intent(out) :: this
+    class(Mesh2D),intent(inout) :: this
     integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     integer,intent(in) :: nSides
@@ -152,16 +152,22 @@ contains
       call this%decomp%init(.false.)
     endif
 
+    print*,__FILE__//' : Reading HOPr mesh from'//trim(meshfile)
     if(this%decomp%mpiEnabled) then
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)
     else
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
     endif
 
+    print*,__FILE__//' : Loading mesh attributes'
     call ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     call ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
     call ReadAttribute_HDF5(fileId,'nBCs',nBCs)
     call ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
+    print*,__FILE__//' : N Global Elements = ',nGlobalElem
+    print*,__FILE__//' : Mesh geometry degree = ',nGeo
+    print*,__FILE__//' : N Boundary conditions = ',nBCs
+    print*,__FILE__//' : N Unique Sides (3D) = ',nUniqueSides3D
 
     ! Read BCType
     allocate(bcType(1:4,1:nBCS))
@@ -174,11 +180,15 @@ contains
     endif
 
     ! Read local subarray of ElemInfo
+    print*,__FILE__//' : Generating Domain Decomposition'
     call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides3D)
 
     firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
     nLocalElems = this%decomp%offsetElem(this%decomp%rankId+2)- &
                   this%decomp%offsetElem(this%decomp%rankId+1)
+
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : element offset = ',firstElem
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : n_elements = ',nLocalElems
 
     ! Allocate Space for hopr_elemInfo!
     allocate(hopr_elemInfo(1:6,1:nLocalElems))
@@ -215,6 +225,7 @@ contains
     allocate(hopr_sideInfo(1:5,1:nLocalSides3D))
     if(this%decomp%mpiEnabled) then
       offset = (/0,firstSide-1/)
+      print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Reading side information'
       call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
     else
       call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
@@ -224,11 +235,14 @@ contains
     ! ---- Done reading 3-D Mesh information ---- !
 
     ! Now we need to convert from 3-D to 2-D !
-    nLocalSides2D = nLocalSides3D-2*nGlobalElem
+    nLocalSides2D = nLocalSides3D-2*nLocalElems
     nUniqueSides2D = nUniqueSides3D-2*nGlobalElem ! Remove the "top" and "bottom" faces
-    nLocalNodes2D = nLocalNodes2D-nGlobalElem*nGeo*(nGeo+1)**2 ! Remove the third dimension
+    nLocalNodes2D = nLocalNodes2D-nLocalElems*nGeo*(nGeo+1)**2 ! Remove the third dimension
 
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Allocating memory for mesh'
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' n local sides  : ',nLocalSides2D
     call this%Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
+    this%nUniqueSides = nUniqueSides2D ! Store the number of sides in the global mesh
 
     ! Copy data from local arrays into this
     !  elemInfo(1:6,iEl)
@@ -269,7 +283,6 @@ contains
         this%sideInfo(4,lsid,eid) = this%sideInfo(4,lsid,eid)-10
       enddo
     enddo
-
     call this%RecalculateFlip()
 
     deallocate(hopr_elemInfo,hopr_nodeCoords,hopr_globalNodeIDs,hopr_sideInfo)

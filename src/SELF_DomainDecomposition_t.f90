@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_DomainDecomposition
+module SELF_DomainDecomposition_t
 
   use SELF_Constants
   use SELF_Lagrange
@@ -34,7 +34,7 @@ module SELF_DomainDecomposition
 
   implicit none
 
-  type DomainDecomposition
+  type DomainDecomposition_t
     logical :: mpiEnabled
     integer :: mpiComm
     integer :: mpiPrec
@@ -50,23 +50,23 @@ module SELF_DomainDecomposition
 
   contains
 
-    procedure :: Init => Init_DomainDecomposition
-    procedure :: Free => Free_DomainDecomposition
+    procedure :: Init => Init_DomainDecomposition_t
+    procedure :: Free => Free_DomainDecomposition_t
 
-    procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition
-    procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
+    procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
+    procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
 
     procedure,public :: FinalizeMPIExchangeAsync
 
-  endtype DomainDecomposition
+  endtype DomainDecomposition_t
 
 contains
 
-  subroutine Init_DomainDecomposition(this,enableMPI)
+  subroutine Init_DomainDecomposition_t(this,enableMPI)
 #undef __FUNC__
-#define __FUNC__ "Init_DomainDecomposition"
+#define __FUNC__ "Init_DomainDecomposition_t"
     implicit none
-    class(DomainDecomposition),intent(out) :: this
+    class(DomainDecomposition_t),intent(out) :: this
     logical,intent(in) :: enableMPI
     ! Local
     integer       :: ierror
@@ -97,11 +97,11 @@ contains
 
     allocate(this%offsetElem(1:this%nRanks+1))
 
-  endsubroutine Init_DomainDecomposition
+  endsubroutine Init_DomainDecomposition_t
 
-  subroutine Free_DomainDecomposition(this)
+  subroutine Free_DomainDecomposition_t(this)
     implicit none
-    class(DomainDecomposition),intent(inout) :: this
+    class(DomainDecomposition_t),intent(inout) :: this
     ! Local
     integer :: ierror
 
@@ -120,11 +120,11 @@ contains
       call MPI_FINALIZE(ierror)
     endif
 
-  endsubroutine Free_DomainDecomposition
+  endsubroutine Free_DomainDecomposition_t
 
-  subroutine GenerateDecomposition_DomainDecomposition(this,nGlobalElem,maxMsg)
+  subroutine GenerateDecomposition_DomainDecomposition_t(this,nGlobalElem,maxMsg)
     implicit none
-    class(DomainDecomposition),intent(inout) :: this
+    class(DomainDecomposition_t),intent(inout) :: this
     integer,intent(in) :: nGlobalElem
     integer,intent(in) :: maxMsg
 
@@ -139,11 +139,11 @@ contains
     print*,__FILE__//" : Rank ",this%rankId+1," : n_elements = ", &
       this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
 
-  endsubroutine GenerateDecomposition_DomainDecomposition
+  endsubroutine GenerateDecomposition_DomainDecomposition_t
 
-  subroutine SetElemToRank_DomainDecomposition(this,nElem)
+  subroutine SetElemToRank_DomainDecomposition_t(this,nElem)
     implicit none
-    class(DomainDecomposition),intent(inout) :: this
+    class(DomainDecomposition_t),intent(inout) :: this
     integer,intent(in) :: nElem
     ! Local
     integer :: iel
@@ -163,7 +163,7 @@ contains
                       this%elemToRank(iel))
     enddo
 
-  endsubroutine SetElemToRank_DomainDecomposition
+  endsubroutine SetElemToRank_DomainDecomposition_t
 
   subroutine DomainDecomp(nElems,nDomains,offSetElem)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 4
@@ -225,7 +225,7 @@ contains
   endsubroutine ElemToRank
 
   subroutine FinalizeMPIExchangeAsync(mpiHandler)
-    class(DomainDecomposition),intent(inout) :: mpiHandler
+    class(DomainDecomposition_t),intent(inout) :: mpiHandler
     ! Local
     integer :: ierror
     integer :: msgCount
@@ -241,7 +241,7 @@ contains
   endsubroutine FinalizeMPIExchangeAsync
 
   ! subroutine GlobalReduce_RealScalar(mpiHandler,sendBuf,recvBuf)
-  !   class(DomainDecomposition),intent(in) :: mpiHandler
+  !   class(DomainDecomposition_t),intent(in) :: mpiHandler
   !   real(prec),intent(in) :: sendBuf
   !   real(prec),intent(out) :: recvBuf
   !   ! Local
@@ -261,4 +261,4 @@ contains
 
   ! endsubroutine GlobalReduce_RealScalar
 
-endmodule SELF_DomainDecomposition
+endmodule SELF_DomainDecomposition_t
