@@ -26,33 +26,32 @@
 
 module SELF_DomainDecomposition
 
-    use SELF_DomainDecomposition_t
-    use mpi
-    use iso_c_binding
-  
-    implicit none
-  
-    type, extends(DomainDecomposition_t) :: DomainDecomposition
-      type(c_ptr) :: elemToRank_gpu
+  use SELF_DomainDecomposition_t
+  use mpi
+  use iso_c_binding
 
+  implicit none
 
-    contains
-  
-      procedure :: Init => Init_DomainDecomposition
-      procedure :: Free => Free_DomainDecomposition
-  
-      procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
-   
-    endtype DomainDecomposition
-  
-    interface
-      function check_gpu_aware_support() bind(c,name="check_gpu_aware_support")
-        use iso_c_binding
-        integer(c_int) :: check_gpu_aware_support
-      end function check_gpu_aware_support
-    endinterface
+  type,extends(DomainDecomposition_t) :: DomainDecomposition
+    type(c_ptr) :: elemToRank_gpu
+
   contains
-  
+
+    procedure :: Init => Init_DomainDecomposition
+    procedure :: Free => Free_DomainDecomposition
+
+    procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
+
+  endtype DomainDecomposition
+
+  interface
+    function check_gpu_aware_support() bind(c,name="check_gpu_aware_support")
+      use iso_c_binding
+      integer(c_int) :: check_gpu_aware_support
+    endfunction check_gpu_aware_support
+  endinterface
+contains
+
   subroutine Init_DomainDecomposition(this,enableMPI)
     implicit none
     class(DomainDecomposition),intent(out) :: this
@@ -73,7 +72,7 @@ module SELF_DomainDecomposition
       print*,__FILE__," : Initializing MPI"
       call MPI_INIT(ierror)
 
-      if( check_gpu_aware_support() == 0 )then
+      if(check_gpu_aware_support() == 0) then
         print*,__FILE__" : Error! GPU Aware support is not detected. Stopping."
         call MPI_FINALIZE(ierror)
         stop
@@ -145,6 +144,5 @@ module SELF_DomainDecomposition
     call gpuCheck(hipMemcpy(this%elemToRank_gpu,c_loc(this%elemToRank),sizeof(this%elemToRank),hipMemcpyHostToDevice))
 
   endsubroutine SetElemToRank_DomainDecomposition
-
 
 endmodule SELF_DomainDecomposition

@@ -62,7 +62,7 @@ module SELF_MappedScalar_2D
       type(c_ptr),value :: extBoundary,sideInfo,elemToRank
       integer(c_int),value :: rankId,offset,N,nVar,nEl
     endsubroutine ApplyFlip_2D_gpu
-  end interface
+  endinterface
 
   interface
     subroutine ContravariantWeight_2D_gpu(f,dsdx,jaf,N,nvar,nel) &
@@ -267,11 +267,11 @@ contains
                              this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
                              mesh%decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
 
-     if(mesh%decomp%mpiEnabled) then
+    if(mesh%decomp%mpiEnabled) then
       call mesh%decomp%FinalizeMPIExchangeAsync()
       ! Apply side flips for data exchanged with MPI
-      call ApplyFlip_2D_gpu(this%extboundary_gpu,mesh%sideInfo_gpu,&
-                            mesh%decomp%elemToRank_gpu,mesh%decomp%rankId,&
+      call ApplyFlip_2D_gpu(this%extboundary_gpu,mesh%sideInfo_gpu, &
+                            mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
                             offset,this%interp%N,this%nVar,this%nElem)
     endif
 
