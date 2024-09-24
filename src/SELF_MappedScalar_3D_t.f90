@@ -156,19 +156,19 @@ contains
 
               msgCount = msgCount+1
               call MPI_IRECV(this%extBoundary(:,:,s1,e1,ivar), &
-                              (this%interp%N+1)*(this%interp%N+1), &
-                              mesh%decomp%mpiPrec, &
-                              r2,globalSideId, &
-                              mesh%decomp%mpiComm, &
-                              mesh%decomp%requests(msgCount),iError)
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             r2,globalSideId, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
 
               msgCount = msgCount+1
               call MPI_ISEND(this%boundary(:,:,s1,e1,ivar), &
-                              (this%interp%N+1)*(this%interp%N+1), &
-                              mesh%decomp%mpiPrec, &
-                              r2,globalSideId, &
-                              mesh%decomp%mpiComm, &
-                              mesh%decomp%requests(msgCount),iError)
+                             (this%interp%N+1)*(this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             r2,globalSideId, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
             endif
           endif
 
@@ -199,7 +199,7 @@ contains
           e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
           s2 = mesh%sideInfo(4,s1,e1)/10
           bcid = mesh%sideInfo(5,s1,e1)
-          if(e2 >  0) then ! Interior Element
+          if(e2 > 0) then ! Interior Element
             r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
 
             if(r2 /= mesh%decomp%rankId) then

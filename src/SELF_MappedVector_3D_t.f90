@@ -127,7 +127,6 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector3D_t
 
-
   subroutine MPIExchangeAsync_MappedVector3D_t(this,mesh,resetCount)
     implicit none
     class(MappedVector3D_t),intent(inout) :: this
@@ -158,23 +157,23 @@ contains
 
                 s2 = mesh%sideInfo(4,s1,e1)/10
                 globalSideId = abs(mesh%sideInfo(2,s1,e1))
-                tag = globalsideid+mesh%nUniqueSides*(ivar-1 + this%nvar*(idir-1))
+                tag = globalsideid+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
 
                 msgCount = msgCount+1
                 call MPI_IRECV(this%extBoundary(:,:,s1,e1,ivar,idir), &
-                                (this%interp%N+1)*(this%interp%N+1), &
-                                mesh%decomp%mpiPrec, &
-                                r2,globalSideId, &
-                                mesh%decomp%mpiComm, &
-                                mesh%decomp%requests(msgCount),iError)
+                               (this%interp%N+1)*(this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,globalSideId, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
 
                 msgCount = msgCount+1
                 call MPI_ISEND(this%boundary(:,:,s1,e1,ivar,idir), &
-                                (this%interp%N+1)*(this%interp%N+1), &
-                                mesh%decomp%mpiPrec, &
-                                r2,globalSideId, &
-                                mesh%decomp%mpiComm, &
-                                mesh%decomp%requests(msgCount),iError)
+                               (this%interp%N+1)*(this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,globalSideId, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
               endif
             endif
 
@@ -199,7 +198,6 @@ contains
     integer :: bcid
     real(prec) :: extBuff(1:this%interp%N+1,1:this%interp%N+1)
 
-
     do idir = 1,3
       do ivar = 1,this%nvar
         do e1 = 1,this%nElem
@@ -208,7 +206,7 @@ contains
             e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
             s2 = mesh%sideInfo(4,s1,e1)/10
             bcid = mesh%sideInfo(5,s1,e1)
-            if(e2 >  0) then ! Interior Element
+            if(e2 > 0) then ! Interior Element
               r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
 
               if(r2 /= mesh%decomp%rankId) then

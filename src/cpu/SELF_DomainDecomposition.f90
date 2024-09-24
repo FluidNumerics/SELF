@@ -30,8 +30,7 @@ module SELF_DomainDecomposition
 
   implicit none
 
-  type, extends(DomainDecomposition_t) :: DomainDecomposition
+  type,extends(DomainDecomposition_t) :: DomainDecomposition
   endtype DomainDecomposition
-
 
 endmodule SELF_DomainDecomposition
