@@ -230,7 +230,7 @@ contains
     type(Mesh2D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
-    integer :: flip,bcid
+    integer :: flip
     integer :: i1,i2,ivar
     integer :: r2
     integer :: rankId,offset,N
@@ -255,12 +255,11 @@ contains
       e2 = e2Global-offset
       s2 = mesh%sideInfo(4,s1,e1)/10
       flip = mesh%sideInfo(4,s1,e1)-s2*10
-      bcid = mesh%sideInfo(5,s1,e1)
 
       if(e2Global > 0) then
 
         r2 = elemToRank(e2Global)
-        if(r2 == mesh%decomp%rankId) then
+        if(r2 == rankId) then
 
           if(flip == 0) then
             do i1 = 1,N+1

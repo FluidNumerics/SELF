@@ -133,4 +133,6 @@ add_fortran_tests (
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
                        "mappedscalarbrgradient_2d_linear_mpi.f90"
-                       "mappedvectordgdivergence_3d_linear_mpi.f90" )
+                       "mappedvectordgdivergence_3d_linear_mpi.f90"
+                       "mappedvectordgdivergence_3d_linear_sideexchange_mpi.f90"
+                       "mappedscalarbrgradient_3d_linear_mpi.f90" )

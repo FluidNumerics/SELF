@@ -29,18 +29,18 @@ program test
   implicit none
   integer :: exit_code
 
-  exit_code = mappedvectordgdivergence_2d_linear()
+  exit_code = mappedscalarbrgradient_3d_linear()
   stop exit_code
 
 contains
-  integer function mappedvectordgdivergence_2d_linear() result(r)
+  integer function mappedscalarbrgradient_3d_linear() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Mesh_2D
-    use SELF_Geometry_2D
-    use SELF_MappedScalar_2D
-    use SELF_MappedVector_2D
+    use SELF_Mesh_3D
+    use SELF_Geometry_3D
+    use SELF_MappedScalar_3D
+    use SELF_MappedVector_3D
 
     implicit none
 
@@ -50,16 +50,20 @@ contains
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-    real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 10.0_prec**(-2)
 #endif
     type(Lagrange),target :: interp
-    type(Mesh2D),target :: mesh
-    type(SEMQuad),target :: geometry
-    type(MappedVector2D) :: f
-    type(MappedScalar2D) :: df
+    type(Mesh3D),target :: mesh
+    type(SEMHex),target :: geometry
+    type(MappedScalar3D) :: f
+    type(MappedVector3D) :: df
+    integer :: iel
+    integer :: iside
+    integer :: i
+    integer :: j
+    integer :: k
+    integer :: e2,s2,bcid
     character(LEN=255) :: WORKSPACE
-    integer :: i,j,iel,e2
-    real(prec) :: nhat(1:2),nmag,fx,fy,diff
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -69,7 +73,7 @@ contains
 
     ! Create a uniform block mesh
     call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",enableDomainDecomposition=.true.)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",enableDomainDecomposition=.true.)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
@@ -79,65 +83,67 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    call f%SetEquation(1,1,'f = x') ! x-component
-    call f%SetEquation(2,1,'f = y') ! y-component
+    call f%SetName(1,"f")
+    call df%SetName(1,"df")
+
+    call f%SetEquation(1,'f = x*y')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-    call f%boundaryInterp()
+    call f%BoundaryInterp()
     call f%UpdateHost()
+    print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh)
+    call f%UpdateHost()
 
-    ! Set boundary conditions
-    do iEl = 1,f%nElem
-      do j = 1,4
-        e2 = mesh%sideInfo(3,j,iel) ! Neighbor Element (global id)
-
-        if(e2 == 0) then ! Exterior edge
-          do i = 1,f%interp%N+1
-            f%extboundary(i,j,iEl,1,1) = f%boundary(i,j,iEl,1,1)
-            f%extboundary(i,j,iEl,1,2) = f%boundary(i,j,iEl,1,2)
+    ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
+    do iel = 1,f%nElem
+      do iside = 1,6
+        e2 = mesh%sideInfo(3,iside,iel) ! Neighboring Element ID
+        s2 = mesh%sideInfo(4,iside,iel)/10
+        bcid = mesh%sideInfo(5,iside,iel)
+        if(s2 == 0) then
+          do j = 1,f%interp%N+1
+            do i = 1,f%interp%N+1
+              f%extBoundary(i,j,iside,iel,1) = f%boundary(i,j,iside,iel,1)
+            enddo
           enddo
         endif
       enddo
     enddo
 
-    do iEl = 1,f%nElem
-      do j = 1,4
-        diff = 0.0_prec
-        do i = 1,f%interp%N+1
-
-          ! Get the boundary normals on cell edges from the mesh geometry
-          nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
-          nmag = geometry%nScale%boundary(i,j,iEl,1)
-          diff = diff+abs(f%boundary(i,j,iEl,1,1)-f%extboundary(i,j,iEl,1,1))
-          fx = 0.5*(f%boundary(i,j,iEl,1,1)+f%extboundary(i,j,iEl,1,1))
-          fy = 0.5*(f%boundary(i,j,iEl,1,2)+f%extboundary(i,j,iEl,1,2))
-
-          f%boundaryNormal(i,j,iEl,1) = (fx*nhat(1)+fy*nhat(2))*nmag
-
-        enddo
-        if(diff > tolerance) then
-          print*,'rank ',mesh%decomp%rankId,' : mismatched edge iel, s (diff)= ',iel,j,diff
-        endif
-      enddo
-    enddo
+    print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
 
     call f%UpdateDevice()
+    call f%AverageSides()
+    call f%UpdateHost()
+    print*,"min, max (avgboundary)",minval(f%avgBoundary),maxval(f%avgBoundary)
 
 #ifdef ENABLE_GPU
-    call f%MappedDGDivergence(df%interior_gpu)
+    call f%MappedDGGradient(df%interior_gpu)
 #else
-    call f%MappedDGDivergence(df%interior)
+    call f%MappedDGGradient(df%interior)
 #endif
     call df%UpdateHost()
 
     ! Calculate diff from exact
-    df%interior = abs(df%interior-2.0_prec)
+    do iel = 1,mesh%nelem
+      do k = 1,controlDegree+1
+        do j = 1,controlDegree+1
+          do i = 1,controlDegree+1
+            df%interior(i,j,k,iel,1,1) = abs(df%interior(i,j,k,iel,1,1)- &
+                                             geometry%x%interior(i,j,k,iel,1,2)) ! df/dx = y*z
+            df%interior(i,j,k,iel,1,2) = abs(df%interior(i,j,k,iel,1,2)- &
+                                             geometry%x%interior(i,j,k,iel,1,1)) ! df/dy = x*z
+            df%interior(i,j,k,iel,1,3) = abs(df%interior(i,j,k,iel,1,3)) ! df/dy = x*y
+          enddo
+        enddo
+      enddo
+    enddo
+    print*,"maxval(df_error)",maxval(df%interior),tolerance
 
-    print*,"absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
@@ -152,5 +158,5 @@ contains
     call f%free()
     call df%free()
 
-  endfunction mappedvectordgdivergence_2d_linear
+  endfunction mappedscalarbrgradient_3d_linear
 endprogram test
