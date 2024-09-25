@@ -118,7 +118,6 @@ module SELF_GPUInterfaces
     endsubroutine ApplyFlip_2D_gpu
   endinterface
 
-
   interface
     subroutine DG_BoundaryContribution_2D_gpu(bmatrix,qweights,bf,df,N,nvar,nel) &
       bind(c,name="DG_BoundaryContribution_2D_gpu")

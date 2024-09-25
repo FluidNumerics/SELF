@@ -133,23 +133,23 @@ contains
                 s2 = mesh%sideInfo(4,s1,e1)/10
                 globalSideId = abs(mesh%sideInfo(2,s1,e1))
                 ! create unique tag for each side and each variable
-                tag = globalsideid+mesh%nUniqueSides*(ivar-1 + this%nvar*(idir-1))
+                tag = globalsideid+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
 
                 msgCount = msgCount+1
                 call MPI_IRECV(extBoundary(:,s1,e1,ivar,idir), &
-                              (this%interp%N+1), &
-                              mesh%decomp%mpiPrec, &
-                              r2,tag, &
-                              mesh%decomp%mpiComm, &
-                              mesh%decomp%requests(msgCount),iError)
+                               (this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,tag, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
 
                 msgCount = msgCount+1
                 call MPI_ISEND(boundary(:,s1,e1,ivar,idir), &
-                              (this%interp%N+1), &
-                              mesh%decomp%mpiPrec, &
-                              r2,tag, &
-                              mesh%decomp%mpiComm, &
-                              mesh%decomp%requests(msgCount),iError)
+                               (this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,tag, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
               endif
             endif
 
