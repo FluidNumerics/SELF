@@ -75,7 +75,7 @@ contains
       if(check_gpu_aware_support() == 0) then
         print*,__FILE__" : Error! GPU Aware support is not detected. Stopping."
         call MPI_FINALIZE(ierror)
-        stop
+        stop 1
       endif
 
       call MPI_COMM_RANK(this%mpiComm,this%rankId,ierror)

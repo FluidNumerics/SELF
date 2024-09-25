@@ -10,6 +10,7 @@ extern "C"
 
 #if defined(OMPI_HAVE_MPI_EXT_ROCM) && OMPI_HAVE_MPI_EXT_ROCM
         gpuaware = (int) MPIX_Query_rocm_support();
+        printf("Query rocm support");
 #endif
 
 #if defined(OMPI_HAVE_MPI_EXT_CUDA) && OMPI_HAVE_MPI_EXT_CUDA

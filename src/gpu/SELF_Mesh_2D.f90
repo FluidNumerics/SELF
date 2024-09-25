@@ -147,7 +147,7 @@ contains
     integer,dimension(:,:),allocatable :: bcType
 
     if(present(enableDomainDecomposition)) then
-      call this%decomp%init(enableDomainDecomposition)
+      call this%decomp%init(.true.)
     else
       call this%decomp%init(.false.)
     endif

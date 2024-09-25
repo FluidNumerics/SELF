@@ -55,16 +55,6 @@ module SELF_MappedScalar_2D
   endtype MappedScalar2D
 
   interface
-    subroutine ApplyFlip_2D_gpu(extBoundary,sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="ApplyFlip_2D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: extBoundary,sideInfo,elemToRank
-      integer(c_int),value :: rankId,offset,N,nVar,nEl
-    endsubroutine ApplyFlip_2D_gpu
-  endinterface
-
-  interface
     subroutine ContravariantWeight_2D_gpu(f,dsdx,jaf,N,nvar,nel) &
       bind(c,name="ContravariantWeight_2D_gpu")
       use iso_c_binding
