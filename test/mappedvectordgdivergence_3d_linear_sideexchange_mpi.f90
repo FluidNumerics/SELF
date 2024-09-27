@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedvectordgdivergence_3d_linear()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedvectordgdivergence_3d_linear() result(r)
@@ -81,15 +83,18 @@ contains
 
     call f%SetEquation(1,1,'f = x') ! x-component
     call f%SetEquation(2,1,'f = y') ! y-component
-    call f%SetEquation(3,1,'f = z') ! z-component
+    call f%SetEquation(3,1,'f = 0') ! z-component
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
     call f%boundaryInterp()
-    call f%UpdateHost()
+    
+    print*,"Exchanging data on element faces"
 
     call f%SideExchange(mesh)
+    call f%UpdateHost()
 
+    print*, "Setting boundary conditions"
     ! Set boundary conditions
     do iEl = 1,f%nElem
       do k = 1,6
@@ -107,6 +112,7 @@ contains
       enddo
     enddo
 
+    print*, "Calculating boundary normal flux"
     do iEl = 1,f%nElem
       do k = 1,6
         do j = 1,f%interp%N+1
@@ -134,7 +140,7 @@ contains
     call df%UpdateHost()
 
     ! Calculate diff from exact
-    df%interior = abs(df%interior-3.0_prec)
+    df%interior = abs(df%interior-2.0_prec)
 
     if(maxval(df%interior) <= tolerance) then
       r = 0
@@ -150,8 +156,6 @@ contains
     call interp%Free()
     call f%free()
     call df%free()
-
-    r = 0
 
   endfunction mappedvectordgdivergence_3d_linear
 endprogram test

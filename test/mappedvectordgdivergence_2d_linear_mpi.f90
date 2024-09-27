@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedvectordgdivergence_2d_linear()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedvectordgdivergence_2d_linear() result(r)
@@ -119,16 +121,17 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
+      print*,"absmax error greater than tolerance :",tolerance
       r = 1
     endif
 
     ! Clean up
     call f%DissociateGeometry()
     call geometry%Free()
-    call mesh%Free()
     call interp%Free()
     call f%free()
     call df%free()
+    call mesh%Free()
 
   endfunction mappedvectordgdivergence_2d_linear
 endprogram test

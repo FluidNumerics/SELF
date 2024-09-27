@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedscalarderivative_1d_constant()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedscalarderivative_1d_constant() result(r)

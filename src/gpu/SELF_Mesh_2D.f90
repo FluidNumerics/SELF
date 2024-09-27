@@ -111,6 +111,7 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    call this%decomp%Free()
 
     call gpuCheck(hipFree(this%sideInfo_gpu))
 
@@ -147,7 +148,7 @@ contains
     integer,dimension(:,:),allocatable :: bcType
 
     if(present(enableDomainDecomposition)) then
-      call this%decomp%init(.true.)
+      call this%decomp%init(enableDomainDecomposition)
     else
       call this%decomp%init(.false.)
     endif

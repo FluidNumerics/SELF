@@ -29,13 +29,13 @@ program test
   implicit none
   integer :: exit_code
 
-  exit_code = mappedvectordivergence_3d_constant()
+  exit_code = mappedvectordgdivergence_3d_linear()
   if(exit_code /= 0) then
     stop exit_code
   endif
 
 contains
-  integer function mappedvectordivergence_3d_constant() result(r)
+  integer function mappedvectordgdivergence_3d_linear() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
@@ -60,6 +60,8 @@ contains
     type(MappedVector3D) :: f
     type(MappedScalar3D) :: df
     character(LEN=255) :: WORKSPACE
+    integer :: i,j,k,iel,e2,s2
+    real(prec) :: nhat(1:3),nmag,fx,fy,fz
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -79,27 +81,66 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    call f%SetEquation(1,1,'f = 1.0') ! x-component
-    call f%SetEquation(2,1,'f = 1.0') ! y-component
-    call f%SetEquation(3,1,'f = 1.0') ! z-component
+    call f%SetEquation(1,1,'f = x') ! x-component
+    call f%SetEquation(2,1,'f = y') ! y-component
+    call f%SetEquation(3,1,'f = 0') ! z-component
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
+    call f%boundaryInterp()
+    call f%SideExchange(mesh)
+    call f%UpdateHost()
+
+    ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
+    do iel = 1,f%nElem
+      do k = 1,6
+        e2 = mesh%sideInfo(3,k,iel) ! Neighboring Element ID
+        if(e2 == 0) then
+          do j = 1,f%interp%N+1
+            do i = 1,f%interp%N+1
+              f%extBoundary(i,j,k,iel,1,1:3) = f%boundary(i,j,k,iel,1,1:3)
+            enddo
+          enddo
+        endif
+      enddo
+    enddo
+
+    print*,"min, max (extboundary)",minval(f%extboundary),maxval(f%extboundary)
+
+    ! Calculate the flux
+    do iEl = 1,f%nElem
+      do k = 1,6
+        do j = 1,f%interp%N+1
+          do i = 1,f%interp%N+1
+
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat(1:3) = geometry%nHat%boundary(i,j,k,iEl,1,1:3)
+            nmag = geometry%nScale%boundary(i,j,k,iEl,1)
+            fx = 0.5_prec*(f%boundary(i,j,k,iEl,1,1)+f%extboundary(i,j,k,iEl,1,1))
+            fy = 0.5_prec*(f%boundary(i,j,k,iEl,1,2)+f%extboundary(i,j,k,iEl,1,2))
+            fz = 0.5_prec*(f%boundary(i,j,k,iEl,1,3)+f%extboundary(i,j,k,iEl,1,3))
+
+            f%boundaryNormal(i,j,k,iEl,1) = (fx*nhat(1)+fy*nhat(2)+fz*nhat(3))*nmag
+          enddo
+        enddo
+      enddo
+    enddo
+    call f%UpdateDevice()
 
 #ifdef ENABLE_GPU
-    call f%MappedDivergence(df%interior_gpu)
+    call f%MappedDGDivergence(df%interior_gpu)
 #else
-    call f%MappedDivergence(df%interior)
+    call f%MappedDGDivergence(df%interior)
 #endif
     call df%UpdateHost()
 
     ! Calculate diff from exact
-    df%interior = abs(df%interior-0.0_prec)
+    df%interior = abs(df%interior-2.0_prec)
 
+    print*,"max error (tolerance)",maxval(df%interior),tolerance
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*,"max error (tolerance)",maxval(df%interior),tolerance
       r = 1
     endif
 
@@ -111,7 +152,5 @@ contains
     call f%free()
     call df%free()
 
-    r = 0
-
-  endfunction mappedvectordivergence_3d_constant
+  endfunction mappedvectordgdivergence_3d_linear
 endprogram test

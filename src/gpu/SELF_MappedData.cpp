@@ -4,8 +4,8 @@
 // The functions take in an array of data and divide by the jacobian.
 __global__ void JacobianWeight(real *f, real *jacobian, int ndof){
 
-  size_t ivar = blockIdx.y;
-  size_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+ uint32_t ivar = blockIdx.y;
+ uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
     f[idof + ndof*ivar] = f[idof + ndof*ivar]/jacobian[idof];
@@ -137,10 +137,10 @@ __global__ void ApplyFlip_2D(real *extBoundary, int *sideInfo, int *elemToRank, 
         if(flip == 1){
           for( int i1 = 0; i1<N+1; i1++){
             int i2 = N-i1;
-            buff[i1] = extBoundary[SCB_2D_INDEX(i2,s1-1,e1-1,ivar,N,nEl)];
+            buff[i1] = extBoundary[SCB_2D_INDEX(i2,s1,e1,ivar,N,nEl)];
           }
           for( int i1 = 0; i1<N+1; i1++){
-            extBoundary[SCB_2D_INDEX(i1,s1-1,e1-1,ivar,N,nEl)] = buff[i1];
+            extBoundary[SCB_2D_INDEX(i1,s1,e1,ivar,N,nEl)] = buff[i1];
           }
         }
       }
@@ -246,91 +246,61 @@ extern "C"
 
 __global__ void ApplyFlip_3D(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar, int nEl){
 
-  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
-  uint32_t ndof = nVar*nEl*6;
-  uint32_t s1 = (idof) % 6;
-  uint32_t e1 = (idof/6) % nEl;
-  uint32_t ivar = idof/6/nEl;
+  uint32_t s1 = blockIdx.x;
+  uint32_t e1 = blockIdx.y;
+  uint32_t ivar = blockIdx.z;
+  uint32_t i = threadIdx.x;
+  uint32_t j = threadIdx.y;
+
+  __shared__ real extBuff[256];
+
+  extBuff[i+(N+1)*j] = extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)];
+
+  __syncthreads();
   
-  if(idof < ndof){
-    int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)];
-    int e2 = e2Global - offset;
-    int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-    int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-    real buff[81]; // warning : set fixed buffer size for applying flip. This limits the polynomial degree to 8 [ (N+1)^2 <= 81 ]
+  int e2Global = sideInfo[INDEX3(2,s1,e1,5,4)];
+  int e2 = e2Global - offset;
+  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
 
-    if(e2Global != 0){
-      int neighborRank = elemToRank[e2Global-1];
-      if( neighborRank != rankId ){
+  if(e2Global != 0){
+    int neighborRank = elemToRank[e2Global-1];
+    if( neighborRank != rankId ){
 
-
-        if(flip == 1){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = N-i1;
-              int j2 = j1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }
-        }
-        else if(flip == 2){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = N-i1;
-              int j2 = N-j1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }
-        }
-        else if(flip == 3){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = i1;
-              int j2 = N-j1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }
-        }
-        else if(flip == 4){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = j1;
-              int j2 = i1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }
-        }
-        else if(flip == 5){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = N-j1;
-              int j2 = i1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }        }
-        else if(flip == 6){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = N-j1;
-              int j2 = N-i1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }         }
-        else if(flip == 7){
-          for( int j1 = 0; j1<N+1; j1++){
-            for( int i1 = 0; i1<N+1; i1++){
-              int i2 = j1;
-              int j2 = N-i1;
-              buff[i1+(N+1)*j1] = extBoundary[SCB_3D_INDEX(i2,j2,s1-1,e1-1,ivar,N,nEl)];
-            }
-          }         
-        }
-        for( int j1 = 0; j1<N+1; j1++){
-          for( int i1 = 0; i1<N+1; i1++){
-            extBoundary[SCB_3D_INDEX(i1,j1,s1-1,e1-1,ivar,N,nEl)] = buff[i1+(N+1)*j1];
-          }
-        }
-
+      if(flip == 1){
+        int i2 = N-i;
+        int j2 = j;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];
+      }
+      else if(flip == 2){
+        int i2 = N-i;
+        int j2 = N-j;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];
+      }
+      else if(flip == 3){
+        int i2 = i;
+        int j2 = N-j;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];
+      }
+      else if(flip == 4){
+        int i2 = j;
+        int j2 = i;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];
+      }
+      else if(flip == 5){
+        int i2 = N-j;
+        int j2 = i;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];
+      }
+      else if(flip == 6){
+        int i2 = N-j;
+        int j2 = N-i;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];
+      }
+      else if(flip == 7){
+        int i2 = j;
+        int j2 = N-i;
+        extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = extBuff[i2+(N+1)*j2];    
       }
     }
   }
@@ -341,12 +311,8 @@ extern "C"
 {
   void ApplyFlip_3D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    int ndof = 6*nEl*nVar;
-    int threads_per_block = 256;
-    int nblocks_x = ndof/threads_per_block + 1;
-
-    dim3 nblocks(nblocks_x,1,1);
-    dim3 nthreads(threads_per_block,1,1);
+    dim3 nblocks(6,nEl,nVar);
+    dim3 nthreads(N+1,N+1,1);
     ApplyFlip_3D<<<nblocks,nthreads>>>(extBoundary, sideInfo, elemToRank, rankId, offset, N, nVar, nEl);
   }
 }

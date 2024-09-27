@@ -316,7 +316,7 @@ contains
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip
-    integer :: i1,i2,j1,j2,ivar
+    integer :: i,i2,j,j2,ivar
     integer :: r2
     integer :: rankId,offset
     integer :: idir
@@ -333,7 +333,6 @@ contains
     do concurrent(s1=1:6,e1=1:mesh%nElem,ivar=1:this%nvar,idir=1:3)
 
       e2Global = mesh%sideInfo(3,s1,e1)
-      e2 = e2Global-offset
       s2 = mesh%sideInfo(4,s1,e1)/10
       flip = mesh%sideInfo(4,s1,e1)-s2*10
 
@@ -343,58 +342,86 @@ contains
 
         if(r2 == rankId) then
 
+          e2 = e2Global-offset
+
           if(flip == 0) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i1,j1,s2,e2,ivar,idir)
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                this%extBoundary(i,j,s1,e1,ivar,idir) = &
+                  this%boundary(i,j,s2,e2,ivar,idir)
               enddo
             enddo
 
           else if(flip == 1) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-
-                i2 = j1
-                j2 = this%interp%N+2-i1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-i
+                j2 = j
+                this%extBoundary(i,j,s1,e1,ivar,idir) = &
                   this%boundary(i2,j2,s2,e2,ivar,idir)
-
               enddo
             enddo
 
           else if(flip == 2) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                i2 = this%interp%N+2-i1
-                j2 = this%interp%N+2-j1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-i
+                j2 = this%interp%N+2-j
+                this%extBoundary(i,j,s1,e1,ivar,idir) = &
                   this%boundary(i2,j2,s2,e2,ivar,idir)
               enddo
             enddo
 
           else if(flip == 3) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                i2 = this%interp%N+2-j1
-                j2 = i1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = i
+                j2 = this%interp%N+2-j
+                this%extBoundary(i,j,s1,e1,ivar,idir) = &
                   this%boundary(i2,j2,s2,e2,ivar,idir)
               enddo
             enddo
 
           else if(flip == 4) then
 
-            do j1 = 1,this%interp%N+1
-              do i1 = 1,this%interp%N+1
-                i2 = j1
-                j2 = i1
-                this%extBoundary(i1,j1,s1,e1,ivar,idir) = &
-                  this%boundary(i2,j2,s2,e2,ivar,idir)
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                this%extBoundary(i,j,s1,e1,ivar,idir) = &
+                  this%boundary(j,i,s2,e2,ivar,idir)
+              enddo
+            enddo
+
+          else if(flip == 5) then
+
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-j
+                j2 = i
+                this%extBoundary(i,j,s1,e1,ivar,idir) = this%boundary(i2,j2,s2,e2,ivar,idir)
+              enddo
+            enddo
+
+          else if(flip == 6) then
+
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = this%interp%N+2-j
+                j2 = this%interp%N+2-i
+                this%extBoundary(i,j,s1,e1,ivar,idir) = this%boundary(i2,j2,s2,e2,ivar,idir)
+              enddo
+            enddo
+
+          else if(flip == 7) then
+
+            do j = 1,this%interp%N+1
+              do i = 1,this%interp%N+1
+                i2 = j
+                j2 = this%interp%N+2-i
+                this%extBoundary(i,j,s1,e1,ivar,idir) = this%boundary(i2,j2,s2,e2,ivar,idir)
               enddo
             enddo
 

@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedscalargradient_3d_constant()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedscalargradient_3d_constant() result(r)

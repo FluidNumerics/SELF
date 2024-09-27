@@ -29,7 +29,9 @@ program test
   integer :: exit_code
 
   exit_code = scalargridinterp_2d_constant()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function scalargridinterp_2d_constant() result(r)

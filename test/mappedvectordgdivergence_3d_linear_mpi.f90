@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedvectordgdivergence_3d_linear()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedvectordgdivergence_3d_linear() result(r)
@@ -116,22 +118,21 @@ contains
     ! Calculate diff from exact
     df%interior = abs(df%interior-3.0_prec)
 
+    print*,"absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*,"max error (tolerance)",maxval(df%interior),tolerance
+      print*,"absmax error greater than tolerance :",tolerance
       r = 1
     endif
 
     ! Clean up
     call f%DissociateGeometry()
     call geometry%Free()
-    call mesh%Free()
     call interp%Free()
     call f%free()
     call df%free()
-
-    r = 0
+    call mesh%Free()
 
   endfunction mappedvectordgdivergence_3d_linear
 endprogram test

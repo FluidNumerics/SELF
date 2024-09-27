@@ -66,7 +66,7 @@ contains
 #undef __FUNC__
 #define __FUNC__ "Init_DomainDecomposition_t"
     implicit none
-    class(DomainDecomposition_t),intent(out) :: this
+    class(DomainDecomposition_t),intent(inout) :: this
     logical,intent(in) :: enableMPI
     ! Local
     integer       :: ierror
@@ -81,9 +81,9 @@ contains
     if(enableMPI) then
       this%mpiComm = MPI_COMM_WORLD
       print*,__FILE__," : Initializing MPI"
-      call MPI_INIT(ierror)
-      call MPI_COMM_RANK(this%mpiComm,this%rankId,ierror)
-      call MPI_COMM_SIZE(this%mpiComm,this%nRanks,ierror)
+      call mpi_init(ierror)
+      call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
+      call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
       print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
     else
       print*,__FILE__," : MPI not initialized. No domain decomposition used."

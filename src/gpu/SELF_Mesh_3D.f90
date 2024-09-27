@@ -132,6 +132,7 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    call this%decomp%Free()
 
     call gpuCheck(hipFree(this%sideInfo_gpu))
 

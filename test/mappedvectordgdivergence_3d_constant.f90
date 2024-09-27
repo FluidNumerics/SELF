@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedvectordgdivergence_3d_constant()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedvectordgdivergence_3d_constant() result(r)
@@ -130,8 +132,6 @@ contains
     call interp%Free()
     call f%free()
     call df%free()
-
-    r = 0
 
   endfunction mappedvectordgdivergence_3d_constant
 endprogram test

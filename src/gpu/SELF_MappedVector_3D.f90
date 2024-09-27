@@ -181,11 +181,11 @@ contains
     if(mesh%decomp%mpiEnabled) then
       call this%MPIExchangeAsync(mesh,resetCount=.true.)
     endif
-
     call SideExchange_3D_gpu(this%extboundary_gpu, &
                              this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
                              mesh%decomp%rankid,offset,this%interp%N,3*this%nvar,this%nelem)
 
+                      
     if(mesh%decomp%mpiEnabled) then
       call mesh%decomp%FinalizeMPIExchangeAsync()
       ! Apply side flips for data exchanged with MPI

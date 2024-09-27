@@ -116,6 +116,7 @@ add_fortran_tests (
     "mappedvectordivergence_3d_gausslobatto_constant.f90"
     "mappedvectordgdivergence_3d_constant.f90"
     "mappedvectordgdivergence_3d_linear.f90"
+    "mappedvectordgdivergence_3d_linear_sideexchange.f90"
     "advection_diffusion_1d_euler.f90"
     "advection_diffusion_1d_rk2.f90"
     "advection_diffusion_1d_rk3.f90"

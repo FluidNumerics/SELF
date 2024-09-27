@@ -29,7 +29,9 @@ program test
   integer :: exit_code
 
   exit_code = scalargradient_2d_constant()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
 

@@ -37,63 +37,13 @@ module SELF_DomainDecomposition
 
   contains
 
-    procedure :: Init => Init_DomainDecomposition
     procedure :: Free => Free_DomainDecomposition
 
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
 
   endtype DomainDecomposition
 
-  interface
-    function check_gpu_aware_support() bind(c,name="check_gpu_aware_support")
-      use iso_c_binding
-      integer(c_int) :: check_gpu_aware_support
-    endfunction check_gpu_aware_support
-  endinterface
 contains
-
-  subroutine Init_DomainDecomposition(this,enableMPI)
-    implicit none
-    class(DomainDecomposition),intent(out) :: this
-    logical,intent(in) :: enableMPI
-    ! Local
-    integer       :: ierror
-    integer(c_int) :: gpuaware
-
-    this%mpiComm = 0
-    this%mpiPrec = prec
-    this%rankId = 0
-    this%nRanks = 1
-    this%nElem = 0
-    this%mpiEnabled = enableMPI
-
-    if(enableMPI) then
-      this%mpiComm = MPI_COMM_WORLD
-      print*,__FILE__," : Initializing MPI"
-      call MPI_INIT(ierror)
-
-      if(check_gpu_aware_support() == 0) then
-        print*,__FILE__" : Error! GPU Aware support is not detected. Stopping."
-        call MPI_FINALIZE(ierror)
-        stop 1
-      endif
-
-      call MPI_COMM_RANK(this%mpiComm,this%rankId,ierror)
-      call MPI_COMM_SIZE(this%mpiComm,this%nRanks,ierror)
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
-    else
-      print*,__FILE__," : MPI not initialized. No domain decomposition used."
-    endif
-
-    if(prec == real32) then
-      this%mpiPrec = MPI_FLOAT
-    else
-      this%mpiPrec = MPI_DOUBLE
-    endif
-
-    allocate(this%offsetElem(1:this%nRanks+1))
-
-  endsubroutine Init_DomainDecomposition
 
   subroutine Free_DomainDecomposition(this)
     implicit none

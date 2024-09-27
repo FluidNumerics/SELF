@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedscalarbrgradient_2d_linear()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedscalarbrgradient_2d_linear() result(r)

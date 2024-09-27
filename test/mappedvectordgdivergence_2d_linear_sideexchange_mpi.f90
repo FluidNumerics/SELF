@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mappedvectordgdivergence_2d_linear()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mappedvectordgdivergence_2d_linear() result(r)
@@ -89,6 +91,7 @@ contains
     call f%UpdateHost()
 
     call f%SideExchange(mesh)
+    call f%UpdateHost()
 
     ! Set boundary conditions
     do iEl = 1,f%nElem

@@ -30,7 +30,9 @@ program test
   integer :: exit_code
 
   exit_code = mesh3d_setup()
-  stop exit_code
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
   integer function mesh3d_setup() result(r)
