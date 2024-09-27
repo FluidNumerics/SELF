@@ -19,10 +19,6 @@
 
 #include <hip/hip_runtime.h>
 
-#ifdef __HIPCC__
-#define __CUDACC__
-#endif
-
 __attribute__((unused))
 static void check(const hipError_t err, const char *const file, const int line)
 {
@@ -32,7 +28,7 @@ static void check(const hipError_t err, const char *const file, const int line)
   exit(err);
 }
 
-#elif HAVE_CUDA
+#else
 
 #include <cuda_runtime.h>
 

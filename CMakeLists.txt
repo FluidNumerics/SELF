@@ -54,15 +54,15 @@ project(self VERSION 1.0.0
 	LANGUAGES Fortran C CXX)
 
 # Fortran compiler requirements
-INCLUDE(FortranCInterface)
+include(FortranCInterface)
 FortranCInterface_VERIFY()
-IF(NOT FortranCInterface_VERIFIED_C)
-	MESSAGE(FATAL_ERROR "Fortran compiler must support C Interface")
-ENDIF(NOT FortranCInterface_VERIFIED_C)
+if(NOT FortranCInterface_VERIFIED_C)
+	message(FATAL_ERROR "Fortran compiler must support C Interface")
+endif(NOT FortranCInterface_VERIFIED_C)
 	
-IF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+if(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     MESSAGE(FATAL_ERROR "Fortran compiler does not support F90")
-ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+endif(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 
 # Default Fortran compiler flags
 # Fortran compiler flags
@@ -130,9 +130,8 @@ if( SELF_ENABLE_MULTITHREADING )
 
 endif()
 
-
 # MPI
-find_package(MPI COMPONENTS Fortran REQUIRED)
+find_package(MPI COMPONENTS Fortran C REQUIRED)
 
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)
@@ -162,7 +161,7 @@ if(SELF_ENABLE_DOUBLE_PRECISION)
 endif()
 
 if(SELF_ENABLE_GPU)
-    message("Enabling GPU Support")
+    message("-- Enabling GPU Support")
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DENABLE_GPU" )
     set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DENABLE_GPU" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DENABLE_GPU")
@@ -175,56 +174,68 @@ if(SELF_ENABLE_GPU)
     set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DENABLE_GPU")
     set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DENABLE_GPU" )
 
+    # Check MPI for GPU awareness
+    # Add SELF's cmake module directory to the search path
+    set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+    # Include the custom module
+    include(CheckMPIFeatures)
+    CheckMPIFeatures()
+
     # HIP (Optional)
     # IF HIP is found, we prefer HIP. IF HIP is not found, then we fall back to look for CUDA
     # only. If neither HIP nor CUDA are found, Cmake will error out.
     find_package(hip)
     if(hip_FOUND)
-        find_package(hipblas REQUIRED)
-        message("HIP found. Enabling HIP language.")
-        enable_language(HIP)
-        set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DHAVE_HIP" )
-        set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DHAVE_HIP" )
-        set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_HIP")
-        set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_HIP")
-        set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_HIP" )
+        if(MPI_HAS_QUERY_HIP_SUPPORT)
+            find_package(hipblas REQUIRED)
+            #message("-- HIP found. Enabling HIP language.")
+            #enable_language(HIP)
+            set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DHAVE_HIP" )
+            set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DHAVE_HIP" )
+            set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_HIP")
+            set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_HIP")
+            set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_HIP" )
 
-        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_HIP" )
-        set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DHAVE_HIP" )
-        set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DHAVE_HIP")
-        set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DHAVE_HIP")
-        set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DHAVE_HIP" )
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_HIP" )
+            set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DHAVE_HIP" )
+            set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DHAVE_HIP")
+            set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DHAVE_HIP")
+            set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DHAVE_HIP" )
 
-        set( BACKEND_LIBRARIES hip::device roc::hipblas)
+            set( BACKEND_LIBRARIES hip::device roc::hipblas)
+        else()
+            message( FATAL_ERROR "MPI installation is not GPU-aware" )
+        endif()
     else()
         # CUDA (Optional)
         find_package(cuda)
         if(cuda_FOUND)
-            message("CUDA found. Enabling CUDA language.")
-            enable_language(CUDA)
-            set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DHAVE_CUDA" )
-            set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DHAVE_CUDA" )
-            set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_CUDA")
-            set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_CUDA")
-            set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_CUDA" )
+            if(MPI_HAS_QUERY_CUDA_SUPPORT)
+                #message("-- CUDA found. Enabling CUDA language.")
+                #enable_language(CUDA)
+                set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DHAVE_CUDA" )
+                set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DHAVE_CUDA" )
+                set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DHAVE_CUDA")
+                set( CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS_PROFILE} -DHAVE_CUDA")
+                set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -DHAVE_CUDA" )
+                
+                set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUDA" )
+                set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DHAVE_CUDA" )
+                set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DHAVE_CUDA")
+                set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DHAVE_CUDA")
+                set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DHAVE_CUDA" )
             
-            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUDA" )
-            set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DHAVE_CUDA" )
-            set( CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_COVERAGE} -DHAVE_CUDA")
-            set( CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_PROFILE} -DHAVE_CUDA")
-            set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DHAVE_CUDA" )
-            
-            # TO DO - need cuda libraries and hipblas libraries
+                # TO DO - need cuda libraries and hipblas libraries
+            else()
+                message( FATAL_ERROR "MPI installation is not GPU-aware" )
+            endif()
         else()
             message( FATAL_ERROR "Enabling GPU support requires either HIP or CUDA." )
         endif()
     endif()
 endif()
-# get_cmake_property(_variableNames VARIABLES)
-# list (SORT _variableNames)
-# foreach (_variableName ${_variableNames})
-#     message(STATUS "${_variableName}=${${_variableName}}")
-# endforeach()
+
 # ----- end dependencies ----- #
 
 # Libraries
