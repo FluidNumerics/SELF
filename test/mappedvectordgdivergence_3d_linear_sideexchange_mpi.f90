@@ -88,13 +88,13 @@ contains
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
     call f%boundaryInterp()
-    
+
     print*,"Exchanging data on element faces"
 
     call f%SideExchange(mesh)
     call f%UpdateHost()
 
-    print*, "Setting boundary conditions"
+    print*,"Setting boundary conditions"
     ! Set boundary conditions
     do iEl = 1,f%nElem
       do k = 1,6
@@ -112,7 +112,7 @@ contains
       enddo
     enddo
 
-    print*, "Calculating boundary normal flux"
+    print*,"Calculating boundary normal flux"
     do iEl = 1,f%nElem
       do k = 1,6
         do j = 1,f%interp%N+1

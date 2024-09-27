@@ -334,7 +334,7 @@ contains
         if(r2 == rankId) then
 
           e2 = e2Global-offset
-          
+
           if(flip == 0) then
 
             do j = 1,this%interp%N+1
