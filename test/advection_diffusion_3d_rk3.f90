@@ -63,6 +63,7 @@ program advection_diffusion_3d_rk3
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
+  modelobj%gradient_enabled = .true.
 
   ! Set the velocity
   modelobj%u = u
