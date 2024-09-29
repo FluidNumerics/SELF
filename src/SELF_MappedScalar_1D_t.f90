@@ -31,7 +31,6 @@ module SELF_MappedScalar_1D_t
   use SELF_Scalar_1D
   use SELF_Mesh_1D
   use SELF_Geometry_1D
-  use SELF_DomainDecomposition
   use SELF_HDF5
   use HDF5
 

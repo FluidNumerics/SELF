@@ -335,113 +335,56 @@ contains
 
     INFO("Writing pickup file : "//trim(pickupFile))
     call this%solution%UpdateHost()
-    if(this%mesh%decomp%mpiEnabled) then
 
-      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%mesh%decomp%mpiComm)
+    call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
-      ! Write the interpolant to the file
-      INFO("Writing interpolant data to file")
-      call this%solution%interp%WriteHDF5(fileId)
+    ! Write the interpolant to the file
+    INFO("Writing interpolant data to file")
+    call this%solution%interp%WriteHDF5(fileId)
 
-      ! In this section, we write the solution and geometry on the control (quadrature) grid
-      ! which can be used for model pickup runs or post-processing
-      ! Write the model state to file
-      INFO("Writing control grid solution to file")
-      call CreateGroup_HDF5(fileId,'/controlgrid')
-      call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
-                                   this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
+    ! In this section, we write the solution and geometry on the control (quadrature) grid
+    ! which can be used for model pickup runs or post-processing
 
-      ! Write the geometry to file
-      INFO("Writing control grid geometry to file")
-      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x', &
-                                     this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
+    ! Write the model state to file
+    INFO("Writing control grid solution to file")
+    call CreateGroup_HDF5(fileId,'/controlgrid')
+    call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
-      ! -- END : writing solution on control grid -- !
+    ! Write the geometry to file
+    INFO("Writing control grid  geometry to file")
+    call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+    call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
+    ! -- END : writing solution on control grid -- !
 
-      ! Interpolate the solution to a grid for plotting results
-      ! Create an interpolant for the uniform grid
-      call interp%Init(this%solution%interp%M, &
-                       this%solution%interp%targetNodeType, &
-                       this%solution%interp%N, &
-                       this%solution%interp%controlNodeType)
+    ! Interpolate the solution to a grid for plotting results
+    ! Create an interpolant for the uniform grid
+    call interp%Init(this%solution%interp%M, &
+                     this%solution%interp%targetNodeType, &
+                     this%solution%interp%N, &
+                     this%solution%interp%controlNodeType)
 
-      call solution%Init(interp, &
-                         this%solution%nVar,this%solution%nElem)
+    call solution%Init(interp, &
+                       this%solution%nVar,this%solution%nElem)
 
-      call x%Init(interp,1,this%solution%nElem)
+    call x%Init(interp,1,this%solution%nElem)
 
-      ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x%interior)
+    ! Map the mesh positions to the target grid
+    call this%geometry%x%GridInterp(x%interior)
 
-      ! Map the solution to the target grid
-      call this%solution%GridInterp(solution%interior)
+    ! Map the solution to the target grid
+    call this%solution%GridInterp(solution%interior)
 
-      ! Write the model state to file
-      call CreateGroup_HDF5(fileId,'/targetgrid')
-      call solution%WriteHDF5(fileId,'/targetgrid/solution', &
-                              this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
+    ! Write the model state to file
+    INFO("Writing target grid solution to file")
+    call CreateGroup_HDF5(fileId,'/targetgrid')
+    call solution%WriteHDF5(fileId,'/targetgrid/solution')
 
-      ! Write the geometry to file
-      call CreateGroup_HDF5(fileId,'/targetgrid/mesh')
-      call x%WriteHDF5(fileId,'/targetgrid/mesh/coords', &
-                       this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
+    ! Write the geometry to file
+    INFO("Writing target grid geometry to file")
+    call CreateGroup_HDF5(fileId,'/targetgrid/geometry')
+    call x%WriteHDF5(fileId,'/targetgrid/geometry/x')
 
-      call Close_HDF5(fileId)
-
-    else
-
-      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
-
-      ! Write the interpolant to the file
-      INFO("Writing interpolant data to file")
-      call this%solution%interp%WriteHDF5(fileId)
-
-      ! In this section, we write the solution and geometry on the control (quadrature) grid
-      ! which can be used for model pickup runs or post-processing
-
-      ! Write the model state to file
-      INFO("Writing control grid solution to file")
-      call CreateGroup_HDF5(fileId,'/controlgrid')
-      call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
-
-      ! Write the geometry to file
-      INFO("Writing control grid  geometry to file")
-      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
-      ! -- END : writing solution on control grid -- !
-
-      ! Interpolate the solution to a grid for plotting results
-      ! Create an interpolant for the uniform grid
-      call interp%Init(this%solution%interp%M, &
-                       this%solution%interp%targetNodeType, &
-                       this%solution%interp%N, &
-                       this%solution%interp%controlNodeType)
-
-      call solution%Init(interp, &
-                         this%solution%nVar,this%solution%nElem)
-
-      call x%Init(interp,1,this%solution%nElem)
-
-      ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x%interior)
-
-      ! Map the solution to the target grid
-      call this%solution%GridInterp(solution%interior)
-
-      ! Write the model state to file
-      INFO("Writing target grid solution to file")
-      call CreateGroup_HDF5(fileId,'/targetgrid')
-      call solution%WriteHDF5(fileId,'/targetgrid/solution')
-
-      ! Write the geometry to file
-      INFO("Writing target grid geometry to file")
-      call CreateGroup_HDF5(fileId,'/targetgrid/geometry')
-      call x%WriteHDF5(fileId,'/targetgrid/geometry/x')
-
-      call Close_HDF5(fileId)
-
-    endif
+    call Close_HDF5(fileId)
 
     call x%Free()
     call solution%Free()
@@ -459,28 +402,8 @@ contains
     integer :: firstElem
     integer :: N
 
-    if(this%mesh%decomp%mpiEnabled) then
-      call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
-                     this%mesh%decomp%mpiComm)
-    else
-      call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
-    endif
-
-    ! CALL ReadAttribute_HDF5(fileId,'N',N)
-
-    ! IF (this % solution % interp % N /= N) THEN
-    !   STOP 'Error : Solution polynomial degree does not match input file'
-    ! END IF
-
-    if(this%mesh%decomp%mpiEnabled) then
-      firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId)+1
-      solOffset(1:3) = (/0,1,firstElem/)
-      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
-                          this%solution%interior,solOffset)
-    else
-      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this%solution%interior)
-    endif
-
+    call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
+    call ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this%solution%interior)
     call Close_HDF5(fileId)
     call this%solution%UpdateDevice()
 

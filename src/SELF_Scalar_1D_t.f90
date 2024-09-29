@@ -63,9 +63,8 @@ module SELF_Scalar_1D_t
     procedure,private :: GridInterp_Scalar1D_t
     generic,public :: Derivative => Derivative_Scalar1D_t
     procedure,private :: Derivative_Scalar1D_t
-    generic,public :: WriteHDF5 => WriteHDF5_Scalar1D_t,WriteHDF5_MPI_Scalar1D_t
+    generic,public :: WriteHDF5 => WriteHDF5_Scalar1D_t
     procedure,private :: WriteHDF5_Scalar1D_t
-    procedure,private :: WriteHDF5_MPI_Scalar1D_t
 
   endtype Scalar1D_t
 
@@ -207,45 +206,6 @@ contains
     enddo
 
   endsubroutine Derivative_Scalar1D_t
-
-  subroutine WriteHDF5_MPI_Scalar1D_t(this,fileId,group,elemoffset,nglobalelem)
-    implicit none
-    class(Scalar1D_t),intent(in) :: this
-    character(*),intent(in) :: group
-    integer(HID_T),intent(in) :: fileId
-    integer,intent(in) :: elemoffset
-    integer,intent(in) :: nglobalelem
-    ! Local
-    integer(HID_T) :: offset(1:3)
-    integer(HID_T) :: bOffset(1:3)
-    integer(HID_T) :: globalDims(1:3)
-    integer(HID_T) :: bGlobalDims(1:3)
-    integer :: ivar
-
-    offset(1:3) = (/0,0,elemoffset/)
-    globalDims(1:3) = (/this%interp%N+1, &
-                        this%nVar, &
-                        nGlobalElem/)
-
-    ! Offsets and dimensions for element boundary data
-    bOffset(1:3) = (/0,0,elemoffset/)
-    bGlobalDims(1:3) = (/this%nVar, &
-                         2, &
-                         nGlobalElem/)
-
-    call CreateGroup_HDF5(fileId,trim(group))
-
-    do ivar = 1,this%nVar
-      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
-    enddo
-
-    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
-                         this%interior,offset,globalDims)
-
-    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
-                         this%boundary,bOffset,bGlobalDims)
-
-  endsubroutine WriteHDF5_MPI_Scalar1D_t
 
   subroutine WriteHDF5_Scalar1D_t(this,fileId,group)
     implicit none
