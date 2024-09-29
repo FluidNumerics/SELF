@@ -72,7 +72,7 @@ contains
 
     ! Calculate diff from exact
     f%boundary = abs(f%boundary-1.0_prec)
-    print*, "absmax(error), tolerance : ",maxval(f%boundary),tolerance
+    print*,"absmax(error), tolerance : ",maxval(f%boundary),tolerance
     if(maxval(f%boundary) <= tolerance) then
       r = 0
     else

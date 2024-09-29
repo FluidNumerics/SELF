@@ -105,11 +105,10 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector3D
 
-  subroutine MPIExchangeAsync_MappedVector3D(this,mesh,resetCount)
+  subroutine MPIExchangeAsync_MappedVector3D(this,mesh)
     implicit none
     class(MappedVector3D),intent(inout) :: this
     type(Mesh3D),intent(inout) :: mesh
-    logical,intent(in) :: resetCount
     ! Local
     integer :: e1,s1,e2,s2,ivar,idir
     integer :: globalSideId,r2,tag
@@ -118,11 +117,7 @@ contains
     real(prec),pointer :: boundary(:,:,:,:,:,:)
     real(prec),pointer :: extboundary(:,:,:,:,:,:)
 
-    if(resetCount) then
-      msgCount = 0
-    else
-      msgCount = mesh%decomp%msgCount
-    endif
+    msgCount = 0
     call c_f_pointer(this%boundary_gpu,boundary,[this%interp%N+1,this%interp%N+1,6,this%nelem,this%nvar,3])
     call c_f_pointer(this%extboundary_gpu,extboundary,[this%interp%N+1,this%interp%N+1,6,this%nelem,this%nvar,3])
 
@@ -179,7 +174,7 @@ contains
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
     if(mesh%decomp%mpiEnabled) then
-      call this%MPIExchangeAsync(mesh,resetCount=.true.)
+      call this%MPIExchangeAsync(mesh)
     endif
     call SideExchange_3D_gpu(this%extboundary_gpu, &
                              this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &

@@ -127,22 +127,17 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector3D_t
 
-  subroutine MPIExchangeAsync_MappedVector3D_t(this,mesh,resetCount)
+  subroutine MPIExchangeAsync_MappedVector3D_t(this,mesh)
     implicit none
     class(MappedVector3D_t),intent(inout) :: this
     type(Mesh3D),intent(inout) :: mesh
-    logical,intent(in) :: resetCount
     ! Local
     integer :: e1,s1,e2,s2,ivar,idir
     integer :: globalSideId,r2,tag
     integer :: iError
     integer :: msgCount
 
-    if(resetCount) then
-      msgCount = 0
-    else
-      msgCount = mesh%decomp%msgCount
-    endif
+    msgCount = 0
 
     do idir = 1,3
       do ivar = 1,this%nvar
@@ -327,7 +322,7 @@ contains
     offset = mesh%decomp%offsetElem(rankId+1)
 
     if(mesh%decomp%mpiEnabled) then
-      call this%MPIExchangeAsync(mesh,resetCount=.true.)
+      call this%MPIExchangeAsync(mesh)
     endif
 
     do concurrent(s1=1:6,e1=1:mesh%nElem,ivar=1:this%nvar,idir=1:3)
