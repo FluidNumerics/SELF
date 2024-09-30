@@ -328,7 +328,7 @@ contains
 
     write(timeStampString,'(I13.13)') this%ioIterate
     if(present(filename)) then
-      pickupFile = trim(filename)//timeStampString//'.h5'
+      pickupFile = trim(filename)
     else
       pickupFile = 'solution.'//timeStampString//'.h5'
     endif

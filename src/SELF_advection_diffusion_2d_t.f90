@@ -52,7 +52,7 @@ contains
     implicit none
     class(advection_diffusion_2d_t),intent(inout) :: this
     ! Local
-    integer :: iel,i,j,ivar
+    integer :: iel,i,j,ivar,ierror
     real(prec) :: e,s,jac
 
     e = 0.0_prec
@@ -68,7 +68,17 @@ contains
       enddo
     enddo
 
-    this%entropy = e
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
 
   endsubroutine CalculateEntropy_advection_diffusion_2d_t
 
@@ -130,6 +140,18 @@ contains
 
   endsubroutine setgradientboundarycondition_advection_diffusion_2d_t
 
+  ! function flux_func_advection_diffusion_2d( this, f, dfdx, dfdy ) result(flux)
+  !   class(advection_diffusion_2d_t) :: this
+  !   real(prec) :: f(1:this%nvar)
+  !   real(prec) :: dfdx(1:this%nvar)
+  !   real(prec) :: dfdy(1:this%nvar)
+  !   real(prec) :: flux(1:this%nvar,1:2)
+
+  !   flux(1:this%nvar,1) = this%u*f-this%nu*dfdx ! advective flux + diffusive flux (x-component)
+  !   flux(1:this%nvar,1) = this%v*f-this%nu*dfdy ! advective flux + diffusive flux (x-component)
+
+  ! end function
+
   subroutine fluxmethod_advection_diffusion_2d_t(this)
     implicit none
     class(advection_diffusion_2d_t),intent(inout) :: this
@@ -151,6 +173,8 @@ contains
             f = this%solution%interior(i,j,iel,ivar)
             dfdx = this%solutionGradient%interior(i,j,iel,ivar,1)
             dfdy = this%solutionGradient%interior(i,j,iel,ivar,2)
+
+            !this%flux%interior(i,j,iel,:,:) = this%flux_func( f, dfdx, dfdy )
 
             this%flux%interior(i,j,iel,ivar,1) = u*f-nu*dfdx ! advective flux + diffusive flux (x-component)
             this%flux%interior(i,j,iel,ivar,2) = v*f-nu*dfdy ! advective flux + diffusive flux (y-component)

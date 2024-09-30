@@ -153,22 +153,21 @@ contains
       call this%decomp%init(.false.)
     endif
 
-    print*,__FILE__//' : Reading HOPr mesh from'//trim(meshfile)
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : Reading HOPr mesh from'//trim(meshfile)
     if(this%decomp%mpiEnabled) then
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)
     else
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
     endif
 
-    print*,__FILE__//' : Loading mesh attributes'
     call ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     call ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
     call ReadAttribute_HDF5(fileId,'nBCs',nBCs)
     call ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides3D)
-    print*,__FILE__//' : N Global Elements = ',nGlobalElem
-    print*,__FILE__//' : Mesh geometry degree = ',nGeo
-    print*,__FILE__//' : N Boundary conditions = ',nBCs
-    print*,__FILE__//' : N Unique Sides (3D) = ',nUniqueSides3D
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : N Global Elements = ',nGlobalElem
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : Mesh geometry degree = ',nGeo
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : N Boundary conditions = ',nBCs
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : N Unique Sides (3D) = ',nUniqueSides3D
 
     ! Read BCType
     allocate(bcType(1:4,1:nBCS))
@@ -181,14 +180,13 @@ contains
     endif
 
     ! Read local subarray of ElemInfo
-    print*,__FILE__//' : Generating Domain Decomposition'
     call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides3D)
 
     firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
     nLocalElems = this%decomp%offsetElem(this%decomp%rankId+2)- &
                   this%decomp%offsetElem(this%decomp%rankId+1)
 
-    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : element offset = ',firstElem
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : element offset = ',firstElem-1
     print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : n_elements = ',nLocalElems
 
     ! Allocate Space for hopr_elemInfo!
@@ -226,7 +224,6 @@ contains
     allocate(hopr_sideInfo(1:5,1:nLocalSides3D))
     if(this%decomp%mpiEnabled) then
       offset = (/0,firstSide-1/)
-      print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Reading side information'
       call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
     else
       call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
@@ -240,8 +237,7 @@ contains
     nUniqueSides2D = nUniqueSides3D-2*nGlobalElem ! Remove the "top" and "bottom" faces
     nLocalNodes2D = nLocalNodes2D-nLocalElems*nGeo*(nGeo+1)**2 ! Remove the third dimension
 
-    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Allocating memory for mesh'
-    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' n local sides  : ',nLocalSides2D
+    print*,__FILE__//' : Rank ',this%decomp%rankId+1,' : N local sides  : ',nLocalSides2D
     call this%Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
     this%nUniqueSides = nUniqueSides2D ! Store the number of sides in the global mesh
 

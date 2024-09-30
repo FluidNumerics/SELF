@@ -250,38 +250,24 @@ contains
     integer,intent(in) :: elemoffset
     integer,intent(in) :: nglobalelem
     ! Local
-    integer(HID_T) :: offset(1:5)
-    integer(HID_T) :: bOffset(1:5)
-    integer(HID_T) :: globalDims(1:5)
-    integer(HID_T) :: bGlobalDims(1:5)
+    integer(HID_T) :: offset(1:4)
+    integer(HID_T) :: globalDims(1:4)
     integer :: ivar
 
-    offset(1:5) = (/0,0,0,0,elemoffset/)
-    globalDims(1:5) = (/this%interp%N+1, &
+    offset(1:4) = (/0,0,0,elemoffset/)
+    globalDims(1:4) = (/this%interp%N+1, &
                         this%interp%N+1, &
                         this%interp%N+1, &
-                        this%nVar, &
                         nglobalelem/)
-
-    ! Offsets and dimensions for element boundary data
-    bOffset(1:5) = (/0,0,0,0,elemoffset/)
-    bGlobalDims(1:5) = (/this%interp%N+1, &
-                         this%interp%N+1, &
-                         this%nVar, &
-                         6, &
-                         nglobalelem/)
 
     call CreateGroup_HDF5(fileId,trim(group))
 
     do ivar = 1,this%nVar
-      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+      !call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+      call WriteArray_HDF5(fileId, &
+                           trim(group)//"/"//trim(this%meta(ivar)%name), &
+                           this%interior(:,:,:,:,ivar),offset,globalDims)
     enddo
-
-    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
-                         this%interior,offset,globalDims)
-
-    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
-                         this%boundary,bOffset,bGlobalDims)
 
   endsubroutine WriteHDF5_MPI_Scalar3D_t
 
@@ -297,13 +283,10 @@ contains
 
     do ivar = 1,this%nVar
       call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+      call WriteArray_HDF5(fileId, &
+                           trim(group)//trim(this%meta(ivar)%name), &
+                           this%interior(:,:,:,:,ivar))
     enddo
-
-    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
-                         this%interior)
-
-    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
-                         this%boundary)
 
   endsubroutine WriteHDF5_Scalar3D_t
 

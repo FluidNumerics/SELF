@@ -24,32 +24,35 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program advection_diffusion_2d_rk3
+program advection_diffusion_1d_euler
 
   use self_data
-  use self_advection_diffusion_2d
+  use self_advection_diffusion_1d
 
   implicit none
-  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
+  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
   integer,parameter :: nvar = 1
+  integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
-  real(prec),parameter :: u = 0.25_prec ! velocity
-  real(prec),parameter :: v = 0.25_prec
-  real(prec),parameter :: nu = 0.005_prec ! diffusivity
+  real(prec),parameter :: u = 1.0_prec ! velocity
+  real(prec),parameter :: nu = 0.001_prec ! diffusivity
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
   real(prec),parameter :: endtime = 0.2_prec
   real(prec),parameter :: iointerval = 0.1_prec
   real(prec) :: e0,ef ! Initial and final entropy
-  type(advection_diffusion_2d) :: modelobj
+  type(advection_diffusion_1d) :: modelobj
   type(Lagrange),target :: interp
-  type(Mesh2D),target :: mesh
-  type(SEMQuad),target :: geometry
-  character(LEN=255) :: WORKSPACE
+  type(Mesh1D),target :: mesh
+  type(Geometry1D),target :: geometry
 
-  ! Create a uniform block mesh
-  call get_environment_variable("WORKSPACE",WORKSPACE)
-  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+  ! Create a mesh using the built-in
+  ! uniform mesh generator.
+  ! The domain is set to x in [0,1]
+  ! We use `nelem` elements
+  call mesh%UniformBlockMesh(nGeo=1, &
+                             nElem=nelem, &
+                             x=(/0.0_prec,1.0_prec/))
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -64,16 +67,13 @@ program advection_diffusion_2d_rk3
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
   modelobj%gradient_enabled = .true.
-
   ! Set the velocity
   modelobj%u = u
-  modelobj%v = v
   !Set the diffusivity
   modelobj%nu = nu
 
-  ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
-  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+  ! Set the initial condition from a pickup file
+  call modelobj%ReadModel("advdiff1d-euler.pickup.h5")
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
@@ -81,28 +81,33 @@ program advection_diffusion_2d_rk3
 
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
-  e0 = modelobj%entropy
+  e0 = modelobj%entropy ! Save the initial entropy
+  !Write the initial condition
+  call modelobj%WriteModel()
+  call modelobj%WriteTecplot()
+  call modelobj%IncrementIOCounter()
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
   ! forward step the model to `endtime` using a time step
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
-  call modelobj%WriteModel("advdiff2d-rk3.pickup.h5")
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+
   ef = modelobj%entropy
 
   if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
+
   ! Clean up
   call modelobj%free()
   call mesh%free()
   call geometry%free()
   call interp%free()
 
-endprogram advection_diffusion_2d_rk3
+endprogram advection_diffusion_1d_euler

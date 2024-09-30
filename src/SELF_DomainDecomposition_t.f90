@@ -240,25 +240,4 @@ contains
 
   endsubroutine FinalizeMPIExchangeAsync
 
-  ! subroutine GlobalReduce_RealScalar(mpiHandler,sendBuf,recvBuf)
-  !   class(DomainDecomposition_t),intent(in) :: mpiHandler
-  !   real(prec),intent(in) :: sendBuf
-  !   real(prec),intent(out) :: recvBuf
-  !   ! Local
-  !   integer :: iError
-
-  !   if(mpiHandler%mpiEnabled) then
-  !     call MPI_ALLREDUCE(sendBuf, &
-  !                        recvBuf, &
-  !                        1, &
-  !                        mpiHandler%mpiPrec, &
-  !                        MPI_SUM, &
-  !                        mpiHandler%mpiComm, &
-  !                        iError)
-  !   else
-  !     recvBuf = sendBuf
-  !   endif
-
-  ! endsubroutine GlobalReduce_RealScalar
-
 endmodule SELF_DomainDecomposition_t

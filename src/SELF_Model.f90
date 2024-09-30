@@ -283,7 +283,7 @@ contains
     implicit none
     class(Model),intent(in) :: this
 
-    INFO("None")
+    print*,__FILE__//" : No model type"
 
   endsubroutine PrintType_Model
 
@@ -464,7 +464,7 @@ contains
     implicit none
     class(Model),intent(inout) :: this
 
-    INFO("No model, so nothing to set")
+    print*,__FILE__//" : No model, so nothing to set"
 
   endsubroutine SetInitialConditions_Model
 
@@ -484,8 +484,6 @@ contains
   endsubroutine CalculateEntropy_Model
 
   subroutine ReportEntropy_Model(this)
-#undef __FUNC__
-#define __FUNC__ "ReportEntropy"
   !! Base method for reporting the entropy of a model
   !! to stdout. Only override this procedure if additional
   !! reporting is needed. Alternatively, if you think
@@ -505,7 +503,7 @@ contains
 
     ! Write the output to STDOUT
     open(output_unit,ENCODING='utf-8')
-    write(output_unit,'("INFO : [",A,"] : ")',ADVANCE='no') __FUNC__
+    write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
     str = 'tᵢ ='//trim(modelTime)
     write(output_unit,'(A)',ADVANCE='no') str
     str = '  |  eᵢ ='//trim(entropy)

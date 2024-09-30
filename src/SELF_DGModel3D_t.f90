@@ -310,16 +310,11 @@ contains
   endsubroutine CalculateTendency_DGModel3D_t
 
   subroutine Write_DGModel3D_t(this,fileName)
-#undef __FUNC__
-#define __FUNC__ "Write_DGModel3D_t"
     implicit none
     class(DGModel3D_t),intent(inout) :: this
     character(*),optional,intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
-    type(Scalar3D) :: solution
-    type(Vector3D) :: x
-    type(Lagrange),target :: interp
     character(LEN=self_FileNameLength) :: pickupFile
     character(13) :: timeStampString
 
@@ -346,43 +341,14 @@ contains
       print*,"Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
-                                   this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
+                                   this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
       ! Write the geometry to file
       print*,"Writing control grid geometry to file"
-      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x', &
-                                     this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry', &
+                                     this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
       ! -- END : writing solution on control grid -- !
-
-      ! Interpolate the solution to a grid for plotting results
-      ! Create an interpolant for the uniform grid
-      call interp%Init(this%solution%interp%M, &
-                       this%solution%interp%targetNodeType, &
-                       this%solution%interp%N, &
-                       this%solution%interp%controlNodeType)
-
-      call solution%Init(interp, &
-                         this%solution%nVar,this%solution%nElem)
-
-      call x%Init(interp,1,this%solution%nElem)
-
-      ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x%interior)
-
-      ! Map the solution to the target grid
-      call this%solution%GridInterp(solution%interior)
-
-      ! Write the model state to file
-      call CreateGroup_HDF5(fileId,'/targetgrid')
-      call solution%WriteHDF5(fileId,'/targetgrid/solution', &
-                              this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
-
-      ! Write the geometry to file
-      call CreateGroup_HDF5(fileId,'/targetgrid/mesh')
-      call x%WriteHDF5(fileId,'/targetgrid/mesh/coords', &
-                       this%mesh%decomp%offsetElem(this%mesh%decomp%rankId),this%mesh%decomp%nElem)
 
       call Close_HDF5(fileId)
 
@@ -403,46 +369,13 @@ contains
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
       ! Write the geometry to file
-      print*,"Writing control grid  geometry to file"
-      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
+      print*,"Writing control grid geometry to file"
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry')
       ! -- END : writing solution on control grid -- !
-
-      ! Interpolate the solution to a grid for plotting results
-      ! Create an interpolant for the uniform grid
-      call interp%Init(this%solution%interp%M, &
-                       this%solution%interp%targetNodeType, &
-                       this%solution%interp%N, &
-                       this%solution%interp%controlNodeType)
-
-      call solution%Init(interp, &
-                         this%solution%nVar,this%solution%nElem)
-
-      call x%Init(interp,1,this%solution%nElem)
-
-      ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x%interior)
-
-      ! Map the solution to the target grid
-      call this%solution%GridInterp(solution%interior)
-
-      ! Write the model state to file
-      print*,"Writing target grid solution to file"
-      call CreateGroup_HDF5(fileId,'/targetgrid')
-      call solution%WriteHDF5(fileId,'/targetgrid/solution')
-
-      ! Write the geometry to file
-      print*,"Writing target grid geometry to file"
-      call CreateGroup_HDF5(fileId,'/targetgrid/geometry')
-      call x%WriteHDF5(fileId,'/targetgrid/geometry/x')
 
       call Close_HDF5(fileId)
 
     endif
-
-    call x%Free()
-    call solution%Free()
-    call interp%Free()
 
   endsubroutine Write_DGModel3D_t
 
@@ -452,8 +385,8 @@ contains
     character(*),intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
-    integer(HID_T) :: solOffset(1:5)
-    integer :: firstElem
+    integer(HID_T) :: solOffset(1:4)
+    integer :: firstElem,ivar
 
     if(this%mesh%decomp%mpiEnabled) then
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
@@ -463,12 +396,19 @@ contains
     endif
 
     if(this%mesh%decomp%mpiEnabled) then
-      firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId)+1
-      solOffset(1:5) = (/0,0,0,1,firstElem/)
-      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
-                          this%solution%interior,solOffset)
+      firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1)
+      solOffset(1:4) = (/0,0,0,firstElem/)
+      do ivar = 1,this%solution%nvar
+        call ReadArray_HDF5(fileId, &
+                            '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name), &
+                            this%solution%interior(:,:,:,:,ivar),solOffset)
+      enddo
     else
-      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this%solution%interior)
+      do ivar = 1,this%solution%nvar
+        call ReadArray_HDF5(fileId, &
+                            '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name), &
+                            this%solution%interior(:,:,:,:,ivar))
+      enddo
     endif
 
     call Close_HDF5(fileId)

@@ -94,6 +94,8 @@ program advection_diffusion_1d_euler
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
 
+  call modelobj%WriteModel("advdiff1d-euler.pickup.h5")
+
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)

@@ -46,6 +46,7 @@ program advection_diffusion_3d_rk3
   type(Mesh3D),target :: mesh
   type(SEMHex),target :: geometry
   character(LEN=255) :: WORKSPACE
+  real(prec) :: e0,ef
 
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
@@ -80,16 +81,27 @@ program advection_diffusion_3d_rk3
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
 
+  call modelobj%CalculateEntropy()
+  call modelobj%ReportEntropy()
+  e0 = modelobj%entropy
+
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
   ! forward step the model to `endtime` using a time step
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
+  call modelobj%WriteModel("advdiff3d-rk3.pickup.h5")
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+  ef = modelobj%entropy
+
+  if(ef > e0) then
+    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+    stop 1
+  endif
 
   ! Clean up
   call modelobj%free()

@@ -49,7 +49,7 @@ program advection_diffusion_2d_rk3
 
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
-  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",enableDomainDecomposition=.true.)
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -88,7 +88,7 @@ program advection_diffusion_2d_rk3
   ! forward step the model to `endtime` using a time step
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
-  call modelobj%WriteModel("advdiff2d-rk3.pickup.h5")
+  call modelobj%WriteModel("advdiff2d-rk3-mpi.pickup.h5")
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &

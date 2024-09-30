@@ -86,7 +86,7 @@ contains
     implicit none
     class(advection_diffusion_2d),intent(inout) :: this
     ! Local
-    integer :: iel,i,j,ivar
+    integer :: iel,i,j,ivar,ierror
     real(prec) :: e,s,jac
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
@@ -106,7 +106,17 @@ contains
       enddo
     enddo
 
-    this%entropy = e
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
 
   endsubroutine CalculateEntropy_advection_diffusion_2d
 
