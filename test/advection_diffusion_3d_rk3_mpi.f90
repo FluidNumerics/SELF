@@ -99,7 +99,7 @@ program advection_diffusion_3d_rk3
   ef = modelobj%entropy
 
   if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
 

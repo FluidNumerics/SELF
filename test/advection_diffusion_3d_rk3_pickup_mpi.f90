@@ -94,9 +94,10 @@ program advection_diffusion_3d_rk3
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+  ef = modelobj%entropy
 
   if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
 
