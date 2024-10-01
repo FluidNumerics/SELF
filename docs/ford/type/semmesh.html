@@ -87,7 +87,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 1.6% of total for derived types.</p>Including implementation: 12 statements,  0.1% of total for derived types.">12 statements</a>
+    title="<p> 1.4% of total for derived types.</p>Including implementation: 13 statements,  0.0% of total for derived types.">13 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh.f90"> Source File</a></li>
   </ul>
@@ -116,9 +116,10 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
+      <a class="list-group-item" href="../type/semmesh.html#variable-decomp">decomp</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-nbcs">nBCs</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-ncornernodes">nCornerNodes</a>
-      <a class="list-group-item" href="../type/semmesh.html#variable-nelem~4">nElem</a>
+      <a class="list-group-item" href="../type/semmesh.html#variable-nelem~3">nElem</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-ngeo">nGeo</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-nglobalelem">nGlobalElem</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-nnodes">nNodes</a>
@@ -152,9 +153,10 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
+      <a class="list-group-item" href="../type/semmesh.html#variable-decomp">decomp</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-nbcs">nBCs</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-ncornernodes">nCornerNodes</a>
-      <a class="list-group-item" href="../type/semmesh.html#variable-nelem~4">nElem</a>
+      <a class="list-group-item" href="../type/semmesh.html#variable-nelem~3">nElem</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-ngeo">nGeo</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-nglobalelem">nGlobalElem</a>
       <a class="list-group-item" href="../type/semmesh.html#variable-nnodes">nNodes</a>
@@ -181,6 +183,11 @@
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
+  <td><span class="anchor" id="variable-decomp"></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
   <td><span class="anchor" id="variable-nbcs"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>nBCs</strong></td><td></td><td></td><td></td>
@@ -191,7 +198,7 @@
   <td><strong>nCornerNodes</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-nelem~4"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem~3"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>nElem</strong></td><td></td><td></td><td></td>
 </tr>
@@ -241,19 +248,19 @@
     
     <section>
     <h3><span class="anchor" id="src"></span>Source Code</h3>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">TYPE</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SEMMesh</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGeo</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGlobalElem</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nNodes</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nSides</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nCornerNodes</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nUniqueNodes</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nUniqueSides</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nBCs</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">quadrature</span><span class="w"></span>
-
-<span class="w">  </span><span class="k">END TYPE </span><span class="n">SEMMesh</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SEMMesh</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGeo</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nGlobalElem</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nNodes</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nSides</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nCornerNodes</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nUniqueNodes</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nUniqueSides</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nBCs</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">quadrature</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">DomainDecomposition</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">decomp</span><span class="w"></span>
+<span class="w">  </span><span class="k">endtype </span><span class="n">SEMMesh</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -273,7 +280,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

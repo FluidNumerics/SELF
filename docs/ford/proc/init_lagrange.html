@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.4% of total for procedures.">40 statements</a>
+    title=" 0.5% of total for procedures.">46 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Lagrange.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
      <li><a href='../sourcefile/self_lagrange.f90.html'>SELF_Lagrange.f90</a></li>
-     <li><a href='../module/self_lagrange.html'>SELF_Lagrange</a></li>
+     <li><a href='../module/self_lagrange~2.html'>SELF_Lagrange</a></li>
      <li class="active">Init_Lagrange</li>
   </ol>
 </div>
@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)</h2>
+    <h2>public subroutine Init_Lagrange(this, N, controlNodeType, M, targetNodeType)</h2>
     
 
     <p>Initialize an instance of the Lagrange class
@@ -137,32 +137,32 @@ If a GPU is available, device pointers for the Lagrange attributes are allocated
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-mypoly~10"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+  <td><span class="anchor" id="variable-this~257"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>myPoly</strong></td><td><p>Lagrange class instance</p></td>
+  <td><strong>this</strong></td><td><p>Lagrange class instance</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-n~10"></span>integer,</td>
+  <td><span class="anchor" id="variable-n~16"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>N</strong></td><td><p>The number of control points for interpolant</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-controlnodetype~2"></span>integer,</td>
+  <td><span class="anchor" id="variable-controlnodetype~3"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>controlNodeType</strong></td><td><p>The integer code specifying the type of control points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
 GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-m~2"></span>integer,</td>
+  <td><span class="anchor" id="variable-m~4"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>M</strong></td><td><p>The number of target points for the interpolant</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-targetnodetype~2"></span>integer,</td>
+  <td><span class="anchor" id="variable-targetnodetype~3"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>targetNodeType</strong></td><td><p>The integer code specifying the type of target points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
@@ -197,101 +197,119 @@ GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">Init_Lagrange</span><span class="p">(</span><span class="n">myPoly</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">controlNodeType</span><span class="p">,</span><span class="n">M</span><span class="p">,</span><span class="n">targetNodeType</span><span class="p">)</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Init_Lagrange</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">controlNodeType</span><span class="p">,</span><span class="n">M</span><span class="p">,</span><span class="n">targetNodeType</span><span class="p">)</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! Initialize an instance of the Lagrange class</span>
 <span class="w">    </span><span class="c">!! On output, all of the attributes for the Lagrange class are allocated and values are initialized according to the number of</span>
 <span class="w">    </span><span class="c">!! control points, number of target points, and the types for the control and target nodes.</span>
 <span class="w">    </span><span class="c">!! If a GPU is available, device pointers for the Lagrange attributes are allocated and initialized.</span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myPoly</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! Lagrange class instance</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! The number of control points for interpolant</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">M</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">M</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! The number of target points for the interpolant</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! The integer code specifying the type of control points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),</span>
 <span class="w">    </span><span class="c">!! GAUSS_LOBATTO(=2), or UNIFORM(=3)</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">          </span><span class="kd">::</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! The integer code specifying the type of target points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),</span>
 <span class="w">    </span><span class="c">!! GAUSS_LOBATTO(=2), or UNIFORM(=3)</span>
 <span class="w">    </span><span class="c">! -------!</span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">q</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">M</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">q</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">M</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">N</span><span class="w"></span>
-<span class="w">    </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">M</span><span class="w"></span>
-<span class="w">    </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"></span>
-<span class="w">    </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="n">GPUAvailable</span><span class="p">())</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      print</span><span class="o">*</span><span class="p">,</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39; : Error : Attempt to use GPU extension, but GPU is not available.&#39;</span><span class="w"></span>
+<span class="w">      </span><span class="k">stop </span><span class="mi">1</span><span class="w"></span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                        </span><span class="n">upBound</span><span class="o">=</span><span class="n">N</span><span class="p">)</span><span class="w"></span>
+<span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">N</span><span class="w"></span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">M</span><span class="w"></span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"></span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"></span>
+<span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">controlPoints</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">targetPoints</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">bWeights</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">iMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">dMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">dgMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">             </span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">))</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">targetPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                       </span><span class="n">upBound</span><span class="o">=</span><span class="n">M</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS_LOBATTO</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">bWeights</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                   </span><span class="n">upBound</span><span class="o">=</span><span class="n">N</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">qWeights</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                   </span><span class="n">upBound</span><span class="o">=</span><span class="n">N</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">iMatrix</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">/</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                  </span><span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="o">/</span><span class="p">))</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dMatrix</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">/</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                  </span><span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="p">))</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dgMatrix</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">/</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                   </span><span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="p">))</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">bMatrix</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">/</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                  </span><span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="p">))</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">IF</span><span class="w"> </span><span class="p">(</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS</span><span class="w"> </span><span class="p">.</span><span class="nb">OR</span><span class="p">.</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS_LOBATTO</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span>
-
-<span class="k">      CALL </span><span class="n">LegendreQuadrature</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">qWeights</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="k">      call </span><span class="n">LegendreQuadrature</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                              </span><span class="n">this</span><span class="p">%</span><span class="n">controlPoints</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                              </span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
 <span class="w">                              </span><span class="n">controlNodeType</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">ELSEIF</span><span class="w"> </span><span class="p">(</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CHEBYSHEV_GAUSS</span><span class="w"> </span><span class="p">.</span><span class="nb">OR</span><span class="p">.</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CHEBYSHEV_GAUSS_LOBATTO</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span>
+<span class="w">    </span><span class="n">elseif</span><span class="p">(</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CHEBYSHEV_GAUSS</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CHEBYSHEV_GAUSS_LOBATTO</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 
-<span class="k">      CALL </span><span class="n">ChebyshevQuadrature</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                               </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                               </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">qWeights</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="k">      call </span><span class="n">ChebyshevQuadrature</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                               </span><span class="n">this</span><span class="p">%</span><span class="n">controlPoints</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                               </span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
 <span class="w">                               </span><span class="n">controlNodeType</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">ELSEIF</span><span class="w"> </span><span class="p">(</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UNIFORM</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span>
+<span class="w">    </span><span class="n">elseif</span><span class="p">(</span><span class="n">controlNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UNIFORM</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 
-<span class="k">      </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UniformPoints</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">qWeights</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.0_prec</span><span class="o">/</span><span class="kt">REAL</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">prec</span><span class="p">)</span><span class="w"></span>
+<span class="k">      </span><span class="n">this</span><span class="p">%</span><span class="n">controlPoints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UniformPoints</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.0_prec</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">prec</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">END IF</span><span class="w"></span>
+<span class="w">    </span><span class="k">endif</span><span class="w"></span>
 
 <span class="w">    </span><span class="c">! Target Points</span>
-<span class="w">    </span><span class="k">IF</span><span class="w"> </span><span class="p">(</span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS</span><span class="w"> </span><span class="p">.</span><span class="nb">OR</span><span class="p">.</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS_LOBATTO</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS</span><span class="w"> </span><span class="p">.</span><span class="nb">or</span><span class="p">.</span><span class="w"> </span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">GAUSS_LOBATTO</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 
-<span class="k">      CALL </span><span class="n">LegendreQuadrature</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">targetPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="k">      call </span><span class="n">LegendreQuadrature</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                              </span><span class="n">this</span><span class="p">%</span><span class="n">targetPoints</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
 <span class="w">                              </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
 <span class="w">                              </span><span class="n">targetNodeType</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">ELSEIF</span><span class="w"> </span><span class="p">(</span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UNIFORM</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span>
+<span class="w">    </span><span class="n">elseif</span><span class="p">(</span><span class="n">targetNodeType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UNIFORM</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 
-<span class="k">      </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">targetPoints</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UniformPoints</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">M</span><span class="p">)</span><span class="w"></span>
+<span class="k">      </span><span class="n">this</span><span class="p">%</span><span class="n">targetPoints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UniformPoints</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mf">1.0_prec</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">M</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">END IF</span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="k">    CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateBarycentricWeights</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateInterpolationMatrix</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateDerivativeMatrix</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">bMatrix</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateLagrangePolynomials</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">bMatrix</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateLagrangePolynomials</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="p">)</span><span class="w"></span>
+<span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateBarycentricWeights</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateInterpolationMatrix</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateDerivativeMatrix</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateLagrangePolynomials</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_prec</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateLagrangePolynomials</span><span class="p">(</span><span class="mf">1.0_prec</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myPoly</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateDevice</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">iMatrix_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">iMatrix</span><span class="p">)))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dMatrix_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dMatrix</span><span class="p">)))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dgMatrix_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dgMatrix</span><span class="p">)))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix</span><span class="p">)))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qWeights_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="p">)))</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">Init_Lagrange</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">iMatrix_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">iMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">iMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dMatrix_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dgMatrix_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dgMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dgMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bMatrix</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qWeights_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qWeights</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Init_Lagrange</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -312,7 +330,7 @@ GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

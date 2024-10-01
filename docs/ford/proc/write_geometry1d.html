@@ -89,11 +89,11 @@
     data-placement="bottom" data-html="true"
     title=" 0.3% of total for procedures.">26 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry_1D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_geometry.f90.html'>SELF_Geometry.f90</a></li>
-     <li><a href='../module/self_geometry.html'>SELF_Geometry</a></li>
+     <li><a href='../sourcefile/self_geometry_1d.f90.html'>SELF_Geometry_1D.f90</a></li>
+     <li><a href='../module/self_geometry_1d.html'>SELF_Geometry_1D</a></li>
      <li class="active">Write_Geometry1D</li>
   </ol>
 </div>
@@ -133,13 +133,13 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-mygeom~23"></span>class(<a href='../type/geometry1d.html'>Geometry1D</a>),</td>
+  <td><span class="anchor" id="variable-mygeom~5"></span>class(<a href='../type/geometry1d.html'>Geometry1D</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>myGeom</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-filename~3"></span>character,</td>
+  <td><span class="anchor" id="variable-filename~5"></span>character,</td>
 <td>intent(in),</td>
   <td>optional</td>  <td></td><td>::</td>
   <td><strong>fileName</strong></td><td></td>
@@ -173,54 +173,54 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">Write_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">fileName</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">OPTIONAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileName</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Write_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">fileName</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileName</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="nb">LEN</span><span class="o">=</span><span class="n">self_FileNameLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pickupFile</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">LEN</span><span class="o">=</span><span class="n">self_FileNameLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pickupFile</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">IF</span><span class="p">(</span><span class="w"> </span><span class="nb">PRESENT</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="k">THEN</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
 <span class="k">      </span><span class="n">pickupFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filename</span><span class="w"></span>
-<span class="w">    </span><span class="k">ELSE</span>
+<span class="w">    </span><span class="k">else</span>
 <span class="k">      </span><span class="n">pickupFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;mesh.h5&#39;</span><span class="w"></span>
-<span class="w">    </span><span class="k">ENDIF</span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="k">    CALL </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">pickupFile</span><span class="p">,</span><span class="n">H5F_ACC_TRUNC_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
+<span class="k">    call </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">pickupFile</span><span class="p">,</span><span class="n">H5F_ACC_TRUNC_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature&#39;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature&#39;</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/xi&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                         </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlPoints</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/xi&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">controlPoints</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/weights&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                         </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">qWeights</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/weights&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">qWeights</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/dgmatrix&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                         </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dgMatrix</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/dgmatrix&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dgMatrix</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/dmatrix&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                         </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dMatrix</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/dmatrix&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dMatrix</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh&#39;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh&#39;</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior&#39;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior&#39;</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary&#39;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary&#39;</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior/x&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior/x&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior/dxds&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dxds</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior/dxds&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">dxds</span><span class="p">%</span><span class="n">interior</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary/x&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">boundary</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary/x&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">boundary</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary/dxds&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dxds</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">boundary</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary/dxds&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">dxds</span><span class="p">%</span><span class="n">boundary</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">Close_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">Close_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">Write_Geometry1D</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Write_Geometry1D</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -241,7 +241,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

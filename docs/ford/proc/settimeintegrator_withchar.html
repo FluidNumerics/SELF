@@ -87,7 +87,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">28 statements</a>
+    title=" 0.2% of total for procedures.">19 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Model.f90"> Source File</a></li>
   </ul>
@@ -139,7 +139,7 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-this~44"></span>class(<a href='../type/model.html'>Model</a>),</td>
+  <td><span class="anchor" id="variable-this~86"></span>class(<a href='../type/model.html'>Model</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
@@ -179,7 +179,7 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">SetTimeIntegrator_withChar</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">integrator</span><span class="p">)</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">SetTimeIntegrator_withChar</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">integrator</span><span class="p">)</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! Sets the time integrator method, using a character input</span>
 <span class="w">    </span><span class="c">!!</span>
 <span class="w">    </span><span class="c">!! Valid options for integrator are</span>
@@ -190,46 +190,34 @@
 <span class="w">    </span><span class="c">!!</span>
 <span class="w">    </span><span class="c">!! Note that the character provided is not case-sensitive</span>
 <span class="w">    </span><span class="c">!!</span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">integrator</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">integrator</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="n">SELF_INTEGRATOR_LENGTH</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">upperCaseInt</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="n">SELF_INTEGRATOR_LENGTH</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">upperCaseInt</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">upperCaseInt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UpperCase</span><span class="p">(</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">integrator</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="n">upperCaseInt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UpperCase</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="n">integrator</span><span class="p">))</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">SELECT CASE</span><span class="w"> </span><span class="p">(</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">upperCaseInt</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">select case</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="n">upperCaseInt</span><span class="p">))</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;EULER&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Euler_timeIntegrator</span><span class="w"></span>
+<span class="w">    </span><span class="k">case</span><span class="p">(</span><span class="s2">&quot;EULER&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Euler_timeIntegrator</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;AB2&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdamsBashforth2_timeIntegrator</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">ResizePrevSol</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">case</span><span class="p">(</span><span class="s2">&quot;RK2&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK2_timeIntegrator</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;AB3&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdamsBashforth3_timeIntegrator</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">ResizePrevSol</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">case</span><span class="p">(</span><span class="s2">&quot;RK3&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK3_timeIntegrator</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;AB4&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdamsBashforth4_timeIntegrator</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">ResizePrevSol</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">case</span><span class="p">(</span><span class="s2">&quot;RK4&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK4_timeIntegrator</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;RK2&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK2_timeIntegrator</span><span class="w"></span>
+<span class="w">    </span><span class="k">case </span><span class="n">DEFAULT</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK3_timeIntegrator</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;RK3&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK3_timeIntegrator</span><span class="w"></span>
+<span class="w">    </span><span class="k">endselect</span>
 
-<span class="w">    </span><span class="k">CASE</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;RK4&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK4_timeIntegrator</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">CASE </span><span class="n">DEFAULT</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">LowStorageRK3_timeIntegrator</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">END SELECT</span>
-
-<span class="k">  END SUBROUTINE </span><span class="n">SetTimeIntegrator_withChar</span><span class="w"></span>
+<span class="k">  endsubroutine </span><span class="n">SetTimeIntegrator_withChar</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -250,7 +238,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

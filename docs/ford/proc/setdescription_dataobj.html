@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine SetDescription_DataObj(SELFStorage, ivar, description)</h2>
+    <h2>public subroutine SetDescription_DataObj(this, ivar, description)</h2>
     
 
     <p>Set the description of the <code>ivar-th</code> variable</p>
@@ -134,13 +134,13 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-selfstorage~36"></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+  <td><span class="anchor" id="variable-this~165"></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>SELFStorage</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ivar"></span>integer,</td>
+  <td><span class="anchor" id="variable-ivar~3"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>ivar</strong></td><td></td>
@@ -180,16 +180,16 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">SetDescription_DataObj</span><span class="p">(</span><span class="n">SELFStorage</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">description</span><span class="p">)</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">SetDescription_DataObj</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">description</span><span class="p">)</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! Set the description of the `ivar-th` variable</span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">SELF_DataObj</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SELFStorage</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ivar</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">description</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">SELF_DataObj</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ivar</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">description</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">meta</span><span class="p">(</span><span class="n">ivar</span><span class="p">)</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">SetDescription</span><span class="p">(</span><span class="n">description</span><span class="p">)</span><span class="w"> </span>
+<span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">meta</span><span class="p">(</span><span class="n">ivar</span><span class="p">)%</span><span class="n">SetDescription</span><span class="p">(</span><span class="n">description</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">SetDescription_DataObj</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetDescription_DataObj</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -210,7 +210,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

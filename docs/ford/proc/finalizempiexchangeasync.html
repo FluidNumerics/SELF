@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">7 statements</a>
+    title=" 0.1% of total for procedures.">9 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DomainDecomposition_t.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_mesh.f90.html'>SELF_Mesh.f90</a></li>
-     <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+     <li><a href='../sourcefile/self_domaindecomposition_t.f90.html'>SELF_DomainDecomposition_t.f90</a></li>
+     <li><a href='../module/self_domaindecomposition_t.html'>SELF_DomainDecomposition_t</a></li>
      <li class="active">FinalizeMPIExchangeAsync</li>
   </ol>
 </div>
@@ -133,7 +133,7 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-mpihandler~9"></span>class(<a href='../type/mpilayer.html'>MPILayer</a>),</td>
+  <td><span class="anchor" id="variable-mpihandler"></span>class(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>mpiHandler</strong></td><td></td>
@@ -167,19 +167,21 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">FinalizeMPIExchangeAsync</span><span class="p">(</span><span class="n">mpiHandler</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CLASS</span><span class="p">(</span><span class="n">MPILayer</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mpiHandler</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">FinalizeMPIExchangeAsync</span><span class="p">(</span><span class="n">mpiHandler</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">DomainDecomposition_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mpiHandler</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ierror</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ierror</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">msgCount</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">IF</span><span class="p">(</span><span class="w"> </span><span class="n">mpiHandler</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">mpiEnabled</span><span class="w"> </span><span class="p">)</span><span class="k">THEN</span>
-<span class="k">    CALL </span><span class="n">MPI_WaitAll</span><span class="p">(</span><span class="n">mpiHandler</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">msgCount</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                     </span><span class="n">mpiHandler</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">mpiHandler</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">msgCount</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                     </span><span class="n">mpiHandler</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">stats</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">MPI_STATUS_SIZE</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">mpiHandler</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">msgCount</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                     </span><span class="n">iError</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">ENDIF</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">mpiHandler</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">msgCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mpiHandler</span><span class="p">%</span><span class="n">msgCount</span><span class="w"></span>
+<span class="w">      </span><span class="k">call </span><span class="n">MPI_WaitAll</span><span class="p">(</span><span class="n">msgCount</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">mpiHandler</span><span class="p">%</span><span class="n">requests</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">msgCount</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">mpiHandler</span><span class="p">%</span><span class="n">stats</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">MPI_STATUS_SIZE</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">msgCount</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">iError</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="k">  END SUBROUTINE </span><span class="n">FinalizeMPIExchangeAsync</span><span class="w"></span>
+<span class="k">  endsubroutine </span><span class="n">FinalizeMPIExchangeAsync</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -200,7 +202,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

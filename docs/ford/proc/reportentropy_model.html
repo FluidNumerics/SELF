@@ -87,7 +87,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">19 statements</a>
+    title=" 0.2% of total for procedures.">15 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Model.f90"> Source File</a></li>
   </ul>
@@ -125,19 +125,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>public subroutine ReportEntropy_Model(this)</h2>
-        <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Uses</h3>
-      </div>
-      <ul class="list-group">
-      <li class="list-group-item">
-  <ul class="list-inline">
-    <li><a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a></li>
-  </ul>
-      </li>
-      </ul>
-    </div>
-
+    
 
     <p>Base method for reporting the entropy of a model
 to stdout. Only override this procedure if additional
@@ -151,7 +139,7 @@ method.</p>
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-this~39"></span>class(<a href='../type/model.html'>Model</a>),</td>
+  <td><span class="anchor" id="variable-this~83"></span>class(<a href='../type/model.html'>Model</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
@@ -185,39 +173,33 @@ method.</p>
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">ReportEntropy_Model</span><span class="p">(</span><span class="n">this</span><span class="p">)</span><span class="w"></span>
-<span class="cp">#undef __FUNC__</span>
-<span class="cp">#define __FUNC__ &quot;ReportEntropy&quot;</span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">ReportEntropy_Model</span><span class="p">(</span><span class="n">this</span><span class="p">)</span><span class="w"></span>
 <span class="w">  </span><span class="c">!! Base method for reporting the entropy of a model</span>
 <span class="w">  </span><span class="c">!! to stdout. Only override this procedure if additional</span>
 <span class="w">  </span><span class="c">!! reporting is needed. Alternatively, if you think</span>
 <span class="w">  </span><span class="c">!! additional reporting would be valuable for all models,</span>
 <span class="w">  </span><span class="c">!! open a pull request with modifications to this base</span>
 <span class="w">  </span><span class="c">!! method.</span>
-<span class="w">    </span><span class="k">USE</span><span class="p">,</span><span class="k">INTRINSIC</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ISO_FORTRAN_ENV</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">PARAMETER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ucs2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">SELECTED_CHAR_KIND</span><span class="p">(</span><span class="s1">&#39;ISO_10646&#39;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="nb">KIND</span><span class="o">=</span><span class="n">ucs2</span><span class="p">,</span><span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">modelTime</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="nb">KIND</span><span class="o">=</span><span class="n">ucs2</span><span class="p">,</span><span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="nb">KIND</span><span class="o">=</span><span class="n">ucs2</span><span class="p">,</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span><span class="k">ALLOCATABLE</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">str</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">modelTime</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">str</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">IF</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">decomp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">rankId</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span><span class="w"></span>
-<span class="w">      </span><span class="c">! Copy the time and entropy to a string</span>
-<span class="w">      </span><span class="k">WRITE</span><span class="w"> </span><span class="p">(</span><span class="n">modelTime</span><span class="p">,</span><span class="s2">&quot;(ES16.7E3)&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
-<span class="w">      </span><span class="k">WRITE</span><span class="w"> </span><span class="p">(</span><span class="n">entropy</span><span class="p">,</span><span class="s2">&quot;(ES16.7E3)&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">entropy</span><span class="w"></span>
+<span class="w">    </span><span class="c">! Copy the time and entropy to a string</span>
+<span class="w">    </span><span class="k">write</span><span class="p">(</span><span class="n">modelTime</span><span class="p">,</span><span class="s2">&quot;(ES16.7E3)&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">t</span><span class="w"></span>
+<span class="w">    </span><span class="k">write</span><span class="p">(</span><span class="n">entropy</span><span class="p">,</span><span class="s2">&quot;(ES16.7E3)&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">entropy</span><span class="w"></span>
 
-<span class="w">      </span><span class="c">! Write the output to STDOUT</span>
-<span class="w">      </span><span class="k">OPEN</span><span class="w"> </span><span class="p">(</span><span class="n">OUTPUT_UNIT</span><span class="p">,</span><span class="n">ENCODING</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="k">WRITE</span><span class="p">(</span><span class="n">OUTPUT_UNIT</span><span class="p">,</span><span class="s1">&#39;(&quot;INFO : [&quot;,A,&quot;] : &quot;)&#39;</span><span class="p">,</span><span class="n">ADVANCE</span><span class="o">=</span><span class="s1">&#39;no&#39;</span><span class="p">)</span><span class="err">__</span><span class="n">FUNC__</span><span class="w"></span>
-<span class="w">      </span><span class="n">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ucs2_</span><span class="s1">&#39;t\u1D62 =&#39;</span><span class="o">//</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">modelTime</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="k">WRITE</span><span class="w"> </span><span class="p">(</span><span class="n">OUTPUT_UNIT</span><span class="p">,</span><span class="s1">&#39;(A)&#39;</span><span class="p">,</span><span class="n">ADVANCE</span><span class="o">=</span><span class="s1">&#39;no&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">str</span><span class="w"></span>
-<span class="w">      </span><span class="n">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ucs2_</span><span class="s1">&#39;  |  e\u1D62 =&#39;</span><span class="o">//</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">entropy</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="k">WRITE</span><span class="w"> </span><span class="p">(</span><span class="n">OUTPUT_UNIT</span><span class="p">,</span><span class="s1">&#39;(A)&#39;</span><span class="p">,</span><span class="n">ADVANCE</span><span class="o">=</span><span class="s1">&#39;yes&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">str</span><span class="w"></span>
-<span class="w">    </span><span class="k">END IF</span>
+<span class="w">    </span><span class="c">! Write the output to STDOUT</span>
+<span class="w">    </span><span class="k">open</span><span class="p">(</span><span class="n">output_unit</span><span class="p">,</span><span class="n">ENCODING</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">write</span><span class="p">(</span><span class="n">output_unit</span><span class="p">,</span><span class="s1">&#39;(A,&quot; : &quot;)&#39;</span><span class="p">,</span><span class="n">ADVANCE</span><span class="o">=</span><span class="s1">&#39;no&#39;</span><span class="p">)</span><span class="w"> </span><span class="err">__</span><span class="n">FILE__</span><span class="w"></span>
+<span class="w">    </span><span class="n">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;tᵢ =&#39;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">modelTime</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">write</span><span class="p">(</span><span class="n">output_unit</span><span class="p">,</span><span class="s1">&#39;(A)&#39;</span><span class="p">,</span><span class="n">ADVANCE</span><span class="o">=</span><span class="s1">&#39;no&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">str</span><span class="w"></span>
+<span class="w">    </span><span class="n">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;  |  eᵢ =&#39;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">entropy</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">write</span><span class="p">(</span><span class="n">output_unit</span><span class="p">,</span><span class="s1">&#39;(A)&#39;</span><span class="p">,</span><span class="n">ADVANCE</span><span class="o">=</span><span class="s1">&#39;yes&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">str</span><span class="w"></span>
 
-<span class="k">  END SUBROUTINE </span><span class="n">ReportEntropy_Model</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">ReportEntropy_Model</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -238,7 +220,7 @@ method.</p>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

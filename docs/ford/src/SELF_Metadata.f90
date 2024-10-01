@@ -1,94 +1,112 @@
-! SELF_Metadata.F90
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 !
-! Copyright 2020 Fluid Numerics LLC
-! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self@higherordermethods.org
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
 !
-! //////////////////////////////////////////////////////////////////////////////////////////////// !
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE SELF_Metadata
+module SELF_Metadata
 
-  USE SELF_HDF5
-  USE HDF5
+  use SELF_HDF5
+  use HDF5
 
-  INTEGER,PARAMETER,PUBLIC :: SELF_MTD_NameLength = 250
-  INTEGER,PARAMETER,PUBLIC :: SELF_MTD_DescriptionLength = 1000
-  INTEGER,PARAMETER,PUBLIC :: SELF_MTD_UnitsLength = 20
+  integer,parameter,public :: SELF_MTD_NameLength = 250
+  integer,parameter,public :: SELF_MTD_DescriptionLength = 1000
+  integer,parameter,public :: SELF_MTD_UnitsLength = 20
 
   ! A class for storing metadata information, intended for file IO
-  TYPE Metadata
-    CHARACTER(SELF_MTD_NameLength) :: name
-    CHARACTER(SELF_MTD_DescriptionLength) :: description
-    CHARACTER(SELF_MTD_UnitsLength) :: units
+  type Metadata
+    character(SELF_MTD_NameLength) :: name
+    character(SELF_MTD_DescriptionLength) :: description
+    character(SELF_MTD_UnitsLength) :: units
 
-  CONTAINS
+  contains
 
-    PROCEDURE,PUBLIC :: SetName => SetName_Metadata
-    PROCEDURE,PUBLIC :: SetDescription => SetDescription_Metadata
-    PROCEDURE,PUBLIC :: SetUnits => SetUnits_Metadata
-    PROCEDURE,PUBLIC :: WriteHDF5 => WriteHDF5_Metadata
+    procedure,public :: SetName => SetName_Metadata
+    procedure,public :: SetDescription => SetDescription_Metadata
+    procedure,public :: SetUnits => SetUnits_Metadata
+    procedure,public :: WriteHDF5 => WriteHDF5_Metadata
 
-  END TYPE Metadata
+  endtype Metadata
 
-CONTAINS
+contains
 
-  SUBROUTINE SetName_Metadata(mtd,name)
-    IMPLICIT NONE
-    CLASS(Metadata),INTENT(inout) :: mtd
-    CHARACTER(*),INTENT(in) :: name
+  subroutine SetName_Metadata(mtd,name)
+    implicit none
+    class(Metadata),intent(inout) :: mtd
+    character(*),intent(in) :: name
 
-    mtd % name = name
+    mtd%name = name
 
-  END SUBROUTINE SetName_Metadata
+  endsubroutine SetName_Metadata
 
-  SUBROUTINE SetDescription_Metadata(mtd,description)
-    IMPLICIT NONE
-    CLASS(Metadata),INTENT(inout) :: mtd
-    CHARACTER(*),INTENT(in) :: description
+  subroutine SetDescription_Metadata(mtd,description)
+    implicit none
+    class(Metadata),intent(inout) :: mtd
+    character(*),intent(in) :: description
 
-    mtd % description = description
+    mtd%description = description
 
-  END SUBROUTINE SetDescription_Metadata
+  endsubroutine SetDescription_Metadata
 
-  SUBROUTINE SetUnits_Metadata(mtd,units)
-    IMPLICIT NONE
-    CLASS(Metadata),INTENT(inout) :: mtd
-    CHARACTER(*),INTENT(in) :: units
+  subroutine SetUnits_Metadata(mtd,units)
+    implicit none
+    class(Metadata),intent(inout) :: mtd
+    character(*),intent(in) :: units
 
-    mtd % units = units
+    mtd%units = units
 
-  END SUBROUTINE SetUnits_Metadata
+  endsubroutine SetUnits_Metadata
 
-  SUBROUTINE WriteHDF5_Metadata(mtd,group,varid,fileId)
-  !! Writes the metadata to a HDF5 file using the 
+  subroutine WriteHDF5_Metadata(mtd,group,varid,fileId)
+  !! Writes the metadata to a HDF5 file using the
   !! fields :
   !!  * `/metadata/{group}/name/{varid}`
   !!  * `/metadata/{group}/description/{varid}`
   !!  * `/metadata/{group}/units/{varid}`
   !!
   !! This method assumes that an HDF5 file is already
-  !! open for writing and is associated with the `fileId` 
+  !! open for writing and is associated with the `fileId`
   !! input.
-    CLASS(Metadata), INTENT(in) :: mtd
-    CHARACTER(*), INTENT(in) :: group
-    INTEGER, INTENT(in) :: varid
-    INTEGER(HID_T), INTENT(in) :: fileId
+    class(Metadata),intent(in) :: mtd
+    character(*),intent(in) :: group
+    integer,intent(in) :: varid
+    integer(HID_T),intent(in) :: fileId
     ! Local
-    CHARACTER(4) :: varNumber
+    character(4) :: varNumber
 
     ! Add variable names to the file
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/name")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/description")
-    CALL CreateGroup_HDF5(fileId,TRIM(group)//"/metadata/units")
-  
-    WRITE (varNumber,"(I0)") varid
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/name/"//TRIM(varnumber), &
-                                   TRIM(mtd % name))
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/description/"//TRIM(varnumber), &
-                                TRIM(mtd % description))
-    CALL WriteCharacter_HDF5(fileId, TRIM(group)//"/metadata/units/"//TRIM(varnumber), &
-                                TRIM(mtd % units))
-  END SUBROUTINE WriteHDF5_Metadata
+    call CreateGroup_HDF5(fileId,trim(group)//"/metadata")
+    call CreateGroup_HDF5(fileId,trim(group)//"/metadata/name")
+    call CreateGroup_HDF5(fileId,trim(group)//"/metadata/description")
+    call CreateGroup_HDF5(fileId,trim(group)//"/metadata/units")
 
-END MODULE SELF_Metadata
+    write(varNumber,"(I0)") varid
+    call WriteCharacter_HDF5(fileId,trim(group)//"/metadata/name/"//trim(varnumber), &
+                             trim(mtd%name))
+    call WriteCharacter_HDF5(fileId,trim(group)//"/metadata/description/"//trim(varnumber), &
+                             trim(mtd%description))
+    call WriteCharacter_HDF5(fileId,trim(group)//"/metadata/units/"//trim(varnumber), &
+                             trim(mtd%units))
+  endsubroutine WriteHDF5_Metadata
+
+endmodule SELF_Metadata
