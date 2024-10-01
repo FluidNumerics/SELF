@@ -87,7 +87,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">34 statements</a>
+    title=" 0.4% of total for procedures.">35 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Model.f90"> Source File</a></li>
   </ul>
@@ -140,19 +140,19 @@ is reached</p>
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-this~30"></span>class(<a href='../type/model.html'>Model</a>),</td>
+  <td><span class="anchor" id="variable-this~75"></span>class(<a href='../type/model.html'>Model</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-tn~5"></span>real(kind=prec),</td>
+  <td><span class="anchor" id="variable-tn~2"></span>real(kind=prec),</td>
 <td>intent(in),</td>
   <td>optional</td>  <td></td><td>::</td>
   <td><strong>tn</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dt~5"></span>real(kind=prec),</td>
+  <td><span class="anchor" id="variable-dt~4"></span>real(kind=prec),</td>
 <td>intent(in),</td>
   <td>optional</td>  <td></td><td>::</td>
   <td><strong>dt</strong></td><td></td>
@@ -192,7 +192,7 @@ is reached</p>
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">ForwardStep_Model</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">tn</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">ioInterval</span><span class="p">)</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">ForwardStep_Model</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">tn</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">ioInterval</span><span class="p">)</span><span class="w"></span>
 <span class="w">  </span><span class="c">!!  Forward steps the model using the associated tendency procedure and time integrator</span>
 <span class="w">  </span><span class="c">!!</span>
 <span class="w">  </span><span class="c">!!  If the final time  is provided, the model is forward stepped to that final time,</span>
@@ -203,45 +203,46 @@ is reached</p>
 <span class="w">  </span><span class="c">!!</span>
 <span class="w">  </span><span class="c">!! If ioInterval is provided, file IO will be conducted every ioInterval seconds until tn</span>
 <span class="w">  </span><span class="c">!! is reached</span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">OPTIONAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">tn</span><span class="w"></span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">OPTIONAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dt</span><span class="w"></span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">OPTIONAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ioInterval</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">tn</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dt</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ioInterval</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">targetTime</span><span class="p">,</span><span class="n">tNext</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">nIO</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">targetTime</span><span class="p">,</span><span class="n">tNext</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">nIO</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">IF</span><span class="w"> </span><span class="p">(</span><span class="nb">PRESENT</span><span class="p">(</span><span class="n">dt</span><span class="p">))</span><span class="w"> </span><span class="k">THEN</span>
-<span class="k">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dt</span><span class="w"></span>
-<span class="w">    </span><span class="k">END IF</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">dt</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">this</span><span class="p">%</span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dt</span><span class="w"></span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="k">    IF</span><span class="w"> </span><span class="p">(</span><span class="nb">PRESENT</span><span class="p">(</span><span class="n">tn</span><span class="p">))</span><span class="w"> </span><span class="k">THEN</span>
+<span class="k">    if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">tn</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
 <span class="k">      </span><span class="n">targetTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tn</span><span class="w"></span>
-<span class="w">    </span><span class="k">ELSE</span>
-<span class="k">      </span><span class="n">targetTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dt</span><span class="w"></span>
-<span class="w">    </span><span class="k">END IF</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      </span><span class="n">targetTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">t</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">dt</span><span class="w"></span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="k">    IF</span><span class="w"> </span><span class="p">(</span><span class="nb">PRESENT</span><span class="p">(</span><span class="n">ioInterval</span><span class="p">))</span><span class="w"> </span><span class="k">THEN</span>
-<span class="k">      </span><span class="n">nIO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">INT</span><span class="p">((</span><span class="n">targetTime</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="o">/</span><span class="n">ioInterval</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="k">DO </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nIO</span><span class="w"></span>
-<span class="w">        </span><span class="n">tNext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ioInterval</span><span class="w"></span>
-<span class="w">        </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="p">(</span><span class="n">tNext</span><span class="p">)</span><span class="w"></span>
-<span class="w">        </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tNext</span><span class="w"></span>
-<span class="w">        </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">WriteModel</span><span class="p">()</span><span class="w"></span>
-<span class="w">        </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">IncrementIOCounter</span><span class="p">()</span><span class="w"></span>
-<span class="w">        </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateEntropy</span><span class="p">()</span><span class="w"></span>
-<span class="w">        </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">ReportEntropy</span><span class="p">()</span><span class="w"></span>
-<span class="w">      </span><span class="k">END DO</span>
+<span class="k">    if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">ioInterval</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">nIO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">int</span><span class="p">((</span><span class="n">targetTime</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">t</span><span class="p">)</span><span class="o">/</span><span class="n">ioInterval</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">nIO</span><span class="w"></span>
+<span class="w">        </span><span class="n">tNext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">t</span><span class="o">+</span><span class="n">ioInterval</span><span class="w"></span>
+<span class="w">        </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="p">(</span><span class="n">tNext</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">this</span><span class="p">%</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tNext</span><span class="w"></span>
+<span class="w">        </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">WriteModel</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">WriteTecplot</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">IncrementIOCounter</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateEntropy</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">ReportEntropy</span><span class="p">()</span><span class="w"></span>
+<span class="w">      </span><span class="k">enddo</span>
 
-<span class="k">    ELSE</span>
-<span class="k">      CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="p">(</span><span class="n">targetTime</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">targetTime</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateEntropy</span><span class="p">()</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">this</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">ReportEntropy</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">END IF</span>
+<span class="k">    else</span>
+<span class="k">      call </span><span class="n">this</span><span class="p">%</span><span class="n">timeIntegrator</span><span class="p">(</span><span class="n">targetTime</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">targetTime</span><span class="w"></span>
+<span class="w">      </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateEntropy</span><span class="p">()</span><span class="w"></span>
+<span class="w">      </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">ReportEntropy</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">endif</span>
 
-<span class="k">  END SUBROUTINE </span><span class="n">ForwardStep_Model</span><span class="w"></span>
+<span class="k">  endsubroutine </span><span class="n">ForwardStep_Model</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -262,7 +263,7 @@ is reached</p>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

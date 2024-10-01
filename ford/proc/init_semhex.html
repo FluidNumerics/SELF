@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">13 statements</a>
+    title=" 0.1% of total for procedures.">14 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry_3D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_geometry.f90.html'>SELF_Geometry.f90</a></li>
-     <li><a href='../module/self_geometry.html'>SELF_Geometry</a></li>
+     <li><a href='../sourcefile/self_geometry_3d.f90.html'>SELF_Geometry_3D.f90</a></li>
+     <li><a href='../module/self_geometry_3d.html'>SELF_Geometry_3D</a></li>
      <li class="active">Init_SEMHex</li>
   </ol>
 </div>
@@ -139,13 +139,13 @@
   <td><strong>myGeom</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-interp~3"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+  <td><span class="anchor" id="variable-interp~9"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
 <td>intent(in),</td>
-  <td></td>  <td>POINTER</td><td>::</td>
+  <td></td>  <td>pointer</td><td>::</td>
   <td><strong>interp</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-nelem~6"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem~17"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>nElem</strong></td><td></td>
@@ -179,39 +179,41 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">Init_SEMHex</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">interp</span><span class="p">,</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">POINTER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">interp</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Init_SEMHex</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">interp</span><span class="p">,</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">pointer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">interp</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
+<span class="w">    </span><span class="n">myGeom</span><span class="p">%</span><span class="n">nElem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                           </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                           </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dxds</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">meta</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">SetName</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">dsdx</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">dxds</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nHat</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">dsdx</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nScale</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                              </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">nHat</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">J</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                           </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                           </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">nScale</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                            </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">Init_SEMHex</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">J</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                       </span><span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Init_SEMHex</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -232,7 +234,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

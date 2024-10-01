@@ -89,11 +89,11 @@
     data-placement="bottom" data-html="true"
     title=" 0.1% of total for procedures.">9 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Data.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Scalar_2D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_data.f90.html'>SELF_Data.f90</a></li>
-     <li><a href='../module/self_data.html'>SELF_Data</a></li>
+     <li><a href='../sourcefile/self_scalar_2d.f90.html'>SELF_Scalar_2D.f90</a></li>
+     <li><a href='../module/self_scalar_2d~2.html'>SELF_Scalar_2D</a></li>
      <li class="active">UpdateHost_Scalar2D</li>
   </ol>
 </div>
@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine UpdateHost_Scalar2D(SELFStorage)</h2>
+    <h2>public subroutine UpdateHost_Scalar2D(this)</h2>
     
 
 
@@ -133,10 +133,10 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-selfstorage~50"></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+  <td><span class="anchor" id="variable-this~340"></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>SELFStorage</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
 </tr>
 </tbody>
 </table>
@@ -167,17 +167,17 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">UpdateHost_Scalar2D</span><span class="p">(</span><span class="n">SELFStorage</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Scalar2D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SELFStorage</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">UpdateHost_Scalar2D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Scalar2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateHost</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateHost</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">extBoundary</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateHost</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">avgBoundary</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateHost</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">jumpBoundary</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateHost</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">extboundary</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">extboundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">extboundary</span><span class="p">),</span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">avgboundary</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">avgboundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">avgboundary</span><span class="p">),</span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">boundarynormal</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">boundarynormal_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">boundarynormal</span><span class="p">),</span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">UpdateHost_Scalar2D</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">UpdateHost_Scalar2D</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -198,7 +198,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

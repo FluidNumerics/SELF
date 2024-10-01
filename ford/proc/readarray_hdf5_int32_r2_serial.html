@@ -133,7 +133,7 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-fileid~10"></span>integer(kind=HID_T),</td>
+  <td><span class="anchor" id="variable-fileid~11"></span>integer(kind=HID_T),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>fileId</strong></td><td></td>
@@ -145,9 +145,9 @@
   <td><strong>arrayName</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-hfarray~4"></span>type(<a href='../type/hfint32_r2.html'>hfInt32_r2</a>),</td>
-<td>intent(inout)</td>
-  <td></td>  <td></td><td>::</td>
+  <td><span class="anchor" id="variable-hfarray~4"></span>integer(kind=int32),</td>
+<td>intent(inout),</td>
+  <td></td>  <td>dimension(:,:)</td><td>::</td>
   <td><strong>hfArray</strong></td><td></td>
 </tr>
 </tbody>
@@ -179,25 +179,25 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">ReadArray_HDF5_int32_r2_serial</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="n">arrayName</span><span class="p">,</span><span class="n">hfArray</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    </span><span class="kt">INTEGER</span><span class="p">(</span><span class="n">HID_T</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">arrayName</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">hfInt32_r2</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">hfArray</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">ReadArray_HDF5_int32_r2_serial</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="n">arrayName</span><span class="p">,</span><span class="n">hfArray</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">arrayName</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="k">dimension</span><span class="p">(:,:),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">hfArray</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dsetId</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dims</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">error</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dsetId</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dims</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">error</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">dims</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">SHAPE</span><span class="p">(</span><span class="n">hfArray</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">dims</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">shape</span><span class="p">(</span><span class="n">hfArray</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">h5dopen_f</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="n">arrayName</span><span class="p">,</span><span class="n">dsetId</span><span class="p">,</span><span class="n">error</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">h5dopen_f</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="n">arrayName</span><span class="p">,</span><span class="n">dsetId</span><span class="p">,</span><span class="n">error</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">h5dread_f</span><span class="p">(</span><span class="n">dsetId</span><span class="p">,</span><span class="n">h5kind_to_type</span><span class="p">(</span><span class="n">INT32</span><span class="p">,</span><span class="n">H5_INTEGER_KIND</span><span class="p">),</span><span class="n">hfArray</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="n">dims</span><span class="p">,</span><span class="n">error</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">h5dread_f</span><span class="p">(</span><span class="n">dsetId</span><span class="p">,</span><span class="n">h5kind_to_type</span><span class="p">(</span><span class="n">int32</span><span class="p">,</span><span class="n">H5_INTEGER_KIND</span><span class="p">),</span><span class="n">hfArray</span><span class="p">,</span><span class="n">dims</span><span class="p">,</span><span class="n">error</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">h5dclose_f</span><span class="p">(</span><span class="n">dsetId</span><span class="p">,</span><span class="n">error</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">h5dclose_f</span><span class="p">(</span><span class="n">dsetId</span><span class="p">,</span><span class="n">error</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">ReadArray_HDF5_int32_r2_serial</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">ReadArray_HDF5_int32_r2_serial</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -218,7 +218,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

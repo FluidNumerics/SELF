@@ -1,10 +1,28 @@
-! SELF_SupportRoutines.f90
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 !
-! Copyright 2020 Fluid Numerics LLC
-! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self@higherordermethods.org
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
 !
-! //////////////////////////////////////////////////////////////////////////////////////////////// !
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
 !> \file SELF_SupportRoutines.f90
 !! Contains the \ref SELF_SupportRoutines module
@@ -12,21 +30,20 @@
 !> \defgroup SELF_SupportRoutines SELF_SupportRoutines
 !! This module defines a set of general purpose routines.
 
-MODULE SELF_SupportRoutines
+module SELF_SupportRoutines
 
-  USE ISO_FORTRAN_ENV
-  USE SELF_Constants
+  use iso_fortran_env
+  use SELF_Constants
 
-  IMPLICIT NONE
+  implicit none
 
-  INTERFACE AlmostEqual
-    MODULE PROCEDURE AlmostEqual_r64
-  END INTERFACE AlmostEqual
+  interface AlmostEqual
+    module procedure AlmostEqual_r64
+  endinterface AlmostEqual
 
+  real(prec),private,parameter :: tolerance = 10.0**(-10)
 
-  REAL(prec),PRIVATE,PARAMETER :: tolerance = 10.0**(-10)
-
-CONTAINS
+contains
 
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -57,27 +74,27 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
-  FUNCTION AlmostEqual_r64(a,b) RESULT(AisB)
+  function AlmostEqual_r64(a,b) result(AisB)
 
-    IMPLICIT NONE
-    REAL(real64) :: a,b
-    LOGICAL :: AisB
+    implicit none
+    real(real64) :: a,b
+    logical :: AisB
 
-    IF (a == 0.0_real64 .OR. b == 0.0_real64) THEN
-      IF (ABS(a - b) <= EPSILON(1.0_real64)) THEN
-        AisB = .TRUE.
-      ELSE
-        AisB = .FALSE.
-      END IF
-    ELSE
-      IF ((abs(a - b) <= EPSILON(1.0_real64)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_real64)*abs(b))) THEN
-        AisB = .TRUE.
-      ELSE
-        AisB = .FALSE.
-      END IF
-    END IF
+    if(a == 0.0_real64 .or. b == 0.0_real64) then
+      if(abs(a-b) <= epsilon(1.0_real64)) then
+        AisB = .true.
+      else
+        AisB = .false.
+      endif
+    else
+      if((abs(a-b) <= epsilon(1.0_real64)*abs(a)) .or. (abs(a-b) <= epsilon(1.0_real64)*abs(b))) then
+        AisB = .true.
+      else
+        AisB = .false.
+      endif
+    endif
 
-  END FUNCTION AlmostEqual_r64
+  endfunction AlmostEqual_r64
 
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -109,19 +126,19 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE ForwardShift(myArray,N)
+  subroutine ForwardShift(myArray,N)
 
-    IMPLICIT NONE
-    INTEGER,INTENT(in)    :: N
-    INTEGER,INTENT(inout) :: myArray(1:N)
+    implicit none
+    integer,intent(in)    :: N
+    integer,intent(inout) :: myArray(1:N)
     ! LOCAL
-    INTEGER :: temp(1:N)
+    integer :: temp(1:N)
 
     temp = myArray
     myArray(1) = temp(N)
-    myArray(2:N) = temp(1:N - 1)
+    myArray(2:N) = temp(1:N-1)
 
-  END SUBROUTINE ForwardShift
+  endsubroutine ForwardShift
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -160,28 +177,28 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
-  FUNCTION CompareArray(arrayOne,arrayTwo,N) RESULT(arraysMatch)
+  function CompareArray(arrayOne,arrayTwo,N) result(arraysMatch)
 
-    IMPLICIT NONE
-    INTEGER :: N
-    INTEGER :: arrayOne(1:N),arrayTwo(1:N)
-    LOGICAL :: arraysMatch
+    implicit none
+    integer :: N
+    integer :: arrayOne(1:N),arrayTwo(1:N)
+    logical :: arraysMatch
     ! LOCAL
-    INTEGER :: i,theSumOfDiffs
+    integer :: i,theSumOfDiffs
 
     theSumOfDiffs = 0
 
-    DO i = 1,N
-      theSumOfDiffs = theSumOfDiffs + ABS(arrayOne(i) - arrayTwo(i))
-    END DO
+    do i = 1,N
+      theSumOfDiffs = theSumOfDiffs+abs(arrayOne(i)-arrayTwo(i))
+    enddo
 
-    IF (theSumOfDiffs == 0) THEN
-      arraysMatch = .TRUE.
-    ELSE
-      arraysMatch = .FALSE.
-    END IF
+    if(theSumOfDiffs == 0) then
+      arraysMatch = .true.
+    else
+      arraysMatch = .false.
+    endif
 
-  END FUNCTION CompareArray
+  endfunction CompareArray
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -212,65 +229,65 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
-  FUNCTION UniformPoints(a,b,firstInd,lastInd) RESULT(xU)
+  function UniformPoints(a,b,firstInd,lastInd) result(xU)
 
-    IMPLICIT NONE
-    REAL(prec) :: a,b
-    INTEGER    :: firstInd,lastInd
-    REAL(prec) :: xU(firstInd:lastInd)
+    implicit none
+    real(prec) :: a,b
+    integer    :: firstInd,lastInd
+    real(prec) :: xU(firstInd:lastInd)
     ! LOCAL
-    REAL(prec)    :: dx
-    INTEGER :: i
+    real(prec)    :: dx
+    integer :: i
 
-    dx = (b - a)/REAL((lastInd - firstInd),prec)
+    dx = (b-a)/real((lastInd-firstInd),prec)
 
-    DO i = firstInd,lastInd
+    do i = firstInd,lastInd
 
-      xU(i) = a + dx*REAL(i - firstInd,prec)
+      xU(i) = a+dx*real(i-firstInd,prec)
 
-    END DO
+    enddo
 
-  END FUNCTION UniformPoints
+  endfunction UniformPoints
 
   integer function newunit(unit)
-  !  https://fortranwiki.org/fortran/show/newunit
-  integer, intent(out), optional :: unit
+    !  https://fortranwiki.org/fortran/show/newunit
+    integer,intent(out),optional :: unit
 ! local
-  integer, parameter :: LUN_MIN=10, LUN_MAX=1000
-  logical :: opened
-  integer :: lun
+    integer,parameter :: LUN_MIN = 10,LUN_MAX = 1000
+    logical :: opened
+    integer :: lun
 ! begin
-  newunit=-1
-  do lun=LUN_MIN,LUN_MAX
-    inquire(unit=lun,opened=opened)
-    if (.not. opened) then
-      newunit=lun
-      exit
-    end if
-  end do
-  if (present(unit)) unit=newunit
-  end function newunit
+    newunit = -1
+    do lun = LUN_MIN,LUN_MAX
+      inquire(unit=lun,opened=opened)
+      if(.not. opened) then
+        newunit = lun
+        exit
+      endif
+    enddo
+    if(present(unit)) unit = newunit
+  endfunction newunit
 
-  FUNCTION UpperCase(str) RESULT(upper)
+  function UpperCase(str) result(upper)
 
-    Implicit None
-    CHARACTER(*),INTENT(In) :: str
-    CHARACTER(LEN(str))      :: Upper
+    implicit none
+    character(*),intent(In) :: str
+    character(len(str))      :: Upper
 
-    INTEGER :: ic,i
+    integer :: ic,i
 
-    CHARACTER(27),PARAMETER :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ '
-    CHARACTER(27),PARAMETER :: low = 'abcdefghijklmnopqrstuvwxyz '
+    character(27),parameter :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ '
+    character(27),parameter :: low = 'abcdefghijklmnopqrstuvwxyz '
 
-    DO i = 1,LEN(str)
-      ic = INDEX(low,str(i:i))
-      IF (ic > 0) THEN
+    do i = 1,len(str)
+      ic = index(low,str(i:i))
+      if(ic > 0) then
         Upper(i:i) = cap(ic:ic)
-      ELSE
+      else
         Upper(i:i) = str(i:i)
-      END IF
-    END DO
+      endif
+    enddo
 
-  END FUNCTION UpperCase
+  endfunction UpperCase
 
-END MODULE SELF_SupportRoutines
+endmodule SELF_SupportRoutines

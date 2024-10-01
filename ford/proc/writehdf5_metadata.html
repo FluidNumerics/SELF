@@ -127,13 +127,13 @@
     <h2>public subroutine WriteHDF5_Metadata(mtd, group, varid, fileId)</h2>
     
 
-    <p>Writes the metadata to a HDF5 file using the 
+    <p>Writes the metadata to a HDF5 file using the
 fields :
  * <code>/metadata/{group}/name/{varid}</code>
  * <code>/metadata/{group}/description/{varid}</code>
  * <code>/metadata/{group}/units/{varid}</code></p>
 <p>This method assumes that an HDF5 file is already
-open for writing and is associated with the <code>fileId</code> 
+open for writing and is associated with the <code>fileId</code>
 input.</p>
 
     <h3>Arguments</h3>
@@ -147,7 +147,7 @@ input.</p>
   <td><strong>mtd</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-group"></span>character,</td>
+  <td><span class="anchor" id="variable-group~3"></span>character,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>group</strong></td><td></td>
@@ -159,7 +159,7 @@ input.</p>
   <td><strong>varid</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-fileid~2"></span>integer(kind=HID_T),</td>
+  <td><span class="anchor" id="variable-fileid~3"></span>integer(kind=HID_T),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>fileId</strong></td><td></td>
@@ -193,37 +193,37 @@ input.</p>
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">WriteHDF5_Metadata</span><span class="p">(</span><span class="n">mtd</span><span class="p">,</span><span class="n">group</span><span class="p">,</span><span class="n">varid</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="c">!! Writes the metadata to a HDF5 file using the </span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">WriteHDF5_Metadata</span><span class="p">(</span><span class="n">mtd</span><span class="p">,</span><span class="n">group</span><span class="p">,</span><span class="n">varid</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="c">!! Writes the metadata to a HDF5 file using the</span>
 <span class="w">  </span><span class="c">!! fields :</span>
 <span class="w">  </span><span class="c">!!  * `/metadata/{group}/name/{varid}`</span>
 <span class="w">  </span><span class="c">!!  * `/metadata/{group}/description/{varid}`</span>
 <span class="w">  </span><span class="c">!!  * `/metadata/{group}/units/{varid}`</span>
 <span class="w">  </span><span class="c">!!</span>
 <span class="w">  </span><span class="c">!! This method assumes that an HDF5 file is already</span>
-<span class="w">  </span><span class="c">!! open for writing and is associated with the `fileId` </span>
+<span class="w">  </span><span class="c">!! open for writing and is associated with the `fileId`</span>
 <span class="w">  </span><span class="c">!! input.</span>
-<span class="w">    </span><span class="k">CLASS</span><span class="p">(</span><span class="n">Metadata</span><span class="p">),</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mtd</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">group</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">varid</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">(</span><span class="n">HID_T</span><span class="p">),</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">Metadata</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mtd</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">group</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">varid</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">varNumber</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">varNumber</span><span class="w"></span>
 
 <span class="w">    </span><span class="c">! Add variable names to the file</span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/name&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/description&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/units&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span>
-<span class="w">    </span><span class="k">WRITE</span><span class="w"> </span><span class="p">(</span><span class="n">varNumber</span><span class="p">,</span><span class="s2">&quot;(I0)&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">varid</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteCharacter_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="w"> </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/name/&quot;</span><span class="o">//</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">varnumber</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                   </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">mtd</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">name</span><span class="p">))</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteCharacter_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="w"> </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/description/&quot;</span><span class="o">//</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">varnumber</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">mtd</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">description</span><span class="p">))</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteCharacter_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="w"> </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/units/&quot;</span><span class="o">//</span><span class="nb">TRIM</span><span class="p">(</span><span class="n">varnumber</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">mtd</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">units</span><span class="p">))</span><span class="w"></span>
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">WriteHDF5_Metadata</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/name&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/description&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/units&quot;</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">write</span><span class="p">(</span><span class="n">varNumber</span><span class="p">,</span><span class="s2">&quot;(I0)&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">varid</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteCharacter_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/name/&quot;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">varnumber</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                             </span><span class="nb">trim</span><span class="p">(</span><span class="n">mtd</span><span class="p">%</span><span class="n">name</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteCharacter_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/description/&quot;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">varnumber</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                             </span><span class="nb">trim</span><span class="p">(</span><span class="n">mtd</span><span class="p">%</span><span class="n">description</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteCharacter_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="nb">trim</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">//</span><span class="s2">&quot;/metadata/units/&quot;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">varnumber</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                             </span><span class="nb">trim</span><span class="p">(</span><span class="n">mtd</span><span class="p">%</span><span class="n">units</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">WriteHDF5_Metadata</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -244,7 +244,7 @@ input.</p>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>
