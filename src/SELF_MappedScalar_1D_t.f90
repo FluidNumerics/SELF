@@ -31,7 +31,6 @@ module SELF_MappedScalar_1D_t
   use SELF_Scalar_1D
   use SELF_Mesh_1D
   use SELF_Geometry_1D
-  use SELF_MPI
   use SELF_HDF5
   use HDF5
 
@@ -104,11 +103,10 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedScalar1D_t
 
-  subroutine SideExchange_MappedScalar1D_t(this,mesh,decomp)
+  subroutine SideExchange_MappedScalar1D_t(this,mesh)
     implicit none
     class(MappedScalar1D_t),intent(inout) :: this
-    type(Mesh1D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh1D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2
     integer :: ivar

@@ -55,7 +55,16 @@ module SELF_DGModel2D_t
   contains
 
     procedure :: Init => Init_DGModel2D_t
+    procedure :: SetMetadata => SetMetadata_DGModel2D_t
     procedure :: Free => Free_DGModel2D_t
+
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel2D_t
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel2D_t
+    procedure :: FluxMethod => fluxmethod_DGModel2D_t
+    procedure :: SourceMethod => sourcemethod_DGModel2D_t
+    procedure :: SetBoundaryCondition => setboundarycondition_DGModel2D_t
+    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel2D_t
+
     procedure :: UpdateSolution => UpdateSolution_DGModel2D_t
 
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel2D_t
@@ -78,21 +87,20 @@ module SELF_DGModel2D_t
 
 contains
 
-  subroutine Init_DGModel2D_t(this,nvar,mesh,geometry,decomp)
+  subroutine Init_DGModel2D_t(this,nvar,mesh,geometry)
     implicit none
     class(DGModel2D_t),intent(out) :: this
     integer,intent(in) :: nvar
     type(Mesh2D),intent(in),target :: mesh
     type(SEMQuad),intent(in),target :: geometry
-    type(MPILayer),intent(in),target :: decomp
     ! Local
     integer :: ivar
     character(LEN=3) :: ivarChar
     character(LEN=25) :: varname
 
-    this%decomp => decomp
     this%mesh => mesh
     this%geometry => geometry
+    this%nvar = nvar
 
     call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
@@ -102,20 +110,31 @@ contains
     call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
 
-    ! set default metadata
-    do ivar = 1,nvar
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%SetMetadata()
+
+  endsubroutine Init_DGModel2D_t
+
+  subroutine SetMetadata_DGModel2D_t(this)
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! Local
+    integer :: ivar
+    character(LEN=3) :: ivarChar
+    character(LEN=25) :: varname
+
+    do ivar = 1,this%nvar
       write(ivarChar,'(I3.3)') ivar
       varname = "solution"//trim(ivarChar)
       call this%solution%SetName(ivar,varname)
       call this%solution%SetUnits(ivar,"[null]")
     enddo
 
-    call this%solution%AssociateGeometry(geometry)
-    call this%solutionGradient%AssociateGeometry(geometry)
-    call this%flux%AssociateGeometry(geometry)
-    call this%fluxDivergence%AssociateGeometry(geometry)
-
-  endsubroutine Init_DGModel2D_t
+  endsubroutine SetMetadata_DGModel2D_t
 
   subroutine Free_DGModel2D_t(this)
     implicit none
@@ -272,10 +291,203 @@ contains
 
     ! perform the side exchange to populate the
     ! solutionGradient % extBoundary attribute
-    call this%solutionGradient%SideExchange(this%mesh, &
-                                            this%decomp)
+    call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel2D_t
+
+  subroutine CalculateEntropy_DGModel2D_t(this)
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,ierror
+    real(prec) :: e,jac
+    real(prec) :: s(1:this%nvar)
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do j = 1,this%solution%interp%N+1
+        do i = 1,this%solution%interp%N+1
+          jac = this%geometry%J%interior(i,j,iel,1)
+          s = this%solution%interior(i,j,iel,1:this%nvar)
+          e = e+this%entropy_func(s)*jac
+        enddo
+      enddo
+    enddo
+
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
+
+  endsubroutine CalculateEntropy_DGModel2D_t
+
+  subroutine fluxmethod_DGModel2D_t(this)
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i
+    integer :: j
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:2)
+
+    do iel = 1,this%mesh%nelem
+      do j = 1,this%solution%interp%N+1
+        do i = 1,this%solution%interp%N+1
+
+          s = this%solution%interior(i,j,iel,1:this%nvar)
+          dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
+          this%flux%interior(i,j,iel,1:this%nvar,1:2) = this%flux2d(s,dsdx)
+
+        enddo
+      enddo
+    enddo
+
+  endsubroutine fluxmethod_DGModel2D_t
+
+  subroutine BoundaryFlux_DGModel2D_t(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: j
+    integer :: i
+    real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
+    real(prec) :: dsdx(1:this%nvar,1:2)
+    real(prec) :: nhat(1:2),nmag
+
+    do iEl = 1,this%solution%nElem
+      do j = 1,4
+        do i = 1,this%solution%interp%N+1
+
+          ! Get the boundary normals on cell edges from the mesh geometry
+          nhat = this%geometry%nHat%boundary(i,j,iEl,1,1:2)
+          sL = this%solution%boundary(i,j,iel,1:this%nvar) ! interior solution
+          sR = this%solution%extboundary(i,j,iel,1:this%nvar) ! exterior solution
+          dsdx = this%solutiongradient%avgboundary(i,j,iel,1:this%nvar,1:2)
+          nmag = this%geometry%nScale%boundary(i,j,iEl,1)
+
+          this%flux%boundaryNormal(i,j,iEl,1:this%nvar) = this%riemannflux2d(sL,sR,dsdx,nhat)*nmag
+
+        enddo
+      enddo
+    enddo
+
+  endsubroutine BoundaryFlux_DGModel2D_t
+
+  subroutine sourcemethod_DGModel2D_t(this)
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i
+    integer :: j
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:2)
+
+    do iel = 1,this%mesh%nelem
+      do j = 1,this%solution%interp%N+1
+        do i = 1,this%solution%interp%N+1
+
+          s = this%solution%interior(i,j,iel,1:this%nvar)
+          dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
+          this%source%interior(i,j,iel,1:this%nvar) = this%source2d(s,dsdx)
+
+        enddo
+      enddo
+    enddo
+
+  endsubroutine sourcemethod_DGModel2D_t
+
+  subroutine setboundarycondition_DGModel2D_t(this)
+    !! Boundary conditions for the solution are set to
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! local
+    integer :: i,iEl,j,e2,bcid
+
+    do iEl = 1,this%solution%nElem ! Loop over all elements
+      do j = 1,4 ! Loop over all sides
+
+        bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
+
+        if(e2 == 0) then
+          if(bcid == SELF_BC_PRESCRIBED) then
+            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+                this%bcPrescribed(this%solution%boundary(i,j,iEl,1:this%nvar))
+            enddo
+          elseif(bcid == SELF_BC_RADIATION) then
+            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+                this%bcRadiation(this%solution%boundary(i,j,iEl,1:this%nvar))
+            enddo
+          elseif(bcid == SELF_BC_NONORMALFLOW) then
+            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+                this%bcNoNormalFlow(this%solution%boundary(i,j,iEl,1:this%nvar))
+            enddo
+          endif
+        endif
+
+      enddo
+    enddo
+
+  endsubroutine setboundarycondition_DGModel2D_t
+
+  subroutine setgradientboundarycondition_DGModel2D_t(this)
+    !! Boundary conditions for the solution are set to
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! local
+    integer :: i,iEl,j,e2,bcid
+    real(prec) :: dsdx(1:this%nvar,1:2)
+
+    do iEl = 1,this%solution%nElem ! Loop over all elements
+      do j = 1,4 ! Loop over all sides
+
+        bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
+
+        if(e2 == 0) then
+          if(bcid == SELF_BC_PRESCRIBED) then
+            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+              this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+                this%bcGrad2dPrescribed(dsdx)
+            enddo
+          elseif(bcid == SELF_BC_RADIATION) then
+            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+              this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+                this%bcGrad2dRadiation(dsdx)
+            enddo
+          elseif(bcid == SELF_BC_NONORMALFLOW) then
+            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+              this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+                this%bcGrad2dNoNormalFlow(dsdx)
+            enddo
+          endif
+        endif
+
+      enddo
+    enddo
+
+  endsubroutine setgradientboundarycondition_DGModel2D_t
 
   subroutine CalculateTendency_DGModel2D_t(this)
     implicit none
@@ -284,7 +496,7 @@ contains
     integer :: i,j,iEl,iVar
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh,this%decomp)
+    call this%solution%SideExchange(this%mesh)
 
     call this%PreTendency() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
@@ -297,7 +509,7 @@ contains
     endif
 
     call this%SourceMethod() ! User supplied
-    call this%RiemannSolver() ! User supplied
+    call this%BoundaryFlux() ! User supplied
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
@@ -314,16 +526,11 @@ contains
   endsubroutine CalculateTendency_DGModel2D_t
 
   subroutine Write_DGModel2D_t(this,fileName)
-#undef __FUNC__
-#define __FUNC__ "Write_DGModel2D_t"
     implicit none
     class(DGModel2D_t),intent(inout) :: this
     character(*),optional,intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
-    type(Scalar2D) :: solution
-    type(Vector2D) :: x
-    type(Lagrange),target :: interp
     character(LEN=self_FileNameLength) :: pickupFile
     character(13) :: timeStampString
 
@@ -334,60 +541,32 @@ contains
       pickupFile = 'solution.'//timeStampString//'.h5'
     endif
 
-    INFO("Writing pickup file : "//trim(pickupFile))
+    print*,__FILE__//" : Writing pickup file : "//trim(pickupFile)
     call this%solution%UpdateHost()
 
-    if(this%decomp%mpiEnabled) then
+    if(this%mesh%decomp%mpiEnabled) then
 
-      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%decomp%mpiComm)
+      call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%mesh%decomp%mpiComm)
 
       ! Write the interpolant to the file
-      INFO("Writing interpolant data to file")
+      print*,__FILE__//" : Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
       ! Write the model state to file
-      INFO("Writing control grid solution to file")
+      print*,__FILE__//" : Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
+      print*," offset, nglobal_elem : ",this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
-                                   this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
+                                   this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
       ! Write the geometry to file
-      INFO("Writing control grid geometry to file")
-      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x', &
-                                     this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
+      print*,__FILE__//" : Writing control grid geometry to file"
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry', &
+                                     this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
       ! -- END : writing solution on control grid -- !
-
-      ! Interpolate the solution to a grid for plotting results
-      ! Create an interpolant for the uniform grid
-      call interp%Init(this%solution%interp%M, &
-                       this%solution%interp%targetNodeType, &
-                       this%solution%interp%N, &
-                       this%solution%interp%controlNodeType)
-
-      call solution%Init(interp, &
-                         this%solution%nVar,this%solution%nElem)
-
-      call x%Init(interp,1,this%solution%nElem)
-
-      ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x%interior)
-
-      ! Map the solution to the target grid
-      call this%solution%GridInterp(solution%interior)
-
-      ! Write the model state to file
-      call CreateGroup_HDF5(fileId,'/targetgrid')
-      call solution%WriteHDF5(fileId,'/targetgrid/solution', &
-                              this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
-
-      ! Write the geometry to file
-      call CreateGroup_HDF5(fileId,'/targetgrid/mesh')
-      call x%WriteHDF5(fileId,'/targetgrid/mesh/coords', &
-                       this%decomp%offsetElem(this%decomp%rankId),this%decomp%nElem)
 
       call Close_HDF5(fileId)
 
@@ -396,58 +575,25 @@ contains
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
       ! Write the interpolant to the file
-      INFO("Writing interpolant data to file")
+      print*,__FILE__//" : Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
 
       ! Write the model state to file
-      INFO("Writing control grid solution to file")
+      print*,__FILE__//" : Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
       ! Write the geometry to file
-      INFO("Writing control grid  geometry to file")
-      call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
+      print*,__FILE__//" : Writing control grid geometry to file"
+      call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry')
       ! -- END : writing solution on control grid -- !
-
-      ! Interpolate the solution to a grid for plotting results
-      ! Create an interpolant for the uniform grid
-      call interp%Init(this%solution%interp%M, &
-                       this%solution%interp%targetNodeType, &
-                       this%solution%interp%N, &
-                       this%solution%interp%controlNodeType)
-
-      call solution%Init(interp, &
-                         this%solution%nVar,this%solution%nElem)
-
-      call x%Init(interp,1,this%solution%nElem)
-
-      ! Map the mesh positions to the target grid
-      call this%geometry%x%GridInterp(x%interior)
-
-      ! Map the solution to the target grid
-      call this%solution%GridInterp(solution%interior)
-
-      ! Write the model state to file
-      INFO("Writing target grid solution to file")
-      call CreateGroup_HDF5(fileId,'/targetgrid')
-      call solution%WriteHDF5(fileId,'/targetgrid/solution')
-
-      ! Write the geometry to file
-      INFO("Writing target grid geometry to file")
-      call CreateGroup_HDF5(fileId,'/targetgrid/geometry')
-      call x%WriteHDF5(fileId,'/targetgrid/geometry/x')
 
       call Close_HDF5(fileId)
 
     endif
-
-    call x%Free()
-    call solution%Free()
-    call interp%Free()
 
   endsubroutine Write_DGModel2D_t
 
@@ -457,24 +603,31 @@ contains
     character(*),intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
-    integer(HID_T) :: solOffset(1:4)
+    integer(HID_T) :: solOffset(1:3)
     integer :: firstElem
-    integer :: N
+    integer :: N,ivar
 
-    if(this%decomp%mpiEnabled) then
+    if(this%mesh%decomp%mpiEnabled) then
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
-                     this%decomp%mpiComm)
+                     this%mesh%decomp%mpiComm)
     else
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
     endif
 
-    if(this%decomp%mpiEnabled) then
-      firstElem = this%decomp%offsetElem(this%decomp%rankId)+1
-      solOffset(1:4) = (/0,0,1,firstElem/)
-      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
-                          this%solution%interior,solOffset)
+    if(this%mesh%decomp%mpiEnabled) then
+      firstElem = this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1)
+      solOffset(1:3) = (/0,0,firstElem/)
+      do ivar = 1,this%solution%nvar
+        call ReadArray_HDF5(fileId, &
+                            '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name), &
+                            this%solution%interior(:,:,:,ivar),solOffset)
+      enddo
     else
-      call ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this%solution%interior)
+      do ivar = 1,this%solution%nvar
+        call ReadArray_HDF5(fileId, &
+                            '/controlgrid/solution/'//trim(this%solution%meta(ivar)%name), &
+                            this%solution%interior(:,:,:,ivar))
+      enddo
     endif
 
     call Close_HDF5(fileId)
@@ -505,8 +658,8 @@ contains
     else
       write(timeStampString,'(I13.13)') this%ioIterate
 
-      if(this%decomp%mpiEnabled) then
-        write(rankString,'(I5.5)') this%decomp%rankId
+      if(this%mesh%decomp%mpiEnabled) then
+        write(rankString,'(I5.5)') this%mesh%decomp%rankId
         tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
       else
         tecFile = 'solution.'//timeStampString//'.tec'

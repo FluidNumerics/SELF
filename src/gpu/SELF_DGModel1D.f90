@@ -46,6 +46,13 @@ module SELF_DGModel1D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel1D
 
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel1D
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel1D
+    procedure :: FluxMethod => fluxmethod_DGModel1D
+    procedure :: SourceMethod => sourcemethod_DGModel1D
+    procedure :: SetBoundaryCondition => setboundarycondition_DGModel1D
+    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel1D
+
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D
@@ -137,10 +144,220 @@ contains
 
     ! perform the side exchange to populate the
     ! solutionGradient % extBoundary attribute
-    call this%solutionGradient%SideExchange(this%mesh, &
-                                            this%decomp)
+    call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel1D
+
+  subroutine CalculateEntropy_DGModel1D(this)
+    implicit none
+    class(DGModel1D),intent(inout) :: this
+    ! Local
+    integer :: iel,i,ivar
+    real(prec) :: e,s(1:this%solution%nvar),J
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do i = 1,this%solution%interp%N+1
+        J = this%geometry%dxds%interior(i,iel,1)
+        s(1:this%solution%nvar) = this%solution%interior(i,iel,1:this%solution%nvar)
+        e = e+this%entropy_func(s)*J
+      enddo
+    enddo
+
+    this%entropy = e
+
+  endsubroutine CalculateEntropy_DGModel1D
+
+  subroutine setboundarycondition_DGModel1D(this)
+    ! Here, we use the pre-tendency method to calculate the
+    ! derivative of the solution using a bassi-rebay method
+    ! We then do a boundary interpolation and side exchange
+    ! on the gradient field
+    implicit none
+    class(DGModel1D),intent(inout) :: this
+    ! local
+    integer :: ivar
+    integer :: N,nelem
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
+
+    nelem = this%geometry%nelem ! number of elements in the mesh
+    N = this%solution%interp%N ! polynomial degree
+
+    do ivar = 1,this%solution%nvar
+
+      ! left-most boundary
+      this%solution%extBoundary(1,1,ivar) = &
+        this%solution%boundary(2,nelem,ivar)
+
+      ! right-most boundary
+      this%solution%extBoundary(2,nelem,ivar) = &
+        this%solution%boundary(1,1,ivar)
+
+    enddo
+
+    call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
+                            c_loc(this%solution%extBoundary), &
+                            sizeof(this%solution%extBoundary), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine setboundarycondition_DGModel1D
+
+  subroutine setgradientboundarycondition_DGModel1D(this)
+    ! Here, we set the boundary conditions for the
+    ! solution and the solution gradient at the left
+    ! and right most boundaries.
+    !
+    ! Here, we use periodic boundary conditions
+    implicit none
+    class(DGModel1D),intent(inout) :: this
+    ! local
+    integer :: ivar
+    integer :: nelem
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
+                            this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
+                            hipMemcpyDeviceToHost))
+
+    nelem = this%geometry%nelem ! number of elements in the mesh
+
+    do ivar = 1,this%solution%nvar
+
+      ! left-most boundary
+      this%solutionGradient%extBoundary(1,1,ivar) = &
+        this%solutionGradient%boundary(2,nelem,ivar)
+
+      ! right-most boundary
+      this%solutionGradient%extBoundary(2,nelem,ivar) = &
+        this%solutionGradient%boundary(1,1,ivar)
+
+    enddo
+
+    call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
+                            c_loc(this%solutiongradient%extBoundary), &
+                            sizeof(this%solutiongradient%extBoundary), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine setgradientboundarycondition_DGModel1D
+
+  subroutine BoundaryFlux_DGModel1D(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel1D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: iside
+    real(prec) :: fin(1:this%solution%nvar)
+    real(prec) :: fout(1:this%solution%nvar)
+    real(prec) :: dfdx(1:this%solution%nvar),nhat
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
+                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%avgboundary), &
+                            this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
+                            hipMemcpyDeviceToHost))
+
+    do iel = 1,this%mesh%nelem
+      do iside = 1,2
+
+        ! set the normal velocity
+        if(iside == 1) then
+          nhat = -1.0_prec
+        else
+          nhat = 1.0_prec
+        endif
+
+        fin = this%solution%boundary(iside,iel,1:this%solution%nvar) ! interior solution
+        fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
+        dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
+        this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
+          this%riemannflux1d(fin,fout,dfdx,nhat)
+
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
+                            c_loc(this%flux%boundarynormal), &
+                            sizeof(this%flux%boundarynormal), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine BoundaryFlux_DGModel1D
+
+  subroutine fluxmethod_DGModel1D(this)
+    implicit none
+    class(DGModel1D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i
+    real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
+
+    do iel = 1,this%mesh%nelem
+      do i = 1,this%solution%interp%N+1
+
+        f = this%solution%interior(i,iel,1:this%solution%nvar)
+        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+
+        this%flux%interior(i,iel,1:this%solution%nvar) = &
+          this%flux1d(f,dfdx)
+
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
+                            c_loc(this%flux%interior), &
+                            sizeof(this%flux%interior), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine fluxmethod_DGModel1D
+
+  subroutine sourcemethod_DGModel1D(this)
+    implicit none
+    class(DGModel1D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i
+    real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%interior), &
+                            this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
+                            hipMemcpyDeviceToHost))
+
+    do iel = 1,this%mesh%nelem
+      do i = 1,this%solution%interp%N+1
+
+        f = this%solution%interior(i,iel,1:this%solution%nvar)
+        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+
+        this%source%interior(i,iel,1:this%solution%nvar) = &
+          this%source1d(f,dfdx)
+
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%source%interior_gpu, &
+                            c_loc(this%source%interior), &
+                            sizeof(this%source%interior), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine sourcemethod_DGModel1D
 
   subroutine CalculateTendency_DGModel1D(this)
     implicit none
@@ -149,7 +366,7 @@ contains
     integer :: ndof
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh,this%decomp)
+    call this%solution%SideExchange(this%mesh)
 
     call this%PreTendency() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
@@ -162,7 +379,7 @@ contains
     endif
 
     call this%SourceMethod() ! User supplied
-    call this%RiemannSolver() ! User supplied
+    call this%BoundaryFlux() ! User supplied
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDerivative(this%fluxDivergence%interior_gpu)

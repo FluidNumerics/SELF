@@ -2,23 +2,30 @@ steps:
   - name : "Build on Noether"
     sbatch_options: 
       - "--partition=gpu"
-      - "--gres=gpu:mi210:1"
-      - "--ntasks=1"
-      - "--cpus-per-task=12"
+      - "--gres=gpu:mi210:2"
+      - "--ntasks=6"
+      - "--cpus-per-task=2"
       - "--time=20:00"
     prerequisites:
       - "source /etc/profile.d/z11_lmod.sh"
     modules:
-      - rocm/6.1.2
-      - openmpi/5.0.3
+      - cmake/3.29.6
+      - gcc/12.3.0
+      - rocm/6.0.2
+      - openmpi+rocm+ucx/5.0.3
       - hdf5/1.14.3
       - feq-parse/2.2.2
     env:
       BUILD_DIR: ${WORKSPACE}/build
       PREFIX: ${WORKSPACE}/opt/self
       OUTDIR: ${WORKSPACE}/local
-      OMP_TARGET: gfx90a
+      GPU_ARCH: gfx90a
       BUILD_TYPE: coverage
+      ENABLE_GPU: ON
+      ENABLE_DOUBLE_PRECISION: ON
+      ENABLE_MULTITHREADING: OFF
+      NTHREADS: 4
+      GCOV: gcov-12
     commands: 
       - |
         set -e
@@ -26,40 +33,53 @@ steps:
         mkdir -p ${OUTDIR}
         cd ${WORKSPACE}/build
         FC=gfortran \
+        CXX=hipcc \
         cmake -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
-              -DOMP_TARGET=${OMP_TARGET} \
-              -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/opt/self \
+              -DCMAKE_INSTALL_PREFIX=${PREFIX} \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              -DSELF_ENABLE_GPU=${ENABLE_GPU} \
+              -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
+              -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
+              -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
+              -DCMAKE_HIP_ARCHITECTURE=${GPU_ARCH} \
               ../
         make VERBOSE=1
         make install
 
+
         # Initialize coverage
-        mkdir -p ${WORKSPACE}/tmp/
-        lcov --no-external \
-              --capture \
-              --initial \
-              --exclude 'test/*' \
-              --exclude 'example/*' \
-              --directory ${WORKSPACE} \
-              --output-file ${WORKSPACE}/tmp/lcov_base.info
+        if [ "$BUILD_TYPE" = "coverage" ]; then
+          lcov --capture \
+                --initial \
+                --directory ${BUILD_DIR}/src \
+                --gcov=${GCOV} \
+                --output-file ${WORKSPACE}/initial.info
+        fi
+
 
         # Run ctests
-        ctest --test-dir ${BUILD_DIR}
+        ctest --test-dir ${BUILD_DIR} --verbose
 
-        # Compile coverage information
-        lcov --no-external \
-            --capture \
-            --directory ${WORKSPACE} \
-            --exclude 'test/*' \
-            --exclude 'example/*' \
-            --output-file ${WORKSPACE}/tmp/lcov_test.info
+        if [ "$BUILD_TYPE" = "coverage" ]; then
+          # Compile coverage information
+          lcov --capture \
+                --directory ${BUILD_DIR}/src \
+                --gcov=${GCOV} \
+                --output-file ${WORKSPACE}/ctest-capture.info
 
-        lcov --add-tracefile ${WORKSPACE}/tmp/lcov_base.info \
-             --add-tracefile ${WORKSPACE}/tmp/lcov_test.info \
-             --output-file ${WORKSPACE}/lcov.info
+          lcov --add-tracefile ${WORKSPACE}/initial.info \
+                --add-tracefile ${WORKSPACE}/ctest-capture.info \
+                --gcov=${GCOV} \
+                --output-file ${WORKSPACE}/coverage.info
+                
+          # Generate summary
+          lcov --summary ${WORKSPACE}/coverage.info
 
-        ${HOME}/.local/bin/codecov-linux -t "${CODECOV_TOKEN}" \
-                            --sha "${COMMIT_SHA}" \
-                            --branch "${BRANCH_NAME}" \
-                            --pr "${PR_NUMBER}"
+          ${HOME}/.local/bin/codecov-linux -t "${CODECOV_TOKEN}" \
+                              --sha "${COMMIT_SHA}" \
+                              --branch "${BRANCH_NAME}" \
+                              --pr "${PR_NUMBER}" \
+                              --flag "armory-noether-gfx90a-test" \
+                              --file "${WORKSPACE}/coverage.info"
+        fi
+

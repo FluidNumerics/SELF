@@ -298,38 +298,28 @@ contains
     integer,intent(in) :: elemoffset
     integer,intent(in) :: nglobalelem
     ! Local
-    integer(HID_T) :: offset(1:5)
-    integer(HID_T) :: bOffset(1:5)
-    integer(HID_T) :: globalDims(1:5)
-    integer(HID_T) :: bGlobalDims(1:5)
-    integer :: ivar
+    integer(HID_T) :: offset(1:3)
+    integer(HID_T) :: globalDims(1:3)
+    integer :: ivar,idir
+    character(4) :: dimvar
 
-    offset(1:5) = (/0,0,0,0,elemoffset/)
-    globalDims(1:5) = (/2, &
+    offset(1:3) = (/0,0,elemoffset/)
+    globalDims(1:3) = (/this%interp%N+1, &
                         this%interp%N+1, &
-                        this%interp%N+1, &
-                        this%nVar, &
                         nglobalelem/)
-
-    ! Offsets and dimensions for element boundary data
-    bOffset(1:5) = (/0,0,0,0,elemoffset/)
-    bGlobalDims(1:5) = (/2, &
-                         this%interp%N+1, &
-                         this%nVar, &
-                         4, &
-                         nglobalelem/)
 
     call CreateGroup_HDF5(fileId,trim(group))
 
-    do ivar = 1,this%nVar
-      call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+    do idir = 1,2
+      write(dimvar,'(I1)') idir
+      dimvar = "dim"//trim(dimvar)
+      do ivar = 1,this%nVar
+        !call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
+        call WriteArray_HDF5(fileId, &
+                             trim(group)//"/"//trim(this%meta(ivar)%name)//"_"//dimvar, &
+                             this%interior(:,:,:,ivar,idir),offset,globalDims)
+      enddo
     enddo
-
-    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
-                         this%interior,offset,globalDims)
-
-    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
-                         this%boundary,bOffset,bGlobalDims)
 
   endsubroutine WriteHDF5_MPI_Vector2D_t
 
@@ -339,19 +329,23 @@ contains
     integer(HID_T),intent(in) :: fileId
     character(*),intent(in) :: group
     ! Local
-    integer :: ivar
+    integer :: ivar,idir
+    character(4) :: dimvar
 
     call CreateGroup_HDF5(fileId,trim(group))
 
     do ivar = 1,this%nVar
       call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
     enddo
-
-    call WriteArray_HDF5(fileId,trim(group)//"/interior", &
-                         this%interior)
-
-    call WriteArray_HDF5(fileId,trim(group)//"/boundary", &
-                         this%boundary)
+    do idir = 1,2
+      write(dimvar,'(I1)') idir
+      dimvar = "dim"//trim(dimvar)
+      do ivar = 1,this%nVar
+        call WriteArray_HDF5(fileId, &
+                             trim(group)//"/"//trim(this%meta(ivar)%name)//"_"//dimvar, &
+                             this%interior(:,:,:,ivar,idir))
+      enddo
+    enddo
 
   endsubroutine WriteHDF5_Vector2D_t
 

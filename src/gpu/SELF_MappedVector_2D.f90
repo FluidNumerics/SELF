@@ -40,6 +40,7 @@ module SELF_MappedVector_2D
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
     procedure,public :: SideExchange => SideExchange_MappedVector2D
+    procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
 
     generic,public :: MappedDivergence => MappedDivergence_MappedVector2D
     procedure,private :: MappedDivergence_MappedVector2D
@@ -97,31 +98,94 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector2D
 
-  subroutine SideExchange_MappedVector2D(this,mesh,decomp)
+  subroutine MPIExchangeAsync_MappedVector2D(this,mesh)
     implicit none
     class(MappedVector2D),intent(inout) :: this
-    type(Mesh2D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: e1,s1,e2,s2,ivar,idir
+    integer :: globalSideId,r2,tag
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundary(:,:,:,:,:)
+    real(prec),pointer :: extboundary(:,:,:,:,:)
+
+    msgCount = 0
+    call c_f_pointer(this%boundary_gpu,boundary,[this%interp%N+1,4,this%nelem,this%nvar,2])
+    call c_f_pointer(this%extboundary_gpu,extboundary,[this%interp%N+1,4,this%nelem,this%nvar,2])
+
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do e1 = 1,this%nElem
+          do s1 = 1,4
+
+            e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
+            if(e2 > 0) then
+              r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
+
+              if(r2 /= mesh%decomp%rankId) then
+
+                s2 = mesh%sideInfo(4,s1,e1)/10
+                globalSideId = abs(mesh%sideInfo(2,s1,e1))
+                ! create unique tag for each side and each variable
+                tag = globalsideid+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
+
+                msgCount = msgCount+1
+                call MPI_IRECV(extBoundary(:,s1,e1,ivar,idir), &
+                               (this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,tag, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
+
+                msgCount = msgCount+1
+                call MPI_ISEND(boundary(:,s1,e1,ivar,idir), &
+                               (this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,tag, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
+              endif
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIExchangeAsync_MappedVector2D
+
+  subroutine SideExchange_MappedVector2D(this,mesh)
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip,bcid
     integer :: i1,i2,ivar,idir
     integer :: neighborRank
-    integer :: rankId,offset
+    integer :: offset
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankid+1)
 
-    ! call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIExchangeAsync(mesh)
+    endif
+
     ! Do the side exchange internal to this mpi process
     call SideExchange_2D_gpu(this%extboundary_gpu, &
-                             this%boundary_gpu,mesh%sideinfo_gpu,decomp%elemToRank_gpu, &
-                             decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
+                             this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
 
-    ! call decomp%FinalizeMPIExchangeAsync()
-
-    ! ! Apply side flips for data exchanged with MPI
-    ! call this%ApplyFlip(decomp,mesh)
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      ! Apply side flips for data exchanged with MPI
+      call ApplyFlip_2D_gpu(this%extboundary_gpu,mesh%sideInfo_gpu, &
+                            mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                            offset,this%interp%N,2*this%nVar,this%nElem)
+    endif
 
   endsubroutine SideExchange_MappedVector2D
 

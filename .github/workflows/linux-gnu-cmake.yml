@@ -98,7 +98,10 @@ jobs:
           spack env activate ./share/spack-env/
           mkdir build
           cd build
-          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          FC=${{ matrix.fcompiler }} CC=${{ matrix.ccompiler }} \
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  \
+                -DSELF_MPIEXEC_NUMPROCS=2 \
+                ../
           make VERBOSE=1
 
       - name: Initialize coverage counters

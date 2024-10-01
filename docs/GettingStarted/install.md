@@ -64,7 +64,7 @@ The Spectral Element Library in Fortran can be built provided the following depe
 
 * [Cmake (v3.21 or greater)](https://cmake.org/resources/)
 * Fortran 2008 compliant compiler ( `gfortran` recommended )
-* MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
+* MPI, e.g. [OpenMPI](https://www.open-mpi.org/) with [GPU-Aware Support](./dependencies.md)
 * [MAGMA](https://icl.utk.edu/magma/)
 * [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 * [FluidNumerics/feq-parse](https://github.com/FluidNumerics/feq-parse)

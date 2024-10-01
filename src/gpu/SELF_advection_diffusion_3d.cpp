@@ -87,7 +87,7 @@ extern "C"
 
 }
 
-__global__ void riemannsolver_advection_diffusion_3d_gpukernel(real *fb, real *fextb, real *dfavg, real *nhat, real *nscale, real *flux, real u, real v, real w, real nu, int N, int nel, int nvar){
+__global__ void boundaryflux_advection_diffusion_3d_gpukernel(real *fb, real *fextb, real *dfavg, real *nhat, real *nscale, real *flux, real u, real v, real w, real nu, int N, int nel, int nvar){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
   uint32_t ndof = (N+1)*(N+1)*6*nel;
 
@@ -119,7 +119,7 @@ __global__ void riemannsolver_advection_diffusion_3d_gpukernel(real *fb, real *f
 }
 extern "C"
 {
-  void riemannsolver_advection_diffusion_3d_gpu(real *fb, real *fextb, real *dfavg, real *nhat, real *nscale, real *flux, real u, real v, real w, real nu, int N, int nel, int nvar){
+  void boundaryflux_advection_diffusion_3d_gpu(real *fb, real *fextb, real *dfavg, real *nhat, real *nscale, real *flux, real u, real v, real w, real nu, int N, int nel, int nvar){
     int threads_per_block = 256;
     uint32_t ndof = (N+1)*(N+1)*6*nel;
     int nblocks_x = ndof/threads_per_block +1;
@@ -127,7 +127,7 @@ extern "C"
     dim3 nblocks(nblocks_x,nvar,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    riemannsolver_advection_diffusion_3d_gpukernel<<<nblocks,nthreads>>>(fb,fextb,dfavg,nhat,nscale,flux,u,v,w,nu,N,nel,nvar);
+    boundaryflux_advection_diffusion_3d_gpukernel<<<nblocks,nthreads>>>(fb,fextb,dfavg,nhat,nscale,flux,u,v,w,nu,N,nel,nvar);
   }
 
 }

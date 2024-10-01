@@ -30,8 +30,6 @@ module SELF_Constants
   use iso_fortran_env
 
   implicit none
-  include "mpif.h"
-
 #include "SELF_Macros.h"
 
 #ifdef DOUBLE_PRECISION

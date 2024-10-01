@@ -31,7 +31,7 @@ module SELF_Mesh_3D_t
   use SELF_SupportRoutines
   use SELF_HDF5
   use SELF_Mesh
-  use SELF_MPI
+  use SELF_DomainDecomposition
 
   ! External Libs !
   use HDF5
@@ -176,7 +176,7 @@ contains
 
   subroutine Init_Mesh3D_t(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
-    class(Mesh3D_t),intent(out) :: this
+    class(Mesh3D_t),intent(inout) :: this
     integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     integer,intent(in) :: nSides
@@ -261,6 +261,7 @@ contains
     deallocate(this%BCType)
 
     deallocate(this%BCNames)
+    call this%decomp%Free()
 
   endsubroutine Free_Mesh3D_t
 
@@ -310,7 +311,6 @@ contains
         if(e2 /= 0) then
 
           selfFlip = CGNStoSELFflip(s2,s1,cgnsFlip)
-          ! print*, s1,s2,cgnsFlip,selfFlip
           this%sideInfo(4,s1,e1) = 10*s2+selfFlip
 
         endif
@@ -320,12 +320,12 @@ contains
 
   endsubroutine RecalculateFlip_Mesh3D_t
 
-  subroutine Read_HOPr_Mesh3D_t(this,meshFile,decomp)
+  subroutine Read_HOPr_Mesh3D_t(this,meshFile,enableDomainDecomposition)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     implicit none
     class(Mesh3D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
-    type(MPILayer),intent(inout) :: decomp
+    logical,intent(in),optional :: enableDomainDecomposition
     ! Local
     integer(HID_T) :: fileId
     integer(HID_T) :: offset(1:2),gOffset(1)
@@ -346,8 +346,14 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    if(decomp%mpiEnabled) then
-      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp%mpiComm)
+    if(present(enableDomainDecomposition)) then
+      call this%decomp%init(enableDomainDecomposition)
+    else
+      call this%decomp%init(.false.)
+    endif
+
+    if(this%decomp%mpiEnabled) then
+      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)
     else
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
     endif
@@ -359,7 +365,7 @@ contains
 
     ! Read BCType
     allocate(bcType(1:4,1:nBCs))
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset(:) = 0
       call ReadArray_HDF5(fileId,'BCType',bcType,offset)
     else
@@ -367,15 +373,15 @@ contains
     endif
 
     ! Read local subarray of ElemInfo
-    call decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
+    call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
 
-    firstElem = decomp%offsetElem(decomp%rankId+1)+1
-    nLocalElems = decomp%offsetElem(decomp%rankId+2)- &
-                  decomp%offsetElem(decomp%rankId+1)
+    firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    nLocalElems = this%decomp%offsetElem(this%decomp%rankId+2)- &
+                  this%decomp%offsetElem(this%decomp%rankId+1)
 
     ! Allocate Space for hopr_elemInfo!
     allocate(hopr_elemInfo(1:6,1:nLocalElems))
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset = (/0,firstElem-1/)
       call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
     else
@@ -389,7 +395,7 @@ contains
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     allocate(hopr_nodeCoords(1:3,1:nLocalNodes),hopr_globalNodeIDs(1:nLocalNodes))
 
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset = (/0,firstNode-1/)
       call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
       gOffset = (/firstNode-1/)
@@ -406,7 +412,7 @@ contains
     ! Allocate space for hopr_sideInfo
     allocate(hopr_sideInfo(1:5,1:nLocalSides))
 
-    if(decomp%mpiEnabled) then
+    if(this%decomp%mpiEnabled) then
       offset = (/0,firstSide-1/)
       call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
     else

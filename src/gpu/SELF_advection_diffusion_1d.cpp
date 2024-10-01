@@ -38,7 +38,7 @@ extern "C"
 
 }
 
-__global__ void riemannsolver_advection_diffusion_1d_gpukernel(real *fb, real *fextb, real *dfavg, real *flux, real u, real nu, int ndof){
+__global__ void boundaryflux_advection_diffusion_1d_gpukernel(real *fb, real *fextb, real *dfavg, real *flux, real u, real nu, int ndof){
   uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
   // when i is even, we are looking at the left side of the element and the boundary normal is negative
   // when i is odd, we are looking at the right side of the element and boundary normal is positive
@@ -60,10 +60,10 @@ __global__ void riemannsolver_advection_diffusion_1d_gpukernel(real *fb, real *f
 }
 extern "C"
 {
-  void riemannsolver_advection_diffusion_1d_gpu(real *fb, real *fextb, real *dfavg, real *flux, real u, real nu, int ndof){
+  void boundaryflux_advection_diffusion_1d_gpu(real *fb, real *fextb, real *dfavg, real *flux, real u, real nu, int ndof){
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block +1;
-    riemannsolver_advection_diffusion_1d_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(fb,fextb,dfavg,flux,u,nu,ndof);
+    boundaryflux_advection_diffusion_1d_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(fb,fextb,dfavg,flux,u,nu,ndof);
   }
 
 }

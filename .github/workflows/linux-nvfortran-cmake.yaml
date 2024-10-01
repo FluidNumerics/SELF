@@ -81,7 +81,8 @@ jobs:
           spack env activate ./share/spack-env/
           mkdir build
           cd build
-          FC=${{ env.FC }} CC=${{ env.CC }} cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}  ../
+          FC=${{ env.FC }} CC=${{ env.CC }} \
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ../
           make VERBOSE=1
 
       - name: Run ctests

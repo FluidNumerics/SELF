@@ -45,15 +45,12 @@ program advection_diffusion_3d_rk3
   type(Lagrange),target :: interp
   type(Mesh3D),target :: mesh
   type(SEMHex),target :: geometry
-  type(MPILayer),target :: decomp
   character(LEN=255) :: WORKSPACE
-
-  ! We create a domain decomposition.
-  call decomp%Init(enableMPI=.false.)
+  real(prec) :: e0,ef
 
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
-  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",decomp)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5")
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -66,7 +63,8 @@ program advection_diffusion_3d_rk3
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry,decomp)
+  call modelobj%Init(nvar,mesh,geometry)
+  modelobj%gradient_enabled = .true.
 
   ! Set the velocity
   modelobj%u = u
@@ -83,20 +81,30 @@ program advection_diffusion_3d_rk3
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
 
+  call modelobj%CalculateEntropy()
+  call modelobj%ReportEntropy()
+  e0 = modelobj%entropy
+
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
   ! forward step the model to `endtime` using a time step
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
+  call modelobj%WriteModel("advdiff3d-rk3.pickup.h5")
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
+  ef = modelobj%entropy
+
+  if(ef > e0) then
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
+    stop 1
+  endif
 
   ! Clean up
   call modelobj%free()
-  call decomp%free()
   call mesh%free()
   call geometry%free()
   call interp%free()

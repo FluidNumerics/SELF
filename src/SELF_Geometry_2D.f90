@@ -71,6 +71,8 @@ contains
                        nVar=1, &
                        nElem=nElem)
 
+    call myGeom%x%meta(1)%SetName("x")
+
     call myGeom%dxds%Init(interp=interp, &
                           nVar=1, &
                           nElem=nElem)

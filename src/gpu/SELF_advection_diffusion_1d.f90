@@ -37,9 +37,8 @@ module self_advection_diffusion_1d
   contains
     procedure :: setboundarycondition => setboundarycondition_advection_diffusion_1d
     procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_1d
-    procedure :: riemannsolver => riemannsolver_advection_diffusion_1d
+    procedure :: boundaryflux => boundaryflux_advection_diffusion_1d
     procedure :: fluxmethod => fluxmethod_advection_diffusion_1d
-    procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_1d
 
   endtype advection_diffusion_1d
 
@@ -64,43 +63,17 @@ module self_advection_diffusion_1d
   endinterface
 
   interface
-    subroutine riemannsolver_advection_diffusion_1d_gpu(fb,fextb,dfavg,flux,u,nu,ndof) &
-      bind(c,name="riemannsolver_advection_diffusion_1d_gpu")
+    subroutine boundaryflux_advection_diffusion_1d_gpu(fb,fextb,dfavg,flux,u,nu,ndof) &
+      bind(c,name="boundaryflux_advection_diffusion_1d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fb,fextb,dfavg,flux
       real(c_prec),value :: u,nu
       integer(c_int),value :: ndof
-    endsubroutine riemannsolver_advection_diffusion_1d_gpu
+    endsubroutine boundaryflux_advection_diffusion_1d_gpu
   endinterface
 
 contains
-
-  subroutine CalculateEntropy_advection_diffusion_1d(this)
-    implicit none
-    class(advection_diffusion_1d),intent(inout) :: this
-    ! Local
-    integer :: iel,i,ivar
-    real(prec) :: e,s,J
-
-    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-                            this%solution%interior_gpu,sizeof(this%solution%interior), &
-                            hipMemcpyDeviceToHost))
-
-    e = 0.0_prec
-    do ivar = 1,this%solution%nvar
-      do iel = 1,this%geometry%nelem
-        do i = 1,this%solution%interp%N
-          J = this%geometry%dxds%interior(i,iel,1)
-          s = this%solution%interior(i,iel,ivar)
-          e = e+0.5_prec*s*s*J
-        enddo
-      enddo
-    enddo
-
-    this%entropy = e
-
-  endsubroutine CalculateEntropy_advection_diffusion_1d
 
   subroutine setboundarycondition_advection_diffusion_1d(this)
     !! Boundary conditions are set to periodic boundary conditions
@@ -136,7 +109,7 @@ contains
 
   endsubroutine fluxmethod_advection_diffusion_1d
 
-  subroutine riemannsolver_advection_diffusion_1d(this)
+  subroutine boundaryflux_advection_diffusion_1d(this)
     ! this method uses an linear upwind solver for the
     ! advective flux and the bassi-rebay method for the
     ! diffusive fluxes
@@ -146,10 +119,10 @@ contains
     integer :: ndof
 
     ndof = this%solution%nelem*this%solution%nvar*2
-    call riemannsolver_advection_diffusion_1d_gpu(this%solution%boundary_gpu, &
-                                                  this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
-                                                  this%flux%boundarynormal_gpu,this%u,this%nu,ndof)
+    call boundaryflux_advection_diffusion_1d_gpu(this%solution%boundary_gpu, &
+                                                 this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
+                                                 this%flux%boundarynormal_gpu,this%u,this%nu,ndof)
 
-  endsubroutine riemannsolver_advection_diffusion_1d
+  endsubroutine boundaryflux_advection_diffusion_1d
 
 endmodule self_advection_diffusion_1d

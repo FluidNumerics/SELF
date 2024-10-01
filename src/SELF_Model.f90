@@ -28,7 +28,6 @@ module SELF_Model
 
   use SELF_SupportRoutines
   use SELF_Metadata
-  use SELF_MPI
   use SELF_HDF5
   use HDF5
   use FEQParse
@@ -118,12 +117,9 @@ module SELF_Model
     real(prec) :: t
     integer :: ioIterate = 0
     logical :: gradient_enabled = .false.
-
+    integer :: nvar
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
-
-    ! Domain Decomposition
-    type(MPILayer),pointer :: decomp
 
   contains
 
@@ -148,13 +144,33 @@ module SELF_Model
     procedure(UpdateGRK),deferred :: UpdateGRK4
 
     procedure :: PreTendency => PreTendency_Model
-    procedure :: PreFlux => PreFlux_Model
-    procedure :: SourceMethod => Source_Model
-    procedure :: FluxMethod => Flux_Model
-    procedure :: RiemannSolver => RiemannSolver_Model
-    procedure :: UpdateBoundary => UpdateBoundary_Model
-    procedure :: SetBoundaryCondition => SetBoundaryCondition_Model
-    procedure :: SetGradientBoundaryCondition => SetGradientBoundaryCondition_Model
+    procedure :: entropy_func => entropy_func_Model
+
+    procedure :: flux1D => flux1d_Model
+    procedure :: flux2D => flux2d_Model
+    procedure :: flux3D => flux3d_Model
+
+    procedure :: riemannflux1d => riemannflux1d_Model
+    procedure :: riemannflux2d => riemannflux2d_Model
+    procedure :: riemannflux3d => riemannflux3d_Model
+
+    procedure :: source1d => source1d_Model
+    procedure :: source2d => source2d_Model
+    procedure :: source3d => source3d_Model
+
+    ! Boundary condition functions (hyperbolic)
+    procedure :: bcPrescribed => bcGeneric_Model
+    procedure :: bcRadiation => bcGeneric_Model
+    procedure :: bcNoNormalFlow => bcGeneric_Model
+
+    ! Boundary condition functions (parabolic)
+    procedure :: bcGrad2dPrescribed => bcGrad2dGeneric_Model
+    procedure :: bcGrad2dRadiation => bcGrad2dGeneric_Model
+    procedure :: bcGrad2dNoNormalFlow => bcGrad2dGeneric_Model
+
+    procedure :: bcGrad3dPrescribed => bcGrad3dGeneric_Model
+    procedure :: bcGrad3dRadiation => bcGrad3dGeneric_Model
+    procedure :: bcGrad3dNoNormalFlow => bcGrad3dGeneric_Model
 
     procedure :: ReportEntropy => ReportEntropy_Model
     procedure :: CalculateEntropy => CalculateEntropy_Model
@@ -282,12 +298,10 @@ contains
   endfunction GetBCFlagForChar
 
   subroutine PrintType_Model(this)
-#undef __FUNC__
-#define __FUNC__ "PrintType"
     implicit none
     class(Model),intent(in) :: this
 
-    INFO("None")
+    print*,__FILE__//" : No model type"
 
   endsubroutine PrintType_Model
 
@@ -306,71 +320,185 @@ contains
 
   endsubroutine PreTendency_Model
 
-  subroutine PreFlux_Model(this)
-    !! PreFlux is a template routine that is used to house any additional calculations
-    !! that you want to execute just before the calculation of flux terms.
-    !! This default PreFlux simply returns back to the caller without executing any instructions
-    !!
-    !! The intention is to provide a method that can be overridden through type-extension, to handle
-    !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
-    !!
-    implicit none
-    class(Model),intent(inout) :: this
+  pure function entropy_func_Model(this,s) result(e)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec) :: e
 
-    return
+    e = 0.0_prec
 
-  endsubroutine PreFlux_Model
+  endfunction entropy_func_Model
 
-  subroutine Source_Model(this)
-    !!
-    implicit none
-    class(Model),intent(inout) :: this
+  pure function riemannflux1d_Model(this,sL,sR,dsdx,nhat) result(flux)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: sL(1:this%nvar)
+    real(prec),intent(in) :: sR(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar)
+    real(prec),intent(in) :: nhat
+    real(prec) :: flux(1:this%nvar)
+    ! Local
+    integer :: ivar
 
-    return
+    do ivar = 1,this%nvar
+      flux(ivar) = 0.0_prec
+    enddo
 
-  endsubroutine Source_Model
+  endfunction riemannflux1d_Model
 
-  subroutine RiemannSolver_Model(this)
-    !!
-    implicit none
-    class(Model),intent(inout) :: this
+  pure function riemannflux2d_Model(this,sL,sR,dsdx,nhat) result(flux)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: sL(1:this%nvar)
+    real(prec),intent(in) :: sR(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
+    real(prec),intent(in) :: nhat(1:2)
+    real(prec) :: flux(1:this%nvar)
+    ! Local
+    integer :: ivar
 
-    return
+    do ivar = 1,this%nvar
+      flux(ivar) = 0.0_prec
+    enddo
 
-  endsubroutine RiemannSolver_Model
+  endfunction riemannflux2d_Model
 
-  subroutine Flux_Model(this)
-    !!
-    implicit none
-    class(Model),intent(inout) :: this
+  pure function riemannflux3d_Model(this,sL,sR,dsdx,nhat) result(flux)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: sL(1:this%nvar)
+    real(prec),intent(in) :: sR(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec),intent(in) :: nhat(1:3)
+    real(prec) :: flux(1:this%nvar)
+    ! Local
+    integer :: ivar
 
-    return
+    do ivar = 1,this%nvar
+      flux(ivar) = 0.0_prec
+    enddo
 
-  endsubroutine Flux_Model
+  endfunction riemannflux3d_Model
 
-  subroutine UpdateBoundary_Model(this)
-  !!
-    implicit none
-    class(Model),intent(inout) :: this
+  pure function flux1d_Model(this,s,dsdx) result(flux)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar)
+    real(prec) :: flux(1:this%nvar)
+    ! Local
+    integer :: ivar
 
-    return
-  endsubroutine UpdateBoundary_Model
+    do ivar = 1,this%nvar
+      flux(ivar) = 0.0_prec
+    enddo
 
-  subroutine SetBoundaryCondition_Model(this)
-    implicit none
-    class(Model),intent(inout) :: this
+  endfunction flux1d_Model
 
-    return
+  pure function flux2d_Model(this,s,dsdx) result(flux)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
+    real(prec) :: flux(1:this%nvar,1:2)
+    ! Local
+    integer :: ivar
 
-  endsubroutine SetBoundaryCondition_Model
+    do ivar = 1,this%nvar
+      flux(ivar,1:2) = 0.0_prec
+    enddo
 
-  subroutine SetGradientBoundaryCondition_Model(this)
-    implicit none
-    class(Model),intent(inout) :: this
+  endfunction flux2d_Model
 
-    return
+  pure function flux3d_Model(this,s,dsdx) result(flux)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: flux(1:this%nvar,1:3)
+    ! Local
+    integer :: ivar
 
-  endsubroutine SetGradientBoundaryCondition_Model
+    do ivar = 1,this%nvar
+      flux(ivar,1:3) = 0.0_prec
+    enddo
+
+  endfunction flux3d_Model
+
+  pure function source1d_Model(this,s,dsdx) result(source)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar)
+    real(prec) :: source(1:this%nvar)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%nvar
+      source(ivar) = 0.0_prec
+    enddo
+
+  endfunction source1d_Model
+
+  pure function source2d_Model(this,s,dsdx) result(source)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
+    real(prec) :: source(1:this%nvar)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%nvar
+      source(ivar) = 0.0_prec
+    enddo
+
+  endfunction source2d_Model
+
+  pure function source3d_Model(this,s,dsdx) result(source)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: source(1:this%nvar)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%nvar
+      source(ivar) = 0.0_prec
+    enddo
+
+  endfunction source3d_Model
+
+  pure function bcGeneric_Model(this,s) result(exts)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec) :: exts(1:this%nvar)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%nvar
+      exts(ivar) = 0.0_prec
+    enddo
+
+  endfunction bcGeneric_Model
+
+  pure function bcGrad2dGeneric_Model(this,dsdx) result(extDsdx)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
+    real(prec) :: extDsdx(1:this%nvar,1:2)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%nvar
+      extDsdx(ivar,1:2) = dsdx(ivar,1:2)
+    enddo
+
+  endfunction bcGrad2dGeneric_Model
+
+  pure function bcGrad3dGeneric_Model(this,dsdx) result(extDsdx)
+    class(Model),intent(in) :: this
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: extDsdx(1:this%nvar,1:3)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%nvar
+      extDsdx(ivar,1:3) = dsdx(ivar,1:3)
+    enddo
+
+  endfunction bcGrad3dGeneric_Model
 
   subroutine SetTimeIntegrator_withInt(this,integrator)
     !! Sets the time integrator method, using an integer flag
@@ -468,7 +596,7 @@ contains
     implicit none
     class(Model),intent(inout) :: this
 
-    INFO("No model, so nothing to set")
+    print*,__FILE__//" : No model, so nothing to set"
 
   endsubroutine SetInitialConditions_Model
 
@@ -488,8 +616,6 @@ contains
   endsubroutine CalculateEntropy_Model
 
   subroutine ReportEntropy_Model(this)
-#undef __FUNC__
-#define __FUNC__ "ReportEntropy"
   !! Base method for reporting the entropy of a model
   !! to stdout. Only override this procedure if additional
   !! reporting is needed. Alternatively, if you think
@@ -503,19 +629,17 @@ contains
     character(len=20) :: entropy
     character(len=:),allocatable :: str
 
-    if(this%decomp%rankId == 0) then
-      ! Copy the time and entropy to a string
-      write(modelTime,"(ES16.7E3)") this%t
-      write(entropy,"(ES16.7E3)") this%entropy
+    ! Copy the time and entropy to a string
+    write(modelTime,"(ES16.7E3)") this%t
+    write(entropy,"(ES16.7E3)") this%entropy
 
-      ! Write the output to STDOUT
-      open(output_unit,ENCODING='utf-8')
-      write(output_unit,'("INFO : [",A,"] : ")',ADVANCE='no') __FUNC__
-      str = 'tᵢ ='//trim(modelTime)
-      write(output_unit,'(A)',ADVANCE='no') str
-      str = '  |  eᵢ ='//trim(entropy)
-      write(output_unit,'(A)',ADVANCE='yes') str
-    endif
+    ! Write the output to STDOUT
+    open(output_unit,ENCODING='utf-8')
+    write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+    str = 'tᵢ ='//trim(modelTime)
+    write(output_unit,'(A)',ADVANCE='no') str
+    str = '  |  eᵢ ='//trim(entropy)
+    write(output_unit,'(A)',ADVANCE='yes') str
 
   endsubroutine ReportEntropy_Model
 

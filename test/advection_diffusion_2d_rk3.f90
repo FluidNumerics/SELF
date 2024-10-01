@@ -45,15 +45,11 @@ program advection_diffusion_2d_rk3
   type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
   type(SEMQuad),target :: geometry
-  type(MPILayer),target :: decomp
   character(LEN=255) :: WORKSPACE
-
-  ! We create a domain decomposition.
-  call decomp%Init(enableMPI=.false.)
 
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
-  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",decomp)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -66,7 +62,7 @@ program advection_diffusion_2d_rk3
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry,decomp)
+  call modelobj%Init(nvar,mesh,geometry)
   modelobj%gradient_enabled = .true.
 
   ! Set the velocity
@@ -85,18 +81,19 @@ program advection_diffusion_2d_rk3
 
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
-  e0 = maxval(abs(modelobj%solution%interior))
+  e0 = modelobj%entropy
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
   ! forward step the model to `endtime` using a time step
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
+  call modelobj%WriteModel("advdiff2d-rk3.pickup.h5")
 
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
-  ef = maxval(abs(modelobj%solution%interior))
+  ef = modelobj%entropy
 
   if(ef > e0) then
     print*,"Error: Final absmax greater than initial absmax! ",e0,ef
@@ -104,7 +101,6 @@ program advection_diffusion_2d_rk3
   endif
   ! Clean up
   call modelobj%free()
-  call decomp%free()
   call mesh%free()
   call geometry%free()
   call interp%free()

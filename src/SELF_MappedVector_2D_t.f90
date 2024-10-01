@@ -32,7 +32,7 @@ module SELF_MappedVector_2D_t
   use SELF_Tensor_2D
   use SELF_Mesh_2D
   use SELF_Geometry_2D
-  use SELF_MPI
+  use SELF_DomainDecomposition
   use FEQParse
   use iso_c_binding
 
@@ -54,8 +54,8 @@ module SELF_MappedVector_2D_t
     generic,public :: MappedDGDivergence => MappedDGDivergence_MappedVector2D_t
     procedure,private :: MappedDGDivergence_MappedVector2D_t
 
-    !procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D_t
-    !procedure,private :: ApplyFlip => ApplyFlip_MappedVector2D_t
+    procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D_t
+    procedure,private :: ApplyFlip => ApplyFlip_MappedVector2D_t
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D_t
 
@@ -120,141 +120,135 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector2D_t
 
-  ! subroutine MPIExchangeAsync_MappedVector2D_t(this,decomp,mesh,resetCount)
-  !   implicit none
-  !   class(MappedVector2D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
-  !   type(Mesh2D),intent(in) :: mesh
-  !   logical,intent(in) :: resetCount
-  !   ! Local
-  !   integer :: e1,s1,e2,s2,ivar,idir
-  !   integer :: globalSideId,r2
-  !   integer :: iError
-  !   integer :: msgCount
+  subroutine MPIExchangeAsync_MappedVector2D_t(this,mesh)
+    implicit none
+    class(MappedVector2D_t),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: e1,s1,e2,s2,ivar,idir
+    integer :: globalSideId,r2,tag
+    integer :: iError
+    integer :: msgCount
 
-  !   if(decomp%mpiEnabled) then
-  !     if(resetCount) then
-  !       msgCount = 0
-  !     else
-  !       msgCount = decomp%msgCount
-  !     endif
+    msgCount = 0
 
-  !     do idir = 1,2
-  !       do ivar = 1,this%nvar
-  !         do e1 = 1,this%nElem
-  !           do s1 = 1,4
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do e1 = 1,this%nElem
+          do s1 = 1,4
 
-  !             e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
-  !             if(e2 > 0) then
-  !               r2 = decomp%elemToRank(e2) ! Neighbor Rank
+            e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
+            if(e2 > 0) then
+              r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
 
-  !               if(r2 /= decomp%rankId) then
+              if(r2 /= mesh%decomp%rankId) then
 
-  !                 ! to do : create unique tag for each side and each variable
-  !                 ! tag = globalsideid + nglobalsides*(ivar + nvar*idir)
-  !                 s2 = mesh%sideInfo(4,s1,e1)/10
-  !                 globalSideId = abs(mesh%sideInfo(2,s1,e1))
+                s2 = mesh%sideInfo(4,s1,e1)/10
+                globalSideId = abs(mesh%sideInfo(2,s1,e1))
+                ! create unique tag for each side and each variable
+                tag = globalsideid+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
 
-  !                 msgCount = msgCount+1
-  !                 call MPI_IRECV(this%extBoundary(:,s1,e1,ivar,idir), &
-  !                                (this%interp%N+1), &
-  !                                decomp%mpiPrec, &
-  !                                r2,globalSideId, &
-  !                                decomp%mpiComm, &
-  !                                decomp%requests(msgCount),iError)
+                msgCount = msgCount+1
+                call MPI_IRECV(this%extBoundary(:,s1,e1,ivar,idir), &
+                               (this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,tag, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
 
-  !                 msgCount = msgCount+1
-  !                 call MPI_ISEND(this%boundary(:,s1,e1,ivar,idir), &
-  !                                (this%interp%N+1), &
-  !                                decomp%mpiPrec, &
-  !                                r2,globalSideId, &
-  !                                decomp%mpiComm, &
-  !                                decomp%requests(msgCount),iError)
-  !               endif
-  !             endif
+                msgCount = msgCount+1
+                call MPI_ISEND(this%boundary(:,s1,e1,ivar,idir), &
+                               (this%interp%N+1), &
+                               mesh%decomp%mpiPrec, &
+                               r2,tag, &
+                               mesh%decomp%mpiComm, &
+                               mesh%decomp%requests(msgCount),iError)
+              endif
+            endif
 
-  !           enddo
-  !         enddo
-  !       enddo
-  !     enddo
+          enddo
+        enddo
+      enddo
+    enddo
 
-  !     decomp%msgCount = msgCount
-  !   endif
+    mesh%decomp%msgCount = msgCount
 
-  ! endsubroutine MPIExchangeAsync_MappedVector2D_t
+  endsubroutine MPIExchangeAsync_MappedVector2D_t
 
-  ! subroutine ApplyFlip_MappedVector2D_t(this,decomp,mesh)
-  !   ! Apply side flips to sides where MPI exchanges took place.
-  !   implicit none
-  !   class(MappedVector2D_t),intent(inout) :: this
-  !   type(MPILayer),intent(inout) :: decomp
-  !   type(Mesh2D),intent(in) :: mesh
-  !   ! Local
-  !   integer :: e1,s1,e2,s2
-  !   integer :: i,i2
-  !   integer :: r2,flip,ivar,idir
-  !   integer :: globalSideId
-  !   integer :: bcid
-  !   real(prec) :: extBuff(1:this%interp%N+1)
-
-  !   if(decomp%mpiEnabled) then
-  !     do idir = 1,2
-  !       do ivar = 1,this%nvar
-  !         do e1 = 1,this%nElem
-  !           do s1 = 1,4
-
-  !             e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
-  !             s2 = mesh%sideInfo(4,s1,e1)/10
-  !             bcid = mesh%sideInfo(5,s1,e1)
-  !             if(s2 > 0 .or. bcid == 0) then ! Interior Element
-  !               r2 = decomp%elemToRank(e2) ! Neighbor Rank
-
-  !               if(r2 /= decomp%rankId) then
-
-  !                 flip = mesh%sideInfo(4,s1,e1)-s2*10
-  !                 globalSideId = mesh%sideInfo(2,s1,e1)
-
-  !                 ! Need to update extBoundary with flip applied
-  !                 if(flip == 1) then
-
-  !                   do i = 1,this%interp%N+1
-  !                     i2 = this%interp%N+2-i
-  !                     extBuff(i) = this%extBoundary(i2,s1,e1,ivar,idir)
-  !                   enddo
-  !                   do i = 1,this%interp%N+1
-  !                     this%extBoundary(i,s1,e1,ivar,idir) = extBuff(i)
-  !                   enddo
-
-  !                 endif
-  !               endif
-
-  !             endif
-
-  !           enddo
-  !         enddo
-  !       enddo
-  !     enddo
-
-  !   endif
-
-  ! endsubroutine ApplyFlip_MappedVector2D_t
-
-  subroutine SideExchange_MappedVector2D_t(this,mesh,decomp)
+  subroutine ApplyFlip_MappedVector2D_t(this,mesh)
+    ! Apply side flips to sides where MPI exchanges took place.
     implicit none
     class(MappedVector2D_t),intent(inout) :: this
     type(Mesh2D),intent(in) :: mesh
-    type(MPILayer),intent(inout) :: decomp
+    ! Local
+    integer :: e1,s1,e2,s2
+    integer :: i,i2
+    integer :: r2,flip,ivar,idir
+    real(prec) :: extBuff(1:this%interp%N+1)
+
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do e1 = 1,this%nElem
+          do s1 = 1,4
+
+            e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element (global id)
+
+            if(e2 > 0) then ! Interior Element
+              r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
+
+              if(r2 /= mesh%decomp%rankId) then
+
+                s2 = mesh%sideInfo(4,s1,e1)/10
+                flip = mesh%sideInfo(4,s1,e1)-s2*10
+
+                ! Need to update extBoundary with flip applied
+                if(flip == 1) then
+
+                  do i = 1,this%interp%N+1
+                    i2 = this%interp%N+2-i
+                    extBuff(i) = this%extBoundary(i2,s1,e1,ivar,idir)
+                  enddo
+                  do i = 1,this%interp%N+1
+                    this%extBoundary(i,s1,e1,ivar,idir) = extBuff(i)
+                  enddo
+
+                endif
+              endif
+
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endsubroutine ApplyFlip_MappedVector2D_t
+
+  subroutine SideExchange_MappedVector2D_t(this,mesh)
+    implicit none
+    class(MappedVector2D_t),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
     ! Local
     integer :: e1,e2,s1,s2,e2Global
     integer :: flip,bcid
     integer :: i1,i2,ivar,idir
-    integer :: neighborRank
+    integer :: r2
     integer :: rankId,offset
+    integer,pointer :: elemtorank(:)
 
-    rankId = decomp%rankId
-    offset = decomp%offsetElem(rankId+1)
+    ! This mapping is needed to resolve a build error with
+    ! amdflang that appears to be caused by referencing
+    ! the elemToRank attribute within the do concurrent
+    ! https://github.com/FluidNumerics/SELF/issues/54
+    elemtorank => mesh%decomp%elemToRank(:)
 
-    !   call this%MPIExchangeAsync(decomp,mesh,resetCount=.true.)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIExchangeAsync(mesh)
+    endif
+
     do concurrent(s1=1:4,e1=1:mesh%nElem,ivar=1:this%nvar,idir=1:2)
 
       e2Global = mesh%sideInfo(3,s1,e1)
@@ -263,39 +257,39 @@ contains
       flip = mesh%sideInfo(4,s1,e1)-s2*10
       bcid = mesh%sideInfo(5,s1,e1)
 
-      if(s2 > 0 .or. bcid == 0) then
+      if(e2Global > 0) then
 
-        !neighborRank = decomp%elemToRank(e2Global)
+        r2 = elemToRank(e2Global) ! Neighbor rank
+        if(r2 == mesh%decomp%rankId) then
 
-        !if(neighborRank == decomp%rankId) then
+          if(flip == 0) then
 
-        if(flip == 0) then
+            do i1 = 1,this%interp%N+1
+              this%extBoundary(i1,s1,e1,ivar,idir) = &
+                this%boundary(i1,s2,e2,ivar,idir)
+            enddo
 
-          do i1 = 1,this%interp%N+1
-            this%extBoundary(i1,s1,e1,ivar,idir) = &
-              this%boundary(i1,s2,e2,ivar,idir)
-          enddo
+          elseif(flip == 1) then
 
-        elseif(flip == 1) then
+            do i1 = 1,this%interp%N+1
+              i2 = this%interp%N+2-i1
+              this%extBoundary(i1,s1,e1,ivar,idir) = &
+                this%boundary(i2,s2,e2,ivar,idir)
+            enddo
 
-          do i1 = 1,this%interp%N+1
-            i2 = this%interp%N+2-i1
-            this%extBoundary(i1,s1,e1,ivar,idir) = &
-              this%boundary(i2,s2,e2,ivar,idir)
-          enddo
+          endif
 
         endif
 
       endif
 
-      !endif
-
     enddo
 
-    ! call decomp%FinalizeMPIExchangeAsync()
-
-    ! ! Apply side flips for data exchanged with MPI
-    ! call this%ApplyFlip(decomp,mesh)
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      ! Apply side flips for data exchanged with MPI
+      call this%ApplyFlip(mesh)
+    endif
 
   endsubroutine SideExchange_MappedVector2D_t
 
