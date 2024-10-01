@@ -53,20 +53,13 @@ module SELF_DGModel1D_t
   contains
 
     procedure :: Init => Init_DGModel1D_t
+    procedure :: SetMetadata => SetMetadata_DGModel1D_t
     procedure :: Free => Free_DGModel1D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel1D_t
-    procedure :: entropy_func => entropy_func_DGModel1D_t
-
     procedure :: BoundaryFlux => BoundaryFlux_DGModel1D_t
-    procedure :: riemannflux => riemannflux_DGModel1D_t
-
     procedure :: FluxMethod => fluxmethod_DGModel1D_t
-    procedure :: interiorflux => interiorflux_DGModel1D_t
-
     procedure :: SourceMethod => sourcemethod_DGModel1D_t
-    procedure :: source_func => source_func_DGModel1D_t
-
     procedure :: SetBoundaryCondition => setboundarycondition_DGModel1D_t
     procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel1D_t
 
@@ -98,13 +91,10 @@ contains
     integer,intent(in) :: nvar
     type(Mesh1D),intent(in),target :: mesh
     type(Geometry1D),intent(in),target :: geometry
-    ! Local
-    integer :: ivar
-    character(LEN=3) :: ivarChar
-    character(LEN=25) :: varname
 
     this%mesh => mesh
     this%geometry => geometry
+    this%nvar = nvar
 
     call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
@@ -119,14 +109,26 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
-    ! set default metadata
-    do ivar = 1,nvar
+    call this%SetMetadata()
+
+  endsubroutine Init_DGModel1D_t
+
+  subroutine SetMetadata_DGModel1D_t(this)
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! Local
+    integer :: ivar
+    character(LEN=3) :: ivarChar
+    character(LEN=25) :: varname
+
+    do ivar = 1,this%nvar
       write(ivarChar,'(I3.3)') ivar
       varname = "solution"//trim(ivarChar)
       call this%solution%SetName(ivar,varname)
       call this%solution%SetUnits(ivar,"[null]")
     enddo
-  endsubroutine Init_DGModel1D_t
+
+  endsubroutine SetMetadata_DGModel1D_t
 
   subroutine Free_DGModel1D_t(this)
     implicit none
@@ -313,15 +315,6 @@ contains
 
   endsubroutine CalculateEntropy_DGModel1D_t
 
-  pure function entropy_func_DGModel1D_t(this, s) result(e)
-    class(DGModel1D_t), intent(in) :: this
-    real(prec), intent(in) :: s(1:this%solution%nvar)
-    real(prec) :: e
-
-      e = 0.0_prec
-
-  endfunction entropy_func_DGModel1D_t
-
   subroutine setboundarycondition_DGModel1D_t(this)
     ! Here, we use the pre-tendency method to calculate the
     ! derivative of the solution using a bassi-rebay method
@@ -405,28 +398,12 @@ contains
         fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
         dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
         this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
-          this%riemannflux(fin,fout,dfdx,nhat)
+          this%riemannflux1d(fin,fout,dfdx,nhat)
 
       enddo
     enddo
 
   endsubroutine BoundaryFlux_DGModel1D_t
-
-  pure function riemannflux_DGModel1D_t(this,sL,sR,dsdxavg,nhat) result(flux)
-  class(DGModel1D_t), intent(in) :: this
-  real(prec), intent(in) :: sL(1:this%solution%nvar)
-  real(prec), intent(in) :: sR(1:this%solution%nvar)
-  real(prec), intent(in) :: dsdxavg(1:this%solution%nvar)
-  real(prec), intent(in) :: nhat
-  real(prec) :: flux(1:this%solution%nvar)
-  ! Local
-  integer :: ivar
-
-    do ivar = 1, this%solution%nvar
-      flux(ivar) = 0.0_prec
-    enddo
-
-  end function riemannflux_DGModel1D_t
 
   subroutine fluxmethod_DGModel1D_t(this)
     implicit none
@@ -443,26 +420,12 @@ contains
         dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
         this%flux%interior(i,iel,1:this%solution%nvar) = &
-          this%interiorflux(f,dfdx) 
+          this%flux1d(f,dfdx)
 
       enddo
     enddo
 
   endsubroutine fluxmethod_DGModel1D_t
-
-  pure function interiorflux_DGModel1D_t(this,s,dsdx) result(flux)
-  class(DGModel1D_t), intent(in) :: this
-  real(prec), intent(in) :: s(1:this%solution%nvar)
-  real(prec), intent(in) :: dsdx(1:this%solution%nvar)
-  real(prec) :: flux(1:this%solution%nvar)
-  ! Local
-  integer :: ivar
-
-    do ivar = 1, this%solution%nvar
-      flux(ivar) = 0.0_prec
-    enddo
-
-  end function interiorflux_DGModel1D_t
 
   subroutine sourcemethod_DGModel1D_t(this)
     implicit none
@@ -472,7 +435,6 @@ contains
     integer :: i
     real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
 
-
     do iel = 1,this%mesh%nelem
       do i = 1,this%solution%interp%N+1
 
@@ -480,26 +442,12 @@ contains
         dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
         this%source%interior(i,iel,1:this%solution%nvar) = &
-          this%source_func(f,dfdx) 
+          this%source1d(f,dfdx)
 
       enddo
     enddo
 
   endsubroutine sourcemethod_DGModel1D_t
-
-  pure function source_func_DGModel1D_t(this,s,dsdx) result(source)
-  class(DGModel1D_t), intent(in) :: this
-  real(prec), intent(in) :: s(1:this%solution%nvar)
-  real(prec), intent(in) :: dsdx(1:this%solution%nvar)
-  real(prec) :: source(1:this%solution%nvar)
-  ! Local
-  integer :: ivar
-
-    do ivar = 1, this%solution%nvar
-      source(ivar) = 0.0_prec
-    enddo
-
-  end function source_func_DGModel1D_t
 
   subroutine CalculateTendency_DGModel1D_t(this)
     implicit none

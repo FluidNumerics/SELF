@@ -37,59 +37,58 @@ module self_advection_diffusion_1d_t
     real(prec) :: u ! constant velocity
 
   contains
-    procedure :: riemannflux => riemannflux_advection_diffusion_1d_t
-    procedure :: interiorflux => interiorflux_advection_diffusion_1d_t
+    procedure :: riemannflux1d => riemannflux1d_advection_diffusion_1d_t
+    procedure :: flux1d => flux1d_advection_diffusion_1d_t
     procedure :: entropy_func => entropy_func_advection_diffusion_1d_t
 
   endtype advection_diffusion_1d_t
 
 contains
 
-  pure function entropy_func_advection_diffusion_1d_t(this, s) result(e)
-  class(advection_diffusion_1d_t), intent(in) :: this
-  real(prec), intent(in) :: s(1:this%solution%nvar)
-  real(prec) :: e
-  ! Local
-  integer :: ivar
+  pure function entropy_func_advection_diffusion_1d_t(this,s) result(e)
+    class(advection_diffusion_1d_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%solution%nvar)
+    real(prec) :: e
+    ! Local
+    integer :: ivar
 
     e = 0.0_prec
     do ivar = 1,this%solution%nvar
-      e = e + 0.5_prec*s(ivar)*s(ivar)
+      e = e+0.5_prec*s(ivar)*s(ivar)
     enddo
 
   endfunction entropy_func_advection_diffusion_1d_t
 
-  pure function riemannflux_advection_diffusion_1d_t(this,sL,sR,dsdxavg,nhat) result(flux)
-  class(advection_diffusion_1d_t), intent(in) :: this
-  real(prec), intent(in) :: sL(1:this%solution%nvar)
-  real(prec), intent(in) :: sR(1:this%solution%nvar)
-  real(prec), intent(in) :: dsdxavg(1:this%solution%nvar)
-  real(prec), intent(in) :: nhat
-  real(prec) :: flux(1:this%solution%nvar)
-  ! Local
-  integer :: ivar
+  pure function riemannflux1d_advection_diffusion_1d_t(this,sL,sR,dsdx,nhat) result(flux)
+    class(advection_diffusion_1d_t),intent(in) :: this
+    real(prec),intent(in) :: sL(1:this%solution%nvar)
+    real(prec),intent(in) :: sR(1:this%solution%nvar)
+    real(prec),intent(in) :: dsdx(1:this%solution%nvar)
+    real(prec),intent(in) :: nhat
+    real(prec) :: flux(1:this%solution%nvar)
+    ! Local
+    integer :: ivar
 
-    do ivar = 1, this%solution%nvar
-      flux(ivar) = 0.5_prec*(this%u*nhat*(sL(ivar)+sR(ivar))+&
-                            abs(this%u*nhat)*(sL(ivar)-sR(ivar)))- & ! advective flux
-                            this%nu*dsdxavg(ivar)*nhat ! diffusive flux
+    do ivar = 1,this%solution%nvar
+      flux(ivar) = 0.5_prec*(this%u*nhat*(sL(ivar)+sR(ivar))+ &
+                             abs(this%u*nhat)*(sL(ivar)-sR(ivar)))- & ! advective flux
+                   this%nu*dsdx(ivar)*nhat ! diffusive flux
     enddo
 
-  end function riemannflux_advection_diffusion_1d_t
- 
-  pure function interiorflux_advection_diffusion_1d_t(this,s,dsdx) result(flux)
-  class(advection_diffusion_1d_t), intent(in) :: this
-  real(prec), intent(in) :: s(1:this%solution%nvar)
-  real(prec), intent(in) :: dsdx(1:this%solution%nvar)
-  real(prec) :: flux(1:this%solution%nvar)
-  ! Local
-  integer :: ivar
+  endfunction riemannflux1d_advection_diffusion_1d_t
 
-    do ivar = 1, this%solution%nvar
+  pure function flux1d_advection_diffusion_1d_t(this,s,dsdx) result(flux)
+    class(advection_diffusion_1d_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%solution%nvar)
+    real(prec),intent(in) :: dsdx(1:this%solution%nvar)
+    real(prec) :: flux(1:this%solution%nvar)
+    ! Local
+    integer :: ivar
+
+    do ivar = 1,this%solution%nvar
       flux(ivar) = this%u*s(ivar)-this%nu*dsdx(ivar) ! advective flux + diffusive flux
     enddo
 
-  end function interiorflux_advection_diffusion_1d_t
-
+  endfunction flux1d_advection_diffusion_1d_t
 
 endmodule self_advection_diffusion_1d_t

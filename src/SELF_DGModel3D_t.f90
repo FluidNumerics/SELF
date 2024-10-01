@@ -53,7 +53,15 @@ module SELF_DGModel3D_t
   contains
 
     procedure :: Init => Init_DGModel3D_t
+    procedure :: SetMetadata => SetMetadata_DGModel3D_t
     procedure :: Free => Free_DGModel3D_t
+
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel3D_t
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel3D_t
+    procedure :: FluxMethod => fluxmethod_DGModel3D_t
+    procedure :: SourceMethod => sourcemethod_DGModel3D_t
+    procedure :: SetBoundaryCondition => setboundarycondition_DGModel3D_t
+    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel3D_t
 
     procedure :: UpdateSolution => UpdateSolution_DGModel3D_t
 
@@ -90,6 +98,7 @@ contains
 
     this%mesh => mesh
     this%geometry => geometry
+    this%nvar = nvar
 
     call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
@@ -99,20 +108,31 @@ contains
     call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
     call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
 
-    ! set default metadata
-    do ivar = 1,nvar
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%SetMetadata()
+
+  endsubroutine Init_DGModel3D_t
+
+  subroutine SetMetadata_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: ivar
+    character(LEN=3) :: ivarChar
+    character(LEN=25) :: varname
+
+    do ivar = 1,this%nvar
       write(ivarChar,'(I3.3)') ivar
       varname = "solution"//trim(ivarChar)
       call this%solution%SetName(ivar,varname)
       call this%solution%SetUnits(ivar,"[null]")
     enddo
 
-    call this%solution%AssociateGeometry(geometry)
-    call this%solutionGradient%AssociateGeometry(geometry)
-    call this%flux%AssociateGeometry(geometry)
-    call this%fluxDivergence%AssociateGeometry(geometry)
-
-  endsubroutine Init_DGModel3D_t
+  endsubroutine SetMetadata_DGModel3D_t
 
   subroutine Free_DGModel3D_t(this)
     implicit none
@@ -273,6 +293,213 @@ contains
 
   endsubroutine CalculateSolutionGradient_DGModel3D_t
 
+  subroutine CalculateEntropy_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,k,ierror
+    real(prec) :: e,jac
+    real(prec) :: s(1:this%nvar)
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            jac = this%geometry%J%interior(i,j,k,iel,1)
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            e = e+this%entropy_func(s)*jac
+          enddo
+        enddo
+      enddo
+    enddo
+
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
+
+  endsubroutine CalculateEntropy_DGModel3D_t
+
+  subroutine fluxmethod_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i,j,k
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    do iel = 1,this%mesh%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+            this%flux%interior(i,j,k,iel,1:this%nvar,1:3) = this%flux3d(s,dsdx)
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endsubroutine fluxmethod_DGModel3D_t
+
+  subroutine BoundaryFlux_DGModel3D_t(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
+    real(prec) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: nhat(1:3),nmag
+
+    do iEl = 1,this%solution%nElem
+      do k = 1,6
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nHat%boundary(i,j,k,iEl,1,1:3)
+            sL = this%solution%boundary(i,j,k,iel,1:this%nvar) ! interior solution
+            sR = this%solution%extboundary(i,j,k,iel,1:this%nvar) ! exterior solution
+            dsdx = this%solutiongradient%avgboundary(i,j,k,iel,1:this%nvar,1:3)
+            nmag = this%geometry%nScale%boundary(i,j,k,iEl,1)
+
+            this%flux%boundaryNormal(i,j,k,iEl,1:this%nvar) = this%riemannflux3d(sL,sR,dsdx,nhat)*nmag
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endsubroutine BoundaryFlux_DGModel3D_t
+
+  subroutine sourcemethod_DGModel3D_t(this)
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    do iel = 1,this%mesh%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+            this%source%interior(i,j,k,iel,1:this%nvar) = this%source3d(s,dsdx)
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+  endsubroutine sourcemethod_DGModel3D_t
+
+  subroutine setboundarycondition_DGModel3D_t(this)
+    !! Boundary conditions for the solution are set to
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! local
+    integer :: i,iEl,j,k,e2,bcid
+
+    do iEl = 1,this%solution%nElem ! Loop over all elements
+      do k = 1,6 ! Loop over all sides
+
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+
+        if(e2 == 0) then
+          if(bcid == SELF_BC_PRESCRIBED) then
+            do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                  this%bcPrescribed(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_RADIATION) then
+            do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                  this%bcRadiation(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_NONORMALFLOW) then
+            do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                  this%bcNoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+              enddo
+            enddo
+          endif
+        endif
+
+      enddo
+    enddo
+
+  endsubroutine setboundarycondition_DGModel3D_t
+
+  subroutine setgradientboundarycondition_DGModel3D_t(this)
+    !! Boundary conditions for the solution are set to
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! local
+    integer :: i,iEl,j,k,e2,bcid
+    real(prec) :: dsdx(1:this%nvar,1:3)
+
+    do iEl = 1,this%solution%nElem ! Loop over all elements
+      do k = 1,6 ! Loop over all sides
+
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+
+        if(e2 == 0) then
+          if(bcid == SELF_BC_PRESCRIBED) then
+            do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                  this%bcGrad3dPrescribed(dsdx)
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_RADIATION) then
+            do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                  this%bcGrad3dRadiation(dsdx)
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_NONORMALFLOW) then
+            do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                  this%bcGrad3dNoNormalFlow(dsdx)
+              enddo
+            enddo
+          endif
+        endif
+
+      enddo
+    enddo
+
+  endsubroutine setgradientboundarycondition_DGModel3D_t
+
   subroutine CalculateTendency_DGModel3D_t(this)
     implicit none
     class(DGModel3D_t),intent(inout) :: this
@@ -325,26 +552,26 @@ contains
       pickupFile = 'solution.'//timeStampString//'.h5'
     endif
 
-    print*,"Writing pickup file : "//trim(pickupFile)
+    print*,__FILE__//" : Writing pickup file : "//trim(pickupFile)
 
     if(this%mesh%decomp%mpiEnabled) then
 
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%mesh%decomp%mpiComm)
 
       ! Write the interpolant to the file
-      print*,"Writing interpolant data to file"
+      print*,__FILE__//" : Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
       ! Write the model state to file
-      print*,"Writing control grid solution to file"
+      print*,__FILE__//" : Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
                                    this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
       ! Write the geometry to file
-      print*,"Writing control grid geometry to file"
+      print*,__FILE__//" : Writing control grid geometry to file"
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry', &
                                      this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
@@ -357,19 +584,19 @@ contains
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
       ! Write the interpolant to the file
-      print*,"Writing interpolant data to file"
+      print*,__FILE__//" : Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
 
       ! Write the model state to file
-      print*,"Writing control grid solution to file"
+      print*,__FILE__//" : Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
       ! Write the geometry to file
-      print*,"Writing control grid geometry to file"
+      print*,__FILE__//" : Writing control grid geometry to file"
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry')
       ! -- END : writing solution on control grid -- !
 

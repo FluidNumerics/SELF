@@ -53,7 +53,6 @@ module SELF_DGModel1D
     procedure :: SetBoundaryCondition => setboundarycondition_DGModel1D
     procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel1D
 
-
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel1D
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel1D
@@ -155,10 +154,10 @@ contains
     ! Local
     integer :: iel,i,ivar
     real(prec) :: e,s(1:this%solution%nvar),J
-    
+
     call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-        this%solution%interior_gpu,sizeof(this%solution%interior), &
-        hipMemcpyDeviceToHost))
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
 
     e = 0.0_prec
     do iel = 1,this%geometry%nelem
@@ -185,8 +184,8 @@ contains
     integer :: N,nelem
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
-        this%solution%boundary_gpu,sizeof(this%solution%boundary), &
-        hipMemcpyDeviceToHost))
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
 
     nelem = this%geometry%nelem ! number of elements in the mesh
     N = this%solution%interp%N ! polynomial degree
@@ -203,10 +202,10 @@ contains
 
     enddo
 
-    call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu,&
-         c_loc(this%solution%extBoundary), &
-         sizeof(this%solution%extBoundary), &
-        hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
+                            c_loc(this%solution%extBoundary), &
+                            sizeof(this%solution%extBoundary), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine setboundarycondition_DGModel1D
 
@@ -223,8 +222,8 @@ contains
     integer :: nelem
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
-    this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
-    hipMemcpyDeviceToHost))
+                            this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
+                            hipMemcpyDeviceToHost))
 
     nelem = this%geometry%nelem ! number of elements in the mesh
 
@@ -240,10 +239,10 @@ contains
 
     enddo
 
-    call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu,&
-          c_loc(this%solutiongradient%extBoundary), &
-          sizeof(this%solutiongradient%extBoundary), &
-          hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
+                            c_loc(this%solutiongradient%extBoundary), &
+                            sizeof(this%solutiongradient%extBoundary), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine setgradientboundarycondition_DGModel1D
 
@@ -261,16 +260,16 @@ contains
     real(prec) :: dfdx(1:this%solution%nvar),nhat
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
-    this%solution%boundary_gpu,sizeof(this%solution%boundary), &
-    hipMemcpyDeviceToHost))
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
-    this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
-    hipMemcpyDeviceToHost))
+                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                            hipMemcpyDeviceToHost))
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%avgboundary), &
-    this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
-    hipMemcpyDeviceToHost))
+                            this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
+                            hipMemcpyDeviceToHost))
 
     do iel = 1,this%mesh%nelem
       do iside = 1,2
@@ -291,10 +290,10 @@ contains
       enddo
     enddo
 
-    call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu,&
-    c_loc(this%flux%boundarynormal), &
-    sizeof(this%flux%boundarynormal), &
-    hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
+                            c_loc(this%flux%boundarynormal), &
+                            sizeof(this%flux%boundarynormal), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine BoundaryFlux_DGModel1D
 
@@ -306,7 +305,6 @@ contains
     integer :: i
     real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
 
-
     do iel = 1,this%mesh%nelem
       do i = 1,this%solution%interp%N+1
 
@@ -314,16 +312,16 @@ contains
         dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
         this%flux%interior(i,iel,1:this%solution%nvar) = &
-          this%interiorflux(f,dfdx) 
+          this%interiorflux(f,dfdx)
 
       enddo
     enddo
 
-    call gpuCheck(hipMemcpy(this%flux%interior_gpu,&
-    c_loc(this%flux%interior), &
-    sizeof(this%flux%interior), &
-    hipMemcpyHostToDevice))
-    
+    call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
+                            c_loc(this%flux%interior), &
+                            sizeof(this%flux%interior), &
+                            hipMemcpyHostToDevice))
+
   endsubroutine fluxmethod_DGModel1D
 
   subroutine sourcemethod_DGModel1D(this)
@@ -335,12 +333,12 @@ contains
     real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-    this%solution%interior_gpu,sizeof(this%solution%interior), &
-    hipMemcpyDeviceToHost))
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%interior), &
-    this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
-    hipMemcpyDeviceToHost))
+                            this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
+                            hipMemcpyDeviceToHost))
 
     do iel = 1,this%mesh%nelem
       do i = 1,this%solution%interp%N+1
@@ -349,15 +347,15 @@ contains
         dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
         this%source%interior(i,iel,1:this%solution%nvar) = &
-          this%source_func(f,dfdx) 
+          this%source_func(f,dfdx)
 
       enddo
     enddo
 
-    call gpuCheck(hipMemcpy(this%source%interior_gpu,&
-    c_loc(this%source%interior), &
-    sizeof(this%source%interior), &
-    hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%source%interior_gpu, &
+                            c_loc(this%source%interior), &
+                            sizeof(this%source%interior), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine sourcemethod_DGModel1D
 

@@ -120,8 +120,8 @@ contains
 
     ndof = this%solution%nelem*this%solution%nvar*2
     call boundaryflux_advection_diffusion_1d_gpu(this%solution%boundary_gpu, &
-                                                  this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
-                                                  this%flux%boundarynormal_gpu,this%u,this%nu,ndof)
+                                                 this%solution%extBoundary_gpu,this%solutionGradient%avgBoundary_gpu, &
+                                                 this%flux%boundarynormal_gpu,this%u,this%nu,ndof)
 
   endsubroutine boundaryflux_advection_diffusion_1d
 

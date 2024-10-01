@@ -40,196 +40,64 @@ module self_advection_diffusion_3d_t
 
   contains
 
-    procedure :: setboundarycondition => setboundarycondition_advection_diffusion_3d_t
-    procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_3d_t
-    procedure :: BoundaryFlux => BoundaryFlux_advection_diffusion_3d_t
-    procedure :: fluxmethod => fluxmethod_advection_diffusion_3d_t
-    procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_3d_t
+    procedure :: riemannflux3d => riemannflux3d_advection_diffusion_3d_t
+    procedure :: flux3d => flux3d_advection_diffusion_3d_t
+    procedure :: entropy_func => entropy_func_advection_diffusion_3d_t
 
   endtype advection_diffusion_3d_t
 
 contains
 
-  subroutine CalculateEntropy_advection_diffusion_3d_t(this)
-    implicit none
-    class(advection_diffusion_3d_t),intent(inout) :: this
-    ! Local
-    integer :: iel,i,j,k,ivar,ierror
-    real(prec) :: e,s,jac
+  pure function entropy_func_advection_diffusion_3d_t(this,s) result(e)
+    class(advection_diffusion_3d_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%solution%nvar)
+    real(prec) :: e
+! Local
+    integer :: ivar
 
     e = 0.0_prec
     do ivar = 1,this%solution%nvar
-      do iel = 1,this%geometry%nelem
-        do k = 1,this%solution%interp%N+1
-          do j = 1,this%solution%interp%N+1
-            do i = 1,this%solution%interp%N+1
-              jac = this%geometry%J%interior(i,j,k,iel,1)
-              s = this%solution%interior(i,j,k,iel,ivar)
-              e = e+0.5_prec*s*s*jac
-            enddo
-          enddo
-        enddo
-      enddo
+      e = e+0.5_prec*s(ivar)*s(ivar)
     enddo
 
-    if(this%mesh%decomp%mpiEnabled) then
-      call mpi_allreduce(e, &
-                         this%entropy, &
-                         1, &
-                         this%mesh%decomp%mpiPrec, &
-                         MPI_SUM, &
-                         this%mesh%decomp%mpiComm, &
-                         iError)
-    else
-      this%entropy = e
-    endif
+  endfunction entropy_func_advection_diffusion_3d_t
 
-  endsubroutine CalculateEntropy_advection_diffusion_3d_t
-
-  subroutine setboundarycondition_advection_diffusion_3d_t(this)
-    ! Here, we use the pre-tendency method to calculate the
-    ! derivative of the solution using a bassi-rebay method
-    ! We then do a boundary interpolation and side exchange
-    ! on the gradient field
-    implicit none
-    class(advection_diffusion_3d_t),intent(inout) :: this
-    ! local
-    integer :: i,j,ivar,iEl,k,e2
-
-    do ivar = 1,this%solution%nvar
-      do iEl = 1,this%solution%nElem ! Loop over all elements
-        do k = 1,6 ! Loop over all sides
-
-          !bcid = this % mesh % sideInfo(5,k,iEl) ! Boundary Condition ID
-          e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-          if(e2 == 0) then
-            do j = 1,this%solution%interp%N+1 ! Loop over quadrature point
-              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-                this%solution%extBoundary(i,j,k,iEl,iVar) = 0.0_prec
-              enddo
-            enddo
-          endif
-        enddo
-      enddo
-    enddo
-
-  endsubroutine setboundarycondition_advection_diffusion_3d_t
-
-  subroutine setgradientboundarycondition_advection_diffusion_3d_t(this)
-    ! Here, we set the boundary conditions for the
-    ! solution and the solution gradient at the left
-    ! and right most boundaries.
-    !
-    ! Here, we use periodic boundary conditions
-    implicit none
-    class(advection_diffusion_3d_t),intent(inout) :: this
-    ! local
-    integer :: i,j,ivar,iEl,k,e2
-
-    do ivar = 1,this%solution%nvar
-      do iEl = 1,this%solution%nElem ! Loop over all elements
-        do k = 1,6 ! Loop over all sides
-
-          !bcid = this % mesh % sideInfo(5,k,iEl) ! Boundary Condition ID
-          e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-          if(e2 == 0) then
-            do j = 1,this%solution%interp%N+1 ! Loop over quadrature point
-              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-                this%solutionGradient%extBoundary(i,j,k,iEl,iVar,1:3) = &
-                  this%solutionGradient%boundary(i,j,k,iEl,iVar,1:3)
-              enddo
-            enddo
-          endif
-        enddo
-      enddo
-    enddo
-
-  endsubroutine setgradientboundarycondition_advection_diffusion_3d_t
-
-  subroutine fluxmethod_advection_diffusion_3d_t(this)
-    implicit none
-    class(advection_diffusion_3d_t),intent(inout) :: this
-    ! Local
-    integer :: iel
+  pure function flux3d_advection_diffusion_3d_t(this,s,dsdx) result(flux)
+    class(advection_diffusion_3d_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%solution%nvar)
+    real(prec),intent(in) :: dsdx(1:this%solution%nvar,1:3)
+    real(prec) :: flux(1:this%solution%nvar,1:3)
+! Local
     integer :: ivar
-    integer :: i
-    integer :: j
-    integer :: k
-    real(prec) :: u,v,w,nu,f,dfdx,dfdy,dfdz
 
-    u = this%u
-    v = this%v
-    w = this%w
-    nu = this%nu
     do ivar = 1,this%solution%nvar
-      do iel = 1,this%mesh%nelem
-        do k = 1,this%solution%interp%N+1
-          do j = 1,this%solution%interp%N+1
-            do i = 1,this%solution%interp%N+1
-
-              f = this%solution%interior(i,j,k,iel,ivar)
-              dfdx = this%solutionGradient%interior(i,j,k,iel,ivar,1)
-              dfdy = this%solutionGradient%interior(i,j,k,iel,ivar,2)
-              dfdz = this%solutionGradient%interior(i,j,k,iel,ivar,3)
-
-              this%flux%interior(i,j,k,iel,ivar,1) = u*f-nu*dfdx ! advective flux + diffusive flux (x-component)
-              this%flux%interior(i,j,k,iel,ivar,2) = v*f-nu*dfdy ! advective flux + diffusive flux (y-component)
-              this%flux%interior(i,j,k,iel,ivar,3) = w*f-nu*dfdz ! advective flux + diffusive flux (z-component)
-
-            enddo
-          enddo
-        enddo
-      enddo
+      flux(ivar,1) = this%u*s(ivar)-this%nu*dsdx(ivar,1) ! advective flux + diffusive flux
+      flux(ivar,2) = this%v*s(ivar)-this%nu*dsdx(ivar,2) ! advective flux + diffusive flux
+      flux(ivar,3) = this%w*s(ivar)-this%nu*dsdx(ivar,3) ! advective flux + diffusive flux
     enddo
 
-  endsubroutine fluxmethod_advection_diffusion_3d_t
+  endfunction flux3d_advection_diffusion_3d_t
 
-  subroutine BoundaryFlux_advection_diffusion_3d_t(this)
-    ! this method uses an linear upwind solver for the
-    ! advective flux and the bassi-rebay method for the
-    ! diffusive fluxes
-    implicit none
-    class(advection_diffusion_3d_t),intent(inout) :: this
-    ! Local
-    integer :: iel
+  pure function riemannflux3d_advection_diffusion_3d_t(this,sL,sR,dsdx,nhat) result(flux)
+    class(advection_diffusion_3d_t),intent(in) :: this
+    real(prec),intent(in) :: sL(1:this%nvar)
+    real(prec),intent(in) :: sR(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec),intent(in) :: nhat(1:3)
+    real(prec) :: flux(1:this%nvar)
+! Local
     integer :: ivar
-    integer :: k
-    integer :: i,j
-    real(prec) :: fin,fout,dfdn,un
-    real(prec) :: nx,ny,nz,nmag
+    real(prec) :: un,dsdn
 
-    do ivar = 1,this%solution%nvar
-      do iEl = 1,this%solution%nElem
-        do k = 1,6
-          do j = 1,this%solution%interp%N+1
-            do i = 1,this%solution%interp%N+1
+    un = this%u*nhat(1)+this%v*nhat(2)+this%w*nhat(3)
 
-              ! Get the boundary normals on cell edges from the mesh geometry
-              nx = this%geometry%nHat%boundary(i,j,k,iEl,1,1)
-              ny = this%geometry%nHat%boundary(i,j,k,iEl,1,2)
-              nz = this%geometry%nHat%boundary(i,j,k,iEl,1,3)
-
-              un = this%u*nx+this%v*ny+this%w*nz
-              dfdn = this%solutionGradient%avgboundary(i,j,k,iEl,iVar,1)*nx+ &
-                     this%solutionGradient%avgboundary(i,j,k,iEl,iVar,2)*ny+ &
-                     this%solutionGradient%avgboundary(i,j,k,iEl,iVar,3)*nz
-
-              fin = this%solution%boundary(i,j,k,iEl,iVar) ! interior solution
-              fout = this%solution%extboundary(i,j,k,iEl,iVar) ! exterior solution
-
-              nmag = this%geometry%nScale%boundary(i,j,k,iEl,1)
-
-              this%flux%boundaryNormal(i,j,k,iEl,1) = (0.5_prec*( &
-                                                       un*(fin+fout)+abs(un)*(fin-fout))- & ! advective flux
-                                                       this%nu*dfdn)*nmag
-            enddo
-          enddo
-        enddo
-      enddo
+    do ivar = 1,this%nvar
+      dsdn = dsdx(ivar,1)*nhat(1)+dsdx(ivar,2)*nhat(2)+dsdx(ivar,3)*nhat(3)
+      flux(ivar) = 0.5_prec*( &
+                   (sL(ivar)+sR(ivar))+abs(un)*(sL(ivar)-sR(ivar)))- & ! advective flux
+                   this%nu*dsdn
     enddo
 
-  endsubroutine BoundaryFlux_advection_diffusion_3d_t
+  endfunction riemannflux3d_advection_diffusion_3d_t
 
 endmodule self_advection_diffusion_3d_t
