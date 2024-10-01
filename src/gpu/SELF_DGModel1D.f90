@@ -285,7 +285,7 @@ contains
         fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
         dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
         this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
-          this%riemannflux(fin,fout,dfdx,nhat)
+          this%riemannflux1d(fin,fout,dfdx,nhat)
 
       enddo
     enddo
@@ -312,7 +312,7 @@ contains
         dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
         this%flux%interior(i,iel,1:this%solution%nvar) = &
-          this%interiorflux(f,dfdx)
+          this%flux1d(f,dfdx)
 
       enddo
     enddo
@@ -347,7 +347,7 @@ contains
         dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
         this%source%interior(i,iel,1:this%solution%nvar) = &
-          this%source_func(f,dfdx)
+          this%source1d(f,dfdx)
 
       enddo
     enddo

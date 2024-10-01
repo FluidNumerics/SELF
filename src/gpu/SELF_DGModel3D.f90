@@ -38,6 +38,14 @@ module SELF_DGModel3D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel3D
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel3D
+    procedure :: FluxMethod => fluxmethod_DGModel3D
+    procedure :: SourceMethod => sourcemethod_DGModel3D
+    procedure :: SetBoundaryCondition => setboundarycondition_DGModel3D
+    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel3D
+
+
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel3D
@@ -144,6 +152,270 @@ contains
     call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel3D
+
+  subroutine CalculateEntropy_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,k,ierror
+    real(prec) :: e,jac
+    real(prec) :: s(1:this%nvar)
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+    this%solution%interior_gpu,sizeof(this%solution%interior), &
+    hipMemcpyDeviceToHost))
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            jac = this%geometry%J%interior(i,j,k,iel,1)
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            e = e+this%entropy_func(s)*jac
+          enddo
+        enddo
+      enddo
+    enddo
+
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
+
+  endsubroutine CalculateEntropy_DGModel3D
+
+  subroutine fluxmethod_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i,j,k
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    do iel = 1,this%mesh%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+            this%flux%interior(i,j,k,iel,1:this%nvar,1:3) = this%flux3d(s,dsdx)
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
+    c_loc(this%flux%interior), &
+    sizeof(this%flux%interior), &
+    hipMemcpyHostToDevice))
+
+  endsubroutine fluxmethod_DGModel3D
+
+  subroutine BoundaryFlux_DGModel3D(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
+    real(prec) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: nhat(1:3),nmag
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
+                        this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                        hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
+                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%avgboundary), &
+                            this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
+                            hipMemcpyDeviceToHost))
+    do iEl = 1,this%solution%nElem
+      do k = 1,6
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nHat%boundary(i,j,k,iEl,1,1:3)
+            sL = this%solution%boundary(i,j,k,iel,1:this%nvar) ! interior solution
+            sR = this%solution%extboundary(i,j,k,iel,1:this%nvar) ! exterior solution
+            dsdx = this%solutiongradient%avgboundary(i,j,k,iel,1:this%nvar,1:3)
+            nmag = this%geometry%nScale%boundary(i,j,k,iEl,1)
+
+            this%flux%boundaryNormal(i,j,k,iEl,1:this%nvar) = this%riemannflux3d(sL,sR,dsdx,nhat)*nmag
+          enddo
+        enddo
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
+    c_loc(this%flux%boundarynormal), &
+    sizeof(this%flux%boundarynormal), &
+    hipMemcpyHostToDevice))
+
+  endsubroutine BoundaryFlux_DGModel3D
+
+  subroutine sourcemethod_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%interior), &
+                            this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
+                            hipMemcpyDeviceToHost))
+
+    do iel = 1,this%mesh%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+            this%source%interior(i,j,k,iel,1:this%nvar) = this%source3d(s,dsdx)
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%source%interior_gpu, &
+    c_loc(this%source%interior), &
+    sizeof(this%source%interior), &
+    hipMemcpyHostToDevice))
+
+  endsubroutine sourcemethod_DGModel3D
+
+  subroutine setboundarycondition_DGModel3D(this)
+    !! Boundary conditions for the solution are set to
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! local
+    integer :: i,iEl,j,k,e2,bcid
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
+    this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+    hipMemcpyDeviceToHost))
+
+    do iEl = 1,this%solution%nElem ! Loop over all elements
+      do k = 1,6 ! Loop over all sides
+
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+
+        if(e2 == 0) then
+          if(bcid == SELF_BC_PRESCRIBED) then
+            do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                  this%bcPrescribed(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_RADIATION) then
+            do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                  this%bcRadiation(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_NONORMALFLOW) then
+            do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                  this%bcNoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+              enddo
+            enddo
+          endif
+        endif
+
+      enddo
+    enddo
+
+    call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
+    c_loc(this%solution%extBoundary), &
+    sizeof(this%solution%extBoundary), &
+    hipMemcpyHostToDevice))
+
+
+  endsubroutine setboundarycondition_DGModel3D
+
+  subroutine setgradientboundarycondition_DGModel3D(this)
+    !! Boundary conditions for the solution are set to
+    !! 0 for the external state to provide radiation type
+    !! boundary conditions.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! local
+    integer :: i,iEl,j,k,e2,bcid
+    real(prec) :: dsdx(1:this%nvar,1:3)
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
+    this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
+    hipMemcpyDeviceToHost))
+
+    do iEl = 1,this%solution%nElem ! Loop over all elements
+      do k = 1,6 ! Loop over all sides
+
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+
+        if(e2 == 0) then
+          if(bcid == SELF_BC_PRESCRIBED) then
+            do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                  this%bcGrad3dPrescribed(dsdx)
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_RADIATION) then
+            do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                  this%bcGrad3dRadiation(dsdx)
+              enddo
+            enddo
+          elseif(bcid == SELF_BC_NONORMALFLOW) then
+            do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                  this%bcGrad3dNoNormalFlow(dsdx)
+              enddo
+            enddo
+          endif
+        endif
+
+      enddo
+    enddo
+    
+    call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
+    c_loc(this%solutiongradient%extBoundary), &
+    sizeof(this%solutiongradient%extBoundary), &
+    hipMemcpyHostToDevice))
+
+  endsubroutine setgradientboundarycondition_DGModel3D
 
   subroutine CalculateTendency_DGModel3D(this)
     implicit none

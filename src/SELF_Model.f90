@@ -298,8 +298,6 @@ contains
   endfunction GetBCFlagForChar
 
   subroutine PrintType_Model(this)
-#undef __FUNC__
-#define __FUNC__ "PrintType"
     implicit none
     class(Model),intent(in) :: this
 
