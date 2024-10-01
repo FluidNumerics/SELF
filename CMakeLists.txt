@@ -161,7 +161,7 @@ if(SELF_ENABLE_DOUBLE_PRECISION)
 endif()
 
 if(SELF_ENABLE_GPU)
-    message("-- Enabling GPU Support")
+    message("-- SELF Build System : Enabling GPU Support")
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DENABLE_GPU" )
     set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -DENABLE_GPU" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "${CMAKE_Fortran_FLAGS_COVERAGE} -DENABLE_GPU")
