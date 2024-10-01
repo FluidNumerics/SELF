@@ -18,8 +18,8 @@
 ! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 ! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 ! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUsLESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARIsLG IN ANY WAY OUT OF THE USE OF
 ! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
@@ -37,155 +37,59 @@ module self_advection_diffusion_1d_t
     real(prec) :: u ! constant velocity
 
   contains
-    procedure :: setboundarycondition => setboundarycondition_advection_diffusion_1d_t
-    procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_1d_t
-    procedure :: riemannsolver => riemannsolver_advection_diffusion_1d_t
-    procedure :: fluxmethod => fluxmethod_advection_diffusion_1d_t
-    procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_1d_t
+    procedure :: riemannflux => riemannflux_advection_diffusion_1d_t
+    procedure :: interiorflux => interiorflux_advection_diffusion_1d_t
+    procedure :: entropy_func => entropy_func_advection_diffusion_1d_t
 
   endtype advection_diffusion_1d_t
 
 contains
 
-  subroutine CalculateEntropy_advection_diffusion_1d_t(this)
-    implicit none
-    class(advection_diffusion_1d_t),intent(inout) :: this
-    ! Local
-    integer :: iel,i,ivar
-    real(prec) :: e,s,J
+  pure function entropy_func_advection_diffusion_1d_t(this, s) result(e)
+  class(advection_diffusion_1d_t), intent(in) :: this
+  real(prec), intent(in) :: s(1:this%solution%nvar)
+  real(prec) :: e
+  ! Local
+  integer :: ivar
 
     e = 0.0_prec
     do ivar = 1,this%solution%nvar
-      do iel = 1,this%geometry%nelem
-        do i = 1,this%solution%interp%N+1
-          J = this%geometry%dxds%interior(i,iel,1)
-          s = this%solution%interior(i,iel,ivar)
-          e = e+0.5_prec*s*s*J
-        enddo
-      enddo
+      e = e + 0.5_prec*s(ivar)*s(ivar)
     enddo
 
-    this%entropy = e
+  endfunction entropy_func_advection_diffusion_1d_t
 
-  endsubroutine CalculateEntropy_advection_diffusion_1d_t
+  pure function riemannflux_advection_diffusion_1d_t(this,sL,sR,dsdxavg,nhat) result(flux)
+  class(advection_diffusion_1d_t), intent(in) :: this
+  real(prec), intent(in) :: sL(1:this%solution%nvar)
+  real(prec), intent(in) :: sR(1:this%solution%nvar)
+  real(prec), intent(in) :: dsdxavg(1:this%solution%nvar)
+  real(prec), intent(in) :: nhat
+  real(prec) :: flux(1:this%solution%nvar)
+  ! Local
+  integer :: ivar
 
-  subroutine setboundarycondition_advection_diffusion_1d_t(this)
-    ! Here, we use the pre-tendency method to calculate the
-    ! derivative of the solution using a bassi-rebay method
-    ! We then do a boundary interpolation and side exchange
-    ! on the gradient field
-    implicit none
-    class(advection_diffusion_1d_t),intent(inout) :: this
-    ! local
-    integer :: ivar
-    integer :: N,nelem
-
-    nelem = this%geometry%nelem ! number of elements in the mesh
-    N = this%solution%interp%N ! polynomial degree
-
-    do ivar = 1,this%solution%nvar
-
-      ! left-most boundary
-      this%solution%extBoundary(1,1,ivar) = &
-        this%solution%boundary(2,nelem,ivar)
-
-      ! right-most boundary
-      this%solution%extBoundary(2,nelem,ivar) = &
-        this%solution%boundary(1,1,ivar)
-
+    do ivar = 1, this%solution%nvar
+      flux(ivar) = 0.5_prec*(this%u*nhat*(sL(ivar)+sR(ivar))+&
+                            abs(this%u*nhat)*(sL(ivar)-sR(ivar)))- & ! advective flux
+                            this%nu*dsdxavg(ivar)*nhat ! diffusive flux
     enddo
 
-  endsubroutine setboundarycondition_advection_diffusion_1d_t
+  end function riemannflux_advection_diffusion_1d_t
+ 
+  pure function interiorflux_advection_diffusion_1d_t(this,s,dsdx) result(flux)
+  class(advection_diffusion_1d_t), intent(in) :: this
+  real(prec), intent(in) :: s(1:this%solution%nvar)
+  real(prec), intent(in) :: dsdx(1:this%solution%nvar)
+  real(prec) :: flux(1:this%solution%nvar)
+  ! Local
+  integer :: ivar
 
-  subroutine setgradientboundarycondition_advection_diffusion_1d_t(this)
-    ! Here, we set the boundary conditions for the
-    ! solution and the solution gradient at the left
-    ! and right most boundaries.
-    !
-    ! Here, we use periodic boundary conditions
-    implicit none
-    class(advection_diffusion_1d_t),intent(inout) :: this
-    ! local
-    integer :: ivar
-    integer :: nelem
-
-    nelem = this%geometry%nelem ! number of elements in the mesh
-
-    do ivar = 1,this%solution%nvar
-
-      ! left-most boundary
-      this%solutionGradient%extBoundary(1,1,ivar) = &
-        this%solutionGradient%boundary(2,nelem,ivar)
-
-      ! right-most boundary
-      this%solutionGradient%extBoundary(2,nelem,ivar) = &
-        this%solutionGradient%boundary(1,1,ivar)
-
+    do ivar = 1, this%solution%nvar
+      flux(ivar) = this%u*s(ivar)-this%nu*dsdx(ivar) ! advective flux + diffusive flux
     enddo
 
-  endsubroutine setgradientboundarycondition_advection_diffusion_1d_t
+  end function interiorflux_advection_diffusion_1d_t
 
-  subroutine fluxmethod_advection_diffusion_1d_t(this)
-    implicit none
-    class(advection_diffusion_1d_t),intent(inout) :: this
-    ! Local
-    integer :: iel
-    integer :: ivar
-    integer :: i
-    real(prec) :: u,nu,f,dfdx
-
-    u = this%u
-    nu = this%nu
-    do ivar = 1,this%solution%nvar
-      do iel = 1,this%mesh%nelem
-        do i = 1,this%solution%interp%N+1
-
-          f = this%solution%interior(i,iel,ivar)
-          dfdx = this%solutionGradient%interior(i,iel,ivar)
-
-          this%flux%interior(i,iel,ivar) = u*f-nu*dfdx ! advective flux + diffusive flux
-
-        enddo
-      enddo
-    enddo
-
-  endsubroutine fluxmethod_advection_diffusion_1d_t
-
-  subroutine riemannsolver_advection_diffusion_1d_t(this)
-    ! this method uses an linear upwind solver for the
-    ! advective flux and the bassi-rebay method for the
-    ! diffusive fluxes
-    implicit none
-    class(advection_diffusion_1d_t),intent(inout) :: this
-    ! Local
-    integer :: iel
-    integer :: ivar
-    integer :: iside
-    real(prec) :: fin,fout,dfavg,u,nhat
-
-    u = this%u
-    do ivar = 1,this%solution%nvar
-      do iel = 1,this%mesh%nelem
-        do iside = 1,2
-
-          ! set the normal velocity
-          if(iside == 1) then
-            nhat = -1.0_prec
-          else
-            nhat = 1.0_prec
-          endif
-
-          fin = this%solution%boundary(iside,iel,ivar) ! interior solution
-          fout = this%solution%extboundary(iside,iel,ivar) ! exterior solution
-          dfavg = this%solutionGradient%avgboundary(iside,iel,ivar) ! average solution gradient (with direction taken into account)
-
-          this%flux%boundarynormal(iside,iel,ivar) = 0.5_prec*(u*nhat*(fin+fout)+abs(u*nhat)*(fin-fout))- & ! advective flux
-                                                     this%nu*dfavg*nhat ! diffusive flux
-
-        enddo
-      enddo
-    enddo
-
-  endsubroutine riemannsolver_advection_diffusion_1d_t
 
 endmodule self_advection_diffusion_1d_t

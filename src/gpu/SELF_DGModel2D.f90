@@ -160,7 +160,7 @@ contains
     endif
 
     call this%SourceMethod() ! User supplied
-    call this%RiemannSolver() ! User supplied
+    call this%BoundaryFlux() ! User supplied
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)

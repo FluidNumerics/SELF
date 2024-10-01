@@ -147,7 +147,7 @@ module SELF_Model
     procedure :: PreFlux => PreFlux_Model
     procedure :: SourceMethod => Source_Model
     procedure :: FluxMethod => Flux_Model
-    procedure :: RiemannSolver => RiemannSolver_Model
+    procedure :: BoundaryFlux => BoundaryFlux_Model
     procedure :: UpdateBoundary => UpdateBoundary_Model
     procedure :: SetBoundaryCondition => SetBoundaryCondition_Model
     procedure :: SetGradientBoundaryCondition => SetGradientBoundaryCondition_Model
@@ -326,14 +326,14 @@ contains
 
   endsubroutine Source_Model
 
-  subroutine RiemannSolver_Model(this)
+  subroutine BoundaryFlux_Model(this)
     !!
     implicit none
     class(Model),intent(inout) :: this
 
     return
 
-  endsubroutine RiemannSolver_Model
+  endsubroutine BoundaryFlux_Model
 
   subroutine Flux_Model(this)
     !!

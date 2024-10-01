@@ -42,7 +42,7 @@ module self_advection_diffusion_3d_t
 
     procedure :: setboundarycondition => setboundarycondition_advection_diffusion_3d_t
     procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_3d_t
-    procedure :: riemannsolver => riemannsolver_advection_diffusion_3d_t
+    procedure :: BoundaryFlux => BoundaryFlux_advection_diffusion_3d_t
     procedure :: fluxmethod => fluxmethod_advection_diffusion_3d_t
     procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_3d_t
 
@@ -186,7 +186,7 @@ contains
 
   endsubroutine fluxmethod_advection_diffusion_3d_t
 
-  subroutine riemannsolver_advection_diffusion_3d_t(this)
+  subroutine BoundaryFlux_advection_diffusion_3d_t(this)
     ! this method uses an linear upwind solver for the
     ! advective flux and the bassi-rebay method for the
     ! diffusive fluxes
@@ -230,6 +230,6 @@ contains
       enddo
     enddo
 
-  endsubroutine riemannsolver_advection_diffusion_3d_t
+  endsubroutine BoundaryFlux_advection_diffusion_3d_t
 
 endmodule self_advection_diffusion_3d_t

@@ -60,7 +60,7 @@ module SELF_HDF5
     module procedure :: ReadArray_HDF5_real_r3_serial
     module procedure :: ReadArray_HDF5_real_r4_serial
     module procedure :: ReadArray_HDF5_real_r5_serial
-    module procedure :: ReadArray_HDF5_real_r6_serial
+    ! module procedure :: ReadArray_HDF5_real_r6_serial
 
     module procedure :: ReadArray_HDF5_int32_r1_serial
     module procedure :: ReadArray_HDF5_int32_r2_serial
@@ -69,8 +69,8 @@ module SELF_HDF5
     module procedure :: ReadArray_HDF5_real_r2_parallel
     module procedure :: ReadArray_HDF5_real_r3_parallel
     module procedure :: ReadArray_HDF5_real_r4_parallel
-    module procedure :: ReadArray_HDF5_real_r5_parallel
-    module procedure :: ReadArray_HDF5_real_r6_parallel
+    ! module procedure :: ReadArray_HDF5_real_r5_parallel
+    ! module procedure :: ReadArray_HDF5_real_r6_parallel
 
     module procedure :: ReadArray_HDF5_int32_r1_parallel
     module procedure :: ReadArray_HDF5_int32_r2_parallel
@@ -87,7 +87,7 @@ module SELF_HDF5
     module procedure :: WriteArray_HDF5_real_r3_serial
     module procedure :: WriteArray_HDF5_real_r4_serial
     module procedure :: WriteArray_HDF5_real_r5_serial
-    module procedure :: WriteArray_HDF5_real_r6_serial
+    ! module procedure :: WriteArray_HDF5_real_r6_serial
 
     module procedure :: WriteArray_HDF5_int32_r1_serial
     module procedure :: WriteArray_HDF5_int32_r2_serial
@@ -97,8 +97,8 @@ module SELF_HDF5
     module procedure :: WriteArray_HDF5_real_r3_parallel
     module procedure :: WriteArray_HDF5_real_r4_parallel
 
-    module procedure :: WriteArray_HDF5_int32_r3_parallel
-    module procedure :: WriteArray_HDF5_int32_r4_parallel
+    !module procedure :: WriteArray_HDF5_int32_r3_parallel
+    !module procedure :: WriteArray_HDF5_int32_r4_parallel
 
   endinterface
 
@@ -426,29 +426,29 @@ contains
 
   endsubroutine WriteArray_HDF5_real_r5_serial
 
-  subroutine WriteArray_HDF5_real_r6_serial(fileId,arrayName,hfArray)
-    implicit none
-    integer(HID_T),intent(in) :: fileId
-    character(*),intent(in) :: arrayName
-    real(prec),dimension(:,:,:,:,:,:),intent(in) :: hfArray
-    ! Local
-    integer(HID_T) :: dsetId
-    integer(HID_T) :: memspace
-    integer(HSIZE_T) :: dims(1:6)
-    integer :: error
+  ! subroutine WriteArray_HDF5_real_r6_serial(fileId,arrayName,hfArray)
+  !   implicit none
+  !   integer(HID_T),intent(in) :: fileId
+  !   character(*),intent(in) :: arrayName
+  !   real(prec),dimension(:,:,:,:,:,:),intent(in) :: hfArray
+  !   ! Local
+  !   integer(HID_T) :: dsetId
+  !   integer(HID_T) :: memspace
+  !   integer(HSIZE_T) :: dims(1:6)
+  !   integer :: error
 
-    dims = shape(hfArray)
-    call h5screate_simple_f(6,dims,memspace,error)
+  !   dims = shape(hfArray)
+  !   call h5screate_simple_f(6,dims,memspace,error)
 
-    call h5dcreate_f(fileId,trim(arrayName),HDF5_IO_PREC,memspace,dsetId,error)
+  !   call h5dcreate_f(fileId,trim(arrayName),HDF5_IO_PREC,memspace,dsetId,error)
 
-    call h5dwrite_f(dsetId,HDF5_IO_PREC, &
-                    hfArray,dims,error)
+  !   call h5dwrite_f(dsetId,HDF5_IO_PREC, &
+  !                   hfArray,dims,error)
 
-    call h5dclose_f(dSetId,error)
-    call h5sclose_f(memspace,error)
+  !   call h5dclose_f(dSetId,error)
+  !   call h5sclose_f(memspace,error)
 
-  endsubroutine WriteArray_HDF5_real_r6_serial
+  ! endsubroutine WriteArray_HDF5_real_r6_serial
 
   subroutine WriteArray_HDF5_int32_r1_serial(fileId,arrayName,hfArray)
     implicit none
@@ -639,95 +639,95 @@ contains
     call h5sclose_f(memspace,error)
   endsubroutine WriteArray_HDF5_real_r4_parallel
 
-  subroutine WriteArray_HDF5_int32_r3_parallel(fileId,arrayName,hfArray,offset,globalDims)
-    implicit none
-    integer(HID_T),intent(in) :: fileId
-    character(*),intent(in) :: arrayName
-    integer(HID_T),intent(in) :: offset(1:3)
-    integer(int32),dimension(:,:,:),intent(in) :: hfArray
-    integer(HID_T),intent(in) :: globalDims(1:3)
-    ! Local
-    integer(HID_T) :: plistId
-    integer(HID_T) :: dsetId
-    integer(HID_T) :: filespace
-    integer(HID_T) :: memspace
-    integer(HSIZE_T) :: dims(1:3)
-    integer :: error
+  ! subroutine WriteArray_HDF5_int32_r3_parallel(fileId,arrayName,hfArray,offset,globalDims)
+  !   implicit none
+  !   integer(HID_T),intent(in) :: fileId
+  !   character(*),intent(in) :: arrayName
+  !   integer(HID_T),intent(in) :: offset(1:3)
+  !   integer(int32),dimension(:,:,:),intent(in) :: hfArray
+  !   integer(HID_T),intent(in) :: globalDims(1:3)
+  !   ! Local
+  !   integer(HID_T) :: plistId
+  !   integer(HID_T) :: dsetId
+  !   integer(HID_T) :: filespace
+  !   integer(HID_T) :: memspace
+  !   integer(HSIZE_T) :: dims(1:3)
+  !   integer :: error
 
-    dims = shape(hfArray)
+  !   dims = shape(hfArray)
 
-    call h5screate_simple_f(3,globalDims,filespace,error)
-    call h5screate_simple_f(3,dims,memspace,error)
+  !   call h5screate_simple_f(3,globalDims,filespace,error)
+  !   call h5screate_simple_f(3,dims,memspace,error)
 
-    call h5dcreate_f(fileId,trim(arrayName),HDF5_IO_PREC,filespace,dsetId,error)
+  !   call h5dcreate_f(fileId,trim(arrayName),HDF5_IO_PREC,filespace,dsetId,error)
 
-    call h5sselect_hyperslab_f(filespace, &
-                               H5S_SELECT_SET_F, &
-                               offset, &
-                               dims, &
-                               error)
+  !   call h5sselect_hyperslab_f(filespace, &
+  !                              H5S_SELECT_SET_F, &
+  !                              offset, &
+  !                              dims, &
+  !                              error)
 
-    call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
-    call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dwrite_f(dsetId,H5T_STD_I32LE,hfArray,dims,error, &
-                    mem_space_id=memspace,file_space_id=filespace,xfer_prp=plistId)
+  !   call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
+  !   call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
+  !   call h5dwrite_f(dsetId,H5T_STD_I32LE,hfArray,dims,error, &
+  !                   mem_space_id=memspace,file_space_id=filespace,xfer_prp=plistId)
 
-    if(error /= 0) then
-      print*,'Failure to write dataset'
-      stop 1
-    endif
+  !   if(error /= 0) then
+  !     print*,'Failure to write dataset'
+  !     stop 1
+  !   endif
 
-    call h5pclose_f(plistId,error)
-    call h5sclose_f(filespace,error)
-    call h5dclose_f(dSetId,error)
-    call h5sclose_f(memspace,error)
+  !   call h5pclose_f(plistId,error)
+  !   call h5sclose_f(filespace,error)
+  !   call h5dclose_f(dSetId,error)
+  !   call h5sclose_f(memspace,error)
 
-  endsubroutine WriteArray_HDF5_int32_r3_parallel
+  ! endsubroutine WriteArray_HDF5_int32_r3_parallel
 
-  subroutine WriteArray_HDF5_int32_r4_parallel(fileId,arrayName,hfArray,offset,globalDims)
-    implicit none
-    integer(HID_T),intent(in) :: fileId
-    character(*),intent(in) :: arrayName
-    integer(HID_T),intent(in) :: offset(1:4)
-    integer(int32),dimension(:,:,:,:),intent(in) :: hfArray
-    integer(HID_T),intent(in) :: globalDims(1:4)
-    ! Local
-    integer(HID_T) :: plistId
-    integer(HID_T) :: dsetId
-    integer(HID_T) :: filespace
-    integer(HID_T) :: memspace
-    integer(HSIZE_T) :: dims(1:4)
-    integer :: error
+  ! subroutine WriteArray_HDF5_int32_r4_parallel(fileId,arrayName,hfArray,offset,globalDims)
+  !   implicit none
+  !   integer(HID_T),intent(in) :: fileId
+  !   character(*),intent(in) :: arrayName
+  !   integer(HID_T),intent(in) :: offset(1:4)
+  !   integer(int32),dimension(:,:,:,:),intent(in) :: hfArray
+  !   integer(HID_T),intent(in) :: globalDims(1:4)
+  !   ! Local
+  !   integer(HID_T) :: plistId
+  !   integer(HID_T) :: dsetId
+  !   integer(HID_T) :: filespace
+  !   integer(HID_T) :: memspace
+  !   integer(HSIZE_T) :: dims(1:4)
+  !   integer :: error
 
-    dims = shape(hfArray)
+  !   dims = shape(hfArray)
 
-    call h5screate_simple_f(4,globalDims,filespace,error)
-    call h5screate_simple_f(4,dims,memspace,error)
+  !   call h5screate_simple_f(4,globalDims,filespace,error)
+  !   call h5screate_simple_f(4,dims,memspace,error)
 
-    call h5dcreate_f(fileId,trim(arrayName),HDF5_IO_PREC,filespace,dsetId,error)
+  !   call h5dcreate_f(fileId,trim(arrayName),HDF5_IO_PREC,filespace,dsetId,error)
 
-    call h5sselect_hyperslab_f(filespace, &
-                               H5S_SELECT_SET_F, &
-                               offset, &
-                               dims, &
-                               error)
+  !   call h5sselect_hyperslab_f(filespace, &
+  !                              H5S_SELECT_SET_F, &
+  !                              offset, &
+  !                              dims, &
+  !                              error)
 
-    call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
-    call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dwrite_f(dsetId,H5T_STD_I32LE,hfArray,dims,error, &
-                    mem_space_id=memspace,file_space_id=filespace,xfer_prp=plistId)
+  !   call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
+  !   call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
+  !   call h5dwrite_f(dsetId,H5T_STD_I32LE,hfArray,dims,error, &
+  !                   mem_space_id=memspace,file_space_id=filespace,xfer_prp=plistId)
 
-    if(error /= 0) then
-      print*,'Failure to write dataset'
-      stop 1
-    endif
+  !   if(error /= 0) then
+  !     print*,'Failure to write dataset'
+  !     stop 1
+  !   endif
 
-    call h5pclose_f(plistId,error)
-    call h5sclose_f(filespace,error)
-    call h5dclose_f(dSetId,error)
-    call h5sclose_f(memspace,error)
+  !   call h5pclose_f(plistId,error)
+  !   call h5sclose_f(filespace,error)
+  !   call h5dclose_f(dSetId,error)
+  !   call h5sclose_f(memspace,error)
 
-  endsubroutine WriteArray_HDF5_int32_r4_parallel
+  ! endsubroutine WriteArray_HDF5_int32_r4_parallel
 
   subroutine WriteCharacter_HDF5_serial(fileid,name,hfField)
     ! adapted from https://forum.hdfgroup.org/t/writing-a-string-array-as-attribute-in-fortran/8503/6
@@ -860,25 +860,25 @@ contains
 
   endsubroutine ReadArray_HDF5_real_r5_serial
 
-  subroutine ReadArray_HDF5_real_r6_serial(fileId,arrayName,hfArray)
-    implicit none
-    integer(HID_T),intent(in) :: fileId
-    character(*),intent(in) :: arrayName
-    real(prec),dimension(:,:,:,:,:,:),intent(inout) :: hfArray
-    ! Local
-    integer(HID_T) :: dsetId
-    integer(HID_T) :: dims(1:6)
-    integer :: error
+  ! subroutine ReadArray_HDF5_real_r6_serial(fileId,arrayName,hfArray)
+  !   implicit none
+  !   integer(HID_T),intent(in) :: fileId
+  !   character(*),intent(in) :: arrayName
+  !   real(prec),dimension(:,:,:,:,:,:),intent(inout) :: hfArray
+  !   ! Local
+  !   integer(HID_T) :: dsetId
+  !   integer(HID_T) :: dims(1:6)
+  !   integer :: error
 
-    dims = shape(hfArray)
+  !   dims = shape(hfArray)
 
-    call h5dopen_f(fileId,arrayName,dsetId,error)
+  !   call h5dopen_f(fileId,arrayName,dsetId,error)
 
-    call h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
+  !   call h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray,dims,error)
 
-    call h5dclose_f(dsetId,error)
+  !   call h5dclose_f(dsetId,error)
 
-  endsubroutine ReadArray_HDF5_real_r6_serial
+  ! endsubroutine ReadArray_HDF5_real_r6_serial
 
   subroutine ReadArray_HDF5_int32_r1_serial(fileId,arrayName,hfArray)
     implicit none
@@ -1060,75 +1060,75 @@ contains
 
   endsubroutine ReadArray_HDF5_real_r4_parallel
 
-  subroutine ReadArray_HDF5_real_r5_parallel(fileId,arrayName,hfArray,offset)
-    implicit none
-    integer(HID_T),intent(in) :: fileId
-    character(*),intent(in) :: arrayName
-    integer(HID_T),intent(in) :: offset(1:5)
-    real(prec),dimension(:,:,:,:,:),intent(inout) :: hfArray
-    ! Local
-    integer(HID_T) :: plistId
-    integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
-    integer(HID_T) :: filespace
-    integer(HID_T) :: memspace
-    integer(HID_T) :: dims(1:5)
-    integer :: error
+  ! subroutine ReadArray_HDF5_real_r5_parallel(fileId,arrayName,hfArray,offset)
+  !   implicit none
+  !   integer(HID_T),intent(in) :: fileId
+  !   character(*),intent(in) :: arrayName
+  !   integer(HID_T),intent(in) :: offset(1:5)
+  !   real(prec),dimension(:,:,:,:,:),intent(inout) :: hfArray
+  !   ! Local
+  !   integer(HID_T) :: plistId
+  !   integer(HID_T) :: dsetId
+  !   integer(HID_T) :: dtypeId
+  !   integer(HID_T) :: filespace
+  !   integer(HID_T) :: memspace
+  !   integer(HID_T) :: dims(1:5)
+  !   integer :: error
 
-    dims = shape(hfArray)
-    call h5screate_simple_f(5,dims,memspace,error)
-    call h5dopen_f(fileId,arrayName,dsetId,error)
-    call h5dget_space_f(dsetId,filespace,error)
-    call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
-    call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
-    call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dget_type_f(dsetId,dtypeId,error)
+  !   dims = shape(hfArray)
+  !   call h5screate_simple_f(5,dims,memspace,error)
+  !   call h5dopen_f(fileId,arrayName,dsetId,error)
+  !   call h5dget_space_f(dsetId,filespace,error)
+  !   call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+  !   call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
+  !   call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
+  !   call h5dget_type_f(dsetId,dtypeId,error)
 
-    call h5dread_f(dsetId,dtypeId,hfArray,dims, &
-                   error,memspace,filespace,plistId)
+  !   call h5dread_f(dsetId,dtypeId,hfArray,dims, &
+  !                  error,memspace,filespace,plistId)
 
-    call h5tclose_f(dtypeId,error)
-    call h5pclose_f(plistId,error)
-    call h5sclose_f(filespace,error)
-    call h5dclose_f(dsetId,error)
-    call h5sclose_f(memspace,error)
+  !   call h5tclose_f(dtypeId,error)
+  !   call h5pclose_f(plistId,error)
+  !   call h5sclose_f(filespace,error)
+  !   call h5dclose_f(dsetId,error)
+  !   call h5sclose_f(memspace,error)
 
-  endsubroutine ReadArray_HDF5_real_r5_parallel
+  ! endsubroutine ReadArray_HDF5_real_r5_parallel
 
-  subroutine ReadArray_HDF5_real_r6_parallel(fileId,arrayName,hfArray,offset)
-    implicit none
-    integer(HID_T),intent(in) :: fileId
-    character(*),intent(in) :: arrayName
-    integer(HID_T),intent(in) :: offset(1:6)
-    real(prec),dimension(:,:,:,:,:,:),intent(inout) :: hfArray
-    ! Local
-    integer(HID_T) :: plistId
-    integer(HID_T) :: dsetId
-    integer(HID_T) :: dtypeId
-    integer(HID_T) :: filespace
-    integer(HID_T) :: memspace
-    integer(HID_T) :: dims(1:6)
-    integer :: error
+  ! subroutine ReadArray_HDF5_real_r6_parallel(fileId,arrayName,hfArray,offset)
+  !   implicit none
+  !   integer(HID_T),intent(in) :: fileId
+  !   character(*),intent(in) :: arrayName
+  !   integer(HID_T),intent(in) :: offset(1:6)
+  !   real(prec),dimension(:,:,:,:,:,:),intent(inout) :: hfArray
+  !   ! Local
+  !   integer(HID_T) :: plistId
+  !   integer(HID_T) :: dsetId
+  !   integer(HID_T) :: dtypeId
+  !   integer(HID_T) :: filespace
+  !   integer(HID_T) :: memspace
+  !   integer(HID_T) :: dims(1:6)
+  !   integer :: error
 
-    dims = shape(hfArray)
-    call h5screate_simple_f(6,dims,memspace,error)
-    call h5dopen_f(fileId,arrayName,dsetId,error)
-    call h5dget_space_f(dsetId,filespace,error)
-    call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
-    call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
-    call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
-    call h5dget_type_f(dsetId,dtypeId,error)
+  !   dims = shape(hfArray)
+  !   call h5screate_simple_f(6,dims,memspace,error)
+  !   call h5dopen_f(fileId,arrayName,dsetId,error)
+  !   call h5dget_space_f(dsetId,filespace,error)
+  !   call h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+  !   call h5pcreate_f(H5P_DATASET_XFER_F,plistId,error)
+  !   call h5pset_dxpl_mpio_f(plistId,H5FD_MPIO_COLLECTIVE_F,error)
+  !   call h5dget_type_f(dsetId,dtypeId,error)
 
-    call h5dread_f(dsetId,dtypeId,hfArray,dims, &
-                   error,memspace,filespace,plistId)
+  !   call h5dread_f(dsetId,dtypeId,hfArray,dims, &
+  !                  error,memspace,filespace,plistId)
 
-    call h5tclose_f(dtypeId,error)
-    call h5pclose_f(plistId,error)
-    call h5sclose_f(filespace,error)
-    call h5dclose_f(dsetId,error)
-    call h5sclose_f(memspace,error)
+  !   call h5tclose_f(dtypeId,error)
+  !   call h5pclose_f(plistId,error)
+  !   call h5sclose_f(filespace,error)
+  !   call h5dclose_f(dsetId,error)
+  !   call h5sclose_f(memspace,error)
 
-  endsubroutine ReadArray_HDF5_real_r6_parallel
+  ! endsubroutine ReadArray_HDF5_real_r6_parallel
 
   subroutine ReadArray_HDF5_int32_r1_parallel(fileId,arrayName,hfArray,offset)
     implicit none

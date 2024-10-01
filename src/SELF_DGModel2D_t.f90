@@ -273,7 +273,14 @@ contains
     call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel2D_t
+  ! ! Conditions on the solution
+  ! integer,parameter :: SELF_BC_PRESCRIBED = 100
+  ! integer,parameter :: SELF_BC_RADIATION = 101
+  ! integer,parameter :: SELF_BC_NONORMALFLOW = 102
 
+  ! ! Conditions on the solution gradients
+  ! integer,parameter :: SELF_BC_PRESCRIBED_STRESS = 200
+  ! integer,parameter :: SELF_BC_NOSTRESS = 201
   subroutine CalculateTendency_DGModel2D_t(this)
     implicit none
     class(DGModel2D_t),intent(inout) :: this
@@ -294,7 +301,7 @@ contains
     endif
 
     call this%SourceMethod() ! User supplied
-    call this%RiemannSolver() ! User supplied
+    call this%BoundaryFlux() ! User supplied
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior)

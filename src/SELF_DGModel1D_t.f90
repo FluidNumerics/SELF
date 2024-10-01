@@ -55,6 +55,21 @@ module SELF_DGModel1D_t
     procedure :: Init => Init_DGModel1D_t
     procedure :: Free => Free_DGModel1D_t
 
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel1D_t
+    procedure :: entropy_func => entropy_func_DGModel1D_t
+
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel1D_t
+    procedure :: riemannflux => riemannflux_DGModel1D_t
+
+    procedure :: FluxMethod => fluxmethod_DGModel1D_t
+    procedure :: interiorflux => interiorflux_DGModel1D_t
+
+    procedure :: SourceMethod => sourcemethod_DGModel1D_t
+    procedure :: source_func => source_func_DGModel1D_t
+
+    procedure :: SetBoundaryCondition => setboundarycondition_DGModel1D_t
+    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel1D_t
+
     procedure :: UpdateSolution => UpdateSolution_DGModel1D_t
 
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel1D_t
@@ -278,6 +293,214 @@ contains
 
   endsubroutine CalculateSolutionGradient_DGModel1D_t
 
+  subroutine CalculateEntropy_DGModel1D_t(this)
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! Local
+    integer :: iel,i,ivar
+    real(prec) :: e,s(1:this%solution%nvar),J
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do i = 1,this%solution%interp%N+1
+        J = this%geometry%dxds%interior(i,iel,1)
+        s(1:this%solution%nvar) = this%solution%interior(i,iel,1:this%solution%nvar)
+        e = e+this%entropy_func(s)*J
+      enddo
+    enddo
+
+    this%entropy = e
+
+  endsubroutine CalculateEntropy_DGModel1D_t
+
+  pure function entropy_func_DGModel1D_t(this, s) result(e)
+    class(DGModel1D_t), intent(in) :: this
+    real(prec), intent(in) :: s(1:this%solution%nvar)
+    real(prec) :: e
+
+      e = 0.0_prec
+
+  endfunction entropy_func_DGModel1D_t
+
+  subroutine setboundarycondition_DGModel1D_t(this)
+    ! Here, we use the pre-tendency method to calculate the
+    ! derivative of the solution using a bassi-rebay method
+    ! We then do a boundary interpolation and side exchange
+    ! on the gradient field
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! local
+    integer :: ivar
+    integer :: N,nelem
+
+    nelem = this%geometry%nelem ! number of elements in the mesh
+    N = this%solution%interp%N ! polynomial degree
+
+    do ivar = 1,this%solution%nvar
+
+      ! left-most boundary
+      this%solution%extBoundary(1,1,ivar) = &
+        this%solution%boundary(2,nelem,ivar)
+
+      ! right-most boundary
+      this%solution%extBoundary(2,nelem,ivar) = &
+        this%solution%boundary(1,1,ivar)
+
+    enddo
+
+  endsubroutine setboundarycondition_DGModel1D_t
+
+  subroutine setgradientboundarycondition_DGModel1D_t(this)
+    ! Here, we set the boundary conditions for the
+    ! solution and the solution gradient at the left
+    ! and right most boundaries.
+    !
+    ! Here, we use periodic boundary conditions
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! local
+    integer :: ivar
+    integer :: nelem
+
+    nelem = this%geometry%nelem ! number of elements in the mesh
+
+    do ivar = 1,this%solution%nvar
+
+      ! left-most boundary
+      this%solutionGradient%extBoundary(1,1,ivar) = &
+        this%solutionGradient%boundary(2,nelem,ivar)
+
+      ! right-most boundary
+      this%solutionGradient%extBoundary(2,nelem,ivar) = &
+        this%solutionGradient%boundary(1,1,ivar)
+
+    enddo
+
+  endsubroutine setgradientboundarycondition_DGModel1D_t
+
+  subroutine BoundaryFlux_DGModel1D_t(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: iside
+    real(prec) :: fin(1:this%solution%nvar)
+    real(prec) :: fout(1:this%solution%nvar)
+    real(prec) :: dfdx(1:this%solution%nvar),nhat
+
+    do iel = 1,this%mesh%nelem
+      do iside = 1,2
+
+        ! set the normal velocity
+        if(iside == 1) then
+          nhat = -1.0_prec
+        else
+          nhat = 1.0_prec
+        endif
+
+        fin = this%solution%boundary(iside,iel,1:this%solution%nvar) ! interior solution
+        fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
+        dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
+        this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
+          this%riemannflux(fin,fout,dfdx,nhat)
+
+      enddo
+    enddo
+
+  endsubroutine BoundaryFlux_DGModel1D_t
+
+  pure function riemannflux_DGModel1D_t(this,sL,sR,dsdxavg,nhat) result(flux)
+  class(DGModel1D_t), intent(in) :: this
+  real(prec), intent(in) :: sL(1:this%solution%nvar)
+  real(prec), intent(in) :: sR(1:this%solution%nvar)
+  real(prec), intent(in) :: dsdxavg(1:this%solution%nvar)
+  real(prec), intent(in) :: nhat
+  real(prec) :: flux(1:this%solution%nvar)
+  ! Local
+  integer :: ivar
+
+    do ivar = 1, this%solution%nvar
+      flux(ivar) = 0.0_prec
+    enddo
+
+  end function riemannflux_DGModel1D_t
+
+  subroutine fluxmethod_DGModel1D_t(this)
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i
+    real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
+
+    do iel = 1,this%mesh%nelem
+      do i = 1,this%solution%interp%N+1
+
+        f = this%solution%interior(i,iel,1:this%solution%nvar)
+        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+
+        this%flux%interior(i,iel,1:this%solution%nvar) = &
+          this%interiorflux(f,dfdx) 
+
+      enddo
+    enddo
+
+  endsubroutine fluxmethod_DGModel1D_t
+
+  pure function interiorflux_DGModel1D_t(this,s,dsdx) result(flux)
+  class(DGModel1D_t), intent(in) :: this
+  real(prec), intent(in) :: s(1:this%solution%nvar)
+  real(prec), intent(in) :: dsdx(1:this%solution%nvar)
+  real(prec) :: flux(1:this%solution%nvar)
+  ! Local
+  integer :: ivar
+
+    do ivar = 1, this%solution%nvar
+      flux(ivar) = 0.0_prec
+    enddo
+
+  end function interiorflux_DGModel1D_t
+
+  subroutine sourcemethod_DGModel1D_t(this)
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i
+    real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
+
+
+    do iel = 1,this%mesh%nelem
+      do i = 1,this%solution%interp%N+1
+
+        f = this%solution%interior(i,iel,1:this%solution%nvar)
+        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+
+        this%source%interior(i,iel,1:this%solution%nvar) = &
+          this%source_func(f,dfdx) 
+
+      enddo
+    enddo
+
+  endsubroutine sourcemethod_DGModel1D_t
+
+  pure function source_func_DGModel1D_t(this,s,dsdx) result(source)
+  class(DGModel1D_t), intent(in) :: this
+  real(prec), intent(in) :: s(1:this%solution%nvar)
+  real(prec), intent(in) :: dsdx(1:this%solution%nvar)
+  real(prec) :: source(1:this%solution%nvar)
+  ! Local
+  integer :: ivar
+
+    do ivar = 1, this%solution%nvar
+      source(ivar) = 0.0_prec
+    enddo
+
+  end function source_func_DGModel1D_t
+
   subroutine CalculateTendency_DGModel1D_t(this)
     implicit none
     class(DGModel1D_t),intent(inout) :: this
@@ -297,7 +520,7 @@ contains
     endif
 
     call this%SourceMethod() ! User supplied
-    call this%RiemannSolver() ! User supplied
+    call this%BoundaryFlux() ! User supplied
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDerivative(this%fluxDivergence%interior)
