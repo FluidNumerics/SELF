@@ -132,6 +132,35 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
+<a class="md-nav__link" href="#quick-start">
+    Quick start
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependencies">
+    Dependencies
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#installation-notes">
+    Installation Notes
+  </a>
+<nav aria-label="Installation Notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#multithreading-cpu-support">
+    Multithreading CPU support
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gpu-support">
+    GPU Support
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#bare-metal-install">
     Bare Metal Install
   </a>
@@ -154,8 +183,8 @@
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#install-self_1">
-    Install SELF
+<a class="md-nav__link" href="#install-self-detailed">
+    Install SELF (Detailed)
   </a>
 </li>
 </ul>
@@ -163,11 +192,6 @@
 </li>
 </ul>
 </nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#build-a-docker-container">
-    Build a Docker Container
-  </a>
 </li>
 </ul>
 </nav>
@@ -234,6 +258,11 @@
         Software Architecture
       </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Learning/dependencies/">
+        Dependencies
+      </a>
+</li>
 </ul>
 </nav>
 </li>
@@ -275,6 +304,35 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
+<a class="md-nav__link" href="#quick-start">
+    Quick start
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependencies">
+    Dependencies
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#installation-notes">
+    Installation Notes
+  </a>
+<nav aria-label="Installation Notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#multithreading-cpu-support">
+    Multithreading CPU support
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gpu-support">
+    GPU Support
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#bare-metal-install">
     Bare Metal Install
   </a>
@@ -297,8 +355,8 @@
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#install-self_1">
-    Install SELF
+<a class="md-nav__link" href="#install-self-detailed">
+    Install SELF (Detailed)
   </a>
 </li>
 </ul>
@@ -306,11 +364,6 @@
 </li>
 </ul>
 </nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#build-a-docker-container">
-    Build a Docker Container
-  </a>
 </li>
 </ul>
 </nav>
@@ -323,28 +376,68 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="install-self">Install SELF</h1>
+<h2 id="quick-start">Quick start</h2>
+<p>The easiest way to get started is to use the spack package manager. On a Linux platform, set up spack</p>
+<pre><code>git clone https://github.com/spack/spack ~/spack
+source ~/spack/share/spack/setup-env.sh
+</code></pre>
+<p>Allow spack to locate your compilers (make sure you have C, C++, and Fortran compilers installed!)</p>
+<pre><code>spack compiler find
+</code></pre>
+<p>SELF comes with a spack environment file that defines the dependencies that are required for SELF. The versions listed in this environment file are the specific versions we regularly test against. To get this environment file, clone the SELF repository</p>
+<pre><code>git clone https://github.com/fluidnumerics/SELF/ ~/SELF/
+</code></pre>
+<p>If you have a preferred compiler you would like for spack to use, you can use <code>spack config add</code>, e.g.</p>
+<pre><code>spack -e ~/SELF/share/spack-env config add packages:all:require:['%gcc@12.2.0']
+</code></pre>
+<p>The example above will force packages to be built with version 12.2.0 of gfortran from the <code>gcc</code> compiler set.</p>
+<p>To reduce build time, import existing packages on your system</p>
+<pre><code>spack external find --not-buildable
+</code></pre>
+<p>Next, install SELF's dependencies (OpenMPI, HDF5, and feq-parse)</p>
+<pre><code>spack -e ~/SELF/share/spack-env install --no-check-signature
+</code></pre>
+<p>Then, install SELF</p>
+<pre><code>cd ~/SELF
+spack env activate ~/SELF/share/spack-env
+mkdir ~/SELF/build
+cd ~/SELF/build
+cmake -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self ../
+make
+make install
+</code></pre>
+<p>If you'd like to run the tests included with SELF, to verify your installation, you can use <code>ctest</code>.</p>
+<pre><code>cd ${HOME}/opt/self/test
+ctest
+</code></pre>
+<h2 id="dependencies">Dependencies</h2>
 <p>The Spectral Element Library in Fortran can be built provided the following dependencies are met</p>
 <ul>
-<li>Fortran 2008 compliant compiler ( <code>gfortran</code> recommended )</li>
 <li><a href="https://cmake.org/resources/">Cmake (v3.21 or greater)</a></li>
-<li>MPI, e.g. <a href="https://www.open-mpi.org/">OpenMPI</a></li>
-<li><a href="https://rocm.docs.amd.com/projects/install-on-linux/en/latest/">ROCm v5.7.0 or greater</a></li>
+<li>Fortran 2008 compliant compiler ( <code>gfortran</code> recommended )</li>
+<li>MPI, e.g. <a href="https://www.open-mpi.org/">OpenMPI</a> with <a href="./dependencies.md">GPU-Aware Support</a></li>
+<li><a href="https://icl.utk.edu/magma/">MAGMA</a></li>
 <li><a href="https://www.hdfgroup.org/solutions/hdf5/">HDF5</a></li>
 <li><a href="https://github.com/FluidNumerics/feq-parse">FluidNumerics/feq-parse</a></li>
-<li>(Optional) <a href="https://developer.nvidia.com/cuda-toolkit">CUDA Toolkit</a>, if you are building for Nvidia GPU hardware.</li>
+<li>(Optional, AMD GPU Support) <a href="https://rocm.docs.amd.com/projects/install-on-linux/en/latest/">ROCm v5.7.0 or greater</a></li>
+<li>(Optional, Nvidia GPU Support) <a href="https://developer.nvidia.com/cuda-toolkit">CUDA Toolkit</a></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Since HIP is officially supported only on CentOS, RHEL, Ubuntu, SLES, and Windows operating systems, SELF currently can only be built on these operating systems. Further, testing is only being carried out on Ubuntu at this time. </p>
-</div>
-<p>You can install SELF in two possible ways</p>
-<ol>
-<li>Bare Metal Installation</li>
-<li>Docker image</li>
-</ol>
-<p>A bare metal installation will require that you have a CentOS/RHEL 7 or 8, SLES, Ubuntu 20.04 (focal) or 22.04 (jammy), or Windows operating system. You will also need to ensure that all of the dependencies are installed on your system before installing SELF.</p>
-<p>A Docker image installation uses the Ubuntu 22.04 Docker image as a base and takes care of installing all of the dependencies for you. The resulting Docker image can be run using Docker or Singularity/Apptainer. </p>
-<p>This documentation will walk through steps to install SELF using bare metal installation and the Docker image approaches.</p>
+<h2 id="installation-notes">Installation Notes</h2>
+<h3 id="multithreading-cpu-support">Multithreading CPU support</h3>
+<p>Computationally heavy methods in SELF are expressed using Fortran's <code>do concurrent</code> loop blocks, which gives compilers the freedom to parallelize operations. Every Fortran compiler has their own set of compiler flags to enable parallelization of <code>do concurrent</code> blocks (see <a href="https://fortran-lang.discourse.group/t/do-concurrent-compiler-flags-to-enable-parallelization/4300/6">this post on the Fortran-Lang discourse</a>). We have provided a single option in the CMake build system that allow you to enable parallelization. At the <code>cmake</code> stage of the build process, you can set <code>SELF_ENABLE_MULTITHREADING=ON</code>, e.g.</p>
+<pre><code class="language-shell">cmake -DSELF_ENABLE_MULTITHREADING=ON \
+      -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self \
+       ../
+</code></pre>
+<p>If you are building with the GNU compilers (<code>gfortran</code>), the number of threads used for parallelization is determined at build time. By default, the SELF build system will set the number of threads to 4. You can override this setting at the <code>cmake</code> stage of the build process using the <code>SELF_MULTITHREADING_NTHREADS</code> build variable, e.g. to set the number of threads to 8 with <code>gfortran</code>,</p>
+<pre><code class="language-shell">cmake -DSELF_ENABLE_MULTITHREADING=ON \
+      -DSELF_MULTITHREADING_NTHREADS=8 \
+      -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self \
+       ../
+</code></pre>
+<p>The CMake build system will set the appropriate flags for multithreading for GNU, Intel (<code>ifort</code> and <code>ifx</code>), LLVM, and Nvidia HPC Compilers. If you are not using <code>gfortran</code>, you can set the number of threads for parallelism at runtime using the <code>OMP_NUM_THREADS</code> environment variable</p>
+<h3 id="gpu-support">GPU Support</h3>
+<p>SELF uses OpenMP for GPU offloading. Some of our "heavy-lifting" kernels, such as divergence, gradient, and grid interpolation operations are expressed using the BLAS API. For these, we use MAGMA.</p>
 <h2 id="bare-metal-install">Bare Metal Install</h2>
 <h3 id="install-self-with-cmake">Install SELF with CMake</h3>
 <div class="admonition warning">
@@ -363,7 +456,6 @@
 <h4 id="build-variables">Build Variables</h4>
 <p>There are a number of environment variables you can use to control the behavior of the build and installation process. Importantly, some of these environment variables are necessary to tell the build system where dependencies can be found.</p>
 <ul>
-<li><code>CMAKE_HIP_ARCHITECTURES</code>   The target GPU architecture to build for (e.g. gfx906, gfx90a, sm_72)</li>
 <li><code>CMAKE_INSTALL_PREFIX</code>      The installation path for SELF</li>
 <li><code>CMAKE_BUILD_TYPE</code>          Type of build, one of <code>Release</code>, <code>Debug</code>, or <code>Coverage</code></li>
 </ul>
@@ -392,7 +484,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="install-self_1">Install SELF</h4>
+<h4 id="install-self-detailed">Install SELF (Detailed)</h4>
 <p>First, clone the SELF repository (if you haven't already)</p>
 <pre><code>git clone https://github.com/fluidnumerics/SELF ~/SELF
 </code></pre>
@@ -425,19 +517,6 @@ cd ~/SELF/build
 </code></pre>
 <p>At the end of this process, the <code>self</code> application is installed under <code>${HOME}/opt/self/bin</code>. Additionally, the SELF static library can be found under <code>${HOME}/opt/self/lib</code> and the <code>.mod</code> files for all of the SELF modules are under <code>${HOME}/opt/self/include</code>.</p>
 <p><a href="https://github.com/FluidNumerics/SELF/issues/new/choose">If you encounter any problems, feel free to open an new issue</a></p>
-<h2 id="build-a-docker-container">Build a Docker Container</h2>
-<p>SELF comes with Docker files defined under the <code>docker/</code> subdirectory. Currently, there are recipes for building container images for AMD GPUs (<code>Dockerfile.rocm</code>) and Nvidia GPUs (<code>Dockerfile.cuda</code>). The recipes will install all of SELF's dependencies and SELF in a container image based on the Ubuntu 22.04 image. To bake a SELF image, first clone the SELF repository and navigate to the source code directory</p>
-<pre><code>git clone https://github.com/fluidnumerics/SELF ${HOME}/SELF
-cd ${HOME}/SELF
-</code></pre>
-<p>In this example, SELF is cloned to <code>${HOME}/SELF</code>. From the main directory of the SELF repository, you can use <code>docker build</code> to build a container image.</p>
-<pre><code>docker build -f docker/rocm-5.7/amd/Dockerfile -t self:latest .
-</code></pre>
-<p>This command will create a Docker image for running SELF on AMD MI50 GPUs and the image is tagged <code>self:latest</code>; this is the name of the image that you will reference when running SELF.</p>
-<p>By default, this will build SELF with double precision floating point arithmetic, no optimizations (debug build), and with GPU kernels offloaded to a AMD MI50 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available</p>
-<ul>
-<li><code>_GPU_TARGET</code>: GPU microarchitecture code to build for. Defaults to <code>gfx906</code> (AMD MI50)</li>
-</ul>
 </article>
 </div>
 </div>

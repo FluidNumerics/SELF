@@ -245,6 +245,11 @@
 </ul>
 </nav>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../dependencies/">
+        Dependencies
+      </a>
+</li>
 </ul>
 </nav>
 </li>
@@ -354,38 +359,7 @@
 <p>Every universe has constants, so why shouldn't SELF ? </p>
 <p>The <code>SELF_Constants</code> module provides definitions for floating point precision across the entirety of the SELF. Additionally, there are some other useful constants, like <span class="arithmatex">\(\pi\)</span>, machine precision, and various <code>CHARACTER</code> lengths. Floating point precision is set using a C-preprocessing conditional. If the CPP flag <code>DOUBLE_PRECISION</code> is defined at build time, then <code>prec=real64</code> (from the <code>ISO_FORTRAN_ENV</code> module); alternatively <code>prec=real32</code>. Throughout the rest of SELF, <code>REAL</code> types are declared with <code>prec</code> precision, e.g. <code>REAL(prec)</code>.</p>
 <h2 id="memory-management">Memory Management</h2>
-<p>SELF is designed to provide a simplified interface for managing memory on GPU accelerated systems. Because of this, the bottom end of SELF is a set of classes that manage arrays of 32-bit integers, 64-bit integers, and floating point values (floating point precision is determined at build-time). Classes in <code>SELF_Memory</code> define structure for 1-D through 7-D arrays for each type, giving 21 classes. </p>
-<p>Each class is named according to the underlying data-type and the rank of the underlying array. The convention we use is</p>
-<pre><code>hfTYPE_rN
-</code></pre>
-<p>where <code>TYPE</code> is <code>int32</code>, <code>int64</code>, or <code>real</code> and <code>N</code> is the rank and varies between one and 7. The examples below should help you better understand the naming convention</p>
-<ul>
-<li><code>hfInt32_r3</code> - A structure for working with a rank 3 arrays of 32-bit integers on CPU and GPU</li>
-<li><code>hfReal_r7</code> - A structure for working with rank 7 arrays of floating point values on CPU and GPU</li>
-<li><code>hfInt64_r1</code> - A structure for working with rank 1 arrays of 64-bit floating point values on CPU and GPU</li>
-</ul>
-<p>Each class has a <code>hostData</code> and <code>deviceData</code> attribute. Data within these classes that are stored on the CPU side (<code>hostData</code>) are Fortran <code>POINTER</code>s, while data stored on the GPU side (<code>deviceData</code>) side are <code>TYPE(c_ptr)</code>s from the <code>ISO_C_BINDING</code> module. Memory allocation and deallocation on the host are handled by Fortran's intrinsic <code>ALLOCATE</code> and <code>DEALLOCATE</code> methods. On the device, GPU memory is allocated and deallocated using <code>hipMalloc</code> and <code>hipFree</code>, respectively, from AMD's HIP/HIPFort. </p>
-<p>From the user's perspective, you can work with these classes using their type-bound procedures for</p>
-<ul>
-<li>Memory allocation</li>
-<li>Memory deallocation</li>
-<li>Memory copy from host to device</li>
-<li>Memory copy from device to host</li>
-</ul>
-<p>Accessing data is fairly straightforward using Fortran syntax for access class attributes.</p>
-<pre><code>USE SELF_Memory
-
-TYPE(hfReal_r4) :: mydata
-
-CALL mydata % Alloc(loBound=(/1,1,1,1/),&amp;
-                    upBound=(/10,10,10,10/))
-
-mydata % hostData = 1.0_prec
-
-CALL myData % UpdateDevice()
-
-CALL myData % Free()
-</code></pre>
+<p>SELF is designed to provide a simplified interface for managing memory on GPU accelerated systems. Each array is declared as a Fortran <code>pointer</code> so that we can make use of <a href="https://rocm.docs.amd.com/en/latest/conceptual/gpu-memory.html">HIP Managed Memory</a>. This allows us to use a single pointer to reference data on both the host and device.</p>
 <h2 id="quadrature">Quadrature</h2>
 <p>Polynomial-based spectral and spectral element methods use discrete quadrature to approximate integrals. In nodal spectral element methods, like those implemented in SELF, functions are represented as interpolants whose interpolation knots are chosen to match specific quadrature points. The quadrature points and weights are chosen to preserve discrete orthogonality for specific polynomial basis, like Chebyshev or Legendre polynomials.</p>
 <p>The <code>SELF_Quadrature</code> module provides routines for generating Gauss, Gauss-Lobatto, and Gauss-Radau quadrature for both Chebyshev and Legendre basis. This module is primarily used by the <code>SELF_Lagrange</code> module for building Lagrange interpolating polynomials that exhibit spectral accuracy.</p>
@@ -420,10 +394,10 @@ CALL myData % Free()
 <p>This has been shown to be an equivalent discretization for the split form of the advective operator.</p>
 <p>As a practical aspect, we see that the two-point flux adds a dimension in the computational coordinates, relative to the standard "vectors" implemented in SELF. Because of this, we use the following memory layout for two-point vectors :</p>
 <p>In 2-D </p>
-<pre><code class="language-fortran">F(1:2,0:N,0:N,0:N,1:nVar,1:nEl)
+<pre><code class="language-fortran">F(0:N,0:N,0:N,1:nEl,1:nvar,1:2)
 </code></pre>
 <p>and in 3-D</p>
-<pre><code class="language-fortran">F(1:3,0:N,0:N,0:N,0:N,1:nVar,1:nEl)
+<pre><code class="language-fortran">F(0:N,0:N,0:N,0:N,1:nEl,1:nvar,1:3)
 </code></pre>
 <p>The first dimension refers to the directional component (physical or computational) of the vector. The second dimension is a computational coordinate direction and variations in this dimensions are equivalent to looping over <span class="arithmatex">\(n\)</span> in the two-point vector representation shown above. The remaining array dimensions of size <code>0:N</code> are computational coordinate directions and are the usual <code>(i,j,k)</code> dimensions, in this order. This is followed by the dimension over the solution variables and then the elements. </p>
 <h3 id="tensors">Tensors</h3>
@@ -446,13 +420,13 @@ CALL myData % Free()
             </div>
 </div>
 </a>
-<a aria-label="Next: Documentation" class="md-footer__link md-footer__link--next" href="../../Contributing/Documentation/" rel="next">
+<a aria-label="Next: Dependencies" class="md-footer__link md-footer__link--next" href="../dependencies/" rel="next">
 <div class="md-footer__title">
 <div class="md-ellipsis">
 <span class="md-footer__direction">
                 Next
               </span>
-              Documentation
+              Dependencies
             </div>
 </div>
 <div class="md-footer__button md-icon">
