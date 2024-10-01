@@ -2,9 +2,9 @@ steps:
   - name : "Build on Noether"
     sbatch_options: 
       - "--partition=gpu"
-      - "--gres=gpu:mi210:1"
-      - "--ntasks=1"
-      - "--cpus-per-task=12"
+      - "--gres=gpu:mi210:2"
+      - "--ntasks=6"
+      - "--cpus-per-task=2"
       - "--time=20:00"
     prerequisites:
       - "source /etc/profile.d/z11_lmod.sh"
@@ -58,7 +58,7 @@ steps:
 
 
         # Run ctests
-        ctest --test-dir ${BUILD_DIR}
+        ctest --test-dir ${BUILD_DIR} --verbose
 
         if [ "$BUILD_TYPE" = "coverage" ]; then
           # Compile coverage information
