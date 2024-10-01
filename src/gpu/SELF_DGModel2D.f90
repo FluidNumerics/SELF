@@ -147,7 +147,7 @@ contains
     call this%solutionGradient%SideExchange(this%mesh)
 
   endsubroutine CalculateSolutionGradient_DGModel2D
-  
+
   subroutine CalculateEntropy_DGModel2D(this)
     implicit none
     class(DGModel2D),intent(inout) :: this
@@ -157,8 +157,8 @@ contains
     real(prec) :: s(1:this%nvar)
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-    this%solution%interior_gpu,sizeof(this%solution%interior), &
-    hipMemcpyDeviceToHost))
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
 
     e = 0.0_prec
     do iel = 1,this%geometry%nelem
@@ -207,9 +207,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
-    c_loc(this%flux%interior), &
-    sizeof(this%flux%interior), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%flux%interior), &
+                            sizeof(this%flux%interior), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine fluxmethod_DGModel2D
 
@@ -257,9 +257,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
-    c_loc(this%flux%boundarynormal), &
-    sizeof(this%flux%boundarynormal), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%flux%boundarynormal), &
+                            sizeof(this%flux%boundarynormal), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine BoundaryFlux_DGModel2D
 
@@ -293,9 +293,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%source%interior_gpu, &
-    c_loc(this%source%interior), &
-    sizeof(this%source%interior), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%source%interior), &
+                            sizeof(this%source%interior), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine sourcemethod_DGModel2D
 
@@ -309,8 +309,8 @@ contains
     integer :: i,iEl,j,e2,bcid
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
-    this%solution%boundary_gpu,sizeof(this%solution%boundary), &
-    hipMemcpyDeviceToHost))
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
 
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides
@@ -358,8 +358,8 @@ contains
     real(prec) :: dsdx(1:this%nvar,1:2)
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
-    this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
-    hipMemcpyDeviceToHost))
+                            this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
+                            hipMemcpyDeviceToHost))
 
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides
@@ -393,9 +393,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
-    c_loc(this%solutiongradient%extBoundary), &
-    sizeof(this%solutiongradient%extBoundary), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%solutiongradient%extBoundary), &
+                            sizeof(this%solutiongradient%extBoundary), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine setgradientboundarycondition_DGModel2D
 

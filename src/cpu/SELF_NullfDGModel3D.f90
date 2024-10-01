@@ -26,12 +26,11 @@
 
 module self_NullDGModel3D
 
-    use self_NullDGModel3D_t
-  
-    implicit none
-  
-    type,extends(NullDGModel3D_t) :: NullDGModel3D
-    endtype NullDGModel3D
-  
-  endmodule self_NullDGModel3D
-  
+  use self_NullDGModel3D_t
+
+  implicit none
+
+  type,extends(NullDGModel3D_t) :: NullDGModel3D
+  endtype NullDGModel3D
+
+endmodule self_NullDGModel3D

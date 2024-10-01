@@ -26,12 +26,11 @@
 
 module self_NullDGModel1D
 
-    use self_NullDGModel1D_t
-  
-    implicit none
-  
-    type,extends(NullDGModel1D_t) :: NullDGModel1D
-    endtype NullDGModel1D
-  
-  endmodule self_NullDGModel1D
-  
+  use self_NullDGModel1D_t
+
+  implicit none
+
+  type,extends(NullDGModel1D_t) :: NullDGModel1D
+  endtype NullDGModel1D
+
+endmodule self_NullDGModel1D

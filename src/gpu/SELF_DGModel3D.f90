@@ -45,7 +45,6 @@ module SELF_DGModel3D
     procedure :: SetBoundaryCondition => setboundarycondition_DGModel3D
     procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel3D
 
-
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D
     procedure :: UpdateGRK4 => UpdateGRK4_DGModel3D
@@ -162,8 +161,8 @@ contains
     real(prec) :: s(1:this%nvar)
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-    this%solution%interior_gpu,sizeof(this%solution%interior), &
-    hipMemcpyDeviceToHost))
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
 
     e = 0.0_prec
     do iel = 1,this%geometry%nelem
@@ -215,9 +214,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
-    c_loc(this%flux%interior), &
-    sizeof(this%flux%interior), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%flux%interior), &
+                            sizeof(this%flux%interior), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine fluxmethod_DGModel3D
 
@@ -234,8 +233,8 @@ contains
     real(prec) :: nhat(1:3),nmag
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
-                        this%solution%boundary_gpu,sizeof(this%solution%boundary), &
-                        hipMemcpyDeviceToHost))
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
                             this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
@@ -262,9 +261,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
-    c_loc(this%flux%boundarynormal), &
-    sizeof(this%flux%boundarynormal), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%flux%boundarynormal), &
+                            sizeof(this%flux%boundarynormal), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine BoundaryFlux_DGModel3D
 
@@ -298,9 +297,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%source%interior_gpu, &
-    c_loc(this%source%interior), &
-    sizeof(this%source%interior), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%source%interior), &
+                            sizeof(this%source%interior), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine sourcemethod_DGModel3D
 
@@ -314,8 +313,8 @@ contains
     integer :: i,iEl,j,k,e2,bcid
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
-    this%solution%boundary_gpu,sizeof(this%solution%boundary), &
-    hipMemcpyDeviceToHost))
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
 
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do k = 1,6 ! Loop over all sides
@@ -352,10 +351,9 @@ contains
     enddo
 
     call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
-    c_loc(this%solution%extBoundary), &
-    sizeof(this%solution%extBoundary), &
-    hipMemcpyHostToDevice))
-
+                            c_loc(this%solution%extBoundary), &
+                            sizeof(this%solution%extBoundary), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine setboundarycondition_DGModel3D
 
@@ -370,8 +368,8 @@ contains
     real(prec) :: dsdx(1:this%nvar,1:3)
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
-    this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
-    hipMemcpyDeviceToHost))
+                            this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
+                            hipMemcpyDeviceToHost))
 
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do k = 1,6 ! Loop over all sides
@@ -409,11 +407,11 @@ contains
 
       enddo
     enddo
-    
+
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
-    c_loc(this%solutiongradient%extBoundary), &
-    sizeof(this%solutiongradient%extBoundary), &
-    hipMemcpyHostToDevice))
+                            c_loc(this%solutiongradient%extBoundary), &
+                            sizeof(this%solutiongradient%extBoundary), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine setgradientboundarycondition_DGModel3D
 

@@ -60,7 +60,6 @@ program NullDGModel3D_euler
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
 
-
   ! Set the initial condition
   call modelobj%solution%SetEquation(1,'f = 0.0')
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
