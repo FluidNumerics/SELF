@@ -87,7 +87,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 1.3% of total for derived types.</p>Including implementation: 43 statements,  0.3% of total for derived types.">10 statements</a>
+    title="<p> 1.1% of total for derived types.</p>Including implementation: 43 statements,  0.1% of total for derived types.">10 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Metadata.f90"> Source File</a></li>
   </ul>
@@ -129,7 +129,7 @@
       <a class="list-group-item" href="../type/metadata.html#boundprocedure-setdescription~2">SetDescription</a>
       <a class="list-group-item" href="../type/metadata.html#boundprocedure-setname~2">SetName</a>
       <a class="list-group-item" href="../type/metadata.html#boundprocedure-setunits~2">SetUnits</a>
-      <a class="list-group-item" href="../type/metadata.html#boundprocedure-writehdf5~7">WriteHDF5</a>
+      <a class="list-group-item" href="../type/metadata.html#boundprocedure-writehdf5~3">WriteHDF5</a>
     </div>
   </div>
 </div>
@@ -169,7 +169,7 @@
       <a class="list-group-item" href="../type/metadata.html#boundprocedure-setdescription~2">SetDescription</a>
       <a class="list-group-item" href="../type/metadata.html#boundprocedure-setname~2">SetName</a>
       <a class="list-group-item" href="../type/metadata.html#boundprocedure-setunits~2">SetUnits</a>
-      <a class="list-group-item" href="../type/metadata.html#boundprocedure-writehdf5~7">WriteHDF5</a>
+      <a class="list-group-item" href="../type/metadata.html#boundprocedure-writehdf5~3">WriteHDF5</a>
     </div>
   </div>
 </div>
@@ -299,11 +299,11 @@
 </div>
 
      <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writehdf5~7"></span><h3>procedure, public :: <strong>WriteHDF5</strong>  => <a href='../proc/writehdf5_metadata.html'>WriteHDF5_Metadata</a>   </h3></div>
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writehdf5~3"></span><h3>procedure, public :: <strong>WriteHDF5</strong>  => <a href='../proc/writehdf5_metadata.html'>WriteHDF5_Metadata</a>   </h3></div>
   <ul class="list-group">
       <li class="list-group-item">
           <h3>public subroutine <a href='../proc/writehdf5_metadata.html'>WriteHDF5_Metadata</a>(mtd, group, varid, fileId)</h3>
-<p>Writes the metadata to a HDF5 file using the 
+<p>Writes the metadata to a HDF5 file using the
 fields :
  * <code>/metadata/{group}/name/{varid}</code>
  * <code>/metadata/{group}/description/{varid}</code>
@@ -348,19 +348,19 @@ fields :
     
     <section>
     <h3><span class="anchor" id="src"></span>Source Code</h3>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">TYPE </span><span class="n">Metadata</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="n">SELF_MTD_NameLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">name</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="n">SELF_MTD_DescriptionLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">description</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="n">SELF_MTD_UnitsLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">units</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type </span><span class="n">Metadata</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="n">SELF_MTD_NameLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">name</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="n">SELF_MTD_DescriptionLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">description</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="n">SELF_MTD_UnitsLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">units</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">CONTAINS</span>
+<span class="w">  </span><span class="k">contains</span>
 
-<span class="k">    PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetName</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetName_Metadata</span><span class="w"></span>
-<span class="w">    </span><span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetDescription</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetDescription_Metadata</span><span class="w"></span>
-<span class="w">    </span><span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetUnits</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetUnits_Metadata</span><span class="w"></span>
-<span class="w">    </span><span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">WriteHDF5</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">WriteHDF5_Metadata</span><span class="w"></span>
+<span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetName</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetName_Metadata</span><span class="w"></span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetDescription</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetDescription_Metadata</span><span class="w"></span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetUnits</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetUnits_Metadata</span><span class="w"></span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">WriteHDF5</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">WriteHDF5_Metadata</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END TYPE </span><span class="n">Metadata</span><span class="w"></span>
+<span class="w">  </span><span class="k">endtype </span><span class="n">Metadata</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -380,7 +380,7 @@ fields :
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

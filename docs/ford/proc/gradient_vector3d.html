@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">11 statements</a>
+    title=" 0.2% of total for procedures.">20 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Data.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Vector_3D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_data.f90.html'>SELF_Data.f90</a></li>
-     <li><a href='../module/self_data.html'>SELF_Data</a></li>
+     <li><a href='../sourcefile/self_vector_3d.f90.html'>SELF_Vector_3D.f90</a></li>
+     <li><a href='../module/self_vector_3d~2.html'>SELF_Vector_3D</a></li>
      <li class="active">Gradient_Vector3D</li>
   </ol>
 </div>
@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine Gradient_Vector3D(SELFStorage, SELFOut, gpuAccel)</h2>
+    <h2>public subroutine Gradient_Vector3D(this, df)</h2>
     
 
 
@@ -133,22 +133,16 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-selfstorage~23"></span>class(<a href='../type/vector3d.html'>Vector3D</a>),</td>
+  <td><span class="anchor" id="variable-this~251"></span>class(<a href='../type/vector3d.html'>Vector3D</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>SELFStorage</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-selfout~9"></span>type(<a href='../type/tensor3d.html'>Tensor3D</a>),</td>
+  <td><span class="anchor" id="variable-df~21"></span>type(c_ptr),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>SELFOut</strong></td><td></td>
-</tr>
-<tr>
-  <td><span class="anchor" id="variable-gpuaccel~48"></span>logical,</td>
-<td>intent(in)</td>
-  <td></td>  <td></td><td>::</td>
-  <td><strong>gpuAccel</strong></td><td></td>
+  <td><strong>df</strong></td><td></td>
 </tr>
 </tbody>
 </table>
@@ -179,25 +173,36 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">Gradient_Vector3D</span><span class="p">(</span><span class="n">SELFStorage</span><span class="p">,</span><span class="n">SELFOut</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Vector3D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SELFStorage</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">Tensor3D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SELFOut</span><span class="w"></span>
-<span class="w">    </span><span class="kt">LOGICAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gpuAccel</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Gradient_Vector3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">df</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Vector3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">df</span><span class="w"></span>
+<span class="w">    </span><span class="c">!Local</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">df_p</span><span class="p">(:,:,:,:,:,:,:)</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dfloc</span><span class="p">(:,:,:,:,:)</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dfc</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">IF</span><span class="w"> </span><span class="p">(</span><span class="n">gpuAccel</span><span class="p">)</span><span class="w"> </span><span class="k">THEN</span>
-<span class="k">      CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">VectorGradient_3D</span><span class="p">(</span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">deviceData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                                    </span><span class="n">SELFout</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">deviceData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                                    </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nVar</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                                    </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">ELSE</span>
-<span class="k">      CALL </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">VectorGradient_3D</span><span class="p">(</span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                                    </span><span class="n">SELFout</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                                    </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nVar</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                                    </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">END IF</span>
+<span class="w">    </span><span class="k">call </span><span class="nb">c_f_pointer</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">df_p</span><span class="p">,[</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span><span class="w"></span>
 
-<span class="k">  END SUBROUTINE </span><span class="n">Gradient_Vector3D</span><span class="w"></span>
+<span class="w">    </span><span class="n">dfloc</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">df_p</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">dfc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">dfloc</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">self_blas_matrixop_dim1_3d</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dMatrix_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">dfc</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                                    </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">blas_handle</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">dfloc</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">df_p</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">dfc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">dfloc</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">self_blas_matrixop_dim2_3d</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dMatrix_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">dfc</span><span class="p">,</span><span class="mf">0.0_c_prec</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                                    </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">blas_handle</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">dfloc</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">df_p</span><span class="p">(</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">dfc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">dfloc</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">self_blas_matrixop_dim3_3d</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dMatrix_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">dfc</span><span class="p">,</span><span class="mf">0.0_c_prec</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                                    </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">blas_handle</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">dfloc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="n">df_p</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Gradient_Vector3D</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -218,7 +223,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

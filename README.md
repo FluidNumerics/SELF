@@ -5,6 +5,8 @@ Copyright 2020-2023 Fluid Numerics LLC
 
 [![linux-gnu-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-cmake.yml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-cmake.yml)
 
+[![linux-gnu-multithreaded-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-multithreaded-cmake.yml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-multithreaded-cmake.yml)
+
 [![linux-amdflang-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml)
 
 ## Licensing
@@ -30,12 +32,12 @@ Name | Version | Platform | Build System | Stack | Architecture
 GNU Fortran `gfortran` | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64 - gfx90a (MI210)
 GNU Fortran `gfortran` | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 GNU Fortran `gfortran` | 12.3.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
+GNU Fortran `gfortran` | 12.3.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.3 (ucx+rocm), feq-parse/2.2.2, hdf5/1.14.3 | x86_64 - gfx90a (MI210)
 GNU Fortran `gfortran` | 11.4.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 GNU Fortran `gfortran` | 10.5.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 GNU Fortran `gfortran` | 9.5.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 AOMP `amdflang` | 6.1.2 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64 - gfx90a (MI210)
 AOMP `amdflang` | 6.1.2 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
-Nvidia-HPC `nvfortran` | 6.1.2 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 
 
 "Supported" for us means that we test `self` regularly on the platforms listed. Of course, we want to have `self` working on as many platforms as possible; [open an issue](https://github.com/FluidNumerics/SELF/issues/new/choose) if you encounter any problems installing or running `self` on your own platform.

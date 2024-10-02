@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine SetEquation_DataObj(SELFStorage, ivar, eqnChar)</h2>
+    <h2>public subroutine SetEquation_DataObj(this, ivar, eqnChar)</h2>
     
 
     <p>Sets the equation parser for the <code>ivar-th</code> variable</p>
@@ -134,19 +134,19 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-selfstorage~37"></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+  <td><span class="anchor" id="variable-this~166"></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>SELFStorage</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ivar~2"></span>integer,</td>
+  <td><span class="anchor" id="variable-ivar~4"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>ivar</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-eqnchar~4"></span>character,</td>
+  <td><span class="anchor" id="variable-eqnchar~5"></span>character,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>eqnChar</strong></td><td></td>
@@ -180,17 +180,17 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">SetEquation_DataObj</span><span class="p">(</span><span class="n">SELFStorage</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">eqnChar</span><span class="p">)</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">SetEquation_DataObj</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">eqnChar</span><span class="p">)</span><span class="w"></span>
 <span class="w">    </span><span class="c">!! Sets the equation parser for the `ivar-th` variable</span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">SELF_DataObj</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SELFStorage</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ivar</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">eqnChar</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">SELF_DataObj</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ivar</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">eqnChar</span><span class="w"></span>
 
-<span class="w">    </span><span class="n">SELFStorage</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">eqn</span><span class="p">(</span><span class="n">ivar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EquationParser</span><span class="p">(</span><span class="w"> </span><span class="nb">TRIM</span><span class="p">(</span><span class="n">eqnChar</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">                                              </span><span class="p">(</span><span class="o">/</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">eqn</span><span class="p">(</span><span class="n">ivar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EquationParser</span><span class="p">(</span><span class="nb">trim</span><span class="p">(</span><span class="n">eqnChar</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                                    </span><span class="p">(</span><span class="o">/</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="o">/</span><span class="p">))</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">SetEquation_DataObj</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetEquation_DataObj</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -211,7 +211,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

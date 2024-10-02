@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">16 statements</a>
+    title=" 0.1% of total for procedures.">10 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_MappedData.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_MappedScalar_1D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_mappeddata.f90.html'>SELF_MappedData.f90</a></li>
-     <li><a href='../module/self_mappeddata.html'>SELF_MappedData</a></li>
+     <li><a href='../sourcefile/self_mappedscalar_1d.f90.html'>SELF_MappedScalar_1D.f90</a></li>
+     <li><a href='../module/self_mappedscalar_1d~2.html'>SELF_MappedScalar_1D</a></li>
      <li class="active">SetInteriorFromEquation_MappedScalar1D</li>
   </ol>
 </div>
@@ -124,30 +124,24 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine SetInteriorFromEquation_MappedScalar1D(scalar, geometry, time)</h2>
+    <h2>public subroutine SetInteriorFromEquation_MappedScalar1D(this, time)</h2>
     
 
-    <p>Sets the scalar % interior attribute using the eqn attribute,
-geometry (for physical positions), and provided simulation time. </p>
+    <p>Sets the this % interior attribute using the eqn attribute,
+geometry (for physical positions), and provided simulation time.</p>
 
     <h3>Arguments</h3>
       <table class="table table-striped varlist">
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-scalar~18"></span>class(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+  <td><span class="anchor" id="variable-this~319"></span>class(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>scalar</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-geometry~23"></span>type(<a href='../type/geometry1d.html'>Geometry1D</a>),</td>
-<td>intent(in)</td>
-  <td></td>  <td></td><td>::</td>
-  <td><strong>geometry</strong></td><td></td>
-</tr>
-<tr>
-  <td><span class="anchor" id="variable-time"></span>real(kind=prec),</td>
+  <td><span class="anchor" id="variable-time~8"></span>real(kind=prec),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>time</strong></td><td></td>
@@ -181,34 +175,21 @@ geometry (for physical positions), and provided simulation time. </p>
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">SetInteriorFromEquation_MappedScalar1D</span><span class="p">(</span><span class="w"> </span><span class="n">scalar</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="c">!!  Sets the scalar % interior attribute using the eqn attribute,</span>
-<span class="w">    </span><span class="c">!!  geometry (for physical positions), and provided simulation time. </span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">MappedScalar1D</span><span class="p">),</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">scalar</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">geometry</span><span class="w"></span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="w"> </span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="nb">time</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">SetInteriorFromEquation_MappedScalar1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="nb">time</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="c">!!  Sets the this % interior attribute using the eqn attribute,</span>
+<span class="w">    </span><span class="c">!!  geometry (for physical positions), and provided simulation time.</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">MappedScalar1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="nb">time</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">iEl</span><span class="p">,</span><span class="w"> </span><span class="n">iVar</span><span class="w"></span>
-<span class="w">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iVar</span><span class="w"></span>
 
-<span class="w">    </span><span class="c">! TO DO : Check if scalar % eqn is set before proceeding</span>
+<span class="w">    </span><span class="k">do </span><span class="n">ivar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="w"></span>
+<span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">(:,:,</span><span class="n">ivar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">eqn</span><span class="p">(</span><span class="n">ivar</span><span class="p">)%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">enddo</span>
+<span class="k">    call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">DO </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">scalar</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
-<span class="w">      </span><span class="k">DO </span><span class="n">iVar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">scalar</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nVar</span><span class="w"></span>
-<span class="w">        </span><span class="k">DO </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">scalar</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">N</span><span class="w"></span>
-
-<span class="w">          </span><span class="c">! Get the mesh positions</span>
-<span class="w">          </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">          </span><span class="n">scalar</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">            </span><span class="n">scalar</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">eqn</span><span class="p">(</span><span class="n">iVar</span><span class="p">)</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Evaluate</span><span class="p">((</span><span class="o">/</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="p">,</span><span class="w"> </span><span class="nb">time</span><span class="o">/</span><span class="p">))</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">ENDDO</span>
-<span class="k">      ENDDO</span>
-<span class="k">    ENDDO</span>
-
-<span class="k">  END SUBROUTINE </span><span class="n">SetInteriorFromEquation_MappedScalar1D</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetInteriorFromEquation_MappedScalar1D</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -229,7 +210,7 @@ geometry (for physical positions), and provided simulation time. </p>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

@@ -89,11 +89,11 @@
     data-placement="bottom" data-html="true"
     title=" 0.2% of total for procedures.">15 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_1D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_mesh.f90.html'>SELF_Mesh.f90</a></li>
-     <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+     <li><a href='../sourcefile/self_mesh_1d.f90.html'>SELF_Mesh_1D.f90</a></li>
+     <li><a href='../module/self_mesh_1d.html'>SELF_Mesh_1D</a></li>
      <li class="active">Write_Mesh1D</li>
   </ol>
 </div>
@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine Write_Mesh1D(myMesh, meshFile)</h2>
+    <h2>public subroutine Write_Mesh1D(this, meshFile)</h2>
     
 
 
@@ -133,10 +133,10 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-mymesh~20"></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+  <td><span class="anchor" id="variable-this~172"></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>myMesh</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-meshfile~3"></span>character,</td>
@@ -173,32 +173,32 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">Write_Mesh1D</span><span class="p">(</span><span class="n">myMesh</span><span class="p">,</span><span class="n">meshFile</span><span class="p">)</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Write_Mesh1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">meshFile</span><span class="p">)</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Writes mesh output in HOPR format (serial IO only)</span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">Mesh1D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myMesh</span><span class="w"></span>
-<span class="w">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">meshFile</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Mesh1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">meshFile</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">meshFile</span><span class="p">,</span><span class="n">H5F_ACC_RDWR_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">meshFile</span><span class="p">,</span><span class="n">H5F_ACC_RDWR_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteAttribute_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;nElems&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteAttribute_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;Ngeo&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nGeo</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteAttribute_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;nBCs&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nBCs</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteAttribute_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;nElems&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteAttribute_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;Ngeo&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nGeo</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteAttribute_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;nBCs&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nBCs</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;BCType&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">bcType</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;BCType&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">bcType</span><span class="p">)</span><span class="w"></span>
 
 <span class="w">    </span><span class="c">! Read local subarray of ElemInfo</span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;ElemInfo&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">elemInfo</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;ElemInfo&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">elemInfo</span><span class="p">)</span><span class="w"></span>
 
 <span class="w">    </span><span class="c">! Read local subarray of NodeCoords and GlobalNodeIDs</span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;NodeCoords&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nodeCoords</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;GlobalNodeIDs&#39;</span><span class="p">,</span><span class="n">myMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">globalNodeIDs</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;NodeCoords&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;GlobalNodeIDs&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">globalNodeIDs</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">Close_HDF5</span><span class="p">(</span><span class="n">fileID</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">Close_HDF5</span><span class="p">(</span><span class="n">fileID</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">Write_Mesh1D</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Write_Mesh1D</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -219,7 +219,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>

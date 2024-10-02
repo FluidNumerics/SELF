@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">26 statements</a>
+    title=" 0.3% of total for procedures.">27 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry_3D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_geometry.f90.html'>SELF_Geometry.f90</a></li>
-     <li><a href='../module/self_geometry.html'>SELF_Geometry</a></li>
+     <li><a href='../sourcefile/self_geometry_3d.f90.html'>SELF_Geometry_3D.f90</a></li>
+     <li><a href='../module/self_geometry_3d.html'>SELF_Geometry_3D</a></li>
      <li class="active">GenerateFromMesh_SEMHex</li>
   </ol>
 </div>
@@ -133,13 +133,13 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-mygeom~12"></span>class(<a href='../type/semhex.html'>SEMHex</a>),</td>
+  <td><span class="anchor" id="variable-mygeom~14"></span>class(<a href='../type/semhex.html'>SEMHex</a>),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>myGeom</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-mesh~8"></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+  <td><span class="anchor" id="variable-mesh~15"></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>mesh</strong></td><td></td>
@@ -173,53 +173,44 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">SUBROUTINE </span><span class="n">GenerateFromMesh_SEMHex</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">mesh</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="k">IMPLICIT NONE</span>
-<span class="k">    CLASS</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">GenerateFromMesh_SEMHex</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">mesh</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span><span class="w"></span>
 <span class="w">    </span><span class="c">! Local</span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span><span class="w"></span>
-<span class="w">    </span><span class="kt">INTEGER</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">nid</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">TARGET</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">meshToModel</span><span class="w"></span>
-<span class="w">    </span><span class="k">TYPE</span><span class="p">(</span><span class="n">Vector3D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">xMesh</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span><span class="w"></span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">meshToModel</span><span class="w"></span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Vector3D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">xMesh</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">meshToModel</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nGeo</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">quadrature</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">            </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
-<span class="w">            </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interp</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">controlNodeType</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">meshToModel</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">mesh</span><span class="p">%</span><span class="n">nGeo</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">quadrature</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                          </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">controlNodeType</span><span class="p">)</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">xMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Init</span><span class="p">(</span><span class="n">meshToModel</span><span class="p">,&amp;</span><span class="w"></span>
-<span class="w">                      </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">xMesh</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">meshToModel</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span><span class="w"></span>
+<span class="w">                    </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span><span class="w"></span>
 
 <span class="w">    </span><span class="c">! Set the element internal mesh locations</span>
-<span class="w">    </span><span class="k">DO </span><span class="n">iel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nElem</span><span class="w"></span>
-<span class="w">      </span><span class="k">DO </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nGeo</span><span class="w"></span>
-<span class="w">        </span><span class="k">DO </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nGeo</span><span class="w"></span>
-<span class="w">          </span><span class="k">DO </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nGeo</span><span class="w"></span>
-<span class="w">            </span><span class="n">xMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">interior</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">nodeCoords</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"></span>
-<span class="w">          </span><span class="k">END DO</span>
-<span class="k">        END DO</span>
-<span class="k">      END DO</span>
-<span class="k">    END DO</span><span class="w"></span>
+<span class="w">    </span><span class="k">do </span><span class="n">iel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="w"></span>
+<span class="w">      </span><span class="k">do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="w"></span>
+<span class="w">        </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="w"></span>
+<span class="w">          </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="w"></span>
+<span class="w">            </span><span class="n">xMesh</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">nodeCoords</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="w"></span>
+<span class="w">          </span><span class="k">enddo</span>
+<span class="k">        enddo</span>
+<span class="k">      enddo</span>
+<span class="k">    enddo</span>
 
-<span class="w">    </span><span class="c">! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)</span>
-<span class="w">    </span><span class="c">!IF (GPUAvailable()) THEN</span>
-<span class="w">    </span><span class="c">!  CALL xMesh % UpdateDevice()</span>
-<span class="w">    </span><span class="c">!  CALL xMesh % GridInterp(myGeom % x,.TRUE.)</span>
-<span class="w">    </span><span class="c">!  CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)</span>
-<span class="w">    </span><span class="c">!  CALL myGeom % CalculateMetricTerms()</span>
-<span class="w">    </span><span class="c">!  CALL myGeom % UpdateHost()</span>
-<span class="w">    </span><span class="c">!ELSE</span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">xMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">GridInterp</span><span class="p">(</span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="p">,.</span><span class="n">FALSE</span><span class="p">.)</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">BoundaryInterp</span><span class="p">(</span><span class="n">gpuAccel</span><span class="o">=</span><span class="p">.</span><span class="n">FALSE</span><span class="p">.)</span><span class="w"></span>
-<span class="w">      </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">CalculateMetricTerms</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="c">!END IF</span>
-<span class="c">!    CALL myGeom % CheckSides(mesh)</span>
+<span class="k">    call </span><span class="n">xMesh</span><span class="p">%</span><span class="n">GridInterp</span><span class="p">(</span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">BoundaryInterp</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">UpdateHost</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">myGeom</span><span class="p">%</span><span class="n">CalculateMetricTerms</span><span class="p">()</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">CALL </span><span class="n">myGeom</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">UpdateDevice</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">xMesh</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Free</span><span class="p">()</span><span class="w"></span>
-<span class="w">    </span><span class="k">CALL </span><span class="n">meshToModel</span><span class="w"> </span><span class="p">%</span><span class="w"> </span><span class="n">Free</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">xMesh</span><span class="p">%</span><span class="n">Free</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">call </span><span class="n">meshToModel</span><span class="p">%</span><span class="n">Free</span><span class="p">()</span><span class="w"></span>
 
-<span class="w">  </span><span class="k">END SUBROUTINE </span><span class="n">GenerateFromMesh_SEMHex</span><span class="w"></span>
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">GenerateFromMesh_SEMHex</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -240,7 +231,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-01-31 14:25            </p>
+ on 2024-10-01 17:17            </p>
         </div>
       </div>
       <br>
