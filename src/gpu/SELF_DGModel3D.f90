@@ -311,6 +311,7 @@ contains
     class(DGModel3D),intent(inout) :: this
     ! local
     integer :: i,iEl,j,k,e2,bcid
+    real(prec) :: nhat(1:3),x(1:3)
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
                             this%solution%boundary_gpu,sizeof(this%solution%boundary), &
@@ -324,26 +325,38 @@ contains
 
         if(e2 == 0) then
           if(bcid == SELF_BC_PRESCRIBED) then
+
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
+
                 this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                  this%bcPrescribed(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+                  this%hbc3d_Prescribed(x,this%t)
               enddo
             enddo
+
           elseif(bcid == SELF_BC_RADIATION) then
+
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
                 this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                  this%bcRadiation(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+                  this%hbc3d_Radiation(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
               enddo
             enddo
+
           elseif(bcid == SELF_BC_NONORMALFLOW) then
+
             do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
               do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
                 this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                  this%bcNoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar))
+                  this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
               enddo
             enddo
+            
           endif
         endif
 
@@ -366,6 +379,7 @@ contains
     ! local
     integer :: i,iEl,j,k,e2,bcid
     real(prec) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: nhat(1:3),x(1:3)
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
                             this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
@@ -379,34 +393,48 @@ contains
 
         if(e2 == 0) then
           if(bcid == SELF_BC_PRESCRIBED) then
+
             do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
               do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-                dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+                x = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
                 this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                  this%bcGrad3dPrescribed(dsdx)
+                  this%pbc3d_Prescribed(x,this%t)
               enddo
             enddo
+
           elseif(bcid == SELF_BC_RADIATION) then
+
             do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
               do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
                 dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+
                 this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                  this%bcGrad3dRadiation(dsdx)
+                  this%pbc3d_Radiation(dsdx,nhat)
               enddo
             enddo
+
           elseif(bcid == SELF_BC_NONORMALFLOW) then
+
             do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
               do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+                nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
                 dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+
                 this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                  this%bcGrad3dNoNormalFlow(dsdx)
+                  this%pbc3d_NoNormalFlow(dsdx,nhat)
               enddo
             enddo
+
           endif
         endif
 
       enddo
     enddo
+
 
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
                             c_loc(this%solutiongradient%extBoundary), &

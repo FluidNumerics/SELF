@@ -74,7 +74,7 @@ program advection_diffusion_1d_rk2
   modelobj%nu = nu
 
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = 1.0')
+  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 )/0.01 )')
   call modelobj%solution%SetInteriorFromEquation(0.0_prec)
 
   print*,"min, max (interior)", &

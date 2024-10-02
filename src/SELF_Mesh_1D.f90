@@ -49,11 +49,13 @@ module SELF_Mesh_1D
     integer,pointer,dimension(:) :: globalNodeIDs
     integer,pointer,dimension(:,:) :: BCType
     character(LEN=255),allocatable :: BCNames(:)
+    integer,dimension(2) :: bcid = 0 ! Boundary conditions for the left and right endpoints
 
   contains
     procedure,public :: Init => Init_Mesh1D
     procedure,public :: Free => Free_Mesh1D
     procedure,public :: UniformBlockMesh => UniformBlockMesh_Mesh1D
+    procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh1D
 
     procedure,public  :: Write_Mesh => Write_Mesh1D
 
@@ -76,6 +78,7 @@ contains
     this%nCornerNodes = nElem*2
     this%nUniqueNodes = 0
     this%nBCs = nBCs
+    this%bcid = 0
 
     allocate(this%elemInfo(1:4,1:nElem))
     allocate(this%nodeCoords(1:nNodes))
@@ -163,6 +166,21 @@ contains
     call nGeoInterp%Free()
 
   endsubroutine UniformBlockMesh_Mesh1D
+
+  subroutine ResetBoundaryConditionType_Mesh1D(this,leftbc,rightbc)
+    !! This method can be used to reset all of the boundary elements
+    !! boundary condition type to the desired value.
+    !!
+    !! Note that ALL physical boundaries will be set to have this boundary
+    !! condition
+    implicit none
+    class(Mesh1D),intent(inout) :: this
+    integer,intent(in) ::leftbc,rightbc
+
+      this%bcid(1) = leftbc
+      this%bcid(2) = rightbc
+
+  endsubroutine ResetBoundaryConditionType_Mesh1D
 
   subroutine Write_Mesh1D(this,meshFile)
     ! Writes mesh output in HOPR format (serial IO only)
