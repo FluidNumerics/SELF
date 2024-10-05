@@ -92,19 +92,6 @@ module SELF_Model
   integer,parameter :: SELF_EQUATION_LENGTH = 500
 
 ! //////////////////////////////////////////////// !
-!   Boundary Condition parameters
-!
-
-  ! Conditions on the solution
-  integer,parameter :: SELF_BC_PRESCRIBED = 100
-  integer,parameter :: SELF_BC_RADIATION = 101
-  integer,parameter :: SELF_BC_NONORMALFLOW = 102
-
-  ! Conditions on the solution gradients
-  integer,parameter :: SELF_BC_PRESCRIBED_STRESS = 200
-  integer,parameter :: SELF_BC_NOSTRESS = 201
-
-! //////////////////////////////////////////////// !
 !   Model Formulations
 !
   integer,parameter :: SELF_FORMULATION_LENGTH = 30 ! max length of integrator methods when specified as char
@@ -274,42 +261,11 @@ contains
 
   endsubroutine IncrementIOCounter
 
-  function GetBCFlagForChar(charFlag) result(intFlag)
-  !! This method is used to return the integer flag from a char for boundary conditions
-  !!
-    implicit none
-    character(*),intent(in) :: charFlag
-    integer :: intFlag
-
-    select case(UpperCase(trim(charFlag)))
-
-    case("PRESCRIBED")
-      intFlag = SELF_BC_PRESCRIBED
-
-    case("RADIATION")
-      intFlag = SELF_BC_RADIATION
-
-    case("NO_NORMAL_FLOW")
-      intFlag = SELF_BC_NONORMALFLOW
-
-    case("PRESCRIBED_STRESS")
-      intFlag = SELF_BC_PRESCRIBED_STRESS
-
-    case("NO_STRESS")
-      intFlag = SELF_BC_NOSTRESS
-
-    case DEFAULT
-      intFlag = 0
-
-    endselect
-
-  endfunction GetBCFlagForChar
-
   subroutine PrintType_Model(this)
     implicit none
     class(Model),intent(in) :: this
 
-    print*,__FILE__//" : No model type"
+    print*,__FILE__//" : Model : No model type"
 
   endsubroutine PrintType_Model
 
