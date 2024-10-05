@@ -81,7 +81,7 @@ implicit none
     jump = this%ul - this%ur
     s = 0.5_prec*(this%ul + this%ur)
     r = (x-s*t-this%x0)*jump/(4.0_prec*this%nu)
-    drdx = 1.0_prec/(4.0_prec*this%nu)
+    drdx = jump/(4.0_prec*this%nu)
     extDsdx(1) = -0.5_prec*drdx*( sech( r ) )**2
 
   endfunction pbc1d_Prescribed_burgers1d_shock
