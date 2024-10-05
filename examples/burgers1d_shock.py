@@ -63,7 +63,7 @@ def read_teplot_curve(file_path):
 import os
 
 # Specify the directory you want to search in
-directory_path = '/scratch/joe/build/examples/'# TO DO - set this to the path of your output 
+directory_path = # TO DO - set this to the path of your output 
 
 # Get a list of all files in the directory
 all_files = os.listdir(directory_path)
