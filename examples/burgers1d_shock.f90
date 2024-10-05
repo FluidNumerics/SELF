@@ -101,13 +101,13 @@ program traveling_shock
     implicit none
     character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
     integer,parameter :: nvar = 1
-    integer,parameter :: nelem = 50
+    integer,parameter :: nelem = 10
     integer,parameter :: controlDegree = 7
-    integer,parameter :: targetDegree = 16
+    integer,parameter :: targetDegree = 10
     real(prec),parameter :: nu = 0.01_prec ! diffusivity
     real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-5) ! time-step size
     real(prec),parameter :: endtime = 2.0_prec
-    real(prec),parameter :: iointerval = 0.1_prec
+    real(prec),parameter :: iointerval = 0.05_prec
     type(burgers1d_shock) :: modelobj
     type(Lagrange),target :: interp
     type(Mesh1D),target :: mesh
