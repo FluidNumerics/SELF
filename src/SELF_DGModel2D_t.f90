@@ -415,7 +415,7 @@ contains
     class(DGModel2D_t),intent(inout) :: this
     ! local
     integer :: i,iEl,j,e2,bcid
-    real(prec) :: nhat(1:2), x(1:2)
+    real(prec) :: nhat(1:2),x(1:2)
 
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides

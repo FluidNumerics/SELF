@@ -455,7 +455,7 @@ contains
                   this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
               enddo
             enddo
-            
+
           endif
         endif
 

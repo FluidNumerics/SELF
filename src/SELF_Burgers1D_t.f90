@@ -37,10 +37,10 @@ module self_Burgers1D_t
     real(prec) :: nu = 0.0_prec ! Diffusivity/viscosity
 
   contains
-       procedure :: SetMetadata => SetMetadata_Burgers1D_t
-       procedure :: entropy_func => entropy_func_Burgers1D_t
-       procedure :: flux1d => flux1d_Burgers1D_t
-       procedure :: riemannflux1d => riemannflux1d_Burgers1D_t
+    procedure :: SetMetadata => SetMetadata_Burgers1D_t
+    procedure :: entropy_func => entropy_func_Burgers1D_t
+    procedure :: flux1d => flux1d_Burgers1D_t
+    procedure :: riemannflux1d => riemannflux1d_Burgers1D_t
 
   endtype Burgers1D_t
 
@@ -49,8 +49,8 @@ contains
     implicit none
     class(Burgers1D_t),intent(inout) :: this
 
-      call this%solution%SetName(1,"s")
-      call this%solution%SetUnits(1,"[null]")
+    call this%solution%SetName(1,"s")
+    call this%solution%SetUnits(1,"[null]")
 
   endsubroutine SetMetadata_Burgers1D_t
 
@@ -69,7 +69,7 @@ contains
     real(prec),intent(in) :: dsdx(1:this%solution%nvar)
     real(prec) :: flux(1:this%solution%nvar)
 
-    flux(1) = 0.5_prec*s(1)*s(1) - this%nu*dsdx(1)
+    flux(1) = 0.5_prec*s(1)*s(1)-this%nu*dsdx(1)
 
   endfunction flux1d_Burgers1D_t
 
@@ -81,17 +81,16 @@ contains
     real(prec),intent(in) :: nhat
     real(prec) :: flux(1:this%solution%nvar)
     ! Local
-    real(prec) :: fL, fR, cmax
+    real(prec) :: fL,fR,cmax
 
     ! Local Lax-Friedrich's flux
     fL = 0.5_prec*sL(1)*sL(1)*nhat
     fR = 0.5_prec*sR(1)*sR(1)*nhat
-    cmax = max( abs(sL(1)*nhat), abs(sR(1)*nhat) ) ! maximum wave speed
+    cmax = max(abs(sL(1)*nhat),abs(sR(1)*nhat)) ! maximum wave speed
 
-    flux(1) = 0.5_prec*(fL + fR)  + cmax*(sL(1) - sR(1)) & ! advective flux
+    flux(1) = 0.5_prec*(fL+fR)+cmax*(sL(1)-sR(1)) & ! advective flux
               -this%nu*dsdx(1)*nhat
 
   endfunction riemannflux1d_Burgers1D_t
-
 
 endmodule self_Burgers1D_t

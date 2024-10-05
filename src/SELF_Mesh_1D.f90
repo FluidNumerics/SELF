@@ -177,8 +177,8 @@ contains
     class(Mesh1D),intent(inout) :: this
     integer,intent(in) ::leftbc,rightbc
 
-      this%bcid(1) = leftbc
-      this%bcid(2) = rightbc
+    this%bcid(1) = leftbc
+    this%bcid(2) = rightbc
 
   endsubroutine ResetBoundaryConditionType_Mesh1D
 

@@ -356,7 +356,7 @@ contains
                   this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
               enddo
             enddo
-            
+
           endif
         endif
 
@@ -434,7 +434,6 @@ contains
 
       enddo
     enddo
-
 
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
                             c_loc(this%solutiongradient%extBoundary), &

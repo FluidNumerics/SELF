@@ -330,19 +330,19 @@ contains
     nelem = this%geometry%nelem ! number of elements in the mesh
     N = this%solution%interp%N ! polynomial degree
 
-       ! left-most boundary
+    ! left-most boundary
     if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
 
       x = this%geometry%x%boundary(1,1,1)
       this%solution%extBoundary(1,1,1:this%nvar) = &
         this%hbc1d_Prescribed(x,this%t)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION)then
+    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
 
       this%solution%extBoundary(1,1,1:this%nvar) = &
         this%hbc1d_Radiation(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW)then
+    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
 
       this%solution%extBoundary(1,1,1:this%nvar) = &
         this%hbc1d_NoNormalFlow(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
@@ -353,7 +353,6 @@ contains
 
     endif
 
-
     ! right-most boundary
     if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
 
@@ -361,12 +360,12 @@ contains
       this%solution%extBoundary(2,nelem,1:this%nvar) = &
         this%hbc1d_Prescribed(x,this%t)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION)then
+    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
 
       this%solution%extBoundary(2,nelem,1:this%nvar) = &
         this%hbc1d_Radiation(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW)then
+    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
 
       this%solution%extBoundary(2,nelem,1:this%nvar) = &
         this%hbc1d_NoNormalFlow(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
@@ -400,12 +399,12 @@ contains
       this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
         this%pbc1d_Prescribed(x,this%t)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION)then
+    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
 
       this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
         this%pbc1d_Radiation(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW)then
+    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
 
       this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
         this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
@@ -416,7 +415,6 @@ contains
 
     endif
 
-
     ! right-most boundary
     if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
 
@@ -424,12 +422,12 @@ contains
       this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
         this%pbc1d_Prescribed(x,this%t)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION)then
+    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
 
       this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
         this%pbc1d_Radiation(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
 
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW)then
+    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
 
       this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
         this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
@@ -439,7 +437,7 @@ contains
       this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = this%solutionGradient%boundary(1,1,1:this%nvar)
 
     endif
-  
+
   endsubroutine setgradientboundarycondition_DGModel1D_t
 
   subroutine BoundaryFlux_DGModel1D_t(this)

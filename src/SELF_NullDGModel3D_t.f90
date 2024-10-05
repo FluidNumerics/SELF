@@ -35,7 +35,7 @@ module self_NullDGModel3D_t
   type,extends(dgmodel3d) :: NullDGModel3D_t
     ! Add any additional attributes here that are specific to your model
 
-  contains    
+  contains
     !   procedure :: hbc3d_Prescribed => hbc3d_Generic_Model
     !   procedure :: hbc3d_Radiation => hbc3d_Generic_Model
     !   procedure :: hbc3d_NoNormalFlow => hbc3d_Generic_Model

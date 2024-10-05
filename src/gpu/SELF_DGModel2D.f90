@@ -307,7 +307,7 @@ contains
     class(DGModel2D),intent(inout) :: this
     ! local
     integer :: i,iEl,j,e2,bcid
-    real(prec) :: nhat(1:2), x(1:2)
+    real(prec) :: nhat(1:2),x(1:2)
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
                             this%solution%boundary_gpu,sizeof(this%solution%boundary), &
@@ -375,7 +375,7 @@ contains
                             this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
                             hipMemcpyDeviceToHost))
 
-     do iEl = 1,this%solution%nElem ! Loop over all elements
+    do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides
 
         bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
