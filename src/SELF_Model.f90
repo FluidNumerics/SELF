@@ -176,9 +176,7 @@ module SELF_Model
     procedure(WriteModel),deferred :: WriteModel
     procedure(WriteTecplot),deferred :: WriteTecplot
 
-    generic :: SetTimeIntegrator => SetTimeIntegrator_withInt, &
-      SetTimeIntegrator_withChar
-    procedure,private :: SetTimeIntegrator_withInt
+    generic :: SetTimeIntegrator => SetTimeIntegrator_withChar
     procedure,private :: SetTimeIntegrator_withChar
 
     procedure :: SetSimulationTime
@@ -593,42 +591,13 @@ contains
 
   endfunction pbc3d_Prescribed_Model
 
-  subroutine SetTimeIntegrator_withInt(this,integrator)
-    !! Sets the time integrator method, using an integer flag
-    !!
-    !! Valid options for  are
-    !!
-    !!    SELF_EULER
-    !!    SELF_RK3
-    !!    SELF_RK4
-    !!
-    implicit none
-    class(Model),intent(inout) :: this
-    integer,intent(in) :: integrator
-
-    select case(integrator)
-
-    case(SELF_EULER)
-      this%timeIntegrator => Euler_timeIntegrator
-    case(SELF_RK2)
-      this%timeIntegrator => LowStorageRK2_timeIntegrator
-    case(SELF_RK3)
-      this%timeIntegrator => LowStorageRK3_timeIntegrator
-    case(SELF_RK4)
-      this%timeIntegrator => LowStorageRK4_timeIntegrator
-    case DEFAULT
-      this%timeIntegrator => LowStorageRK3_timeIntegrator
-
-    endselect
-
-  endsubroutine SetTimeIntegrator_withInt
-
   subroutine SetTimeIntegrator_withChar(this,integrator)
     !! Sets the time integrator method, using a character input
     !!
     !! Valid options for integrator are
     !!
     !!   "euler"
+    !!   "rk2"
     !!   "rk3"
     !!   "rk4"
     !!
@@ -682,16 +651,6 @@ contains
     this%t = t
 
   endsubroutine SetSimulationTime
-
-  subroutine SetInitialConditions_Model(this)
-#undef __FUNC__
-#define __FUNC__ "SetInitialConditions"
-    implicit none
-    class(Model),intent(inout) :: this
-
-    print*,__FILE__//" : No model, so nothing to set"
-
-  endsubroutine SetInitialConditions_Model
 
   subroutine CalculateEntropy_Model(this)
   !! Base method for calculating entropy of a model
@@ -752,42 +711,27 @@ contains
   !! is reached
     implicit none
     class(Model),intent(inout) :: this
-    real(prec),optional,intent(in) :: tn
-    real(prec),optional,intent(in) :: dt
-    real(prec),optional,intent(in) :: ioInterval
+    real(prec),intent(in) :: tn
+    real(prec),intent(in) :: dt
+    real(prec),intent(in) :: ioInterval
     ! Local
     real(prec) :: targetTime,tNext
     integer :: i,nIO
 
-    if(present(dt)) then
-      this%dt = dt
-    endif
+    this%dt = dt
+    targetTime = tn
 
-    if(present(tn)) then
-      targetTime = tn
-    else
-      targetTime = this%t+this%dt
-    endif
-
-    if(present(ioInterval)) then
-      nIO = int((targetTime-this%t)/ioInterval)
-      do i = 1,nIO
-        tNext = this%t+ioInterval
-        call this%timeIntegrator(tNext)
-        this%t = tNext
-        call this%WriteModel()
-        call this%WriteTecplot()
-        call this%IncrementIOCounter()
-        call this%CalculateEntropy()
-        call this%ReportEntropy()
-      enddo
-
-    else
-      call this%timeIntegrator(targetTime)
-      this%t = targetTime
+    nIO = int((targetTime-this%t)/ioInterval)
+    do i = 1,nIO
+      tNext = this%t+ioInterval
+      call this%timeIntegrator(tNext)
+      this%t = tNext
+      call this%WriteModel()
+      call this%WriteTecplot()
+      call this%IncrementIOCounter()
       call this%CalculateEntropy()
       call this%ReportEntropy()
-    endif
+    enddo
 
   endsubroutine ForwardStep_Model
 
