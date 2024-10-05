@@ -60,7 +60,7 @@ program NullDGModel3D_euler
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
-  call modelobj%gradient_enabled = .true.
+  modelobj%gradient_enabled = .true.
 
   ! Set the initial condition
   call modelobj%solution%SetEquation(1,'f = 0.0')

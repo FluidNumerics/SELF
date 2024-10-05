@@ -114,8 +114,6 @@ module SELF_Model
 
     procedure :: PrintType => PrintType_Model
 
-    procedure :: SetInitialConditions => SetInitialConditions_Model
-
     procedure :: ForwardStep => ForwardStep_Model
 
     procedure :: Euler_timeIntegrator

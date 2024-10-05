@@ -49,7 +49,7 @@ program NullDGModel2D_euler
   ! Create a uniform block mesh
   call get_environment_variable("WORKSPACE",WORKSPACE)
   call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
-  call mesh%ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
+  call mesh%ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
                    controlNodeType=GAUSS, &
