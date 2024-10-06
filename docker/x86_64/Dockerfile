@@ -9,6 +9,7 @@ RUN mkdir -p /opt/spack-environment && \
 set -o noclobber \
 &&  (echo spack: \
 &&   echo '  specs:' \
+&&   echo '  - cmake@3.29.6' \
 &&   echo '  - feq-parse@2.2.2' \
 &&   echo '  - openmpi@5.0.2' \
 &&   echo '  - hdf5@1.14.3 +fortran +mpi' \
