@@ -10,9 +10,16 @@ Copyright 2020-2023 Fluid Numerics LLC
 [![linux-amdflang-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml)
 
 ## Licensing
-SELF is licensed for use under a [non-commercial use visible-source license](./LICENSE). Fluid Numerics is a small family-owned business and wants to make SELF available to researchers for academic use. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. However, since we are interested in protecting our time-and-effort investment in SELF, sale and commercial-use of SELF is prohibited under the license.
+SELF is licensed for use under a [3 Clause BSD with attribution license](./LICENSE). [Fluid Numerics](https://www.fluidnumerics.com) is a small family-owned business. We want to make SELF available to folks who want to build conservation laws that run on a wide range of platforms. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. 
 
-If you are interested in commercial licensure and would like support from Fluid Numerics, reach out to support@fluidnumerics.com
+## How to support this repository
+Continued support of SELF relies on users and customers. Here's a few ways you can support this project:
+
+* Give this repository a star on Github
+* [Open an issue](https://github.com/FluidNumerics/SELF/issues/new/choose) if you have a question or want to report a problem. We want to help!
+* [Subscribe to Fluid Numerics on Youtube](https://www.youtube.com/@FluidNumerics?sub_confirmation=1)
+* [Sponsor this project on Open Collective](https://opencollective.com/opensource-fluidnumerics)
+* [Work with us](https://www.fluidnumerics.com/services)
 
 ## About
 SELF is an object-oriented Fortran library that support the implementation of Spectral Element Methods for solving partial differential equations.
