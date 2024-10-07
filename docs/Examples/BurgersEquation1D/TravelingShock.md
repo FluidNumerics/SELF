@@ -16,12 +16,12 @@ u(x,t) = s - 0.5(u_l-u_r) \tanh\left( \frac{(x - st - x_0)(u_l-u_r)}{4\nu} \righ
 
 where $s = \frac{u_l + u_r}{2}$ is the shock speed. For the example problem, we let set the following parameters
 
-* $u_l = -1.0$
-* $u_r = 1.0$
+* $u_l = 1.0$
+* $u_r = 0.0$
 * $\nu = 0.01$
 * $x_0 = 0.1$
 
-When $t=0$, this defines a shock with characteristic length-scale $L = \frac{\nu}{U} = \frac{0.01}{1} = 0.01$ centered at $x=x_0=0.1$. The difference in the solution between upstream and downstream of the shock is $\Delta u = u_l - u_r = 1$
+When $t=0$, this defines a shock with characteristic length-scale $L = \frac{\nu}{U} = \frac{0.01}{1} = 0.01$ centered at $x=x_0=0.1$. The difference in the solution between upstream and downstream of the shock is $\Delta u = u_l - u_r = 1$ and the shock travels at a speed of $s=\frac{1}{2}$
 
 <figure markdown>
 ![Viscous shock initial condition](./img/u_t00.png){ align=left }
@@ -108,8 +108,7 @@ pure real(prec) function sech(x) result(fx)
 real(prec),intent(in) :: x
 fx = 2.0_prec/(exp(x)+exp(-x))
 endfunction
-
-``
+```
 
 The main program for this example walks through standard procedures for running any simulation using SELF.
 
