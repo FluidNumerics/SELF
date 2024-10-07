@@ -1,39 +1,28 @@
 # Build stage with Spack pre-installed and ready to be used
-FROM spack/rockylinux8:develop AS builder
+FROM spack/ubuntu-jammy:develop AS builder
 
 
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
-
 RUN mkdir -p /opt/spack-environment && \
 set -o noclobber \
 &&  (echo spack: \
 &&   echo '  specs:' \
-&&   echo '  - cmake@3.29.6' \
+&&   echo '  - cmake@3.30.2' \
 &&   echo '  - feq-parse@2.2.2' \
-&&   echo '  - openmpi@5.0.2' \
+&&   echo '  - openmpi@5.0.2+static' \
 &&   echo '  - hdf5@1.14.3 +fortran +mpi' \
 &&   echo '  concretizer:' \
-&&   echo '    unify: when_possible' \
+&&   echo '    unify: true' \
 &&   echo '  config:' \
 &&   echo '    install_tree: /opt/software' \
 &&   echo '  view: /opt/views/view') > /opt/spack-environment/spack.yaml
 
 # Install the software, remove unnecessary deps
-RUN cd /opt/spack-environment && spack info openmpi && spack env activate . && spack install --fail-fast && spack gc -y
+RUN cd /opt/spack-environment && spack env activate . && spack install --fail-fast && spack gc -y
+COPY . .
 
-# Strip all the binaries
-RUN find -L /opt/views/view/* -type f -exec readlink -f '{}' \; | \
-    xargs file -i | \
-    grep 'charset=binary' | \
-    grep 'x-executable\|x-archive\|x-sharedlib' | \
-    awk -F: '{print $1}' | xargs strip
-
-# Modifications to the environment that are necessary to run
-RUN cd /opt/spack-environment && \
-    spack env activate --sh -d . > activate.sh
-
-RUN spack env activate -d /opt/spack-environment && \
+RUN spack env activate -d /opt/spack-environment &&\
     mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=release  \
           -DSELF_ENABLE_MULTITHREADING=ON \
@@ -42,14 +31,26 @@ RUN spack env activate -d /opt/spack-environment && \
     make VERBOSE=1 && \
     make install 
 
-# Bare OS image to run the installed executables
-FROM docker.io/rockylinux:8
+# # # Strip all the binaries
+# # RUN find -L /opt/views/view/* -type f -exec readlink -f '{}' \; | \
+# #     xargs file -i | \
+# #     grep 'charset=binary' | \
+# #     grep 'x-executable\|x-archive\|x-sharedlib' | \
+# #     awk -F: '{print $1}' | xargs strip
 
-COPY --from=builder /opt/spack-environment /opt/spack-environment
-COPY --from=builder /opt/software /opt/software
+# # Modifications to the environment that are necessary to run
+RUN cd /opt/spack-environment && \
+    spack env activate --sh -d . > activate.sh
 
-# paths.view is a symlink, so copy the parent to avoid dereferencing and duplicating it
-COPY --from=builder /opt/views /opt/views
+
+# # Bare OS image to run the installed executables
+# FROM ubuntu:22.04
+
+# COPY --from=builder /opt/spack-environment /opt/spack-environment
+# COPY --from=builder /opt/software /opt/software
+
+# # paths.view is a symlink, so copy the parent to avoid dereferencing and duplicating it
+# COPY --from=builder /opt/views /opt/views
 
 RUN { \
       echo '#!/bin/sh' \
