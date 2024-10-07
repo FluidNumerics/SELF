@@ -307,6 +307,7 @@ contains
     class(DGModel2D),intent(inout) :: this
     ! local
     integer :: i,iEl,j,e2,bcid
+    real(prec) :: nhat(1:2),x(1:2)
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
                             this%solution%boundary_gpu,sizeof(this%solution%boundary), &
@@ -320,20 +321,32 @@ contains
 
         if(e2 == 0) then
           if(bcid == SELF_BC_PRESCRIBED) then
+
             do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+
               this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%bcPrescribed(this%solution%boundary(i,j,iEl,1:this%nvar))
+                this%hbc2d_Prescribed(x,this%t)
             enddo
+
           elseif(bcid == SELF_BC_RADIATION) then
+
             do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
               this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%bcRadiation(this%solution%boundary(i,j,iEl,1:this%nvar))
+                this%hbc2d_Radiation(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
             enddo
+
           elseif(bcid == SELF_BC_NONORMALFLOW) then
+
             do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
               this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%bcNoNormalFlow(this%solution%boundary(i,j,iEl,1:this%nvar))
+                this%hbc2d_NoNormalFlow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
             enddo
+
           endif
         endif
 
@@ -356,6 +369,7 @@ contains
     ! local
     integer :: i,iEl,j,e2,bcid
     real(prec) :: dsdx(1:this%nvar,1:2)
+    real(prec) :: nhat(1:2),x(1:2)
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
                             this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
@@ -369,23 +383,36 @@ contains
 
         if(e2 == 0) then
           if(bcid == SELF_BC_PRESCRIBED) then
+
             do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+              x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+
               this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-                this%bcGrad2dPrescribed(dsdx)
+                this%pbc2d_Prescribed(x,this%t)
             enddo
+
           elseif(bcid == SELF_BC_RADIATION) then
+
             do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
               dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+
               this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-                this%bcGrad2dRadiation(dsdx)
+                this%pbc2d_Radiation(dsdx,nhat)
             enddo
+
           elseif(bcid == SELF_BC_NONORMALFLOW) then
+
             do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
               dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+
               this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-                this%bcGrad2dNoNormalFlow(dsdx)
+                this%pbc2d_NoNormalFlow(dsdx,nhat)
             enddo
+
           endif
         endif
 

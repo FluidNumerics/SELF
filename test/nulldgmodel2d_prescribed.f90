@@ -24,34 +24,32 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program NullDGModel1D_euler
+program NullDGModel2D_euler
 
   use self_data
-  use self_NullDGModel1D
+  use self_NullDGModel2D
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
   integer,parameter :: nvar = 1
-  integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
   real(prec),parameter :: dt = 1.0_prec
   real(prec),parameter :: endtime = 1.0_prec
   real(prec),parameter :: iointerval = 1.0_prec
   real(prec) :: e0,ef ! Initial and final entropy
-  type(NullDGModel1D) :: modelobj
+  type(NullDGModel2D) :: modelobj
   type(Lagrange),target :: interp
-  type(Mesh1D),target :: mesh
-  type(Geometry1D),target :: geometry
+  type(Mesh2D),target :: mesh
+  type(SEMQuad),target :: geometry
+  character(LEN=255) :: WORKSPACE
 
-  ! Create a mesh using the built-in
-  ! uniform mesh generator.
-  ! The domain is set to x in [0,1]
-  ! We use `nelem` elements
-  call mesh%UniformBlockMesh(nGeo=1, &
-                             nElem=nelem, &
-                             x=(/0.0_prec,1.0_prec/))
+  ! We create a domain decomposition.
 
+  ! Create a uniform block mesh
+  call get_environment_variable("WORKSPACE",WORKSPACE)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+  call mesh%ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
                    controlNodeType=GAUSS, &
@@ -64,22 +62,25 @@ program NullDGModel1D_euler
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
-  call modelobj%PrintType()
-  ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = 0.0 )')
-  call modelobj%solution%SetInteriorFromEquation(0.0_prec)
+  modelobj%gradient_enabled = .true.
 
+  ! Set the initial condition
+  call modelobj%solution%SetEquation(1,'f = 0.0')
+  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+
+  call modelobj%CalculateTendency()
   print*,"min, max (interior)", &
     minval(modelobj%solution%interior), &
     maxval(modelobj%solution%interior)
 
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
-  e0 = modelobj%entropy ! Save the initial entropy
+  e0 = modelobj%entropy
   !Write the initial condition
   call modelobj%WriteModel()
   call modelobj%WriteTecplot()
   call modelobj%IncrementIOCounter()
+
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
 
@@ -94,14 +95,13 @@ program NullDGModel1D_euler
   ef = modelobj%entropy
 
   if(ef > e0) then
-    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
+    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
     stop 1
   endif
-
   ! Clean up
   call modelobj%free()
   call mesh%free()
   call geometry%free()
   call interp%free()
 
-endprogram NullDGModel1D_euler
+endprogram NullDGModel2D_euler

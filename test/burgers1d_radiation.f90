@@ -24,10 +24,10 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program NullDGModel1D_euler
+program burgers1d_constant
 
   use self_data
-  use self_NullDGModel1D
+  use self_burgers1d
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
@@ -35,11 +35,12 @@ program NullDGModel1D_euler
   integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
-  real(prec),parameter :: dt = 1.0_prec
-  real(prec),parameter :: endtime = 1.0_prec
-  real(prec),parameter :: iointerval = 1.0_prec
+  real(prec),parameter :: nu = 0.01_prec ! diffusivity
+  real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-5) ! time-step size
+  real(prec),parameter :: endtime = 0.2_prec
+  real(prec),parameter :: iointerval = 0.1_prec
   real(prec) :: e0,ef ! Initial and final entropy
-  type(NullDGModel1D) :: modelobj
+  type(burgers1d) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh1D),target :: mesh
   type(Geometry1D),target :: geometry
@@ -51,6 +52,7 @@ program NullDGModel1D_euler
   call mesh%UniformBlockMesh(nGeo=1, &
                              nElem=nelem, &
                              x=(/0.0_prec,1.0_prec/))
+  call mesh%ResetBoundaryConditionType(SELF_BC_RADIATION,SELF_BC_RADIATION)
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -64,9 +66,12 @@ program NullDGModel1D_euler
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
-  call modelobj%PrintType()
+  modelobj%gradient_enabled = .true.
+  !Set the diffusivity
+  modelobj%nu = nu
+
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = 0.0 )')
+  call modelobj%solution%SetEquation(1,'f = 1.0')
   call modelobj%solution%SetInteriorFromEquation(0.0_prec)
 
   print*,"min, max (interior)", &
@@ -104,4 +109,4 @@ program NullDGModel1D_euler
   call geometry%free()
   call interp%free()
 
-endprogram NullDGModel1D_euler
+endprogram burgers1d_constant

@@ -36,15 +36,13 @@ module self_NullDGModel2D_t
     ! Add any additional attributes here that are specific to your model
 
   contains
+    !   procedure :: hbc2d_Prescribed => hbc2d_Generic_Model
+    !   procedure :: hbc2d_Radiation => hbc2d_Generic_Model
+    !   procedure :: hbc2d_NoNormalFlow => hbc2d_Generic_Model
+    !   procedure :: pbc2d_Prescribed => pbc2d_Generic_Model
+    !   procedure :: pbc2d_Radiation => pbc2d_Generic_Model
+    !   procedure :: pbc2d_NoNormalFlow => pbc2d_Generic_Model
     !   procedure :: SetMetadata => SetMetadata_NullDGModel2D_t
-
-    !   procedure :: bcGrad2dPrescribed => bcGrad2dGeneric_NullDGModel2D_t
-    !   procedure :: bcGrad2dRadiation => bcGrad2dGeneric_NullDGModel2D_t
-    !   procedure :: bcGrad2dNoNormalFlow => bcGrad2dGeneric_NullDGModel2D_t
-    !   procedure :: bcPrescribed => bcGeneric_NullDGModel2D_t
-    !   procedure :: bcRadiation => bcGeneric_NullDGModel2D_t
-    !   procedure :: bcNoNormalFlow => bcNoNormalFlow_NullDGModel2D_t
-
     !   procedure :: pretendency => pretendency_NullDGModel2D_t
     !   procedure :: entropy_func => entropy_func_NullDGModel2D_t
     !   procedure :: flux2d => flux2d_NullDGModel2D_t
@@ -84,7 +82,7 @@ contains
 
   ! endfunction bcGeneric_NullDGModel2D_t
 
-  ! pure function bcGrad2dGeneric_NullDGModel2D_t(this,dsdx) result(extDsdx)
+  ! pure function pbc2dGeneric_NullDGModel2D_t(this,dsdx) result(extDsdx)
   !   class(NullDGModel2D_t),intent(in) :: this
   !   real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
   !   real(prec) :: extDsdx(1:this%nvar,1:2)
@@ -95,7 +93,7 @@ contains
   !     extDsdx(ivar,1:2) = dsdx(ivar,1:2)
   !   enddo
 
-  ! endfunction bcGrad2dGeneric_NullDGModel2D_t
+  ! endfunction pbc2dGeneric_NullDGModel2D_t
   ! pure function entropy_func_NullDGModel2D_t(this,s) result(e)
   !   class(NullDGModel2D_t),intent(in) :: this
   !   real(prec),intent(in) :: s(1:this%solution%nvar)

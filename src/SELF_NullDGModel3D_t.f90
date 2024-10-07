@@ -36,15 +36,13 @@ module self_NullDGModel3D_t
     ! Add any additional attributes here that are specific to your model
 
   contains
+    !   procedure :: hbc3d_Prescribed => hbc3d_Generic_Model
+    !   procedure :: hbc3d_Radiation => hbc3d_Generic_Model
+    !   procedure :: hbc3d_NoNormalFlow => hbc3d_Generic_Model
+    !   procedure :: pbc3d_Prescribed => pbc3d_Generic_Model
+    !   procedure :: pbc3d_Radiation => pbc3d_Generic_Model
+    !   procedure :: pbc3d_NoNormalFlow => pbc3d_Generic_Model
     !   procedure :: SetMetadata => SetMetadata_NullDGModel3D_t
-
-    !   procedure :: bcGrad3dPrescribed => bcGrad3dGeneric_NullDGModel3D_t
-    !   procedure :: bcGrad3dRadiation => bcGrad3dGeneric_NullDGModel3D_t
-    !   procedure :: bcGrad3dNoNormalFlow => bcGrad3dGeneric_NullDGModel3D_t
-    !   procedure :: bcPrescribed => bcGeneric_NullDGModel3D_t
-    !   procedure :: bcRadiation => bcGeneric_NullDGModel3D_t
-    !   procedure :: bcNoNormalFlow => bcNoNormalFlow_NullDGModel3D_t
-
     !   procedure :: pretendency => pretendency_NullDGModel3D_t
     !   procedure :: entropy_func => entropy_func_NullDGModel3D_t
     !   procedure :: flux3d => flux3d_NullDGModel3D_t
