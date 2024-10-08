@@ -124,26 +124,61 @@
 </ul>
 </nav>
 </li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" id="__nav_3" type="checkbox"/>
 <label class="md-nav__link" for="__nav_3">
-          Learning
+          Examples
           <span class="md-nav__icon md-icon"></span>
 </label>
-<nav aria-label="Learning" class="md-nav" data-md-level="1">
+<nav aria-label="Examples" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="__nav_3">
 <span class="md-nav__icon md-icon"></span>
-          Learning
+          Examples
         </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item md-nav__item--nested">
 <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_1" id="__nav_3_1" type="checkbox"/>
 <label class="md-nav__link" for="__nav_3_1">
+          Burgers Equation
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Burgers Equation" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Burgers Equation
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Examples/BurgersEquation1D/TravelingShock/">
+        Traveling Shock
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4">
+          Learning
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Learning" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+          Learning
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" id="__nav_4_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_1">
           Theory
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Theory" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_3_1">
+<label class="md-nav__title" for="__nav_4_1">
 <span class="md-nav__icon md-icon"></span>
           Theory
         </label>
@@ -167,13 +202,13 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_2" id="__nav_3_2" type="checkbox"/>
-<label class="md-nav__link" for="__nav_3_2">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_2" id="__nav_4_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_2">
           Code
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Code" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_3_2">
+<label class="md-nav__title" for="__nav_4_2">
 <span class="md-nav__icon md-icon"></span>
           Code
         </label>
@@ -242,13 +277,13 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" id="__nav_4" type="checkbox"/>
-<label class="md-nav__link" for="__nav_4">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5">
           Contributing
           <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Contributing" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_4">
+<label class="md-nav__title" for="__nav_5">
 <span class="md-nav__icon md-icon"></span>
           Contributing
         </label>
@@ -328,55 +363,55 @@
 <p>On CPU-only platforms, the <code>boundary</code> attributes of the <code>SELF_Mapped*</code> types are passed to <code>MPI_ISEND</code> (asynchronous send) to send data to neighboring processes. On the flip side, the <code>extboundary</code> attributes are passed to the <code>MPI_IRECV</code> (asynchronous recv) to receive data from the neighboring processes. With each <code>MPI_ISEND/IRECV</code> pair, a unique tag for the message is calculated using the global edge/face ID and variable ID. This ensures the messages get stored in the correct address locations when they are received.</p>
 <p>On GPU and multi-GPU accelerated platforms, we assume that you are working with a GPU-Aware installation of MPI. In this case, the GPU pointer for the <code>boundary</code> attribute (<code>boundary_gpu</code>) is passed to <code>MPI_ISEND</code>. Similarly, <code>extboundary_gpu</code> is passed to <code>MPI_IRECV</code>. If your installation of MPI is not GPU aware and you are using a GPU accelerated build of SELF, your program will halt during the initialization of the <code>DomainDecomposition</code> class. At this stage, we check the results of <code>MPIX_Query_rocm_support</code> and <code>MPIX_Query_cuda_support</code> to determine if you have GPU aware MPI enabled at runtime.</p>
 <h3 id="what-is-supported-for-mpigpu">What is supported for MPI+GPU ?</h3>
-<p>At the moment, we have only tested SELF with OpenMPI with GPU aware support on AMD and Nvidia GPU platforms. As requested by users, we can work to test other MPI flavors ( <a href="https://github.com/FluidNumerics/SELF/issues/new/choose">Open an issue</a> ). To find if your OpenMPI is built with GPU-Aware Support, you can use <code>ompi_info</code> and look for the <code>MPI extensions</code> attribute. For AMD platforms, you should see <code>rocm</code> , and for Nvidia platforms, you should see <code>cuda</code>; if you do not see these, your OpenMPI installation is not GPU aware</p>
-<pre><code class="language-shell">ompi_info | grep "MPI extensions"
-       MPI extensions: affinity, cuda, ftmpi, rocm
-</code></pre>
+<p>At the moment, we have only tested SELF with OpenMPI with GPU aware support on AMD and Nvidia GPU platforms. As requested by users, we can work to test other MPI flavors ( <a href="https://github.com/FluidNumerics/SELF/issues/new/choose">Open an issue</a> ). To find if your OpenMPI is built with GPU-Aware Support, you can use <code>ompi_info</code> and look for the <code>MPI extensions</code> attribute. For AMD platforms, you should see <code>rocm</code> , and for Nvidia platforms, you should see <code>cuda</code>; if you do not see these, your OpenMPI installation is not GPU aware
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>ompi_info <span class="p">|</span> grep <span class="s2">"MPI extensions"</span>
+</span><span id="__span-0-2"><a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>       MPI extensions: affinity, cuda, ftmpi, rocm
+</span></code></pre></div></p>
 <h3 id="how-to-install-openmpi-with-rocm-for-amd-gpus">How to install OpenMPI with ROCm for AMD GPUs</h3>
 <p>Fluid Numerics recommends building OpenMPI with the Unified Communications Framework (UCX) with ROCm enabled. At the time we are writing this documentation, Spack does not have such a build option available for OpenMPI (though we're hoping it happens soon!). Instead, we can provide this build script below that we have found to work on Debian based linux platforms.</p>
-<pre><code class="language-shell">#!/bin/bash
-
-export ROCM_PATH=/opt/rocm-6.0.2 ## Set this to the path of your ROCm installation
-export INSTALL_ROOT=/apps/experimental/rocm-6.0.2 ## Set this to the path you want UCX and OpenMPI installed to
-export BUILD_DIR=${INSTALL_ROOT}/tmp/
-export UCX_DIR=${INSTALL_ROOT}/ucx
-export OMPI_DIR=${INSTALL_ROOT}/ompi_ucx
-
-module load rocm/6.0.2
-module load gcc/12.3.0
-
-rm -rf ${BUILD_DIR}
-mkdir -p ${BUILD_DIR}
-
-
-# Install ucx
-cd $BUILD_DIR
-git clone https://github.com/openucx/ucx.git -b v1.15.x
-cd ucx
-./autogen.sh
-mkdir build
-cd build
-../configure -prefix=${UCX_DIR} \
-    --with-rocm=${ROCM_PATH}
-make -j $(nproc)
-make -j $(nproc) install
-
-# Install openmpi
-cd $BUILD_DIR
-git clone --recursive https://github.com/open-mpi/ompi.git \
-    -b v5.0.x
-cd ompi
-./autogen.pl
-mkdir build
-cd build
-../configure --prefix=$OMPI_DIR \
-         --with-ucx=$UCX_DIR \
-             --with-rocm=${ROCM_PATH} \
-         --with-hwloc=internal \
-             --with-slurm=/usr/local
-make -j $(nproc)
-make install
-</code></pre>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="ch">#!/bin/bash</span>
+</span><span id="__span-1-2"><a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="nb">export</span> <span class="nv">ROCM_PATH</span><span class="o">=</span>/opt/rocm-6.0.2 <span class="c1">## Set this to the path of your ROCm installation</span>
+</span><span id="__span-1-4"><a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="nb">export</span> <span class="nv">INSTALL_ROOT</span><span class="o">=</span>/apps/experimental/rocm-6.0.2 <span class="c1">## Set this to the path you want UCX and OpenMPI installed to</span>
+</span><span id="__span-1-5"><a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="nb">export</span> <span class="nv">BUILD_DIR</span><span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_ROOT</span><span class="si">}</span>/tmp/
+</span><span id="__span-1-6"><a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a><span class="nb">export</span> <span class="nv">UCX_DIR</span><span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_ROOT</span><span class="si">}</span>/ucx
+</span><span id="__span-1-7"><a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a><span class="nb">export</span> <span class="nv">OMPI_DIR</span><span class="o">=</span><span class="si">${</span><span class="nv">INSTALL_ROOT</span><span class="si">}</span>/ompi_ucx
+</span><span id="__span-1-8"><a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a>module load rocm/6.0.2
+</span><span id="__span-1-10"><a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>module load gcc/12.3.0
+</span><span id="__span-1-11"><a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a>rm -rf <span class="si">${</span><span class="nv">BUILD_DIR</span><span class="si">}</span>
+</span><span id="__span-1-13"><a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a>mkdir -p <span class="si">${</span><span class="nv">BUILD_DIR</span><span class="si">}</span>
+</span><span id="__span-1-14"><a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a>
+</span><span id="__span-1-15"><a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a>
+</span><span id="__span-1-16"><a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a><span class="c1"># Install ucx</span>
+</span><span id="__span-1-17"><a href="#__codelineno-1-17" id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="nb">cd</span> <span class="nv">$BUILD_DIR</span>
+</span><span id="__span-1-18"><a href="#__codelineno-1-18" id="__codelineno-1-18" name="__codelineno-1-18"></a>git clone https://github.com/openucx/ucx.git -b v1.15.x
+</span><span id="__span-1-19"><a href="#__codelineno-1-19" id="__codelineno-1-19" name="__codelineno-1-19"></a><span class="nb">cd</span> ucx
+</span><span id="__span-1-20"><a href="#__codelineno-1-20" id="__codelineno-1-20" name="__codelineno-1-20"></a>./autogen.sh
+</span><span id="__span-1-21"><a href="#__codelineno-1-21" id="__codelineno-1-21" name="__codelineno-1-21"></a>mkdir build
+</span><span id="__span-1-22"><a href="#__codelineno-1-22" id="__codelineno-1-22" name="__codelineno-1-22"></a><span class="nb">cd</span> build
+</span><span id="__span-1-23"><a href="#__codelineno-1-23" id="__codelineno-1-23" name="__codelineno-1-23"></a>../configure -prefix<span class="o">=</span><span class="si">${</span><span class="nv">UCX_DIR</span><span class="si">}</span> <span class="se">\</span>
+</span><span id="__span-1-24"><a href="#__codelineno-1-24" id="__codelineno-1-24" name="__codelineno-1-24"></a>    --with-rocm<span class="o">=</span><span class="si">${</span><span class="nv">ROCM_PATH</span><span class="si">}</span>
+</span><span id="__span-1-25"><a href="#__codelineno-1-25" id="__codelineno-1-25" name="__codelineno-1-25"></a>make -j <span class="k">$(</span>nproc<span class="k">)</span>
+</span><span id="__span-1-26"><a href="#__codelineno-1-26" id="__codelineno-1-26" name="__codelineno-1-26"></a>make -j <span class="k">$(</span>nproc<span class="k">)</span> install
+</span><span id="__span-1-27"><a href="#__codelineno-1-27" id="__codelineno-1-27" name="__codelineno-1-27"></a>
+</span><span id="__span-1-28"><a href="#__codelineno-1-28" id="__codelineno-1-28" name="__codelineno-1-28"></a><span class="c1"># Install openmpi</span>
+</span><span id="__span-1-29"><a href="#__codelineno-1-29" id="__codelineno-1-29" name="__codelineno-1-29"></a><span class="nb">cd</span> <span class="nv">$BUILD_DIR</span>
+</span><span id="__span-1-30"><a href="#__codelineno-1-30" id="__codelineno-1-30" name="__codelineno-1-30"></a>git clone --recursive https://github.com/open-mpi/ompi.git <span class="se">\</span>
+</span><span id="__span-1-31"><a href="#__codelineno-1-31" id="__codelineno-1-31" name="__codelineno-1-31"></a>    -b v5.0.x
+</span><span id="__span-1-32"><a href="#__codelineno-1-32" id="__codelineno-1-32" name="__codelineno-1-32"></a><span class="nb">cd</span> ompi
+</span><span id="__span-1-33"><a href="#__codelineno-1-33" id="__codelineno-1-33" name="__codelineno-1-33"></a>./autogen.pl
+</span><span id="__span-1-34"><a href="#__codelineno-1-34" id="__codelineno-1-34" name="__codelineno-1-34"></a>mkdir build
+</span><span id="__span-1-35"><a href="#__codelineno-1-35" id="__codelineno-1-35" name="__codelineno-1-35"></a><span class="nb">cd</span> build
+</span><span id="__span-1-36"><a href="#__codelineno-1-36" id="__codelineno-1-36" name="__codelineno-1-36"></a>../configure --prefix<span class="o">=</span><span class="nv">$OMPI_DIR</span> <span class="se">\</span>
+</span><span id="__span-1-37"><a href="#__codelineno-1-37" id="__codelineno-1-37" name="__codelineno-1-37"></a>         --with-ucx<span class="o">=</span><span class="nv">$UCX_DIR</span> <span class="se">\</span>
+</span><span id="__span-1-38"><a href="#__codelineno-1-38" id="__codelineno-1-38" name="__codelineno-1-38"></a>             --with-rocm<span class="o">=</span><span class="si">${</span><span class="nv">ROCM_PATH</span><span class="si">}</span> <span class="se">\</span>
+</span><span id="__span-1-39"><a href="#__codelineno-1-39" id="__codelineno-1-39" name="__codelineno-1-39"></a>         --with-hwloc<span class="o">=</span>internal <span class="se">\</span>
+</span><span id="__span-1-40"><a href="#__codelineno-1-40" id="__codelineno-1-40" name="__codelineno-1-40"></a>             --with-slurm<span class="o">=</span>/usr/local
+</span><span id="__span-1-41"><a href="#__codelineno-1-41" id="__codelineno-1-41" name="__codelineno-1-41"></a>make -j <span class="k">$(</span>nproc<span class="k">)</span>
+</span><span id="__span-1-42"><a href="#__codelineno-1-42" id="__codelineno-1-42" name="__codelineno-1-42"></a>make install
+</span></code></pre></div>
 <h2 id="hdf5">HDF5</h2>
 <p>SELF is set up so that you can focus on building your conservation law solver easily and not worry about other more mundane coding tasks. When you run a simulation, you need to get data out somehow. SELF uses <a href="https://www.hdfgroup.org/solutions/hdf5/">HDF5</a> to support serial and parallel file IO. All of SELF's parent model classes provide a simple <code>WriteModel</code> API call that will write the <code>solution</code> data (on the quadrature grid) to file, even if you are using domain decomposition. These files are particularly useful for doing "pickup" runs or for doing analysis offline in another toolkit. </p>
 <p>In order to provide serial and parallel IO functionality, SELF requires HDF5 built with Fortran and MPI bindings. When using spack, this can easily be installed using <code>spack install hdf5+fortran+mpi</code>.</p>
