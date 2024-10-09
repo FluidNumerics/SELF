@@ -287,14 +287,14 @@ contains
 
       ! TO DO :: Get the global element ID
       write(zoneID,'(I8.8)') iEl
-      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%solution%interp%N+1, &
-        ', J=',this%solution%interp%N+1
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%x%interp%N+1, &
+        ', J=',this%x%interp%N+1
 
-      do j = 1,this%solution%interp%N+1
-        do i = 1,this%solution%interp%N+1
+      do j = 1,this%x%interp%N+1
+        do i = 1,this%x%interp%N+1
 
           write(fUnit,fmat) this%x%interior(i,j,iEl,1,1), &
-            this%x%interior(i,j,iEl,1,2), real(iEl,prec)
+                            this%x%interior(i,j,iEl,1,2), real(iEl,prec)
 
         enddo
       enddo

@@ -252,6 +252,7 @@ contains
     integer, intent(in) :: nTileY
     real(prec), intent(in) :: dx
     real(prec), intent(in) :: dy
+    integer, intent(in) :: bcids(1:4)
     logical, optional, intent(in) :: enableDomainDecomposition
     ! Local
     integer :: nX, nY, nGeo, nBCs
@@ -292,7 +293,7 @@ contains
         do j = 1,nyPerTile
           iy = j + nyPerTile*(tj-1)
           do i = 1,nxPerTile
-            iel = i + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1 + nTiley)))
+            iel = i + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1)))
             ix = i + nxPerTile*(ti-1) ! nxpertile + nxpertile*(nTileX-1) = nxperTile*nTilex = 1
             do nj = 1, nGeo+1
               do ni = 1, nGeo+1
@@ -331,7 +332,7 @@ contains
               if(tj == 1)then ! southern most tile
                 sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
                 sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
-                sideinfo(5,1,iel) = bcid(1) ! Boundary condition id; set from the user input
+                sideinfo(5,1,iel) = bcids(1) ! Boundary condition id; set from the user input
               else ! interior tile, but souther most edge of the tile
                 sideinfo(3,1,iel) = i + nxPerTile*(nyPerTile-1 + nyPerTile*(ti-1 + nTilex*( tj-2 ))) ! Neigbor element, northernmost element, in tile to the south
                 sideinfo(4,1,iel) = 10*3 ! Neighbor side id - neighbor to the south, north side (3)
@@ -354,7 +355,7 @@ contains
               if(ti == nTileX)then ! eastern most tile
                 sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
                 sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
-                sideinfo(5,1,iel) = bcid(2) ! Boundary condition id; eastern boundary set from the user input
+                sideinfo(5,1,iel) = bcids(2) ! Boundary condition id; eastern boundary set from the user input
               else ! interior tile, but eastern most edge of the tile
                 sideinfo(3,1,iel) = 1 + nxPerTile*(j-1 + nyPerTile*(ti + nTilex*( tj-1))) ! Neigbor element, westernnmost element, in tile to the east
                 sideinfo(4,1,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
@@ -377,7 +378,7 @@ contains
               if(tj == nTileY)then ! northern most tile
                 sideinfo(3,3,iel) = 0 ! Neigbor element (null, boundary condition)
                 sideinfo(4,3,iel) = 0 ! Neighbor side id (null, boundary condition)
-                sideinfo(5,3,iel) = bcid(3) ! Boundary condition id; set from the user input
+                sideinfo(5,3,iel) = bcids(3) ! Boundary condition id; set from the user input
               else ! interior tile, but northern most edge of the tile
                 sideinfo(3,3,iel) =  i + nxPerTile*(nyPerTile*(ti-1 + nTilex*( tj))) ! Neigbor element, southernmost element in tile to the north
                 sideinfo(4,3,iel) = 10*1 ! Neighbor side id - neighbor to the north, south side (1)
@@ -400,7 +401,7 @@ contains
               if(ti == 1)then ! western most tile
                 sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
                 sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
-                sideinfo(5,1,iel) = bcid(4) ! Boundary condition id; eastern boundary set from the user input
+                sideinfo(5,1,iel) = bcids(4) ! Boundary condition id; eastern boundary set from the user input
               else ! interior tile, but western most edge of the tile
                 sideinfo(3,1,iel) = nxPerTile + nxPerTile*(j-1 + nyPerTile*(ti-2 + nTilex*( tj-1))) ! Neigbor element, easternnmost element in tile to the west
                 sideinfo(4,1,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
@@ -419,14 +420,15 @@ contains
 
     call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
 
-    e1 = this%decomp%offsetElem(this%decomp%rankId+1)
-    e2 = this%decomp%offsetElem(this%decomp%rankId+2)-1
+    e1 = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    e2 = this%decomp%offsetElem(this%decomp%rankId+2)
     nLocalElems = e2-e1+1
                    
     nLocalSides = nLocalElems*4
     nLocalNodes = nLocalElems*4
     call this%Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
     this%nUniqueSides = nUniqueSides
+    this%quadrature = UNIFORM
 
     this%nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nLocalElems) = nodeCoords(1:2,1:nGeo+1,1:nGeo+1,e1:e2)
     this%globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nLocalElems) = globalNodeIDs(1:nGeo+1,1:nGeo+1,e1:e2)

@@ -65,13 +65,12 @@ contains
 
     ! Create a uniform block mesh
     bcids(1:4) = [SELF_BC_NONORMALFLOW,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED]
-    call mesh%UniformStructuredMesh( 5, 5, 2, 2, 0.1_prec, 0.1_prec, bcids)
+    call mesh%UniformStructuredMesh( 10, 10, 2, 2, 0.05_prec, 0.05_prec, bcids)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
     call geometry%GenerateFromMesh(mesh)
     call geometry%WriteTecplot('geometry2d.tec')
-    call mesh%Write('mesh2d.h5')
 
     ! Clean up
     call geometry%Free()
