@@ -95,6 +95,7 @@ add_fortran_tests (
     "vectorgridinterp_3d_constant.f90"
     "vectorboundaryinterp_3d_constant.f90"
     "mesh2d_setup.f90"
+    "mesh2d_uniformstructured.f90"
     "mesh3d_setup.f90"
     "mappedscalarderivative_1d_constant.f90"
     "mappedscalarbrderivative_1d_constant.f90"
