@@ -64,6 +64,7 @@ contains
     integer :: i
     integer :: e2
     character(LEN=255) :: WORKSPACE
+    integer :: bcids(1:4)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -71,10 +72,13 @@ contains
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
-    ! Create a uniform block mesh
-    call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
-
+    ! Create a structured mesh
+    bcids(1:4) = [SELF_BC_PRESCRIBED,& ! South
+                  SELF_BC_PRESCRIBED,& ! East
+                  SELF_BC_PRESCRIBED,& ! North
+                  SELF_BC_PRESCRIBED] ! West
+    call mesh%UniformStructuredMesh( 10, 10, 2, 2, 0.05_prec, 0.05_prec, bcids)
+                 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
     call geometry%GenerateFromMesh(mesh)

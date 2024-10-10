@@ -29,13 +29,13 @@ program test
   implicit none
   integer :: exit_code
 
-  exit_code = mappedscalarbrgradient_2d_constant()
+  exit_code = mappedscalarbrgradient_2d_linear()
   if(exit_code /= 0) then
     stop exit_code
   endif
 
 contains
-  integer function mappedscalarbrgradient_2d_constant() result(r)
+  integer function mappedscalarbrgradient_2d_linear() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
@@ -52,18 +52,19 @@ contains
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-    real(prec),parameter :: tolerance = 4.0_prec*10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 5.0_prec*10.0_prec**(-3)
 #endif
     type(Lagrange),target :: interp
     type(Mesh2D),target :: mesh
     type(SEMQuad),target :: geometry
     type(MappedScalar2D) :: f
     type(MappedVector2D) :: df
-    integer :: iel
     integer :: iside
-    integer :: i
     integer :: e2
     character(LEN=255) :: WORKSPACE
+    integer :: iel,j,i
+    integer(HID_T) :: fileId
+    integer :: bcids(1:4)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -71,9 +72,12 @@ contains
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
-    ! Create a uniform block mesh
-    call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+    ! Create a structured mesh
+    bcids(1:4) = [SELF_BC_PRESCRIBED,& ! South
+                  SELF_BC_PRESCRIBED,& ! East
+                  SELF_BC_PRESCRIBED,& ! North
+                  SELF_BC_PRESCRIBED] ! West
+    call mesh%UniformStructuredMesh( 10, 10, 2, 2, 0.05_prec, 0.05_prec, bcids)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
@@ -83,7 +87,7 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    call f%SetEquation(1,'f = 1.0')
+    call f%SetEquation(1,'f = x*y')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
@@ -121,13 +125,50 @@ contains
 #endif
     call df%UpdateHost()
 
+    print*,"min, max (df/dx)",minval(df%interior(:,:,:,1,1)),maxval(df%interior(:,:,:,1,1))
+    print*,"min, max (df/dy)",minval(df%interior(:,:,:,1,2)),maxval(df%interior(:,:,:,1,2))
+
+    call f%SetName(1,"f")
+    call f%SetUnits(1,"[null]")
+
+    call Open_HDF5('output.h5',H5F_ACC_TRUNC_F,fileId)
+
+    ! Write the interpolant to the file
+    print*,"Writing interpolant data to file"
+    call f%interp%WriteHDF5(fileId)
+
+    ! Write the model state to file
+    print*,"Writing control grid solution to file"
+    call CreateGroup_HDF5(fileId,'/controlgrid')
+    call f%WriteHDF5(fileId,'/controlgrid/solution')
+
+    print*,"Writing control grid solution gradient to file"
+    call CreateGroup_HDF5(fileId,'/controlgrid')
+    call df%WriteHDF5(fileId,'/controlgrid/solution_gradient')
+
+    ! Write the geometry to file
+    print*,"Writing control grid  geometry to file"
+    call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+    call geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
+
+    call Close_HDF5(fileId)
+
     ! Calculate diff from exact
-    df%interior = abs(df%interior-0.0_prec)
+    do iel = 1,mesh%nelem
+      do j = 1,controlDegree+1
+        do i = 1,controlDegree+1
+          df%interior(i,j,iel,1,1) = abs(df%interior(i,j,iel,1,1)-geometry%x%interior(i,j,iel,1,2)) ! df/dx = y
+          df%interior(i,j,iel,1,2) = abs(df%interior(i,j,iel,1,2)-geometry%x%interior(i,j,iel,1,1)) ! df/dy = x
+
+        enddo
+      enddo
+    enddo
+
+    print*,"maxval(df_error)",maxval(df%interior),tolerance
 
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*,"max(error) : ",maxval(df%interior),tolerance
       r = 1
     endif
 
@@ -139,5 +180,5 @@ contains
     call f%free()
     call df%free()
 
-  endfunction mappedscalarbrgradient_2d_constant
+  endfunction mappedscalarbrgradient_2d_linear
 endprogram test

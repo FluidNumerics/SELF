@@ -269,6 +269,7 @@ contains
     integer :: ix, iy, iel
     integer :: ni, nj
     integer :: e1,e2
+    integer :: nedges
 
     if(present(enableDomainDecomposition)) then
       call this%decomp%init(enableDomainDecomposition)
@@ -314,7 +315,7 @@ contains
     !    3 - Neighbor Element ID (Can stay the same)
     !    4 - 10*( neighbor local side )  + flip (Need to recalculate flip)
     !    5 - Boundary Condition ID (Can stay the same)
-
+    nedges = 0
     do tj = 1,nTileY
       do ti = 1,nTileX
         do j = 1,nyPerTile
@@ -323,57 +324,55 @@ contains
 
             ! south, iside=1
             ! Get the corner node ids for this edge
-            ! n1 = globalNodeIds(this%CGNSCornerMap(1,1),this%CGNSCornerMap(2,1),iel)
-            ! n2 = globalNodeIds(this%CGNSCornerMap(1,2),this%CGNSCornerMap(2,2),iel)
-            ! nc1 = min(n1,n2)
-            ! nc2 = max(n1,n2)
             ! sideInfo(2,1,iel) = (nc1+nc2)*(nc1+nc2+1)/2 + nc2
             if(j == 1)then ! southern most part of the tile
               if(tj == 1)then ! southern most tile
+                nedges = nedges+1
+                sideinfo(2,1,iel) = nedges
                 sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
                 sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
                 sideinfo(5,1,iel) = bcids(1) ! Boundary condition id; set from the user input
               else ! interior tile, but souther most edge of the tile
-                sideinfo(3,1,iel) = i + nxPerTile*(nyPerTile-1 + nyPerTile*(ti-1 + nTilex*( tj-2 ))) ! Neigbor element, northernmost element, in tile to the south
+                e2 = i + nxPerTile*(nyPerTile-1 + nyPerTile*(ti-1 + nTilex*( tj-2 ))) ! Neigbor element, northernmost element, in tile to the south
+                sideinfo(2,1,iel) = sideInfo(2,3,e2) ! Copy the edge id from neighbor's north edge
+                sideinfo(3,1,iel) = e2
                 sideinfo(4,1,iel) = 10*3 ! Neighbor side id - neighbor to the south, north side (3)
                 sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
               endif
             else ! interior to the tile
-              sideinfo(3,1,iel) = i + nxPerTile*(j-2 + nyPerTile*(ti-1 + nTilex*( tj-1 ))) ! Neigbor element, inside same tile, to the south
+              e2 = i + nxPerTile*(j-2 + nyPerTile*(ti-1 + nTilex*( tj-1 ))) ! Neigbor element, inside same tile, to the south
+              sideinfo(2,1,iel) = sideInfo(2,3,e2) ! Copy the edge id from neighbor's north edge
+              sideinfo(3,1,iel) = e2
               sideinfo(4,1,iel) = 10*3 ! Neighbor side id - neighbor to the south, north side (3)
               sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
             endif
 
             ! east, iside=2
             ! Get the corner node ids for this edge
-            ! n1 = globalNodeIds(this%CGNSCornerMap(1,2),this%CGNSCornerMap(2,2),iel)
-            ! n2 = globalNodeIds(this%CGNSCornerMap(1,3),this%CGNSCornerMap(2,3),iel)
-            ! nc1 = min(n1,n2)
-            ! nc2 = max(n1,n2)
-            ! sideInfo(2,1,iel) = (nc1+nc2)*(nc1+nc2+1)/2 + nc2
+            ! East edges are always new edges, due to the way we are traversing the grid
+            nedges = nedges + 1
+            sideinfo(2,2,iel) = nedges
             if(i == nxPerTile)then ! eastern most part of the tile
               if(ti == nTileX)then ! eastern most tile
-                sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
-                sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
-                sideinfo(5,1,iel) = bcids(2) ! Boundary condition id; eastern boundary set from the user input
+                sideinfo(3,2,iel) = 0 ! Neigbor element (null, boundary condition)
+                sideinfo(4,2,iel) = 0 ! Neighbor side id (null, boundary condition)
+                sideinfo(5,2,iel) = bcids(2) ! Boundary condition id; eastern boundary set from the user input
               else ! interior tile, but eastern most edge of the tile
-                sideinfo(3,1,iel) = 1 + nxPerTile*(j-1 + nyPerTile*(ti + nTilex*( tj-1))) ! Neigbor element, westernnmost element, in tile to the east
-                sideinfo(4,1,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
-                sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
+                sideinfo(3,2,iel) = 1 + nxPerTile*(j-1 + nyPerTile*(ti + nTilex*( tj-1))) ! Neigbor element, westernnmost element, in tile to the east
+                sideinfo(4,2,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
+                sideinfo(5,2,iel) = 0 ! Boundary condition id; (null, interior edge)
               endif
             else ! interior to the tile
-              sideinfo(3,1,iel) = i+1 + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the east
-              sideinfo(4,1,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
-              sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
+              sideinfo(3,2,iel) = i+1 + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the east
+              sideinfo(4,2,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
+              sideinfo(5,2,iel) = 0 ! Boundary condition id; (null, interior edge)
             endif
 
             ! north, iside=3
             ! Get the corner node ids for this edge
-            ! n1 = globalNodeIds(this%CGNSCornerMap(1,4),this%CGNSCornerMap(2,4),iel)
-            ! n2 = globalNodeIds(this%CGNSCornerMap(1,3),this%CGNSCornerMap(2,3),iel)
-            ! nc1 = min(n1,n2)
-            ! nc2 = max(n1,n2)
-            ! sideInfo(2,3,iel) = (nc1+nc2)*(nc1+nc2+1)/2 + nc2
+            ! East edges are always new edges, due to the way we are traversing the grid
+            nedges = nedges + 1
+            sideinfo(2,3,iel) = nedges
             if(j == nyPerTile)then ! northern most part of the tile
               if(tj == nTileY)then ! northern most tile
                 sideinfo(3,3,iel) = 0 ! Neigbor element (null, boundary condition)
@@ -399,24 +398,33 @@ contains
             ! sideInfo(2,1,iel) = (nc1+nc2)*(nc1+nc2+1)/2 + nc2
             if(i == 1)then ! western most part of the tile
               if(ti == 1)then ! western most tile
-                sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
-                sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
-                sideinfo(5,1,iel) = bcids(4) ! Boundary condition id; eastern boundary set from the user input
+                nedges = nedges+1
+                sideinfo(2,4,iel) = nedges
+                sideinfo(3,4,iel) = 0 ! Neigbor element (null, boundary condition)
+                sideinfo(4,4,iel) = 0 ! Neighbor side id (null, boundary condition)
+                sideinfo(5,4,iel) = bcids(4) ! Boundary condition id; eastern boundary set from the user input
               else ! interior tile, but western most edge of the tile
-                sideinfo(3,1,iel) = nxPerTile + nxPerTile*(j-1 + nyPerTile*(ti-2 + nTilex*( tj-1))) ! Neigbor element, easternnmost element in tile to the west
-                sideinfo(4,1,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
-                sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
+                e2 = nxPerTile + nxPerTile*(j-1 + nyPerTile*(ti-2 + nTilex*( tj-1))) ! Neigbor element, easternnmost element in tile to the west
+                sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+                sideinfo(3,4,iel) = e2
+                sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
+                sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
               endif
             else ! interior to the tile
-              sideinfo(3,1,iel) = i-1 + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the west
-              sideinfo(4,1,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
-              sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
+              e2 = i-1 + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the west
+              sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+              sideinfo(3,4,iel) = e2
+              sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
+              sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
             endif
 
           enddo
         enddo
       enddo
     enddo
+    if(nedges /= nUniqueSides )then
+      print*, "nedges not equal to nuniquesides, wtf : ", nedges, nUniqueSides
+    endif
 
     call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
 
