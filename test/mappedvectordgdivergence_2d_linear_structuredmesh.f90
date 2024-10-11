@@ -71,11 +71,11 @@ contains
                      targetNodeType=UNIFORM)
 
     ! Create a structured mesh
-    bcids(1:4) = [SELF_BC_PRESCRIBED,& ! South
-                  SELF_BC_PRESCRIBED,& ! East
-                  SELF_BC_PRESCRIBED,& ! North
+    bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
-    call mesh%StructuredMesh( 10, 10, 2, 2, 0.05_prec, 0.05_prec, bcids)
+    call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
@@ -94,7 +94,7 @@ contains
     call f%boundaryInterp()
     call f%SideExchange(mesh)
     call f%UpdateHost()
-        ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
+    ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
     do iel = 1,f%nElem
       do j = 1,4
         e2 = mesh%sideInfo(3,j,iel) ! Neighboring Element ID

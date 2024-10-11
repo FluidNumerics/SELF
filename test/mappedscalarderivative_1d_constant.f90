@@ -60,7 +60,7 @@ contains
     type(Geometry1D),target :: geometry
 
     call mesh%StructuredMesh(nElem=nelem, &
-                               x=(/0.0_prec,10.0_prec/))
+                             x=(/0.0_prec,10.0_prec/))
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

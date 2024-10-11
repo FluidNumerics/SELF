@@ -65,7 +65,7 @@ contains
 
     ! Create a uniform block mesh
     bcids(1:4) = [SELF_BC_NONORMALFLOW,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED]
-    call mesh%StructuredMesh( 10, 10, 2, 2, 0.05_prec, 0.05_prec, bcids)
+    call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)

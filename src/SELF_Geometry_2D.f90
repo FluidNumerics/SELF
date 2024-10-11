@@ -269,7 +269,6 @@ contains
     character(LEN=self_TecplotHeaderLength) :: tecHeader
     character(LEN=self_FormatLength) :: fmat
 
-
     open(UNIT=NEWUNIT(fUnit), &
          FILE=trim(filename), &
          FORM='formatted', &
@@ -294,7 +293,7 @@ contains
         do i = 1,this%x%interp%N+1
 
           write(fUnit,fmat) this%x%interior(i,j,iEl,1,1), &
-                            this%x%interior(i,j,iEl,1,2), real(iEl,prec)
+            this%x%interior(i,j,iEl,1,2),real(iEl,prec)
 
         enddo
       enddo

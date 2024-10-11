@@ -73,11 +73,11 @@ contains
                      targetNodeType=UNIFORM)
 
     ! Create a structured mesh
-    bcids(1:4) = [SELF_BC_PRESCRIBED,& ! South
-                  SELF_BC_PRESCRIBED,& ! East
-                  SELF_BC_PRESCRIBED,& ! North
+    bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
-    call mesh%StructuredMesh( 10, 10, 2, 2, 0.05_prec, 0.05_prec, bcids)
+    call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
