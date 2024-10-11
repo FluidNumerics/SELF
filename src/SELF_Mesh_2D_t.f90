@@ -109,7 +109,8 @@ module SELF_Mesh_2D_t
     procedure,public :: Init => Init_Mesh2D_t
     procedure,public :: Free => Free_Mesh2D_t
 
-    procedure,public :: UniformStructuredMesh => UniformStructuredMesh_Mesh2D_t
+    generic,public :: StructuredMesh => UniformStructuredMesh_Mesh2D_t
+    procedure,private :: UniformStructuredMesh_Mesh2D_t
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D_t
 
     procedure,public :: Read_HOPr => Read_HOPr_Mesh2D_t

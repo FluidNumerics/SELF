@@ -118,8 +118,7 @@ program traveling_shock
   ! uniform mesh generator.
   ! The domain is set to x in [0,1]
   ! We use `nelem` elements
-  call mesh%UniformBlockMesh(nGeo=1, &
-                             nElem=nelem, &
+  call mesh%UniformBlockMesh(nElem=nelem, &
                              x=(/0.0_prec,1.0_prec/))
 
   ! Set the left and right boundary conditions to prescribed

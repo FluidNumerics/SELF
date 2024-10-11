@@ -59,8 +59,7 @@ contains
     type(Mesh1D),target :: mesh
     type(Geometry1D),target :: geometry
 
-    call mesh%UniformBlockMesh(nGeo=1, &
-                               nElem=nelem, &
+    call mesh%StructuredMesh(nElem=nelem, &
                                x=(/0.0_prec,10.0_prec/))
 
     ! Create an interpolant

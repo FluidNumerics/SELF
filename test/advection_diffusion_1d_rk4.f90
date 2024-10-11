@@ -50,8 +50,7 @@ program advection_diffusion_1d_rk4
   ! uniform mesh generator.
   ! The domain is set to x in [0,1]
   ! We use `nelem` elements
-  call mesh%UniformBlockMesh(nGeo=1, &
-                             nElem=nelem, &
+  call mesh%StructuredMesh(nElem=nelem, &
                              x=(/0.0_prec,1.0_prec/))
 
   ! Create an interpolant
