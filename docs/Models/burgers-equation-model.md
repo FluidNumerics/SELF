@@ -29,7 +29,7 @@ e = \int_x \frac{s^2}{2} \hspace{1mm} dx
 \end{equation}
 
 ## Implementation
-The viscous Burgers equation model is implemented as a type extension of the [`DGModel1D` class](../ford/type/dgmodel1d_t.html). The [Burgers1D_t class](ford/type/burgers1d_t.html) adds a parameter for the viscosity and overrides the `SetMetadata`, `entropy_func`, `flux1d`, and `riemannflux1d` type-bound procedures.
+The viscous Burgers equation model is implemented as a type extension of the [`DGModel1D` class](../ford/type/dgmodel1d_t.html). The [Burgers1D_t class](../ford/type/burgers1d_t.html) adds a parameter for the viscosity and overrides the `SetMetadata`, `entropy_func`, `flux1d`, and `riemannflux1d` type-bound procedures.
 
 ## Riemann Solver
 The `Burgers1D` class is defined using the conservative form of the conservation law. The Riemman solver for the hyperbolic part of Burgers equation is the local Lax Friedrichs upwind riemann solver
@@ -124,7 +124,7 @@ implicit none
 
     do ivar = 1,this%nvar
       extDsdx(ivar) = ! To do : fill in the external state 
-                      !          here as a function of space and time
+                      !         here as a function of space and time
     enddo
 
   endfunction pbc1d_mymodel
@@ -146,8 +146,7 @@ implicit none
   type(Mesh1D),target :: mesh
   type(Geometry1D),target :: geometry
 
-  call mesh % UniformBlockMesh(nGeo=1, &
-                               nElem=10, &
+  call mesh % UniformBlockMesh(nElem=10, &
                                x=(/0.0_prec,1.0_prec/))
 
   ! Set the left and right boundary conditions to prescribed

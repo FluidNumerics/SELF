@@ -41,8 +41,6 @@ module SELF_Mesh_1D
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,extends(SEMMesh) :: Mesh1D
     integer,pointer,dimension(:,:) :: elemInfo
     real(prec),pointer,dimension(:) :: nodeCoords
@@ -54,7 +52,8 @@ module SELF_Mesh_1D
   contains
     procedure,public :: Init => Init_Mesh1D
     procedure,public :: Free => Free_Mesh1D
-    procedure,public :: UniformBlockMesh => UniformBlockMesh_Mesh1D
+    generic,public :: StructuredMesh => UniformBlockMesh_Mesh1D
+    procedure,private ::  UniformBlockMesh_Mesh1D
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh1D
 
     procedure,public  :: Write_Mesh => Write_Mesh1D
@@ -63,15 +62,14 @@ module SELF_Mesh_1D
 
 contains
 
-  subroutine Init_Mesh1D(this,nGeo,nElem,nNodes,nBCs)
+  subroutine Init_Mesh1D(this,nElem,nNodes,nBCs)
     implicit none
     class(Mesh1D),intent(out) :: this
-    integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     integer,intent(in) :: nNodes
     integer,intent(in) :: nBCs
 
-    this%nGeo = nGeo
+    this%nGeo = 1
     this%nElem = nElem
     this%nGlobalElem = nElem
     this%nNodes = nNodes
@@ -108,14 +106,13 @@ contains
 
   endsubroutine Free_Mesh1D
 
-  subroutine UniformBlockMesh_Mesh1D(this,nGeo,nElem,x)
+  subroutine UniformBlockMesh_Mesh1D(this,nElem,x)
     implicit none
     class(Mesh1D),intent(out) :: this
-    integer,intent(in) :: nGeo
     integer,intent(in) :: nElem
     real(prec),intent(in) :: x(1:2)
     ! Local
-    integer :: iel
+    integer :: iel,ngeo
     integer :: nid,nNodes
     integer :: i
     real(prec) :: xU(1:nElem+1)
@@ -124,8 +121,11 @@ contains
     type(Scalar1D) :: xLinear
     type(Scalar1D) :: xGeo
 
+
+    ngeo = 1
+
     nNodes = nElem*(nGeo+1)
-    call this%Init(nGeo,nElem,nNodes,2)
+    call this%Init(nElem,nNodes,2)
     this%quadrature = GAUSS_LOBATTO
 
     ! Set the hopr_nodeCoords
