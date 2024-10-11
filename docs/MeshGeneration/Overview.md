@@ -1,5 +1,5 @@
 
-## Overview of Mesh generation in
+## Overview of Mesh generation
 <figure markdown="span">
   ![Image title](img/spectral-element-mesh.png){ width=600 }
   <figcaption></figcaption>

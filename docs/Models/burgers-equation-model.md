@@ -1,5 +1,6 @@
 # Viscous Burgers Equation
 
+## Definition
 The [`SELF_Burgers1D_t` module](../ford/module/self_burgers1d_t.html) defines the [Burgers1D_t class](ford/type/burgers1d_t.html) class. In SELF, models are posed in the form of a generic conservation law
 
 \begin{equation}
@@ -31,7 +32,7 @@ e = \int_x \frac{s^2}{2} \hspace{1mm} dx
 ## Implementation
 The viscous Burgers equation model is implemented as a type extension of the [`DGModel1D` class](../ford/type/dgmodel1d_t.html). The [Burgers1D_t class](../ford/type/burgers1d_t.html) adds a parameter for the viscosity and overrides the `SetMetadata`, `entropy_func`, `flux1d`, and `riemannflux1d` type-bound procedures.
 
-## Riemann Solver
+### Riemann Solver
 The `Burgers1D` class is defined using the conservative form of the conservation law. The Riemman solver for the hyperbolic part of Burgers equation is the local Lax Friedrichs upwind riemann solver
 
 \begin{equation}
