@@ -2,6 +2,62 @@
 
 
 ## Install with Spack
+The easiest way to get started is to use the spack package manager. On a Linux platform, set up spack
+
+```
+git clone https://github.com/spack/spack ~/spack
+source ~/spack/share/spack/setup-env.sh
+```
+
+Allow spack to locate your compilers (make sure you have C, C++, and Fortran compilers installed!)
+
+```
+spack compiler find
+```
+
+SELF comes with a spack environment file that defines the dependencies that are required for SELF. The versions listed in this environment file are the specific versions we regularly test against. To get this environment file, clone the SELF repository
+
+```
+git clone https://github.com/fluidnumerics/SELF/ ~/SELF/
+```
+
+If you have a preferred compiler you would like for spack to use, you can use `spack config add`, e.g.
+
+```
+spack -e ~/SELF/share/spack-env config add packages:all:require:['%gcc@12.2.0']
+```
+
+The example above will force packages to be built with version 12.2.0 of gfortran from the `gcc` compiler set.
+
+To reduce build time, import existing packages on your system
+```
+spack external find --not-buildable
+```
+
+Next, install SELF's dependencies (OpenMPI, HDF5, and feq-parse)
+```
+spack -e ~/SELF/share/spack-env install --no-check-signature
+```
+
+Then, install SELF
+```
+cd ~/SELF
+spack env activate ~/SELF/share/spack-env
+mkdir ~/SELF/build
+cd ~/SELF/build
+cmake -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self ../
+make
+make install
+```
+
+If you'd like to run the tests included with SELF, to verify your installation, you can use `ctest`.
+
+```
+cd ${HOME}/opt/self/test
+ctest
+```
+
+### Once v0.0.1 is released 
 The easiest way to get started is to use the [spack package manager](https://spack.io). The spack package manager provides you with an easy command line interface to install research software from source code with all of its dependencies. 
 
 !!! note

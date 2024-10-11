@@ -83,16 +83,16 @@
   <div class="col-lg-12">
 <div class="well well-sm">
   <ul class="list-inline" style="margin-bottom:0px;display:inline">
-    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for modules and submodules.">6 statements</a>
+    title=" 0.4% of total for modules and submodules.">45 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_DomainDecomposition.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_domaindecomposition.f90~2.html'>SELF_DomainDecomposition.f90</a></li>
+     <li><a href='../sourcefile/self_domaindecomposition.f90.html'>SELF_DomainDecomposition.f90</a></li>
      <li class="active">SELF_DomainDecomposition</li>
   </ol>
 </div>
@@ -115,7 +115,16 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#type-domaindecomposition~2">DomainDecomposition</a>
+      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#type-domaindecomposition">DomainDecomposition</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#proc-free_domaindecomposition">Free_DomainDecomposition</a>
+      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#proc-setelemtorank_domaindecomposition">SetElemToRank_DomainDecomposition</a>
     </div>
   </div>
 </div>
@@ -133,7 +142,9 @@
       <ul class="list-group">
       <li class="list-group-item">
   <ul class="list-inline">
+    <li><a href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm">mpi</a></li>
     <li><a href='../module/self_domaindecomposition_t.html'>SELF_DomainDecomposition_t</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
   </ul>
       </li>
       </ul>
@@ -149,7 +160,16 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#type-domaindecomposition~2">DomainDecomposition</a>
+      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#type-domaindecomposition">DomainDecomposition</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#proc-free_domaindecomposition">Free_DomainDecomposition</a>
+      <a class="list-group-item" href="../module/self_domaindecomposition~2.html#proc-setelemtorank_domaindecomposition">SetElemToRank_DomainDecomposition</a>
     </div>
   </div>
 </div>
@@ -165,7 +185,7 @@
     <section>
      <h2>Derived Types</h2>
      <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-domaindecomposition~2"></span><h3>type, public, extends(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>) :: <a href='../type/domaindecomposition~2.html'>DomainDecomposition</a>  </h3></div>
+  <div class="panel-heading codesum"><span class="anchor" id="type-domaindecomposition"></span><h3>type, public, extends(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>) :: <a href='../type/domaindecomposition.html'>DomainDecomposition</a>  </h3></div>
   <div class="panel-body">
      <h4>Components</h4>
     <table class="table table-striped varlist">
@@ -175,6 +195,11 @@
   <td><span class="anchor" id="variable-elemtorank"></span>integer,</td>
 <td>public,</td>  <td>pointer, dimension(:)</td><td>::</td>
   <td><strong>elemToRank</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elemtorank_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>elemToRank_gpu</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-maxmsg"></span>integer,</td>
@@ -240,13 +265,13 @@
       <tbody>
        <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-finalizempiexchangeasync'>FinalizeMPIExchangeAsync</a></strong>  </td>
        <td></td></tr>
-       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-free~19'>Free</a></strong>  => Free_DomainDecomposition_t </td>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition.html#boundprocedure-free~26'>Free</a></strong>  => Free_DomainDecomposition </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-generatedecomposition'>GenerateDecomposition</a></strong>  => GenerateDecomposition_DomainDecomposition_t </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-init~19'>Init</a></strong>  => Init_DomainDecomposition_t </td>
        <td></td></tr>
-       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-setelemtorank'>SetElemToRank</a></strong>  => SetElemToRank_DomainDecomposition_t </td>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition.html#boundprocedure-setelemtorank~2'>SetElemToRank</a></strong>  => SetElemToRank_DomainDecomposition </td>
        <td></td></tr>
        </tbody>
        </table>
@@ -257,6 +282,56 @@
   <br>
     
 
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_domaindecomposition"></span><h3>public subroutine <a href='../proc/free_domaindecomposition.html'>Free_DomainDecomposition</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setelemtorank_domaindecomposition"></span><h3>public subroutine <a href='../proc/setelemtorank_domaindecomposition.html'>SetElemToRank_DomainDecomposition</a>(this, nElem)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
     
     </div>
   </div>
@@ -266,14 +341,14 @@
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 Anti-Capitalist Software License
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 3-Clause BSD with attribution
 </p>
         </div>
         <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-01 17:17            </p>
+ on 2024-10-11 10:46            </p>
         </div>
       </div>
       <br>

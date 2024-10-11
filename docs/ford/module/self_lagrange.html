@@ -83,16 +83,16 @@
   <div class="col-lg-12">
 <div class="well well-sm">
   <ul class="list-inline" style="margin-bottom:0px;display:inline">
-    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for modules and submodules.">10 statements</a>
+    title=" 0.8% of total for modules and submodules.">90 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Lagrange.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_lagrange.f90~3.html'>SELF_Lagrange.f90</a></li>
+     <li><a href='../sourcefile/self_lagrange.f90~2.html'>SELF_Lagrange.f90</a></li>
      <li class="active">SELF_Lagrange</li>
   </ol>
 </div>
@@ -115,7 +115,16 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../module/self_lagrange.html#type-lagrange~3">Lagrange</a>
+      <a class="list-group-item" href="../module/self_lagrange.html#type-lagrange~2">Lagrange</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_lagrange.html#proc-free_lagrange~2">Free_Lagrange</a>
+      <a class="list-group-item" href="../module/self_lagrange.html#proc-init_lagrange~2">Init_Lagrange</a>
     </div>
   </div>
 </div>
@@ -133,10 +142,11 @@
       <ul class="list-group">
       <li class="list-group-item">
   <ul class="list-inline">
-    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
     <li><a href='../module/self_lagrange_t.html'>SELF_Lagrange_t</a></li>
-    <li><a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a></li>
     <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a></li>
+    <li><a href='../module/self_gpu~2.html'>SELF_GPU</a></li>
   </ul>
       </li>
       </ul>
@@ -152,7 +162,16 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../module/self_lagrange.html#type-lagrange~3">Lagrange</a>
+      <a class="list-group-item" href="../module/self_lagrange.html#type-lagrange~2">Lagrange</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_lagrange.html#proc-free_lagrange~2">Free_Lagrange</a>
+      <a class="list-group-item" href="../module/self_lagrange.html#proc-init_lagrange~2">Init_Lagrange</a>
     </div>
   </div>
 </div>
@@ -168,7 +187,7 @@
     <section>
      <h2>Derived Types</h2>
      <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-lagrange~3"></span><h3>type, public, extends(<a href='../type/lagrange_t.html'>Lagrange_t</a>) :: <a href='../type/lagrange~3.html'>Lagrange</a>  </h3></div>
+  <div class="panel-heading codesum"><span class="anchor" id="type-lagrange~2"></span><h3>type, public, extends(<a href='../type/lagrange_t.html'>Lagrange_t</a>) :: <a href='../type/lagrange~2.html'>Lagrange</a>  </h3></div>
   <div class="panel-body">
      <h4>Components</h4>
     <table class="table table-striped varlist">
@@ -190,14 +209,19 @@
   <td><strong>bMatrix</strong></td><td></td><td></td><td><p>The boundary interpolation matrix that is used to map a grid of nodal values at the control points to the element boundaries.</p></td>
 </tr>
 <tr>
+  <td><span class="anchor" id="variable-bmatrix_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>bMatrix_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
   <td><span class="anchor" id="variable-bweights"></span>real(kind=prec),</td>
 <td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
   <td><strong>bWeights</strong></td><td></td><td></td><td><p>The barycentric weights that are calculated from the controlPoints and used for interpolation.</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-backend~12"></span>character(len=3),</td>
+  <td><span class="anchor" id="variable-backend~9"></span>character(len=3),</td>
 <td>public</td>  <td></td><td>::</td>
-  <td><strong>backend</strong></td><td> =</td><td>'cpu'</td><td></td>
+  <td><strong>backend</strong></td><td> =</td><td>'gpu'</td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-blas_handle"></span>type(c_ptr),</td>
@@ -228,15 +252,30 @@ these quadrature types or uniform points on [-1,1].</p></td>
 dMatrix is based on a strong form of the derivative.</p></td>
 </tr>
 <tr>
+  <td><span class="anchor" id="variable-dmatrix_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dMatrix_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
   <td><span class="anchor" id="variable-dgmatrix"></span>real(kind=prec),</td>
 <td>public,</td>  <td>pointer, contiguous, dimension(:,:)</td><td>::</td>
   <td><strong>dgMatrix</strong></td><td></td><td></td><td><p>The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The dgMatrix is based
 on a weak form of the derivative. It must be used with bMatrix to account for boundary contributions in the weak form.</p></td>
 </tr>
 <tr>
+  <td><span class="anchor" id="variable-dgmatrix_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dgMatrix_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
   <td><span class="anchor" id="variable-imatrix"></span>real(kind=prec),</td>
 <td>public,</td>  <td>pointer, contiguous, dimension(:,:)</td><td>::</td>
   <td><strong>iMatrix</strong></td><td></td><td></td><td><p>The interpolation matrix (transpose) for mapping data from the control grid to the target grid.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-imatrix_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>iMatrix_gpu</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-qweights"></span>real(kind=prec),</td>
@@ -245,6 +284,11 @@ on a weak form of the derivative. It must be used with bMatrix to account for bo
 provided; one of Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss,
 Chebyshev-Gauss-Lobatto, Chebyshev-Gauss Radau, or Uniform. If Uniform, the quadrature weights are constant
 <script type="math/tex; mode=display">dx = \frac{2.0}{N+1}</script>.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-qweights_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>qWeights_gpu</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-targetnodetype"></span>integer,</td>
@@ -274,9 +318,9 @@ the targetPoints. In practice, the targetPoints are set to a uniformly distribut
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/lagrange_t.html#boundprocedure-calculatelagrangepolynomials'>CalculateLagrangePolynomials</a></strong>  </td>
        <td></td></tr>
-       <tr><td>procedure, public :: <strong><a href='../type/lagrange_t.html#boundprocedure-free~11'>Free</a></strong>  => Free_Lagrange_t </td>
+       <tr><td>procedure, public :: <strong><a href='../type/lagrange~2.html#boundprocedure-free~32'>Free</a></strong>  => Free_Lagrange </td>
        <td></td></tr>
-       <tr><td>procedure, public :: <strong><a href='../type/lagrange_t.html#boundprocedure-init~11'>Init</a></strong>  => Init_Lagrange_t </td>
+       <tr><td>procedure, public :: <strong><a href='../type/lagrange~2.html#boundprocedure-init~31'>Init</a></strong>  => Init_Lagrange </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/lagrange_t.html#boundprocedure-writehdf5~6'>WriteHDF5</a></strong>  => WriteHDF5_Lagrange_t </td>
        <td></td></tr>
@@ -289,6 +333,83 @@ the targetPoints. In practice, the targetPoints are set to a uniformly distribut
   <br>
     
 
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_lagrange~2"></span><h3>public subroutine <a href='../proc/free_lagrange~2.html'>Free_Lagrange</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Frees all memory (host and device) associated with an instance of the Lagrange class</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/lagrange~2.html'>Lagrange</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td><p>Lagrange class instance</p></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_lagrange~2"></span><h3>public subroutine <a href='../proc/init_lagrange~2.html'>Init_Lagrange</a>(this, N, controlNodeType, M, targetNodeType)</h3></div>
+  <div class="panel-body">
+       
+<p>Initialize an instance of the Lagrange class
+On output, all of the attributes for the Lagrange class are allocated and values are initialized according to the number of
+control points, number of target points, and the types for the control and target nodes.
+If a GPU is available, device pointers for the Lagrange attributes are allocated and initialized.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/lagrange~2.html'>Lagrange</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td><p>Lagrange class instance</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td><p>The number of control points for interpolant</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>controlNodeType</strong></td><td><p>The integer code specifying the type of control points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
+GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>M</strong></td><td><p>The number of target points for the interpolant</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>targetNodeType</strong></td><td><p>The integer code specifying the type of target points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
+GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
     
     </div>
   </div>
@@ -298,14 +419,14 @@ the targetPoints. In practice, the targetPoints are set to a uniformly distribut
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 Anti-Capitalist Software License
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 3-Clause BSD with attribution
 </p>
         </div>
         <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-01 17:17            </p>
+ on 2024-10-11 10:46            </p>
         </div>
       </div>
       <br>

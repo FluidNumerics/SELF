@@ -16,25 +16,18 @@ SELF provides a few pre-canned models for 1-D, 2-D, and 3-D simulations. The spe
 where $\vec{s}$ is a vector of solution variables, $\overleftrightarrow{f}$ is the conservative flux, and $\vec{q}$ are non-conservative source terms. The conservative fluxes are assumed to be functions of the solution variables and their gradients. Effectively, this means that SELF can be used to solve hyperbolic and weakly parabolic partial differential equations. 
 
 Building your own model is done by making a type extension of one of SELF's template classes and overriding the necessary type-bound procedures to fit your needs. Often, it's as simple as defining a `pure function` for the flux, source terms, riemann solver, and boundary conditions. You can use the following template classes to easily build your own models:
+
 * `DGModel1D`
 * `DGModel2D`
 * `DGModel3D`
 
 Alternatively, you can build on top of one of the pre-canned models:
+
 * `Burgers1D`
 
-[*Learn more about building your own models**](./Tutorials/MakingYourOwnModel.md)
 
-### Viscous Burgers Equation in 1-D
-The `SELF_Burgers` module provides the For Burgers equation in 1-D
+[**Learn more about building your own models**](./Tutorials/MakingYourOwnModel.md)
 
-\begin{equation}
-\vec{s} = s
-\end{equation}
-
-\begin{equation}
-\overleftrightarrow{f} = \frac{s^2}{2} \hat{x}
-\end{equation}
 
 ## Support
 
@@ -43,6 +36,7 @@ SELF is made available as a free and open-source software to give you the opport
 Fluid Numerics LLC provides a range of professional services for any of the following
 
 * Implementing new features
+* Adding new pre-canned models
 * Resolving bugs
 * Porting SELF to new hardware
 * On call support

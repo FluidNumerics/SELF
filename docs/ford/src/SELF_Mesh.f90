@@ -78,4 +78,17 @@ module SELF_Mesh
   integer,parameter :: SELF_MESH_HOPR_2D = 3
   integer,parameter :: SELF_MESH_HOPR_3D = 4
 
+! //////////////////////////////////////////////// !
+!   Boundary Condition parameters
+!
+
+  ! Conditions on the solution
+  integer,parameter :: SELF_BC_PRESCRIBED = 100
+  integer,parameter :: SELF_BC_RADIATION = 101
+  integer,parameter :: SELF_BC_NONORMALFLOW = 102
+
+  ! Conditions on the solution gradients
+  integer,parameter :: SELF_BC_PRESCRIBED_STRESS = 200
+  integer,parameter :: SELF_BC_NOSTRESS = 201
+
 endmodule SELF_Mesh

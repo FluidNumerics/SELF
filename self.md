@@ -26,5 +26,5 @@ print_creation_date: true
 creation_date: %Y-%m-%d %H:%M %z
 macro: TEST
        LOGIC=.true.
-license: Anti-Capitalist Software License
+license: 3-Clause BSD with attribution
 extra_filetypes: cpp #

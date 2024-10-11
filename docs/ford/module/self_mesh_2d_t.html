@@ -83,11 +83,11 @@
   <div class="col-lg-12">
 <div class="well well-sm">
   <ul class="list-inline" style="margin-bottom:0px;display:inline">
-    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.0% of total for modules and submodules.">343 statements</a>
+    title=" 4.2% of total for modules and submodules.">508 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_2D_t.f90"> Source File</a></li>
   </ul>
@@ -139,6 +139,7 @@
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-read_hopr_mesh2d_t">Read_HOPr_Mesh2D_t</a>
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-recalculateflip_mesh2d_t">RecalculateFlip_Mesh2D_t</a>
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-resetboundaryconditiontype_mesh2d_t">ResetBoundaryConditionType_Mesh2D_t</a>
+      <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-uniformstructuredmesh_mesh2d_t">UniformStructuredMesh_Mesh2D_t</a>
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-write_mesh2d_t">Write_Mesh2D_t</a>
     </div>
   </div>
@@ -157,13 +158,13 @@
       <ul class="list-group">
       <li class="list-group-item">
   <ul class="list-inline">
-    <li><a href='../module/self_domaindecomposition.html'>SELF_DomainDecomposition</a></li>
+    <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
     <li><a href='../module/self_supportroutines.html'>SELF_SupportRoutines</a></li>
+    <li><a href='../module/self_lagrange~2.html'>SELF_Lagrange</a></li>
     <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
     <li><a href='../module/self_hdf5.html'>SELF_HDF5</a></li>
     <li>HDF5</li>
-    <li><a href='../module/self_lagrange~2.html'>SELF_Lagrange</a></li>
-    <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+    <li><a href='../module/self_domaindecomposition~2.html'>SELF_DomainDecomposition</a></li>
     <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
   </ul>
       </li>
@@ -204,6 +205,7 @@
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-read_hopr_mesh2d_t">Read_HOPr_Mesh2D_t</a>
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-recalculateflip_mesh2d_t">RecalculateFlip_Mesh2D_t</a>
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-resetboundaryconditiontype_mesh2d_t">ResetBoundaryConditionType_Mesh2D_t</a>
+      <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-uniformstructuredmesh_mesh2d_t">UniformStructuredMesh_Mesh2D_t</a>
       <a class="list-group-item" href="../module/self_mesh_2d_t.html#proc-write_mesh2d_t">Write_Mesh2D_t</a>
     </div>
   </div>
@@ -367,6 +369,8 @@
        <tr><td>procedure, public :: <strong><a href='../type/mesh2d_t.html#boundprocedure-recalculateflip'>RecalculateFlip</a></strong>  => RecalculateFlip_Mesh2D_t </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh2d_t.html#boundprocedure-resetboundaryconditiontype'>ResetBoundaryConditionType</a></strong>  => ResetBoundaryConditionType_Mesh2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mesh2d_t.html#boundprocedure-uniformstructuredmesh'>UniformStructuredMesh</a></strong>  => UniformStructuredMesh_Mesh2D_t </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh2d_t.html#boundprocedure-write_mesh'>Write_Mesh</a></strong>  => Write_Mesh2D_t </td>
        <td></td></tr>
@@ -533,6 +537,78 @@ boundary condition type to the desired value.</p><a href="../proc/resetboundaryc
   </div>
 
       <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-uniformstructuredmesh_mesh2d_t"></span><h3>public subroutine <a href='../proc/uniformstructuredmesh_mesh2d_t.html'>UniformStructuredMesh_Mesh2D_t</a>(this, nxPerTile, nyPerTile, nTileX, nTileY, dx, dy, bcids, enableDomainDecomposition)</h3></div>
+  <div class="panel-body">
+       
+<p>Create a structured mesh and store it in SELF's unstructured mesh format.
+The mesh is created in tiles of size (tnx,tny). Tiling is used to determine
+the element ordering.</p><a href="../proc/uniformstructuredmesh_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nxPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nyPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileX</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileY</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dy</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:4)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>logical,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>enableDomainDecomposition</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-write_mesh2d_t"></span><h3>public subroutine <a href='../proc/write_mesh2d_t.html'>Write_Mesh2D_t</a>(this, meshFile)</h3></div>
   <div class="panel-body">
            
@@ -569,14 +645,14 @@ boundary condition type to the desired value.</p><a href="../proc/resetboundaryc
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 Anti-Capitalist Software License
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 3-Clause BSD with attribution
 </p>
         </div>
         <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-01 17:17            </p>
+ on 2024-10-11 10:46            </p>
         </div>
       </div>
       <br>

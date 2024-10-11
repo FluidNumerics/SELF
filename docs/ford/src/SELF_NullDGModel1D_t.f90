@@ -36,6 +36,12 @@ module self_NullDGModel1D_t
     ! Add any additional attributes here that are specific to your model
 
   contains
+    !   procedure :: hbc1d_Prescribed => hbc1d_Prescribed_Model
+    !   procedure :: hbc1d_Radiation => hbc1d_Generic_Model
+    !   procedure :: hbc1d_NoNormalFlow => hbc1d_Generic_Model
+    !   procedure :: pbc1d_Prescribed => pbc1d_Prescribed_Model
+    !   procedure :: pbc1d_Radiation => pbc1d_Generic_Model
+    !   procedure :: pbc1d_NoNormalFlow => pbc1d_Generic_Model
     !   procedure :: SetMetadata => SetMetadata_NullDGModel1D_t
     !   procedure :: pretendency => pretendency_NullDGModel1D_t
     !   procedure :: entropy_func => entropy_func_NullDGModel1D_t
