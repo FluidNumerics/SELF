@@ -108,6 +108,7 @@ module SELF_Mesh_2D_t
   contains
     procedure,public :: Init => Init_Mesh2D_t
     procedure,public :: Free => Free_Mesh2D_t
+    procedure,public :: UpdateDevice => UpdateDevice_Mesh2D_t
 
     generic,public :: StructuredMesh => UniformStructuredMesh_Mesh2D_t
     procedure,private :: UniformStructuredMesh_Mesh2D_t
@@ -191,6 +192,14 @@ contains
     call this%decomp%Free()
 
   endsubroutine Free_Mesh2D_t
+
+  subroutine UpdateDevice_Mesh2D_t(this)
+    implicit none
+    class(Mesh2D_t),intent(inout) :: this
+
+    return
+
+  endsubroutine UpdateDevice_Mesh2D_t
 
   subroutine ResetBoundaryConditionType_Mesh2D_t(this,bcid)
     !! This method can be used to reset all of the boundary elements
@@ -447,6 +456,8 @@ contains
     deallocate(globalNodeIDs)
     deallocate(sideInfo)
 
+    call this%UpdateDevice()
+
   endsubroutine UniformStructuredMesh_Mesh2D_t
 
   subroutine Read_HOPr_Mesh2D_t(this,meshFile,enableDomainDecomposition)
@@ -619,6 +630,8 @@ contains
     call this%RecalculateFlip()
 
     deallocate(hopr_elemInfo,hopr_nodeCoords,hopr_globalNodeIDs,hopr_sideInfo)
+
+    call this%UpdateDevice()
 
   endsubroutine Read_HOPr_Mesh2D_t
 
