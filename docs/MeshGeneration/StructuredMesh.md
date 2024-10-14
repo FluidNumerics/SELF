@@ -38,7 +38,7 @@ Notice that initializing the geometry requires an interpolant and the number of 
 Once the geometry is initialized, the physical positions and metric terms can be calculated and stored using the `GenerateFromMesh` method.
 
 ## Two Dimensions (2-D)
-To generate a structured mesh in one dimension, use the `StructuredMesh` generic in the [`Mesh2D`](../ford/type/mesh2d.html) class. 
+To generate a structured mesh in two dimensions, use the `StructuredMesh` generic in the [`Mesh2D`](../ford/type/mesh2d.html) class. 
 
 At the moment, only uniformly space structured meshes of elements can be generated. This means that all of the elements are of the same width; keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
 
