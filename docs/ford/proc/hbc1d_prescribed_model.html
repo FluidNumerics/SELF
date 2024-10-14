@@ -8,7 +8,7 @@
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>SetInitialConditions_Model &ndash; SELF</title>
+    <title>hbc1d_Prescribed_Model &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -76,25 +76,25 @@
 
     <div class="container">
   <div class="row">
-    <h1>SetInitialConditions_Model
-      <small>Subroutine</small>
+    <h1>hbc1d_Prescribed_Model
+      <small>Function</small>
     </h1>
     <div class="row">
   <div class="col-lg-12">
 <div class="well well-sm">
   <ul class="list-inline" style="margin-bottom:0px;display:inline">
-    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">5 statements</a>
+    title=" 0.1% of total for procedures.">10 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Model.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
      <li><a href='../sourcefile/self_model.f90.html'>SELF_Model.f90</a></li>
      <li><a href='../module/self_model.html'>SELF_Model</a></li>
-     <li class="active">SetInitialConditions_Model</li>
+     <li class="active">hbc1d_Prescribed_Model</li>
   </ol>
 </div>
 </div>
@@ -115,7 +115,7 @@
 <div class="panel panel-primary">
   <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
   <div class="list-group">
-    <a class="list-group-item" href="../proc/setinitialconditions_model.html#src">SetInitialConditions_Model</a>
+    <a class="list-group-item" href="../proc/hbc1d_prescribed_model.html#src">hbc1d_Prescribed_Model</a>
   </div>
 </div>
 
@@ -124,7 +124,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine SetInitialConditions_Model(this)</h2>
+    <h2>public pure function hbc1d_Prescribed_Model(this, x, t) result(exts)</h2>
     
 
 
@@ -133,14 +133,28 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-this~84"></span>class(<a href='../type/model.html'>Model</a>),</td>
-<td>intent(inout)</td>
+  <td><span class="anchor" id="variable-this~65"></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-x~4"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>x</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t~2"></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
 </tr>
 </tbody>
 </table>
 
+   <h3>Return Value <small><span class="anchor" id="variable-exts~2"></span>real(kind=prec)(1:this%nvar)</small></h3>
+    
     <br>
 
     <section class="visible-xs visible-sm hidden-md">
@@ -149,7 +163,7 @@
 <div class="panel panel-primary">
   <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
   <div class="list-group">
-    <a class="list-group-item" href="../proc/setinitialconditions_model.html#src">SetInitialConditions_Model</a>
+    <a class="list-group-item" href="../proc/hbc1d_prescribed_model.html#src">hbc1d_Prescribed_Model</a>
   </div>
 </div>
 
@@ -167,15 +181,19 @@
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">SetInitialConditions_Model</span><span class="p">(</span><span class="n">this</span><span class="p">)</span><span class="w"></span>
-<span class="cp">#undef __FUNC__</span>
-<span class="cp">#define __FUNC__ &quot;SetInitialConditions&quot;</span>
-<span class="w">    </span><span class="k">implicit none</span>
-<span class="k">    class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">pure function </span><span class="n">hbc1d_Prescribed_Model</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">exts</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">exts</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ivar</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">print</span><span class="o">*</span><span class="p">,</span><span class="err">__</span><span class="n">FILE__</span><span class="o">//</span><span class="s2">&quot; : No model, so nothing to set&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="k">do </span><span class="n">ivar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="w"></span>
+<span class="w">      </span><span class="n">exts</span><span class="p">(</span><span class="n">ivar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"></span>
+<span class="w">    </span><span class="k">enddo</span>
 
-<span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetInitialConditions_Model</span><span class="w"></span>
+<span class="k">  endfunction </span><span class="n">hbc1d_Prescribed_Model</span><span class="w"></span>
 </pre></div>
 
     </section>
@@ -189,14 +207,14 @@
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 Anti-Capitalist Software License
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 3-Clause BSD with attribution
 </p>
         </div>
         <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-01 17:17            </p>
+ on 2024-10-11 12:50            </p>
         </div>
       </div>
       <br>

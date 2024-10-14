@@ -83,11 +83,11 @@
   <div class="col-lg-12">
 <div class="well well-sm">
   <ul class="list-inline" style="margin-bottom:0px;display:inline">
-    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.0% of total for modules and submodules.">118 statements</a>
+    title=" 1.1% of total for modules and submodules.">128 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_1D.f90"> Source File</a></li>
   </ul>
@@ -125,6 +125,7 @@
     <div id="subs-0" class="panel-collapse collapse">
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-free_mesh1d">Free_Mesh1D</a>
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-init_mesh1d">Init_Mesh1D</a>
+      <a class="list-group-item" href="../module/self_mesh_1d.html#proc-resetboundaryconditiontype_mesh1d">ResetBoundaryConditionType_Mesh1D</a>
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-uniformblockmesh_mesh1d">UniformBlockMesh_Mesh1D</a>
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-write_mesh1d">Write_Mesh1D</a>
     </div>
@@ -144,15 +145,15 @@
       <ul class="list-group">
       <li class="list-group-item">
   <ul class="list-inline">
-    <li><a href='../module/self_data.html'>SELF_Data</a></li>
-    <li><a href='../module/self_supportroutines.html'>SELF_SupportRoutines</a></li>
-    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
-    <li><a href='../module/self_hdf5.html'>SELF_HDF5</a></li>
     <li>HDF5</li>
-    <li><a href='../module/self_lagrange~2.html'>SELF_Lagrange</a></li>
+    <li><a href='../module/self_lagrange.html'>SELF_Lagrange</a></li>
+    <li><a href='../module/self_hdf5.html'>SELF_HDF5</a></li>
+    <li><a href='../module/self_scalar_1d.html'>SELF_Scalar_1D</a></li>
+    <li><a href='../module/self_supportroutines.html'>SELF_SupportRoutines</a></li>
+    <li><a href='../module/self_data.html'>SELF_Data</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
     <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
     <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
-    <li><a href='../module/self_scalar_1d.html'>SELF_Scalar_1D</a></li>
   </ul>
       </li>
       </ul>
@@ -178,6 +179,7 @@
     <div id="subs-1" class="panel-collapse collapse">
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-free_mesh1d">Free_Mesh1D</a>
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-init_mesh1d">Init_Mesh1D</a>
+      <a class="list-group-item" href="../module/self_mesh_1d.html#proc-resetboundaryconditiontype_mesh1d">ResetBoundaryConditionType_Mesh1D</a>
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-uniformblockmesh_mesh1d">UniformBlockMesh_Mesh1D</a>
       <a class="list-group-item" href="../module/self_mesh_1d.html#proc-write_mesh1d">Write_Mesh1D</a>
     </div>
@@ -210,6 +212,11 @@
   <td><span class="anchor" id="variable-bctype~2"></span>integer,</td>
 <td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
   <td><strong>BCType</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bcid"></span>integer,</td>
+<td>public,</td>  <td>dimension(2)</td><td>::</td>
+  <td><strong>bcid</strong></td><td> =</td><td>0</td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-decomp"></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
@@ -292,7 +299,11 @@
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh1d.html#boundprocedure-init~16'>Init</a></strong>  => Init_Mesh1D </td>
        <td></td></tr>
-       <tr><td>procedure, public :: <strong><a href='../type/mesh1d.html#boundprocedure-uniformblockmesh'>UniformBlockMesh</a></strong>  => UniformBlockMesh_Mesh1D </td>
+       <tr><td>procedure, public :: <strong><a href='../type/mesh1d.html#boundprocedure-resetboundaryconditiontype~2'>ResetBoundaryConditionType</a></strong>  => ResetBoundaryConditionType_Mesh1D </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mesh1d.html#boundprocedure-structuredmesh~2'>StructuredMesh</a></strong>  => UniformBlockMesh_Mesh1D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/mesh1d.html#boundprocedure-uniformblockmesh_mesh1d'>UniformBlockMesh_Mesh1D</a></strong>  </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh1d.html#boundprocedure-write_mesh~2'>Write_Mesh</a></strong>  => Write_Mesh1D </td>
        <td></td></tr>
@@ -328,7 +339,7 @@
   </div>
 
       <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-init_mesh1d"></span><h3>public subroutine <a href='../proc/init_mesh1d.html'>Init_Mesh1D</a>(this, nGeo, nElem, nNodes, nBCs)</h3></div>
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_mesh1d"></span><h3>public subroutine <a href='../proc/init_mesh1d.html'>Init_Mesh1D</a>(this, nElem, nNodes, nBCs)</h3></div>
   <div class="panel-body">
            
 <h4>Arguments</h4>      <table class="table table-striped varlist">
@@ -339,12 +350,6 @@
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
-</tr>
-<tr>
-  <td><span class="anchor" ></span>integer,</td>
-<td>intent(in)</td>
-  <td></td>  <td></td><td>::</td>
-  <td><strong>nGeo</strong></td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" ></span>integer,</td>
@@ -372,7 +377,42 @@
   </div>
 
       <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-uniformblockmesh_mesh1d"></span><h3>public subroutine <a href='../proc/uniformblockmesh_mesh1d.html'>UniformBlockMesh_Mesh1D</a>(this, nGeo, nElem, x)</h3></div>
+  <div class="panel-heading codesum"><span class="anchor" id="proc-resetboundaryconditiontype_mesh1d"></span><h3>public subroutine <a href='../proc/resetboundaryconditiontype_mesh1d.html'>ResetBoundaryConditionType_Mesh1D</a>(this, leftbc, rightbc)</h3></div>
+  <div class="panel-body">
+       
+<p>This method can be used to reset all of the boundary elements
+boundary condition type to the desired value.</p><a href="../proc/resetboundaryconditiontype_mesh1d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>leftbc</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rightbc</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-uniformblockmesh_mesh1d"></span><h3>public subroutine <a href='../proc/uniformblockmesh_mesh1d.html'>UniformBlockMesh_Mesh1D</a>(this, nElem, x)</h3></div>
   <div class="panel-body">
            
 <h4>Arguments</h4>      <table class="table table-striped varlist">
@@ -383,12 +423,6 @@
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
-</tr>
-<tr>
-  <td><span class="anchor" ></span>integer,</td>
-<td>intent(in)</td>
-  <td></td>  <td></td><td>::</td>
-  <td><strong>nGeo</strong></td><td></td>
 </tr>
 <tr>
   <td><span class="anchor" ></span>integer,</td>
@@ -446,14 +480,14 @@
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 Anti-Capitalist Software License
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2024 3-Clause BSD with attribution
 </p>
         </div>
         <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-01 17:17            </p>
+ on 2024-10-11 12:50            </p>
         </div>
       </div>
       <br>

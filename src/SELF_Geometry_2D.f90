@@ -54,6 +54,7 @@ module SELF_Geometry_2D
     procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMQuad
     procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
+    procedure,public :: WriteTecplot => WriteTecplot_SEMQuad
 
   endtype SEMQuad
 
@@ -256,5 +257,51 @@ contains
     call myGeom%CalculateContravariantBasis()
 
   endsubroutine CalculateMetricTerms_SEMQuad
+
+  subroutine WriteTecplot_SEMQuad(this,filename)
+    implicit none
+    class(SEMQuad),intent(inout) :: this
+    character(*),intent(in) :: filename
+    ! Local
+    character(8) :: zoneID
+    integer :: fUnit
+    integer :: iEl,i,j,iVar
+    character(LEN=self_TecplotHeaderLength) :: tecHeader
+    character(LEN=self_FormatLength) :: fmat
+
+    open(UNIT=NEWUNIT(fUnit), &
+         FILE=trim(filename), &
+         FORM='formatted', &
+         STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y", "eID"'
+
+    write(fUnit,*) trim(tecHeader)
+
+    ! Create format statement
+    write(fmat,*) 3
+    fmat = '('//trim(fmat)//'(ES16.7E3,1x))'
+
+    do iEl = 1,this%x%nElem
+
+      ! TO DO :: Get the global element ID
+      write(zoneID,'(I8.8)') iEl
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%x%interp%N+1, &
+        ', J=',this%x%interp%N+1
+
+      do j = 1,this%x%interp%N+1
+        do i = 1,this%x%interp%N+1
+
+          write(fUnit,fmat) this%x%interior(i,j,iEl,1,1), &
+            this%x%interior(i,j,iEl,1,2),real(iEl,prec)
+
+        enddo
+      enddo
+
+    enddo
+
+    close(UNIT=fUnit)
+
+  endsubroutine WriteTecplot_SEMQuad
 
 endmodule SELF_Geometry_2D

@@ -109,6 +109,8 @@ module SELF_Mesh_2D_t
     procedure,public :: Init => Init_Mesh2D_t
     procedure,public :: Free => Free_Mesh2D_t
 
+    generic,public :: StructuredMesh => UniformStructuredMesh_Mesh2D_t
+    procedure,private :: UniformStructuredMesh_Mesh2D_t
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D_t
 
     procedure,public :: Read_HOPr => Read_HOPr_Mesh2D_t
@@ -215,6 +217,237 @@ contains
     enddo
 
   endsubroutine ResetBoundaryConditionType_Mesh2D_t
+
+  subroutine UniformStructuredMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy,bcids,enableDomainDecomposition)
+  !! 
+  !! Create a structured mesh and store it in SELF's unstructured mesh format.
+  !! The mesh is created in tiles of size (tnx,tny). Tiling is used to determine
+  !! the element ordering.
+  !!
+  !!
+  !!  Input
+  !!    - this : Fresh/empty mesh2d_t object
+  !!    - nxPerTile : The number of elements in the x direction within a tile
+  !!    - nyPerTile : The number of elements in the y direction within a tile
+  !!    - nTileX : The number of tiles in the x direction
+  !!    - nTileY : The number of tiles in the y direction
+  !!    - dx : Element width in the x-direction
+  !!    - dy : Element width in the y-direction
+  !!    - bcids(1:4) : Boundary condition flags for the south, east, north, and west sides of the domain
+  !!    - enableDomainDecomposition : Boolean to determine if domain decomposition is used.
+  !!
+  !!  Output
+  !!    - this : mesh2d_t object with vertices, edges, and element information
+  !!
+  !! Total number of elements in the x-direction is nX = nxPerTile*nTileX
+  !! Total number of elements in the y-direction is nY = nyPerTile*nTileY
+  !!
+  !! Length of the domain in the x-direction is Lx = dx*nX
+  !! Length of the domain in the y-direction is Ly = dy*nY
+  !!
+    implicit none
+    class(Mesh2D_t),intent(out) :: this
+    integer, intent(in) :: nxPerTile
+    integer, intent(in) :: nyPerTile
+    integer, intent(in) :: nTileX
+    integer, intent(in) :: nTileY
+    real(prec), intent(in) :: dx
+    real(prec), intent(in) :: dy
+    integer, intent(in) :: bcids(1:4)
+    logical, optional, intent(in) :: enableDomainDecomposition
+    ! Local
+    integer :: nX, nY, nGeo, nBCs
+    integer :: nGlobalElem
+    integer :: nUniqueSides
+    integer :: nUniqueNodes
+    integer :: nLocalElems
+    integer :: nLocalSides
+    integer :: nLocalNodes
+    real(prec), allocatable :: nodeCoords(:,:,:,:)
+    integer, allocatable :: globalNodeIDs(:,:,:)
+    integer, allocatable :: sideInfo(:,:,:)
+    integer :: i, j, ti, tj
+    integer :: ix, iy, iel
+    integer :: ni, nj
+    integer :: e1,e2
+    integer :: nedges
+
+    if(present(enableDomainDecomposition)) then
+      call this%decomp%init(enableDomainDecomposition)
+    else
+      call this%decomp%init(.false.)
+    endif
+    nX = nTileX*nxPerTile
+    nY = nTileY*nyPerTile
+    nGeo = 1 ! Force the geometry to be linear
+    nBCs = 4 ! Force the number of boundary conditions to 4
+
+    nGlobalElem = nX*nY
+    nUniqueSides = (nX+1)*nY + (nY+1)*nX
+    nUniqueNodes = (nX+1)*(nY+1)
+
+    allocate(nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nGlobalElem))
+    allocate(globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nGlobalElem))
+    allocate(sideInfo(1:5,1:4,1:nGlobalElem))
+
+    do tj = 1,nTileY
+      do ti = 1,nTileX
+        do j = 1,nyPerTile
+          iy = j + nyPerTile*(tj-1)
+          do i = 1,nxPerTile
+            iel = i + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1)))
+            ix = i + nxPerTile*(ti-1) ! nxpertile + nxpertile*(nTileX-1) = nxperTile*nTilex = 1
+            do nj = 1, nGeo+1
+              do ni = 1, nGeo+1
+                nodeCoords(1,ni,nj,iel) = real(ni-1 + ix-1,prec)*dx 
+                nodeCoords(2,ni,nj,iel) = real(nj-1 + iy-1,prec)*dy
+                globalNodeIDs(ni,nj,iel) = ni-1+i + (nxPerTile+1)*( nj-1+j-1 + (nyPerTile+1)*(ti-1 + nTileX*(tj-1)) )
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+
+    ! Fill in edge information
+    !  sideInfo(1:5,iSide,iEl)
+    !    1 - Side Type (currently unused in SELF)
+    !    2 - Global Side ID (Used for message passing. Don't need to change)
+    !    3 - Neighbor Element ID (Can stay the same)
+    !    4 - 10*( neighbor local side )  + flip (Need to recalculate flip)
+    !    5 - Boundary Condition ID (Can stay the same)
+    nedges = 0
+    do tj = 1,nTileY
+      do ti = 1,nTileX
+        do j = 1,nyPerTile
+          do i = 1,nxPerTile
+            iel = i + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1)))
+
+            ! south, iside=1
+            ! Get the corner node ids for this edge
+            ! sideInfo(2,1,iel) = (nc1+nc2)*(nc1+nc2+1)/2 + nc2
+            if(j == 1)then ! southern most part of the tile
+              if(tj == 1)then ! southern most tile
+                nedges = nedges+1
+                sideinfo(2,1,iel) = nedges
+                sideinfo(3,1,iel) = 0 ! Neigbor element (null, boundary condition)
+                sideinfo(4,1,iel) = 0 ! Neighbor side id (null, boundary condition)
+                sideinfo(5,1,iel) = bcids(1) ! Boundary condition id; set from the user input
+              else ! interior tile, but souther most edge of the tile
+                e2 = i + nxPerTile*(nyPerTile-1 + nyPerTile*(ti-1 + nTilex*( tj-2 ))) ! Neigbor element, northernmost element, in tile to the south
+                sideinfo(2,1,iel) = sideInfo(2,3,e2) ! Copy the edge id from neighbor's north edge
+                sideinfo(3,1,iel) = e2
+                sideinfo(4,1,iel) = 10*3 ! Neighbor side id - neighbor to the south, north side (3)
+                sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
+              endif
+            else ! interior to the tile
+              e2 = i + nxPerTile*(j-2 + nyPerTile*(ti-1 + nTilex*( tj-1 ))) ! Neigbor element, inside same tile, to the south
+              sideinfo(2,1,iel) = sideInfo(2,3,e2) ! Copy the edge id from neighbor's north edge
+              sideinfo(3,1,iel) = e2
+              sideinfo(4,1,iel) = 10*3 ! Neighbor side id - neighbor to the south, north side (3)
+              sideinfo(5,1,iel) = 0 ! Boundary condition id; (null, interior edge)
+            endif
+
+            ! east, iside=2
+            ! Get the corner node ids for this edge
+            ! East edges are always new edges, due to the way we are traversing the grid
+            nedges = nedges + 1
+            sideinfo(2,2,iel) = nedges
+            if(i == nxPerTile)then ! eastern most part of the tile
+              if(ti == nTileX)then ! eastern most tile
+                sideinfo(3,2,iel) = 0 ! Neigbor element (null, boundary condition)
+                sideinfo(4,2,iel) = 0 ! Neighbor side id (null, boundary condition)
+                sideinfo(5,2,iel) = bcids(2) ! Boundary condition id; eastern boundary set from the user input
+              else ! interior tile, but eastern most edge of the tile
+                sideinfo(3,2,iel) = 1 + nxPerTile*(j-1 + nyPerTile*(ti + nTilex*( tj-1))) ! Neigbor element, westernnmost element, in tile to the east
+                sideinfo(4,2,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
+                sideinfo(5,2,iel) = 0 ! Boundary condition id; (null, interior edge)
+              endif
+            else ! interior to the tile
+              sideinfo(3,2,iel) = i+1 + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the east
+              sideinfo(4,2,iel) = 10*4 ! Neighbor side id - neighbor to the east, west side (4)
+              sideinfo(5,2,iel) = 0 ! Boundary condition id; (null, interior edge)
+            endif
+
+            ! north, iside=3
+            ! Get the corner node ids for this edge
+            ! East edges are always new edges, due to the way we are traversing the grid
+            nedges = nedges + 1
+            sideinfo(2,3,iel) = nedges
+            if(j == nyPerTile)then ! northern most part of the tile
+              if(tj == nTileY)then ! northern most tile
+                sideinfo(3,3,iel) = 0 ! Neigbor element (null, boundary condition)
+                sideinfo(4,3,iel) = 0 ! Neighbor side id (null, boundary condition)
+                sideinfo(5,3,iel) = bcids(3) ! Boundary condition id; set from the user input
+              else ! interior tile, but northern most edge of the tile
+                sideinfo(3,3,iel) =  i + nxPerTile*(nyPerTile*(ti-1 + nTilex*( tj))) ! Neigbor element, southernmost element in tile to the north
+                sideinfo(4,3,iel) = 10*1 ! Neighbor side id - neighbor to the north, south side (1)
+                sideinfo(5,3,iel) = 0 ! Boundary condition id; (null, interior edge)
+              endif
+            else ! interior to the tile
+              sideinfo(3,3,iel) =  i + nxPerTile*(j + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the north
+              sideinfo(4,3,iel) = 10*1 ! Neighbor side id - neighbor to the north, south side (1)
+              sideinfo(5,3,iel) = 0 ! Boundary condition id; (null, interior edge)
+            endif
+
+            ! west, iside=4
+            ! Get the corner node ids for this edge
+            ! n1 = globalNodeIds(this%CGNSCornerMap(1,1),this%CGNSCornerMap(2,1),iel)
+            ! n2 = globalNodeIds(this%CGNSCornerMap(1,4),this%CGNSCornerMap(2,4),iel)
+            ! nc1 = min(n1,n2)
+            ! nc2 = max(n1,n2)
+            ! sideInfo(2,1,iel) = (nc1+nc2)*(nc1+nc2+1)/2 + nc2
+            if(i == 1)then ! western most part of the tile
+              if(ti == 1)then ! western most tile
+                nedges = nedges+1
+                sideinfo(2,4,iel) = nedges
+                sideinfo(3,4,iel) = 0 ! Neigbor element (null, boundary condition)
+                sideinfo(4,4,iel) = 0 ! Neighbor side id (null, boundary condition)
+                sideinfo(5,4,iel) = bcids(4) ! Boundary condition id; eastern boundary set from the user input
+              else ! interior tile, but western most edge of the tile
+                e2 = nxPerTile + nxPerTile*(j-1 + nyPerTile*(ti-2 + nTilex*( tj-1))) ! Neigbor element, easternnmost element in tile to the west
+                sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+                sideinfo(3,4,iel) = e2
+                sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
+                sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
+              endif
+            else ! interior to the tile
+              e2 = i-1 + nxPerTile*(j-1 + nyPerTile*(ti-1 + nTilex*( tj-1))) ! Neigbor element, inside same tile, to the west
+              sideinfo(3,4,iel) = sideInfo(2,2,e2) ! Copy the edge id from neighbor's east edge
+              sideinfo(3,4,iel) = e2
+              sideinfo(4,4,iel) = 10*2 ! Neighbor side id - neighbor to the west, east side (2)
+              sideinfo(5,4,iel) = 0 ! Boundary condition id; (null, interior edge)
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+    if(nedges /= nUniqueSides )then
+      print*, "nedges not equal to nuniquesides, wtf : ", nedges, nUniqueSides
+    endif
+
+    call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
+
+    e1 = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    e2 = this%decomp%offsetElem(this%decomp%rankId+2)
+    nLocalElems = e2-e1+1
+                   
+    nLocalSides = nLocalElems*4
+    nLocalNodes = nLocalElems*4
+    call this%Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
+    this%nUniqueSides = nUniqueSides
+    this%quadrature = UNIFORM
+
+    this%nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nLocalElems) = nodeCoords(1:2,1:nGeo+1,1:nGeo+1,e1:e2)
+    this%globalNodeIDs(1:nGeo+1,1:nGeo+1,1:nLocalElems) = globalNodeIDs(1:nGeo+1,1:nGeo+1,e1:e2)
+    this%sideInfo(1:5,1:4,1:nLocalElems) = sideInfo(1:5,1:4,e1:e2)
+
+    deallocate(nodeCoords)
+    deallocate(globalNodeIDs)
+    deallocate(sideInfo)
+
+  endsubroutine UniformStructuredMesh_Mesh2D_t
 
   subroutine Read_HOPr_Mesh2D_t(this,meshFile,enableDomainDecomposition)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
