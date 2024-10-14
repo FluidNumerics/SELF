@@ -260,7 +260,8 @@ AMD    | Instinct MI100 | gfx908  |
 AMD    | Instinct MI210 | gfx90a  |
 AMD    | Instinct MI250 | gfx90a  |
 AMD    | Instinct MI250x | gfx90a  |
-AMD    | Radeon Pro W7900 | gfx90a  |
+AMD    | Radeon Pro W7900 | gfx1100  |
+AMD    | Radeon Pro W7800 | gfx1100  |
 Nvidia | Volta (V100) | sm_70, sm_72 |
 Nvidia | Ampere (A100) | sm_80, sm_86, sm_87 |
 Nvidia | Hopper (H100) | sm_90, sm_90a |

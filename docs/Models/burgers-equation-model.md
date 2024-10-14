@@ -1,7 +1,7 @@
 # Viscous Burgers Equation
 
 ## Definition
-The [`SELF_Burgers1D_t` module](../ford/module/self_burgers1d_t.html) defines the [Burgers1D_t class](ford/type/burgers1d_t.html) class. In SELF, models are posed in the form of a generic conservation law
+The [`SELF_Burgers1D_t` module](../ford/module/self_burgers1d_t.html) defines the [`Burgers1D_t` class](ford/type/burgers1d_t.html). In SELF, models are posed in the form of a generic conservation law
 
 \begin{equation}
 \vec{s}_t + \nabla \cdot \overleftrightarrow{f} = \vec{q}
