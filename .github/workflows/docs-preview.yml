@@ -1,8 +1,8 @@
 name: Publish documentation
 on:
-  push:
+  pull_request:
     branches:
-      - main
+        - main
 
 jobs:
   build:
@@ -26,9 +26,3 @@ jobs:
           python -m pip install --upgrade pip
           ford self.md
 
-      - name: Deploy docs
-        uses: mhausenblas/mkdocs-deploy-gh-pages@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG_FILE: mkdocs.yml
-          REQUIREMENTS: docs/requirements.txt
