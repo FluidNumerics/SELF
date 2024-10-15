@@ -137,7 +137,7 @@ contains
     call gpuCheck(hipFree(this%sideInfo_gpu))
 
   endsubroutine Free_Mesh3D
-  
+
   subroutine UpdateDevice_Mesh3D(this)
     implicit none
     class(Mesh3D),intent(inout) :: this

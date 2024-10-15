@@ -65,7 +65,7 @@ contains
     integer :: j
     integer :: k
     integer :: e2,s2,bcid
-    character(LEN=255) :: WORKSPACE
+    integer :: bcids(1:6)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -74,8 +74,17 @@ contains
                      targetNodeType=UNIFORM)
 
     ! Create a uniform block mesh
-    call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",enableDomainDecomposition=.true.)
+    bcids(1:6) = [SELF_BC_PRESCRIBED, & ! Bottom
+                  SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
+                  SELF_BC_PRESCRIBED, & ! West
+                  SELF_BC_PRESCRIBED] ! Top
+
+    call mesh%StructuredMesh(2,2,2, &
+                             2,2,2, &
+                             0.1_prec,0.1_prec,0.1_prec, &
+                             bcids)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
@@ -88,7 +97,7 @@ contains
     call f%SetName(1,"f")
     call df%SetName(1,"df")
 
-    call f%SetEquation(1,'f = x*y')
+    call f%SetEquation(1,'f = x*y*z')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
@@ -104,8 +113,6 @@ contains
     do iel = 1,f%nElem
       do iside = 1,6
         e2 = mesh%sideInfo(3,iside,iel) ! Neighboring Element ID
-        s2 = mesh%sideInfo(4,iside,iel)/10
-        bcid = mesh%sideInfo(5,iside,iel)
         if(e2 == 0) then
           do j = 1,f%interp%N+1
             do i = 1,f%interp%N+1
@@ -136,15 +143,21 @@ contains
         do j = 1,controlDegree+1
           do i = 1,controlDegree+1
             df%interior(i,j,k,iel,1,1) = abs(df%interior(i,j,k,iel,1,1)- &
-                                             geometry%x%interior(i,j,k,iel,1,2)) ! df/dx = y*z
+                                             geometry%x%interior(i,j,k,iel,1,2)* &
+                                             geometry%x%interior(i,j,k,iel,1,3)) ! df/dx = y*z
             df%interior(i,j,k,iel,1,2) = abs(df%interior(i,j,k,iel,1,2)- &
-                                             geometry%x%interior(i,j,k,iel,1,1)) ! df/dy = x*z
-            df%interior(i,j,k,iel,1,3) = abs(df%interior(i,j,k,iel,1,3)) ! df/dy = x*y
+                                             geometry%x%interior(i,j,k,iel,1,1)* &
+                                             geometry%x%interior(i,j,k,iel,1,3)) ! df/dy = x*z
+            df%interior(i,j,k,iel,1,3) = abs(df%interior(i,j,k,iel,1,3)- &
+                                             geometry%x%interior(i,j,k,iel,1,1)* &
+                                             geometry%x%interior(i,j,k,iel,1,2)) ! df/dy = x*y
           enddo
         enddo
       enddo
     enddo
-    print*,"maxval(df_error)",maxval(df%interior),tolerance
+    print*,"maxval(df_error)",maxval(df%interior(:,:,:,:,:,1)),tolerance
+    print*,"maxval(df_error)",maxval(df%interior(:,:,:,:,:,2)),tolerance
+    print*,"maxval(df_error)",maxval(df%interior(:,:,:,:,:,3)),tolerance
 
     if(maxval(df%interior) <= tolerance) then
       r = 0

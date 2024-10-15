@@ -29,13 +29,13 @@ program test
   implicit none
   integer :: exit_code
 
-  exit_code = mappedscalarbrgradient_3d_linear()
+  exit_code = mappedscalarbrgradient_3d_constant()
   if(exit_code /= 0) then
     stop exit_code
   endif
 
 contains
-  integer function mappedscalarbrgradient_3d_linear() result(r)
+  integer function mappedscalarbrgradient_3d_constant() result(r)
 
     use SELF_Constants
     use SELF_Lagrange
@@ -63,9 +63,8 @@ contains
     integer :: iside
     integer :: i
     integer :: j
-    integer :: k
     integer :: e2,s2,bcid
-    character(LEN=255) :: WORKSPACE
+    integer :: bcids(1:6)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -74,9 +73,17 @@ contains
                      targetNodeType=UNIFORM)
 
     ! Create a uniform block mesh
-    call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",enableDomainDecomposition=.true.)
+    bcids(1:6) = [SELF_BC_PRESCRIBED, & ! Bottom
+                  SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
+                  SELF_BC_PRESCRIBED, & ! West
+                  SELF_BC_PRESCRIBED] ! Top
 
+    call mesh%StructuredMesh(5,5,5, &
+                             2,2,2, &
+                             0.1_prec,0.1_prec,0.1_prec, &
+                             bcids)
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
     call geometry%GenerateFromMesh(mesh)
@@ -85,10 +92,7 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    call f%SetName(1,"f")
-    call df%SetName(1,"df")
-
-    call f%SetEquation(1,'f = x*y')
+    call f%SetEquation(1,'f = 1.0')
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
@@ -113,11 +117,14 @@ contains
             enddo
           enddo
         endif
+
+        if(minval(f%extBoundary(:,:,iside,iel,1)) < 1.0_prec) then
+          print*,"wrong extBoundary at (iside,iel, e2,s2,bcid) ",iside,iel,e2,s2,bcid
+        endif
       enddo
     enddo
 
     print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
-
     call f%UpdateDevice()
     call f%AverageSides()
     call f%UpdateHost()
@@ -131,19 +138,7 @@ contains
     call df%UpdateHost()
 
     ! Calculate diff from exact
-    do iel = 1,mesh%nelem
-      do k = 1,controlDegree+1
-        do j = 1,controlDegree+1
-          do i = 1,controlDegree+1
-            df%interior(i,j,k,iel,1,1) = abs(df%interior(i,j,k,iel,1,1)- &
-                                             geometry%x%interior(i,j,k,iel,1,2)) ! df/dx = y*z
-            df%interior(i,j,k,iel,1,2) = abs(df%interior(i,j,k,iel,1,2)- &
-                                             geometry%x%interior(i,j,k,iel,1,1)) ! df/dy = x*z
-            df%interior(i,j,k,iel,1,3) = abs(df%interior(i,j,k,iel,1,3)) ! df/dy = x*y
-          enddo
-        enddo
-      enddo
-    enddo
+    df%interior = abs(df%interior-0.0_prec)
     print*,"maxval(df_error)",maxval(df%interior),tolerance
 
     if(maxval(df%interior) <= tolerance) then
@@ -160,5 +155,5 @@ contains
     call f%free()
     call df%free()
 
-  endfunction mappedscalarbrgradient_3d_linear
+  endfunction mappedscalarbrgradient_3d_constant
 endprogram test
