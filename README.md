@@ -7,8 +7,6 @@ Copyright 2017-2024 Fluid Numerics LLC
 
 [![linux-gnu-multithreaded-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-multithreaded-cmake.yml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-multithreaded-cmake.yml)
 
-[![linux-amdflang-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml)
-
 ## Licensing
 SELF is licensed for use under a [3 Clause BSD with attribution license](./LICENSE). [Fluid Numerics](https://www.fluidnumerics.com) is a small family-owned business. We want to make SELF available to folks who want to build conservation laws that run on a wide range of platforms. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. 
 
