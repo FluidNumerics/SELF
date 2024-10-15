@@ -121,7 +121,6 @@ contains
     type(Scalar1D) :: xLinear
     type(Scalar1D) :: xGeo
 
-
     ngeo = 1
 
     nNodes = nElem*(nGeo+1)

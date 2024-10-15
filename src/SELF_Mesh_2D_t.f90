@@ -310,7 +310,9 @@ contains
               do ni = 1,nGeo+1
                 nodeCoords(1,ni,nj,iel) = real(ni-1+ix-1,prec)*dx
                 nodeCoords(2,ni,nj,iel) = real(nj-1+iy-1,prec)*dy
-                globalNodeIDs(ni,nj,iel) = ni-1+i+(nxPerTile+1)*(nj-1+j-1+(nyPerTile+1)*(ti-1+nTileX*(tj-1)))
+                globalNodeIDs(ni,nj,iel) = ni-1+i+(nxPerTile+1)*( &
+                                           nj-1+j-1+(nyPerTile+1)*( &
+                                           ti-1+nTileX*(tj-1)))
               enddo
             enddo
           enddo
@@ -432,9 +434,6 @@ contains
         enddo
       enddo
     enddo
-    if(nedges /= nUniqueSides) then
-      print*,"nedges not equal to nuniquesides, wtf : ",nedges,nUniqueSides
-    endif
 
     call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
 

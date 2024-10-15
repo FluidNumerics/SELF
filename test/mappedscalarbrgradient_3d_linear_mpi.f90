@@ -106,7 +106,7 @@ contains
         e2 = mesh%sideInfo(3,iside,iel) ! Neighboring Element ID
         s2 = mesh%sideInfo(4,iside,iel)/10
         bcid = mesh%sideInfo(5,iside,iel)
-        if(s2 == 0) then
+        if(e2 == 0) then
           do j = 1,f%interp%N+1
             do i = 1,f%interp%N+1
               f%extBoundary(i,j,iside,iel,1) = f%boundary(i,j,iside,iel,1)

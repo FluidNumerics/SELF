@@ -87,12 +87,12 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for modules and submodules.">6 statements</a>
+    title=" 0.7% of total for modules and submodules.">90 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_3D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/self_mesh_3d.f90~2.html'>SELF_Mesh_3D.f90</a></li>
+     <li><a href='../sourcefile/self_mesh_3d.f90.html'>SELF_Mesh_3D.f90</a></li>
      <li class="active">SELF_Mesh_3D</li>
   </ol>
 </div>
@@ -115,7 +115,17 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../module/self_mesh_3d~2.html#type-mesh3d~2">Mesh3D</a>
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#type-mesh3d">Mesh3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#proc-free_mesh3d">Free_Mesh3D</a>
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#proc-init_mesh3d">Init_Mesh3D</a>
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#proc-updatedevice_mesh3d">UpdateDevice_Mesh3D</a>
     </div>
   </div>
 </div>
@@ -134,6 +144,8 @@
       <li class="list-group-item">
   <ul class="list-inline">
     <li><a href='../module/self_mesh_3d_t.html'>SELF_Mesh_3D_t</a></li>
+    <li><a href='../module/self_gpu~2.html'>SELF_GPU</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
   </ul>
       </li>
       </ul>
@@ -149,7 +161,17 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../module/self_mesh_3d~2.html#type-mesh3d~2">Mesh3D</a>
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#type-mesh3d">Mesh3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#proc-free_mesh3d">Free_Mesh3D</a>
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#proc-init_mesh3d">Init_Mesh3D</a>
+      <a class="list-group-item" href="../module/self_mesh_3d~2.html#proc-updatedevice_mesh3d">UpdateDevice_Mesh3D</a>
     </div>
   </div>
 </div>
@@ -165,7 +187,7 @@
     <section>
      <h2>Derived Types</h2>
      <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-mesh3d~2"></span><h3>type, public, extends(<a href='../type/mesh3d_t.html'>Mesh3D_t</a>) :: <a href='../type/mesh3d~2.html'>Mesh3D</a>  </h3></div>
+  <div class="panel-heading codesum"><span class="anchor" id="type-mesh3d"></span><h3>type, public, extends(<a href='../type/mesh3d_t.html'>Mesh3D_t</a>) :: <a href='../type/mesh3d.html'>Mesh3D</a>  </h3></div>
   <div class="panel-body">
      <h4>Components</h4>
     <table class="table table-striped varlist">
@@ -267,6 +289,11 @@
   <td><strong>sideInfo</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
+  <td><span class="anchor" id="variable-sideinfo_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>sideInfo_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
   <td><span class="anchor" id="variable-sidemap"></span>integer,</td>
 <td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
   <td><strong>sideMap</strong></td><td></td><td></td><td></td>
@@ -278,15 +305,19 @@
      <h4>Type-Bound Procedures</h4>
       <table class="table table-striped varlist">
       <tbody>
-       <tr><td>procedure, public :: <strong><a href='../type/mesh3d_t.html#boundprocedure-free~18'>Free</a></strong>  => Free_Mesh3D_t </td>
+       <tr><td>procedure, public :: <strong><a href='../type/mesh3d.html#boundprocedure-free~28'>Free</a></strong>  => Free_Mesh3D </td>
        <td></td></tr>
-       <tr><td>procedure, public :: <strong><a href='../type/mesh3d_t.html#boundprocedure-init~18'>Init</a></strong>  => Init_Mesh3D_t </td>
+       <tr><td>procedure, public :: <strong><a href='../type/mesh3d.html#boundprocedure-init~27'>Init</a></strong>  => Init_Mesh3D </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh3d_t.html#boundprocedure-read_hopr~2'>Read_HOPr</a></strong>  => Read_HOPr_Mesh3D_t </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh3d_t.html#boundprocedure-recalculateflip~2'>RecalculateFlip</a></strong>  => RecalculateFlip_Mesh3D_t </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh3d_t.html#boundprocedure-resetboundaryconditiontype~3'>ResetBoundaryConditionType</a></strong>  => ResetBoundaryConditionType_Mesh3D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mesh3d.html#boundprocedure-structuredmesh~5'>StructuredMesh</a></strong>  => UniformStructuredMesh_Mesh3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mesh3d.html#boundprocedure-updatedevice~16'>UpdateDevice</a></strong>  => UpdateDevice_Mesh3D </td>
        <td></td></tr>
        <tr><td>procedure, public :: <strong><a href='../type/mesh3d_t.html#boundprocedure-write_mesh~3'>Write_Mesh</a></strong>  => Write_Mesh3D_t </td>
        <td></td></tr>
@@ -299,6 +330,100 @@
   <br>
     
 
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_mesh3d"></span><h3>public subroutine <a href='../proc/free_mesh3d.html'>Free_Mesh3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_mesh3d"></span><h3>public subroutine <a href='../proc/init_mesh3d.html'>Init_Mesh3D</a>(this, nGeo, nElem, nSides, nNodes, nBCs)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nGeo</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nSides</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nNodes</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nBCs</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-updatedevice_mesh3d"></span><h3>public subroutine <a href='../proc/updatedevice_mesh3d.html'>UpdateDevice_Mesh3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
     
     </div>
   </div>
@@ -315,7 +440,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-11 12:50            </p>
+ on 2024-10-14 21:56            </p>
         </div>
       </div>
       <br>
