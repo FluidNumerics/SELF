@@ -63,9 +63,9 @@ The tiled layout is convenient for domain decomposition, when you are wanting to
 
 In the example below, we create a 2-D mesh with the following attributes
 
-* $2 × 2$ elements for the domain
+* $2 × 2$ tiles for the domain
 * $10 × 10$ elements per tile
-* Each element is has dimensions of $0.05 × 0.05$
+* Each element is has dimensions of $0.05 × 0.05$. The domain dimensions are then $L_x × L_y = 1 × 1$
 * Domain decomposition is enabled
 
 The geometry fields are created from the mesh information and a $7^{th}$ degree interpolant through the Legendre-Gauss points. 
