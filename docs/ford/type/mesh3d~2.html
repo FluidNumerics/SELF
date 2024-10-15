@@ -87,13 +87,13 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 0.2% of total for derived types.</p>Including implementation: 222 statements,  0.5% of total for derived types.">2 statements</a>
+    title="<p> 0.2% of total for derived types.</p>Including implementation: 462 statements,  1.1% of total for derived types.">2 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_3D.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
      <li><a href='../sourcefile/self_mesh_3d.f90~2.html'>SELF_Mesh_3D.f90</a></li>
-     <li><a href='../module/self_mesh_3d~2.html'>SELF_Mesh_3D</a></li>
+     <li><a href='../module/self_mesh_3d.html'>SELF_Mesh_3D</a></li>
      <li class="active">Mesh3D</li>
   </ol>
 </div>
@@ -148,6 +148,8 @@
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-read_hopr~2">Read_HOPr</a>
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-recalculateflip~2">RecalculateFlip</a>
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-resetboundaryconditiontype~3">ResetBoundaryConditionType</a>
+      <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-structuredmesh~7">StructuredMesh</a>
+      <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-updatedevice~10">UpdateDevice</a>
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-write_mesh~3">Write_Mesh</a>
     </div>
   </div>
@@ -207,6 +209,8 @@
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-read_hopr~2">Read_HOPr</a>
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-recalculateflip~2">RecalculateFlip</a>
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-resetboundaryconditiontype~3">ResetBoundaryConditionType</a>
+      <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-structuredmesh~7">StructuredMesh</a>
+      <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-updatedevice~10">UpdateDevice</a>
       <a class="list-group-item" href="../type/mesh3d~2.html#boundprocedure-write_mesh~3">Write_Mesh</a>
     </div>
   </div>
@@ -499,6 +503,120 @@ boundary condition type to the desired value.</p><a href="../proc/resetboundaryc
 </div>
 
      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-structuredmesh~7"></span><h3>generic, public :: <strong>StructuredMesh</strong>  => <a href='../type/mesh3d_t.html#boundprocedure-uniformstructuredmesh_mesh3d_t'>UniformStructuredMesh_Mesh3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/uniformstructuredmesh_mesh3d_t.html'>UniformStructuredMesh_Mesh3D_t</a>(this, nxPerTile, nyPerTile, nzPerTile, nTileX, nTileY, nTileZ, dx, dy, dz, bcids, enableDomainDecomposition)</h3>
+<p>Create a structured mesh and store it in SELF's unstructured mesh format.
+The mesh is created in tiles of size (tnx,tny,tnz). Tiling is used to determine
+the element ordering.</p><a href="../proc/uniformstructuredmesh_mesh3d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh3d_t.html'>Mesh3D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nxPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nyPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nzPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileX</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileY</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileZ</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dy</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dz</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:6)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>logical,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>enableDomainDecomposition</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice~10"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_mesh3d_t.html'>UpdateDevice_Mesh3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatedevice_mesh3d_t.html'>UpdateDevice_Mesh3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh3d_t.html'>Mesh3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-write_mesh~3"></span><h3>procedure, public :: <strong>Write_Mesh</strong>  => <a href='../proc/write_mesh3d_t.html'>Write_Mesh3D_t</a>   </h3></div>
   <ul class="list-group">
       <li class="list-group-item">
@@ -551,7 +669,7 @@ boundary condition type to the desired value.</p><a href="../proc/resetboundaryc
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2024-10-11 12:50            </p>
+ on 2024-10-14 21:56            </p>
         </div>
       </div>
       <br>
