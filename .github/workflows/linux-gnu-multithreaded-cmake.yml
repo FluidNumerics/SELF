@@ -3,21 +3,22 @@ name: linux-gnu-multithreaded-cmake
 on:
   push:
     branches:
-      - master
       - main
     paths-ignore:
+      - 'docs/'
       - 'AUTHORS.md'
       - 'LICENSE.md'
       - 'README.md'
   pull_request:
     paths-ignore:
+      - 'docs/'
       - 'AUTHORS.md'
       - 'LICENSE.md'
       - 'README.md'
 
 jobs:
   linux-tests:
-    timeout-minutes: 30
+    timeout-minutes: 60
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     name: ${{ matrix.os }} - ${{ matrix.fcompiler }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
@@ -80,6 +81,8 @@ jobs:
 
       - name: Set up Spack
         uses: spack/setup-spack@v2
+        with:
+          ref: develop-2024-10-06
 
       - name: Install dependencies in spack environment
         run: |
