@@ -19,11 +19,11 @@ jobs:
 
       - name: Install docs dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r docs/requirements.txt
 
       - name: Generate API docs
         run: |
-          python -m pip install --upgrade pip
           ford self.md
 
       - name: Deploy docs
