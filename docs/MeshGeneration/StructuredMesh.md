@@ -42,7 +42,7 @@ To generate a structured mesh in two dimensions, use the `StructuredMesh` generi
 
 At the moment, only uniformly spaced structured meshes of elements can be generated. This means that all of the elements are of the same width; keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
 
-SELF uses a tiled structured grid. Tiled grids divide the 2-D grid into `nTilex`x`nTiley` tiles of size `nxPerTile`x`nyPerTile` . The width and height of the elements are defined as `dx` and `dy`. With these parameters,
+SELF uses a tiled structured grid. Tiled grids divide the 2-D grid into `nTilex`×`nTiley` tiles of size `nxPerTile`×`nyPerTile` . The width and height of the elements are defined as `dx` and `dy`. With these parameters,
 
 * `nx = nTilex*nxPerTile` is the total number of elements in the x-direction
 * `ny = nTiley*nyPerTile` is the total number of elements in the y-direction
@@ -108,7 +108,7 @@ To generate a structured mesh in three dimensions, use the `StructuredMesh` gene
 
 At the moment, only uniformly spaced structured meshes of elements can be generated. This means that all of the elements are of the same length, width, and height; though, the length, width, and height can each be their own value. Keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
 
-SELF uses a tiled structured grid. Tiled grids divide the 3-D grid into `nTilex`x`nTiley`x`nTilez` tiles of size `nxPerTile`x`nyPerTile`x`nzPerTile` . The length, width, and height of the elements are defined as `dx`, `dy`, and `dz` respectively. With these parameters,
+SELF uses a tiled structured grid. Tiled grids divide the 3-D grid into `nTilex`×`nTiley`×`nTilez` tiles of size `nxPerTile`×`nyPerTile`×`nzPerTile` . The length, width, and height of the elements are defined as `dx`, `dy`, and `dz` respectively. With these parameters,
 
 * `nx = nTilex*nxPerTile` is the total number of elements in the x-direction
 * `ny = nTiley*nyPerTile` is the total number of elements in the y-direction
