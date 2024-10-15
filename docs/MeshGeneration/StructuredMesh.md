@@ -7,7 +7,7 @@ Although SELF uses unstructured mesh data structures, we have provided methods t
 ## One Dimension (1-D)
 In one dimension, the only mesh we use is a structured mesh. To generate a structured mesh in one dimension, use the `StructuredMesh` generic in the [`Mesh1D`](../ford/type/mesh1d.html) class. 
 
-At the moment, only uniformly space structured meshes of elements can be generated. This means that all of the elements are of the same width; keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
+At the moment, only uniformly spaced structured meshes of elements can be generated. This means that all of the elements are of the same width; keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
 
 To generate a structured grid in 1-D, you need to provide the number of elements and the left and right endpoints of the mesh. 
 
@@ -40,7 +40,7 @@ Once the geometry is initialized, the physical positions and metric terms can be
 ## Two Dimensions (2-D)
 To generate a structured mesh in two dimensions, use the `StructuredMesh` generic in the [`Mesh2D`](../ford/type/mesh2d.html) class. 
 
-At the moment, only uniformly space structured meshes of elements can be generated. This means that all of the elements are of the same width; keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
+At the moment, only uniformly spaced structured meshes of elements can be generated. This means that all of the elements are of the same width; keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
 
 SELF uses a tiled structured grid. Tiled grids divide the 2-D grid into `nTilex`x`nTiley` tiles of size `nxPerTile`x`nyPerTile` . The width and height of the elements are defined as `dx` and `dy`. With these parameters,
 
@@ -106,7 +106,7 @@ Once the geometry is initialized, the physical positions and metric terms can be
 ## Three Dimensions (3-D)
 To generate a structured mesh in three dimensions, use the `StructuredMesh` generic in the [`Mesh3D`](../ford/type/mesh3d.html) class. 
 
-At the moment, only uniformly space structured meshes of elements can be generated. This means that all of the elements are of the same length, width, and height; though, the length, width, and height can each be their own value. Keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
+At the moment, only uniformly spaced structured meshes of elements can be generated. This means that all of the elements are of the same length, width, and height; though, the length, width, and height can each be their own value. Keep in mind that within each element, there is a quadrature grid. The points in the quadrature grid are spaced so that spectral accuracy is guaranteed.
 
 SELF uses a tiled structured grid. Tiled grids divide the 3-D grid into `nTilex`x`nTiley`x`nTilez` tiles of size `nxPerTile`x`nyPerTile`x`nzPerTile` . The length, width, and height of the elements are defined as `dx`, `dy`, and `dz` respectively. With these parameters,
 
