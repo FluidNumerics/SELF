@@ -29,56 +29,67 @@ program test
   implicit none
   integer :: exit_code
 
-  exit_code = mappedscalarbrderivative_1d_constant()
+  exit_code = mappedscalarbrgradient_2d_constant()
   if(exit_code /= 0) then
     stop exit_code
   endif
 
 contains
-  integer function mappedscalarbrderivative_1d_constant() result(r)
+  integer function mappedscalarbrgradient_2d_constant() result(r)
+
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_MappedScalar_1D
-    use SELF_Mesh_1D
-    use SELF_Geometry_1D
+    use SELF_Mesh_2D
+    use SELF_Geometry_2D
+    use SELF_MappedScalar_2D
+    use SELF_MappedVector_2D
 
     implicit none
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
     integer,parameter :: nvar = 1
-    integer,parameter :: nelem = 100
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-    real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 4.0_prec*10.0_prec**(-3)
 #endif
-    type(MappedScalar1D) :: f
-    type(MappedScalar1D) :: df
     type(Lagrange),target :: interp
-    type(Mesh1D),target :: mesh
-    type(Geometry1D),target :: geometry
+    type(Mesh2D),target :: mesh
+    type(SEMQuad),target :: geometry
+    type(MappedScalar2D) :: f
+    type(MappedVector2D) :: df
+    integer :: iel
+    integer :: iside
+    integer :: i
+    integer :: e2
+    character(LEN=255) :: WORKSPACE
+    integer :: bcids(1:4)
 
-    call mesh%StructuredMesh(nElem=nelem, &
-                             x=(/0.0_prec,10.0_prec/))
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
                      controlNodeType=GAUSS, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
+    ! Create a structured mesh
+    bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
+                  SELF_BC_PRESCRIBED] ! West
+    call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
+
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
     call geometry%GenerateFromMesh(mesh)
 
-    ! Initialize scalars
-    call f%Init(interp,nvar,nelem)
-    call df%Init(interp,nvar,nelem)
+    call f%Init(interp,nvar,mesh%nelem)
+    call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
-    call df%AssociateGeometry(geometry)
 
     call f%SetEquation(1,'f = 1.0')
-    call f%SetInteriorFromEquation(0.0_prec)
+
+    call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
     call f%BoundaryInterp()
@@ -86,25 +97,31 @@ contains
     print*,"min, max (boundary)",minval(f%boundary),maxval(f%boundary)
 
     call f%SideExchange(mesh)
-    ! Set boundary conditions
-    f%extBoundary(1,1,1) = 1.0_prec ! Left most
-    f%extBoundary(2,nelem,1) = 1.0_prec ! Right most
-    print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
+    call f%UpdateHost()
+    ! Set boundary conditions by prolonging the "boundary" attribute to the domain boundaries
+    do iel = 1,f%nElem
+      do iside = 1,4
+        e2 = mesh%sideInfo(3,iside,iel) ! Neighboring Element ID
+        if(e2 == 0) then
+          do i = 1,f%interp%N+1
+            f%extBoundary(i,iside,iel,1) = f%boundary(i,iside,iel,1)
+          enddo
+        endif
+      enddo
+    enddo
 
+    print*,"min, max (extboundary)",minval(f%extBoundary),maxval(f%extBoundary)
     call f%UpdateDevice()
+
     call f%AverageSides()
+
     call f%UpdateHost()
     print*,"min, max (avgboundary)",minval(f%avgboundary),maxval(f%avgboundary)
 
-    ! Compute "fluxes"
-    f%boundarynormal(1,:,:) = -f%avgBoundary(1,:,:) ! Account for left facing normal
-    f%boundarynormal(2,:,:) = f%avgBoundary(2,:,:) ! Account for right facing normal
-
-    call f%UpdateDevice()
 #ifdef ENABLE_GPU
-    call f%MappedDGDerivative(df%interior_gpu)
+    call f%MappedDGGradient(df%interior_gpu)
 #else
-    call f%MappedDGDerivative(df%interior)
+    call f%MappedDGGradient(df%interior)
 #endif
     call df%UpdateHost()
 
@@ -114,19 +131,17 @@ contains
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
-      print*,"Max error : ",maxval(df%interior)
+      print*,"max(error) : ",maxval(df%interior),tolerance
       r = 1
     endif
 
     ! Clean up
     call f%DissociateGeometry()
-    call df%DissociateGeometry()
-
-    call mesh%Free()
     call geometry%Free()
-    call interp%free()
+    call mesh%Free()
+    call interp%Free()
     call f%free()
     call df%free()
 
-  endfunction mappedscalarbrderivative_1d_constant
+  endfunction mappedscalarbrgradient_2d_constant
 endprogram test

@@ -49,9 +49,8 @@ program burgers1d_constant
   ! uniform mesh generator.
   ! The domain is set to x in [0,1]
   ! We use `nelem` elements
-  call mesh%UniformBlockMesh(nGeo=1, &
-                             nElem=nelem, &
-                             x=(/0.0_prec,1.0_prec/))
+  call mesh%StructuredMesh(nElem=nelem, &
+                           x=(/0.0_prec,1.0_prec/))
   call mesh%ResetBoundaryConditionType(SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED)
   ! Create an interpolant
   call interp%Init(N=controlDegree, &

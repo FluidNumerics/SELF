@@ -1,5 +1,5 @@
 # Spectral Element Libraries in Fortran (SELF)
-Copyright 2020-2023 Fluid Numerics LLC
+Copyright 2017-2024 Fluid Numerics LLC
 
 [![codecov](https://codecov.io/gh/FluidNumerics/SELF/branch/main/graph/badge.svg?token=AKKSL5CWK6)](https://codecov.io/gh/FluidNumerics/SELF)
 
@@ -7,12 +7,17 @@ Copyright 2020-2023 Fluid Numerics LLC
 
 [![linux-gnu-multithreaded-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-multithreaded-cmake.yml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-gnu-multithreaded-cmake.yml)
 
-[![linux-amdflang-cmake](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml/badge.svg)](https://github.com/FluidNumerics/SELF/actions/workflows/linux-amdflang-cmake.yaml)
-
 ## Licensing
-SELF is licensed for use under a [non-commercial use visible-source license](./LICENSE). Fluid Numerics is a small family-owned business and wants to make SELF available to researchers for academic use. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. However, since we are interested in protecting our time-and-effort investment in SELF, sale and commercial-use of SELF is prohibited under the license.
+SELF is licensed for use under a [3 Clause BSD with attribution license](./LICENSE). [Fluid Numerics](https://www.fluidnumerics.com) is a small family-owned business. We want to make SELF available to folks who want to build conservation laws that run on a wide range of platforms. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. 
 
-If you are interested in commercial licensure and would like support from Fluid Numerics, reach out to support@fluidnumerics.com
+## How to support this repository
+Continued support of SELF relies on users and customers. Here's a few ways you can support this project:
+
+* Give this repository a star on Github
+* [Open an issue](https://github.com/FluidNumerics/SELF/issues/new/choose) if you have a question or want to report a problem. We want to help!
+* [Subscribe to Fluid Numerics on Youtube](https://www.youtube.com/@FluidNumerics?sub_confirmation=1)
+* [Sponsor this project on Open Collective](https://opencollective.com/opensource-fluidnumerics)
+* [Work with us](https://www.fluidnumerics.com/services)
 
 ## About
 SELF is an object-oriented Fortran library that support the implementation of Spectral Element Methods for solving partial differential equations.
@@ -29,25 +34,24 @@ The following combinations are tested on the main branch of self :
 
 Name | Version | Platform | Build System | Stack | Architecture
 --- | --- | --- | --- | --- | --- |
-GNU Fortran `gfortran` | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64 - gfx90a (MI210)
+GNU Fortran `gfortran` | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3, rocm/6.1.0 | x86_64 - gfx90a (MI210)
 GNU Fortran `gfortran` | 13.2.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 GNU Fortran `gfortran` | 12.3.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
-GNU Fortran `gfortran` | 12.3.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.3 (ucx+rocm), feq-parse/2.2.2, hdf5/1.14.3 | x86_64 - gfx90a (MI210)
+GNU Fortran `gfortran` | 12.3.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.3 (ucx+rocm), feq-parse/2.2.2, hdf5/1.14.3, rocm/6.0.2 | x86_64 - gfx90a (MI210)
 GNU Fortran `gfortran` | 11.4.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 GNU Fortran `gfortran` | 10.5.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 GNU Fortran `gfortran` | 9.5.0 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
-AOMP `amdflang` | 6.1.2 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64 - gfx90a (MI210)
-AOMP `amdflang` | 6.1.2 | Ubuntu 22.04.2 LTS | `cmake` | openmpi/5.0.1, feq-parse/2.2.2, hdf5/1.14.3 | x86_64
 
 
-"Supported" for us means that we test `self` regularly on the platforms listed. Of course, we want to have `self` working on as many platforms as possible; [open an issue](https://github.com/FluidNumerics/SELF/issues/new/choose) if you encounter any problems installing or running `self` on your own platform.
+
+"Supported" for us means that we test `self` regularly on the platforms listed; `self` may work just fine on a different platform. Of course, we want to have `self` working on as many platforms as possible; [open an issue](https://github.com/FluidNumerics/SELF/issues/new/choose) if you encounter any problems installing or running `self` on your own platform.
 
 ## Support
 
 ### Documentation
 
-* [**User & Developer Documentation**](https://fluidnumerics.github.io/SELF)
-* [**API Documentation**](https://fluidnumerics.github.io/SELF/ford/)
+* [**User & Developer Documentation**](https://self.fluidnumerics.com)
+* [**API Documentation**](https://self.fluidnumerics.com/ford/)
 
 
 If you'd like to contribute, see [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
