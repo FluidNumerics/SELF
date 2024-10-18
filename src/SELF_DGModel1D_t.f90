@@ -85,24 +85,23 @@ module SELF_DGModel1D_t
 
 contains
 
-  subroutine Init_DGModel1D_t(this,nvar,mesh,geometry)
+  subroutine Init_DGModel1D_t(this,mesh,geometry)
     implicit none
     class(DGModel1D_t),intent(out) :: this
-    integer,intent(in) :: nvar
     type(Mesh1D),intent(in),target :: mesh
     type(Geometry1D),intent(in),target :: geometry
 
     this%mesh => mesh
     this%geometry => geometry
-    this%nvar = nvar
+    call this%SetNumberOfVariables()
 
-    call this%solution%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%workSol%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%dSdt%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%solutionGradient%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%flux%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%source%Init(geometry%x%interp,nVar,this%mesh%nElem)
-    call this%fluxDivergence%Init(geometry%x%interp,nVar,this%mesh%nElem)
+    call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
 
     call this%solution%AssociateGeometry(geometry)
     call this%solutionGradient%AssociateGeometry(geometry)

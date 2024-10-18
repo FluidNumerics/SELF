@@ -36,6 +36,7 @@ module self_NullDGModel1D_t
     ! Add any additional attributes here that are specific to your model
 
   contains
+    !   procedure :: SetNumberOfVariables => SetNumberOfVariables_NullDGModel1D_t
     !   procedure :: hbc1d_Prescribed => hbc1d_Prescribed_Model
     !   procedure :: hbc1d_Radiation => hbc1d_Generic_Model
     !   procedure :: hbc1d_NoNormalFlow => hbc1d_Generic_Model
@@ -52,6 +53,13 @@ module self_NullDGModel1D_t
   endtype NullDGModel1D_t
 
 contains
+
+  ! subroutine SetNumberOfVariables_NullDGModel1D_t(this)
+  !   implicit none
+  !   class(Model),intent(inout) :: this
+  !     this%nvar = 1
+  ! endsubroutine SetNumberOfVariables_NullDGModel1D_t
+
   ! subroutine SetMetadata_NullDGModel1D_t(this)
   !   implicit none
   !   class(NullDGModel1D_t),intent(inout) :: this

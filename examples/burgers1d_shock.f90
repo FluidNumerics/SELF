@@ -100,7 +100,6 @@ program traveling_shock
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
-  integer,parameter :: nvar = 1
   integer,parameter :: nelem = 10
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 10
@@ -135,7 +134,7 @@ program traveling_shock
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry)
+  call modelobj%Init(mesh,geometry)
   modelobj%gradient_enabled = .true.
   !Set the diffusivity
   modelobj%nu = nu

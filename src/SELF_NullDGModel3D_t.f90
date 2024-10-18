@@ -36,6 +36,7 @@ module self_NullDGModel3D_t
     ! Add any additional attributes here that are specific to your model
 
   contains
+    !   procedure :: SetNumberOfVariables => SetNumberOfVariables_NullDGModel3D_t
     !   procedure :: hbc3d_Prescribed => hbc3d_Generic_Model
     !   procedure :: hbc3d_Radiation => hbc3d_Generic_Model
     !   procedure :: hbc3d_NoNormalFlow => hbc3d_Generic_Model
@@ -52,6 +53,13 @@ module self_NullDGModel3D_t
   endtype NullDGModel3D_t
 
 contains
+
+  ! subroutine SetNumberOfVariables_NullDGModel3D_t(this)
+  !   implicit none
+  !   class(Model),intent(inout) :: this
+  !     this%nvar = 1
+  ! endsubroutine SetNumberOfVariables_NullDGModel3D_t
+
   ! subroutine SetMetadata_NullDGModel3D_t(this)
   !   implicit none
   !   class(NullDGModel3D_t),intent(inout) :: this

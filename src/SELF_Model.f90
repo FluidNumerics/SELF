@@ -114,6 +114,8 @@ module SELF_Model
 
     procedure :: PrintType => PrintType_Model
 
+    procedure :: SetNumberOfVariables => SetNumberOfVariables_Model
+
     procedure :: ForwardStep => ForwardStep_Model
 
     procedure :: Euler_timeIntegrator
@@ -256,6 +258,14 @@ contains
     this%ioIterate = this%ioIterate+1
 
   endsubroutine IncrementIOCounter
+
+  subroutine SetNumberOfVariables_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
+
+      this%nvar = 1
+
+  endsubroutine SetNumberOfVariables_Model
 
   subroutine PrintType_Model(this)
     implicit none
