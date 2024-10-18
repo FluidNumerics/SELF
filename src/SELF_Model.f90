@@ -263,7 +263,7 @@ contains
     implicit none
     class(Model),intent(inout) :: this
 
-      this%nvar = 1
+    this%nvar = 1
 
   endsubroutine SetNumberOfVariables_Model
 

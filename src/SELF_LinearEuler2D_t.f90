@@ -25,9 +25,9 @@
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
 module self_LinearEuler2D_t
-!! This module defines a class that can be used to solve the Linear Euler 
+!! This module defines a class that can be used to solve the Linear Euler
 !! equations in 2-D. The Linear Euler Equations, here, are the Euler equations
-!! linearized about a motionless background state. 
+!! linearized about a motionless background state.
 !!
 !! The conserved variables are
 
@@ -36,7 +36,7 @@ module self_LinearEuler2D_t
 !!     \rho \\
 !!      u \\
 !!      v \\
-!!      p 
+!!      p
 !!  \end{pmatrix}
 !! \end{equation}
 !!
@@ -66,7 +66,6 @@ module self_LinearEuler2D_t
     real(prec) :: c = 1.0_prec ! Sound speed
     real(prec) :: g = 0.0_prec ! gravitational acceleration (y-direction only)
 
-
   contains
     procedure :: SetNumberOfVariables => SetNumberOfVariables_LinearEuler2D_t
     procedure :: SetMetadata => SetMetadata_LinearEuler2D_t
@@ -84,7 +83,7 @@ contains
     implicit none
     class(LinearEuler2D_t),intent(inout) :: this
 
-      this%nvar = 4
+    this%nvar = 4
 
   endsubroutine SetNumberOfVariables_LinearEuler2D_t
 
@@ -116,7 +115,7 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec) :: e
 
-    e = 0.5_prec*this%rho0*(s(2)*s(2) + s(3)*(3)) +&
+    e = 0.5_prec*this%rho0*(s(2)*s(2)+s(3)*(3))+ &
         0.5_prec*(s(4)*s(4)/(this%rho0*this%c*this%c))
 
   endfunction entropy_func_LinearEuler2D_t
@@ -130,8 +129,8 @@ contains
     integer :: ivar
 
     exts(1) = s(1) ! density
-    exts(2) = (nhat(2)**2 - nhat(1)**2)*s(2) - 2.0_prec*nhat(1)*nhat(2)*s(3) ! u
-    exts(3) = (nhat(1)**2 - nhat(2)**2)*s(3) - 2.0_prec*nhat(1)*nhat(2)*s(2) ! v
+    exts(2) = (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
+    exts(3) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
     exts(4) = s(4) ! p
 
   endfunction hbc2d_NoNormalFlow_LinearEuler2D_t
@@ -145,8 +144,8 @@ contains
     flux(1,1) = this%rho0*s(2) ! density, x flux ; rho0*u
     flux(1,2) = this%rho0*s(3) ! density, y flux ; rho0*v
     flux(2,1) = s(4)/this%rho0 ! x-velocity, x flux; p/rho0
-    flux(2,2) = 0.0_prec       ! x-velocity, y flux; 0
-    flux(3,1) = 0.0_prec       ! y-velocity, x flux; 0
+    flux(2,2) = 0.0_prec ! x-velocity, y flux; 0
+    flux(3,1) = 0.0_prec ! y-velocity, x flux; 0
     flux(3,2) = s(4)/this%rho0 ! y-velocity, y flux; p/rho0
     flux(4,1) = this%c*this%c*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
     flux(4,2) = this%c*this%c*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
@@ -165,29 +164,28 @@ contains
     ! Local
     real(prec) :: fL(1:this%nvar)
     real(prec) :: fR(1:this%nvar)
-    real(prec) :: u, v, p, c, rho0
+    real(prec) :: u,v,p,c,rho0
 
     u = sL(2)
     v = sL(3)
     p = sL(4)
     rho0 = this%rho0
     c = this%c
-    fL(1) = rho0*(u*nhat(1) + v*nhat(2)) ! density
+    fL(1) = rho0*(u*nhat(1)+v*nhat(2)) ! density
     fL(2) = p*nhat(1)/rho0 ! u
     fL(3) = p*nhat(2)/rho0 ! v
-    fL(4) = rho0*c*c*(u*nhat(1) + v*nhat(2)) ! pressure
+    fL(4) = rho0*c*c*(u*nhat(1)+v*nhat(2)) ! pressure
 
     u = sR(2)
     v = sR(3)
     p = sR(4)
-    fR(1) = rho0*(u*nhat(1) + v*nhat(2)) ! density
+    fR(1) = rho0*(u*nhat(1)+v*nhat(2)) ! density
     fR(2) = p*nhat(1)/rho0 ! u
     fR(3) = p*nhat(2)/rho0 ! v
-    fR(4) = rho0*c*c*(u*nhat(1) + v*nhat(2)) ! pressure
+    fR(4) = rho0*c*c*(u*nhat(1)+v*nhat(2)) ! pressure
 
-    flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4)) + c*(sL(1:4) - sR(1:4))
+    flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+c*(sL(1:4)-sR(1:4))
 
   endfunction riemannflux2d_LinearEuler2D_t
-
 
 endmodule self_LinearEuler2D_t
