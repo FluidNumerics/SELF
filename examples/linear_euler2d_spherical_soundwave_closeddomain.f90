@@ -33,8 +33,8 @@ program LinearEuler_Example
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
-  real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec),parameter :: endtime = 0.5_prec
+  real(prec),parameter :: dt = 2.0_prec*10.0_prec**(-4) ! time-step size
+  real(prec),parameter :: endtime = 1.0_prec
   real(prec),parameter :: iointerval = 0.1_prec
   real(prec) :: e0,ef ! Initial and final entropy
   type(LinearEuler2D) :: modelobj
@@ -49,7 +49,7 @@ program LinearEuler_Example
                 SELF_BC_NONORMALFLOW, & ! North
                 SELF_BC_NONORMALFLOW] ! West
 
-  call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
+  call mesh%StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
