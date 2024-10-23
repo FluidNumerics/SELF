@@ -81,4 +81,4 @@ for pickup_file in pickup_files:
 
 # Create a gif from the png
 print("Generating gif from frames")
-subprocess.run("ffmpeg -framerate 20 -s 1920x1080 -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" -pattern_type glob -i '*.png' -vcodec libx264 -crf 25 -pix_fmt yuv420p linear_euler2d.mp4",shell=True,check=True)
+subprocess.run("ffmpeg -y -framerate 20 -s 1920x1080 -pattern_type glob -i '*.png' -vcodec libx264 -crf 25 -pix_fmt yuv420p -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" linear_euler2d.mp4",shell=True,check=True)
