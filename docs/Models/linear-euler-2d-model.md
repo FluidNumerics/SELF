@@ -69,10 +69,7 @@ When initializing the mesh for your Euler 2D equation solver, you can change the
 * `SELF_BC_NoNormalFlow` to set the external normal velocity to the negative of the interior normal velocity and prolong the density, pressure, and tangential velocity (free slip). This effectively creates a reflecting boundary condition.
 * `SELF_BC_Prescribed` to set a prescribed external state.
 
-!!! note
-    To set a prescribed state as a function of position and time, you can create a type-extension of the `LinearEuler2D` class and override the [`hbc2d_Prescribed`](../ford/proc/hbc2d_prescribed_model.html) 
 
-    
 As an example, when using the built-in structured mesh generator, you can do the following
 
 ```fortran
@@ -95,7 +92,8 @@ integer :: bcids(1:4)
 !!! note
     See the [Structured Mesh documentation](../MeshGeneration/StructuredMesh.md) for details on using the `structuredmesh` procedure
 
-
+!!! note
+    To set a prescribed state as a function of position and time, you can create a type-extension of the `LinearEuler2D` class and override the [`hbc2d_Prescribed`](../ford/proc/hbc2d_prescribed_model.html) 
 
 
 ## Example usage

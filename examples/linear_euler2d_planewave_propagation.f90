@@ -34,9 +34,6 @@ module lineareuler2d_planewave_model
 !! the exact plane wave solution at each model time step.
 !!
 !! See section 5.4.3 of D. A. Kopriva, "Implementing Spectral Methods for Partial Differential Equations" (2009)
-!!
-!! The exact solution is derived using method of images, assuming we have a no-normal-flow boundary condition
-!! on the "eastern" boundary of the domain.
 
   use self_lineareuler2d
 
@@ -64,9 +61,7 @@ contains
     class(lineareuler2d_planewave), intent(inout) :: this
     ! Local
     integer :: i,j,iel
-    real(prec) :: p,rho,u,v,x,y
-    real(prec) :: phi,phr,shi,shr
-  
+    real(prec) :: p,rho,u,v,x,y,phase,shape
 
     p = this%p
     rho = this%p/this%c/this%c
@@ -78,19 +73,13 @@ contains
 
       x = this%geometry%x%interior(i,j,iel,1,1)
       y = this%geometry%x%interior(i,j,iel,1,2)
+      phase = this%wx*(x-this%x0) + this%wy*(y-this%y0) - this%c*this%t
+      shape = exp( -phase*phase/(this%L*this%L) )
 
-      ! Incident wabe
-      phi = this%wx*(x-this%x0) + this%wy*(y-this%y0) - this%c*this%t
-      shi = exp( -phi*phi/(this%L*this%L) )
-
-      ! Reflected wave
-      phr = -this%wx*(x-(2.0_prec-this%x0) ) + this%wy*(y-this%y0) - this%c*this%t
-      shr = exp( -phr*phr/(this%L*this%L) )
-
-      this%solution%interior(i,j,iel,1) = rho*(shi+shr) ! density
-      this%solution%interior(i,j,iel,2) = u*(shi-shr) ! u
-      this%solution%interior(i,j,iel,3) = v*(shi+shr)! v
-      this%solution%interior(i,j,iel,4) = p*(shi+shr) ! pressure
+      this%solution%interior(i,j,iel,1) = rho*shape ! density
+      this%solution%interior(i,j,iel,2) = u*shape ! u
+      this%solution%interior(i,j,iel,3) = v*shape ! v
+      this%solution%interior(i,j,iel,4) = p*shape ! pressure
 
     enddo
 
@@ -104,25 +93,20 @@ contains
     real(prec),intent(in) :: t
     real(prec) :: exts(1:this%nvar)
     ! Local
-    real(prec) :: p,rho,u,v,phase,shi,shr
+    real(prec) :: p,rho,u,v,phase,shape
 
     p = this%p
     rho = this%p/this%c/this%c
     u = this%p*this%wx/this%c
     v = this%p*this%wy/this%c
 
-    ! Incident wave
     phase = this%wx*(x(1)-this%x0) + this%wy*(x(2)-this%y0) - this%c*this%t
-    shi = exp( -phase*phase/(this%L*this%L) )
+    shape = exp( -phase*phase/(this%L*this%L) )
 
-    ! Reflected wave
-    phase = -this%wx*(x(1)+this%x0-2.0_prec) + this%wy*(x(2)-this%y0) - this%c*this%t
-    shr = exp( -phase*phase/(this%L*this%L) )
-
-    exts(1) = rho*(shi+shr) ! density
-    exts(2) = u*(shi-shr) ! u
-    exts(3) = v*(shi+shr) ! v
-    exts(4) = p*(shi+shr) ! pressure
+    exts(1) = rho*shape ! density
+    exts(2) = u*shape ! u
+    exts(3) = v*shape ! v
+    exts(4) = p*shape ! pressure
 
   endfunction hbc2d_Prescribed_lineareuler2d_planewave
 
@@ -149,7 +133,7 @@ program LinearEuler_Example
 
   ! Create a structured mesh
   bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
-                SELF_BC_NONORMALFLOW, & ! East
+                SELF_BC_PRESCRIBED, & ! East
                 SELF_BC_PRESCRIBED, & ! North
                 SELF_BC_PRESCRIBED] ! West
 
