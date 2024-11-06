@@ -36,7 +36,7 @@ program shallow_water_2d_constant
     integer,parameter :: targetDegree = 16
     real(prec),parameter :: H = 1.0_prec ! uniform resting depth
     real(prec),parameter :: g = 9.8_prec ! acceleration due to gravity
-    real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-5) ! time-step size
+    real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
     real(prec),parameter :: endtime = 0.2_prec
     real(prec),parameter :: iointerval = 0.1_prec
     real(prec) :: e0,ef ! Initial and final entropy
@@ -54,7 +54,7 @@ program shallow_water_2d_constant
                   SELF_BC_PRESCRIBED]   ! West
 
     ! Create a uniform block mesh
-    call mesh % StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
+    call mesh % StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

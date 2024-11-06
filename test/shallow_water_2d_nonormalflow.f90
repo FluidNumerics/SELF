@@ -38,7 +38,7 @@ program shallow_water_2d_nonormalflow
     real(prec),parameter :: H = 1.0_prec ! uniform resting depth
     real(prec),parameter :: g = 1.0_prec ! acceleration due to gravity
     real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4) ! time-step size
-    real(prec),parameter :: endtime = 1.0_prec
+    real(prec),parameter :: endtime = 0.2_prec
     real(prec),parameter :: iointerval = 0.1_prec
     real(prec) :: e0,ef ! Initial and final entropy
     type(shallow_water_2d) :: modelobj
@@ -55,7 +55,7 @@ program shallow_water_2d_nonormalflow
                   SELF_BC_NONORMALFLOW]  ! West
 
     ! Create a uniform block mesh
-    call mesh % StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
+    call mesh % StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
