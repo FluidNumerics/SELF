@@ -149,6 +149,8 @@ add_fortran_tests (
     "advection_diffusion_3d_rk3.f90"
     "advection_diffusion_3d_rk4.f90"
     "shallow_water_2d_constant.f90"
+    "shallow_water_2d_nonormalflow.f90"
+    # "shallow_water_2d_radiation.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"

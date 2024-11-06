@@ -40,6 +40,7 @@ module self_shallow_water_2d_t
         procedure :: entropy_func => entropy_func_shallow_water_2d_t
         procedure :: flux2d => flux2d_shallow_water_2d_t
         procedure :: riemannflux2d => riemannflux2d_shallow_water_2d_t
+        procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_shallow_water_2d_t
     endtype shallow_water_2d_t
 
   contains
@@ -104,5 +105,19 @@ module self_shallow_water_2d_t
         flux(3) = 0.5_prec * (this%H * (unL + unR) + c * (sL(3) - sR(3)))
 
     endfunction riemannflux2d_shallow_water_2d_t
+
+    pure function hbc2d_NoNormalFlow_shallow_water_2d_t(this,s,nhat) result(exts)
+    class(shallow_water_2d_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: nhat(1:2)
+    real(prec) :: exts(1:this%nvar)
+    ! Local
+    integer :: ivar
+
+    exts(1) = (nhat(2)**2 - nhat(1)**2)*s(1) - 2.0_prec*nhat(1)*nhat(2)*s(2) ! u
+    exts(2) = (nhat(1)**2 - nhat(2)**2)*s(2) - 2.0_prec*nhat(1)*nhat(2)*s(1) ! v
+    exts(3) = s(3) ! eta (free surface height)
+
+  endfunction hbc2d_NoNormalFlow_shallow_water_2d_t
 
 endmodule self_shallow_water_2d_t
