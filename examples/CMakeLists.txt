@@ -80,4 +80,5 @@ endfunction ()
 
 add_fortran_tests (
   "burgers1d_shock.f90"
+  "shallow_water_2d.f90"
     )

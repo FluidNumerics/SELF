@@ -43,12 +43,18 @@ program shallow_water_2d_constant
     type(shallow_water_2d) :: modelobj
     type(Lagrange),target :: interp
     type(Mesh2D),target :: mesh
+    integer :: bcids(1:4)
     type(SEMQuad),target :: geometry
     character(LEN=255) :: WORKSPACE
 
+    ! Set boundary conditions
+    bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
+                  SELF_BC_PRESCRIBED]   ! West
+
     ! Create a uniform block mesh
-    call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+    call mesh % StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -70,6 +76,8 @@ program shallow_water_2d_constant
 
     ! Set the initial condition
     call modelobj%solution%SetEquation(1,'f = 1.0')
+    call modelobj%solution%SetEquation(2,'f = 1.0')
+    call modelobj%solution%SetEquation(3,'f = 1.0')
     call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
     call modelobj%CalculateTendency()
@@ -78,7 +86,6 @@ program shallow_water_2d_constant
       maxval(modelobj%solution%interior)
   
     call modelobj%CalculateEntropy()
-    call modelobj%ReportEntropy()
     e0 = modelobj%entropy
 
     !Write the initial condition
@@ -100,8 +107,8 @@ program shallow_water_2d_constant
     ef = modelobj%entropy
 
     if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
-    stop 1
+      print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+      stop 1
     endif
     ! Clean up
     call modelobj%free()
