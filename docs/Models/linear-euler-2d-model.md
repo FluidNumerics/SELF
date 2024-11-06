@@ -115,6 +115,19 @@ integer :: bcids(1:4)
     To set a prescribed state as a function of position and time, you can create a type-extension of the `LinearEuler2D` class and override the [`hbc2d_Prescribed`](../ford/proc/hbc2d_prescribed_model.html) 
 
 
+## GPU Acceleration
+When building SELF with GPU acceleration enabled, the Linear Euler (2-D) model overrides the following `DGModel2D` type-bound procedures
+
+* `BoundaryFlux`
+* `FluxMethod` 
+* `SourceMethod`
+* `SetBoundaryCondition`
+* `SetGradientBoundaryCondition`
+
+These methods are one-level above the usual `pure function` type-bound procedures used to define the riemann solver, flux, source terms, and boundary conditions. These procedures need to be overridden with calls to GPU accelerated kernels to make the solver fully resident on the GPU. 
+
+Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU accelerated. However, implementing prescribed boundary conditions requires that you implement a small `__device__` function in C++ that can be called during execution.
+
 ## Example usage
 
 For examples, see any of the following

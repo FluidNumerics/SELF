@@ -22,6 +22,7 @@ $$
     p
     \end{pmatrix}
 $$
+
 and
 
 $$
