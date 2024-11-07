@@ -201,8 +201,8 @@ contains
     call ContravariantProjection_3D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
-    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu,&
-                            this%interp%N,this%nvar,this%nelem)
+    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu, &
+                           this%interp%N,this%nvar,this%nelem)
 
     call JacobianWeight_3D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
 
@@ -222,8 +222,8 @@ contains
     call ContravariantProjection_3D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
-    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dgMatrix_gpu,&
-                            this%interp%N,this%nvar,this%nelem)
+    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dgMatrix_gpu, &
+                           this%interp%N,this%nvar,this%nelem)
 
     ! Boundary terms
     call DG_BoundaryContribution_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &

@@ -392,7 +392,7 @@ contains
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%extboundary), &
                             this%solutiongradient%extboundary_gpu,sizeof(this%solutiongradient%extboundary), &
                             hipMemcpyDeviceToHost))
-                            
+
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do k = 1,6 ! Loop over all sides
 

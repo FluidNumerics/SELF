@@ -74,6 +74,9 @@ program LinearEuler_Example
   call modelobj%solution%SetEquation(4,'p = 0.001*exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )') ! pressure
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
+  call modelobj%WriteModel()
+  call modelobj%IncrementIOCounter()
+
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
   e0 = modelobj%entropy

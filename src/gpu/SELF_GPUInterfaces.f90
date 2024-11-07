@@ -70,7 +70,7 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
-  subroutine Divergence_3D_gpu(f,df,dmat,N,nVar,nEl) &
+    subroutine Divergence_3D_gpu(f,df,dmat,N,nVar,nEl) &
       bind(c,name="Divergence_3D_gpu")
       use iso_c_binding
       implicit none

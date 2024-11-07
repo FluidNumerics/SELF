@@ -69,9 +69,9 @@ contains
     call df%Init(interp,nvar,nelem)
 
     ! Set the source vector (on the control grid) to a non-zero constant
-    do ivar=1,nvar
-      do iel=1,nelem
-        do j=1,controlDegree+1
+    do ivar = 1,nvar
+      do iel = 1,nelem
+        do j = 1,controlDegree+1
           do i = 1,controlDegree+1
             f%interior(i,j,iel,ivar,1) = interp%controlPoints(i)
             f%interior(i,j,iel,ivar,2) = interp%controlPoints(j)

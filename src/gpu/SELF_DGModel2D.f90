@@ -317,7 +317,6 @@ contains
                             this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
                             hipMemcpyDeviceToHost))
 
-
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides
 

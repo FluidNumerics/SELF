@@ -118,7 +118,7 @@ contains
             nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
             nmag = geometry%nScale%boundary(i,j,iEl,1)
             diff = diff+abs(f%boundary(i,j,iEl,ivar,1)-f%extboundary(i,j,iEl,ivar,1))
-            
+
             fx = 0.5*(f%boundary(i,j,iEl,ivar,1)+f%extboundary(i,j,iEl,ivar,1))
             fy = 0.5*(f%boundary(i,j,iEl,ivar,2)+f%extboundary(i,j,iEl,ivar,2))
 

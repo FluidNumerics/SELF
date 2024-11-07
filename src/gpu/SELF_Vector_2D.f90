@@ -242,8 +242,8 @@ contains
     !real(prec),pointer :: f_p(:,:,:,:,:)
     !type(c_ptr) :: fc
 
-    call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu,&
-                            this%interp%N,this%nvar,this%nelem)
+    call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu, &
+                           this%interp%N,this%nvar,this%nelem)
     ! call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
 
     ! fc = c_loc(f_p(1,1,1,1,1))

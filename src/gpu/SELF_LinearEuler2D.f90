@@ -31,7 +31,7 @@ module self_LinearEuler2D
   implicit none
 
   type,extends(LinearEuler2D_t) :: LinearEuler2D
-    contains
+  contains
     !procedure :: setboundarycondition => setboundarycondition_LinearEuler2D
     !procedure :: boundaryflux => boundaryflux_LinearEuler2D
     !procedure :: fluxmethod => fluxmethod_LinearEuler2D
@@ -69,7 +69,7 @@ module self_LinearEuler2D
   !   endsubroutine boundaryflux_LinearEuler2D_gpu
   ! endinterface
 
-  contains
+contains
 
   ! subroutine boundaryflux_LinearEuler2D(this)
   !   ! this method uses an linear upwind solver for the

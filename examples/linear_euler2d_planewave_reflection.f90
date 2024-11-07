@@ -45,15 +45,15 @@ module lineareuler2d_planewave_model
   type,extends(lineareuler2d) :: lineareuler2d_planewave
     real(prec) :: wx = 0.0_prec ! Wave number in the x-direction
     real(prec) :: wy = 0.0_prec ! Wave number in the y-direction
-    real(prec) :: p = 0.0_prec  ! Peak pressure amplitude
+    real(prec) :: p = 0.0_prec ! Peak pressure amplitude
     real(prec) :: x0 = 0.0_prec ! x component of the wave center position
     real(prec) :: y0 = 0.0_prec ! y component of the wave center position
-    real(prec) :: L = 1.0_prec  ! Halfwidth of the plane wave
+    real(prec) :: L = 1.0_prec ! Halfwidth of the plane wave
 
   contains
 
     procedure :: setInitialCondition
-    procedure :: hbc2d_Prescribed => hbc2d_Prescribed_lineareuler2d_planewave! override for the hyperbolic boundary conditions
+    procedure :: hbc2d_Prescribed => hbc2d_Prescribed_lineareuler2d_planewave ! override for the hyperbolic boundary conditions
 
   endtype lineareuler2d_planewave
 
@@ -61,12 +61,11 @@ contains
 
   subroutine setInitialCondition(this)
     implicit none
-    class(lineareuler2d_planewave), intent(inout) :: this
+    class(lineareuler2d_planewave),intent(inout) :: this
     ! Local
     integer :: i,j,iel
     real(prec) :: p,rho,u,v,x,y
     real(prec) :: phi,phr,shi,shr
-  
 
     p = this%p
     rho = this%p/this%c/this%c
@@ -74,22 +73,22 @@ contains
     v = this%p*this%wy/this%c
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-      iel=1:this%mesh%nElem)
+                  iel=1:this%mesh%nElem)
 
       x = this%geometry%x%interior(i,j,iel,1,1)
       y = this%geometry%x%interior(i,j,iel,1,2)
 
       ! Incident wabe
-      phi = this%wx*(x-this%x0) + this%wy*(y-this%y0) - this%c*this%t
-      shi = exp( -phi*phi/(this%L*this%L) )
+      phi = this%wx*(x-this%x0)+this%wy*(y-this%y0)-this%c*this%t
+      shi = exp(-phi*phi/(this%L*this%L))
 
       ! Reflected wave
-      phr = -this%wx*(x-(2.0_prec-this%x0) ) + this%wy*(y-this%y0) - this%c*this%t
-      shr = exp( -phr*phr/(this%L*this%L) )
+      phr = -this%wx*(x-(2.0_prec-this%x0))+this%wy*(y-this%y0)-this%c*this%t
+      shr = exp(-phr*phr/(this%L*this%L))
 
       this%solution%interior(i,j,iel,1) = rho*(shi+shr) ! density
       this%solution%interior(i,j,iel,2) = u*(shi-shr) ! u
-      this%solution%interior(i,j,iel,3) = v*(shi+shr)! v
+      this%solution%interior(i,j,iel,3) = v*(shi+shr) ! v
       this%solution%interior(i,j,iel,4) = p*(shi+shr) ! pressure
 
     enddo
@@ -112,12 +111,12 @@ contains
     v = this%p*this%wy/this%c
 
     ! Incident wave
-    phase = this%wx*(x(1)-this%x0) + this%wy*(x(2)-this%y0) - this%c*this%t
-    shi = exp( -phase*phase/(this%L*this%L) )
+    phase = this%wx*(x(1)-this%x0)+this%wy*(x(2)-this%y0)-this%c*this%t
+    shi = exp(-phase*phase/(this%L*this%L))
 
     ! Reflected wave
-    phase = -this%wx*(x(1)+this%x0-2.0_prec) + this%wy*(x(2)-this%y0) - this%c*this%t
-    shr = exp( -phase*phase/(this%L*this%L) )
+    phase = -this%wx*(x(1)+this%x0-2.0_prec)+this%wy*(x(2)-this%y0)-this%c*this%t
+    shr = exp(-phase*phase/(this%L*this%L))
 
     exts(1) = rho*(shi+shr) ! density
     exts(2) = u*(shi-shr) ! u
@@ -138,7 +137,7 @@ program LinearEuler_Example
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec),parameter :: endtime = 1.0_prec
+  real(prec),parameter :: endtime = 3.0_prec
   real(prec),parameter :: iointerval = 0.05_prec
   real(prec) :: e0,ef ! Initial and final entropy
   type(lineareuler2d_planewave) :: modelobj
@@ -167,7 +166,7 @@ program LinearEuler_Example
 
   ! Initialize the model
   call modelobj%Init(mesh,geometry)
-  
+
   ! Set the plane wave parameters
   modelobj%x0 = 0.2_prec
   modelobj%y0 = 0.2_prec
@@ -192,7 +191,7 @@ program LinearEuler_Example
   ef = modelobj%entropy
 
   if(ef /= ef) then
-    print*,"Error: Final entropy is not finite or not a number", ef
+    print*,"Error: Final entropy is not finite or not a number",ef
     stop 1
   endif
 

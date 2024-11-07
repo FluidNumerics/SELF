@@ -82,7 +82,6 @@ module self_advection_diffusion_2d
 
 contains
 
-
   subroutine setboundarycondition_advection_diffusion_2d(this)
     !! Boundary conditions are set to periodic boundary conditions
     implicit none
