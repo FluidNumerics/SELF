@@ -313,6 +313,11 @@ contains
                             this%solution%boundary_gpu,sizeof(this%solution%boundary), &
                             hipMemcpyDeviceToHost))
 
+    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
+                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                            hipMemcpyDeviceToHost))
+
+
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides
 
@@ -375,6 +380,10 @@ contains
                             this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
                             hipMemcpyDeviceToHost))
 
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%extboundary), &
+                            this%solutiongradient%extboundary_gpu,sizeof(this%solutiongradient%extboundary), &
+                            hipMemcpyDeviceToHost))
+
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do j = 1,4 ! Loop over all sides
 
@@ -434,21 +443,6 @@ contains
 
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh)
-    ! call this%solution%UpdateHost()
-
-    ! print*, "min/max interior (1) : ",minval(this%solution%interior(:,:,:,1)), maxval(this%solution%interior(:,:,:,1))
-    ! print*, "min/max boundary (1) : ",minval(this%solution%boundary(:,:,:,1)), maxval(this%solution%boundary(:,:,:,1))
-    ! print*, "min/max extboundary (1) : ",minval(this%solution%extboundary(:,:,:,1)), maxval(this%solution%extboundary(:,:,:,1))
-    ! print*, "min/max interior (2) : ",minval(this%solution%interior(:,:,:,2)), maxval(this%solution%interior(:,:,:,2))
-    ! print*, "min/max boundary (2) : ",minval(this%solution%boundary(:,:,:,2)), maxval(this%solution%boundary(:,:,:,2))
-    ! print*, "min/max extboundary (2) : ",minval(this%solution%extboundary(:,:,:,2)), maxval(this%solution%extboundary(:,:,:,2))
-    ! print*, "min/max interior (3) : ",minval(this%solution%interior(:,:,:,3)), maxval(this%solution%interior(:,:,:,3))
-    ! print*, "min/max boundary (3) : ",minval(this%solution%boundary(:,:,:,3)), maxval(this%solution%boundary(:,:,:,3))
-    ! print*, "min/max extboundary (3) : ",minval(this%solution%extboundary(:,:,:,3)), maxval(this%solution%extboundary(:,:,:,3))
-    ! print*, "min/max interior (4) : ",minval(this%solution%interior(:,:,:,4)), maxval(this%solution%interior(:,:,:,4))
-    ! print*, "min/max boundary (4) : ",minval(this%solution%boundary(:,:,:,4)), maxval(this%solution%boundary(:,:,:,4))
-    ! print*, "min/max extboundary (4) : ",minval(this%solution%extboundary(:,:,:,4)), maxval(this%solution%extboundary(:,:,:,4))
-    ! print*," =========================================================================== "
 
     call this%PreTendency() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
