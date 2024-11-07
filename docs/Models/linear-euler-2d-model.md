@@ -3,32 +3,38 @@
 ## Definition
 The [`SELF_LinearEuler2D_t` module](../ford/module/self_lineareuler2d_t.html) defines the [`LinearEuler2D_t` class](ford/type/lineareuler2d_t.html). In SELF, models are posed in the form of a generic conservation law
 
-\begin{equation}
-\vec{s}_t + \nabla \cdot \overleftrightarrow{f} = \vec{q}
-\end{equation}
+$$
+  \vec{s}_t + \nabla \cdot \overleftrightarrow{f} = \vec{q}
+$$
 
 where $\vec{s}$ is a vector of solution variables, $\overleftrightarrow{f}$ is the conservative flux, and $\vec{q}$ are non-conservative source terms. 
 
 For the Linear Euler equations in 2-D
 
-\begin{equation}
-\vec{s} = \begin{pmatrix}
-\rho \\ 
-u \\ 
-v \\ 
-p
-\end{pmatrix}
-\end{equation}
+
+
+$$
+    \vec{s} = 
+    \begin{pmatrix}
+    \rho \\ 
+    u \\ 
+    v \\ 
+    p
+    \end{pmatrix}
+$$
+
 where $\rho$ is a density anomaly, referenced to the density $\rho_0$, $u$ and $v$ are the $x$ and $y$ components of the fluid velocity (respectively), and $p$ is the pressure. When we assume an ideal gas, and a motionless background state, the conservative fluxes are
 
-\begin{equation}
-\overleftrightarrow{f} = \begin{pmatrix}
-\rho_0(u \hat{x} + v \hat{y}) \\
-p \hat{x} \\
-p \hat{y} \\
-\rho_0c^2(u \hat{x} + v \hat{y})
-\end{pmatrix}
-\end{equation}
+$$
+    \overleftrightarrow{f} = 
+    \begin{pmatrix}
+    \rho_0(u \hat{x} + v \hat{y}) \\
+    p \hat{x} \\
+    p \hat{y} \\
+    \rho_0c^2(u \hat{x} + v \hat{y})
+    \end{pmatrix}
+$$
+
 where $c$ is the (constant) speed of sound. The source term is set to zero.
 
 \begin{equation}
@@ -47,18 +53,31 @@ The Linear Euler 2D model is implemented as a type extension of the [`DGModel2D`
 ### Riemann Solver
 The `LinearEuler2D` class is defined using the conservative form of the conservation law. The Riemman solver for the hyperbolic part of Euler equation is the local Lax Friedrichs upwind riemann solver
 
-\begin{equation}
-\overleftrightarrow{f}_h^* \cdot \hat{n} = \frac{1}{2}( \overleftrightarrow{f}_L \cdot \hat{n}  + \overleftrightarrow{f}_R \cdot \hat{n}  + c (\vec{s}_L - \vec{s}_R))
-\end{equation}
+$$
+    \overleftrightarrow{f}_h^* \cdot \hat{n} = \frac{1}{2}( \overleftrightarrow{f}_L \cdot \hat{n}  + \overleftrightarrow{f}_R \cdot \hat{n}  + c (\vec{s}_L - \vec{s}_R))
+$$
 
 where 
-\begin{equation}
-f_L = 
-\end{equation}
 
-\begin{equation}
-f_R = 
-\end{equation}
+$$
+    \overleftrightarrow{f}_L \cdot \hat{n} = 
+    \begin{pmatrix}
+    \rho_0(u_L n_x + v_L n_y) \\
+    p_L n_x \\
+    p_L n_y \\
+    \rho_0c^2(u_L n_x + v_L n_y)
+    \end{pmatrix}
+$$
+
+$$
+    \overleftrightarrow{f}_R \cdot \hat{n} = 
+    \begin{pmatrix}
+    \rho_0(u_R n_x + v_R n_y) \\
+    p_R n_x \\
+    p_R n_y \\
+    \rho_0c^2(u_R n_x + v_R n_y)
+    \end{pmatrix}
+$$
 
 The details for this implementation can be found in [`self_lineareuler2d_t.f90`](../ford/sourcefile/self_lineareuler2d_t.f90.html)
 
@@ -96,8 +115,23 @@ integer :: bcids(1:4)
     To set a prescribed state as a function of position and time, you can create a type-extension of the `LinearEuler2D` class and override the [`hbc2d_Prescribed`](../ford/proc/hbc2d_prescribed_model.html) 
 
 
+## GPU Acceleration
+When building SELF with GPU acceleration enabled, the Linear Euler (2-D) model overrides the following `DGModel2D` type-bound procedures
+
+* `BoundaryFlux`
+* `FluxMethod` 
+* `SourceMethod`
+* `SetBoundaryCondition`
+* `SetGradientBoundaryCondition`
+
+These methods are one-level above the usual `pure function` type-bound procedures used to define the riemann solver, flux, source terms, and boundary conditions. These procedures need to be overridden with calls to GPU accelerated kernels to make the solver fully resident on the GPU. 
+
+Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU accelerated. However, implementing prescribed boundary conditions requires that you implement a small `__device__` function in C++ that can be called during execution.
+
 ## Example usage
 
 For examples, see any of the following
 
 * [`examples/lineareuler2d_spherical_soundwave_closeddomain.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_spherical_soundwave_closeddomain.f90) - Implements a simulation with a gaussian pressure and density anomaly as an initial condition in a domain with no normal flow boundary conditions on all sides.
+* [`examples/linear_euler2d_planewave_propagation.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_planewave_propagation.f90) - Implements a simulation with a gaussian plane wave that propagates at a $45^\circ$ angle through a square domain. The initial and boundary conditions are all taken as an exact plane wave solution to the Linear Euler equations in 2D. This provides an example for using prescribed boundary conditions.
+* [`examples/linear_euler2d_planewave_reflection.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_planewave_reflection.f90) - Implements a simulation with a gaussian plane wave that propagates at a $45^\circ$ angle through a square domain and reflects off a wall at x=1 (eastern domain boundary). The initial and boundary conditions are all taken as an exact plane wave solution to the Linear Euler equations in 2D derived using the method of images. This provides an example for using prescribed boundary conditions in combination with the no-normal-flow boundary conditions.
