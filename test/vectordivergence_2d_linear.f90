@@ -55,6 +55,7 @@ contains
     type(Vector2D) :: f
     type(Scalar2D) :: df
     type(Lagrange),target :: interp
+    integer :: i,j,iel,ivar
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -68,7 +69,16 @@ contains
     call df%Init(interp,nvar,nelem)
 
     ! Set the source vector (on the control grid) to a non-zero constant
-    f%interior = 1.0_prec
+    do ivar=1,nvar
+      do iel=1,nelem
+        do j=1,controlDegree+1
+          do i = 1,controlDegree+1
+            f%interior(i,j,iel,ivar,1) = interp%controlPoints(i)
+            f%interior(i,j,iel,ivar,2) = interp%controlPoints(j)
+          enddo
+        enddo
+      enddo
+    enddo
     call f%UpdateDevice()
 
 #ifdef ENABLE_GPU
@@ -80,8 +90,9 @@ contains
     call df%UpdateHost()
 
     ! Calculate diff from exact
-    df%interior = abs(df%interior-0.0_prec)
-
+    print*,"absmax ∇ ⋅ f :",maxval(df%interior)
+    df%interior = abs(df%interior-2.0_prec)
+    print*,"absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else

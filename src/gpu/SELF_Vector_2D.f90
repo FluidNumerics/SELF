@@ -239,20 +239,22 @@ contains
     class(Vector2D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
     !Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
+    !real(prec),pointer :: f_p(:,:,:,:,:)
+    !type(c_ptr) :: fc
 
-    call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
+    call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu,&
+                            this%interp%N,this%nvar,this%nelem)
+    ! call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
 
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    ! fc = c_loc(f_p(1,1,1,1,1))
+    ! call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
+    !                                 this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
 
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    1.0_c_prec,this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
+    ! fc = c_loc(f_p(1,1,1,1,2))
+    ! call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df, &
+    !                                 1.0_c_prec,this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
 
-    f_p => null()
+    ! f_p => null()
 
   endsubroutine Divergence_Vector2D
 

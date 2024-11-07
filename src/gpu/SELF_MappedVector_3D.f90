@@ -196,29 +196,13 @@ contains
     implicit none
     class(MappedVector3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:,:)
-    type(c_ptr) :: fc
 
     ! Contravariant projection
     call ContravariantProjection_3D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
-    call c_f_pointer(this%interior_gpu,f_p, &
-                     [this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,3])
-
-    fc = c_loc(f_p(1,1,1,1,1,1))
-    call self_blas_matrixop_dim1_3d(this%interp%dMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,1,2))
-    call self_blas_matrixop_dim2_3d(this%interp%dMatrix_gpu,fc,df,1.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,1,3))
-    call self_blas_matrixop_dim3_3d(this%interp%dMatrix_gpu,fc,df,1.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-    f_p => null()
+    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu,&
+                            this%interp%N,this%nvar,this%nelem)
 
     call JacobianWeight_3D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
 
@@ -233,29 +217,13 @@ contains
     implicit none
     class(MappedVector3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:,:)
-    type(c_ptr) :: fc
 
     ! Contravariant projection
     call ContravariantProjection_3D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
-    call c_f_pointer(this%interior_gpu,f_p, &
-                     [this%interp%N+1,this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,3])
-
-    fc = c_loc(f_p(1,1,1,1,1,1))
-    call self_blas_matrixop_dim1_3d(this%interp%dgMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,1,2))
-    call self_blas_matrixop_dim2_3d(this%interp%dgMatrix_gpu,fc,df,1.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,1,3))
-    call self_blas_matrixop_dim3_3d(this%interp%dgMatrix_gpu,fc,df,1.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-    f_p => null()
+    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dgMatrix_gpu,&
+                            this%interp%N,this%nvar,this%nelem)
 
     ! Boundary terms
     call DG_BoundaryContribution_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &

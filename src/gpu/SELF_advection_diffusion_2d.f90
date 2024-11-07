@@ -37,7 +37,6 @@ module self_advection_diffusion_2d
     procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_2d
     procedure :: boundaryflux => boundaryflux_advection_diffusion_2d
     procedure :: fluxmethod => fluxmethod_advection_diffusion_2d
-    procedure :: CalculateEntropy => CalculateEntropy_advection_diffusion_2d
 
   endtype advection_diffusion_2d
 
@@ -82,43 +81,7 @@ module self_advection_diffusion_2d
   endinterface
 
 contains
-  subroutine CalculateEntropy_advection_diffusion_2d(this)
-    implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
-    ! Local
-    integer :: iel,i,j,ivar,ierror
-    real(prec) :: e,s,jac
 
-    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
-                            this%solution%interior_gpu,sizeof(this%solution%interior), &
-                            hipMemcpyDeviceToHost))
-
-    e = 0.0_prec
-    do ivar = 1,this%solution%nvar
-      do iel = 1,this%geometry%nelem
-        do j = 1,this%solution%interp%N+1
-          do i = 1,this%solution%interp%N+1
-            jac = this%geometry%J%interior(i,j,iel,1)
-            s = this%solution%interior(i,j,iel,ivar)
-            e = e+0.5_prec*s*s*jac
-          enddo
-        enddo
-      enddo
-    enddo
-
-    if(this%mesh%decomp%mpiEnabled) then
-      call mpi_allreduce(e, &
-                         this%entropy, &
-                         1, &
-                         this%mesh%decomp%mpiPrec, &
-                         MPI_SUM, &
-                         this%mesh%decomp%mpiComm, &
-                         iError)
-    else
-      this%entropy = e
-    endif
-
-  endsubroutine CalculateEntropy_advection_diffusion_2d
 
   subroutine setboundarycondition_advection_diffusion_2d(this)
     !! Boundary conditions are set to periodic boundary conditions

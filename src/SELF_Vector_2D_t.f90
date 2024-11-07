@@ -272,19 +272,10 @@ contains
 
       dfLoc = 0.0_prec
       do ii = 1,this%N+1
-        dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar,1)
+        dfLoc = dfLoc+this%interp%dMatrix(ii,i)*this%interior(ii,j,iel,ivar,1)+&
+                      this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar,2)
       enddo
       dF(i,j,iel,ivar) = dfLoc
-
-    enddo
-
-    do concurrent(i=1:this%N+1,j=1:this%N+1,iel=1:this%nElem,ivar=1:this%nVar)
-
-      dfLoc = 0.0_prec
-      do ii = 1,this%N+1
-        dfLoc = dfLoc+this%interp%dMatrix(ii,j)*this%interior(i,ii,iel,ivar,2)
-      enddo
-      dF(i,j,iel,ivar) = dF(i,j,iel,ivar)+dfLoc
 
     enddo
 

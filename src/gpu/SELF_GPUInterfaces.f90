@@ -59,6 +59,26 @@ module SELF_GPUInterfaces
     endsubroutine BoundaryInterp_3D_gpu
   endinterface
 
+  interface
+    subroutine Divergence_2D_gpu(f,df,dmat,N,nVar,nEl) &
+      bind(c,name="Divergence_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,df,dmat
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine Divergence_2D_gpu
+  endinterface
+
+  interface
+  subroutine Divergence_3D_gpu(f,df,dmat,N,nVar,nEl) &
+      bind(c,name="Divergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,df,dmat
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine Divergence_3D_gpu
+  endinterface
+
   ! MappedData
 
   ! Model

@@ -29,32 +29,40 @@ program test
   implicit none
   integer :: exit_code
 
-  exit_code = vectordivergence_2d_constant()
+  exit_code = mappedvectordgdivergence_2d_linear()
   if(exit_code /= 0) then
     stop exit_code
   endif
 
 contains
-  integer function vectordivergence_2d_constant() result(r)
+  integer function mappedvectordgdivergence_2d_linear() result(r)
+
     use SELF_Constants
     use SELF_Lagrange
-    use SELF_Scalar_2D
-    use SELF_Vector_2D
+    use SELF_Mesh_2D
+    use SELF_Geometry_2D
+    use SELF_MappedScalar_2D
+    use SELF_MappedVector_2D
 
     implicit none
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
-    integer,parameter :: nvar = 3
-    integer,parameter :: nelem = 100
+    integer,parameter :: nvar = 4
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
     real(prec),parameter :: tolerance = 10.0_prec**(-3)
 #endif
-    type(Vector2D) :: f
-    type(Scalar2D) :: df
     type(Lagrange),target :: interp
+    type(Mesh2D),target :: mesh
+    type(SEMQuad),target :: geometry
+    type(MappedVector2D) :: f
+    type(MappedScalar2D) :: df
+    character(LEN=255) :: WORKSPACE
+    integer :: i,j,iel,e2,ivar
+    real(prec) :: nhat(1:2),nmag,fx,fy,diff
+    integer :: bcids(1:4)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
@@ -62,35 +70,55 @@ contains
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
-    ! Initialize vectors
-    call f%Init(interp,nvar,nelem)
+    ! Create a structured mesh
+    bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
+                  SELF_BC_PRESCRIBED] ! West
+    call mesh%StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
 
-    call df%Init(interp,nvar,nelem)
+    ! Generate geometry (metric terms) from the mesh elements
+    call geometry%Init(interp,mesh%nElem)
+    call geometry%GenerateFromMesh(mesh)
 
-    ! Set the source vector (on the control grid) to a non-zero constant
-    f%interior = 1.0_prec
+    call f%Init(interp,nvar,mesh%nelem)
+    call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
+
+    do ivar = 1,nvar
+      call f%SetEquation(1,ivar,'f = x') ! x-component
+      call f%SetEquation(2,ivar,'f = y') ! y-component
+    enddo
+
+    call f%SetInteriorFromEquation(geometry,0.0_prec)
+    print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
+
     call f%UpdateDevice()
 
 #ifdef ENABLE_GPU
-    call f%Divergence(df%interior_gpu)
+    call f%MappedDivergence(df%interior_gpu)
 #else
-    call f%Divergence(df%interior)
+    call f%MappedDivergence(df%interior)
 #endif
-
     call df%UpdateHost()
 
     ! Calculate diff from exact
-    df%interior = abs(df%interior-0.0_prec)
+    df%interior = abs(df%interior-2.0_prec)
 
+    print*,"absmax error :",maxval(df%interior)
     if(maxval(df%interior) <= tolerance) then
       r = 0
     else
       r = 1
     endif
 
+    ! Clean up
+    call f%DissociateGeometry()
+    call geometry%Free()
+    call mesh%Free()
+    call interp%Free()
     call f%free()
     call df%free()
-    call interp%free()
 
-  endfunction vectordivergence_2d_constant
+  endfunction mappedvectordgdivergence_2d_linear
 endprogram test

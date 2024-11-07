@@ -31,6 +31,59 @@ module self_LinearEuler2D
   implicit none
 
   type,extends(LinearEuler2D_t) :: LinearEuler2D
+    contains
+    !procedure :: setboundarycondition => setboundarycondition_LinearEuler2D
+    !procedure :: boundaryflux => boundaryflux_LinearEuler2D
+    !procedure :: fluxmethod => fluxmethod_LinearEuler2D
+
   endtype LinearEuler2D
+
+  ! interface
+  !   subroutine setboundarycondition_LinearEuler2D_gpu(extboundary,boundary,sideinfo,N,nel,nvar) &
+  !     bind(c,name="setboundarycondition_LinearEuler2D_gpu")
+  !     use iso_c_binding
+  !     type(c_ptr),value :: extboundary,boundary,sideinfo
+  !     integer(c_int),value :: N,nel,nvar
+  !   endsubroutine setboundarycondition_LinearEuler2D_gpu
+  ! endinterface
+
+  ! interface
+  !   subroutine fluxmethod_LinearEuler2D_gpu(solution,solutiongradient,flux,u,v,nu,N,nel,nvar) &
+  !     bind(c,name="fluxmethod_LinearEuler2D_gpu")
+  !     use iso_c_binding
+  !     use SELF_Constants
+  !     type(c_ptr),value :: solution,solutiongradient,flux
+  !     real(c_prec),value :: u,v,nu
+  !     integer(c_int),value :: N,nel,nvar
+  !   endsubroutine fluxmethod_LinearEuler2D_gpu
+  ! endinterface
+
+  ! interface
+  !   subroutine boundaryflux_LinearEuler2D_gpu(fb,fextb,nhat,nscale,flux,rho0,c,N,nel,nvar) &
+  !     bind(c,name="boundaryflux_LinearEuler2D_gpu")
+  !     use iso_c_binding
+  !     use SELF_Constants
+  !     type(c_ptr),value :: fb,fextb,flux,nhat,nscale
+  !     real(c_prec),value :: rho0,c
+  !     integer(c_int),value :: N,nel,nvar
+  !   endsubroutine boundaryflux_LinearEuler2D_gpu
+  ! endinterface
+
+  contains
+
+  ! subroutine boundaryflux_LinearEuler2D(this)
+  !   ! this method uses an linear upwind solver for the
+  !   ! advective flux and the bassi-rebay method for the
+  !   ! diffusive fluxes
+  !   implicit none
+  !   class(LinearEuler2D),intent(inout) :: this
+
+  !   call boundaryflux_LinearEuler2D_gpu(this%solution%boundary_gpu, &
+  !                                                this%solution%extBoundary_gpu, &
+  !                                                this%geometry%nhat%boundary_gpu,this%geometry%nscale%boundary_gpu, &
+  !                                                this%flux%boundarynormal_gpu,this%rho0,this%c,this%solution%interp%N, &
+  !                                                this%solution%nelem,this%solution%nvar)
+
+  ! endsubroutine boundaryflux_LinearEuler2D
 
 endmodule self_LinearEuler2D
