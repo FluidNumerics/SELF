@@ -114,6 +114,8 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
+    call this%AdditionalInit()
+
     call this%SetMetadata()
 
   endsubroutine Init_DGModel2D_t
@@ -146,6 +148,7 @@ contains
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
+    call this%AdditionalFree()
 
   endsubroutine Free_DGModel2D_t
 

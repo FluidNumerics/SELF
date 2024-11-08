@@ -117,6 +117,8 @@ module SELF_Model
 
     procedure :: SetNumberOfVariables => SetNumberOfVariables_Model
 
+    procedure :: AdditionalInit => AdditionalInit_Model
+
     procedure :: ForwardStep => ForwardStep_Model
 
     procedure :: Euler_timeIntegrator
@@ -268,6 +270,12 @@ contains
 
   endsubroutine SetNumberOfVariables_Model
 
+  subroutine AdditionalInit_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
+    return
+  endsubroutine AdditionalInit_Model
+  
   subroutine PrintType_Model(this)
     implicit none
     class(Model),intent(in) :: this
