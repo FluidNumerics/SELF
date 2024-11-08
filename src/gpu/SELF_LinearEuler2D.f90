@@ -107,7 +107,7 @@ contains
     integer :: i,iEl,j,e2,bcid
     real(prec) :: x(1:2)
 
-    if( this%prescribed_bcs_enabled )then
+    if(this%prescribed_bcs_enabled) then
       call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
                               this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
                               hipMemcpyDeviceToHost))
