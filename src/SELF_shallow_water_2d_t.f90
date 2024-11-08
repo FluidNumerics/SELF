@@ -107,16 +107,16 @@ module self_shallow_water_2d_t
     endfunction riemannflux2d_shallow_water_2d_t
 
     pure function hbc2d_NoNormalFlow_shallow_water_2d_t(this,s,nhat) result(exts)
-    class(shallow_water_2d_t),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:2)
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
+        class(shallow_water_2d_t),intent(in) :: this
+        real(prec),intent(in) :: s(1:this%nvar)
+        real(prec),intent(in) :: nhat(1:2)
+        real(prec) :: exts(1:this%nvar)
+        ! Local
+        integer :: ivar
 
-    exts(1) = (nhat(2)**2 - nhat(1)**2)*s(1) - 2.0_prec*nhat(1)*nhat(2)*s(2) ! u
-    exts(2) = (nhat(1)**2 - nhat(2)**2)*s(2) - 2.0_prec*nhat(1)*nhat(2)*s(1) ! v
-    exts(3) = s(3) ! eta (free surface height)
+        exts(1) = (nhat(2)**2 - nhat(1)**2)*s(1) - 2.0_prec*nhat(1)*nhat(2)*s(2) ! u
+        exts(2) = (nhat(1)**2 - nhat(2)**2)*s(2) - 2.0_prec*nhat(1)*nhat(2)*s(1) ! v
+        exts(3) = s(3)                                                           ! eta
 
   endfunction hbc2d_NoNormalFlow_shallow_water_2d_t
 
