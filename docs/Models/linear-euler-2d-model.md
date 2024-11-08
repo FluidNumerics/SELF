@@ -126,7 +126,11 @@ When building SELF with GPU acceleration enabled, the Linear Euler (2-D) model o
 
 These methods are one-level above the usual `pure function` type-bound procedures used to define the riemann solver, flux, source terms, and boundary conditions. These procedures need to be overridden with calls to GPU accelerated kernels to make the solver fully resident on the GPU. 
 
-Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU accelerated. However, implementing prescribed boundary conditions requires that you implement a small `__device__` function in C++ that can be called during execution.
+Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU accelerated. However, prescribed boundary conditions are CPU-only. We have opted to keep the prescribed boundary conditions CPU-only so that their implementation remain easy-to-use. This implies that some data is copied between host and device every iteration when prescribed boundary conditions are enabled. 
+
+!!! note
+    In simulations where no prescribed boundaries are used, or your prescribed boundaries are time independent, you can disable prescribed boundary conditions by explicitly setting `modelobj % prescribed_bcs_enabled = .false.`. This can improve the time-to-solution for your simulation by avoiding unnecessary host-device memory movement. An example of this feature is shown in [`examples/lineareuler2d_spherical_soundwave_closeddomain.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_spherical_soundwave_closeddomain.f90)
+
 
 ## Example usage
 

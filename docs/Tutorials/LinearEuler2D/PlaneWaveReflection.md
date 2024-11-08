@@ -1,4 +1,4 @@
-# Plane Wave Reflection Tutorial
+# Linear Euler 2D - Plane Wave Reflection Tutorial
 This tutorial will walk you through using an example program that uses the `LinearEuler2D` class to run a simulation with the linear Euler equations for an ideal gas in 2-D. This example is configured using the built in structured mesh generator with prescribed boundary conditions on all domain boundaries.
 
 ## Problem statement
@@ -49,7 +49,7 @@ The variables are defined as follows
 * $c$ is the (constant) speed of sound. 
 
 ### Model Domain
-The physical domain is defined by $\vec{x} \in [0, 1]\times[0,1]$. We use the `StructuredMesh` routine to create a domain with 20 × 20 elements that are dimensioned 0.05 × 0.05 . Model boundaries on the south, north, and west edges of the domain are all tagged with the `SELF_BC_PRESCRIBED` flag to implement prescribed boundary conditions; the east boundary is tagged with `SELF_BC_NONORMAL_FLOW` to implement no-normal-flow boundary conditions.
+The physical domain is defined by $\vec{x} \in [0, 1]\times[0,1]$. We use the `StructuredMesh` routine to create a domain with 20 × 20 elements that are dimensioned 0.05 × 0.05 . Model boundaries on the south, north, and west edges of the domain are all tagged with the `SELF_BC_PRESCRIBED` flag to implement prescribed boundary conditions; the east boundary is tagged with `SELF_BC_NONORMALFLOW` to implement no-normal-flow boundary conditions.
 
 Within each element, all variables are approximated by a Lagrange interpolating polynomial of degree 7. The interpolation knots are the Legendre-Gauss points.
 
@@ -70,7 +70,7 @@ $$
     \frac{k_x}{c} \\ 
     \frac{k_y}{c} \\ 
     1
-    \end{pmatrix} \bar{p} e^{-\left( \frac{k_x(x-x_0) + k_y(y-y_0) - ct}{L^2} \right)}
+    \end{pmatrix} \bar{p} e^{-\left( (\frac{k_x(x-x_0) + k_y(y-y_0) - ct)^2}{L^2} \right)}
 $$
 
 is the incident wave, and
@@ -82,7 +82,7 @@ $$
     -\frac{k_x}{c} \\ 
     \frac{k_y}{c} \\ 
     1
-    \end{pmatrix} \bar{p} e^{-\left( \frac{-k_x(x-(2-x_0)) + k_y(y-y_0) - ct}{L^2} \right)}
+    \end{pmatrix} \bar{p} e^{-\left( \frac{(-k_x(x-(2-x_0)) + k_y(y-y_0) - ct)^2}{L^2} \right)}
 $$
 
 The parameters used in the exact solution are as follows : 

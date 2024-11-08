@@ -1,4 +1,4 @@
-# Plane Wave Propagation Tutorial
+# Linear Euler 2D - Plane Wave Propagation Tutorial
 This tutorial will walk you through using an example program that uses the `LinearEuler2D` class to run a simulation with the linear Euler equations for an ideal gas in 2-D. This example is configured using the built in structured mesh generator with prescribed boundary conditions on all domain boundaries.
 
 ## Problem statement
@@ -69,7 +69,7 @@ $$
     \frac{k_x}{c} \\ 
     \frac{k_y}{c} \\ 
     1
-    \end{pmatrix} \bar{p} e^{-\left( \frac{k_x(x-x_0) + k_y(y-y_0) - ct}{L^2} \right)}
+    \end{pmatrix} \bar{p} e^{-\left( \frac{(k_x(x-x_0) + k_y(y-y_0) - ct)^2}{L^2} \right)}
 $$
 
 where
