@@ -34,7 +34,7 @@ program LinearEuler_Example
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
   real(prec),parameter :: dt = 2.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec),parameter :: endtime = 1.0_prec
+  real(prec),parameter :: endtime = 0.1_prec
   real(prec),parameter :: iointerval = 0.1_prec
   real(prec) :: e0,ef ! Initial and final entropy
   type(LinearEuler2D) :: modelobj
