@@ -29,7 +29,7 @@ program shallow_water_2d_constant
     use self_shallow_water_2d
 
     implicit none
-    character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
+    character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
     integer,parameter :: nvar = 3
 
     integer,parameter :: controlDegree = 7
