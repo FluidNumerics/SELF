@@ -24,34 +24,36 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program shallow_water_2d_constant
+program shallow_water_2d_no_normal_flow_model
   use self_data
   use self_shallow_water_2d
+  use self_mesh_2d
 
   implicit none
-  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
-  integer,parameter :: nvar = 3
+  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3' ! Which integrator method
+  integer,parameter :: nvar = 3                                     ! Number of variables 
+  integer,parameter :: controlDegree = 7                            ! Degree of control polynomial
+  integer,parameter :: targetDegree = 16                            ! Degree of target polynomial
+  real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4)             ! Time-step size
+  real(prec),parameter :: endtime = 1.0_prec                        ! Final time
+  real(prec),parameter :: iointerval = 0.05_prec                    ! How often to write .tec files
+  
+  real(prec) :: e0,ef                                               ! Initial and final entropy
+  type(shallow_water_2d) :: modelobj                                ! Shallow water model
+  type(Lagrange),target :: interp                                   ! Interpolant
+  integer :: bcids(1:4)                                             ! Boundary conditions for structured mesh
+  type(Mesh2D),target :: mesh                                       ! Mesh class
+  type(SEMQuad),target :: geometry                                  ! Geometry class
+  character(LEN=255) :: WORKSPACE                                   ! Used for file I/O
 
-  integer,parameter :: controlDegree = 7
-  integer,parameter :: targetDegree = 16
-  real(prec),parameter :: H = 1.0_prec ! uniform resting depth
-  real(prec),parameter :: g = 9.8_prec ! acceleration due to gravity
-  real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-5) ! time-step size
-  real(prec),parameter :: endtime = 0.2_prec
-  real(prec),parameter :: iointerval = 0.1_prec
-  real(prec) :: e0,ef ! Initial and final entropy
-  type(shallow_water_2d) :: modelobj
-  type(Lagrange),target :: interp
-  type(Mesh2D),target :: mesh
-  integer :: bcids(1:4)
-  type(SEMQuad),target :: geometry
-  character(LEN=255) :: WORKSPACE
+  real(prec),parameter :: g = 1.0_prec                              ! Acceleration due to gravity
+  real(prec),parameter :: H = 1.0_prec                              ! Uniform resting depth
 
-  ! Set boundary conditions
-  bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
-                SELF_BC_PRESCRIBED, & ! East
-                SELF_BC_PRESCRIBED, & ! North
-                SELF_BC_PRESCRIBED]   ! West
+  ! Set no normal flow boundary conditions
+  bcids(1:4) = [SELF_BC_NONORMALFLOW,& ! South
+                SELF_BC_NONORMALFLOW,& ! East
+                SELF_BC_NONORMALFLOW,& ! North
+                SELF_BC_NONORMALFLOW]  ! West
 
   ! Create a uniform block mesh
   call mesh % StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
@@ -68,30 +70,19 @@ program shallow_water_2d_constant
 
   ! Initialize the model
   call modelobj%Init(nvar,mesh,geometry)
-  modelobj%gradient_enabled = .true.
 
   ! Set the resting surface height and gravity
   modelobj%H = H
   modelobj%g = g
 
-  ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'f = 1.0')
-  call modelobj%solution%SetEquation(2,'f = 1.0')
-  call modelobj%solution%SetEquation(3,'f = 1.0')
+  ! Set the initial conditions
+  call modelobj%solution%SetEquation(1,'f = 0')
+  call modelobj%solution%SetEquation(2,'f = 0')
+  call modelobj%solution%SetEquation(3,'f = 0.001*exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.01 )')
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
-
-  call modelobj%CalculateTendency()
-  print*,"min, max (interior)", &
-    minval(modelobj%solution%interior), &
-    maxval(modelobj%solution%interior)
 
   call modelobj%CalculateEntropy()
   e0 = modelobj%entropy
-
-  !Write the initial condition
-  call modelobj%WriteModel()
-  call modelobj%WriteTecplot()
-  call modelobj%IncrementIOCounter()
 
   ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
@@ -100,20 +91,17 @@ program shallow_water_2d_constant
   ! of `dt` and outputing model data every `iointerval`
   call modelobj%ForwardStep(endtime,dt,iointerval)
 
-  print*,"min, max (interior)", &
-  minval(modelobj%solution%interior), &
-  maxval(modelobj%solution%interior)
-
   ef = modelobj%entropy
 
   if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
+  
   ! Clean up
   call modelobj%free()
   call mesh%free()
   call geometry%free()
   call interp%free()
 
-endprogram shallow_water_2d_constant
+endprogram shallow_water_2d_no_normal_flow_model
