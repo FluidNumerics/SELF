@@ -2,13 +2,13 @@ from setuptools import setup
 
 setup(
     name='pyself',
-    version='0.1.0',
+    version='0.0.1',
     description='A python interface for the Spectral Element Library in Fortran',
     url='https://github.com/fluidnumerics/self',
-    author='Dr. Joe Schoonover',
-    author_email='joe@fluidnumerics.com',
-    license='Researcher Software License',
-    packages=['self'],
+    author='Fluid Numerics',
+    author_email='support@fluidnumerics.com',
+    license='3-Clause BSD with Attribution',
+    packages=['pyself'],
     install_requires=['h5py>=3.7.0',
                       'dask',
                       'pyvista'],
