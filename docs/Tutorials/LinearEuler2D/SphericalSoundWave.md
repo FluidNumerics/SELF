@@ -55,71 +55,53 @@ Within each element, all variables are approximated by a Lagrange interpolating 
 
 
 ### Initial Conditions
-The initial and boundary conditions are set using an exact solution. The exact solution is found using the method of images where a no-normal-flow wall is placed at $x=1$ . We define the solution as the sum of an incident wave and a reflecting wave
-
-$$
-\vec{s} = \vec{s}_i + \vec{s}_r
-$$
+The initial condition is set using
 
 where
 
 $$
-    \vec{s}_i = 
+    \begin{pmatrix}
+    ρ \\ 
+    u \\ 
+    v \\ 
+    P
+    \end{pmatrix} = 
     \begin{pmatrix}
     \frac{1}{c^2} \\
-    \frac{k_x}{c} \\ 
-    \frac{k_y}{c} \\ 
+    0 \\ 
+    0 \\ 
     1
-    \end{pmatrix} \bar{p} e^{-\left( \frac{k_x(x-x_0) + k_y(y-y_0) - ct}{L^2} \right)}
+    \end{pmatrix} \bar{p} e^{-\left( \frac{ (x-x_0)^2 + (y-y_0)^2 }{L^2} \right)}
 $$
 
-is the incident wave, and
-
-$$
-    \vec{s}_r = 
-    \begin{pmatrix}
-    \frac{1}{c^2} \\
-    -\frac{k_x}{c} \\ 
-    \frac{k_y}{c} \\ 
-    1
-    \end{pmatrix} \bar{p} e^{-\left( \frac{-k_x(x-(2-x_0)) + k_y(y-y_0) - ct}{L^2} \right)}
-$$
 
 The parameters used in the exact solution are as follows : 
 
 * $\bar{p} = 10^{-4}$ is the amplitude of the sound wave
-* $x_0 = y_0 = 0.2$ defines the center of the initial sound wave
-* $L = \frac{0.2}{2\sqrt{\ln{2}}}$ is the half-width of the sound wave
-* $k_x = k_y = \frac{\sqrt{2}}{2}$ are the $x$ and $y$ components of the wave number
+* $x_0 = y_0 = 0.5$ defines the center of the initial sound wave
+* $L = \frac{0.06}{\sqrt{\ln{2}}}$ is the half-width of the sound wave
 * $c = 1$ is the speed of sound.
 
-The model domain
+This initial condition is similar to the spherical sound wave on pg. 218 of [Kopriva (2009), "Implementing Spectral Methods for Partial Differential Equations"](https://link.springer.com/book/10.1007/978-90-481-2261-5)
+
+
 <figure markdown>
-![Plane wave initial condition](./img/planewave_p_init.png){ align=left }
-  <figcaption>Pressure field for the initial condition, showing a plane wave with a front oriented at 45 degrees</figcaption>
+![Spherical sound-wave initial condition](./img/sphericalwave_r_init.png){ align=left }
+  <figcaption>Pressure field for the initial condition, showing a spherical sound wave centered in the domain. </figcaption>
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_r_t05.png){ align=left }
+![Spherical sound-wave halfway through the simulation](./img/sphericalwave_r_t05.png){ align=left }
   <figcaption>Pressure field at t=0.5 computed with SELF</figcaption>
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_r_t075.png){ align=left }
-  <figcaption>Pressure field at t=0.75 computed with SELF</figcaption>
+![Spherical sound-wave at the end of the simulation](./img/sphericalwave_r_t1.png){ align=left }
+  <figcaption>Pressure field at t=1 computed with SELF</figcaption>
 </figure>
 
 ## How we implement this
-You can find the example file for this demo in the `examples/linear_euler2d_planewave_propagation.f90` file. This file defines the `lineareuler2d_planewave_model` module in addition to a program that runs the propagating plane wave simulation.
-
-
-The `lineareuler2d_planewave_model` module defines the `lineareuler2d_planewave` class, which is a type extension of the `lineareuler2d` class that is provided by SELF. We make this type extension so that we can 
-
-* add attributes ( `kx` and `ky` ) for the x and y components of the plane-wave wave number
-* add attributes ( `x0` and `y0` ) for the initial center position of the plane-wave
-* add an attribute ( `p` ) for the pressure amplitude of the wave
-* ad an attribute ( `L` ) for the half-width of the plane wave
-* override the `hbc1d_Prescribed` type-bound procedure to set the boundary condition to the exact solution
+You can find the example file for this demo in the `examples/linear_euler2d_spherical_soundwave_closeddomain.f90` file. This examples using the `LinearEuler2D` class as-is to write a simple program that 
 
 ## Running this example
 
@@ -130,9 +112,9 @@ The `lineareuler2d_planewave_model` module defines the `lineareuler2d_planewave`
 To run this example, simply execute
 
 ```shell
-${SELF_ROOT}/examples/linear_euler2d_planewave_propagation
+${SELF_ROOT}/examples/linear_euler2d_spherical_soundwave_closeddomain
 ```
 
-This will run the simulation from $t=0$ to $t=1.0$ and write model output at intervals of $Δ t_{io} = 0.05$.
+This will run the simulation from $t=0$ to $t=1.0$ and write model output at intervals of $Δ t_{io} = 0.1$.
 
 During the simulation, tecplot (`solution.*.tec`) files are generated which can easily be visualized with paraview.

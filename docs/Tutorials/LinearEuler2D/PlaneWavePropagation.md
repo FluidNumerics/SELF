@@ -86,7 +86,7 @@ The model domain
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_p_t05.png){ align=left }
+![Plane wave at the end of the simulation](./img/planewave_p_t05.png){ align=left }
   <figcaption>Pressure field at t=0.5 computed with SELF</figcaption>
 </figure>
 

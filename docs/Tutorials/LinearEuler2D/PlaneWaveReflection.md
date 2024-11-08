@@ -100,12 +100,12 @@ The model domain
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_r_t05.png){ align=left }
+![Plane wave during initial reflection](./img/planewave_r_t05.png){ align=left }
   <figcaption>Pressure field at t=0.5 computed with SELF</figcaption>
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_r_t075.png){ align=left }
+![Plane wave reflection later in the simulation](./img/planewave_r_t075.png){ align=left }
   <figcaption>Pressure field at t=0.75 computed with SELF</figcaption>
 </figure>
 
