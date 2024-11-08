@@ -64,15 +64,15 @@ program LinearEuler_Example
   ! Initialize the model
   call modelobj%Init(mesh,geometry)
   modelobj%prescribed_bcs_enabled = .false. ! Disables prescribed boundary condition block for gpu accelerated implementations
-  ! this%rho0 = ! optional, set the reference density
-  ! this%c = ! optional set the reference sound wave speed
-  ! this%g = ! optional set the gravitational acceleration (y-direction)
+  ! modelobj%rho0 = ! optional, set the reference density
+  ! modelobj%c = ! optional set the reference sound wave speed
+  ! modelobj%g = ! optional set the gravitational acceleration (y-direction)
 
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'d = 0.001*exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )') ! density
+  call modelobj%solution%SetEquation(1,'d = 0.0001*exp( -ln(2)*( (x-0.5)^2 + (y-0.5)^2 )/0.0036 )') ! density
   call modelobj%solution%SetEquation(2,'u = 0') ! u
   call modelobj%solution%SetEquation(3,'v = 0') ! v
-  call modelobj%solution%SetEquation(4,'p = 0.001*exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )') ! pressure
+  call modelobj%solution%SetEquation(4,'p = 0.0001*exp( -ln(2)*( (x-0.5)^2 + (y-0.5)^2 )/0.0036 )') ! pressure
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
   call modelobj%WriteModel()
