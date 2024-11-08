@@ -63,6 +63,7 @@ program LinearEuler_Example
 
   ! Initialize the model
   call modelobj%Init(mesh,geometry)
+  modelobj%prescribed_bcs_enabled = .false. ! Disables prescribed boundary condition block for gpu accelerated implementations
   ! this%rho0 = ! optional, set the reference density
   ! this%c = ! optional set the reference sound wave speed
   ! this%g = ! optional set the gravitational acceleration (y-direction)
