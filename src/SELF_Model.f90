@@ -104,6 +104,7 @@ module SELF_Model
     real(prec) :: t
     integer :: ioIterate = 0
     logical :: gradient_enabled = .false.
+    logical :: prescribed_bcs_enabled = .true.
     integer :: nvar
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model

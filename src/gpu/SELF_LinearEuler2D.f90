@@ -107,38 +107,39 @@ contains
     integer :: i,iEl,j,e2,bcid
     real(prec) :: x(1:2)
 
-    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
-                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
-                            hipMemcpyDeviceToHost))
+    if( this%prescribed_bcs_enabled )then
+      call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
+                              this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                              hipMemcpyDeviceToHost))
 
-    ! Prescribed boundaries are still done on the GPU
-    do iEl = 1,this%solution%nElem ! Loop over all elements
-      do j = 1,4 ! Loop over all sides
+      ! Prescribed boundaries are still done on the GPU
+      do iEl = 1,this%solution%nElem ! Loop over all elements
+        do j = 1,4 ! Loop over all sides
 
-        bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
-        e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
+          bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
+          e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
 
-        if(e2 == 0) then
-          if(bcid == SELF_BC_PRESCRIBED) then
+          if(e2 == 0) then
+            if(bcid == SELF_BC_PRESCRIBED) then
 
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+              do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+                x = this%geometry%x%boundary(i,j,iEl,1,1:2)
 
-              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%hbc2d_Prescribed(x,this%t)
-            enddo
+                this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+                  this%hbc2d_Prescribed(x,this%t)
+              enddo
 
+            endif
           endif
-        endif
 
+        enddo
       enddo
-    enddo
 
-    call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
-                            c_loc(this%solution%extBoundary), &
-                            sizeof(this%solution%extBoundary), &
-                            hipMemcpyHostToDevice))
-
+      call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
+                              c_loc(this%solution%extBoundary), &
+                              sizeof(this%solution%extBoundary), &
+                              hipMemcpyHostToDevice))
+    endif
     call setboundarycondition_LinearEuler2D_gpu(this%solution%extboundary_gpu, &
                                                 this%solution%boundary_gpu, &
                                                 this%mesh%sideInfo_gpu, &
