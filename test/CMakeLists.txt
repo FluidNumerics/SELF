@@ -150,6 +150,7 @@ add_fortran_tests (
     "advection_diffusion_3d_rk2.f90"
     "advection_diffusion_3d_rk3.f90"
     "advection_diffusion_3d_rk4.f90"
+    "euler2d_constant.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
