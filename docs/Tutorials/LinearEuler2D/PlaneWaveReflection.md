@@ -55,7 +55,7 @@ Within each element, all variables are approximated by a Lagrange interpolating 
 
 
 ### Initial and Boundary Conditions
-The initial and boundary conditions are set using an exact solution. The exact solution is found using the method of images where a no-normal-flow wall is placed at $x=1$ . We define the solution as the sum of an incident wave and a reflecting wave
+The initial and prescribed boundary conditions are set using an exact solution. The exact solution is found using the method of images where a no-normal-flow wall is placed at $x=1$ . We define the solution as the sum of an incident wave and a reflecting wave
 
 $$
 \vec{s} = \vec{s}_i + \vec{s}_r
