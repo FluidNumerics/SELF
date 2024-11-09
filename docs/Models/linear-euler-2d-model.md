@@ -37,9 +37,9 @@ $$
 
 where $c$ is the (constant) speed of sound. The source term is set to zero.
 
-\begin{equation}
-\vec{q} = \vec{0}
-\end{equation}
+$$
+    \vec{q} = \vec{0}
+$$ 
 
 To track stability of the Euler equation, the total entropy function is
 
