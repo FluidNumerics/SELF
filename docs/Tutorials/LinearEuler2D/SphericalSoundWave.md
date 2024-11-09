@@ -57,7 +57,6 @@ Within each element, all variables are approximated by a Lagrange interpolating 
 ### Initial Conditions
 The initial condition is set using
 
-where
 
 $$
     \begin{pmatrix}
