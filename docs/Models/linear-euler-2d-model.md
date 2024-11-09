@@ -43,9 +43,9 @@ $$
 
 To track stability of the Euler equation, the total entropy function is
 
-\begin{equation}
-e = \frac{1}{2} \int_V u^2 + v^2 + \frac{p}{\rho_0 c^2} \hspace{1mm} dV
-\end{equation}
+$$
+    e = \frac{1}{2} \int_V u^2 + v^2 + \frac{p}{\rho_0 c^2} \hspace{1mm} dV
+$$
 
 ## Implementation
 The Linear Euler 2D model is implemented as a type extension of the [`DGModel2D` class](../ford/type/dgmodel2d_t.html). The [`LinearEuler2D_t` class](../ford/type/lineareuler2d_t.html) adds parameters for the reference density and the speed speed of sound and overrides the `SetMetadata`, `entropy_func`, `flux2d`, and `riemannflux2d` type-bound procedures.
