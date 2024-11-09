@@ -99,7 +99,7 @@ The `lineareuler2d_planewave_model` module defines the `lineareuler2d_planewave`
 * add attributes ( `kx` and `ky` ) for the x and y components of the plane-wave wave number
 * add attributes ( `x0` and `y0` ) for the initial center position of the plane-wave
 * add an attribute ( `p` ) for the pressure amplitude of the wave
-* ad an attribute ( `L` ) for the half-width of the plane wave
+* add an attribute ( `L` ) for the half-width of the plane wave
 * override the `hbc1d_Prescribed` type-bound procedure to set the boundary condition to the exact solution
 
 ## Running this example
