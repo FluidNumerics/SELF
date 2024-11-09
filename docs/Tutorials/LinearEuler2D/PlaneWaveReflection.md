@@ -1,5 +1,5 @@
 # Linear Euler 2D - Plane Wave Reflection Tutorial
-This tutorial will walk you through using an example program that uses the `LinearEuler2D` class to run a simulation with the linear Euler equations for an ideal gas in 2-D. This example is configured using the built in structured mesh generator with prescribed boundary conditions on all domain boundaries.
+This tutorial will walk you through using an example program that uses the `LinearEuler2D` class to run a simulation with the linear Euler equations for an ideal gas in 2-D. This example is configured using the built in structured mesh generator with prescribed boundary conditions on north, west, and south boundaries and a no-normal-flow boundary condition on the east boundary.
 
 ## Problem statement
 
