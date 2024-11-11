@@ -36,20 +36,28 @@ program Euler_Example
 ! - Sebastian Hennemann, Gregor J. Gassner (2020)
 !   A provably entropy stable subcell shock capturing approach for high order split form DG
 !   [arXiv: 2008.12044](https://arxiv.org/abs/2008.12044)
-  real(prec),parameter :: rho0 = 1.0_prec
-  real(prec),parameter :: rhoprime = 0.5_prec
-  real(prec),parameter :: Lr = 3.0_prec*10.0_prec**(-2)
-  real(prec),parameter :: P0 = 10.0_prec**(-5)
-  real(prec),parameter :: Eprime = 1.0_prec
-  real(prec),parameter :: Le = 2.0_prec*10.0_prec**(-2)
-  real(prec),parameter :: x0 = 0.5_prec
-  real(prec),parameter :: y0 = 0.5_prec
+  real(prec),parameter :: rho0 = 1.225_prec
+  real(prec),parameter :: rhoprime = 0.0_prec
+  real(prec),parameter :: Lr = 75.0_prec
+  real(prec),parameter :: P0 = 101325.0_prec ! 1 atm
+  real(prec),parameter :: Eprime = 35900.0_prec
+  real(prec),parameter :: Le = 50.0_prec
+  real(prec),parameter :: x0 = 250.0_prec 
+  real(prec),parameter :: y0 = 250.0_prec
+  ! Grid parameters
+  real(prec),parameter :: dx = 5.0_prec ! Grid spacing in the x-direction
+  real(prec),parameter :: dy = 5.0_prec ! Grid spacing in the y-direction
+  integer,parameter :: ny = 50 ! Number of x grid points per tile
+  integer,parameter :: nx = 50 ! Number of y grid points per tile
+  integer,parameter :: nTx = 2 ! Number of tiles in the x-direction
+  integer,parameter :: nTy = 2 ! Number of tiles in the y-direction
+
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
-  real(prec),parameter :: dt = 2.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec),parameter :: endtime = 1.0_prec
-  real(prec),parameter :: iointerval = 0.1_prec
+  real(prec),parameter :: dt = 10.0_prec**(-4) ! time-step size
+  real(prec),parameter :: endtime = 10.0_prec**(-2) ! end time
+  real(prec),parameter :: iointerval = 10.0_prec**(-3)
   real(prec) :: e0,ef ! Initial and final entropy
   type(Euler2D) :: modelobj
   type(Lagrange),target :: interp
@@ -63,7 +71,7 @@ program Euler_Example
                 SELF_BC_NONORMALFLOW, & ! North
                 SELF_BC_NONORMALFLOW] ! West
 
-  call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
+  call mesh%StructuredMesh(nx,ny,nTx,nTy,dx,dy,bcids)
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -78,8 +86,10 @@ program Euler_Example
   ! Initialize the model
   call modelobj%Init(mesh,geometry)
   modelobj%prescribed_bcs_enabled = .false. ! Disables prescribed boundary condition block for gpu accelerated implementations
+  modelobj%tecplot_enabled = .false. ! Disable tecplot output
 
-  call modelobj%WeakBlastWave(rho0,rhoprime,Lr,P0,Eprime,Le,x0,y0)
+  ! Set up blast wave initial conditions
+  call modelobj%SphericalBlastWave(rho0,rhoprime,Lr,P0,Eprime,Le,x0,y0)
 
   call modelobj%WriteModel()
   call modelobj%IncrementIOCounter()
