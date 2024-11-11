@@ -24,14 +24,13 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ShallowWater2D_no_normal_flow_model
+program ShallowWater2D_nonormalflow_model
   use self_data
   use self_ShallowWater2D
   use self_mesh_2d
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3' ! Which integrator method
-  integer,parameter :: nvar = 3                                     ! Number of variables 
   integer,parameter :: controlDegree = 7                            ! Degree of control polynomial
   integer,parameter :: targetDegree = 16                            ! Degree of target polynomial
   real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4)             ! Time-step size
@@ -69,7 +68,7 @@ program ShallowWater2D_no_normal_flow_model
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry)
+  call modelobj%Init(mesh,geometry)
 
   ! Set the resting surface height and gravity
   modelobj%H = H
@@ -104,4 +103,4 @@ program ShallowWater2D_no_normal_flow_model
   call geometry%free()
   call interp%free()
 
-endprogram ShallowWater2D_no_normal_flow_model
+endprogram ShallowWater2D_nonormalflow_model

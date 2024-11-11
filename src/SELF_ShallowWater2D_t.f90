@@ -36,6 +36,7 @@ module self_ShallowWater2D_t
         real(prec) :: g = 0.0_prec ! acceleration due to gravity
 
     contains
+        procedure :: SetNumberOfVariables => SetNumberOfVariables_ShallowWater2D_t
         procedure :: SetMetadata => SetMetadata_ShallowWater2D_t
         procedure :: entropy_func => entropy_func_ShallowWater2D_t
         procedure :: flux2d => flux2d_ShallowWater2D_t
@@ -44,6 +45,15 @@ module self_ShallowWater2D_t
     endtype ShallowWater2D_t
 
   contains
+
+    subroutine SetNumberOfVariables_ShallowWater2D_t(this)
+        implicit none
+        class(ShallowWater2D_t),intent(inout) :: this
+
+        this%nvar = 3
+
+    endsubroutine SetNumberOfVariables_ShallowWater2D_t
+
     subroutine SetMetadata_ShallowWater2D_t(this)
         implicit none
         class(ShallowWater2D_t),intent(inout) :: this

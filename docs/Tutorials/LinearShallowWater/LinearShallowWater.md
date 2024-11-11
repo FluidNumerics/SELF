@@ -168,7 +168,7 @@ call geometry%Init(interp,mesh%nElem)
 call geometry%GenerateFromMesh(mesh)
 
 ! Initialize the model
-call modelobj%Init(nvar,mesh,geometry)
+call modelobj%Init(mesh,geometry)
 ```
 
 We set our model-specific constants, 

@@ -30,7 +30,6 @@ program ShallowWater2D_constant
 
     implicit none
     character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
-    integer,parameter :: nvar = 3
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
@@ -67,7 +66,7 @@ program ShallowWater2D_constant
     call geometry%GenerateFromMesh(mesh)
 
     ! Initialize the model
-    call modelobj%Init(nvar,mesh,geometry)
+    call modelobj%Init(mesh,geometry)
     modelobj%gradient_enabled = .true.
 
     ! Set the resting surface height and gravity
