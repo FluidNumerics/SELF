@@ -137,7 +137,7 @@ program LinearEuler_Example
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
   real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-  real(prec),parameter :: endtime = 3.0_prec
+  real(prec),parameter :: endtime = 0.05_prec
   real(prec),parameter :: iointerval = 0.05_prec
   real(prec) :: e0,ef ! Initial and final entropy
   type(lineareuler2d_planewave) :: modelobj

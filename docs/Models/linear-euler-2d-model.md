@@ -37,15 +37,15 @@ $$
 
 where $c$ is the (constant) speed of sound. The source term is set to zero.
 
-\begin{equation}
-\vec{q} = \vec{0}
-\end{equation}
+$$
+    \vec{q} = \vec{0}
+$$ 
 
 To track stability of the Euler equation, the total entropy function is
 
-\begin{equation}
-e = \frac{1}{2} \int_V u^2 + v^2 + \frac{p}{\rho_0 c^2} \hspace{1mm} dV
-\end{equation}
+$$
+    e = \frac{1}{2} \int_V u^2 + v^2 + \frac{p}{\rho_0 c^2} \hspace{1mm} dV
+$$
 
 ## Implementation
 The Linear Euler 2D model is implemented as a type extension of the [`DGModel2D` class](../ford/type/dgmodel2d_t.html). The [`LinearEuler2D_t` class](../ford/type/lineareuler2d_t.html) adds parameters for the reference density and the speed speed of sound and overrides the `SetMetadata`, `entropy_func`, `flux2d`, and `riemannflux2d` type-bound procedures.
@@ -126,7 +126,7 @@ When building SELF with GPU acceleration enabled, the Linear Euler (2-D) model o
 
 These methods are one-level above the usual `pure function` type-bound procedures used to define the riemann solver, flux, source terms, and boundary conditions. These procedures need to be overridden with calls to GPU accelerated kernels to make the solver fully resident on the GPU. 
 
-Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU accelerated. However, prescribed boundary conditions are CPU-only. We have opted to keep the prescribed boundary conditions CPU-only so that their implementation remain easy-to-use. This implies that some data is copied between host and device every iteration when prescribed boundary conditions are enabled. 
+Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU accelerated. However, prescribed boundary conditions are CPU-only. We have opted to keep the prescribed boundary conditions CPU-only so that their implementation remains easy-to-use. This implies that some data is copied between host and device every iteration when prescribed boundary conditions are enabled. 
 
 !!! note
     In simulations where no prescribed boundaries are used, or your prescribed boundaries are time independent, you can disable prescribed boundary conditions by explicitly setting `modelobj % prescribed_bcs_enabled = .false.`. This can improve the time-to-solution for your simulation by avoiding unnecessary host-device memory movement. An example of this feature is shown in [`examples/lineareuler2d_spherical_soundwave_closeddomain.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_spherical_soundwave_closeddomain.f90)

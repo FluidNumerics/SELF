@@ -1,5 +1,5 @@
 # Linear Euler 2D - Plane Wave Reflection Tutorial
-This tutorial will walk you through using an example program that uses the `LinearEuler2D` class to run a simulation with the linear Euler equations for an ideal gas in 2-D. This example is configured using the built in structured mesh generator with prescribed boundary conditions on all domain boundaries.
+This tutorial will walk you through using an example program that uses the `LinearEuler2D` class to run a simulation with the linear Euler equations for an ideal gas in 2-D. This example is configured using the built in structured mesh generator with prescribed boundary conditions on north, west, and south boundaries and a no-normal-flow boundary condition on the east boundary.
 
 ## Problem statement
 
@@ -55,7 +55,7 @@ Within each element, all variables are approximated by a Lagrange interpolating 
 
 
 ### Initial and Boundary Conditions
-The initial and boundary conditions are set using an exact solution. The exact solution is found using the method of images where a no-normal-flow wall is placed at $x=1$ . We define the solution as the sum of an incident wave and a reflecting wave
+The initial and prescribed boundary conditions are set using an exact solution. The exact solution is found using the method of images where a no-normal-flow wall is placed at $x=1$ . We define the solution as the sum of an incident wave and a reflecting wave
 
 $$
 \vec{s} = \vec{s}_i + \vec{s}_r
@@ -85,6 +85,8 @@ $$
     \end{pmatrix} \bar{p} e^{-\left( \frac{(-k_x(x-(2-x_0)) + k_y(y-y_0) - ct)^2}{L^2} \right)}
 $$
 
+is the reflecting wave.
+
 The parameters used in the exact solution are as follows : 
 
 * $\bar{p} = 10^{-4}$ is the amplitude of the sound wave
@@ -100,12 +102,12 @@ The model domain
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_r_t05.png){ align=left }
+![Plane wave during initial reflection](./img/planewave_r_t05.png){ align=left }
   <figcaption>Pressure field at t=0.5 computed with SELF</figcaption>
 </figure>
 
 <figure markdown>
-![Plane wave initial condition](./img/planewave_r_t075.png){ align=left }
+![Plane wave reflection later in the simulation](./img/planewave_r_t075.png){ align=left }
   <figcaption>Pressure field at t=0.75 computed with SELF</figcaption>
 </figure>
 

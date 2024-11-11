@@ -38,7 +38,7 @@
 
 import numpy as np
 import matplotlib
-import self.model2d as model2d
+import pyself.model2d as model2d
 import pyvista as pv
 import os
 import sys
