@@ -100,7 +100,7 @@ This initial condition is similar to the spherical sound wave on pg. 218 of [Kop
 </figure>
 
 ## How we implement this
-You can find the example file for this demo in the `examples/linear_euler2d_spherical_soundwave_closeddomain.f90` file. This examples using the `LinearEuler2D` class as-is to write a simple program that simulates the linear Euler equations in 2-D using a Gaussian bump for initial conditions. This is comparable to a spherical soundwave reverberating in a square room. 
+You can find the example file for this demo in the `examples/linear_euler2d_spherical_soundwave_closeddomain.f90` file. This examples using the `LinearEuler2D` class as-is to write a simple program that simulates the expansion of a spherical sound-wave in a closed domain.
 
 ## Running this example
 
