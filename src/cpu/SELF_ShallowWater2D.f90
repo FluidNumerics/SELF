@@ -24,14 +24,14 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module self_shallow_water_2d
+module self_ShallowWater2D
 
-    use self_shallow_water_2d_t
+    use self_ShallowWater2D_t
   
     implicit none
   
-    type,extends(shallow_water_2d_t) :: shallow_water_2d
-    endtype shallow_water_2d
+    type,extends(ShallowWater2D_t) :: ShallowWater2D
+    endtype ShallowWater2D
   
-endmodule self_shallow_water_2d
+endmodule self_ShallowWater2D
   

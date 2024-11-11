@@ -24,9 +24,9 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program shallow_water_2d_nonormalflow
+program ShallowWater2D_nonormalflow
     use self_data
-    use self_shallow_water_2d
+    use self_ShallowWater2D
     use self_mesh_2d
 
     implicit none
@@ -41,7 +41,7 @@ program shallow_water_2d_nonormalflow
     real(prec),parameter :: endtime = 0.2_prec
     real(prec),parameter :: iointerval = 0.1_prec
     real(prec) :: e0,ef ! Initial and final entropy
-    type(shallow_water_2d) :: modelobj
+    type(ShallowWater2D) :: modelobj
     type(Lagrange),target :: interp
     integer :: bcids(1:4)
     type(Mesh2D),target :: mesh
@@ -103,4 +103,4 @@ program shallow_water_2d_nonormalflow
     call geometry%free()
     call interp%free()
 
-endprogram shallow_water_2d_nonormalflow
+endprogram ShallowWater2D_nonormalflow

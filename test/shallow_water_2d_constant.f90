@@ -24,9 +24,9 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program shallow_water_2d_constant
+program ShallowWater2D_constant
     use self_data
-    use self_shallow_water_2d
+    use self_ShallowWater2D
 
     implicit none
     character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
@@ -40,7 +40,7 @@ program shallow_water_2d_constant
     real(prec),parameter :: endtime = 0.2_prec
     real(prec),parameter :: iointerval = 0.1_prec
     real(prec) :: e0,ef ! Initial and final entropy
-    type(shallow_water_2d) :: modelobj
+    type(ShallowWater2D) :: modelobj
     type(Lagrange),target :: interp
     type(Mesh2D),target :: mesh
     integer :: bcids(1:4)
@@ -116,4 +116,4 @@ program shallow_water_2d_constant
     call geometry%free()
     call interp%free()
 
-endprogram shallow_water_2d_constant
+endprogram ShallowWater2D_constant
