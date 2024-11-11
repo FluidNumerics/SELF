@@ -578,23 +578,21 @@ contains
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this%mesh%decomp%mpiComm)
 
       ! Write the interpolant to the file
-      print*,__FILE__//" : Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
       ! Write the model state to file
-      print*,__FILE__//" : Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       print*," offset, nglobal_elem : ",this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution', &
                                    this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
       ! Write the geometry to file
-      print*,__FILE__//" : Writing control grid geometry to file"
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry', &
                                      this%mesh%decomp%offsetElem(this%mesh%decomp%rankId+1),this%mesh%decomp%nElem)
 
+      call this%AdditionalOutput(fileId)
       ! -- END : writing solution on control grid -- !
 
       call Close_HDF5(fileId)
@@ -604,20 +602,19 @@ contains
       call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
       ! Write the interpolant to the file
-      print*,__FILE__//" : Writing interpolant data to file"
       call this%solution%interp%WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
 
       ! Write the model state to file
-      print*,__FILE__//" : Writing control grid solution to file"
       call CreateGroup_HDF5(fileId,'/controlgrid')
       call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
       ! Write the geometry to file
-      print*,__FILE__//" : Writing control grid geometry to file"
       call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry')
+
+      call this%AdditionalOutput(fileId)
       ! -- END : writing solution on control grid -- !
 
       call Close_HDF5(fileId)

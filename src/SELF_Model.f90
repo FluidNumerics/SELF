@@ -105,6 +105,7 @@ module SELF_Model
     integer :: ioIterate = 0
     logical :: gradient_enabled = .false.
     logical :: prescribed_bcs_enabled = .true.
+    logical :: tecplot_enabled = .true.
     integer :: nvar
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
@@ -119,6 +120,7 @@ module SELF_Model
 
     procedure :: AdditionalInit => AdditionalInit_Model
     procedure :: AdditionalFree => AdditionalFree_Model
+    procedure :: AdditionalOutput => AdditionalOutput_Model
 
     procedure :: ForwardStep => ForwardStep_Model
 
@@ -283,6 +285,12 @@ contains
     return
   endsubroutine AdditionalFree_Model
   
+  subroutine AdditionalOutput_Model(this,fileid)
+    implicit none
+    class(Model),intent(inout) :: this
+    integer(HID_T),intent(in) :: fileid
+    return
+  endsubroutine AdditionalOutput_Model
 
   subroutine PrintType_Model(this)
     implicit none
@@ -752,7 +760,9 @@ contains
       call this%timeIntegrator(tNext)
       this%t = tNext
       call this%WriteModel()
-      call this%WriteTecplot()
+      if(this%tecplot_enabled)then
+        call this%WriteTecplot()
+      endif
       call this%IncrementIOCounter()
       call this%CalculateEntropy()
       call this%ReportEntropy()

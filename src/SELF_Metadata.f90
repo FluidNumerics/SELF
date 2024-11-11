@@ -31,7 +31,7 @@ module SELF_Metadata
 
   integer,parameter,public :: SELF_MTD_NameLength = 250
   integer,parameter,public :: SELF_MTD_DescriptionLength = 1000
-  integer,parameter,public :: SELF_MTD_UnitsLength = 20
+  integer,parameter,public :: SELF_MTD_UnitsLength = 64
 
   ! A class for storing metadata information, intended for file IO
   type Metadata
