@@ -44,6 +44,12 @@ import os
 import sys
 import subprocess
 
+pmin = -0.2e-4
+pmax = 0.2e-4
+# output video name
+#video_name = "linear_euler2d_planewave_reflection.mp4"
+video_name = "linear_euler2d_spherical_soundwave_closeddomain.mp4"
+
 # Specify the directory you want to search in
 directory_path = "/scratch/joe/build/examples/" 
 
@@ -69,7 +75,7 @@ for pickup_file in pickup_files:
     pl.add_mesh(model.pvdata,
                 scalars="pressure",
                 cmap=colormap,
-                clim=[-1.1e-4, 1.1e-4])
+                clim=[pmin,pmax])
     pl.camera_position = 'xy'
     output = pickup_file.split("/")[-1].replace("h5","eps")
     pl.save_graphic(f"./{output}")
@@ -81,4 +87,4 @@ for pickup_file in pickup_files:
 
 # Create a gif from the png
 print("Generating gif from frames")
-subprocess.run("ffmpeg -y -framerate 20 -s 1920x1080 -pattern_type glob -i '*.png' -vcodec libx264 -crf 25 -pix_fmt yuv420p -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" linear_euler2d.mp4",shell=True,check=True)
+subprocess.run(f"ffmpeg -y -framerate 20 -s 1920x1080 -pattern_type glob -i '*.png' -vcodec libx264 -crf 25 -pix_fmt yuv420p -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" {video_name}",shell=True,check=True)
