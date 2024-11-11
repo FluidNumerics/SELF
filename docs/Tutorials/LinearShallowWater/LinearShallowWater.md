@@ -20,6 +20,7 @@ $$
 
 The variables are defined as follows:
 
+* $f$ is the background vorticity (set to zero hereafter)
 * $\vec{u} =  u \hat{x} + v \hat{y}$ is the barotropic velocity
 * $g$ is the acceleration of gravity
 * $H$ is a uniform resting fluid depth
@@ -48,36 +49,34 @@ All boundaries are set to no normal flow, i.e., reflecting wave boundary conditi
 1. The reflected wave is equal to the incident wave from the fluid interior:
 $$
 \begin{pmatrix}
-u_{I} \\ v_{I} \\ \eta_{I} 
+u_L \\ v_L \\ \eta_L 
 \end{pmatrix}
 =
 \begin{pmatrix}
-u_{E} \\ v_{E} \\ \eta_{E} 
+u_R \\ v_R \\ \eta_R 
 \end{pmatrix}
 $$
 2. The boundary condition pressure matches the fluid interior pressure.
 3. The boundary condition tangential velocity matches the fluid interior tangential velocity:
 $$
--u_E \eta_y + v_E \eta_x = -u_L\eta_y + v_L \eta_x
+-u_R \eta_y + v_R \eta_x = -u_L\eta_y + v_L \eta_x
 $$
 
-(Subscript $I$ denotes interior variable and subscript $E$ denotes exterior variable.)
+(Subscript $L$ denotes interior variable and subscript $R$ denotes exterior variable.)
 
 Together, these conditions imply:
 
 $$
 \begin{pmatrix}
-u_{E} \\ v_{E} \\ \eta_{E} 
+u_R \\ v_R \\ \eta_R 
 \end{pmatrix}
 =
 \begin{pmatrix}
-(\eta_y^2 - \eta_x^2) u_I - 2 \eta_x \eta_y v_I \\ 
-(\eta_x^2 - \eta_y^2) u_I - 2 \eta_x \eta_y u_I \\ 
-\eta_{I} 
+(\eta_y^2 - \eta_x^2) u_L - 2 \eta_x \eta_y v_L \\ 
+(\eta_x^2 - \eta_y^2) u_L - 2 \eta_x \eta_y u_L \\ 
+\eta_L 
 \end{pmatrix}
 $$
-
-
 
 The model is integrated forward in time using $3^{rd}$ order Runge-Kutta with a time step of $\Delta t = 0.5 s$. 
 
@@ -112,7 +111,7 @@ No normal flow conditions are built into the `shallow_water_2d` module when we a
   endfunction hbc2d_NoNormalFlow_shallow_water_2d_t
 ```
 
-You should notice that the lines marked with `! <variable>` correspond directly to our derived conditions for $u_E$, $v_E$, and $\eta_E$ above.
+You should notice that the lines marked with `! <variable>` correspond directly to our derived conditions for $u_R$, $v_R$, and $\eta_R$ above.
 
 Let us now look at the main program `shallow_water_2d_no_normal_flow_model` in `examples/shallow_water_2d.f90`. This program steps through the standard procedures for setting up and running a simulation on a structured 2-D mesh in SELF.
 
