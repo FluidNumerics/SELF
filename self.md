@@ -1,12 +1,12 @@
 ---
 project: SELF
-summary: SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.
-author: Joe Schoonover
-author_description: Committed to service for science
+summary: Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.
+author: Fluid Numerics
+author_description: We science everything
 github: https://github.com/fluidnumerics
-email: joe@fluidnumerics.com
+email: support@fluidnumerics.com
 project_github: https://github.com/FluidNumerics/SELF
-project_website: https://www.fluidnumerics.com/products/selffluids
+project_website: https://self.fluidnumerics.com
 src_dir: ./src/
 output_dir: ./docs/ford
 exclude_dir: ./src/dev

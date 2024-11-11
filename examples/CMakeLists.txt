@@ -80,5 +80,8 @@ endfunction ()
 
 add_fortran_tests (
   "burgers1d_shock.f90"
+  "linear_euler2d_spherical_soundwave_closeddomain.f90"
+  "linear_euler2d_planewave_reflection.f90"
+  "linear_euler2d_planewave_propagation.f90"
   "ShallowWater2D.f90"
     )

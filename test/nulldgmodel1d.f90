@@ -31,7 +31,6 @@ program NullDGModel1D_euler
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
-  integer,parameter :: nvar = 1
   integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
@@ -62,7 +61,7 @@ program NullDGModel1D_euler
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry)
+  call modelobj%Init(mesh,geometry)
   call modelobj%PrintType()
   ! Set the initial condition
   call modelobj%solution%SetEquation(1,'f = 0.0 )')

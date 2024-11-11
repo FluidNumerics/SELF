@@ -424,91 +424,23 @@ extern "C"
   }
 }
 
-__global__ void DG_BoundaryContribution_2D_gpukernel(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nel){
+__global__ void ContravariantProjection_2D_gpukernel(real *vector, real *dsdx, int nq){
 
-  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
-  uint32_t ivar = blockIdx.y;
-  uint32_t ndof = nel*(N+1)*(N+1);
-  if( idof < ndof ){
-    uint32_t i = idof % (N+1);
-    uint32_t j = (idof/(N+1))%(N+1);
-    uint32_t iel = (idof/(N+1)/(N+1));
-    df[SC_2D_INDEX(i,j,iel,ivar,N,nel)] += (bf[SCB_2D_INDEX(j,1,iel,ivar,N,nel)]*bMatrix[i+(N+1)] + // east
-                                          bf[SCB_2D_INDEX(j,3,iel,ivar,N,nel)]*bMatrix[i])/       // west
-                                         qWeights[i] +
-                                         (bf[SCB_2D_INDEX(i,2,iel,ivar,N,nel)]*bMatrix[j+(N+1)] + // north
-                                          bf[SCB_2D_INDEX(i,0,iel,ivar,N,nel)]*bMatrix[j])/       // south
-                                         qWeights[j];
-  }
+    uint32_t idof = threadIdx.x;
 
-}
-
-extern "C"
-{
-  void DG_BoundaryContribution_2D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
-  {
-    int ndof = (N+1)*(N+1)*nEl;
-    int threads_per_block = 256;
-    int nblocks_x = ndof/threads_per_block + 1;
-
-    dim3 nblocks(nblocks_x,nVar,1);
-    dim3 nthreads(threads_per_block,1,1);
-
-	  DG_BoundaryContribution_2D_gpukernel<<<nblocks,nthreads, 0, 0>>>(bMatrix, qWeights, bf, df, N, nEl);
-  } 
-}
-
-__global__ void DG_BoundaryContribution_3D_gpukernel(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nel){
-
-  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
-  uint32_t ndof = nel*(N+1)*(N+1)*(N+1);
-
-  if( idof < ndof ){
-    uint32_t i = idof % (N+1);
-    uint32_t j = (idof/(N+1))%(N+1);
-    uint32_t k = (idof/(N+1)/(N+1))%(N+1);
-    uint32_t iel = (idof/(N+1)/(N+1)/(N+1));
-    uint32_t ivar = blockIdx.y;
-    df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] += (bf[SCB_3D_INDEX(i,j,5,iel,ivar,N,nel)]*bMatrix[k+(N+1)] + // top
-                                              bf[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])/       // bottom
-                                              qWeights[k] +
-                                             (bf[SCB_3D_INDEX(j,k,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] + // east
-                                              bf[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])/       // west
-                                              qWeights[i] +
-                                             (bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] + // north
-                                              bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])/       // south
-                                              qWeights[j];
-  }
-
-}
-
-extern "C"
-{
-  void DG_BoundaryContribution_3D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nVar, int nEl)
-  {
-    int ndof = (N+1)*(N+1)*(N+1)*nEl;
-    int threads_per_block = 256;
-    int nblocks_x = ndof/threads_per_block + 1;
-
-    dim3 nblocks(nblocks_x,nVar,1);
-    dim3 nthreads(threads_per_block,1,1);
-
-	  DG_BoundaryContribution_3D_gpukernel<<<nblocks,nthreads, 0, 0>>>(bMatrix, qWeights, bf, df, N, nEl);
-
-  } 
-}
-
-__global__ void ContravariantProjection_2D_gpukernel(real *vector, real *dsdx, int N, int ndof){
-
-    uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
-
-    if( i < ndof ){
+    if( idof < nq ){
+      uint32_t iel = blockIdx.x;
+      uint32_t nel = gridDim.x;
       uint32_t ivar = blockIdx.y;
-      uint32_t nvar = blockDim.y;
-      real Fx = vector[i+ndof*ivar];
-      real Fy = vector[i+ndof*(ivar + nvar)];
-      vector[i+ndof*ivar] = dsdx[i]*Fx + dsdx[i + ndof]*Fy;
-      vector[i+ndof*(ivar + nvar)] = dsdx[i + 2*ndof]*Fx + dsdx[i + 3*ndof]*Fy;
+      uint32_t nvar = gridDim.y;
+      real Fx = vector[idof + nq*(iel + nel*(ivar))];
+      real Fy = vector[idof + nq*(iel + nel*(ivar + nvar))];
+            
+      vector[idof + nq*(iel + nel*(ivar))] = dsdx[idof + nq*(iel)]*Fx + // dsdx(...,0,0)*Fx
+                                             dsdx[idof + nq*(iel+nel)]*Fy; // dsdx(...,1,0)*Fy;
+
+      vector[idof + nq*(iel + nel*(ivar+nvar))] = dsdx[idof + nq*(iel+nel*2)]*Fx + //dsdx(...,0,1)*Fx
+                                                  dsdx[idof + nq*(iel+nel*3)]*Fy;  //dsdx(...,1,1)*Fy
     }
 
 }
@@ -517,17 +449,15 @@ extern "C"
 {
   void ContravariantProjection_2D_gpu(real *vector, real *dsdx, int N, int nVar, int nEl)
   {
-    int ndof = (N+1)*(N+1)*nEl;
-    int threads_per_block = 256;
-    int nblocks_x = ndof/threads_per_block + 1;
+    int nq = (N+1)*(N+1);
 
-    dim3 nblocks(nblocks_x,nVar,1);
-    dim3 nthreads(threads_per_block,1,1);
-    ContravariantProjection_2D_gpukernel<<<nblocks,nthreads, 0, 0>>>(vector, dsdx, N, ndof);
-
+    if( N <= 7 ){
+      ContravariantProjection_2D_gpukernel<<<dim3(nEl,nVar,1), dim3(64,1,1), 0, 0>>>(vector, dsdx, nq);
+    } else {
+      ContravariantProjection_2D_gpukernel<<<dim3(nEl,nVar,1), dim3(256,1,1), 0, 0>>>(vector, dsdx, nq);
+    }
   } 
 }
-
 
 __global__ void ContravariantProjection_3D_gpukernel(real *vector, real *dsdx, int N, int ndof){
 

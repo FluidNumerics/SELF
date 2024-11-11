@@ -36,6 +36,7 @@ module self_NullDGModel2D_t
     ! Add any additional attributes here that are specific to your model
 
   contains
+    !   procedure :: SetNumberOfVariables => SetNumberOfVariables_NullDGModel2D_t
     !   procedure :: hbc2d_Prescribed => hbc2d_Generic_Model
     !   procedure :: hbc2d_Radiation => hbc2d_Generic_Model
     !   procedure :: hbc2d_NoNormalFlow => hbc2d_Generic_Model
@@ -52,6 +53,13 @@ module self_NullDGModel2D_t
   endtype NullDGModel2D_t
 
 contains
+
+  ! subroutine SetNumberOfVariables_NullDGModel2D_t(this)
+  !   implicit none
+  !   class(Model),intent(inout) :: this
+  !     this%nvar = 1
+  ! endsubroutine SetNumberOfVariables_NullDGModel2D_t
+
   ! subroutine SetMetadata_NullDGModel2D_t(this)
   !   implicit none
   !   class(NullDGModel2D_t),intent(inout) :: this

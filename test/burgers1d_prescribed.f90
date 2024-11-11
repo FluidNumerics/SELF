@@ -31,7 +31,6 @@ program burgers1d_constant
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
-  integer,parameter :: nvar = 1
   integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
@@ -63,7 +62,7 @@ program burgers1d_constant
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry)
+  call modelobj%Init(mesh,geometry)
   modelobj%gradient_enabled = .true.
   !Set the diffusivity
   modelobj%nu = nu

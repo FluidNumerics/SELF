@@ -119,22 +119,4 @@ module SELF_GPU
 
                   endfunction GPUAvailable
 
-                  ! subroutine HostToDevice(fsource,fdest)
-                  !   implicit none
-                  !   type(c_ptr), intent(inout) :: fsource
-                  !   type(c_ptr), intent(inout) :: fdest
-
-                  !   call gpuCheck(hipMemcpy(fdest,fsource,sizeof(fsource),hipMemcpyHostToDevice))
-
-                  ! endsubroutine HostToDevice
-
-                  ! subroutine DeviceToHost(fsource,fdest)
-                  !   implicit none
-                  !   type(c_ptr), intent(inout)    :: fsource
-                  !   type(c_ptr), intent(inout) :: fdest
-
-                  !   call gpuCheck(hipMemcpy(fdest,fsource,sizeof(fsource),hipMemcpyDeviceToHost))
-
-                  ! endsubroutine DeviceToHost
-
                   endmodule SELF_GPU
