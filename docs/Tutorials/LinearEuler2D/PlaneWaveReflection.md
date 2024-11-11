@@ -85,6 +85,8 @@ $$
     \end{pmatrix} \bar{p} e^{-\left( \frac{(-k_x(x-(2-x_0)) + k_y(y-y_0) - ct)^2}{L^2} \right)}
 $$
 
+is the reflecting wave.
+
 The parameters used in the exact solution are as follows : 
 
 * $\bar{p} = 10^{-4}$ is the amplitude of the sound wave
