@@ -742,16 +742,16 @@ contains
     integer(SIZE_T),dimension(1) :: str_len
     integer :: error
 
-    ! string output requires to open a file local = non-parallel
-
-    str_len(1) = len_trim(hfField)
+    str_len(1) = len(hfField)
     size(1) = str_len(1)
     size(2) = 1
     str_data(1) = hfField//char(0)
 
     ! create data space
     call H5Tcopy_f(H5T_STRING,h5_strtype,error)
-    call H5Tset_strpad_f(h5_strtype,H5T_STR_NULLPAD_F,error)
+    CALL H5Tset_cset_f(h5_strtype, H5T_CSET_UTF8_F, error)
+    CALL H5Tset_strpad_f(h5_strtype, H5T_STR_NULLTERM_F, error)
+
     call h5screate_simple_f(1,size(2),h5_dspace,error)
     call h5dcreate_f(fileid,trim(name),h5_strtype,h5_dspace,h5_dset,error)
     call h5dwrite_vl_f(h5_dset,h5_strtype,str_data,size,str_len,error,h5_dspace)
