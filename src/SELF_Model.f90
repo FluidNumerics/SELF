@@ -174,6 +174,7 @@ module SELF_Model
     procedure :: pbc3d_NoNormalFlow => pbc3d_Generic_Model
 
     procedure :: ReportEntropy => ReportEntropy_Model
+    procedure :: ReportUserMetrics => ReportUserMetrics_Model
     procedure :: CalculateEntropy => CalculateEntropy_Model
 
     procedure(UpdateSolution),deferred :: UpdateSolution
@@ -728,6 +729,14 @@ contains
 
   endsubroutine ReportEntropy_Model
 
+  subroutine ReportUserMetrics_Model(this)
+    !! Method that can be overridden by users to 
+    !! report their own custom metrics after file io
+      implicit none
+      class(Model),intent(in) :: this
+      return
+    endsubroutine ReportUserMetrics_Model
+
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
 
@@ -766,6 +775,7 @@ contains
       call this%IncrementIOCounter()
       call this%CalculateEntropy()
       call this%ReportEntropy()
+      call this%ReportUserMetrics()
     enddo
 
   endsubroutine ForwardStep_Model

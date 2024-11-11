@@ -90,9 +90,9 @@ module self_Euler2D_t
     ! Pre-tendency methods
     procedure :: CalculateDiagnostics => CalculateDiagnostics_Euler2D_t
     procedure :: ConservativeToPrimitive => ConservativeToPrimitive_Euler2D_t
-    
-    ! Euler2D_t definition methods
     procedure :: PreTendency => PreTendency_Euler2D_t
+
+    ! Euler2D_t definition methods
     procedure :: entropy_func => entropy_func_Euler2D_t
     
     procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_Euler2D_t
@@ -103,6 +103,7 @@ module self_Euler2D_t
     !procedure :: source2d => source2d_Euler2D_t
 
     ! Additional support methods
+    procedure :: ReportUserMetrics => ReportUserMetrics_Euler2D_t
     procedure :: PrimitiveToConservative => PrimitiveToConservative_Euler2D_t
     procedure,private :: pressure
     procedure,private :: speedofsound
@@ -193,13 +194,92 @@ contains
 
   endsubroutine SetMetadata_Euler2D_t
 
+  subroutine ReportUserMetrics_Euler2D_t(this)
+    !! Base method for reporting the entropy of a model
+    !! to stdout. Only override this procedure if additional
+    !! reporting is needed. Alternatively, if you think
+    !! additional reporting would be valuable for all models,
+    !! open a pull request with modifications to this base
+    !! method.
+      implicit none
+      class(Euler2D_t),intent(in) :: this
+      ! Local
+      character(len=20) :: modelTime
+      character(len=20) :: minv,maxv
+      character(len=:),allocatable :: str
+      integer :: ivar
+  
+      ! Copy the time and entropy to a string
+      write(modelTime,"(ES16.7E3)") this%t
+
+      do ivar = 1,this%nvar
+        write(maxv,"(ES16.7E3)") maxval(this%primitive%interior(:,:,:,ivar))
+        write(minv,"(ES16.7E3)") minval(this%primitive%interior(:,:,:,ivar))
+  
+        ! Write the output to STDOUT
+        open(output_unit,ENCODING='utf-8')
+        write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+        str = 'tᵢ ='//trim(modelTime)
+        write(output_unit,'(A)',ADVANCE='no') str
+        str = '  |  min('//trim(this%primitive%meta(ivar)%name)//'), max('//trim(this%primitive%meta(ivar)%name)//') = '//minv//" , "//maxv
+        write(output_unit,'(A)',ADVANCE='yes') str
+      enddo
+
+      do ivar = 1,this%ndiagnostics
+        write(maxv,"(ES16.7E3)") maxval(this%diagnostics%interior(:,:,:,ivar))
+        write(minv,"(ES16.7E3)") minval(this%diagnostics%interior(:,:,:,ivar))
+  
+        ! Write the output to STDOUT
+        open(output_unit,ENCODING='utf-8')
+        write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+        str = 'tᵢ ='//trim(modelTime)
+        write(output_unit,'(A)',ADVANCE='no') str
+        str = '  |  min('//trim(this%diagnostics%meta(ivar)%name)//'), max('//trim(this%diagnostics%meta(ivar)%name)//') = '//minv//" , "//maxv
+        write(output_unit,'(A)',ADVANCE='yes') str
+      enddo
+      ! write(maxv,"(ES16.7E3)") maxval(this%primitive%interior(:,:,:,2))
+      ! write(minv,"(ES16.7E3)") minval(this%primitive%interior(:,:,:,2))
+  
+      ! ! Write the output to STDOUT
+      ! open(output_unit,ENCODING='utf-8')
+      ! write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+      ! str = 'tᵢ ='//trim(modelTime)
+      ! write(output_unit,'(A)',ADVANCE='no') str
+      ! str = '  |  min(u), max(u) = '//minv//" , "//maxv
+      ! write(output_unit,'(A)',ADVANCE='yes') str
+      
+      ! write(maxv,"(ES16.7E3)") maxval(this%primitive%interior(:,:,:,3))
+      ! write(minv,"(ES16.7E3)") minval(this%primitive%interior(:,:,:,3))
+  
+      ! ! Write the output to STDOUT
+      ! open(output_unit,ENCODING='utf-8')
+      ! write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+      ! str = 'tᵢ ='//trim(modelTime)
+      ! write(output_unit,'(A)',ADVANCE='no') str
+      ! str = '  |  min(v), max(v) = '//minv//" , "//maxv
+      ! write(output_unit,'(A)',ADVANCE='yes') str
+
+      ! write(maxv,"(ES16.7E3)") maxval(this%primitive%interior(:,:,:,4))
+      ! write(minv,"(ES16.7E3)") minval(this%primitive%interior(:,:,:,4))
+  
+      ! ! Write the output to STDOUT
+      ! open(output_unit,ENCODING='utf-8')
+      ! write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+      ! str = 'tᵢ ='//trim(modelTime)
+      ! write(output_unit,'(A)',ADVANCE='no') str
+      ! str = '  |  min(P), max(P) = '//minv//" , "//maxv
+      ! write(output_unit,'(A)',ADVANCE='yes') str
+
+  
+    endsubroutine ReportUserMetrics_Euler2D_t
+
   subroutine PreTendency_Euler2D_t(this)
     implicit none
     class(Euler2D_t),intent(inout) :: this
 
     call this%ConservativeToPrimitive()
     call this%CalculateDiagnostics()
-    
+
   endsubroutine PreTendency_Euler2D_t
 
   subroutine CalculateDiagnostics_Euler2D_t(this)
