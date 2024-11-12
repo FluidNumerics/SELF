@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program LinearShallowWater2D_nonormalflow_model
+program linear_shallow_water2d_nonormalflow_model
   use self_data
   use self_LinearShallowWater2D
   use self_mesh_2d
@@ -103,4 +103,4 @@ program LinearShallowWater2D_nonormalflow_model
   call geometry%free()
   call interp%free()
 
-endprogram LinearShallowWater2D_nonormalflow_model
+endprogram linear_shallow_water2d_nonormalflow_model
