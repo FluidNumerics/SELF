@@ -44,7 +44,7 @@ contains
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
-    integer,parameter :: nvar = 1
+    integer,parameter :: nvar = 4
     integer,parameter :: nelem = 100
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)

@@ -71,7 +71,7 @@ type(Mesh1D),target :: mesh
   ! Create a mesh using the built-in
   ! uniform mesh generator.
   ! The domain is set to x in [0,1] with 10 elements
-  call mesh%UniformBlockMesh(nGeo=1, &
+  call mesh%StructuredMesh(nGeo=1, &
                              nElem=10, &
                              x=(/0.0_prec,1.0_prec/))
 
@@ -147,8 +147,8 @@ implicit none
   type(Mesh1D),target :: mesh
   type(Geometry1D),target :: geometry
 
-  call mesh % UniformBlockMesh(nElem=10, &
-                               x=(/0.0_prec,1.0_prec/))
+  call mesh % StructuredMesh(nElem=10, &
+                             x=(/0.0_prec,1.0_prec/))
 
   ! Set the left and right boundary conditions to prescribed
   call mesh % ResetBoundaryConditionType(SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED)

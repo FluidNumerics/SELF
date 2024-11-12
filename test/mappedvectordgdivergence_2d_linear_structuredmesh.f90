@@ -48,7 +48,7 @@ contains
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
-    integer,parameter :: nvar = 1
+    integer,parameter :: nvar = 2
 #ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
@@ -60,7 +60,7 @@ contains
     type(MappedVector2D) :: f
     type(MappedScalar2D) :: df
     character(LEN=255) :: WORKSPACE
-    integer :: i,j,iel,e2
+    integer :: i,j,iel,e2,ivar
     real(prec) :: nhat(1:2),nmag,fx,fy,diff
     integer :: bcids(1:4)
 
@@ -85,8 +85,10 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    call f%SetEquation(1,1,'f = x') ! x-component
-    call f%SetEquation(2,1,'f = y') ! y-component
+    do ivar = 1,nvar
+      call f%SetEquation(1,ivar,'f = x') ! x-component
+      call f%SetEquation(2,ivar,'f = y') ! y-component
+    enddo
 
     call f%SetInteriorFromEquation(geometry,0.0_prec)
     print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
@@ -100,31 +102,33 @@ contains
         e2 = mesh%sideInfo(3,j,iel) ! Neighboring Element ID
         if(e2 == 0) then
           do i = 1,f%interp%N+1
-            f%extBoundary(i,j,iel,1,1:2) = f%boundary(i,j,iel,1,1:2)
+            f%extBoundary(i,j,iel,1:nvar,1:2) = f%boundary(i,j,iel,1:nvar,1:2)
           enddo
         endif
       enddo
     enddo
 
-    do iEl = 1,f%nElem
-      do j = 1,4
-        diff = 0.0_prec
-        do i = 1,f%interp%N+1
+    do ivar = 1,nvar
+      do iEl = 1,f%nElem
+        do j = 1,4
+          diff = 0.0_prec
+          do i = 1,f%interp%N+1
 
-          ! Get the boundary normals on cell edges from the mesh geometry
-          nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
-          nmag = geometry%nScale%boundary(i,j,iEl,1)
-          diff = diff+abs(f%boundary(i,j,iEl,1,1)-f%extboundary(i,j,iEl,1,1))
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
+            nmag = geometry%nScale%boundary(i,j,iEl,1)
+            diff = diff+abs(f%boundary(i,j,iEl,ivar,1)-f%extboundary(i,j,iEl,ivar,1))
 
-          fx = 0.5*(f%boundary(i,j,iEl,1,1)+f%extboundary(i,j,iEl,1,1))
-          fy = 0.5*(f%boundary(i,j,iEl,1,2)+f%extboundary(i,j,iEl,1,2))
+            fx = 0.5*(f%boundary(i,j,iEl,ivar,1)+f%extboundary(i,j,iEl,ivar,1))
+            fy = 0.5*(f%boundary(i,j,iEl,ivar,2)+f%extboundary(i,j,iEl,ivar,2))
 
-          f%boundaryNormal(i,j,iEl,1) = (fx*nhat(1)+fy*nhat(2))*nmag
+            f%boundaryNormal(i,j,iEl,ivar) = (fx*nhat(1)+fy*nhat(2))*nmag
 
+          enddo
+          if(diff > tolerance) then
+            print*,'rank ',mesh%decomp%rankId,' : mismatched edge iel, s (diff)= ',iel,j,diff
+          endif
         enddo
-        if(diff > tolerance) then
-          print*,'rank ',mesh%decomp%rankId,' : mismatched edge iel, s (diff)= ',iel,j,diff
-        endif
       enddo
     enddo
 

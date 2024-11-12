@@ -317,6 +317,10 @@ contains
                             this%solution%boundary_gpu,sizeof(this%solution%boundary), &
                             hipMemcpyDeviceToHost))
 
+    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
+                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                            hipMemcpyDeviceToHost))
+
     do iEl = 1,this%solution%nElem ! Loop over all elements
       do k = 1,6 ! Loop over all sides
 
@@ -383,6 +387,10 @@ contains
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
                             this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%extboundary), &
+                            this%solutiongradient%extboundary_gpu,sizeof(this%solutiongradient%extboundary), &
                             hipMemcpyDeviceToHost))
 
     do iEl = 1,this%solution%nElem ! Loop over all elements

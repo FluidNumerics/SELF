@@ -104,6 +104,7 @@ module SELF_Model
     real(prec) :: t
     integer :: ioIterate = 0
     logical :: gradient_enabled = .false.
+    logical :: prescribed_bcs_enabled = .true.
     integer :: nvar
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
@@ -113,6 +114,8 @@ module SELF_Model
     procedure :: IncrementIOCounter
 
     procedure :: PrintType => PrintType_Model
+
+    procedure :: SetNumberOfVariables => SetNumberOfVariables_Model
 
     procedure :: ForwardStep => ForwardStep_Model
 
@@ -256,6 +259,14 @@ contains
     this%ioIterate = this%ioIterate+1
 
   endsubroutine IncrementIOCounter
+
+  subroutine SetNumberOfVariables_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
+
+    this%nvar = 1
+
+  endsubroutine SetNumberOfVariables_Model
 
   subroutine PrintType_Model(this)
     implicit none

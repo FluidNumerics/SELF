@@ -31,7 +31,6 @@ program advection_diffusion_2d_euler
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
-  integer,parameter :: nvar = 1
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
   real(prec),parameter :: u = 0.25_prec ! velocity
@@ -64,7 +63,7 @@ program advection_diffusion_2d_euler
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry)
+  call modelobj%Init(mesh,geometry)
   modelobj%gradient_enabled = .true.
 
   ! Set the velocity
