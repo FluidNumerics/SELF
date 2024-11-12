@@ -1,7 +1,7 @@
 # Linear Shallow Water Equations
 
 ## Definition
-The [`SELF_ShallowWater2D_t` module](../ford/sourcefile/self_ShallowWater2D_t.f90.html) defines the [`ShallowWater2D_t` class](ford/type/ShallowWater2D_t.html). In SELF, models are posed in the form of a generic conservation law
+The [`SELF_LinearShallowWater2D_t` module](../ford/sourcefile/self_LinearShallowWater2D_t.f90.html) defines the [`LinearShallowWater2D_t` class](ford/type/LinearShallowWater2D_t.html). In SELF, models are posed in the form of a generic conservation law
 
 $$
   \vec{s}_t + \nabla \cdot \overleftrightarrow{f} = \vec{q}
@@ -44,10 +44,10 @@ $$
 $$
 
 ## Implementation
-The 2D Linear Shallow Water model is implemented as a type extension of the `DGModel2d` class. The `ShallowWater2D_t` class adds parameters for acceleration due to gravity and the uniform resting fluid depth. It also overrides `SetMetaData`, `entropy_func`, `flux2d`, and `riemannflux2d` type-bound procedures.
+The 2D Linear Shallow Water model is implemented as a type extension of the `DGModel2d` class. The `LinearShallowWater2D_t` class adds parameters for acceleration due to gravity and the uniform resting fluid depth. It also overrides `SetMetaData`, `entropy_func`, `flux2d`, and `riemannflux2d` type-bound procedures.
 
 ### Riemann Solver
-The `ShallowWater2D` class is defined using the advective form.
+The `LinearShallowWater2D` class is defined using the advective form.
 The Riemann solver for the hyperbolic part of the shallow water equations is the local Lax-Friedrichs upwind Riemann solver
 
 $$
@@ -90,7 +90,7 @@ $$
     \end{pmatrix}
 $$
 
-The details for this implementation can be found in [self_ShallowWater2D_t.f90](../ford/sourcefile/self_ShallowWater2D_t.f90.html).
+The details for this implementation can be found in [self_LinearShallowWater2D_t.f90](../ford/sourcefile/self_LinearShallowWater2D_t.f90.html).
 
 
 ### Boundary Conditions
@@ -124,10 +124,10 @@ call mesh%StructuredMesh(nxPerTile=5,nyPerTile=5,&
     See the [Structured Mesh documentation](../MeshGeneration/StructuredMesh.md) for details on using the `structuredmesh` procedure
 
 !!! note
-    To set a prescribed state as a function of position and time, you can create a type-extension of the `ShallowWater2D` class and override the [`hbc2d_Prescribed`](../ford/proc/hbc2d_prescribed_model.html) 
+    To set a prescribed state as a function of position and time, you can create a type-extension of the `LinearShallowWater2D` class and override the [`hbc2d_Prescribed`](../ford/proc/hbc2d_prescribed_model.html) 
 
 ## Example usage
 
 For examples, see any of the following
 
-* [`examples/ShallowWater2D.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/ShallowWater2D.f90) - Implements the 2D shallow water equations with no normal flow boundary conditions
+* [`examples/LinearShallowWater2D.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/LinearShallowWater2D.f90) - Implements the 2D shallow water equations with no normal flow boundary conditions

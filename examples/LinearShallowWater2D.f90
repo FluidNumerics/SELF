@@ -24,9 +24,9 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ShallowWater2D_nonormalflow_model
+program LinearShallowWater2D_nonormalflow_model
   use self_data
-  use self_ShallowWater2D
+  use self_LinearShallowWater2D
   use self_mesh_2d
 
   implicit none
@@ -38,7 +38,7 @@ program ShallowWater2D_nonormalflow_model
   real(prec),parameter :: iointerval = 0.05_prec                    ! How often to write .tec files
   
   real(prec) :: e0,ef                                               ! Initial and final entropy
-  type(ShallowWater2D) :: modelobj                                ! Shallow water model
+  type(LinearShallowWater2D) :: modelobj                                  ! Shallow water model
   type(Lagrange),target :: interp                                   ! Interpolant
   integer :: bcids(1:4)                                             ! Boundary conditions for structured mesh
   type(Mesh2D),target :: mesh                                       ! Mesh class
@@ -103,4 +103,4 @@ program ShallowWater2D_nonormalflow_model
   call geometry%free()
   call interp%free()
 
-endprogram ShallowWater2D_nonormalflow_model
+endprogram LinearShallowWater2D_nonormalflow_model

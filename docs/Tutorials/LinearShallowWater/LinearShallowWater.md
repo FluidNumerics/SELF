@@ -1,6 +1,6 @@
 # Linear Shallow Water No Normal Flow Tutorial
 
-This tutorial will walk you through using an example program that uses the `ShallowWater2D` class to run a simulation with the linear shallow water equations in 2-D. This example is configured using the built in structured mesh generator with no normal flow boundary conditions on all domain boundaries.
+This tutorial will walk you through using an example program that uses the `LinearShallowWater2D` class to run a simulation with the linear shallow water equations in 2-D. This example is configured using the built in structured mesh generator with no normal flow boundary conditions on all domain boundaries.
 
 ## Problem Statement
 
@@ -91,13 +91,13 @@ The model is integrated forward in time using $3^{rd}$ order Runge-Kutta with a 
 </p>
 
 ## How we implement this
-You can find the example file for this demo in the `examples/ShallowWater2D.f90` file. This file uses the `ShallowWater2D` module from `src/SELF_ShallowWater2D_t.f90`.
+You can find the example file for this demo in the `examples/LinearShallowWater2D.f90` file. This file uses the `LinearShallowWater2D` module from `src/SELF_LinearShallowWater2D_t.f90`.
 
-No normal flow conditions are built into the `ShallowWater2D` module when we assign `hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_ShallowWater2D_t`:
+No normal flow conditions are built into the `LinearShallowWater2D` module when we assign `hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_LinearShallowWater2D_t`:
 
 ```fortran
-    pure function hbc2d_NoNormalFlow_ShallowWater2D_t(this,s,nhat) result(exts)
-        class(ShallowWater2D_t),intent(in) :: this
+    pure function hbc2d_NoNormalFlow_LinearShallowWater2D_t(this,s,nhat) result(exts)
+        class(LinearShallowWater2D_t),intent(in) :: this
         real(prec),intent(in) :: s(1:this%nvar)
         real(prec),intent(in) :: nhat(1:2)
         real(prec) :: exts(1:this%nvar)
@@ -108,12 +108,12 @@ No normal flow conditions are built into the `ShallowWater2D` module when we ass
         exts(2) = (nhat(1)**2 - nhat(2)**2)*s(2) - 2.0_prec*nhat(1)*nhat(2)*s(1) ! v
         exts(3) = s(3)                                                           ! eta
 
-  endfunction hbc2d_NoNormalFlow_ShallowWater2D_t
+  endfunction hbc2d_NoNormalFlow_LinearShallowWater2D_t
 ```
 
 You should notice that the lines marked with `! <variable>` correspond directly to our derived conditions for $u_R$, $v_R$, and $\eta_R$ above.
 
-Let us now look at the main program `ShallowWater2D_no_normal_flow_model` in `examples/ShallowWater2D.f90`. This program steps through the standard procedures for setting up and running a simulation on a structured 2-D mesh in SELF.
+Let us now look at the main program `LinearShallowWater2D_no_normal_flow_model` in `examples/LinearShallowWater2D.f90`. This program steps through the standard procedures for setting up and running a simulation on a structured 2-D mesh in SELF.
 
 We assign/initialize the usual variables as follows:
 ```fortran
@@ -126,7 +126,7 @@ real(prec),parameter :: endtime = 1.0_prec                        ! Final time
 real(prec),parameter :: iointerval = 0.05_prec                    ! How often to write .tec files
   
 real(prec) :: e0,ef                                               ! Initial and final entropy
-type(ShallowWater2D) :: modelobj                                ! Shallow water model
+type(LinearShallowWater2D) :: modelobj                                ! Shallow water model
 type(Lagrange),target :: interp                                   ! Interpolant
 integer :: bcids(1:4)                                             ! Boundary conditions for structured mesh
 type(Mesh2D),target :: mesh                                       ! Mesh class
@@ -250,7 +250,7 @@ Running this program should output twenty `shallow-water.00XX.tec` in the build 
 To run this example, simply execute
 
 ```shell
-${SELF_ROOT}/examples/ShallowWater2D
+${SELF_ROOT}/examples/LinearShallowWater2D
 ```
 
 This will run the simulation from $t=0$ to $t=1.0$ and write model output at intervals of $Δ t_{io} = 0.05$.

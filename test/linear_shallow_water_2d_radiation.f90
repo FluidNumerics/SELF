@@ -24,9 +24,9 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ShallowWater2D_nonormalflow
+program LinearShallowWater2D_nonormalflow
     use self_data
-    use self_ShallowWater2D
+    use self_LinearShallowWater2D
     use self_mesh_2d
 
     implicit none
@@ -40,18 +40,18 @@ program ShallowWater2D_nonormalflow
     real(prec),parameter :: endtime = 0.2_prec
     real(prec),parameter :: iointerval = 0.1_prec
     real(prec) :: e0,ef ! Initial and final entropy
-    type(ShallowWater2D) :: modelobj
+    type(LinearShallowWater2D) :: modelobj
     type(Lagrange),target :: interp
     integer :: bcids(1:4)
     type(Mesh2D),target :: mesh
     type(SEMQuad),target :: geometry
     character(LEN=255) :: WORKSPACE
 
-    ! Set no normal flow boundary conditions
-    bcids(1:4) = [SELF_BC_NONORMALFLOW,& ! South
-                  SELF_BC_NONORMALFLOW,& ! East
-                  SELF_BC_NONORMALFLOW,& ! North
-                  SELF_BC_NONORMALFLOW]  ! West
+    ! Set radiation boundary conditions
+    bcids(1:4) = [SELF_BC_RADIATION,& ! South
+                  SELF_BC_RADIATION,& ! East
+                  SELF_BC_RADIATION,& ! North
+                  SELF_BC_RADIATION]  ! West
 
     ! Create a uniform block mesh
     call mesh % StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
@@ -102,4 +102,4 @@ program ShallowWater2D_nonormalflow
     call geometry%free()
     call interp%free()
 
-endprogram ShallowWater2D_nonormalflow
+endprogram LinearShallowWater2D_nonormalflow
