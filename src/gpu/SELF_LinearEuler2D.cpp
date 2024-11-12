@@ -123,8 +123,8 @@ __global__ void setboundarycondition_LinearEuler2D_gpukernel(real *extBoundary, 
 
         real u = boundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)];
         real v = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)];
-        real nx = nhat[VEB_2D_INDEX(i,s1,e1,0,0,N,nel,nvar)];
-        real ny = nhat[VEB_2D_INDEX(i,s1,e1,0,1,N,nel,nvar)];
+        real nx = nhat[VEB_2D_INDEX(i,s1,e1,0,0,N,nel,1)];
+        real ny = nhat[VEB_2D_INDEX(i,s1,e1,0,1,N,nel,1)];
         extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)]; // density
         extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = (ny*ny-nx*nx)*u-2.0*nx*ny*v; // u
         extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = (nx*nx-ny*ny)*v-2.0*nx*ny*u; //v
