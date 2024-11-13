@@ -25,81 +25,81 @@
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
 program LinearShallowWater2D_nonormalflow
-    use self_data
-    use self_LinearShallowWater2D
-    use self_mesh_2d
+  use self_data
+  use self_LinearShallowWater2D
+  use self_mesh_2d
 
-    implicit none
-    character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
+  implicit none
+  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
 
-    integer,parameter :: controlDegree = 7
-    integer,parameter :: targetDegree = 16
-    real(prec),parameter :: H = 1.0_prec ! uniform resting depth
-    real(prec),parameter :: g = 1.0_prec ! acceleration due to gravity
-    real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4) ! time-step size
-    real(prec),parameter :: endtime = 0.2_prec
-    real(prec),parameter :: iointerval = 0.1_prec
-    real(prec) :: e0,ef ! Initial and final entropy
-    type(LinearShallowWater2D) :: modelobj
-    type(Lagrange),target :: interp
-    integer :: bcids(1:4)
-    type(Mesh2D),target :: mesh
-    type(SEMQuad),target :: geometry
-    character(LEN=255) :: WORKSPACE
+  integer,parameter :: controlDegree = 7
+  integer,parameter :: targetDegree = 16
+  real(prec),parameter :: H = 1.0_prec ! uniform resting depth
+  real(prec),parameter :: g = 1.0_prec ! acceleration due to gravity
+  real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4) ! time-step size
+  real(prec),parameter :: endtime = 0.2_prec
+  real(prec),parameter :: iointerval = 0.1_prec
+  real(prec) :: e0,ef ! Initial and final entropy
+  type(LinearShallowWater2D) :: modelobj
+  type(Lagrange),target :: interp
+  integer :: bcids(1:4)
+  type(Mesh2D),target :: mesh
+  type(SEMQuad),target :: geometry
+  character(LEN=255) :: WORKSPACE
 
-    ! Set no normal flow boundary conditions
-    bcids(1:4) = [SELF_BC_NONORMALFLOW,& ! South
-                  SELF_BC_NONORMALFLOW,& ! East
-                  SELF_BC_NONORMALFLOW,& ! North
-                  SELF_BC_NONORMALFLOW]  ! West
+  ! Set no normal flow boundary conditions
+  bcids(1:4) = [SELF_BC_NONORMALFLOW, & ! South
+                SELF_BC_NONORMALFLOW, & ! East
+                SELF_BC_NONORMALFLOW, & ! North
+                SELF_BC_NONORMALFLOW] ! West
 
-    ! Create a uniform block mesh
-    call mesh % StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
+  ! Create a uniform block mesh
+  call mesh%StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids)
 
-    ! Create an interpolant
-    call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
-                     M=targetDegree, &
-                     targetNodeType=UNIFORM)
+  ! Create an interpolant
+  call interp%Init(N=controlDegree, &
+                   controlNodeType=GAUSS, &
+                   M=targetDegree, &
+                   targetNodeType=UNIFORM)
 
-    ! Generate geometry (metric terms) from the mesh elements
-    call geometry%Init(interp,mesh%nElem)
-    call geometry%GenerateFromMesh(mesh)
+  ! Generate geometry (metric terms) from the mesh elements
+  call geometry%Init(interp,mesh%nElem)
+  call geometry%GenerateFromMesh(mesh)
 
-    ! Initialize the model
-    call modelobj%Init(mesh,geometry)
+  ! Initialize the model
+  call modelobj%Init(mesh,geometry)
 
-    ! Set the resting surface height and gravity
-    modelobj%H = H
-    modelobj%g = g
+  ! Set the resting surface height and gravity
+  modelobj%H = H
+  modelobj%g = g
 
-    ! Set the initial condition
-    call modelobj%solution%SetEquation(1,'f = 0')
-    call modelobj%solution%SetEquation(2,'f = 0')
-    call modelobj%solution%SetEquation(3,'f = 0.001*exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.01 )')
-    call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+  ! Set the initial condition
+  call modelobj%solution%SetEquation(1,'f = 0')
+  call modelobj%solution%SetEquation(2,'f = 0')
+  call modelobj%solution%SetEquation(3,'f = 0.001*exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.01 )')
+  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
-    call modelobj%CalculateEntropy()
-    e0 = modelobj%entropy
+  call modelobj%CalculateEntropy()
+  e0 = modelobj%entropy
 
-    ! Set the model's time integration method
-    call modelobj%SetTimeIntegrator(integrator)
+  ! Set the model's time integration method
+  call modelobj%SetTimeIntegrator(integrator)
 
-    ! forward step the model to `endtime` using a time step
-    ! of `dt` and outputing model data every `iointerval`
-    call modelobj%ForwardStep(endtime,dt,iointerval)
+  ! forward step the model to `endtime` using a time step
+  ! of `dt` and outputing model data every `iointerval`
+  call modelobj%ForwardStep(endtime,dt,iointerval)
 
-    ef = modelobj%entropy
+  ef = modelobj%entropy
 
-    if(ef > e0) then
-      ! print*,"Final entropy not a finite number.",e0,ef
-      print*,"Error: Final entropy greater than initial entropy! ",e0,ef
-      stop 1
-    endif
-    ! Clean up
-    call modelobj%free()
-    call mesh%free()
-    call geometry%free()
-    call interp%free()
+  if(ef > e0) then
+    ! print*,"Final entropy not a finite number.",e0,ef
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
+    stop 1
+  endif
+  ! Clean up
+  call modelobj%free()
+  call mesh%free()
+  call geometry%free()
+  call interp%free()
 
 endprogram LinearShallowWater2D_nonormalflow

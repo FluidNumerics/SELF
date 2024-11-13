@@ -31,31 +31,31 @@ program linear_shallow_water2d_nonormalflow_model
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3' ! Which integrator method
-  integer,parameter :: controlDegree = 7                            ! Degree of control polynomial
-  integer,parameter :: targetDegree = 16                            ! Degree of target polynomial
-  real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4)             ! Time-step size
-  real(prec),parameter :: endtime = 1.0_prec                        ! Final time
-  real(prec),parameter :: iointerval = 0.05_prec                    ! How often to write .tec files
-  
-  real(prec) :: e0,ef                                               ! Initial and final entropy
-  type(LinearShallowWater2D) :: modelobj                                  ! Shallow water model
-  type(Lagrange),target :: interp                                   ! Interpolant
-  integer :: bcids(1:4)                                             ! Boundary conditions for structured mesh
-  type(Mesh2D),target :: mesh                                       ! Mesh class
-  type(SEMQuad),target :: geometry                                  ! Geometry class
-  character(LEN=255) :: WORKSPACE                                   ! Used for file I/O
+  integer,parameter :: controlDegree = 7 ! Degree of control polynomial
+  integer,parameter :: targetDegree = 16 ! Degree of target polynomial
+  real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4) ! Time-step size
+  real(prec),parameter :: endtime = 1.0_prec ! Final time
+  real(prec),parameter :: iointerval = 0.05_prec ! How often to write .tec files
 
-  real(prec),parameter :: g = 1.0_prec                              ! Acceleration due to gravity
-  real(prec),parameter :: H = 1.0_prec                              ! Uniform resting depth
+  real(prec) :: e0,ef ! Initial and final entropy
+  type(LinearShallowWater2D) :: modelobj ! Shallow water model
+  type(Lagrange),target :: interp ! Interpolant
+  integer :: bcids(1:4) ! Boundary conditions for structured mesh
+  type(Mesh2D),target :: mesh ! Mesh class
+  type(SEMQuad),target :: geometry ! Geometry class
+  character(LEN=255) :: WORKSPACE ! Used for file I/O
+
+  real(prec),parameter :: g = 1.0_prec ! Acceleration due to gravity
+  real(prec),parameter :: H = 1.0_prec ! Uniform resting depth
 
   ! Set no normal flow boundary conditions
-  bcids(1:4) = [SELF_BC_NONORMALFLOW,& ! South
-                SELF_BC_NONORMALFLOW,& ! East
-                SELF_BC_NONORMALFLOW,& ! North
-                SELF_BC_NONORMALFLOW]  ! West
+  bcids(1:4) = [SELF_BC_NONORMALFLOW, & ! South
+                SELF_BC_NONORMALFLOW, & ! East
+                SELF_BC_NONORMALFLOW, & ! North
+                SELF_BC_NONORMALFLOW] ! West
 
   ! Create a uniform block mesh
-  call mesh % StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
+  call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
 
   ! Create an interpolant
   call interp%Init(N=controlDegree, &
@@ -96,7 +96,7 @@ program linear_shallow_water2d_nonormalflow_model
     print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
-  
+
   ! Clean up
   call modelobj%free()
   call mesh%free()

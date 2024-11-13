@@ -26,12 +26,11 @@
 
 module self_LinearShallowWater2D
 
-    use self_LinearShallowWater2D_t
-  
-    implicit none
-  
-    type,extends(LinearShallowWater2D_t) :: LinearShallowWater2D
-    endtype LinearShallowWater2D
-  
+  use self_LinearShallowWater2D_t
+
+  implicit none
+
+  type,extends(LinearShallowWater2D_t) :: LinearShallowWater2D
+  endtype LinearShallowWater2D
+
 endmodule self_LinearShallowWater2D
-  
