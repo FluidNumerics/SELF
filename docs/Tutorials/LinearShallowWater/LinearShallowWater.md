@@ -91,7 +91,7 @@ The model is integrated forward in time using $3^{rd}$ order Runge-Kutta with a 
 </p>
 
 ## How we implement this
-You can find the example file for this demo in the `examples/LinearShallowWater2D.f90` file. This file uses the `LinearShallowWater2D` module from `src/SELF_LinearShallowWater2D_t.f90`.
+You can find the example file for this demo in the `examples/linear_shallow_water2d_nonormalflow.f90` file. This file uses the `LinearShallowWater2D` module from `src/SELF_LinearShallowWater2D_t.f90`.
 
 No normal flow conditions are built into the `LinearShallowWater2D` module when we assign `hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_LinearShallowWater2D_t`:
 
@@ -113,7 +113,7 @@ No normal flow conditions are built into the `LinearShallowWater2D` module when 
 
 You should notice that the lines marked with `! <variable>` correspond directly to our derived conditions for $u_R$, $v_R$, and $\eta_R$ above.
 
-Let us now look at the main program `LinearShallowWater2D_no_normal_flow_model` in `examples/LinearShallowWater2D.f90`. This program steps through the standard procedures for setting up and running a simulation on a structured 2-D mesh in SELF.
+Let us now look at the main program `linear_shallow_water2d_nonormalflow_model` in `examples/linear_shallow_water2d_nonormalflow.f90`. This program steps through the standard procedures for setting up and running a simulation on a structured 2-D mesh in SELF.
 
 We assign/initialize the usual variables as follows:
 ```fortran
@@ -257,7 +257,7 @@ Running this program should output twenty `shallow-water.00XX.tec` in the build 
 To run this example, simply execute
 
 ```shell
-${SELF_ROOT}/examples/LinearShallowWater2D
+${SELF_ROOT}/examples/linear_shallow_water2d_nonormalflow
 ```
 
 This will run the simulation from $t=0$ to $t=1.0$ and write model output at intervals of $Δ t_{io} = 0.05$.
