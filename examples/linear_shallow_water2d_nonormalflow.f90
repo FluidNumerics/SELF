@@ -34,8 +34,8 @@ program linear_shallow_water2d_nonormalflow_model
   integer,parameter :: controlDegree = 7 ! Degree of control polynomial
   integer,parameter :: targetDegree = 16 ! Degree of target polynomial
   real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4) ! Time-step size
-  real(prec),parameter :: endtime = 1.0_prec ! Final time
-  real(prec),parameter :: iointerval = 0.05_prec ! How often to write .tec files
+  real(prec),parameter :: endtime = 10.0_prec**(-3) !1.0_prec ! Final time
+  real(prec),parameter :: iointerval = 10.0_prec**(-3) !0.05_prec ! How often to write .tec files
 
   real(prec) :: e0,ef ! Initial and final entropy
   type(LinearShallowWater2D) :: modelobj ! Shallow water model
