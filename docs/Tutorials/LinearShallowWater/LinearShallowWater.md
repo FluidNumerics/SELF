@@ -117,25 +117,32 @@ Let us now look at the main program `LinearShallowWater2D_no_normal_flow_model` 
 
 We assign/initialize the usual variables as follows:
 ```fortran
-character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3' ! Which integrator method
-integer,parameter :: nvar = 3                                     ! Number of variables 
-integer,parameter :: controlDegree = 7                            ! Degree of control polynomial
-integer,parameter :: targetDegree = 16                            ! Degree of target polynomial
-real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4)             ! Time-step size
-real(prec),parameter :: endtime = 1.0_prec                        ! Final time
-real(prec),parameter :: iointerval = 0.05_prec                    ! How often to write .tec files
-  
-real(prec) :: e0,ef                                               ! Initial and final entropy
-type(LinearShallowWater2D) :: modelobj                                ! Shallow water model
-type(Lagrange),target :: interp                                   ! Interpolant
-integer :: bcids(1:4)                                             ! Boundary conditions for structured mesh
-type(Mesh2D),target :: mesh                                       ! Mesh class
-type(SEMQuad),target :: geometry                                  ! Geometry class
-character(LEN=255) :: WORKSPACE                                   ! Used for file I/O
+  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3' ! Which integrator method
+  integer,parameter :: controlDegree = 7 ! Degree of control polynomial
+  integer,parameter :: targetDegree = 16 ! Degree of target polynomial
+  real(prec),parameter :: dt = 0.5_prec*10.0_prec**(-4) ! Time-step size
+  real(prec),parameter :: endtime = 10.0_prec**(-3) !1.0_prec ! Final time
+  real(prec),parameter :: iointerval = 10.0_prec**(-3) !0.05_prec ! How often to write .tec files
 
-real(prec),parameter :: g = 1.0_prec                              ! Acceleration due to gravity
-real(prec),parameter :: H = 1.0_prec                              ! Uniform resting depth
+  real(prec) :: e0,ef ! Initial and final entropy
+  type(LinearShallowWater2D) :: modelobj ! Shallow water model
+  type(Lagrange),target :: interp ! Interpolant
+  integer :: bcids(1:4) ! Boundary conditions for structured mesh
+  type(Mesh2D),target :: mesh ! Mesh class
+  type(SEMQuad),target :: geometry ! Geometry class
+  character(LEN=255) :: WORKSPACE ! Used for file I/O
+
+  real(prec),parameter :: g = 1.0_prec ! Acceleration due to gravity
+  real(prec),parameter :: H = 1.0_prec ! Uniform resting depth
 ```
+
+Currently, the variables `endtime` and `iointerval` are both set to $10^{-3}$ to shorten test runtime. These can be changed to $1.0$ and $0.05$ by changing the lines to the following:
+
+```fortran
+real(prec),parameter :: endtime = 1.0_prec ! Final time
+real(prec),parameter :: iointerval = 0.05_prec ! How often to write .tec files
+```
+
 
 Since we are using the `StructuredMesh` class to generate our square mesh, we'll first set the boundary conditions to pass in when we initialize our mesh.
 
@@ -210,15 +217,15 @@ Next, to actually run the simulation, we forward step the model in time. We pass
 call modelobj%ForwardStep(endtime,dt,iointerval)
 ```
 
-Next, we evaluate our final entropy to verify stability.
+Next, we evaluate our final entropy to verify stability. We compare the difference of initial and final values against machine epsilon.
 
 ```fortran
 ef = modelobj%entropy
 
-if(ef > e0) then
-  print*,"Error: Final entropy greater than initial entropy! ",e0,ef
-  stop 1
-endif
+  if (abs(ef - e0) > epsilon(e0))  then
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
+    stop 1
+  endif
 ```
 Finally, we destruct the relevant objects.
 
