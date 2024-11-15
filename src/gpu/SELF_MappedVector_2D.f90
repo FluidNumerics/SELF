@@ -201,15 +201,8 @@ contains
     call ContravariantProjection_2D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
-    call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
-
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df,1.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-    f_p => null()
+    call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu, &
+                           this%interp%N,this%nvar,this%nelem)
 
     call JacobianWeight_2D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
 
@@ -219,25 +212,15 @@ contains
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(c_ptr),intent(out) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
 
     ! Contravariant projection
     call ContravariantProjection_2D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
 
-    call c_f_pointer(this%interior_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
+    call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dgMatrix_gpu, &
+                           this%interp%N,this%nvar,this%nelem)
 
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dgMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dgMatrix_gpu,fc,df,1.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-    f_p => null()
-
-    ! Boundary terms
+    ! Boundary terms --> TO DO : problem here when nvar > 1
     call DG_BoundaryContribution_2D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
                                         this%boundarynormal_gpu,df,this%interp%N,this%nvar,this%nelem)
 

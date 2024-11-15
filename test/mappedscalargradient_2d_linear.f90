@@ -92,30 +92,6 @@ contains
     call f%MappedGradient(df%interior)
 #endif
     call df%UpdateHost()
-    call f%SetName(1,"f")
-    call f%SetUnits(1,"[null]")
-
-    call Open_HDF5('output.h5',H5F_ACC_TRUNC_F,fileId)
-
-    ! Write the interpolant to the file
-    print*,"Writing interpolant data to file"
-    call f%interp%WriteHDF5(fileId)
-
-    ! Write the model state to file
-    print*,"Writing control grid solution to file"
-    call CreateGroup_HDF5(fileId,'/controlgrid')
-    call f%WriteHDF5(fileId,'/controlgrid/solution')
-
-    print*,"Writing control grid solution gradient to file"
-    call CreateGroup_HDF5(fileId,'/controlgrid')
-    call df%WriteHDF5(fileId,'/controlgrid/solution_gradient')
-
-    ! Write the geometry to file
-    print*,"Writing control grid  geometry to file"
-    call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-    call geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
-
-    call Close_HDF5(fileId)
 
     ! Calculate diff from exact
     do iel = 1,mesh%nelem

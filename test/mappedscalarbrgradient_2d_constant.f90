@@ -49,7 +49,7 @@ contains
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 16
     integer,parameter :: nvar = 1
-#ifdef doUBLE_PRECISION
+#ifdef DOUBLE_PRECISION
     real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
     real(prec),parameter :: tolerance = 4.0_prec*10.0_prec**(-3)

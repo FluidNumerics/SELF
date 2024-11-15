@@ -31,7 +31,6 @@ program burgers1d_constant
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
-  integer,parameter :: nvar = 1
   integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
@@ -49,9 +48,8 @@ program burgers1d_constant
   ! uniform mesh generator.
   ! The domain is set to x in [0,1]
   ! We use `nelem` elements
-  call mesh%UniformBlockMesh(nGeo=1, &
-                             nElem=nelem, &
-                             x=(/0.0_prec,1.0_prec/))
+  call mesh%StructuredMesh(nElem=nelem, &
+                           x=(/0.0_prec,1.0_prec/))
   call mesh%ResetBoundaryConditionType(SELF_BC_RADIATION,SELF_BC_RADIATION)
 
   ! Create an interpolant
@@ -65,7 +63,7 @@ program burgers1d_constant
   call geometry%GenerateFromMesh(mesh)
 
   ! Initialize the model
-  call modelobj%Init(nvar,mesh,geometry)
+  call modelobj%Init(mesh,geometry)
   modelobj%gradient_enabled = .true.
   !Set the diffusivity
   modelobj%nu = nu

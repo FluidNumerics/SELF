@@ -38,7 +38,7 @@ module SELF_Mesh_3D
   contains
     procedure,public :: Init => Init_Mesh3D
     procedure,public :: Free => Free_Mesh3D
-    procedure,public :: Read_HOPr => Read_HOPr_Mesh3D
+    procedure,public :: UpdateDevice => UpdateDevice_Mesh3D
 
   endtype Mesh3D
 
@@ -138,143 +138,12 @@ contains
 
   endsubroutine Free_Mesh3D
 
-  subroutine Read_HOPr_Mesh3D(this,meshFile,enableDomainDecomposition)
-    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+  subroutine UpdateDevice_Mesh3D(this)
     implicit none
-    class(Mesh3D),intent(out) :: this
-    character(*),intent(in) :: meshFile
-    logical,intent(in),optional :: enableDomainDecomposition
-    ! Local
-    integer(HID_T) :: fileId
-    integer(HID_T) :: offset(1:2),gOffset(1)
-    integer :: nGlobalElem
-    integer :: firstElem
-    integer :: firstNode
-    integer :: firstSide
-    integer :: nLocalElems
-    integer :: nLocalNodes
-    integer :: nLocalSides
-    integer :: nUniqueSides
-    integer :: nGeo,nBCs
-    integer :: eid,lsid,iSide
-    integer :: i,j,k,nid
-    integer,dimension(:,:),allocatable :: hopr_elemInfo
-    integer,dimension(:,:),allocatable :: hopr_sideInfo
-    real(prec),dimension(:,:),allocatable :: hopr_nodeCoords
-    integer,dimension(:),allocatable :: hopr_globalNodeIDs
-    integer,dimension(:,:),allocatable :: bcType
-
-    if(present(enableDomainDecomposition)) then
-      call this%decomp%init(enableDomainDecomposition)
-    else
-      call this%decomp%init(.false.)
-    endif
-
-    if(this%decomp%mpiEnabled) then
-      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)
-    else
-      call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
-    endif
-
-    call ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
-    call ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
-    call ReadAttribute_HDF5(fileId,'nBCs',nBCs)
-    call ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
-
-    ! Read BCType
-    allocate(bcType(1:4,1:nBCs))
-    if(this%decomp%mpiEnabled) then
-      offset(:) = 0
-      call ReadArray_HDF5(fileId,'BCType',bcType,offset)
-    else
-      call ReadArray_HDF5(fileId,'BCType',bcType)
-    endif
-
-    ! Read local subarray of ElemInfo
-    call this%decomp%GenerateDecomposition(nGlobalElem,nUniqueSides)
-
-    firstElem = this%decomp%offsetElem(this%decomp%rankId+1)+1
-    nLocalElems = this%decomp%offsetElem(this%decomp%rankId+2)- &
-                  this%decomp%offsetElem(this%decomp%rankId+1)
-
-    ! Allocate Space for hopr_elemInfo!
-    allocate(hopr_elemInfo(1:6,1:nLocalElems))
-    if(this%decomp%mpiEnabled) then
-      offset = (/0,firstElem-1/)
-      call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
-    else
-      call ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
-    endif
-
-    ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode = hopr_elemInfo(5,1)+1
-    nLocalNodes = hopr_elemInfo(6,nLocalElems)-hopr_elemInfo(5,1)
-
-    ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
-    allocate(hopr_nodeCoords(1:3,1:nLocalNodes),hopr_globalNodeIDs(1:nLocalNodes))
-
-    if(this%decomp%mpiEnabled) then
-      offset = (/0,firstNode-1/)
-      call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
-      gOffset = (/firstNode-1/)
-      call ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
-    else
-      call ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
-      call ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
-    endif
-
-    ! Read local subarray of SideInfo
-    firstSide = hopr_elemInfo(3,1)+1
-    nLocalSides = hopr_elemInfo(4,nLocalElems)-hopr_elemInfo(3,1)
-
-    ! Allocate space for hopr_sideInfo
-    allocate(hopr_sideInfo(1:5,1:nLocalSides))
-
-    if(this%decomp%mpiEnabled) then
-      offset = (/0,firstSide-1/)
-      call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
-    else
-      call ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
-    endif
-
-    call Close_HDF5(fileID)
-    ! ---- Done reading 3-D Mesh information ---- !
-    ! Load hopr data into mesh data structure
-
-    call this%Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
-
-    ! Copy data from local arrays into this
-    this%elemInfo = hopr_elemInfo
-    this%nUniqueSides = nUniqueSides
-    this%quadrature = UNIFORM
-
-    ! Grab the node coordinates
-    do eid = 1,this%nElem
-      do k = 1,nGeo+1
-        do j = 1,nGeo+1
-          do i = 1,nGeo+1
-            nid = i+(nGeo+1)*(j-1+(nGeo+1)*(k-1+(nGeo+1)*(eid-1)))
-            this%nodeCoords(1:3,i,j,k,eid) = hopr_nodeCoords(1:3,nid)
-            this%globalNodeIDs(i,j,k,eid) = hopr_globalNodeIDs(nid)
-          enddo
-        enddo
-      enddo
-    enddo
-
-    iSide = 0
-    do eid = 1,this%nElem
-      do lsid = 1,6
-        iSide = iSide+1
-        this%sideInfo(1:5,lsid,eid) = hopr_sideInfo(1:5,iSide)
-      enddo
-    enddo
-
-    call this%RecalculateFlip()
-
-    deallocate(hopr_elemInfo,hopr_nodeCoords,hopr_globalNodeIDs,hopr_sideInfo)
+    class(Mesh3D),intent(inout) :: this
 
     call gpuCheck(hipMemcpy(this%sideInfo_gpu,c_loc(this%sideInfo),sizeof(this%sideInfo),hipMemcpyHostToDevice))
 
-  endsubroutine Read_HOPr_Mesh3D
+  endsubroutine UpdateDevice_Mesh3D
 
 endmodule SELF_Mesh_3D

@@ -37,8 +37,6 @@ module SELF_Geometry_3D
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,public :: SEMHex
     type(Vector3D) :: x ! Physical positions
     type(Tensor3D) :: dxds ! Covariant basis vectors
@@ -55,6 +53,7 @@ module SELF_Geometry_3D
     procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMHex
     procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
     procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
+    procedure,public :: WriteTecplot => WriteTecplot_SEMHex
 
   endtype SEMHex
 
@@ -405,5 +404,53 @@ contains
     call myGeom%CalculateContravariantBasis()
 
   endsubroutine CalculateMetricTerms_SEMHex
+
+  subroutine WriteTecplot_SEMHex(this,filename)
+    implicit none
+    class(SEMHex),intent(inout) :: this
+    character(*),intent(in) :: filename
+    ! Local
+    character(8) :: zoneID
+    integer :: fUnit
+    integer :: iEl,i,j,k,iVar
+    character(LEN=self_TecplotHeaderLength) :: tecHeader
+    character(LEN=self_FormatLength) :: fmat
+
+    open(UNIT=NEWUNIT(fUnit), &
+         FILE=trim(filename), &
+         FORM='formatted', &
+         STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y", "Z", "eID"'
+
+    write(fUnit,*) trim(tecHeader)
+
+    ! Create format statement
+    write(fmat,*) 4
+    fmat = '('//trim(fmat)//'(ES16.7E3,1x))'
+
+    do iEl = 1,this%x%nElem
+
+      ! TO DO :: Get the global element ID
+      write(zoneID,'(I8.8)') iEl
+      write(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this%x%interp%N+1, &
+        ', J=',this%x%interp%N+1,', K=',this%x%interp%N+1
+
+      do k = 1,this%x%interp%N+1
+        do j = 1,this%x%interp%N+1
+          do i = 1,this%x%interp%N+1
+
+            write(fUnit,fmat) this%x%interior(i,j,k,iEl,1,1), &
+              this%x%interior(i,j,k,iEl,1,2),this%x%interior(i,j,k,iel,1,3),real(iEl,prec)
+
+          enddo
+        enddo
+      enddo
+
+    enddo
+
+    close(UNIT=fUnit)
+
+  endsubroutine WriteTecplot_SEMHex
 
 endmodule SELF_Geometry_3D
