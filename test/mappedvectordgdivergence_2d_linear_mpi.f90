@@ -26,112 +26,112 @@
 
 program test
 
-   implicit none
-   integer :: exit_code
+  implicit none
+  integer :: exit_code
 
-   exit_code = mappedvectordgdivergence_2d_linear()
-   if (exit_code /= 0) then
-      stop exit_code
-   end if
+  exit_code = mappedvectordgdivergence_2d_linear()
+  if(exit_code /= 0) then
+    stop exit_code
+  endif
 
 contains
-   integer function mappedvectordgdivergence_2d_linear() result(r)
+  integer function mappedvectordgdivergence_2d_linear() result(r)
 
-      use SELF_Constants
-      use SELF_Lagrange
-      use SELF_Mesh_2D
-      use SELF_Geometry_2D
-      use SELF_MappedScalar_2D
-      use SELF_MappedVector_2D
+    use SELF_Constants
+    use SELF_Lagrange
+    use SELF_Mesh_2D
+    use SELF_Geometry_2D
+    use SELF_MappedScalar_2D
+    use SELF_MappedVector_2D
 
-      implicit none
+    implicit none
 
-      integer, parameter :: controlDegree = 7
-      integer, parameter :: targetDegree = 16
-      integer, parameter :: nvar = 1
+    integer,parameter :: controlDegree = 7
+    integer,parameter :: targetDegree = 16
+    integer,parameter :: nvar = 1
 #ifdef DOUBLE_PRECISION
-      real(prec), parameter :: tolerance = 10.0_prec**(-7)
+    real(prec),parameter :: tolerance = 10.0_prec**(-7)
 #else
-      real(prec), parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 10.0_prec**(-3)
 #endif
-      type(Lagrange), target :: interp
-      type(Mesh2D), target :: mesh
-      type(SEMQuad), target :: geometry
-      type(MappedVector2D) :: f
-      type(MappedScalar2D) :: df
-      character(LEN=255) :: WORKSPACE
-      integer :: i, j, iel
-      real(prec) :: nhat(1:2), nmag
+    type(Lagrange),target :: interp
+    type(Mesh2D),target :: mesh
+    type(SEMQuad),target :: geometry
+    type(MappedVector2D) :: f
+    type(MappedScalar2D) :: df
+    character(LEN=255) :: WORKSPACE
+    integer :: i,j,iel
+    real(prec) :: nhat(1:2),nmag
 
-      ! Create a uniform block mesh
-      call get_environment_variable("WORKSPACE", WORKSPACE)
-      call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5", enableDomainDecomposition=.true.)
+    ! Create a uniform block mesh
+    call get_environment_variable("WORKSPACE",WORKSPACE)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",enableDomainDecomposition=.true.)
 
-      ! Create an interpolant
-      call interp%Init(N=controlDegree, &
-                       controlNodeType=GAUSS, &
-                       M=targetDegree, &
-                       targetNodeType=UNIFORM)
+    ! Create an interpolant
+    call interp%Init(N=controlDegree, &
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
-      ! Generate geometry (metric terms) from the mesh elements
-      call geometry%Init(interp, mesh%nElem)
-      call geometry%GenerateFromMesh(mesh)
+    ! Generate geometry (metric terms) from the mesh elements
+    call geometry%Init(interp,mesh%nElem)
+    call geometry%GenerateFromMesh(mesh)
 
-      call f%Init(interp, nvar, mesh%nelem)
-      call df%Init(interp, nvar, mesh%nelem)
-      call f%AssociateGeometry(geometry)
+    call f%Init(interp,nvar,mesh%nelem)
+    call df%Init(interp,nvar,mesh%nelem)
+    call f%AssociateGeometry(geometry)
 
-      call f%SetEquation(1, 1, 'f = x') ! x-component
-      call f%SetEquation(2, 1, 'f = y') ! y-component
+    call f%SetEquation(1,1,'f = x') ! x-component
+    call f%SetEquation(2,1,'f = y') ! y-component
 
-      call f%SetInteriorFromEquation(geometry, 0.0_prec)
-      print *, "min, max (interior)", minval(f%interior), maxval(f%interior)
+    call f%SetInteriorFromEquation(geometry,0.0_prec)
+    print*,"min, max (interior)",minval(f%interior),maxval(f%interior)
 
-      call f%boundaryInterp()
-      call f%UpdateHost()
+    call f%boundaryInterp()
+    call f%UpdateHost()
 
-      do iEl = 1, f%nElem
-         do j = 1, 4
-            do i = 1, f%interp%N + 1
+    do iEl = 1,f%nElem
+      do j = 1,4
+        do i = 1,f%interp%N+1
 
-               ! Get the boundary normals on cell edges from the mesh geometry
-               nhat(1:2) = geometry%nHat%boundary(i, j, iEl, 1, 1:2)
-               nmag = geometry%nScale%boundary(i, j, iEl, 1)
+          ! Get the boundary normals on cell edges from the mesh geometry
+          nhat(1:2) = geometry%nHat%boundary(i,j,iEl,1,1:2)
+          nmag = geometry%nScale%boundary(i,j,iEl,1)
 
-               f%boundaryNormal(i, j, iEl, 1) = (f%boundary(i, j, iEl, 1, 1)*nhat(1) + &
-                                                 f%boundary(i, j, iEl, 1, 2)*nhat(2))*nmag
+          f%boundaryNormal(i,j,iEl,1) = (f%boundary(i,j,iEl,1,1)*nhat(1)+ &
+                                         f%boundary(i,j,iEl,1,2)*nhat(2))*nmag
 
-            end do
-         end do
-      end do
+        enddo
+      enddo
+    enddo
 
-      call f%UpdateDevice()
+    call f%UpdateDevice()
 
 #ifdef ENABLE_GPU
-      call f%MappedDGDivergence(df%interior_gpu)
+    call f%MappedDGDivergence(df%interior_gpu)
 #else
-      call f%MappedDGDivergence(df%interior)
+    call f%MappedDGDivergence(df%interior)
 #endif
-      call df%UpdateHost()
+    call df%UpdateHost()
 
-      ! Calculate diff from exact
-      df%interior = abs(df%interior - 2.0_prec)
+    ! Calculate diff from exact
+    df%interior = abs(df%interior-2.0_prec)
 
-      print *, "absmax error :", maxval(df%interior)
-      if (maxval(df%interior) <= tolerance) then
-         r = 0
-      else
-         print *, "absmax error greater than tolerance :", tolerance
-         r = 1
-      end if
+    print*,"absmax error :",maxval(df%interior)
+    if(maxval(df%interior) <= tolerance) then
+      r = 0
+    else
+      print*,"absmax error greater than tolerance :",tolerance
+      r = 1
+    endif
 
-      ! Clean up
-      call f%DissociateGeometry()
-      call geometry%Free()
-      call interp%Free()
-      call f%free()
-      call df%free()
-      call mesh%Free()
+    ! Clean up
+    call f%DissociateGeometry()
+    call geometry%Free()
+    call interp%Free()
+    call f%free()
+    call df%free()
+    call mesh%Free()
 
-   end function mappedvectordgdivergence_2d_linear
-end program test
+  endfunction mappedvectordgdivergence_2d_linear
+endprogram test
