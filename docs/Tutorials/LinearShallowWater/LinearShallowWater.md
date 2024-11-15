@@ -11,9 +11,11 @@ In this model, we are solving the linear shallow water equations in 2-D, given b
 $$
     u_t - fv = -g \eta_x
 $$
+
 $$
     v_t + fu = -g \eta_y
 $$
+
 $$
     \eta_t + (Hu)_x + (Hv)_y = 0
 $$
