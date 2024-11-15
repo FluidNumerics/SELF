@@ -35,6 +35,7 @@ module self_LinearEuler2D
     procedure :: setboundarycondition => setboundarycondition_LinearEuler2D
     procedure :: boundaryflux => boundaryflux_LinearEuler2D
     procedure :: fluxmethod => fluxmethod_LinearEuler2D
+    procedure :: sourcemethod => sourcemethod_LinearEuler2D
 
   endtype LinearEuler2D
 
@@ -70,6 +71,14 @@ module self_LinearEuler2D
   endinterface
 
 contains
+
+  subroutine sourcemethod_LinearEuler2D(this)
+    implicit none
+    class(LinearEuler2D),intent(inout) :: this
+
+    return
+
+  endsubroutine sourcemethod_LinearEuler2D
 
   subroutine boundaryflux_LinearEuler2D(this)
     ! this method uses an linear upwind solver for the
