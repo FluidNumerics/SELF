@@ -27,6 +27,9 @@ RUN spack env activate -d /opt/spack-environment &&\
     cmake -DCMAKE_BUILD_TYPE=release  \
           -DSELF_ENABLE_MULTITHREADING=ON \
           -DCMAKE_INSTALL_PREFIX=/opt/views/view \
+          -DSELF_ENABLE_TESTS=OFF \
+          -DSELF_ENABLE_EXAMPLES=ON \
+          -DSELF_MULTITHREADING_NTHREADS=4 \
           ../ && \
     make VERBOSE=1 && \
     make install 
