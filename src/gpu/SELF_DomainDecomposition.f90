@@ -26,124 +26,126 @@
 
 module SELF_DomainDecomposition
 
-  use SELF_DomainDecomposition_t
-  use mpi
-  use iso_c_binding
+   use SELF_DomainDecomposition_t
+   use mpi
+   use iso_c_binding
 
-  implicit none
+   implicit none
 
-  type,extends(DomainDecomposition_t) :: DomainDecomposition
-    type(c_ptr) :: elemToRank_gpu
+   type, extends(DomainDecomposition_t) :: DomainDecomposition
+      type(c_ptr) :: elemToRank_gpu
 
-  contains
+   contains
 
-    procedure :: Init => Init_DomainDecomposition
-    procedure :: Free => Free_DomainDecomposition
+      procedure :: Init => Init_DomainDecomposition
+      procedure :: Free => Free_DomainDecomposition
 
-    procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
+      procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
 
-  endtype DomainDecomposition
+   end type DomainDecomposition
 
 contains
 
-  subroutine Init_DomainDecomposition(this,enableMPI)
-    implicit none
-    class(DomainDecomposition),intent(inout) :: this
-    logical,intent(in) :: enableMPI
-    ! Local
-    integer       :: ierror
-    integer(c_int) :: num_devices,hip_err,device_id
+   subroutine Init_DomainDecomposition(this, enableMPI)
+      implicit none
+      class(DomainDecomposition), intent(inout) :: this
+      logical, intent(in) :: enableMPI
+      ! Local
+      integer       :: ierror
+      integer(c_int) :: num_devices, hip_err, device_id
 
-    this%mpiComm = 0
-    this%mpiPrec = prec
-    this%rankId = 0
-    this%nRanks = 1
-    this%nElem = 0
-    this%mpiEnabled = enableMPI
+      this%mpiComm = 0
+      this%mpiPrec = prec
+      this%rankId = 0
+      this%nRanks = 1
+      this%nElem = 0
+      this%mpiEnabled = enableMPI
 
-    if(enableMPI) then
-      this%mpiComm = MPI_COMM_WORLD
-      print*,__FILE__," : Initializing MPI"
-      call mpi_init(ierror)
-      call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
-      call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
-    else
-      print*,__FILE__," : MPI not initialized. No domain decomposition used."
-    endif
+      if (enableMPI) then
+         this%mpiComm = MPI_COMM_WORLD
+         print *, __FILE__, " : Initializing MPI"
+         call mpi_init(ierror)
+         call mpi_comm_rank(this%mpiComm, this%rankId, ierror)
+         call mpi_comm_size(this%mpiComm, this%nRanks, ierror)
+         print *, __FILE__, " : Rank ", this%rankId + 1, "/", this%nRanks, " checking in."
+      else
+         print *, __FILE__, " : MPI not initialized. No domain decomposition used."
+      end if
 
-    if(prec == real32) then
-      this%mpiPrec = MPI_FLOAT
-    else
-      this%mpiPrec = MPI_DOUBLE
-    endif
+      if (prec == real32) then
+         this%mpiPrec = MPI_FLOAT
+      else
+         this%mpiPrec = MPI_DOUBLE
+      end if
 
-    allocate(this%offsetElem(1:this%nRanks+1))
+      allocate (this%offsetElem(1:this%nRanks + 1))
 
-    hip_err = hipGetDeviceCount(num_devices)
-    if(hip_err /= 0) then
-      print*,'Failed to get device count on rank',this%rankId
-      call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
-    endif
+      hip_err = hipGetDeviceCount(num_devices)
+      if (hip_err /= 0) then
+         print *, 'Failed to get device count on rank', this%rankId
+         call MPI_Abort(MPI_COMM_WORLD, hip_err, ierror)
+      end if
 
-    ! Assign GPU device ID based on MPI rank
-    device_id = modulo(this%rankId,num_devices) ! Assumes that mpi ranks are packed sequentially on a node until the node is filled up.
-    hip_err = hipSetDevice(device_id)
-    print*,__FILE__," : Rank ",this%rankId+1," assigned to device ",device_id
-    if(hip_err /= 0) then
-      print*,'Failed to set device for rank',this%rankId,'to device',device_id
-      call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
-    endif
+      ! Assign GPU device ID based on MPI rank
+      device_id = modulo(this%rankId, num_devices) ! Assumes that mpi ranks are packed sequentially on a node until the node is filled up.
+      hip_err = hipSetDevice(device_id)
+      print *, __FILE__, " : Rank ", this%rankId + 1, " assigned to device ", device_id
+      if (hip_err /= 0) then
+         print *, 'Failed to set device for rank', this%rankId, 'to device', device_id
+         call MPI_Abort(MPI_COMM_WORLD, hip_err, ierror)
+      end if
 
-  endsubroutine Init_DomainDecomposition
-  subroutine Free_DomainDecomposition(this)
-    implicit none
-    class(DomainDecomposition),intent(inout) :: this
-    ! Local
-    integer :: ierror
+      this%initialized = .true.
 
-    if(associated(this%offSetElem)) then
-      deallocate(this%offSetElem)
-    endif
-    if(associated(this%elemToRank)) then
-      deallocate(this%elemToRank)
-      call gpuCheck(hipFree(this%elemToRank_gpu))
-    endif
+   end subroutine Init_DomainDecomposition
+   subroutine Free_DomainDecomposition(this)
+      implicit none
+      class(DomainDecomposition), intent(inout) :: this
+      ! Local
+      integer :: ierror
 
-    if(allocated(this%requests)) deallocate(this%requests)
-    if(allocated(this%stats)) deallocate(this%stats)
+      if (associated(this%offSetElem)) then
+         deallocate (this%offSetElem)
+      end if
+      if (associated(this%elemToRank)) then
+         deallocate (this%elemToRank)
+         call gpuCheck(hipFree(this%elemToRank_gpu))
+      end if
 
-    if(this%mpiEnabled) then
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
-      call MPI_FINALIZE(ierror)
-    endif
+      if (allocated(this%requests)) deallocate (this%requests)
+      if (allocated(this%stats)) deallocate (this%stats)
 
-  endsubroutine Free_DomainDecomposition
+      if (this%mpiEnabled) then
+         print *, __FILE__, " : Rank ", this%rankId + 1, "/", this%nRanks, " checking out."
+         call MPI_FINALIZE(ierror)
+      end if
 
-  subroutine SetElemToRank_DomainDecomposition(this,nElem)
-    implicit none
-    class(DomainDecomposition),intent(inout) :: this
-    integer,intent(in) :: nElem
-    ! Local
-    integer :: iel
+   end subroutine Free_DomainDecomposition
 
-    this%nElem = nElem
+   subroutine SetElemToRank_DomainDecomposition(this, nElem)
+      implicit none
+      class(DomainDecomposition), intent(inout) :: this
+      integer, intent(in) :: nElem
+      ! Local
+      integer :: iel
 
-    allocate(this%elemToRank(1:nelem))
-    call gpuCheck(hipMalloc(this%elemToRank_gpu,sizeof(this%elemToRank)))
+      this%nElem = nElem
 
-    call DomainDecomp(nElem, &
-                      this%nRanks, &
-                      this%offSetElem)
+      allocate (this%elemToRank(1:nelem))
+      call gpuCheck(hipMalloc(this%elemToRank_gpu, sizeof(this%elemToRank)))
 
-    do iel = 1,nElem
-      call ElemToRank(this%nRanks, &
-                      this%offSetElem, &
-                      iel, &
-                      this%elemToRank(iel))
-    enddo
-    call gpuCheck(hipMemcpy(this%elemToRank_gpu,c_loc(this%elemToRank),sizeof(this%elemToRank),hipMemcpyHostToDevice))
+      call DomainDecomp(nElem, &
+                        this%nRanks, &
+                        this%offSetElem)
 
-  endsubroutine SetElemToRank_DomainDecomposition
+      do iel = 1, nElem
+         call ElemToRank(this%nRanks, &
+                         this%offSetElem, &
+                         iel, &
+                         this%elemToRank(iel))
+      end do
+      call gpuCheck(hipMemcpy(this%elemToRank_gpu, c_loc(this%elemToRank), sizeof(this%elemToRank), hipMemcpyHostToDevice))
 
-endmodule SELF_DomainDecomposition
+   end subroutine SetElemToRank_DomainDecomposition
+
+end module SELF_DomainDecomposition
