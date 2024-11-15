@@ -92,6 +92,7 @@ program linear_shallow_water2d_nonormalflow_model
 
   ef = modelobj%entropy
 
+  print*,e0,ef
   if(abs(ef-e0) > epsilon(e0)) then
     print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
