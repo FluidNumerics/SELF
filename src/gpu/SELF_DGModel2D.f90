@@ -194,16 +194,13 @@ contains
     integer :: j
     real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:2)
 
-    do iel = 1,this%mesh%nelem
-      do j = 1,this%solution%interp%N+1
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem)
 
-          s = this%solution%interior(i,j,iel,1:this%nvar)
-          dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
-          this%flux%interior(i,j,iel,1:this%nvar,1:2) = this%flux2d(s,dsdx)
+      s = this%solution%interior(i,j,iel,1:this%nvar)
+      dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
+      this%flux%interior(i,j,iel,1:this%nvar,1:2) = this%flux2d(s,dsdx)
 
-        enddo
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
@@ -239,21 +236,18 @@ contains
                             this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
                             hipMemcpyDeviceToHost))
 
-    do iEl = 1,this%solution%nElem
-      do j = 1,4
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,j=1:4, &
+                  iel=1:this%mesh%nElem)
 
-          ! Get the boundary normals on cell edges from the mesh geometry
-          nhat = this%geometry%nHat%boundary(i,j,iEl,1,1:2)
-          sL = this%solution%boundary(i,j,iel,1:this%nvar) ! interior solution
-          sR = this%solution%extboundary(i,j,iel,1:this%nvar) ! exterior solution
-          dsdx = this%solutiongradient%avgboundary(i,j,iel,1:this%nvar,1:2)
-          nmag = this%geometry%nScale%boundary(i,j,iEl,1)
+      ! Get the boundary normals on cell edges from the mesh geometry
+      nhat = this%geometry%nHat%boundary(i,j,iEl,1,1:2)
+      sL = this%solution%boundary(i,j,iel,1:this%nvar) ! interior solution
+      sR = this%solution%extboundary(i,j,iel,1:this%nvar) ! exterior solution
+      dsdx = this%solutiongradient%avgboundary(i,j,iel,1:this%nvar,1:2)
+      nmag = this%geometry%nScale%boundary(i,j,iEl,1)
 
-          this%flux%boundaryNormal(i,j,iEl,1:this%nvar) = this%riemannflux2d(sL,sR,dsdx,nhat)*nmag
+      this%flux%boundaryNormal(i,j,iEl,1:this%nvar) = this%riemannflux2d(sL,sR,dsdx,nhat)*nmag
 
-        enddo
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
@@ -280,16 +274,13 @@ contains
                             this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
                             hipMemcpyDeviceToHost))
 
-    do iel = 1,this%mesh%nelem
-      do j = 1,this%solution%interp%N+1
-        do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  iel=1:this%mesh%nElem)
 
-          s = this%solution%interior(i,j,iel,1:this%nvar)
-          dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
-          this%source%interior(i,j,iel,1:this%nvar) = this%source2d(s,dsdx)
+      s = this%solution%interior(i,j,iel,1:this%nvar)
+      dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
+      this%source%interior(i,j,iel,1:this%nvar) = this%source2d(s,dsdx)
 
-        enddo
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%source%interior_gpu, &
@@ -317,44 +308,42 @@ contains
                             this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
                             hipMemcpyDeviceToHost))
 
-    do iEl = 1,this%solution%nElem ! Loop over all elements
-      do j = 1,4 ! Loop over all sides
+    do concurrent(j=1:4,iel=1:this%mesh%nElem)
 
-        bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
-        e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
+      bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
+      e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
 
-        if(e2 == 0) then
-          if(bcid == SELF_BC_PRESCRIBED) then
+      if(e2 == 0) then
+        if(bcid == SELF_BC_PRESCRIBED) then
 
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            x = this%geometry%x%boundary(i,j,iEl,1,1:2)
 
-              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%hbc2d_Prescribed(x,this%t)
-            enddo
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              this%hbc2d_Prescribed(x,this%t)
+          enddo
 
-          elseif(bcid == SELF_BC_RADIATION) then
+        elseif(bcid == SELF_BC_RADIATION) then
 
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%hbc2d_Radiation(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
-            enddo
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              this%hbc2d_Radiation(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
 
-          elseif(bcid == SELF_BC_NONORMALFLOW) then
+        elseif(bcid == SELF_BC_NONORMALFLOW) then
 
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-              this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-                this%hbc2d_NoNormalFlow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
-            enddo
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              this%hbc2d_NoNormalFlow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
 
-          endif
         endif
+      endif
 
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
@@ -383,48 +372,46 @@ contains
                             this%solutiongradient%extboundary_gpu,sizeof(this%solutiongradient%extboundary), &
                             hipMemcpyDeviceToHost))
 
-    do iEl = 1,this%solution%nElem ! Loop over all elements
-      do j = 1,4 ! Loop over all sides
+    do concurrent(j=1:4,iel=1:this%mesh%nElem)
 
-        bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
-        e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
+      bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
+      e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
 
-        if(e2 == 0) then
-          if(bcid == SELF_BC_PRESCRIBED) then
+      if(e2 == 0) then
+        if(bcid == SELF_BC_PRESCRIBED) then
 
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+          do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+            x = this%geometry%x%boundary(i,j,iEl,1,1:2)
 
-              this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-                this%pbc2d_Prescribed(x,this%t)
-            enddo
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              this%pbc2d_Prescribed(x,this%t)
+          enddo
 
-          elseif(bcid == SELF_BC_RADIATION) then
+        elseif(bcid == SELF_BC_RADIATION) then
 
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+          do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-              dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+            dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
 
-              this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-                this%pbc2d_Radiation(dsdx,nhat)
-            enddo
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              this%pbc2d_Radiation(dsdx,nhat)
+          enddo
 
-          elseif(bcid == SELF_BC_NONORMALFLOW) then
+        elseif(bcid == SELF_BC_NONORMALFLOW) then
 
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+          do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-              dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+            dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
 
-              this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-                this%pbc2d_NoNormalFlow(dsdx,nhat)
-            enddo
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              this%pbc2d_NoNormalFlow(dsdx,nhat)
+          enddo
 
-          endif
         endif
+      endif
 
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &

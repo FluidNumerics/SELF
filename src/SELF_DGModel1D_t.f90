@@ -452,23 +452,21 @@ contains
     real(prec) :: fout(1:this%solution%nvar)
     real(prec) :: dfdx(1:this%solution%nvar),nhat
 
-    do iel = 1,this%mesh%nelem
-      do iside = 1,2
+    do concurrent(iside=1:2,iel=1:this%mesh%nElem)
 
-        ! set the normal velocity
-        if(iside == 1) then
-          nhat = -1.0_prec
-        else
-          nhat = 1.0_prec
-        endif
+      ! set the normal velocity
+      if(iside == 1) then
+        nhat = -1.0_prec
+      else
+        nhat = 1.0_prec
+      endif
 
-        fin = this%solution%boundary(iside,iel,1:this%solution%nvar) ! interior solution
-        fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
-        dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
-        this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
-          this%riemannflux1d(fin,fout,dfdx,nhat)
+      fin = this%solution%boundary(iside,iel,1:this%solution%nvar) ! interior solution
+      fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
+      dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
+      this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
+        this%riemannflux1d(fin,fout,dfdx,nhat)
 
-      enddo
     enddo
 
   endsubroutine BoundaryFlux_DGModel1D_t
@@ -481,16 +479,14 @@ contains
     integer :: i
     real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
 
-    do iel = 1,this%mesh%nelem
-      do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,iel=1:this%mesh%nElem)
 
-        f = this%solution%interior(i,iel,1:this%solution%nvar)
-        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+      f = this%solution%interior(i,iel,1:this%solution%nvar)
+      dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
-        this%flux%interior(i,iel,1:this%solution%nvar) = &
-          this%flux1d(f,dfdx)
+      this%flux%interior(i,iel,1:this%solution%nvar) = &
+        this%flux1d(f,dfdx)
 
-      enddo
     enddo
 
   endsubroutine fluxmethod_DGModel1D_t
@@ -503,16 +499,14 @@ contains
     integer :: i
     real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
 
-    do iel = 1,this%mesh%nelem
-      do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,iel=1:this%mesh%nElem)
 
-        f = this%solution%interior(i,iel,1:this%solution%nvar)
-        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+      f = this%solution%interior(i,iel,1:this%solution%nvar)
+      dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
-        this%source%interior(i,iel,1:this%solution%nvar) = &
-          this%source1d(f,dfdx)
+      this%source%interior(i,iel,1:this%solution%nvar) = &
+        this%source1d(f,dfdx)
 
-      enddo
     enddo
 
   endsubroutine sourcemethod_DGModel1D_t
@@ -578,19 +572,16 @@ contains
     call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
     ! Write the interpolant to the file
-    INFO("Writing interpolant data to file")
     call this%solution%interp%WriteHDF5(fileId)
 
     ! In this section, we write the solution and geometry on the control (quadrature) grid
     ! which can be used for model pickup runs or post-processing
 
     ! Write the model state to file
-    INFO("Writing control grid solution to file")
     call CreateGroup_HDF5(fileId,'/controlgrid')
     call this%solution%WriteHDF5(fileId,'/controlgrid/solution')
 
     ! Write the geometry to file
-    INFO("Writing control grid  geometry to file")
     call CreateGroup_HDF5(fileId,'/controlgrid/geometry')
     call this%geometry%x%WriteHDF5(fileId,'/controlgrid/geometry/x')
     ! -- END : writing solution on control grid -- !
@@ -614,12 +605,10 @@ contains
     call this%solution%GridInterp(solution%interior)
 
     ! Write the model state to file
-    INFO("Writing target grid solution to file")
     call CreateGroup_HDF5(fileId,'/targetgrid')
     call solution%WriteHDF5(fileId,'/targetgrid/solution')
 
     ! Write the geometry to file
-    INFO("Writing target grid geometry to file")
     call CreateGroup_HDF5(fileId,'/targetgrid/geometry')
     call x%WriteHDF5(fileId,'/targetgrid/geometry/x')
 
