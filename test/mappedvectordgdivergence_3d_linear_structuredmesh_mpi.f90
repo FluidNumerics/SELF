@@ -63,28 +63,28 @@ contains
       real(prec) :: nhat(1:3), nmag, fx, fy, fz
       integer :: bcids(1:6)
 
-      ! Create a uniform block mesh
-      bcids(1:6) = [SELF_BC_PRESCRIBED, & ! Bottom
-                    SELF_BC_PRESCRIBED, & ! South
-                    SELF_BC_PRESCRIBED, & ! East
-                    SELF_BC_PRESCRIBED, & ! North
-                    SELF_BC_PRESCRIBED, & ! West
-                    SELF_BC_PRESCRIBED] ! Top
+    ! Create a uniform block mesh
+    bcids(1:6) = [SELF_BC_PRESCRIBED, & ! Bottom
+                  SELF_BC_PRESCRIBED, & ! South
+                  SELF_BC_PRESCRIBED, & ! East
+                  SELF_BC_PRESCRIBED, & ! North
+                  SELF_BC_PRESCRIBED, & ! West
+                  SELF_BC_PRESCRIBED] ! Top
 
-      call mesh%StructuredMesh(5, 5, 5, &
-                               2, 2, 2, &
-                               0.1_prec, 0.1_prec, 0.1_prec, &
-                               bcids, enableDomainDecomposition=.true.)
+    call mesh%StructuredMesh(5,5,5, &
+                             2,2,2, &
+                             0.1_prec,0.1_prec,0.1_prec, &
+                             bcids,enableDomainDecomposition=.true.)
 
-      ! Create an interpolant
-      call interp%Init(N=controlDegree, &
-                       controlNodeType=GAUSS, &
-                       M=targetDegree, &
-                       targetNodeType=UNIFORM)
+    ! Create an interpolant
+    call interp%Init(N=controlDegree, &
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
-      ! Generate geometry (metric terms) from the mesh elements
-      call geometry%Init(interp, mesh%nElem)
-      call geometry%GenerateFromMesh(mesh)
+    ! Generate geometry (metric terms) from the mesh elements
+    call geometry%Init(interp,mesh%nElem)
+    call geometry%GenerateFromMesh(mesh)
 
       call f%Init(interp, nvar, mesh%nelem)
       call df%Init(interp, nvar, mesh%nelem)

@@ -54,22 +54,22 @@ contains
 #else
       real(prec), parameter :: tolerance = 10.0_prec**(-2)
 #endif
-      type(Lagrange), target :: interp
-      type(Mesh3D), target :: mesh
-      type(SEMHex), target :: geometry
-      type(MappedScalar3D) :: f
-      type(MappedVector3D) :: df
-      integer :: iel
-      integer :: iside
-      integer :: i
-      integer :: j
-      integer :: k
-      integer :: e2, s2, bcid
-      character(LEN=255) :: WORKSPACE
+    type(Lagrange),target :: interp
+    type(Mesh3D),target :: mesh
+    type(SEMHex),target :: geometry
+    type(MappedScalar3D) :: f
+    type(MappedVector3D) :: df
+    integer :: iel
+    integer :: iside
+    integer :: i
+    integer :: j
+    integer :: k
+    integer :: e2,s2,bcid
+    character(LEN=255) :: WORKSPACE
 
-      ! Create a uniform block mesh
-      call get_environment_variable("WORKSPACE", WORKSPACE)
-      call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5", enableDomainDecomposition=.true.)
+    ! Create a uniform block mesh
+    call get_environment_variable("WORKSPACE",WORKSPACE)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",enableDomainDecomposition=.true.)
 
       ! Create an interpolant
       call interp%Init(N=controlDegree, &
@@ -77,9 +77,9 @@ contains
                        M=targetDegree, &
                        targetNodeType=UNIFORM)
 
-      ! Generate geometry (metric terms) from the mesh elements
-      call geometry%Init(interp, mesh%nElem)
-      call geometry%GenerateFromMesh(mesh)
+    ! Generate geometry (metric terms) from the mesh elements
+    call geometry%Init(interp,mesh%nElem)
+    call geometry%GenerateFromMesh(mesh)
 
       call f%Init(interp, nvar, mesh%nelem)
       call df%Init(interp, nvar, mesh%nelem)

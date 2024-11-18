@@ -34,20 +34,20 @@ module SELF_DomainDecomposition_t
 
    implicit none
 
-   type DomainDecomposition_t
-      logical :: mpiEnabled = .false.
-      logical :: initialized = .false.
-      integer :: mpiComm
-      integer :: mpiPrec
-      integer :: rankId
-      integer :: nRanks
-      integer :: nElem
-      integer :: maxMsg
-      integer :: msgCount
-      integer, pointer, dimension(:) :: elemToRank
-      integer, pointer, dimension(:) :: offSetElem
-      integer, allocatable :: requests(:)
-      integer, allocatable :: stats(:, :)
+  type DomainDecomposition_t
+    logical :: mpiEnabled = .false.
+    logical :: initialized = .false.
+    integer :: mpiComm
+    integer :: mpiPrec
+    integer :: rankId
+    integer :: nRanks
+    integer :: nElem
+    integer :: maxMsg
+    integer :: msgCount
+    integer,pointer,dimension(:) :: elemToRank
+    integer,pointer,dimension(:) :: offSetElem
+    integer,allocatable :: requests(:)
+    integer,allocatable :: stats(:,:)
 
    contains
 
@@ -100,7 +100,9 @@ contains
 
       this%initialized = .true.
 
-   end subroutine Init_DomainDecomposition_t
+    this%initialized = .true.
+
+  endsubroutine Init_DomainDecomposition_t
 
    subroutine Free_DomainDecomposition_t(this)
       implicit none

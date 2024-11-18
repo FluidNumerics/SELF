@@ -95,14 +95,14 @@ contains
          call MPI_Abort(MPI_COMM_WORLD, hip_err, ierror)
       end if
 
-      this%initialized = .true.
+    this%initialized = .true.
 
-   end subroutine Init_DomainDecomposition
-   subroutine Free_DomainDecomposition(this)
-      implicit none
-      class(DomainDecomposition), intent(inout) :: this
-      ! Local
-      integer :: ierror
+  endsubroutine Init_DomainDecomposition
+  subroutine Free_DomainDecomposition(this)
+    implicit none
+    class(DomainDecomposition),intent(inout) :: this
+    ! Local
+    integer :: ierror
 
       if (associated(this%offSetElem)) then
          deallocate (this%offSetElem)
