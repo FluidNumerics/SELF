@@ -45,78 +45,91 @@ module SELF_GPU
       endfunction
       endinterface
 
-      interface hipMalloc
+      interface hipSetDevice
 #ifdef HAVE_HIP
-        function hipMalloc_(ptr,mySize) bind(c,name="hipMalloc")
+        function hipSetDevice_(device_id) bind(c,name="hipSetDevice")
 #elif HAVE_CUDA
-          function hipMalloc_(ptr,mySize) bind(c,name="cudaMalloc")
+          function hipSetDevice_(device_id) bind(c,name="cudaSetDevice")
 #endif
             use iso_c_binding
             use SELF_GPU_enums
             implicit none
-            integer(kind(hipSuccess)) :: hipMalloc_
-            type(c_ptr) :: ptr
-            integer(c_size_t),value :: mySize
+            integer(kind(hipSuccess)) :: hipSetDevice_
+            integer(c_int),value :: device_id
           endfunction
-          endinterface hipMalloc
-
-          interface hipFree
+          endinterface
+          interface hipMalloc
 #ifdef HAVE_HIP
-            function hipFree_(ptr) bind(c,name="hipFree")
+            function hipMalloc_(ptr,mySize) bind(c,name="hipMalloc")
 #elif HAVE_CUDA
-              function hipFree_(ptr) bind(c,name="cudaFree")
+              function hipMalloc_(ptr,mySize) bind(c,name="cudaMalloc")
 #endif
                 use iso_c_binding
                 use SELF_GPU_enums
                 implicit none
-                integer(kind(hipSuccess)) :: hipFree_
-                type(c_ptr),value :: ptr
+                integer(kind(hipSuccess)) :: hipMalloc_
+                type(c_ptr) :: ptr
+                integer(c_size_t),value :: mySize
               endfunction
-              endinterface hipFree
+              endinterface hipMalloc
 
-              interface hipMemcpy
+              interface hipFree
 #ifdef HAVE_HIP
-                function hipMemcpy_(dest,src,sizeBytes,myKind) bind(c,name="hipMemcpy")
+                function hipFree_(ptr) bind(c,name="hipFree")
 #elif HAVE_CUDA
-                  function hipMemcpy_(dest,src,sizeBytes,myKind) bind(c,name="cudaMemcpy")
+                  function hipFree_(ptr) bind(c,name="cudaFree")
 #endif
                     use iso_c_binding
                     use SELF_GPU_enums
                     implicit none
-                    integer(kind(hipSuccess)) :: hipMemcpy_
-                    type(c_ptr),value :: dest
-                    type(c_ptr),value :: src
-                    integer(c_size_t),value :: sizeBytes
-                    integer(kind(hipMemcpyHostToHost)),value :: myKind
-                  endfunction hipMemcpy_
-                  endinterface hipMemcpy
+                    integer(kind(hipSuccess)) :: hipFree_
+                    type(c_ptr),value :: ptr
+                  endfunction
+                  endinterface hipFree
 
-                  contains
+                  interface hipMemcpy
+#ifdef HAVE_HIP
+                    function hipMemcpy_(dest,src,sizeBytes,myKind) bind(c,name="hipMemcpy")
+#elif HAVE_CUDA
+                      function hipMemcpy_(dest,src,sizeBytes,myKind) bind(c,name="cudaMemcpy")
+#endif
+                        use iso_c_binding
+                        use SELF_GPU_enums
+                        implicit none
+                        integer(kind(hipSuccess)) :: hipMemcpy_
+                        type(c_ptr),value :: dest
+                        type(c_ptr),value :: src
+                        integer(c_size_t),value :: sizeBytes
+                        integer(kind(hipMemcpyHostToHost)),value :: myKind
+                      endfunction hipMemcpy_
+                      endinterface hipMemcpy
 
-                  subroutine gpuCheck(gpuError_t)
-                    implicit none
-                    integer(kind(hipSuccess)) :: gpuError_t
+                      contains
 
-                    if(gpuError_t /= hipSuccess) then
-                      write(*,*) "GPU ERROR: Error code = ",gpuError_t
-                      call exit(gpuError_t)
-                    endif
-                  endsubroutine gpuCheck
+                      subroutine gpuCheck(gpuError_t)
+                        implicit none
+                        integer(kind(hipSuccess)) :: gpuError_t
 
-                  function GPUAvailable() result(avail)
-                    implicit none
-                    logical :: avail
-                    ! Local
-                    integer(c_int) :: gpuCount
-                    integer(kind(hipSuccess)) :: err
+                        if(gpuError_t /= hipSuccess) then
+                          write(*,*) "GPU ERROR: Error code = ",gpuError_t
+                          call exit(gpuError_t)
+                        endif
+                      endsubroutine gpuCheck
 
-                    err = hipGetDeviceCount(gpuCount)
-                    if(gpuCount > 0 .and. err == hipSuccess) then
-                      avail = .true.
-                    else
-                      avail = .false.
-                    endif
+                      function GPUAvailable() result(avail)
+                        implicit none
+                        logical :: avail
+                        ! Local
+                        integer(c_int) :: gpuCount
+                        integer(kind(hipSuccess)) :: err
 
-                  endfunction GPUAvailable
+                        err = hipGetDeviceCount(gpuCount)
+                        if(gpuCount > 0 .and. err == hipSuccess) then
+                          avail = .true.
+                        else
+                          avail = .false.
+                        endif
 
-                  endmodule SELF_GPU
+                      endfunction GPUAvailable
+
+                      endmodule SELF_GPU

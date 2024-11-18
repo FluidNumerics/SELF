@@ -37,6 +37,7 @@ module SELF_DomainDecomposition
 
   contains
 
+    procedure :: Init => Init_DomainDecomposition
     procedure :: Free => Free_DomainDecomposition
 
     procedure :: SetElemToRank => SetElemToRank_DomainDecomposition
@@ -45,6 +46,58 @@ module SELF_DomainDecomposition
 
 contains
 
+  subroutine Init_DomainDecomposition(this,enableMPI)
+    implicit none
+    class(DomainDecomposition),intent(inout) :: this
+    logical,intent(in) :: enableMPI
+    ! Local
+    integer       :: ierror
+    integer(c_int) :: num_devices,hip_err,device_id
+
+    this%mpiComm = 0
+    this%mpiPrec = prec
+    this%rankId = 0
+    this%nRanks = 1
+    this%nElem = 0
+    this%mpiEnabled = enableMPI
+
+    if(enableMPI) then
+      this%mpiComm = MPI_COMM_WORLD
+      print*,__FILE__," : Initializing MPI"
+      call mpi_init(ierror)
+      call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
+      call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
+      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
+    else
+      print*,__FILE__," : MPI not initialized. No domain decomposition used."
+    endif
+
+    if(prec == real32) then
+      this%mpiPrec = MPI_FLOAT
+    else
+      this%mpiPrec = MPI_DOUBLE
+    endif
+
+    allocate(this%offsetElem(1:this%nRanks+1))
+
+    hip_err = hipGetDeviceCount(num_devices)
+    if(hip_err /= 0) then
+      print*,'Failed to get device count on rank',this%rankId
+      call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
+    endif
+
+    ! Assign GPU device ID based on MPI rank
+    device_id = modulo(this%rankId,num_devices) ! Assumes that mpi ranks are packed sequentially on a node until the node is filled up.
+    hip_err = hipSetDevice(device_id)
+    print*,__FILE__," : Rank ",this%rankId+1," assigned to device ",device_id
+    if(hip_err /= 0) then
+      print*,'Failed to set device for rank',this%rankId,'to device',device_id
+      call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
+    endif
+
+    this%initialized = .true.
+
+  endsubroutine Init_DomainDecomposition
   subroutine Free_DomainDecomposition(this)
     implicit none
     class(DomainDecomposition),intent(inout) :: this

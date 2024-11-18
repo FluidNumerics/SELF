@@ -63,15 +63,15 @@ contains
     integer :: i,j,k,iel,e2
     real(prec) :: nhat(1:3),nmag,fx,fy,fz
 
+    ! Create a uniform block mesh
+    call get_environment_variable("WORKSPACE",WORKSPACE)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",enableDomainDecomposition=.true.)
+
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
                      controlNodeType=GAUSS, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
-
-    ! Create a uniform block mesh
-    call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block3D/Block3D_mesh.h5",enableDomainDecomposition=.true.)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
