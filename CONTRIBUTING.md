@@ -12,12 +12,28 @@ Copyright 2017-2024 Fluid Numerics LLC
 8. Open a pull request with the upstream SELF repository. In the title, reference the issue number that you worked on. Include a detailed description of the changes you made and why. If you have recommendations for updates to documentation as a result of your changes, please indicate so. If you've added a new routine, you will need to work with the maintainers to develop tests when integrating your new feature in. 
 
 ### Code formatting
-Each pull request is checked for formatting before running other tests. The `self` project uses [`fprettify`](https://pypi.org/project/fprettify/) for formatting fortran source code. We have included a configuration file in the `self` repository (`fprettify.config`) that can be used for ensuring formatting correctness. 
+Each pull request is checked for formatting before running other tests. The `self` project uses [`fprettify`](https://pypi.org/project/fprettify/) for formatting fortran source code. We have included a configuration file in the `self` repository (`fprettify.config`) that can be used for ensuring formatting correctness.
 
+#### Using pre-commit
+SELF comes with a `.pre-commmit-config.yaml` file that can be used with [`pre-commit`](https://pre-commit.com/). The benefit of using pre-commit is that this automates applying formatting to all Fortran files in SELF with each commit. To use `pre-commit` :
+
+1. Install `pre-commit` 
+
+```
+pip install pre-commit fprettify
+```
+
+2. Configure your pre-commit hooks. This command must be run from the root directory of the `self` repository
+
+```
+pre-commit install
+```
+
+#### Manual formatting
 You can run the following to format code to conform to the expected format for `self`.
 
 ```
 fprettify  './src/' --config-file ./fprettify.config --recursive --case 1 1 1 1
 fprettify  './test/' --config-file ./fprettify.config --recursive --case 1 1 1 1
-fprettify  './example/' --config-file ./fprettify.config --recursive --case 1 1 1 1
+fprettify  './examples/' --config-file ./fprettify.config --recursive --case 1 1 1 1
 ```
