@@ -100,6 +100,8 @@ contains
 
     this%initialized = .true.
 
+    this%initialized = .true.
+
   endsubroutine Init_DomainDecomposition_t
 
   subroutine Free_DomainDecomposition_t(this)
