@@ -63,12 +63,6 @@ contains
     real(prec) :: nhat(1:3),nmag,fx,fy,fz
     integer :: bcids(1:6)
 
-    ! Create an interpolant
-    call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
-                     M=targetDegree, &
-                     targetNodeType=UNIFORM)
-
     ! Create a uniform block mesh
     bcids(1:6) = [SELF_BC_PRESCRIBED, & ! Bottom
                   SELF_BC_PRESCRIBED, & ! South
@@ -81,6 +75,13 @@ contains
                              2,2,2, &
                              0.1_prec,0.1_prec,0.1_prec, &
                              bcids,enableDomainDecomposition=.true.)
+
+    ! Create an interpolant
+    call interp%Init(N=controlDegree, &
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
+
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)
     call geometry%GenerateFromMesh(mesh)

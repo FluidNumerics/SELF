@@ -35,7 +35,8 @@ module SELF_DomainDecomposition_t
   implicit none
 
   type DomainDecomposition_t
-    logical :: mpiEnabled
+    logical :: mpiEnabled = .false.
+    logical :: initialized = .false.
     integer :: mpiComm
     integer :: mpiPrec
     integer :: rankId
@@ -96,6 +97,8 @@ contains
     endif
 
     allocate(this%offsetElem(1:this%nRanks+1))
+
+    this%initialized = .true.
 
   endsubroutine Init_DomainDecomposition_t
 

@@ -64,18 +64,18 @@ contains
     real(prec) :: nhat(1:2),nmag,fx,fy,diff
     integer :: bcids(1:4)
 
-    ! Create an interpolant
-    call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
-                     M=targetDegree, &
-                     targetNodeType=UNIFORM)
-
     ! Create a structured mesh
     bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
                   SELF_BC_PRESCRIBED, & ! East
                   SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
     call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids,enableDomainDecomposition=.true.)
+
+    ! Create an interpolant
+    call interp%Init(N=controlDegree, &
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
     ! Generate geometry (metric terms) from the mesh elements
     call geometry%Init(interp,mesh%nElem)

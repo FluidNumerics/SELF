@@ -139,7 +139,7 @@ Following this, the `burgers1d_shock` model is initialized, associating the inte
 ```fortran
 
 ! Initialize the model
-call modelobj%Init(nvar,mesh,geometry)
+call modelobj%Init(mesh,geometry)
 modelobj%gradient_enabled = .true.
 !Set the diffusivity
 modelobj%nu = nu

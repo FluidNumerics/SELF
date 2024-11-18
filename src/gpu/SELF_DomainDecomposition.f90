@@ -95,6 +95,8 @@ contains
       call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
     endif
 
+    this%initialized = .true.
+
   endsubroutine Init_DomainDecomposition
   subroutine Free_DomainDecomposition(this)
     implicit none
