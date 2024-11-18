@@ -20,7 +20,7 @@ $$
     \end{pmatrix}
 $$
 
-where $u$ and $v$ are the horizontal and vertical components of the barycentric velocity ($\vec{u} =  u \hat{x} + v \hat{y}$) and $\eta$ is the deviation of the fluid free surface relative to the resting fluid.
+where $u$ and $v$ are the x and y components of the barotropic velocity ($\vec{u} =  u \hat{x} + v \hat{y}$) and $\eta$ is the deviation of the fluid free surface relative to the resting fluid.
 
 $$
     \overleftrightarrow{f} = 
@@ -65,7 +65,7 @@ $$
     \begin{pmatrix}
         g \eta_L n_x \\ 
         g \eta_L n_y \\ 
-        H \vec{u}_L \cot \hat{n}
+        H \vec{u}_L \cdot \hat{n}
     \end{pmatrix}
 $$
 
@@ -74,7 +74,7 @@ $$
     \begin{pmatrix}
         g \eta_R n_x \\ 
         g \eta_R n_y \\ 
-        H \vec{u}_R \cot \hat{n}
+        H \vec{u}_R \cdot \hat{n}
     \end{pmatrix}
 $$
 
