@@ -340,23 +340,21 @@ contains
                             this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
                             hipMemcpyDeviceToHost))
 
-    do iel = 1,this%mesh%nelem
-      do iside = 1,2
+    do concurrent(iside=1:2,iel=1:this%mesh%nElem)
 
-        ! set the normal velocity
-        if(iside == 1) then
-          nhat = -1.0_prec
-        else
-          nhat = 1.0_prec
-        endif
+      ! set the normal velocity
+      if(iside == 1) then
+        nhat = -1.0_prec
+      else
+        nhat = 1.0_prec
+      endif
 
-        fin = this%solution%boundary(iside,iel,1:this%solution%nvar) ! interior solution
-        fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
-        dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
-        this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
-          this%riemannflux1d(fin,fout,dfdx,nhat)
+      fin = this%solution%boundary(iside,iel,1:this%solution%nvar) ! interior solution
+      fout = this%solution%extboundary(iside,iel,1:this%solution%nvar) ! exterior solution
+      dfdx = this%solutionGradient%avgboundary(iside,iel,1:this%solution%nvar) ! average solution gradient (with direction taken into account)
+      this%flux%boundarynormal(iside,iel,1:this%solution%nvar) = &
+        this%riemannflux1d(fin,fout,dfdx,nhat)
 
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
@@ -374,16 +372,14 @@ contains
     integer :: i
     real(prec) :: f(1:this%solution%nvar),dfdx(1:this%solution%nvar)
 
-    do iel = 1,this%mesh%nelem
-      do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,iel=1:this%mesh%nElem)
 
-        f = this%solution%interior(i,iel,1:this%solution%nvar)
-        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+      f = this%solution%interior(i,iel,1:this%solution%nvar)
+      dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
-        this%flux%interior(i,iel,1:this%solution%nvar) = &
-          this%flux1d(f,dfdx)
+      this%flux%interior(i,iel,1:this%solution%nvar) = &
+        this%flux1d(f,dfdx)
 
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
@@ -409,16 +405,14 @@ contains
                             this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
                             hipMemcpyDeviceToHost))
 
-    do iel = 1,this%mesh%nelem
-      do i = 1,this%solution%interp%N+1
+    do concurrent(i=1:this%solution%N+1,iel=1:this%mesh%nElem)
 
-        f = this%solution%interior(i,iel,1:this%solution%nvar)
-        dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
+      f = this%solution%interior(i,iel,1:this%solution%nvar)
+      dfdx = this%solutionGradient%interior(i,iel,1:this%solution%nvar)
 
-        this%source%interior(i,iel,1:this%solution%nvar) = &
-          this%source1d(f,dfdx)
+      this%source%interior(i,iel,1:this%solution%nvar) = &
+        this%source1d(f,dfdx)
 
-      enddo
     enddo
 
     call gpuCheck(hipMemcpy(this%source%interior_gpu, &
