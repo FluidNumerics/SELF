@@ -34,19 +34,9 @@ function (add_fortran_tests)
     foreach (TFILE ${ARGN})
         string (REGEX REPLACE ".f90$" "" TEST_NAME ${TFILE})
         add_executable (${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${TFILE})
-        target_link_libraries(${TEST_NAME}
-                    ${CMAKE_BINARY_DIR}/src/libself-static.a
-                    ${FEQPARSE_LIBRARIES}
-                    ${HDF5_LIBRARIES}
-                    ${MPI_Fortran_LIBRARIES}
-                    ${BACKEND_LIBRARIES})
-                           
-        target_include_directories(${TEST_NAME} PRIVATE 
-                        ${CMAKE_BINARY_DIR}/include
-                        ${FEQPARSE_INCLUDE_DIRS}
-                        ${HDF5_INCLUDE_DIRS}
-                        ${MPI_Fortran_INCLUDE_DIRS})
-
+        add_dependencies(${TEST_NAME} self)
+        target_link_libraries(${TEST_NAME} self)
+        target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include)
         add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
         install(TARGETS ${TEST_NAME} DESTINATION test)
     endforeach ()
@@ -58,19 +48,9 @@ function (add_mpi_fortran_tests)
     foreach (TFILE ${ARGN})
         string (REGEX REPLACE ".f90$" "" TEST_NAME ${TFILE})
         add_executable (${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${TFILE})
-        target_link_libraries(${TEST_NAME}
-                    ${CMAKE_BINARY_DIR}/src/libself-static.a
-                    ${FEQPARSE_LIBRARIES}
-                    ${HDF5_LIBRARIES}
-                    ${MPI_Fortran_LIBRARIES}
-                    ${BACKEND_LIBRARIES})
-                           
-        target_include_directories(${TEST_NAME} PRIVATE 
-                        ${CMAKE_BINARY_DIR}/include
-                        ${FEQPARSE_INCLUDE_DIRS}
-                        ${HDF5_INCLUDE_DIRS}
-                        ${MPI_Fortran_INCLUDE_DIRS})
-
+        add_dependencies(${TEST_NAME} self)
+        target_link_libraries(${TEST_NAME} self)
+        target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include)
         add_test(NAME ${TEST_NAME} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS} ${SELF_MPIEXEC_OPTIONS} ${TEST_NAME})
 
         install(TARGETS ${TEST_NAME} DESTINATION test)

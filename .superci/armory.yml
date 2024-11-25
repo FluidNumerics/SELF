@@ -34,7 +34,8 @@ steps:
         cd ${WORKSPACE}/build
         FC=gfortran \
         CXX=hipcc \
-        cmake -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
+        cmake -G Ninja \
+              -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
               -DCMAKE_INSTALL_PREFIX=${PREFIX} \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
               -DSELF_ENABLE_GPU=${ENABLE_GPU} \
@@ -43,8 +44,7 @@ steps:
               -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
               -DCMAKE_HIP_ARCHITECTURE=${GPU_ARCH} \
               ../
-        make VERBOSE=1
-        make install
+        ninja
 
 
         # Initialize coverage

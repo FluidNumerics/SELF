@@ -23,7 +23,7 @@
 ! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
-module lineareuler2d_planewave_model
+module lineareuler2d_planewave_prop_model
 !! This module can be used for simulating plane wave propagation in a 2-D domain
 !! We use a type extension of the linearEuler2D class to add parameters for a simple
 !! plane wave solution, including the x and y wave numbers and the peak pressure.
@@ -110,12 +110,12 @@ contains
 
   endfunction hbc2d_Prescribed_lineareuler2d_planewave
 
-endmodule lineareuler2d_planewave_model
+endmodule lineareuler2d_planewave_prop_model
 
 program LinearEuler_Example
 
   use self_data
-  use lineareuler2d_planewave_model
+  use lineareuler2d_planewave_prop_model
 
   implicit none
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
