@@ -65,31 +65,27 @@ set_source_files_properties(
 
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
-# add_library(self SHARED ${SELF_FSRC} ${SELF_HIPSRC})
-# target_link_libraries(self PRIVATE ${libfeqparse} HDF5::HDF5 ${MPI_Fortran_LIBRARIES})
-# target_include_directories(self PRIVATE ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
-# target_compile_options(self PRIVATE -fPIC)
-
-add_library(self-static STATIC ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC})
-
-target_link_libraries(self-static PRIVATE 
+add_library(self SHARED ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC})
+#set_target_properties(self PROPERTIES OUTPUT_NAME "self") 
+target_link_libraries(self PUBLIC
                         ${FEQPARSE_LIBRARIES}
                         HDF5::HDF5
                         ${MPI_Fortran_LIBRARIES}
                         ${BACKEND_LIBRARIES})
 
-target_include_directories(self-static PRIVATE 
+target_include_directories(self PUBLIC
                         ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS})
-                        
-set_target_properties(self-static PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties(self-static PROPERTIES PUBLIC_HEADER ${SELF_HEADERS})
 
-install(TARGETS self-static
+target_compile_options(self PUBLIC -fPIC)    
+
+set_target_properties(self PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties(self PROPERTIES PUBLIC_HEADER ${SELF_HEADERS})
+
+install(TARGETS self
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
-
 
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)

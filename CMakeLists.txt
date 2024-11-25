@@ -23,8 +23,16 @@
 #  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # 
 #  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+
 cmake_minimum_required(VERSION 3.21)
 cmake_policy(VERSION 3.21...3.27)
+
+# C Language is needed in order to verify Fortran compiler is C-interoperable
+# CXX language is needed to properly find "hip" package
+project(SELF VERSION 1.0.0
+	DESCRIPTION "Spectral Element Library in Fortran"
+	LANGUAGES Fortran C CXX)
+
 
 option(SELF_ENABLE_MULTITHREADING "Option to enable CPU multithreading for `do concurrent` loop blocks."  OFF)
 option(SELF_ENABLE_TESTING "Option to enable build of tests. (Default On)"  ON)
@@ -48,11 +56,6 @@ if(NOT DEFINED ROCM_PATH)
     endif()
 endif()
 
-# C Language is needed in order to verify Fortran compiler is C-interoperable
-# CXX language is needed to properly find "hip" package
-project(self VERSION 1.0.0
-	DESCRIPTION "Spectral Element Library in Fortran"
-	LANGUAGES Fortran C CXX)
 
 # Fortran compiler requirements
 include(FortranCInterface)
@@ -241,7 +244,7 @@ endif()
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
-
+# link_directories(${CMAKE_BINARY_DIR}/src)
 
 if(SELF_ENABLE_TESTING)
     enable_testing()
