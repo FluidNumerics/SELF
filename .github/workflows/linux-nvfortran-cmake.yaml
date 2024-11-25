@@ -86,7 +86,7 @@ jobs:
           cd build
           FC=${{ env.FC }} CC=${{ env.CC }} \
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ../
-          make VERBOSE=1
+          make -j $(nproc) VERBOSE=1
 
       - name: Run ctests
         run: |

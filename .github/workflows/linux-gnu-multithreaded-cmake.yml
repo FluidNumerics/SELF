@@ -107,7 +107,7 @@ jobs:
                 -DSELF_MULTITHREADING_NTHREADS=4 \
                 -DSELF_MPIEXEC_NUMPROCS=2 \
                 ../
-          make VERBOSE=1
+          make -j $(nproc) VERBOSE=1
 
       - name: Run ctests
         run: |

@@ -85,7 +85,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
                 -DSELF_MPIEXEC_NUMPROCS=2 \
                 ../
-          make VERBOSE=1
+          make -j $(nproc) VERBOSE=1
 
       - name: Run ctests
         run: |
