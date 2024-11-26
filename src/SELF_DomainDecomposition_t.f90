@@ -26,223 +26,238 @@
 
 module SELF_DomainDecomposition_t
 
-  use SELF_Constants
-  use SELF_Lagrange
-  use SELF_SupportRoutines
-  use mpi
-  use iso_c_binding
+   use SELF_Constants
+   use SELF_Lagrange
+   use SELF_SupportRoutines
+   use mpi
+   use iso_c_binding
 
-  implicit none
+   implicit none
 
-  type DomainDecomposition_t
-    logical :: mpiEnabled = .false.
-    logical :: initialized = .false.
-    integer :: mpiComm
-    integer :: mpiPrec
-    integer :: rankId
-    integer :: nRanks
-    integer :: nElem
-    integer :: maxMsg
-    integer :: msgCount
-    integer,pointer,dimension(:) :: elemToRank
-    integer,pointer,dimension(:) :: offSetElem
-    integer,allocatable :: requests(:)
-    integer,allocatable :: stats(:,:)
+   type DomainDecomposition_t
+      logical :: mpiEnabled = .false.
+      logical :: initialized = .false.
+      integer :: mpiComm
+      integer :: mpiPrec
+      integer :: rankId
+      integer :: nRanks
+      integer :: nElem
+      integer :: maxMsg
+      integer :: msgCount
+      integer, pointer, dimension(:) :: elemToRank
+      integer, pointer, dimension(:) :: offSetElem
+      integer, allocatable :: requests(:)
+      integer, allocatable :: stats(:, :)
 
-  contains
+   contains
 
-    procedure :: Init => Init_DomainDecomposition_t
-    procedure :: Free => Free_DomainDecomposition_t
+      procedure :: Init => Init_DomainDecomposition_t
+      procedure :: Free => Free_DomainDecomposition_t
 
-    procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
-    procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
+      procedure :: GenerateDecomposition => GenerateDecomposition_DomainDecomposition_t
+      procedure :: SetElemToRank => SetElemToRank_DomainDecomposition_t
 
-    procedure,public :: FinalizeMPIExchangeAsync
+      procedure, public :: FinalizeMPIExchangeAsync
 
-  endtype DomainDecomposition_t
+   end type DomainDecomposition_t
 
 contains
 
-  subroutine Init_DomainDecomposition_t(this,enableMPI)
-#undef __FUNC__
-#define __FUNC__ "Init_DomainDecomposition_t"
-    implicit none
-    class(DomainDecomposition_t),intent(inout) :: this
-    logical,intent(in) :: enableMPI
-    ! Local
-    integer       :: ierror
+   subroutine Init_DomainDecomposition_t(this)
+      implicit none
+      class(DomainDecomposition_t), intent(inout) :: this
+      ! Local
+      integer       :: ierror
 
-    this%mpiComm = 0
-    this%mpiPrec = prec
-    this%rankId = 0
-    this%nRanks = 1
-    this%nElem = 0
-    this%mpiEnabled = enableMPI
+      this%mpiComm = 0
+      this%mpiPrec = prec
+      this%rankId = 0
+      this%nRanks = 1
+      this%nElem = 0
+      this%mpiEnabled = .false.
 
-    if(enableMPI) then
+      !if(enableMPI) then
       this%mpiComm = MPI_COMM_WORLD
-      print*,__FILE__," : Initializing MPI"
+      print *, __FILE__, " : Initializing MPI"
       call mpi_init(ierror)
-      call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
-      call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
-    else
-      print*,__FILE__," : MPI not initialized. No domain decomposition used."
-    endif
+      call mpi_comm_rank(this%mpiComm, this%rankId, ierror)
+      call mpi_comm_size(this%mpiComm, this%nRanks, ierror)
+      print *, __FILE__, " : Rank ", this%rankId + 1, "/", this%nRanks, " checking in."
 
-    if(prec == real32) then
-      this%mpiPrec = MPI_FLOAT
-    else
-      this%mpiPrec = MPI_DOUBLE
-    endif
+      if (this%nRanks > 1) then
+         this%mpiEnabled = .true.
+      else
+         print *, __FILE__, " : No domain decomposition used."
+      end if
+      !else
+      !  print*,__FILE__," : MPI not initialized. No domain decomposition used."
+      !endif
 
-    allocate(this%offsetElem(1:this%nRanks+1))
+      if (prec == real32) then
+         this%mpiPrec = MPI_FLOAT
+      else
+         this%mpiPrec = MPI_DOUBLE
+      end if
 
-    this%initialized = .true.
+      allocate (this%offsetElem(1:this%nRanks + 1))
 
-    this%initialized = .true.
+      this%initialized = .true.
 
-  endsubroutine Init_DomainDecomposition_t
+      this%initialized = .true.
 
-  subroutine Free_DomainDecomposition_t(this)
-    implicit none
-    class(DomainDecomposition_t),intent(inout) :: this
-    ! Local
-    integer :: ierror
+   end subroutine Init_DomainDecomposition_t
 
-    if(associated(this%offSetElem)) then
-      deallocate(this%offSetElem)
-    endif
-    if(associated(this%elemToRank)) then
-      deallocate(this%elemToRank)
-    endif
+   subroutine Free_DomainDecomposition_t(this)
+      implicit none
+      class(DomainDecomposition_t), intent(inout) :: this
+      ! Local
+      integer :: ierror
 
-    if(allocated(this%requests)) deallocate(this%requests)
-    if(allocated(this%stats)) deallocate(this%stats)
+      if (associated(this%offSetElem)) then
+         deallocate (this%offSetElem)
+      end if
+      if (associated(this%elemToRank)) then
+         deallocate (this%elemToRank)
+      end if
 
-    if(this%mpiEnabled) then
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
+      if (allocated(this%requests)) deallocate (this%requests)
+      if (allocated(this%stats)) deallocate (this%stats)
+
+      !if(this%mpiEnabled) then
+      print *, __FILE__, " : Rank ", this%rankId + 1, "/", this%nRanks, " checking out."
       call MPI_FINALIZE(ierror)
-    endif
+      !endif
 
-  endsubroutine Free_DomainDecomposition_t
+   end subroutine Free_DomainDecomposition_t
 
-  subroutine GenerateDecomposition_DomainDecomposition_t(this,nGlobalElem,maxMsg)
-    implicit none
-    class(DomainDecomposition_t),intent(inout) :: this
-    integer,intent(in) :: nGlobalElem
-    integer,intent(in) :: maxMsg
+   ! subroutine LaunchedWithMPI_DomainDecomposition_t(this)
+   !   !! This subroutine uses typical environment variables to determine if the
+   !   !! program was launched with MPI. If so, the `mpiEnabled` flag is set to
+   !   !! true.
+   !   implicit none
+   !   class(DomainDecomposition_t),intent(inout) :: this
+   !   ! Local
+   !   integer :: var_status
 
-    call this%setElemToRank(nGlobalElem)
-    if(allocated(this%requests)) deallocate(this%requests)
-    if(allocated(this%stats)) deallocate(this%stats)
+   !   this%mpiEnabled = .false.
+   !   call get_environment_variable("OMPI_COMM_WORLD_SIZE",this%nRanks,status=var_status)
 
-    allocate(this%requests(1:maxMsg))
-    allocate(this%stats(MPI_STATUS_SIZE,1:maxMsg))
-    this%maxMsg = maxMsg
+   subroutine GenerateDecomposition_DomainDecomposition_t(this, nGlobalElem, maxMsg)
+      implicit none
+      class(DomainDecomposition_t), intent(inout) :: this
+      integer, intent(in) :: nGlobalElem
+      integer, intent(in) :: maxMsg
 
-    print*,__FILE__//" : Rank ",this%rankId+1," : n_elements = ", &
-      this%offSetElem(this%rankId+2)-this%offSetElem(this%rankId+1)
+      call this%setElemToRank(nGlobalElem)
+      if (allocated(this%requests)) deallocate (this%requests)
+      if (allocated(this%stats)) deallocate (this%stats)
 
-  endsubroutine GenerateDecomposition_DomainDecomposition_t
+      allocate (this%requests(1:maxMsg))
+      allocate (this%stats(MPI_STATUS_SIZE, 1:maxMsg))
+      this%maxMsg = maxMsg
 
-  subroutine SetElemToRank_DomainDecomposition_t(this,nElem)
-    implicit none
-    class(DomainDecomposition_t),intent(inout) :: this
-    integer,intent(in) :: nElem
-    ! Local
-    integer :: iel
+      print *, __FILE__//" : Rank ", this%rankId + 1, " : n_elements = ", &
+         this%offSetElem(this%rankId + 2) - this%offSetElem(this%rankId + 1)
 
-    this%nElem = nElem
+   end subroutine GenerateDecomposition_DomainDecomposition_t
 
-    allocate(this%elemToRank(1:nelem))
+   subroutine SetElemToRank_DomainDecomposition_t(this, nElem)
+      implicit none
+      class(DomainDecomposition_t), intent(inout) :: this
+      integer, intent(in) :: nElem
+      ! Local
+      integer :: iel
 
-    call DomainDecomp(nElem, &
-                      this%nRanks, &
-                      this%offSetElem)
+      this%nElem = nElem
 
-    do iel = 1,nElem
-      call ElemToRank(this%nRanks, &
-                      this%offSetElem, &
-                      iel, &
-                      this%elemToRank(iel))
-    enddo
+      allocate (this%elemToRank(1:nelem))
 
-  endsubroutine SetElemToRank_DomainDecomposition_t
+      call DomainDecomp(nElem, &
+                        this%nRanks, &
+                        this%offSetElem)
 
-  subroutine DomainDecomp(nElems,nDomains,offSetElem)
-    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 4
-    implicit none
-    integer,intent(in) :: nElems
-    integer,intent(in) :: nDomains
-    integer,intent(out) :: offsetElem(0:nDomains)
-    ! Local
-    integer :: nLocalElems
-    integer :: remainElems
-    integer :: iDom
+      do iel = 1, nElem
+         call ElemToRank(this%nRanks, &
+                         this%offSetElem, &
+                         iel, &
+                         this%elemToRank(iel))
+      end do
 
-    nLocalElems = nElems/nDomains
-    remainElems = nElems-nLocalElems*nDomains
-    do iDom = 0,nDomains-1
-      offSetElem(iDom) = iDom*nLocalElems+min(iDom,remainElems)
-    enddo
-    offSetElem(nDomains) = nElems
+   end subroutine SetElemToRank_DomainDecomposition_t
 
-  endsubroutine DomainDecomp
+   subroutine DomainDecomp(nElems, nDomains, offSetElem)
+      ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 4
+      implicit none
+      integer, intent(in) :: nElems
+      integer, intent(in) :: nDomains
+      integer, intent(out) :: offsetElem(0:nDomains)
+      ! Local
+      integer :: nLocalElems
+      integer :: remainElems
+      integer :: iDom
 
-  subroutine ElemToRank(nDomains,offsetElem,elemID,domain)
-    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 7
-    !   "Find domain containing element index"
-    !
-    implicit none
-    integer,intent(in) :: nDomains
-    integer,intent(in) :: offsetElem(0:nDomains)
-    integer,intent(in) :: elemID
-    integer,intent(out) :: domain
-    ! Local
-    integer :: maxSteps
-    integer :: low,up,mid
-    integer :: i
+      nLocalElems = nElems/nDomains
+      remainElems = nElems - nLocalElems*nDomains
+      do iDom = 0, nDomains - 1
+         offSetElem(iDom) = iDom*nLocalElems + min(iDom, remainElems)
+      end do
+      offSetElem(nDomains) = nElems
 
-    domain = 0
-    maxSteps = int(log10(real(nDomains))/log10(2.0))+1
-    low = 0
-    up = nDomains-1
+   end subroutine DomainDecomp
 
-    if(offsetElem(low) < elemID .and. elemID <= offsetElem(low+1)) then
-      domain = low
-    elseif(offsetElem(up) < elemID .and. elemID <= offsetElem(up+1)) then
-      domain = up
-    else
-      do i = 1,maxSteps
-        mid = (up-low)/2+low
-        if(offsetElem(mid) < elemID .and. elemID <= offsetElem(mid+1)) then
-          domain = mid
-          return
-        elseif(elemID > offsetElem(mid+1)) then
-          low = mid+1
-        else
-          up = mid
-        endif
-      enddo
-    endif
+   subroutine ElemToRank(nDomains, offsetElem, elemID, domain)
+      ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 7
+      !   "Find domain containing element index"
+      !
+      implicit none
+      integer, intent(in) :: nDomains
+      integer, intent(in) :: offsetElem(0:nDomains)
+      integer, intent(in) :: elemID
+      integer, intent(out) :: domain
+      ! Local
+      integer :: maxSteps
+      integer :: low, up, mid
+      integer :: i
 
-  endsubroutine ElemToRank
+      domain = 0
+      maxSteps = int(log10(real(nDomains))/log10(2.0)) + 1
+      low = 0
+      up = nDomains - 1
 
-  subroutine FinalizeMPIExchangeAsync(mpiHandler)
-    class(DomainDecomposition_t),intent(inout) :: mpiHandler
-    ! Local
-    integer :: ierror
-    integer :: msgCount
+      if (offsetElem(low) < elemID .and. elemID <= offsetElem(low + 1)) then
+         domain = low
+      elseif (offsetElem(up) < elemID .and. elemID <= offsetElem(up + 1)) then
+         domain = up
+      else
+         do i = 1, maxSteps
+            mid = (up - low)/2 + low
+            if (offsetElem(mid) < elemID .and. elemID <= offsetElem(mid + 1)) then
+               domain = mid
+               return
+            elseif (elemID > offsetElem(mid + 1)) then
+               low = mid + 1
+            else
+               up = mid
+            end if
+         end do
+      end if
 
-    if(mpiHandler%mpiEnabled) then
-      msgCount = mpiHandler%msgCount
-      call MPI_WaitAll(msgCount, &
-                       mpiHandler%requests(1:msgCount), &
-                       mpiHandler%stats(1:MPI_STATUS_SIZE,1:msgCount), &
-                       iError)
-    endif
+   end subroutine ElemToRank
 
-  endsubroutine FinalizeMPIExchangeAsync
+   subroutine FinalizeMPIExchangeAsync(mpiHandler)
+      class(DomainDecomposition_t), intent(inout) :: mpiHandler
+      ! Local
+      integer :: ierror
+      integer :: msgCount
 
-endmodule SELF_DomainDecomposition_t
+      if (mpiHandler%mpiEnabled) then
+         msgCount = mpiHandler%msgCount
+         call MPI_WaitAll(msgCount, &
+                          mpiHandler%requests(1:msgCount), &
+                          mpiHandler%stats(1:MPI_STATUS_SIZE, 1:msgCount), &
+                          iError)
+      end if
+
+   end subroutine FinalizeMPIExchangeAsync
+
+end module SELF_DomainDecomposition_t
