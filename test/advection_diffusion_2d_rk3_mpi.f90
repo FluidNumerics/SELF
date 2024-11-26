@@ -26,82 +26,82 @@
 
 program advection_diffusion_2d_rk3
 
-   use self_data
-   use self_advection_diffusion_2d
+  use self_data
+  use self_advection_diffusion_2d
 
-   implicit none
-   character(SELF_INTEGRATOR_LENGTH), parameter :: integrator = 'rk3'
-   integer, parameter :: controlDegree = 7
-   integer, parameter :: targetDegree = 16
-   real(prec), parameter :: u = 0.25_prec ! velocity
-   real(prec), parameter :: v = 0.25_prec
-   real(prec), parameter :: nu = 0.005_prec ! diffusivity
-   real(prec), parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
-   real(prec), parameter :: endtime = 0.2_prec
-   real(prec), parameter :: iointerval = 0.1_prec
-   real(prec) :: e0, ef ! Initial and final entropy
-   type(advection_diffusion_2d) :: modelobj
-   type(Lagrange), target :: interp
-   type(Mesh2D), target :: mesh
-   type(SEMQuad), target :: geometry
-   character(LEN=255) :: WORKSPACE
+  implicit none
+  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
+  integer,parameter :: controlDegree = 7
+  integer,parameter :: targetDegree = 16
+  real(prec),parameter :: u = 0.25_prec ! velocity
+  real(prec),parameter :: v = 0.25_prec
+  real(prec),parameter :: nu = 0.005_prec ! diffusivity
+  real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
+  real(prec),parameter :: endtime = 0.2_prec
+  real(prec),parameter :: iointerval = 0.1_prec
+  real(prec) :: e0,ef ! Initial and final entropy
+  type(advection_diffusion_2d) :: modelobj
+  type(Lagrange),target :: interp
+  type(Mesh2D),target :: mesh
+  type(SEMQuad),target :: geometry
+  character(LEN=255) :: WORKSPACE
 
-   ! Create a uniform block mesh
-   call get_environment_variable("WORKSPACE", WORKSPACE)
-   call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+  ! Create a uniform block mesh
+  call get_environment_variable("WORKSPACE",WORKSPACE)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
 
-   ! Create an interpolant
-   call interp%Init(N=controlDegree, &
-                    controlNodeType=GAUSS, &
-                    M=targetDegree, &
-                    targetNodeType=UNIFORM)
+  ! Create an interpolant
+  call interp%Init(N=controlDegree, &
+                   controlNodeType=GAUSS, &
+                   M=targetDegree, &
+                   targetNodeType=UNIFORM)
 
-   ! Generate geometry (metric terms) from the mesh elements
-   call geometry%Init(interp, mesh%nElem)
-   call geometry%GenerateFromMesh(mesh)
+  ! Generate geometry (metric terms) from the mesh elements
+  call geometry%Init(interp,mesh%nElem)
+  call geometry%GenerateFromMesh(mesh)
 
-   ! Initialize the model
-   call modelobj%Init(mesh, geometry)
-   modelobj%gradient_enabled = .true.
+  ! Initialize the model
+  call modelobj%Init(mesh,geometry)
+  modelobj%gradient_enabled = .true.
 
-   ! Set the velocity
-   modelobj%u = u
-   modelobj%v = v
-   !Set the diffusivity
-   modelobj%nu = nu
+  ! Set the velocity
+  modelobj%u = u
+  modelobj%v = v
+  !Set the diffusivity
+  modelobj%nu = nu
 
-   ! Set the initial condition
-   call modelobj%solution%SetEquation(1, 'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
-   call modelobj%solution%SetInteriorFromEquation(geometry, 0.0_prec)
+  ! Set the initial condition
+  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
+  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
-   print *, "min, max (interior)", &
-      minval(modelobj%solution%interior), &
-      maxval(modelobj%solution%interior)
+  print*,"min, max (interior)", &
+    minval(modelobj%solution%interior), &
+    maxval(modelobj%solution%interior)
 
-   call modelobj%CalculateEntropy()
-   call modelobj%ReportEntropy()
-   e0 = modelobj%entropy
-   ! Set the model's time integration method
-   call modelobj%SetTimeIntegrator(integrator)
+  call modelobj%CalculateEntropy()
+  call modelobj%ReportEntropy()
+  e0 = modelobj%entropy
+  ! Set the model's time integration method
+  call modelobj%SetTimeIntegrator(integrator)
 
-   ! forward step the model to `endtime` using a time step
-   ! of `dt` and outputing model data every `iointerval`
-   call modelobj%ForwardStep(endtime, dt, iointerval)
-   call modelobj%WriteModel("advdiff2d-rk3-mpi.pickup.h5")
+  ! forward step the model to `endtime` using a time step
+  ! of `dt` and outputing model data every `iointerval`
+  call modelobj%ForwardStep(endtime,dt,iointerval)
+  call modelobj%WriteModel("advdiff2d-rk3-mpi.pickup.h5")
 
-   print *, "min, max (interior)", &
-      minval(modelobj%solution%interior), &
-      maxval(modelobj%solution%interior)
-   ef = modelobj%entropy
+  print*,"min, max (interior)", &
+    minval(modelobj%solution%interior), &
+    maxval(modelobj%solution%interior)
+  ef = modelobj%entropy
 
-   if (ef > e0) then
-      print *, "Error: Final absmax greater than initial absmax! ", e0, ef
-      stop 1
-   end if
-   ! Clean up
-   call modelobj%free()
-   call mesh%free()
-   call geometry%free()
-   call interp%free()
+  if(ef > e0) then
+    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+    stop 1
+  endif
+  ! Clean up
+  call modelobj%free()
+  call mesh%free()
+  call geometry%free()
+  call interp%free()
 
-end program advection_diffusion_2d_rk3
+endprogram advection_diffusion_2d_rk3
