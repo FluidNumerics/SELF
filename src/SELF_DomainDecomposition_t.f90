@@ -76,7 +76,6 @@ contains
       this%nElem = 0
       this%mpiEnabled = .false.
 
-      !if(enableMPI) then
       this%mpiComm = MPI_COMM_WORLD
       print *, __FILE__, " : Initializing MPI"
       call mpi_init(ierror)
@@ -89,9 +88,6 @@ contains
       else
          print *, __FILE__, " : No domain decomposition used."
       end if
-      !else
-      !  print*,__FILE__," : MPI not initialized. No domain decomposition used."
-      !endif
 
       if (prec == real32) then
          this%mpiPrec = MPI_FLOAT
