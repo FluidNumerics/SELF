@@ -126,18 +126,6 @@ contains
 
    end subroutine Free_DomainDecomposition_t
 
-   ! subroutine LaunchedWithMPI_DomainDecomposition_t(this)
-   !   !! This subroutine uses typical environment variables to determine if the
-   !   !! program was launched with MPI. If so, the `mpiEnabled` flag is set to
-   !   !! true.
-   !   implicit none
-   !   class(DomainDecomposition_t),intent(inout) :: this
-   !   ! Local
-   !   integer :: var_status
-
-   !   this%mpiEnabled = .false.
-   !   call get_environment_variable("OMPI_COMM_WORLD_SIZE",this%nRanks,status=var_status)
-
    subroutine GenerateDecomposition_DomainDecomposition_t(this, nGlobalElem, maxMsg)
       implicit none
       class(DomainDecomposition_t), intent(inout) :: this
