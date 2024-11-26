@@ -301,6 +301,8 @@ contains
          end do
       end do
 
+      call this%UpdateDevice()
+
    end subroutine ResetBoundaryConditionType_Mesh3D_t
 
    subroutine RecalculateFlip_Mesh3D_t(this)
