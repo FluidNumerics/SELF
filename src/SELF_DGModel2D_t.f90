@@ -64,6 +64,7 @@ module SELF_DGModel2D_t
     procedure :: SourceMethod => sourcemethod_DGModel2D_t
     procedure :: SetBoundaryCondition => setboundarycondition_DGModel2D_t
     procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel2D_t
+    procedure :: ReportMetrics => ReportMetrics_DGModel2D_t
 
     procedure :: UpdateSolution => UpdateSolution_DGModel2D_t
 
@@ -148,6 +149,42 @@ contains
     call this%fluxDivergence%Free()
 
   endsubroutine Free_DGModel2D_t
+
+  subroutine ReportMetrics_DGModel2D_t(this)
+    !! Base method for reporting the entropy of a model
+    !! to stdout. Only override this procedure if additional
+    !! reporting is needed. Alternatively, if you think
+    !! additional reporting would be valuable for all models,
+    !! open a pull request with modifications to this base
+    !! method.
+    implicit none
+    class(DGModel2D_t), intent(inout) :: this
+    ! Local
+    character(len=20) :: modelTime
+    character(len=20) :: minv, maxv
+    character(len=:), allocatable :: str
+    integer :: ivar
+
+
+    ! Copy the time and entropy to a string
+    write (modelTime, "(ES16.7E3)") this%t
+
+    do ivar = 1, this%nvar
+        write (maxv, "(ES16.7E3)") maxval(this%solution%interior(:, :, :, ivar))
+        write (minv, "(ES16.7E3)") minval(this%solution%interior(:, :, :, ivar))
+
+        ! Write the output to STDOUT
+        open (output_unit, ENCODING='utf-8')
+        write (output_unit, '(1x, A," : ")', ADVANCE='no') __FILE__
+        str = 'tᵢ ='//trim(modelTime)
+        write (output_unit, '(A)', ADVANCE='no') str
+str = '  |  min('//trim(this%solution%meta(ivar)%name)//'), max('//trim(this%solution%meta(ivar)%name)//') = '//minv//" , "//maxv
+        write (output_unit, '(A)', ADVANCE='yes') str
+    end do
+
+    call this%ReportUserMetrics()
+
+  end subroutine ReportMetrics_DGModel2D_t
 
   subroutine SetSolutionFromEqn_DGModel2D_t(this,eqn)
     implicit none

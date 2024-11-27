@@ -74,6 +74,7 @@ module self_LinearEuler2D_t
     procedure :: flux2d => flux2d_LinearEuler2D_t
     procedure :: riemannflux2d => riemannflux2d_LinearEuler2D_t
     !procedure :: source2d => source2d_LinearEuler2D_t
+    procedure :: SphericalSoundWave => SphericalSoundWave_LinearEuler2D_t
 
   endtype LinearEuler2D_t
 
@@ -187,5 +188,50 @@ contains
     flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+c*(sL(1:4)-sR(1:4))
 
   endfunction riemannflux2d_LinearEuler2D_t
+
+  subroutine SphericalSoundWave_LinearEuler2D_t(this, rhoprime, Lr, x0, y0)
+    !! This subroutine sets the initial condition for a weak blast wave
+    !! problem. The initial condition is given by
+    !!
+    !! \begin{equation}
+    !! \begin{aligned}
+    !! \rho &= \rho_0 + \rho' \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_r^2} \right)
+    !! u &= 0 \\
+    !! v &= 0 \\
+    !! E &= \frac{P_0}{\gamma - 1} + E \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_e^2} \right)
+    !! \end{aligned}
+    !! \end{equation}
+    !!
+      implicit none
+      class(LinearEuler2D_t), intent(inout) :: this
+      real(prec), intent(in) ::  rhoprime, Lr, x0, y0
+      ! Local
+      integer :: i, j, iEl
+      real(prec) :: x, y, rho, r, E
+
+      print *, __FILE__, " : Configuring weak blast wave initial condition. "
+      print *, __FILE__, " : rhoprime = ", rhoprime
+      print *, __FILE__, " : Lr = ", Lr
+      print *, __FILE__, " : x0 = ", x0
+      print *, __FILE__, " : y0 = ", y0
+
+      do concurrent(i=1:this%solution%N + 1, j=1:this%solution%N + 1, &
+                    iel=1:this%mesh%nElem)
+         x = this%geometry%x%interior(i, j, iEl, 1, 1) - x0
+         y = this%geometry%x%interior(i, j, iEl, 1, 2) - y0
+         r = sqrt(x**2 + y**2)
+
+         rho = (rhoprime)*exp(-log(2.0_prec)*r**2/Lr**2)
+
+         this%solution%interior(i, j, iEl, 1) = rho
+         this%solution%interior(i, j, iEl, 2) = 0.0_prec
+         this%solution%interior(i, j, iEl, 3) = 0.0_prec
+         this%solution%interior(i, j, iEl, 4) = rho*this%c*this%c
+
+      end do
+
+      call this%ReportMetrics()
+
+   end subroutine SphericalSoundWave_LinearEuler2D_t
 
 endmodule self_LinearEuler2D_t
