@@ -32,7 +32,7 @@ program LinearEuler_Example
   implicit none
   real(prec),parameter :: rho0 = 1.225_prec
   real(prec),parameter :: rhoprime = 0.01_prec
-  real(prec),parameter :: c = 1.0_prec ! Speed of sound 
+  real(prec),parameter :: c = 1.0_prec ! Speed of sound
   real(prec),parameter :: Lr = 0.06_prec
   real(prec),parameter :: x0 = 0.5_prec
   real(prec),parameter :: y0 = 0.5_prec

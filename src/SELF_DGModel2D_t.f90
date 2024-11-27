@@ -158,33 +158,34 @@ contains
     !! open a pull request with modifications to this base
     !! method.
     implicit none
-    class(DGModel2D_t), intent(inout) :: this
+    class(DGModel2D_t),intent(inout) :: this
     ! Local
     character(len=20) :: modelTime
-    character(len=20) :: minv, maxv
-    character(len=:), allocatable :: str
+    character(len=20) :: minv,maxv
+    character(len=:),allocatable :: str
     integer :: ivar
 
-
     ! Copy the time and entropy to a string
-    write (modelTime, "(ES16.7E3)") this%t
+    write(modelTime,"(ES16.7E3)") this%t
 
-    do ivar = 1, this%nvar
-        write (maxv, "(ES16.7E3)") maxval(this%solution%interior(:, :, :, ivar))
-        write (minv, "(ES16.7E3)") minval(this%solution%interior(:, :, :, ivar))
+    do ivar = 1,this%nvar
+      write(maxv,"(ES16.7E3)") maxval(this%solution%interior(:,:,:,ivar))
+      write(minv,"(ES16.7E3)") minval(this%solution%interior(:,:,:,ivar))
 
-        ! Write the output to STDOUT
-        open (output_unit, ENCODING='utf-8')
-        write (output_unit, '(1x, A," : ")', ADVANCE='no') __FILE__
-        str = 'tᵢ ='//trim(modelTime)
-        write (output_unit, '(A)', ADVANCE='no') str
-str = '  |  min('//trim(this%solution%meta(ivar)%name)//'), max('//trim(this%solution%meta(ivar)%name)//') = '//minv//" , "//maxv
-        write (output_unit, '(A)', ADVANCE='yes') str
-    end do
+      ! Write the output to STDOUT
+      open(output_unit,ENCODING='utf-8')
+      write(output_unit,'(1x, A," : ")',ADVANCE='no') __FILE__
+      str = 'tᵢ ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = '  |  min('//trim(this%solution%meta(ivar)%name)// &
+            '), max('//trim(this%solution%meta(ivar)%name)//') = '// &
+            minv//" , "//maxv
+      write(output_unit,'(A)',ADVANCE='yes') str
+    enddo
 
     call this%ReportUserMetrics()
 
-  end subroutine ReportMetrics_DGModel2D_t
+  endsubroutine ReportMetrics_DGModel2D_t
 
   subroutine SetSolutionFromEqn_DGModel2D_t(this,eqn)
     implicit none
