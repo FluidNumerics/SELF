@@ -11,7 +11,8 @@ setup(
     packages=['pyself'],
     install_requires=['h5py>=3.7.0',
                       'dask',
-                      'pyvista'],
+                      'pyvista',
+                      'imageio[ffmpeg]'],
     classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Science/Research',
