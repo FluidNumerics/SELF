@@ -115,7 +115,7 @@ endif()
 # Check for openmp support if offload target is provided
 if( SELF_ENABLE_MULTITHREADING )
     if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
-        set( OFFLOAD_FLAGS "-ftree-parallelize-loops=${SELF_MULTITHREADING_NTHREADS} -fopt-info-loop" )
+        set( OFFLOAD_FLAGS "-ftree-parallelize-loops=${SELF_MULTITHREADING_NTHREADS}" ) #-fopt-info-loop"
     elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel" )
         set( OFFLOAD_FLAGS "-parallel -qopt-report -qopt-report-phase=par" )
     elseif( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "IntelLLVM" )
