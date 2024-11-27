@@ -74,7 +74,7 @@ contains
     call mesh%StructuredMesh(5,5,5, &
                              2,2,2, &
                              0.1_prec,0.1_prec,0.1_prec, &
-                             bcids,enableDomainDecomposition=.true.)
+                             bcids)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

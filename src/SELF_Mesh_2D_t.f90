@@ -227,7 +227,7 @@ contains
 
   endsubroutine ResetBoundaryConditionType_Mesh2D_t
 
-  subroutine UniformStructuredMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy,bcids,enableDomainDecomposition)
+  subroutine UniformStructuredMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy,bcids)
   !!
   !! Create a structured mesh and store it in SELF's unstructured mesh format.
   !! The mesh is created in tiles of size (tnx,tny). Tiling is used to determine
@@ -263,7 +263,6 @@ contains
     real(prec),intent(in) :: dx
     real(prec),intent(in) :: dy
     integer,intent(in) :: bcids(1:4)
-    logical,optional,intent(in) :: enableDomainDecomposition
     ! Local
     integer :: nX,nY,nGeo,nBCs
     integer :: nGlobalElem
@@ -281,11 +280,8 @@ contains
     integer :: e1,e2
     integer :: nedges
 
-    if(present(enableDomainDecomposition)) then
-      call this%decomp%init(enableDomainDecomposition)
-    else
-      call this%decomp%init(.false.)
-    endif
+    call this%decomp%init()
+
     nX = nTileX*nxPerTile
     nY = nTileY*nyPerTile
     nGeo = 1 ! Force the geometry to be linear
@@ -459,13 +455,12 @@ contains
 
   endsubroutine UniformStructuredMesh_Mesh2D_t
 
-  subroutine Read_HOPr_Mesh2D_t(this,meshFile,enableDomainDecomposition)
+  subroutine Read_HOPr_Mesh2D_t(this,meshFile)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
     implicit none
     class(Mesh2D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
-    logical,intent(in),optional :: enableDomainDecomposition
     ! Local
     integer(HID_T) :: fileId
     integer(HID_T) :: offset(1:2),gOffset(1)
@@ -489,11 +484,7 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    if(present(enableDomainDecomposition)) then
-      call this%decomp%init(enableDomainDecomposition)
-    else
-      call this%decomp%init(.false.)
-    endif
+    call this%decomp%init()
 
     print*,__FILE__//' : Reading HOPr mesh from'//trim(meshfile)
     if(this%decomp%mpiEnabled) then

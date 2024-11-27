@@ -67,7 +67,7 @@ contains
 
     ! Create a uniform block mesh
     call get_environment_variable("WORKSPACE",WORKSPACE)
-    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",enableDomainDecomposition=.true.)
+    call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

@@ -63,12 +63,9 @@ module SELF_DomainDecomposition_t
 
 contains
 
-  subroutine Init_DomainDecomposition_t(this,enableMPI)
-#undef __FUNC__
-#define __FUNC__ "Init_DomainDecomposition_t"
+  subroutine Init_DomainDecomposition_t(this)
     implicit none
     class(DomainDecomposition_t),intent(inout) :: this
-    logical,intent(in) :: enableMPI
     ! Local
     integer       :: ierror
 
@@ -77,17 +74,19 @@ contains
     this%rankId = 0
     this%nRanks = 1
     this%nElem = 0
-    this%mpiEnabled = enableMPI
+    this%mpiEnabled = .false.
 
-    if(enableMPI) then
-      this%mpiComm = MPI_COMM_WORLD
-      print*,__FILE__," : Initializing MPI"
-      call mpi_init(ierror)
-      call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
-      call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
+    this%mpiComm = MPI_COMM_WORLD
+    print*,__FILE__," : Initializing MPI"
+    call mpi_init(ierror)
+    call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
+    call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
+    print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
+
+    if(this%nRanks > 1) then
+      this%mpiEnabled = .true.
     else
-      print*,__FILE__," : MPI not initialized. No domain decomposition used."
+      print*,__FILE__," : No domain decomposition used."
     endif
 
     if(prec == real32) then
@@ -120,10 +119,10 @@ contains
     if(allocated(this%requests)) deallocate(this%requests)
     if(allocated(this%stats)) deallocate(this%stats)
 
-    if(this%mpiEnabled) then
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
-      call MPI_FINALIZE(ierror)
-    endif
+    !if(this%mpiEnabled) then
+    print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
+    call MPI_FINALIZE(ierror)
+    !endif
 
   endsubroutine Free_DomainDecomposition_t
 

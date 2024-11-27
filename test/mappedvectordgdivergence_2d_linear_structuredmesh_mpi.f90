@@ -69,7 +69,7 @@ contains
                   SELF_BC_PRESCRIBED, & ! East
                   SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
-    call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids,enableDomainDecomposition=.true.)
+    call mesh%StructuredMesh(10,10,2,2,0.05_prec,0.05_prec,bcids)
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &
