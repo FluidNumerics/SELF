@@ -101,7 +101,7 @@ contains
     call this%solution%SetName(3,"v") ! y-velocity component
     call this%solution%SetUnits(3,"m⋅s⁻¹")
 
-    call this%solution%SetName(4,"pressure") ! Pressure
+    call this%solution%SetName(4,"P") ! Pressure
     call this%solution%SetUnits(4,"kg⋅m⁻¹⋅s⁻²")
 
   endsubroutine SetMetadata_LinearEuler2D_t
