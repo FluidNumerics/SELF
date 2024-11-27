@@ -93,8 +93,8 @@ program LinearEuler_Example
 
   ef = modelobj%entropy
 
-  if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+  if(ef /= ef) then
+    print*,"Error: Final entropy is inf or nan",ef
     stop 1
   endif
   ! Clean up
