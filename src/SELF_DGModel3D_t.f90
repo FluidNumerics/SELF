@@ -62,6 +62,7 @@ module SELF_DGModel3D_t
     procedure :: SourceMethod => sourcemethod_DGModel3D_t
     procedure :: SetBoundaryCondition => setboundarycondition_DGModel3D_t
     procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel3D_t
+    procedure :: ReportMetrics => ReportMetrics_DGModel3D_t
 
     procedure :: UpdateSolution => UpdateSolution_DGModel3D_t
 
@@ -146,6 +147,43 @@ contains
     call this%fluxDivergence%Free()
 
   endsubroutine Free_DGModel3D_t
+
+  subroutine ReportMetrics_DGModel3D_t(this)
+    !! Base method for reporting the entropy of a model
+    !! to stdout. Only override this procedure if additional
+    !! reporting is needed. Alternatively, if you think
+    !! additional reporting would be valuable for all models,
+    !! open a pull request with modifications to this base
+    !! method.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    character(len=20) :: modelTime
+    character(len=20) :: minv,maxv
+    character(len=:),allocatable :: str
+    integer :: ivar
+
+    ! Copy the time and entropy to a string
+    write(modelTime,"(ES16.7E3)") this%t
+
+    do ivar = 1,this%nvar
+      write(maxv,"(ES16.7E3)") maxval(this%solution%interior(:,:,:,:,ivar))
+      write(minv,"(ES16.7E3)") minval(this%solution%interior(:,:,:,:,ivar))
+
+      ! Write the output to STDOUT
+      open(output_unit,ENCODING='utf-8')
+      write(output_unit,'(1x, A," : ")',ADVANCE='no') __FILE__
+      str = 'tᵢ ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = '  |  min('//trim(this%solution%meta(ivar)%name)// &
+            '), max('//trim(this%solution%meta(ivar)%name)//') = '// &
+            minv//" , "//maxv
+      write(output_unit,'(A)',ADVANCE='yes') str
+    enddo
+
+    call this%ReportUserMetrics()
+
+  endsubroutine ReportMetrics_DGModel3D_t
 
   subroutine SetSolutionFromEqn_DGModel3D_t(this,eqn)
     implicit none
@@ -305,7 +343,7 @@ contains
       do k = 1,this%solution%interp%N+1
         do j = 1,this%solution%interp%N+1
           do i = 1,this%solution%interp%N+1
-            jac = this%geometry%J%interior(i,j,k,iel,1)
+            jac = abs(this%geometry%J%interior(i,j,k,iel,1))
             s = this%solution%interior(i,j,k,iel,1:this%nvar)
             e = e+this%entropy_func(s)*jac
           enddo

@@ -169,7 +169,7 @@ contains
       do k = 1,this%solution%interp%N+1
         do j = 1,this%solution%interp%N+1
           do i = 1,this%solution%interp%N+1
-            jac = this%geometry%J%interior(i,j,k,iel,1)
+            jac = abs(this%geometry%J%interior(i,j,k,iel,1))
             s = this%solution%interior(i,j,k,iel,1:this%nvar)
             e = e+this%entropy_func(s)*jac
           enddo

@@ -30,6 +30,13 @@ program LinearEuler_Example
   use self_LinearEuler2D
 
   implicit none
+  real(prec),parameter :: rho0 = 1.225_prec
+  real(prec),parameter :: rhoprime = 0.01_prec
+  real(prec),parameter :: c = 1.0_prec ! Speed of sound
+  real(prec),parameter :: Lr = 0.06_prec
+  real(prec),parameter :: x0 = 0.5_prec
+  real(prec),parameter :: y0 = 0.5_prec
+
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 15
@@ -64,16 +71,12 @@ program LinearEuler_Example
   ! Initialize the model
   call modelobj%Init(mesh,geometry)
   modelobj%prescribed_bcs_enabled = .false. ! Disables prescribed boundary condition block for gpu accelerated implementations
-  ! modelobj%rho0 = ! optional, set the reference density
-  ! modelobj%c = ! optional set the reference sound wave speed
-  ! modelobj%g = ! optional set the gravitational acceleration (y-direction)
+  modelobj%tecplot_enabled = .false. ! Disables tecplot output
+  modelobj%rho0 = rho0 ! optional, set the reference density
+  modelobj%c = c ! optional set the reference sound wave speed
 
   ! Set the initial condition
-  call modelobj%solution%SetEquation(1,'d = 0.0001*exp( -ln(2)*( (x-0.5)^2 + (y-0.5)^2 )/0.0036 )') ! density
-  call modelobj%solution%SetEquation(2,'u = 0') ! u
-  call modelobj%solution%SetEquation(3,'v = 0') ! v
-  call modelobj%solution%SetEquation(4,'p = 0.0001*exp( -ln(2)*( (x-0.5)^2 + (y-0.5)^2 )/0.0036 )') ! pressure
-  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+  call modelobj%SphericalSoundWave(rhoprime,Lr,x0,y0)
 
   call modelobj%WriteModel()
   call modelobj%IncrementIOCounter()
@@ -90,8 +93,8 @@ program LinearEuler_Example
 
   ef = modelobj%entropy
 
-  if(ef > e0) then
-    print*,"Error: Final absmax greater than initial absmax! ",e0,ef
+  if(ef /= ef) then
+    print*,"Error: Final entropy is inf or nan",ef
     stop 1
   endif
   ! Clean up

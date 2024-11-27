@@ -105,6 +105,7 @@ module SELF_Model
     integer :: ioIterate = 0
     logical :: gradient_enabled = .false.
     logical :: prescribed_bcs_enabled = .true.
+    logical :: tecplot_enabled = .true.
     integer :: nvar
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
@@ -116,6 +117,10 @@ module SELF_Model
     procedure :: PrintType => PrintType_Model
 
     procedure :: SetNumberOfVariables => SetNumberOfVariables_Model
+
+    procedure :: AdditionalInit => AdditionalInit_Model
+    procedure :: AdditionalFree => AdditionalFree_Model
+    procedure :: AdditionalOutput => AdditionalOutput_Model
 
     procedure :: ForwardStep => ForwardStep_Model
 
@@ -169,6 +174,8 @@ module SELF_Model
     procedure :: pbc3d_NoNormalFlow => pbc3d_Generic_Model
 
     procedure :: ReportEntropy => ReportEntropy_Model
+    procedure :: ReportMetrics => ReportMetrics_Model
+    procedure :: ReportUserMetrics => ReportUserMetrics_Model
     procedure :: CalculateEntropy => CalculateEntropy_Model
 
     procedure(UpdateSolution),deferred :: UpdateSolution
@@ -267,6 +274,25 @@ contains
     this%nvar = 1
 
   endsubroutine SetNumberOfVariables_Model
+
+  subroutine AdditionalInit_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
+    return
+  endsubroutine AdditionalInit_Model
+
+  subroutine AdditionalFree_Model(this)
+    implicit none
+    class(Model),intent(inout) :: this
+    return
+  endsubroutine AdditionalFree_Model
+
+  subroutine AdditionalOutput_Model(this,fileid)
+    implicit none
+    class(Model),intent(inout) :: this
+    integer(HID_T),intent(in) :: fileid
+    return
+  endsubroutine AdditionalOutput_Model
 
   subroutine PrintType_Model(this)
     implicit none
@@ -696,13 +722,29 @@ contains
 
     ! Write the output to STDOUT
     open(output_unit,ENCODING='utf-8')
-    write(output_unit,'(A," : ")',ADVANCE='no') __FILE__
+    write(output_unit,'(1x,A," : ")',ADVANCE='no') __FILE__
     str = 'tᵢ ='//trim(modelTime)
     write(output_unit,'(A)',ADVANCE='no') str
     str = '  |  eᵢ ='//trim(entropy)
     write(output_unit,'(A)',ADVANCE='yes') str
 
   endsubroutine ReportEntropy_Model
+
+  subroutine ReportMetrics_Model(this)
+      !! Method that can be overridden by users to
+      !! report their own custom metrics after file io
+    implicit none
+    class(Model),intent(inout) :: this
+    return
+  endsubroutine ReportMetrics_Model
+
+  subroutine ReportUserMetrics_Model(this)
+    !! Method that can be overridden by users to
+    !! report their own custom metrics after file io
+    implicit none
+    class(Model),intent(inout) :: this
+    return
+  endsubroutine ReportUserMetrics_Model
 
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
@@ -735,11 +777,17 @@ contains
       tNext = this%t+ioInterval
       call this%timeIntegrator(tNext)
       this%t = tNext
-      call this%WriteModel()
-      call this%WriteTecplot()
-      call this%IncrementIOCounter()
+
       call this%CalculateEntropy()
       call this%ReportEntropy()
+      call this%ReportMetrics()
+
+      call this%WriteModel()
+      if(this%tecplot_enabled) then
+        call this%WriteTecplot()
+      endif
+      call this%IncrementIOCounter()
+
     enddo
 
   endsubroutine ForwardStep_Model
