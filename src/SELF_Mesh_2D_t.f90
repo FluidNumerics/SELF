@@ -225,6 +225,8 @@ contains
       enddo
     enddo
 
+    call this%UpdateDevice()
+
   endsubroutine ResetBoundaryConditionType_Mesh2D_t
 
   subroutine UniformStructuredMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy,bcids)
