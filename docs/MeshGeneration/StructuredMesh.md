@@ -56,7 +56,7 @@ You can set boundary conditions for each of the four sides of the structured mes
 * `SELF_BC_PRESCRIBED`
 * `SELF_BC_RADIATION`
 
-The tiled layout is convenient for domain decomposition, when you are wanting to scale up your application for distributed memory platforms. You can further enable domain decomposition by setting the optional `enableDomainDecompisition` input to `.true.` . In this case, when you launch your application with `mpirun`, the domain will be automatically divided as evenly as possible across all MPI ranks.
+The tiled layout is convenient for domain decomposition, when you are wanting to scale up your application for distributed memory platforms. Domain decomposition is automatically enabled when you launch your application with `mpirun/mpiexec/srun` with more than one rank. In this case, the domain will be automatically divided as evenly as possible across all MPI ranks.
 
 !!! note
     It's good practice to set the total number of tiles equal to the number of MPI ranks that you are running with. Alternatively, you can use fairly small tiles when working with a large number of MPI ranks to increase the chance of minimizing point-to-point communications .
@@ -66,7 +66,7 @@ In the example below, we create a 2-D mesh with the following attributes
 * $2 × 2$ tiles for the domain
 * $10 × 10$ elements per tile
 * Each element is has dimensions of $0.05 × 0.05$. The domain dimensions are then $L_x × L_y = 1 × 1$
-* Domain decomposition is enabled
+* Domain decomposition is enabled automatically when launched with more than one mpi rank
 
 The geometry fields are created from the mesh information and a $7^{th}$ degree interpolant through the Legendre-Gauss points. 
 
@@ -124,7 +124,7 @@ You can set boundary conditions for each of the four sides of the structured mes
 * `SELF_BC_PRESCRIBED`
 * `SELF_BC_RADIATION`
 
-The tiled layout is convenient for domain decomposition, when you are wanting to scale up your application for distributed memory platforms. You can further enable domain decomposition by setting the optional `enableDomainDecompisition` input to `.true.` . In this case, when you launch your application with `mpirun`, the domain will be automatically divided as evenly as possible across all MPI ranks.
+The tiled layout is convenient for domain decomposition, when you are wanting to scale up your application for distributed memory platforms. Domain decomposition is automatically enabled when you launch your application with `mpirun/mpiexec/srun` with more than one rank. In this case, the domain will be automatically divided as evenly as possible across all MPI ranks.
 
 !!! note
     It's good practice to set the total number of tiles equal to the number of MPI ranks that you are running with. Alternatively, you can use fairly small tiles when working with a large number of MPI ranks to increase the chance of minimizing point-to-point communications .

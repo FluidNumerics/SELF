@@ -346,7 +346,7 @@ contains
   endfunction elementid
 
   subroutine UniformStructuredMesh_Mesh3D_t(this,nxPerTile,nyPerTile,nzPerTile, &
-                                            nTileX,nTileY,nTileZ,dx,dy,dz,bcids,enableDomainDecomposition)
+                                            nTileX,nTileY,nTileZ,dx,dy,dz,bcids)
   !!
   !! Create a structured mesh and store it in SELF's unstructured mesh format.
   !! The mesh is created in tiles of size (tnx,tny,tnz). Tiling is used to determine
@@ -388,7 +388,6 @@ contains
     real(prec),intent(in) :: dy
     real(prec),intent(in) :: dz
     integer,intent(in) :: bcids(1:6)
-    logical,optional,intent(in) :: enableDomainDecomposition
     ! Local
     integer :: nX,nY,nZ,nGeo,nBCs
     integer :: nGlobalElem
@@ -406,11 +405,8 @@ contains
     integer :: e1,e2,s1,s2
     integer :: nfaces
 
-    if(present(enableDomainDecomposition)) then
-      call this%decomp%init(enableDomainDecomposition)
-    else
-      call this%decomp%init(.false.)
-    endif
+    call this%decomp%init()
+
     nX = nTileX*nxPerTile
     nY = nTileY*nyPerTile
     nZ = nTileZ*nzPerTile
@@ -699,12 +695,11 @@ contains
 
   endsubroutine UniformStructuredMesh_Mesh3D_t
 
-  subroutine Read_HOPr_Mesh3D_t(this,meshFile,enableDomainDecomposition)
+  subroutine Read_HOPr_Mesh3D_t(this,meshFile)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     implicit none
     class(Mesh3D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
-    logical,intent(in),optional :: enableDomainDecomposition
     ! Local
     integer(HID_T) :: fileId
     integer(HID_T) :: offset(1:2),gOffset(1)
@@ -725,11 +720,7 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    if(present(enableDomainDecomposition)) then
-      call this%decomp%init(enableDomainDecomposition)
-    else
-      call this%decomp%init(.false.)
-    endif
+    call this%decomp%init()
 
     if(this%decomp%mpiEnabled) then
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)

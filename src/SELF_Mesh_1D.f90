@@ -84,7 +84,7 @@ contains
     allocate(this%BCType(1:4,1:nBCs))
 
     allocate(this%BCNames(1:nBCs))
-    call this%decomp%Init(.false.)
+    call this%decomp%Init()
 
   endsubroutine Init_Mesh1D
 
