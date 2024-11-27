@@ -177,7 +177,8 @@ contains
       write(output_unit,'(A)',ADVANCE='no') str
       str = '  |  min('//trim(this%solution%meta(ivar)%name)// &
             '), max('//trim(this%solution%meta(ivar)%name)//') = '// &
-            minv//" , "//maxv write(output_unit,'(A)',ADVANCE='yes') str
+            minv//" , "//maxv
+      write(output_unit,'(A)',ADVANCE='yes') str
     enddo
 
     call this%ReportUserMetrics()
