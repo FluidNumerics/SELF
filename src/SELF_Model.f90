@@ -768,14 +768,58 @@ contains
     ! Local
     real(prec) :: targetTime,tNext
     integer :: i,nIO
+    character(10) :: ntimesteps
+    real(prec) :: t1,t2
+    character(len=:),allocatable :: str
+    character(len=20) :: modelTime
 
     this%dt = dt
     targetTime = tn
 
+    write(ntimesteps,"(I10)") int(ioInterval/this%dt)
     nIO = int((targetTime-this%t)/ioInterval)
     do i = 1,nIO
+
       tNext = this%t+ioInterval
+      call cpu_time(t1)
       call this%timeIntegrator(tNext)
+      call cpu_time(t2)
+
+      open(output_unit,ENCODING='utf-8')
+      write(output_unit,'(A)',ADVANCE='no') ' --------------------------------------------------------'
+      write(output_unit,'(A)',ADVANCE='yes') '----------------------------------------------------------------------- '
+      write(output_unit,'(A)',ADVANCE='no') ' <><><><><><><><><><><><><><><><><><><><><><><><><><><><>'
+      write(output_unit,'(A)',ADVANCE='yes') '<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> '
+      write(output_unit,'(A)',ADVANCE='no') ' --------------------------------------------------------'
+      write(output_unit,'(A)',ADVANCE='yes') '------------------------------------------------------------------------ '
+      write(modelTime,"(ES16.7E3)") this%t
+      ! Write the wall-time
+      write(output_unit,'(1x, A," : ")',ADVANCE='no') __FILE__
+      str = 'tᵢ ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = '  | Time to complete '//trim(ntimesteps)//' time steps (s) : '
+      write(output_unit,'(A)',ADVANCE='no') str
+      write(str,"(ES16.7E3)") t2-t1
+      write(output_unit,'(A)',ADVANCE='yes') str
+
+      ! Wall-time per time step
+      write(output_unit,'(1x, A," : ")',ADVANCE='no') __FILE__
+      str = 'tᵢ ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = '  | Wall-time per time step : '
+      write(output_unit,'(A)',ADVANCE='no') str
+      write(str,"(ES16.7E3)")(t2-t1)/(floor(ioInterval/this%dt))
+      write(output_unit,'(A)',ADVANCE='yes') str
+
+      ! Wall-time per simulation time
+      write(output_unit,'(1x, A," : ")',ADVANCE='no') __FILE__
+      str = 'tᵢ ='//trim(modelTime)
+      write(output_unit,'(A)',ADVANCE='no') str
+      str = '  | Wall-time per simulation time : '
+      write(output_unit,'(A)',ADVANCE='no') str
+      write(str,"(ES16.7E3)")(t2-t1)/(ioInterval)
+      write(output_unit,'(A)',ADVANCE='yes') str
+
       this%t = tNext
 
       call this%CalculateEntropy()
