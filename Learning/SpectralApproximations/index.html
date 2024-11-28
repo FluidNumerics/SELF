@@ -1,0 +1,1539 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="SELF Documentation">
+      
+      
+        <meta name="author" content="Fluid Numerics">
+      
+      
+      
+        <link rel="prev" href="../../MeshGeneration/StructuredMesh/">
+      
+      
+        <link rel="next" href="../DifferentialGeometry/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>Spectral Approximations - Spectral Element Library in Fortran</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spectral-approximations" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-header__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spectral Element Library in Fortran
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spectral Approximations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-nav__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    Spectral Element Library in Fortran
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/dependencies/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependencies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/building-with-self/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Applications with SELF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/multi-gpu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using Multiple GPUs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Burgers Equation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Burgers Equation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/BurgersEquation1D/TravelingShock/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traveling Shock
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Linear Euler (2D)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Linear Euler (2D)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plane wave propagation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWaveReflection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plane wave reflection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spherical sound wave
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Linear Shallow Water (2D)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Linear Shallow Water (2D)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/LinearShallowWater/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reflecting wave
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/burgers-equation-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Viscous Burgers Equation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear Euler (2D)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-shallow-water-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear Shallow Water (2D)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Mesh Generation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Mesh Generation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/Overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/StructuredMesh/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structured Mesh Generators
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Learning
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Learning
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Theory
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Theory
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Spectral Approximations
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Spectral Approximations
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    Motivation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modal-approximations" class="md-nav__link">
+    Modal Approximations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#polynomial-spectral-methods" class="md-nav__link">
+    Polynomial Spectral Methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#truncation" class="md-nav__link">
+    Truncation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nodal-approximations" class="md-nav__link">
+    Nodal Approximations
+  </a>
+  
+    <nav class="md-nav" aria-label="Nodal Approximations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quadrature" class="md-nav__link">
+    Quadrature
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpolation-aliasing" class="md-nav__link">
+    Interpolation &amp; Aliasing
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DifferentialGeometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Differential Geometry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ProvableStability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Provable Stability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Code
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SoftwareArchitecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Software Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dependencies.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependencies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ford/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Documentation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/Documentation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    Motivation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modal-approximations" class="md-nav__link">
+    Modal Approximations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#polynomial-spectral-methods" class="md-nav__link">
+    Polynomial Spectral Methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#truncation" class="md-nav__link">
+    Truncation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nodal-approximations" class="md-nav__link">
+    Nodal Approximations
+  </a>
+  
+    <nav class="md-nav" aria-label="Nodal Approximations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quadrature" class="md-nav__link">
+    Quadrature
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpolation-aliasing" class="md-nav__link">
+    Interpolation &amp; Aliasing
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="spectral-approximations">Spectral Approximations<a class="headerlink" href="#spectral-approximations" title="Permanent link">#</a></h1>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">#</a></h2>
+<p>In spectral element methods, functions are approximated in a "nodal" form, where the function is replaced by an interpolant</p>
+<div class="arithmatex">\[
+  f \approx I^N(f) \equiv \sum_{i=0}^N f_i l_i(x)
+\]</div>
+<p>where the <span class="arithmatex">\(\{f_i\}_{i=0}^N\)</span> are the nodal values of the function at interpolation knots <span class="arithmatex">\(x_i\)</span>, and <span class="arithmatex">\(l_i(x)\)</span> are interpolants that typically satisfy the Kronecker-delta property <span class="arithmatex">\(l_i(x_j) = \delta_{i,j}\)</span>. For polynomial based spectral element methods, the <span class="arithmatex">\(l_i(x)\)</span> are typically the <a href="https://mathworld.wolfram.com/LagrangeInterpolatingPolynomial.html">Lagrange interpolating polynomials</a>.</p>
+<p>The error in the interpolation is defined as the difference between the interpolant and the function</p>
+<div class="arithmatex">\[
+  \epsilon_I = || f - I^N(f) || 
+\]</div>
+<p>It turns out that the size of this error and the convergence rate depends on the smoothness of the function <span class="arithmatex">\(f\)</span> and where the interpolation knots are located. In order to show this, we actually need to take a step back and talk about polynomial basis functions and projections.</p>
+<h2 id="modal-approximations">Modal Approximations<a class="headerlink" href="#modal-approximations" title="Permanent link">#</a></h2>
+<p>When discussing projections, we need to first lay down some ground rules that restrict our attention to only certain types of functions. Here, we consider only functions that are square integrable over the domain <span class="arithmatex">\([-1,1]\)</span>. This criteria means that</p>
+<div class="arithmatex">\[
+\int_{-1}^{1} f^2 \hspace{1mm} dx &lt; \infty
+\]</div>
+<p>and this space is often denoted as <span class="arithmatex">\(L^2([-1,1])\)</span>. </p>
+<p>A <strong>basis</strong> for <span class="arithmatex">\(L^2([-1,1])\)</span> is a set of functions that can be linearly combined together to represent any other function in <span class="arithmatex">\(L^2([-1,1])\)</span>. If you've taken linear algebra before, basis functions here are analogous to basis vectors in linear algebra. What this means is that, if I have a set of basis functions <span class="arithmatex">\(\{\phi_i(x)\}_{i=0}^{\infty}\)</span>, I can write any square-integrable function as</p>
+<div class="arithmatex">\[
+  f = \sum_{i=0}^\infty \hat{f}_i \phi_i(x); \hspace{5mm} f, \phi_i \in L^2([-1,1])
+\]</div>
+<p>where the <span class="arithmatex">\(\hat{f}_i\)</span> are the <strong>modal</strong> coefficients of <span class="arithmatex">\(f\)</span>. </p>
+<p>In practice this can be useful; we have the ability to represent an unknown function <span class="arithmatex">\(f\)</span> by a linear combination of functions we know more about. By representing the function by a linear combination of basis functions <span class="arithmatex">\(\phi\)</span> that we know the properties of, we can gain an understanding about the observations we've made; in our case, we exploit this knowledge to develop numerical methods, where the function <span class="arithmatex">\(f\)</span> is an unknown solution to an ordinary or partial differential equation.</p>
+<h2 id="polynomial-spectral-methods">Polynomial Spectral Methods<a class="headerlink" href="#polynomial-spectral-methods" title="Permanent link">#</a></h2>
+<p>Polynomial based spectral elements use Jacobi Polynomials, which are generated from a special class of Sturm-Liouville problem. You can read more about the Sturm-Liouville problem that is used to generate polynomial basis in Chapter 1, Section 1.8 in <a href="https://link.springer.com/book/10.1007/978-90-481-2261-5">"Implementing Spectral Methods for Partial Differential Equations" by D.A. Kopriva</a>.</p>
+<p>Jacobi polynomials come with an orthogonality property : </p>
+<div class="arithmatex">\[
+&lt; P_i, P_j&gt; = \int_{-1}^{1} P_i(x) P_j(x) w(x) \hspace{1mm} dx = ||P_j||^2 \delta_{i,j}
+\]</div>
+<p>where <span class="arithmatex">\(&lt;u,v&gt;\)</span> denotes an <strong>inner product</strong> of <span class="arithmatex">\(u\)</span> and <span class="arithmatex">\(v\)</span>, <span class="arithmatex">\(w(x)\)</span> is a weight function that is determined from the Sturm-Liouville problem that generates the Jacobi polynomials <span class="arithmatex">\(P_i(x)\)</span>, and <span class="arithmatex">\(||P_j||^2 = &lt;P_j,P_j&gt;\)</span> is the squared norm of the <span class="arithmatex">\(j^{th}\)</span> Jacobi polynomial.</p>
+<p>Most often Legendre or Chebyshev polynomials, which are types of Jacobi Polynomials, are used. In this discussion, we focus on Legendre polynomials, which have a constant weight function <span class="arithmatex">\(w(x) = 1\)</span>. Legendre polynomials satisfy the three term recursion</p>
+<div class="arithmatex">\[
+L_{k+1}(x) = \frac{2k+1}{k+1} x L_k(x) - \frac{k}{k+1}L_{k-1}(x)
+\]</div>
+<p>with <span class="arithmatex">\(L_0(x) = 1\)</span> and <span class="arithmatex">\(L_1(x) = x\)</span>. The first few Legendre polynomials are shown below.</p>
+<p><a class="glightbox" href="../legendre.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img align="center" alt="Legendre polynomials" src="../legendre.png" /></a></p>
+<p>The orthogonality property for Legendre polynomials is </p>
+<div class="arithmatex">\[
+&lt; L_i, L_j&gt; = \int_{-1}^{1} L_i(x) L_j(x) \hspace{1mm} dx = ||L_j||^2 \delta_{i,j}
+\]</div>
+<p>This property is useful in that it simplifies the determination of the modal coefficients of a function.</p>
+<div class="arithmatex">\[
+  &lt;f,L_j&gt; = \sum_{i=0}^\infty \hat{f}_i &lt;L_i(x),L_j(x)&gt; = \hat{f}_j ||L_j||^2
+\]</div>
+<div class="arithmatex">\[
+  \rightarrow \hat{f}_j = \frac{&lt;f,L_j&gt;}{||L_j||^2}
+\]</div>
+<p>where <span class="arithmatex">\(||L_j||^2 = &lt;L_j,L_j&gt;\)</span> is the squared norm of the <span class="arithmatex">\(j^{th}\)</span> Legendre polynomial.</p>
+<p>In the example below, we show a few functions with varying degree of smoothness and calculate the first 50 Legendre modal coefficients.</p>
+<p><a class="glightbox" href="../example-functions-1d.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img align="center" alt="Example functions" src="../example-functions-1d.png" /></a> </p>
+<p>In this example, we compare two functions :</p>
+<ul>
+<li><span class="arithmatex">\(f(x) = |x - \frac{1}{4}|\)</span></li>
+<li><span class="arithmatex">\(f(x) = e^{-\frac{(x-\frac{3}{4})^2}{0.2}}\)</span></li>
+</ul>
+<p>The first function has a discontinuity in its derivative at <span class="arithmatex">\(x=\frac{1}{4}\)</span>, while the Guassian is "complete" (all derivatives exist and are continuous). Notice the rate of decay of the Legendre coefficients (below) for the absolute value function compared to the Gaussian. </p>
+<p>The Gaussian's coefficients decay exponentially fast, while the absolute value function decays rather slowly.</p>
+<p><a class="glightbox" href="../example-functions-1d-legendre-coefficients.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img align="center" alt="Example functions Legendre coefficients" src="../example-functions-1d-legendre-coefficients.png" /></a></p>
+<h2 id="truncation">Truncation<a class="headerlink" href="#truncation" title="Permanent link">#</a></h2>
+<p>To develop a practical numerical method, we need to be able to work with a finite series representation of a function; we cannot sum to infinity over all Legendre polynomials in practice. Thus, we can split the infinite sum into a finite sum and everything else</p>
+<div class="arithmatex">\[
+  f = \underline{\sum_{i=0}^N \hat{f}_i L_i(x)} + \sum_{i=N+1}^\infty \hat{f}_i L_i(x)
+\]</div>
+<p>The underlined term is called the <strong>projection</strong> of <span class="arithmatex">\(f\)</span> onto the space of polynomials of degree <span class="arithmatex">\(N\)</span>. Often, this is written</p>
+<div class="arithmatex">\[
+ P^N(f) \equiv \sum_{i=0}^N \hat{f}_i L_i(x)
+\]</div>
+<p>The (squared norm) error associated with truncation can then be written</p>
+<div class="arithmatex">\[
+\epsilon_P = || f - P^N(f) ||^2 = \sum_{i=N+1}^\infty |\hat{f}_i|^2 || L_i(x) ||^2 
+\]</div>
+<p>which shows that the error depends on the magnitude of the modal coefficients.</p>
+<p>In the examples above, you can see the modal coefficients for a few functions, some that are "smooth" and some that are not, like the heaviside step function. Notice that smooth functions have coefficients that decay rapidly, while functions that have discontinuities have a slower decay rate. Because of this, we say that a spectral approximation has an error convergence rate (as a function of <span class="arithmatex">\(N\)</span>) that depends on the smoothness of the function. Complete functions have errors that decay exponentially fast. Functions that have a discontinuity in their <span class="arithmatex">\(h^{th}\)</span> derivative have an error convergence rate that is <span class="arithmatex">\(\mathcal{O}(N^h)\)</span>.</p>
+<h2 id="nodal-approximations">Nodal Approximations<a class="headerlink" href="#nodal-approximations" title="Permanent link">#</a></h2>
+<p>So far, we've looked at <strong>modal</strong> approximations using the projection onto the Legendre polynomial basis. In most applications of numerical methods, we are more interested in knowing how a function varies with space and time. When using modal approximations, the degrees of freedom in the method are the modal coefficients; the nodal values of the function are then diagnosed using the formula for the projection of the function.</p>
+<p>Alternatively, you could use an interpolant instead where the unknowns are taken to be values of the function at specific locations in space. To introduce a nodal approximation and discuss the error incurred in such a representation, we need to discuss quadrature rules for discrete integration.</p>
+<h3 id="quadrature">Quadrature<a class="headerlink" href="#quadrature" title="Permanent link">#</a></h3>
+<p>A quadrature rule is a formula that is used to approximate an integral as a weighted sum</p>
+<div class="arithmatex">\[
+\int_a^b f(x) dx = \sum_{i=0}^N f(x_i) \omega_i + \epsilon_Q
+\]</div>
+<p>where the <span class="arithmatex">\(x_i\)</span> are the quadrature knots, the <span class="arithmatex">\(\{\omega_i\}_{i=0}^N\)</span> are the quadrature weights, and <span class="arithmatex">\(\epsilon_Q\)</span> is the error.</p>
+<p>In spectral methods, we choose the quadrature so that we preserve the orthogonality condition between the underlying basis. Mathematically, we want to find <span class="arithmatex">\(\{x_i;\omega_i\}_{i=0}^N\)</span> so that</p>
+<div class="arithmatex">\[
+  \sum_{k=0}^N L_i(x_k)L_j(x_k) \omega_k = \int_{-1}^{1}L_i(x_k)L_j(x_k) dx
+\]</div>
+<p>over the widest possible range of <span class="arithmatex">\(i\)</span> and <span class="arithmatex">\(j\)</span>. The derivation of the solution to this problem can be found in Chapter 1, Section 1.11 of <a href="https://link.springer.com/book/10.1007/978-90-481-2261-5">"Implementing Spectral Methods for Partial Differential Equations" by D.A. Kopriva</a>. The end result is that the <strong>Legendre Gauss</strong> qaudrature rule is necessary to maintain discrete orthogonality, where</p>
+<div class="arithmatex">\[
+  x_k = \text{zeros of } L_{N+1}(x)
+\]</div>
+<div class="arithmatex">\[
+  \omega_k = \frac{2}{(1-x_k^2)[L'_{N+1}(x_j)]^2}
+\]</div>
+<p>Legendre Gauss Quadrature is exact for polynomials of degree <span class="arithmatex">\(2N+1\)</span> or less. </p>
+<p>Another popular choice is the <strong>Legendre Gauss-Lobatto</strong> Quadrature, since the quadrature knots include the domain end-points </p>
+<div class="arithmatex">\[
+  x_k = \pm 1, \text{zeros of } L'_{N}(x)
+\]</div>
+<div class="arithmatex">\[
+  \omega_k = \frac{2}{N(N+1)[L_{N}(x_j)]^2}
+\]</div>
+<p>Legendre Gauss-Lobatto Quadrature, however, is less accurate and is exact for polynomials of degree <span class="arithmatex">\(2N-1\)</span> or less.</p>
+<p>With the quadrature rule, we can now define the discrete inner product</p>
+<div class="arithmatex">\[
+&lt;u,v&gt;_N = \sum_{k=0}^N u(x_k) v(x_k) \omega_k
+\]</div>
+<p>where the <span class="arithmatex">\(x_k\)</span> and <span class="arithmatex">\(\omega_k\)</span> are taken as a Legendre-Gauss type quadrature rule.</p>
+<h2 id="interpolation-aliasing">Interpolation &amp; Aliasing<a class="headerlink" href="#interpolation-aliasing" title="Permanent link">#</a></h2>
+<p>We now define the interpolant </p>
+<div class="arithmatex">\[\begin{equation}
+  I_N(f) = \sum_{i=0}^N \tilde{f}_i L_i(x)
+\end{equation}\]</div>
+<p>where the <span class="arithmatex">\(L_k\)</span> are the Legendre polynomials. The interpolant satisfies the constraint </p>
+<div class="arithmatex">\[\begin{equation}
+I_N(f)(x_k) = \sum_{i=0}^N \tilde{f}_i L_i(x_k) = f(x_k)
+\end{equation}\]</div>
+<p>The <span class="arithmatex">\(\tilde{f}_k\)</span> are the discrete coefficients; they are not the modal coefficients <span class="arithmatex">\(\hat{f}_k\)</span> that we derived previously.</p>
+<p>To find the discrete coefficients, we can appeal to our quadrature rules that maintain discrete orthogonality,
+\begin{equation}
+<I_N(f),L_j><em i="0">N = \sum</em>^N \tilde{f}_i <L_i, L_j>_N, \hspace{5mm} j=0,1,2,...,N
+\end{equation}</p>
+<p>Using the discrete orthogonality condition, we have that</p>
+<div class="arithmatex">\[\begin{equation}
+\tilde{f}_j = \frac{&lt;I_N(f),L_j&gt;_N}{||L_j||^2_N} = \frac{1}{||L_j||^2_N}\sum_{k=0}^N f(x_k) L_j(x_k) \omega_k
+\end{equation}\]</div>
+<p>Likewise, the nodal values of the interpolant can be computed
+\begin{equation}
+f(x_j) = \sum_{i=0}^N \tilde{f}_i L_i(x_j)
+\end{equation}</p>
+<p>These two equations are the "Discrete Polynomial Transform Pair"; much like the Discrete Fourier and Inverse Fourier Transforms they allow you to transition between the discrete modal coefficients and nodal values.</p>
+<p>To understand the errors involved, we can replace <span class="arithmatex">\(f(x_j)\)</span> in the equation for the modal coefficients by its complete modal expansion</p>
+<div class="arithmatex">\[\begin{align}
+\tilde{f}_j &amp;= \frac{1}{||L_j||^2_N}\sum_{k=0}^N f(x_k) L_j(x_k) \omega_k \\
+&amp;= \frac{1}{||L_j||^2_N}\sum_{k=0}^N \left[ \sum_{i=0}^\infty \hat{f}_i L_i(x_k)\right] L_j(x_k) \omega_k \\
+&amp;= \frac{1}{||L_j||^2_N}\sum_{k=0}^N \left[ \sum_{i=0}^N \hat{f}_i L_i(x_k)\right] L_j(x_k) \omega_k + \frac{1}{||L_j||^2_N}\sum_{k=0}^N \left[ \sum_{i=N+1}^\infty \hat{f}_i L_i(x_k)\right] L_j(x_k) \omega_k\\
+&amp;= \hat{f}_k + \frac{1}{||L_j||^2_N}\sum_{k=0}^N \left[ \sum_{i=N+1}^\infty \hat{f}_i L_i(x_k)\right] L_j(x_k) \omega_k\\
+&amp;= \hat{f}_k + \underline{\frac{1}{||L_j||^2_N} \sum_{i=N+1}^\infty \hat{f}_i &lt;L_i,L_j&gt;_N}\\
+\end{align}\]</div>
+<p>The underlined term is non-zero, because the discrete quadrature is inexact for polynomials with degree greater than <span class="arithmatex">\(2N+1\)</span> (Gauss). Thus, the discrete coefficients are the modal coefficients plus an additional error, called the <strong>aliasing error</strong>. </p>
+<p>With this result, we can now write the interpolant as </p>
+<div class="arithmatex">\[\begin{align}
+I_N(f) &amp;= \sum_{k=0}^N \hat{f}_k L_k + \sum_{k=0}^N \left[ \frac{1}{||L_j||^2_N} \sum_{i=N+1}^\infty \hat{f}_i &lt;L_i,L_j&gt;_N \right]L_k \\
+&amp;= P_N(f) + R_N(f)
+\end{align}\]</div>
+<p>Thus, the interpolant is the projection operator plus an additional aliasing error. Further, we can estimate the error magnitude</p>
+<div class="arithmatex">\[\begin{align}
+ || f - I_N(f) ||^2 &amp;= || ( f-P_N(f) ) - R_N(f) ||^2 \\
+ &amp;\leq || ( f-P_N(f) )||^2 + || R_N(f) ||^2
+\end{align}\]</div>
+<p>Keep in mind that the aliasing error size also depends on the magnitude of the modal coefficients. Using the same arguments we made before for the projection error, you can see that the aliasing error is also spectrally accurate. For detailed proofs that relate the Legendre coefficient magnitude decay rate to function smoothness can be found in <a href="https://link.springer.com/book/10.1007/978-3-540-30726-6">Spectral Methods Fundamentals in Single Domains</a>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

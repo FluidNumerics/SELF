@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_NullDGModel3D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_NullDGModel3D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for source files.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_NullDGModel3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_NullDGModel3D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_nulldgmodel3d.html">self_NullDGModel3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_nulldgmodel3d.f90.html#src">SELF_NullDGModel3D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_nulldgmodel3df90EfferentGraph" width="641pt" height="194pt"
+ viewBox="0.00 0.00 641.00 193.71" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph" class="graph" transform="scale(0.23 0.23) rotate(0) translate(4 841.86)">
+<title>sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-841.86 2795,-841.86 2795,4 -4,4"/>
+<!-- sourcefile~self_nulldgmodel3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_nulldgmodel3d.f90</title>
+<polygon fill="none" stroke="black" points="2791,-331.97 2643,-331.97 2643,-307.97 2791,-307.97 2791,-331.97"/>
+<text text-anchor="middle" x="2717" y="-317.57" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_NullDGModel3D.f90</text>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_nulldgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_nulldgmodel3d_t.f90.html" xlink:title="SELF_NullDGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2607,-331.97 2450,-331.97 2450,-307.97 2607,-307.97 2607,-331.97"/>
+<text text-anchor="middle" x="2528.5" y="-317.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_nulldgmodel3d.f90&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2642.83,-319.97C2634.39,-319.97 2625.73,-319.97 2617.12,-319.97"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2617.07,-316.47 2607.07,-319.97 2617.07,-323.47 2617.07,-316.47"/>
+</g>
+<!-- sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_model.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_model.f90.html" xlink:title="SELF_Model.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="795.5,-688.97 699.5,-688.97 699.5,-664.97 795.5,-664.97 795.5,-688.97"/>
+<text text-anchor="middle" x="747.5" y="-674.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2525.15,-332.22C2510.05,-406.72 2419.92,-795.97 2184,-795.97 2184,-795.97 2184,-795.97 1797.5,-795.97 1683,-795.97 1654.22,-789.01 1541,-771.97 1428.99,-755.11 1404.77,-719.97 1291.5,-719.97 1291.5,-719.97 1291.5,-719.97 1147.5,-719.97 1025.15,-719.97 882.89,-699.74 805.62,-687.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="806.06,-683.55 795.62,-685.36 804.91,-690.46 806.06,-683.55"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_dgmodel3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_dgmodel3d.f90.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2414,-331.97 2287,-331.97 2287,-307.97 2414,-307.97 2414,-331.97"/>
+<text text-anchor="middle" x="2350.5" y="-317.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2449.79,-319.97C2441.28,-319.97 2432.64,-319.97 2424.19,-319.97"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2424.01,-316.47 2414.01,-319.97 2424.01,-323.47 2424.01,-316.47"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1194,-104.97 1103,-104.97 1103,-80.97 1194,-80.97 1194,-104.97"/>
+<text text-anchor="middle" x="1148.5" y="-90.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2518.39,-307.66C2482.03,-260.09 2341.68,-90.97 2184,-90.97 2184,-90.97 2184,-90.97 1445,-90.97 1361.03,-90.97 1263.64,-91.79 1204.32,-92.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1204.02,-88.88 1194.05,-92.48 1204.09,-95.88 1204.02,-88.88"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-206.97 152,-206.97 152,-182.97 303,-182.97 303,-206.97"/>
+<text text-anchor="middle" x="227.5" y="-192.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M699.48,-687.95C659.47,-694.76 601.65,-698.46 557.5,-675.97"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-675.97C420.53,-607.24 543.73,-476.13 463,-347.97 427.92,-292.27 392.58,-305.21 339,-266.97 322.5,-255.2 319.76,-250.37 303,-238.97 289.17,-229.57 273.29,-220.02 259.74,-212.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="261.22,-209.05 250.8,-207.15 257.76,-215.14 261.22,-209.05"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-609.97 499.5,-609.97 499.5,-585.97 613.5,-585.97 613.5,-609.97"/>
+<text text-anchor="middle" x="556.5" y="-595.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M717.38,-664.8C684.82,-651.19 631.95,-629.09 596,-614.06"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="596.92,-610.65 586.34,-610.03 594.22,-617.11 596.92,-610.65"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-571.97 181,-571.97 181,-547.97 274,-547.97 274,-571.97"/>
+<text text-anchor="middle" x="227.5" y="-557.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-675.97C492.87,-644.08 471.87,-645.6 402,-637.97"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_dgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_dgmodel3d_t.f90.html" xlink:title="SELF_DGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2251,-331.97 2115,-331.97 2115,-307.97 2251,-307.97 2251,-331.97"/>
+<text text-anchor="middle" x="2183" y="-317.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2286.93,-319.97C2278.51,-319.97 2269.79,-319.97 2261.16,-319.97"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="2261.08,-316.47 2251.08,-319.97 2261.08,-323.47 2261.08,-316.47"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-380.97 0,-380.97 0,-356.97 116,-356.97 116,-380.97"/>
+<text text-anchor="middle" x="58" y="-366.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1132.82,-105.28C1104.24,-127.88 1038.38,-173.5 975,-170.97"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M973,-170.97C785.88,-163.5 743.8,-81.91 557.5,-100.97"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-222.97 881,-222.97 881,-198.97 1067,-198.97 1067,-222.97"/>
+<text text-anchor="middle" x="974" y="-208.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1121.32,-105.11C1114.83,-108.93 1108.24,-113.58 1103,-118.97 1079.72,-142.94 1093.12,-164.13 1067,-184.97 1062.26,-188.75 1057,-191.98 1051.47,-194.74"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1049.67,-191.71 1041.94,-198.96 1052.5,-198.11 1049.67,-191.71"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M973,-676.97C916.33,-671.31 851.21,-672.11 805.76,-673.84"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="805.35,-670.35 795.5,-674.26 805.64,-677.35 805.35,-670.35"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2169.73,-307.95C2151.42,-290.63 2115.21,-258.67 2079,-239.97 1818.73,-105.56 1739.93,-52.97 1447,-52.97 1447,-52.97 1447,-52.97 1289.5,-52.97 1198.3,-52.97 622.42,-105.46 339,-162.97 317.4,-167.35 293.89,-173.9 274.13,-179.94"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="272.97,-176.63 264.46,-182.94 275.05,-183.32 272.97,-176.63"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2175.2,-332.14C2132.88,-406.11 1898.01,-790.94 1610.5,-757.97"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1608.5,-757.97C1557.02,-757.85 1554.75,-719.21 1505,-705.97 1277.03,-645.3 1209.74,-700.42 975,-676.97"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M973,-676.97C867.87,-666.77 854.13,-599.09 748.5,-598.97"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1608.5,-757.97C1114.52,-765.49 972.89,-829.6 499,-689.97 452.08,-676.15 450.38,-645.17 402,-637.97"/>
+</g>
+<!-- sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_mesh_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_mesh_3d.f90.html" xlink:title="SELF_Mesh_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1502,-203.97 1390,-203.97 1390,-179.97 1502,-179.97 1502,-203.97"/>
+<text text-anchor="middle" x="1446" y="-189.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2115,-325.08C2038.38,-329.74 1909.34,-333.98 1799.5,-319.97"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1797.5,-319.97C1741.36,-311.67 1731.26,-294.57 1678,-274.97 1612.85,-251 1537.07,-223.92 1490.57,-207.4"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1491.71,-204.09 1481.11,-204.04 1489.36,-210.69 1491.71,-204.09"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_mappedvector_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_mappedvector_3d.f90.html" xlink:title="SELF_MappedVector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2079,-272.97 1919,-272.97 1919,-248.97 2079,-248.97 2079,-272.97"/>
+<text text-anchor="middle" x="1999" y="-258.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedvector_3d.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2144.73,-307.89C2116.39,-298.7 2077.22,-286 2046.77,-276.13"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="2047.81,-272.79 2037.22,-273.04 2045.65,-279.45 2047.81,-272.79"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_mappedscalar_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_mappedscalar_3d.f90.html" xlink:title="SELF_MappedScalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2079,-371.97 1919,-371.97 1919,-347.97 2079,-347.97 2079,-371.97"/>
+<text text-anchor="middle" x="1999" y="-357.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedscalar_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedscalar_3d.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2127.39,-331.97C2107.69,-336.3 2085.26,-341.23 2064.76,-345.74"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="2063.9,-342.34 2054.88,-347.91 2065.4,-349.18 2063.9,-342.34"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_geometry_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_geometry_3d.f90.html" xlink:title="SELF_Geometry_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1678,-340.97 1541,-340.97 1541,-316.97 1678,-316.97 1678,-340.97"/>
+<text text-anchor="middle" x="1609.5" y="-326.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1797.5,-319.97C1761.85,-315.42 1722.12,-316.48 1688.47,-319.16"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1687.9,-315.69 1678.24,-320.03 1688.5,-322.67 1687.9,-315.69"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-186.97 650,-186.97 650,-162.97 845,-162.97 845,-186.97"/>
+<text text-anchor="middle" x="747.5" y="-172.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M897.93,-198.93C877.24,-195.62 854.66,-191.99 833.45,-188.59"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="833.92,-185.12 823.5,-187 832.82,-192.04 833.92,-185.12"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M200.24,-207.05C185.09,-214.81 166.29,-225.88 152,-238.97 116.12,-271.84 85.77,-320.66 70.2,-348.17"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="67.12,-346.51 65.32,-356.95 73.24,-349.91 67.12,-346.51"/>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M531.19,-610.08C501.27,-623.63 448.68,-643.07 402,-637.97"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M180.81,-549.83C170.57,-546.05 160.3,-540.91 152,-533.97 105.37,-494.96 77.59,-426.24 65.75,-391.07"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="69,-389.73 62.58,-381.3 62.34,-391.89 69,-389.73"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_mesh_3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_mesh_3d_t.f90.html" xlink:title="SELF_Mesh_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1351,-184.97 1230,-184.97 1230,-160.97 1351,-160.97 1351,-184.97"/>
+<text text-anchor="middle" x="1290.5" y="-170.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_mesh_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_mesh_3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1389.58,-185.11C1380.44,-183.98 1370.86,-182.79 1361.41,-181.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1361.6,-178.12 1351.25,-180.37 1360.74,-185.07 1361.6,-178.12"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M649.98,-176.13C580.91,-176.81 485.73,-177.45 402,-176.97"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M400,-176.97C323.15,-176.77 296.07,-118.37 228.5,-154.97"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M400,-176.97C371.6,-176.81 340.71,-179.24 313.06,-182.36"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="312.55,-178.89 303.03,-183.54 313.37,-185.85 312.55,-178.89"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-380.97 499,-380.97 499,-356.97 614,-356.97 614,-380.97"/>
+<text text-anchor="middle" x="556.5" y="-366.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M734.68,-187.11C702.86,-219.77 615.19,-309.75 576.4,-349.58"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="573.79,-347.23 569.32,-356.84 578.8,-352.12 573.79,-347.23"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_mappedvector_3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_mappedvector_3d_t.f90.html" xlink:title="SELF_MappedVector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1883,-262.97 1714,-262.97 1714,-238.97 1883,-238.97 1883,-262.97"/>
+<text text-anchor="middle" x="1798.5" y="-248.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_mappedvector_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_mappedvector_3d_t.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1918.98,-256.99C1910.51,-256.56 1901.83,-256.13 1893.21,-255.69"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1893.3,-252.19 1883.13,-255.18 1892.95,-259.18 1893.3,-252.19"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_mappedscalar_3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_mappedscalar_3d_t.f90.html" xlink:title="SELF_MappedScalar_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1883,-371.97 1714,-371.97 1714,-347.97 1883,-347.97 1883,-371.97"/>
+<text text-anchor="middle" x="1798.5" y="-357.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_mappedscalar_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_mappedscalar_3d_t.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1918.98,-359.97C1910.51,-359.97 1901.83,-359.97 1893.21,-359.97"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1893.13,-356.47 1883.13,-359.97 1893.13,-363.47 1893.13,-356.47"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M400,-252.97C324.2,-244.96 303.63,-240.11 228.5,-252.97"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M226.5,-252.97C162.44,-263.94 104.06,-318.91 76.2,-349.08"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="73.27,-347.1 69.17,-356.87 78.46,-351.79 73.27,-347.1"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1541.65,-341.01C1477.67,-351.47 1378.32,-364.97 1291.5,-364.97"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1289.5,-364.97C1088.26,-372.72 1044.82,-302.04 845,-276.97 649.36,-252.43 598.5,-269.28 402,-252.97"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M400,-252.97C350.21,-247.71 295.99,-226.54 262.13,-211.3"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="263.26,-207.97 252.71,-206.98 260.34,-214.33 263.26,-207.97"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1567.21,-316.83C1558.13,-313.16 1548.88,-308.57 1541,-302.97 1505.96,-278.06 1475.95,-237.19 1459.78,-212.61"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1462.63,-210.57 1454.28,-204.05 1456.74,-214.35 1462.63,-210.57"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1289.5,-364.97C1225.03,-364.97 1213.97,-403.99 1149.5,-402.97"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1147.5,-402.97C1069.77,-401.74 1052.07,-384.15 975,-373.97"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="792,-456.97 703,-456.97 703,-432.97 792,-432.97 792,-456.97"/>
+<text text-anchor="middle" x="747.5" y="-442.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1601.25,-341.05C1586.53,-364.28 1550.6,-414.71 1505,-434.97 1379.42,-490.76 953.79,-462.04 802.45,-449.68"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="802.29,-446.15 792.04,-448.82 801.72,-453.13 802.29,-446.15"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_scalar_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_scalar_3d.f90.html" xlink:title="SELF_Scalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1349.5,-591.97 1231.5,-591.97 1231.5,-567.97 1349.5,-567.97 1349.5,-591.97"/>
+<text text-anchor="middle" x="1290.5" y="-577.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_scalar_3d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1607.26,-341.23C1602.53,-380.86 1581.82,-506.13 1505,-560.97 1463.33,-590.72 1404.77,-593.98 1359.53,-590.63"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1359.76,-587.14 1349.5,-589.76 1359.16,-594.11 1359.76,-587.14"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_vector_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_vector_3d.f90.html" xlink:title="SELF_Vector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1505,-425.97 1387,-425.97 1387,-401.97 1505,-401.97 1505,-425.97"/>
+<text text-anchor="middle" x="1446" y="-411.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_vector_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_vector_3d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1585.36,-341.15C1557.46,-355.83 1510.41,-380.6 1479.03,-397.11"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1477.05,-394.2 1469.84,-401.95 1480.31,-400.39 1477.05,-394.2"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_tensor_3d.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_tensor_3d.f90.html" xlink:title="SELF_Tensor_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1505,-551.97 1387,-551.97 1387,-527.97 1505,-527.97 1505,-551.97"/>
+<text text-anchor="middle" x="1446" y="-537.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_tensor_3d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1600.66,-341.15C1584,-366.79 1543.42,-427.96 1505,-475.97 1492.7,-491.34 1477.77,-507.77 1466.14,-520.14"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1463.37,-517.96 1459.03,-527.62 1468.45,-522.78 1463.37,-517.96"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1268.24,-160.82C1244.56,-147.29 1206.12,-125.33 1179.42,-110.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1180.92,-106.9 1170.5,-104.97 1177.45,-112.97 1180.92,-106.9"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1229.79,-169.36C1204.91,-168.57 1175.77,-168.57 1149.5,-170.97"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-170.97C1071.15,-177.94 1051.66,-170.22 975,-170.97"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-170.97C1105.21,-175.45 1058.25,-186.77 1024.02,-196.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1022.95,-192.9 1014.27,-198.97 1024.84,-199.63 1022.95,-192.9"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-170.97C1102.86,-175.7 1109.55,-217.67 1067,-231.97 997,-255.5 512.04,-218.56 313.23,-202.17"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.38,-198.67 303.12,-201.33 312.8,-205.64 313.38,-198.67"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1286.6,-185.14C1273.06,-238.84 1210.64,-455.71 1067,-539.97 969.28,-597.3 663.47,-517.9 557.5,-557.97"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1280.54,-185.21C1245.99,-230.81 1116.26,-387.58 975,-373.97"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-373.97C929.93,-368.28 919.43,-361.22 881,-340.97 863.54,-331.77 862.9,-323.28 845,-314.97 804.91,-296.36 792.45,-286.32 748.5,-290.97"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M522.29,-381.05C514.22,-384.82 505.93,-389.46 499,-394.97 443.93,-438.7 470.53,-504.21 402,-519.97"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M400,-519.97C270.63,-549.72 129.75,-434.96 78.78,-388.08"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="81.09,-385.44 71.39,-381.17 76.31,-390.56 81.09,-385.44"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-380.97 339,-380.97 339,-356.97 463,-356.97 463,-380.97"/>
+<text text-anchor="middle" x="401" y="-366.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M498.78,-368.97C490.43,-368.97 481.74,-368.97 473.15,-368.97"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="473.13,-365.47 463.13,-368.97 473.13,-372.47 473.13,-365.47"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M727.04,-457.04C693.78,-476.64 623.23,-513.83 557.5,-519.97"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M555.5,-519.97C487.57,-526.32 469.72,-511.74 402,-519.97"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M722,-457.03C700.98,-468.28 670.88,-486.66 650,-508.97 627.97,-532.52 637.78,-550.19 614,-571.97 610.36,-575.3 606.22,-578.28 601.87,-580.91"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="599.88,-578.01 592.75,-585.85 603.21,-584.17 599.88,-578.01"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M727.92,-457.12C708.43,-469.91 676.95,-490.68 650,-508.97 633.88,-519.91 631.05,-524.56 614,-533.97 590.11,-547.15 583.02,-548.32 557.5,-557.97"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M555.5,-557.97C530.72,-567.34 522.94,-565.62 499,-576.97 452.99,-598.8 452.63,-643.5 402,-637.97"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M716.55,-432.93C684.3,-419.96 632.83,-399.26 597.21,-384.94"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="598.2,-381.57 587.62,-381.08 595.59,-388.06 598.2,-381.57"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1445,-619.97C1172.01,-665.03 1115.46,-727.59 845,-785.97 718.58,-813.26 686.45,-821.07 557.5,-830.97"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1608.5,-288.97C1428.23,-228.46 1204.98,-214.02 1077.38,-211.08"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1077.3,-207.58 1067.23,-210.87 1077.15,-214.58 1077.3,-207.58"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1749.21,-347.84C1737.4,-344.09 1725,-339.47 1714,-333.97 1696.35,-325.14 1695.77,-316.55 1678,-307.97 1649.94,-294.42 1640.05,-298.89 1610.5,-288.97"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1608.5,-288.97C1554.88,-270.97 1500.01,-233.03 1470.04,-210.3"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1471.98,-207.37 1461.92,-204.04 1467.71,-212.92 1471.98,-207.37"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1724.93,-347.94C1712.9,-345.95 1700.38,-343.87 1688.23,-341.86"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1688.57,-338.36 1678.13,-340.18 1687.42,-345.27 1688.57,-338.36"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1789.6,-372.05C1766.7,-405.86 1696.45,-501.47 1610.5,-539.97"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1608.5,-539.97C1584.21,-550.85 1176.11,-403.39 1149.5,-402.97"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_scalar_3d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1608.5,-539.97C1535.4,-572.72 1526.03,-606.93 1447,-619.97"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1445,-619.97C1423.92,-623.45 1372.02,-608.02 1334.39,-595.33"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1335.27,-591.93 1324.68,-592 1333.01,-598.55 1335.27,-591.93"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_tensor_3d.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1608.5,-539.97C1579.77,-552.84 1545.18,-554.42 1515.4,-552.14"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1515.36,-548.62 1505.08,-551.19 1514.72,-555.59 1515.36,-548.62"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1789.23,-238.88C1771.46,-213.65 1727.24,-154.8 1678,-118.97 1586.96,-52.72 1559.59,-14.97 1447,-14.97 1447,-14.97 1447,-14.97 1289.5,-14.97 1004.92,-14.97 922.76,34.19 650,-46.97 604.37,-60.55 604.98,-97.57 557.5,-100.97"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M555.5,-100.97C408.51,-110.55 358.02,-84.81 228.5,-154.97"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M226.5,-154.97C196.32,-170.99 178.4,-152.28 152,-173.97 96.52,-219.55 72.01,-306.02 63.17,-346.72"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="59.71,-346.2 61.13,-356.7 66.57,-347.6 59.71,-346.2"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1785.39,-238.58C1757.62,-211.33 1685.9,-147.46 1610.5,-132.97"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1608.5,-132.97C1498.06,-111.75 1208.48,-117.96 1103,-156.97 1083.99,-164 1085.09,-175.82 1067,-184.97 1058.65,-189.2 1049.51,-192.82 1040.33,-195.91"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1039.27,-192.57 1030.79,-198.93 1041.38,-199.25 1039.27,-192.57"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1608.5,-132.97C1558.07,-123.28 1502.49,-153.25 1471.46,-173.96"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1469.26,-171.22 1463.01,-179.77 1473.23,-176.99 1469.26,-171.22"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1770.59,-263.07C1746.46,-273.83 1710.03,-289.84 1678,-302.97 1669.64,-306.4 1660.65,-309.95 1652.04,-313.29"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1650.62,-310.09 1642.54,-316.95 1653.13,-316.62 1650.62,-310.09"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1713.93,-250.97C1642.92,-250.97 1538.28,-250.97 1447,-250.97 1447,-250.97 1447,-250.97 1289.5,-250.97 1048.4,-250.97 988.26,-265.61 748.5,-290.97"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-290.97C702.68,-296.71 690.94,-298.33 650,-314.97 626.38,-324.57 601.53,-339.38 583.54,-351.06"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="581.21,-348.4 574.8,-356.84 585.07,-354.24 581.21,-348.4"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1147.5,-605.97C1132.48,-607.9 893.02,-653.77 881,-662.97 853.22,-684.23 871.48,-710.11 845,-732.97 793.91,-777.08 624.67,-824.35 557.5,-830.97"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M555.5,-830.97C487.48,-836.19 469.16,-842.99 402,-830.97"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node28" class="node">
+<title>sourcefile~self_scalar_3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node28"><a xlink:href=".././sourcefile/self_scalar_3d_t.f90.html" xlink:title="SELF_Scalar_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-610.97 910.5,-610.97 910.5,-586.97 1037.5,-586.97 1037.5,-610.97"/>
+<text text-anchor="middle" x="974" y="-596.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_scalar_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_scalar_3d_t.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1232.85,-591.98C1207.46,-596.98 1177.08,-602.43 1149.5,-605.97"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1147.5,-605.97C1115.05,-610.14 1078.91,-609.48 1048.12,-607.35"/>
+<polygon fill="#003fff" stroke="#003fff" points="1048.14,-603.84 1037.9,-606.58 1047.61,-610.82 1048.14,-603.84"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node27" class="node">
+<title>sourcefile~self_vector_3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node27"><a xlink:href=".././sourcefile/self_vector_3d_t.f90.html" xlink:title="SELF_Vector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-442.97 910.5,-442.97 910.5,-418.97 1037.5,-418.97 1037.5,-442.97"/>
+<text text-anchor="middle" x="974" y="-428.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_vector_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_vector_3d_t.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1386.9,-416.07C1301.32,-419.17 1141.46,-424.95 1048.05,-428.33"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1047.7,-424.84 1037.83,-428.7 1047.95,-431.83 1047.7,-424.84"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node26" class="node">
+<title>sourcefile~self_tensor_3d_t.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node26"><a xlink:href=".././sourcefile/self_tensor_3d_t.f90.html" xlink:title="SELF_Tensor_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-530.97 910.5,-530.97 910.5,-506.97 1037.5,-506.97 1037.5,-530.97"/>
+<text text-anchor="middle" x="974" y="-516.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_tensor_3d_t.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_tensor_3d_t.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1386.9,-537.37C1301.32,-533.55 1141.46,-526.41 1048.05,-522.23"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1047.98,-518.73 1037.83,-521.78 1047.67,-525.72 1047.98,-518.73"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M366.87,-356.84C357.59,-352.92 347.67,-348.21 339,-342.97 284.78,-310.23 291.36,-245.18 228.5,-252.97"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M386.56,-356.86C373.43,-344.6 353.39,-324.69 339,-304.97 319.3,-277.98 326.22,-263 303,-238.97 292.5,-228.11 278.75,-218.99 265.92,-211.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="267.29,-208.68 256.81,-207.14 264.04,-214.88 267.29,-208.68"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M389.01,-381.21C360.16,-413.34 282.04,-500.34 246.52,-539.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="243.7,-537.81 239.62,-547.59 248.9,-542.48 243.7,-537.81"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node29" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_node29"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-380.97 165.5,-380.97 165.5,-356.97 289.5,-356.97 289.5,-380.97"/>
+<text text-anchor="middle" x="227.5" y="-366.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M338.57,-368.97C325.98,-368.97 312.63,-368.97 299.73,-368.97"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="299.5,-365.47 289.5,-368.97 299.5,-372.47 299.5,-365.47"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M910.06,-518.99C865.04,-519.27 803,-520.21 748.5,-522.97"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M746.5,-522.97C662.6,-527.22 641.15,-512.16 557.5,-519.97"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M953.41,-531.14C915.4,-553.55 828.36,-599.06 748.5,-598.97"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M746.5,-598.97C705.88,-598.92 660.36,-598.69 624.17,-598.46"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="623.76,-594.96 613.74,-598.39 623.71,-601.96 623.76,-594.96"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M746.5,-522.97C661.18,-527.29 637.41,-527.76 557.5,-557.97"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M955.93,-506.78C937.37,-493.47 906.89,-471.46 881,-451.97 864.81,-439.78 863.47,-432.33 845,-423.97 773.77,-391.73 684.32,-378.38 624.27,-372.85"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="624.42,-369.35 614.16,-371.97 623.82,-376.33 624.42,-369.35"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M921.04,-506.96C907.73,-503.16 893.62,-498.49 881,-492.97 863.82,-485.46 862.23,-478.37 845,-470.97 831.4,-465.13 816.15,-460.29 801.85,-456.44"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="802.7,-453.04 792.14,-453.93 800.95,-459.82 802.7,-453.04"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M947.21,-418.95C928.76,-410.34 903.34,-398.47 881,-387.97 822.65,-360.56 812.88,-332.34 748.5,-328.97"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-328.97C731.98,-328.21 242.93,-251.18 228.5,-252.97"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M942.33,-418.8C879.85,-396.23 736.44,-356.04 650,-423.97 596.77,-465.8 657.04,-519.72 614,-571.97 611.41,-575.12 608.35,-577.9 605.03,-580.36"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="602.93,-577.54 596.32,-585.82 606.65,-583.47 602.93,-577.54"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-328.97C697.86,-323.68 688.9,-352.29 650,-381.97 642.13,-387.98 411.84,-639.08 402,-637.97"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M400,-637.97C345,-629.78 287.41,-598.07 254.93,-577.69"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="256.77,-574.71 246.46,-572.27 253,-580.6 256.77,-574.71"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-328.97C693.86,-323.24 634.25,-339.8 596.3,-353.33"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="594.85,-350.13 586.67,-356.86 597.26,-356.7 594.85,-350.13"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M910.46,-434.87C876.51,-436.99 834.96,-439.58 802.44,-441.61"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="801.99,-438.13 792.22,-442.24 802.42,-445.11 801.99,-438.13"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge79" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M910.11,-609.1C899.61,-612.84 889.42,-617.96 881,-624.97 853.19,-648.11 873.47,-675.65 845,-697.97 775.15,-752.72 735.23,-716.22 650,-740.97 537.39,-773.67 517.45,-810.48 402,-830.97"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M400,-830.97C178.8,-849.68 84.41,-486.27 63.58,-391.36"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="66.97,-390.44 61.45,-381.39 60.12,-391.9 66.97,-390.44"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge82" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M910.1,-599.01C865.09,-599.03 803.07,-599.03 748.5,-598.97"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge83" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M910.33,-610.48C805.07,-628.19 586.22,-658.08 402,-637.97"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge80" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M952.35,-586.87C933.33,-575.47 904.58,-557.55 881,-539.97 864.07,-527.35 863.88,-518.42 845,-508.97 765.63,-469.26 727.32,-509.53 650,-465.97 616.32,-447 587.4,-411.8 571.25,-389.43"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="573.93,-387.16 565.32,-380.99 568.2,-391.18 573.93,-387.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge81" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M946.58,-586.76C926.62,-576.51 899.57,-560.27 881,-539.97 857.66,-514.44 871.97,-492.63 845,-470.97 832.79,-461.17 817.2,-455.05 802.13,-451.23"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="802.86,-447.8 792.34,-449.03 801.33,-454.64 802.86,-447.8"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_nulldgmodel3d.f90~~EfferentGraph_edge84" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M165.08,-368.97C152.48,-368.97 139.16,-368.97 126.36,-368.97"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="126.24,-365.47 116.24,-368.97 126.24,-372.47 126.24,-365.47"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_nulldgmodel3df90EfferentGraph = svgPanZoom('#sourcefileself_nulldgmodel3df90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_nulldgmodel3d.html">self_NullDGModel3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_nulldgmodel3d.f90.html#src">SELF_NullDGModel3D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">self_NullDGModel3D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">self_NullDGModel3D_t</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">implicit none</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">NullDGModel3D_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NullDGModel3D</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">  </span><span class="k">endtype </span><span class="n">NullDGModel3D</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="k">endmodule </span><span class="n">self_NullDGModel3D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2024 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2024-11-28 16:32            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
