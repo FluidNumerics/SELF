@@ -66,4 +66,5 @@ add_fortran_tests (
   "linear_euler2d_planewave_reflection.f90"
   "linear_euler2d_planewave_propagation.f90"
   "linear_shallow_water2d_nonormalflow.f90"
+  "linear_euler3d_spherical_soundwave_radiation.f90"
     )
