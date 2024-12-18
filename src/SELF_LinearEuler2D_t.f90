@@ -231,6 +231,7 @@ contains
     enddo
 
     call this%ReportMetrics()
+    call this%solution%UpdateDevice()
 
   endsubroutine SphericalSoundWave_LinearEuler2D_t
 

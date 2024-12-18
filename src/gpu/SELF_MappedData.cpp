@@ -426,21 +426,21 @@ extern "C"
 
 __global__ void ContravariantProjection_2D_gpukernel(real *vector, real *dsdx, int nq){
 
-    uint32_t idof = threadIdx.x;
+    uint32_t iq= threadIdx.x;
 
-    if( idof < nq ){
+    if( iq< nq ){
       uint32_t iel = blockIdx.x;
       uint32_t nel = gridDim.x;
       uint32_t ivar = blockIdx.y;
       uint32_t nvar = gridDim.y;
-      real Fx = vector[idof + nq*(iel + nel*(ivar))];
-      real Fy = vector[idof + nq*(iel + nel*(ivar + nvar))];
+      real Fx = vector[iq+ nq*(iel + nel*(ivar))];
+      real Fy = vector[iq+ nq*(iel + nel*(ivar + nvar))];
             
-      vector[idof + nq*(iel + nel*(ivar))] = dsdx[idof + nq*(iel)]*Fx + // dsdx(...,0,0)*Fx
-                                             dsdx[idof + nq*(iel+nel)]*Fy; // dsdx(...,1,0)*Fy;
+      vector[iq+ nq*(iel + nel*(ivar))] = dsdx[iq+ nq*(iel)]*Fx + // dsdx(...,0,0)*Fx
+                                             dsdx[iq+ nq*(iel+nel)]*Fy; // dsdx(...,1,0)*Fy;
 
-      vector[idof + nq*(iel + nel*(ivar+nvar))] = dsdx[idof + nq*(iel+nel*2)]*Fx + //dsdx(...,0,1)*Fx
-                                                  dsdx[idof + nq*(iel+nel*3)]*Fy;  //dsdx(...,1,1)*Fy
+      vector[iq+ nq*(iel + nel*(ivar+nvar))] = dsdx[iq+ nq*(iel+nel*2)]*Fx + //dsdx(...,0,1)*Fx
+                                                  dsdx[iq+ nq*(iel+nel*3)]*Fy;  //dsdx(...,1,1)*Fy
     }
 
 }
@@ -459,33 +459,46 @@ extern "C"
   } 
 }
 
-__global__ void ContravariantProjection_3D_gpukernel(real *vector, real *dsdx, int N, int ndof){
+__global__ void ContravariantProjection_3D_gpukernel(real *vector, real *dsdx, int nq){
 
-    uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
+    uint32_t iq = threadIdx.x; // loops over quadrature points and elements
 
-    if( i < ndof ){
+    if( iq < nq ){
+      uint32_t iel = blockIdx.x;
+      uint32_t nel = gridDim.x;
       uint32_t ivar = blockIdx.y;
-      uint32_t nvar = blockDim.y;
-      real Fx = vector[i+ndof*ivar];
-      real Fy = vector[i+ndof*(ivar + nvar)];
-      real Fz = vector[i+ndof*(ivar + 2*nvar)];
-      vector[i+ndof*ivar] = dsdx[i]*Fx + dsdx[i + ndof]*Fy + dsdx[i + 2*ndof]*Fz;
-      vector[i+ndof*(ivar + nvar)] = dsdx[i + 3*ndof]*Fx + dsdx[i + 4*ndof]*Fy + + dsdx[i + 5*ndof]*Fz;
-      vector[i+ndof*(ivar + 2*nvar)] = dsdx[i + 6*ndof]*Fx + dsdx[i + 7*ndof]*Fy + + dsdx[i + 8*ndof]*Fz;
+      uint32_t nvar = gridDim.y;
+
+      real Fx = vector[iq+ nq*(iel + nel*(ivar))];
+      real Fy = vector[iq+ nq*(iel + nel*(ivar + nvar))];
+      real Fz = vector[iq+ nq*(iel + nel*(ivar + 2*nvar))];
+
+      vector[iq+ nq*(iel + nel*(ivar))] = dsdx[iq+ nq*iel]*Fx + 
+                                          dsdx[iq+ nq*(iel+nel)]*Fy + 
+                                          dsdx[iq+ nq*(iel+2*nel)]*Fz;
+
+      vector[iq+ nq*(iel + nel*(ivar + nvar))] = dsdx[iq+ nq*(iel+3*nel)]*Fx + 
+                                                 dsdx[iq+ nq*(iel+4*nel)]*Fy + 
+                                                 dsdx[iq+ nq*(iel+5*nel)]*Fz;
+
+      vector[iq+ nq*(iel + nel*(ivar + 2*nvar))] = dsdx[iq+ nq*(iel+6*nel)]*Fx + 
+                                                   dsdx[iq+ nq*(iel+7*nel)]*Fy + 
+                                                   dsdx[iq+ nq*(iel+8*nel)]*Fz;
     }
 
 }
 
 extern "C"
 {
-  void ContravariantProjection_3D_gpu(real *vector, real *dsdx, int N, int nVar, int nEl)
+  void ContravariantProjection_3D_gpu(real *vector, real *dsdx, int N, int nvar, int nel)
   {
-    int ndof = (N+1)*(N+1)*(N+1)*nEl;
-    int threads_per_block = 256;
-    int nblocks_x = ndof/threads_per_block + 1;
 
-    dim3 nblocks(nblocks_x,nVar,1);
-    dim3 nthreads(threads_per_block,1,1);
-    ContravariantProjection_3D_gpukernel<<<nblocks,nthreads, 0, 0>>>(vector, dsdx, N, ndof);
+    int nq = (N+1)*(N+1)*(N+1);
+    if( N < 4 ){
+        ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(vector, dsdx, nq);
+
+    } else if( N >= 4 && N < 8 ){
+        ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(vector, dsdx, nq);
+    }
   } 
 }
