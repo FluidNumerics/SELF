@@ -37,8 +37,6 @@ module SELF_Data
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,public :: SELF_DataObj
   !! The SELF_DataObj class is a base class for all data objects in SELF.
   !! A data object in SELF is a multidimensional array of data, represented

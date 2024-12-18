@@ -30,7 +30,6 @@ module SELF_Constants
   use iso_fortran_env
 
   implicit none
-#include "SELF_Macros.h"
 
 #ifdef DOUBLE_PRECISION
   integer,parameter :: prec = c_double

@@ -35,8 +35,6 @@ module SELF_Geometry_1D
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,public :: Geometry1D
     type(Scalar1D) :: x ! Physical Positions
     type(Scalar1D) :: dxds ! Conversion from computational to physical space

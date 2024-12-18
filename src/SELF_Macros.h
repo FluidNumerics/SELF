@@ -28,3 +28,10 @@
 #define INFO(msg) PRINT('("INFO : [",A,"] : ",A)'),__FUNC__,msg
 #define WARNING(msg) PRINT('("WARNING : [",A,"] : ",A)'),__FUNC__,msg
 #define ERROR(msg) PRINT('("ERROR : [",A,"] : ",A)'),__FUNC__,msg
+
+#ifdef MULTITHREADING
+use omp_lib
+#define TIMER(t) t=omp_get_wtime()
+#else
+#define TIMER(t) call cpu_time(t)
+#endif

@@ -37,8 +37,6 @@ module SELF_Geometry_2D
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,public :: SEMQuad
     type(Vector2D) :: x ! Physical positions
     type(Tensor2D) :: dxds ! Covariant basis vectors

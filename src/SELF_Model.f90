@@ -32,9 +32,9 @@ module SELF_Model
   use HDF5
   use FEQParse
 
-  implicit none
-
 #include "SELF_Macros.h"
+
+  implicit none
 
 ! //////////////////////////////////////////////// !
 !   Time integration parameters
@@ -781,9 +781,10 @@ contains
     do i = 1,nIO
 
       tNext = this%t+ioInterval
-      call cpu_time(t1)
+
+      TIMER(t1) ! See SELF_Macros.h for TIMER selection
       call this%timeIntegrator(tNext)
-      call cpu_time(t2)
+      TIMER(t2)
 
       open(output_unit,ENCODING='utf-8')
       write(output_unit,'(A)',ADVANCE='no') ' --------------------------------------------------------'

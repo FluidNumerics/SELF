@@ -38,8 +38,6 @@ module SELF_Scalar_2D_t
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,extends(SELF_DataObj),public :: Scalar2D_t
 
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: interior

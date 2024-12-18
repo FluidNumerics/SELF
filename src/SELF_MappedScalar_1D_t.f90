@@ -40,8 +40,6 @@ module SELF_MappedScalar_1D_t
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,extends(Scalar1D),public :: MappedScalar1D_t
     logical :: geometry_associated = .false.
     type(Geometry1D),pointer :: geometry => null()
