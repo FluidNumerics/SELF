@@ -21,13 +21,16 @@ SELF comes with a spack environment file that defines the dependencies that are 
 git clone https://github.com/fluidnumerics/SELF/ ~/SELF/
 ```
 
-If you have a preferred compiler you would like for spack to use, you can use `spack config add`, e.g.
+**If you have a preferred compiler** you would like for spack to use, you can use `spack config add`, e.g.
 
 ```
-spack -e ~/SELF/share/spack-env config add packages:all:require:['%gcc@12.2.0']
+spack -e ~/SELF/share/spack-env config add packages:all:require:["'%gcc@12.2.0'"]
 ```
 
-The example above will force packages to be built with version 12.2.0 of gfortran from the `gcc` compiler set.
+The example above will force packages to be built with version 12.2.0 of gfortran from the `gcc` compiler set. 
+
+!!! note
+    If you do not set a preferred compiler, spack will pick one based on the available compilers found using `spack compiler find`
 
 To reduce build time, import existing packages on your system
 ```
