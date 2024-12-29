@@ -1,7 +1,7 @@
 steps:
   - name : "Build on Noether"
     sbatch_options: 
-      - "--partition=gpu"
+      - "--account=fluidnumerics"
       - "--gres=gpu:mi210:2"
       - "--ntasks=6"
       - "--cpus-per-task=2"
@@ -9,11 +9,11 @@ steps:
     prerequisites:
       - "source /etc/profile.d/z11_lmod.sh"
     modules:
-      - cmake/3.29.6
-      - gcc/12.3.0
-      - rocm/6.0.2
-      - openmpi+rocm+ucx/5.0.3
-      - hdf5/1.14.3
+      - cmake/3.31.2
+      - gcc/12.4.0
+      - rocm/6.3.0
+      - openmpi/5.0.6
+      - hdf5/1.14.5 
       - feq-parse/2.2.2
     env:
       BUILD_DIR: ${WORKSPACE}/build
@@ -42,7 +42,7 @@ steps:
               -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
               -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
               -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
-              -DCMAKE_HIP_ARCHITECTURE=${GPU_ARCH} \
+              -DAMDGPU_TARGETS=${GPU_ARCH} \
               ../
         ninja
 

@@ -76,7 +76,6 @@ module self_LinearEuler3D_t
     !procedure :: hbc3D_NoNormalFlow => hbc3D_NoNormalFlow_LinearEuler3D_t
     procedure :: flux3D => flux3D_LinearEuler3D_t
     procedure :: riemannflux3D => riemannflux3D_LinearEuler3D_t
-    !procedure :: source3D => source3D_LinearEuler3D_t
     procedure :: SphericalSoundWave => SphericalSoundWave_LinearEuler3D_t
 
   endtype LinearEuler3D_t
@@ -243,7 +242,7 @@ contains
     print*,__FILE__," : Lr = ",Lr
     print*,__FILE__," : x0 = ",x0
     print*,__FILE__," : y0 = ",y0
-    print*,__FILE__," : y0 = ",z0
+    print*,__FILE__," : z0 = ",z0
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   k=1:this%solution%N+1,iel=1:this%mesh%nElem)
