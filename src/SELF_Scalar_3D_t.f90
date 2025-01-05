@@ -282,7 +282,7 @@ contains
     do ivar = 1,this%nVar
       call this%meta(ivar)%WriteHDF5(group,ivar,fileId)
       call WriteArray_HDF5(fileId, &
-                           trim(group)//trim(this%meta(ivar)%name), &
+                           trim(group)//"/"//trim(this%meta(ivar)%name), &
                            this%interior(:,:,:,:,ivar))
     enddo
 
