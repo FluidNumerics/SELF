@@ -38,8 +38,6 @@ module SELF_Scalar_1D_t
 
   implicit none
 
-#include "SELF_Macros.h"
-
 ! ---------------------- Scalars ---------------------- !
   type,extends(SELF_DataObj),public :: Scalar1D_t
 

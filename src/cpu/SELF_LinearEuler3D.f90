@@ -24,14 +24,13 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-#define __FUNC__
-#define INFO(msg) PRINT('("INFO : [",A,"] : ",A)'),__FUNC__,msg
-#define WARNING(msg) PRINT('("WARNING : [",A,"] : ",A)'),__FUNC__,msg
-#define ERROR(msg) PRINT('("ERROR : [",A,"] : ",A)'),__FUNC__,msg
+module self_LinearEuler3D
 
-#ifdef MULTITHREADING
-use omp_lib
-#define TIMER(t) t=omp_get_wtime()
-#else
-#define TIMER(t) call cpu_time(t)
-#endif
+  use self_LinearEuler3D_t
+
+  implicit none
+
+  type,extends(LinearEuler3D_t) :: LinearEuler3D
+  endtype LinearEuler3D
+
+endmodule self_LinearEuler3D

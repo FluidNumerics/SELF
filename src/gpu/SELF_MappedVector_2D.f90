@@ -220,7 +220,7 @@ contains
     call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dgMatrix_gpu, &
                            this%interp%N,this%nvar,this%nelem)
 
-    ! Boundary terms --> TO DO : problem here when nvar > 1
+    ! Boundary terms
     call DG_BoundaryContribution_2D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
                                         this%boundarynormal_gpu,df,this%interp%N,this%nvar,this%nelem)
 

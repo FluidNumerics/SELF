@@ -37,8 +37,6 @@ module SELF_DGModel1D_t
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,extends(Model) :: DGModel1D_t
     type(MappedScalar1D) :: solution
     type(MappedScalar1D) :: solutionGradient
@@ -566,7 +564,7 @@ contains
       pickupFile = 'solution.'//timeStampString//'.h5'
     endif
 
-    INFO("Writing pickup file : "//trim(pickupFile))
+    print*,__FILE__," : Writing pickup file : "//trim(pickupFile)
     call this%solution%UpdateHost()
 
     call Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)

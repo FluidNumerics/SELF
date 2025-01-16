@@ -39,8 +39,6 @@ module SELF_DGModel2D_t
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type,extends(Model) :: DGModel2D_t
     type(MappedScalar2D)   :: solution
     type(MappedVector2D)   :: solutionGradient

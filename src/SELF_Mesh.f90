@@ -32,8 +32,6 @@ module SELF_Mesh
 
   implicit none
 
-#include "SELF_Macros.h"
-
   type :: SEMMesh
     integer :: nGeo
     integer :: nElem

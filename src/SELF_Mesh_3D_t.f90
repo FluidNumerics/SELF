@@ -40,7 +40,6 @@ module SELF_Mesh_3D_t
 
   implicit none
 
-#include "SELF_Macros.h"
 ! ========================================================================= !
 ! Node, Edge, Face, Element and Connectivity Standard
 ! ========================================================================= !

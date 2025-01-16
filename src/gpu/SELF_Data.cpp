@@ -184,44 +184,44 @@ extern "C"
 }
 
 template<int blockSize, int matSize>
-__global__ void __launch_bounds__(512) Divergence_3D_gpukernel(double *f, double *df, double *dmatrix, int nq, int N, int nel, int nvar){
+__global__ void __launch_bounds__(512) Divergence_3D_gpukernel(real *f, real *df, real *dmatrix, int nq, int N, int nel, int nvar){
 
-    uint32_t idof = threadIdx.x;
-    if( idof < nq ){
+    uint32_t iq = threadIdx.x;
+    if( iq < nq ){
         
         uint32_t iel = blockIdx.x;
         uint32_t ivar = blockIdx.y;
-        uint32_t i = idof % (N+1);
-        uint32_t j = (idof/(N+1)) % (N+1);
-        uint32_t k = (idof/(N+1)/(N+1));
+        uint32_t i = iq % (N+1);
+        uint32_t j = (iq/(N+1)) % (N+1);
+        uint32_t k = (iq/(N+1)/(N+1));
 
-        __shared__ double f1[blockSize];
-        __shared__ double f2[blockSize];
-        __shared__ double f3[blockSize];
-        __shared__ double dmloc[matSize];
-        f1[i+(N+1)*(j+(N+1)*k)] = f[i+(N+1)*(j+(N+1)*(k + (N+1)*(iel + nel*(ivar))))];
-        f2[i+(N+1)*(j+(N+1)*k)] = f[i+(N+1)*(j+(N+1)*(k + (N+1)*(iel + nel*(ivar + nvar))))];
-        f3[i+(N+1)*(j+(N+1)*k)] = f[i+(N+1)*(j+(N+1)*(k + (N+1)*(iel + nel*(ivar + 2*nvar))))];
+        __shared__ real f1[blockSize];
+        __shared__ real f2[blockSize];
+        __shared__ real f3[blockSize];
+        __shared__ real dmloc[matSize];
+        f1[iq] = f[iq + nq*(iel + nel*(ivar))];
+        f2[iq] = f[iq + nq*(iel + nel*(ivar + nvar))];
+        f3[iq] = f[iq + nq*(iel + nel*(ivar + 2*nvar))];
         if( k == 0 ){
             dmloc[i+(N+1)*j] = dmatrix[i+(N+1)*j];
         }
         __syncthreads();
 
-        double dfloc = 0.0;
+        real dfloc = 0.0;
 
         for(int ii = 0; ii<N+1; ii++){
             dfloc += dmloc[ii+(N+1)*i]*f1[ii+(N+1)*(j+(N+1)*(k))]+
                      dmloc[ii+(N+1)*j]*f2[i+(N+1)*(ii+(N+1)*(k))]+
                      dmloc[ii+(N+1)*k]*f3[i+(N+1)*(j+(N+1)*(ii))];
         }
-        df[idof + nq*(iel + nel*ivar)] = dfloc;
+        df[iq + nq*(iel + nel*ivar)] = dfloc;
     }
 
 }
 
 extern "C"
 {
-  void Divergence_3D_gpu(double *f, double *df, double *dmatrix, int N, int nel, int nvar){
+  void Divergence_3D_gpu(real *f, real *df, real *dmatrix, int N, int nel, int nvar){
     int nq = (N+1)*(N+1)*(N+1);
     if( N < 4 ){
         Divergence_3D_gpukernel<64,16><<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(f,df,dmatrix,nq,N,nel,nvar);
@@ -232,27 +232,28 @@ extern "C"
   }
 }
 
-__global__ void __launch_bounds__(512) DG_BoundaryContribution_3D_gpukernel(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nel){
+__global__ void __launch_bounds__(512) DG_BoundaryContribution_3D_gpukernel(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nq){
 
   uint32_t iq = threadIdx.x;
-  uint32_t nq = (N+1)*(N+1)*(N+1);
 
   if( iq < nq ){
     uint32_t i = iq % (N+1);
     uint32_t j = (iq/(N+1))%(N+1);
-    uint32_t k = (iq/(N+1)/(N+1))%(N+1);
+    uint32_t k = iq/(N+1)/(N+1);
     uint32_t iel = blockIdx.x;
+    uint32_t nel = gridDim.x;
     uint32_t ivar = blockIdx.y;
+    
     df[iq + nq*(iel + nel*ivar)] += (bf[SCB_3D_INDEX(i,j,5,iel,ivar,N,nel)]*bMatrix[k+(N+1)] + // top
-                                              bf[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])/       // bottom
-                                              qWeights[k];
+                                     bf[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])/       // bottom
+                                        qWeights[k];
 
     df[iq + nq*(iel + nel*ivar)] += (bf[SCB_3D_INDEX(j,k,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] + // east
-                                              bf[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])/       // west
-                                              qWeights[i];
+                                     bf[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])/       // west
+                                        qWeights[i];
 
     df[iq + nq*(iel + nel*ivar)] += (bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] + // north
-                                              bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])/       // south
+                                     bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])/       // south
                                               qWeights[j];
   }
 
@@ -265,10 +266,10 @@ extern "C"
 
     int nq = (N+1)*(N+1)*(N+1);
     if( N < 4 ){
-        DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nel);
+        DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nq);
 
     } else if( N >= 4 && N < 8 ){
-        DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nel);
+        DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nq);
     }
   } 
 }
