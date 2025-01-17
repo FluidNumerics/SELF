@@ -44,20 +44,29 @@ spack -e ~/SELF/share/spack-env install --no-check-signature
 
 Then, install SELF
 ```
-cd ~/SELF
-spack env activate ~/SELF/share/spack-env
-mkdir ~/SELF/build
-cd ~/SELF/build
+cd ${HOME}/SELF
+spack env activate ${HOME}/SELF/share/spack-env
+mkdir ${HOME}/SELF/build
+cd ${HOME}/SELF/build
 cmake -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self ../
 make
-make install
 ```
 
 If you'd like to run the tests included with SELF, to verify your installation, you can use `ctest`.
 
 ```
-cd ${HOME}/opt/self/test
+cd ${HOME}/SELF/build
+export WORKSPACE=${HOME}/SELF
 ctest
+```
+
+!!! note
+    Note that we're setting the environment variable `WORKSPACE` to the path to the SELF source code. This is due to the fact that some of the tests use this path to find mesh files that are read in during testing. If `WORKSPACE` is not set, some tests will fail.
+
+Once you confirm all tests have passed, you can finish installation
+
+```
+make install
 ```
 
 ### Once v0.0.1 is released 
