@@ -35,7 +35,7 @@ spack install self
 ```
 
 !!! note
-    Currently, GPU Accelerated builds of SELF are not supported through the Spack package manager. We are currently working on a few issues we encountered while integrating ROCm and CUDA package support in Spack.
+    Currently, GPU Accelerated and multithreaded builds of SELF are not supported through the Spack package manager. We are currently working on a few issues we encountered related to these features while integrating with Spack.
 
 By default, this will install SELF with the following features
 * Double precision floating point arithmetic
@@ -64,23 +64,8 @@ spack load self
 $(spack location -i self)/test/burgers1d_shock
 ```
 
-### Enable Multithreading
-Many of the computationally intensive methods in SELF are written using the `do concurrent` structure. We have provided the variant `+multithreading` which will enable multithreading for all `do concurrent` blocks. You can install SELF with multithreading using
-
-```shell
-spack install self+multithreading
-```
-
-If you are using the GNU compiler suite, the number of threads used for `do concurrent` blocks is determined during build time. Because of this, we have provided the `nthreads` option, which defaults to 4. You can change this option to a value more sensible for your platform, e.g.
-
-```shell
-spack install self+multithreading % gcc
-```
-
-The `%gcc` here indicates that you intend to build SELF with the GNU compilers.
-
 ## Advanced Installation
-You can use these instructions for installing SELF on GPU accelerated platforms, or in cases where you do not wish to use the spack package manager.
+You can use these instructions for installing SELF on GPU accelerated platforms or with multithreading enabled, or in cases where you do not wish to use the spack package manager.
 
 ### Dependencies
 The Spectral Element Library in Fortran can be built provided the following dependencies are met
