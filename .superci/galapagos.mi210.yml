@@ -3,8 +3,8 @@ steps:
     sbatch_options: 
       - "--account=fluidnumerics"
       - "--gres=gpu:mi210:2"
-      - "--ntasks=6"
-      - "--cpus-per-task=2"
+      - "--ntasks=2"
+      - "--cpus-per-task=16"
       - "--time=40:00"
     prerequisites:
       - "source /etc/profile.d/z11_lmod.sh"
@@ -25,15 +25,13 @@ steps:
       ENABLE_DOUBLE_PRECISION: ON
       ENABLE_MULTITHREADING: OFF
       NTHREADS: 4
-      GCOV: gcov-12
+      GCOV: gcov
     commands: 
       - |
         set -e
         mkdir -p ${BUILD_DIR}
         mkdir -p ${OUTDIR}
         cd ${WORKSPACE}/build
-        FC=gfortran \
-        CXX=hipcc \
         cmake -G Ninja \
               -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
               -DCMAKE_INSTALL_PREFIX=${PREFIX} \
@@ -42,7 +40,7 @@ steps:
               -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
               -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
               -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
-              -DAMDGPU_TARGETS=${GPU_ARCH} \
+              -DCMAKE_HIP_ARCHITECTURES=${GPU_ARCH} \
               ../
         ninja
 
