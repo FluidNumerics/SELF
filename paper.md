@@ -1,5 +1,5 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'Spectral Element Library in Fortran : A portable, spectrally accurate, multi-GPU accelerated conservation law solver written in Fortran'
 tags:
   - Fortran
   - Computational Fluid Dynamics
