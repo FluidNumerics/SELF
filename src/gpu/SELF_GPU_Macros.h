@@ -15,7 +15,7 @@
 #include <climits>
 #include <cstdio>
 
-#ifdef HAVE_HIP
+#ifdef __HIP_PLATFORM_AMD__
 
 #include <hip/hip_runtime.h>
 
