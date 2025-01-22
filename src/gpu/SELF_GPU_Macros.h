@@ -31,6 +31,7 @@ static void check(const hipError_t err, const char *const file, const int line)
 #else
 
 #include <cuda_runtime.h>
+#include <stdint.h> // required to provide uint32_t
 
 #define hipLaunchKernelGGL(F,G,B,M,S,...) F<<<G,B,M,S>>>(__VA_ARGS__)
 

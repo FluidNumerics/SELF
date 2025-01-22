@@ -29,16 +29,10 @@ file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
 if(SELF_ENABLE_GPU)
     file(GLOB SELF_BACKEND_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/gpu/*.f*")
     file(GLOB SELF_BACKEND_CPPSRC "${CMAKE_CURRENT_SOURCE_DIR}/gpu/*.cpp*")
-    # Note : joe@fluidnumerics.com (Oct. 1 2024)
-    # Ultimately, we want to be able to use the language support for HIP/CUDA
-    # rather than bringing in HIP/CUDA through `find_package`. At the moment
-    # we are doing a hack overrided the CXX compiler with either hipcc or nvcc
-    # The reason we're doing it this way (hacky) at the moment is that we get
-    # segmentation faults on our AMD GPU tests when using the HIP language support
-    # via Cmake, for some yet unknown reason.
+
     if(hip_FOUND)
       set_source_files_properties(${SELF_BACKEND_CPPSRC} PROPERTIES LANGUAGE HIP)
-    elseif(cuda_FOUND)
+    else()
       set_source_files_properties(${SELF_BACKEND_CPPSRC} PROPERTIES LANGUAGE CUDA)
     endif()
 else()
