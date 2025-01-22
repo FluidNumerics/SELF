@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 
-import self.lagrange as lagrange
+import pyself.lagrange as lagrange
 
 
 # class semline:

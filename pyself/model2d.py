@@ -136,3 +136,58 @@ class model:
                     k+=1
             
         print(self.pvdata)
+
+    def update_from_file(self, hdf5File):
+        """Loads in 2-D model from SELF model output"""
+        import h5py
+        import dask.array as da
+
+        f = h5py.File(hdf5File, 'r')
+            
+        if 'controlgrid' in list(f.keys()):
+
+            controlgrid = f['controlgrid']
+            for group_name in controlgrid.keys():
+
+                if( group_name == 'geometry' ):
+                    continue
+
+                group = controlgrid[group_name]
+                # Create a list to hold data for this group
+                group_data = getattr(self, group_name)
+                print(f"Loading {group_name} group")
+                
+                for k in group.keys():
+                    k_decoded = k.encode('utf-8').decode('utf-8')
+                    if k == 'metadata':
+                        continue
+                    else:
+                        print(f"Loading {k_decoded} field")
+                        # Load the actual data
+                        d = group[k]
+                        N = d.shape[2]
+
+                        # Find index for this field
+                        i = 0
+                        for sol in group_data:
+                            if sol['name'] == k_decoded:
+                                break
+                            else:
+                                i += 1
+
+                        group_data[i]['data'] = da.from_array(d, chunks=(self.geom.daskChunkSize, N, N))
+
+            # # Load fields into pvdata
+            k = 0
+            for attr in self.__dict__:
+                if not attr in ['pvdata','varnames','varunits','geom']:
+                    controlgroup = getattr(self, attr)
+                    for var in controlgroup:
+                        self.pvdata.point_data.set_array(var['data'].flatten(),var['name'])
+                        k+=1
+
+        else:
+            print(f"Error: /controlgrid group not found in {hdf5File}.")
+            return 1
+
+        return 0 
