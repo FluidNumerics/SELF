@@ -2,16 +2,15 @@ steps:
   - name : "Build on Noether"
     sbatch_options: 
       - "--account=fluidnumerics"
-      - "--gres=gpu:mi210:2"
+      - "--gres=gpu:v100:2"
       - "--ntasks=2"
-      - "--cpus-per-task=16"
+      - "--cpus-per-task=6"
       - "--time=40:00"
-    prerequisites:
-      - "source /etc/profile.d/z11_lmod.sh"
+    prerequisites: []
     modules:
-      - cmake/3.31.2
       - gcc/12.4.0
-      - rocm/6.3.0
+      - cmake/3.31.2
+      - cuda/12.4.1
       - openmpi/5.0.6
       - hdf5/1.14.5 
       - feq-parse/2.2.2
@@ -19,7 +18,7 @@ steps:
       BUILD_DIR: ${WORKSPACE}/build
       PREFIX: ${WORKSPACE}/opt/self
       OUTDIR: ${WORKSPACE}/local
-      GPU_ARCH: gfx90a
+      GPU_ARCH: 70
       BUILD_TYPE: coverage
       ENABLE_GPU: ON
       ENABLE_DOUBLE_PRECISION: ON
@@ -77,7 +76,7 @@ steps:
                               --sha "${COMMIT_SHA}" \
                               --branch "${BRANCH_NAME}" \
                               --pr "${PR_NUMBER}" \
-                              --flag "galapagos-noether-gfx90a-test" \
+                              --flag "galapagos-oram-v100-test" \
                               --file "${WORKSPACE}/coverage.info"
         fi
 
