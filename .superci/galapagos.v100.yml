@@ -1,0 +1,85 @@
+steps:
+  - name : "Build on Noether"
+    sbatch_options: 
+      - "--account=fluidnumerics"
+      - "--gres=gpu:v100:2"
+      - "--ntasks=2"
+      - "--cpus-per-task=6"
+      - "--time=40:00"
+    prerequisites: []
+    modules:
+      - gcc/12.4.0
+      - cmake/3.31.2
+      - cuda/12.4.1
+      - openmpi/5.0.6
+      - hdf5/1.14.5 
+      - feq-parse/2.2.2
+    env:
+      BUILD_DIR: ${WORKSPACE}/build
+      PREFIX: ${WORKSPACE}/install
+      OUTDIR: ${WORKSPACE}/local
+      GPU_ARCH: 70
+      BUILD_TYPE: release
+      ENABLE_GPU: ON
+      ENABLE_DOUBLE_PRECISION: ON
+      ENABLE_MULTITHREADING: OFF
+      ENABLE_TESTING: ON
+      ENABLE_EXAMPLES: ON
+      NTHREADS: 4
+      GCOV: gcov
+    commands: 
+      - |
+        set -e
+        mkdir -p ${BUILD_DIR}
+        mkdir -p ${OUTDIR}
+        cd ${BUILD_DIR}
+        cmake -G Ninja \
+              -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              -DSELF_ENABLE_GPU=${ENABLE_GPU} \
+              -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
+              -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
+              -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
+              -DCMAKE_CUDA_ARCHITECTURES=${GPU_ARCH} \
+              -DSELF_ENABLE_EXAMPLES=${ENABLE_EXAMPLES} \
+              -DSELF_ENABLE_TESTING=${ENABLE_TESTING} \
+              ../
+        ninja
+
+
+        # Initialize coverage
+        if [ "$BUILD_TYPE" = "coverage" ]; then
+          lcov --capture \
+                --initial \
+                --directory ${BUILD_DIR}/src \
+                --gcov=${GCOV} \
+                --output-file ${WORKSPACE}/initial.info
+        fi
+
+
+        # Run ctests
+        ctest --test-dir ${BUILD_DIR} --verbose
+
+        if [ "$BUILD_TYPE" = "coverage" ]; then
+          # Compile coverage information
+          lcov --capture \
+                --directory ${BUILD_DIR}/src \
+                --gcov=${GCOV} \
+                --output-file ${WORKSPACE}/ctest-capture.info
+
+          lcov --add-tracefile ${WORKSPACE}/initial.info \
+                --add-tracefile ${WORKSPACE}/ctest-capture.info \
+                --gcov=${GCOV} \
+                --output-file ${WORKSPACE}/coverage.info
+                
+          # Generate summary
+          lcov --summary ${WORKSPACE}/coverage.info
+
+          ${HOME}/.local/bin/codecov-linux -t "${CODECOV_TOKEN}" \
+                              --sha "${COMMIT_SHA}" \
+                              --branch "${BRANCH_NAME}" \
+                              --pr "${PR_NUMBER}" \
+                              --flag "galapagos-oram-v100-test" \
+                              --file "${WORKSPACE}/coverage.info"
+        fi
+

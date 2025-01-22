@@ -3,11 +3,10 @@ steps:
     sbatch_options: 
       - "--account=fluidnumerics"
       - "--gres=gpu:mi210:2"
-      - "--ntasks=6"
-      - "--cpus-per-task=2"
+      - "--ntasks=2"
+      - "--cpus-per-task=16"
       - "--time=40:00"
-    prerequisites:
-      - "source /etc/profile.d/z11_lmod.sh"
+    prerequisites: []
     modules:
       - cmake/3.31.2
       - gcc/12.4.0
@@ -17,35 +16,35 @@ steps:
       - feq-parse/2.2.2
     env:
       BUILD_DIR: ${WORKSPACE}/build
-      PREFIX: ${WORKSPACE}/opt/self
+      PREFIX: ${WORKSPACE}/install
       OUTDIR: ${WORKSPACE}/local
       GPU_ARCH: gfx90a
-      BUILD_TYPE: coverage
+      BUILD_TYPE: release
       ENABLE_GPU: ON
       ENABLE_DOUBLE_PRECISION: ON
       ENABLE_MULTITHREADING: OFF
+      ENABLE_TESTING: ON
+      ENABLE_EXAMPLES: ON
       NTHREADS: 4
-      GCOV: gcov-12
+      GCOV: gcov
     commands: 
       - |
         set -e
         mkdir -p ${BUILD_DIR}
         mkdir -p ${OUTDIR}
-        cd ${WORKSPACE}/build
-        FC=gfortran \
-        CXX=hipcc \
+        cd ${BUILD_DIR}
         cmake -G Ninja \
-              -DCMAKE_PREFIX_PATH=${ROCM_PATH} \
               -DCMAKE_INSTALL_PREFIX=${PREFIX} \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
               -DSELF_ENABLE_GPU=${ENABLE_GPU} \
               -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
               -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
               -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
-              -DAMDGPU_TARGETS=${GPU_ARCH} \
+              -DCMAKE_HIP_ARCHITECTURES=${GPU_ARCH} \
+              -DSELF_ENABLE_EXAMPLES=${ENABLE_EXAMPLES} \
+              -DSELF_ENABLE_TESTING=${ENABLE_TESTING} \
               ../
         ninja
-
 
         # Initialize coverage
         if [ "$BUILD_TYPE" = "coverage" ]; then
@@ -79,7 +78,7 @@ steps:
                               --sha "${COMMIT_SHA}" \
                               --branch "${BRANCH_NAME}" \
                               --pr "${PR_NUMBER}" \
-                              --flag "armory-noether-gfx90a-test" \
+                              --flag "galapagos-noether-gfx90a-test" \
                               --file "${WORKSPACE}/coverage.info"
         fi
 
