@@ -118,6 +118,8 @@ contains
 
     call hipblasCheck(hipblasCreate(this%blas_handle))
 
+    call this%UpdateDevice()
+
   endsubroutine Init_MappedScalar2D
 
   subroutine Free_MappedScalar2D(this)
