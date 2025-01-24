@@ -134,6 +134,8 @@ contains
     ! with a non-zero coriolis parameter.
     ! In this case, we have that the tendency calculation will give
     ! the gradient in the free surface, consistent with the DG approximation
+    this%solution%interior(:,:,:,1) = 0.0_prec ! Set u=0
+    this%solution%interior(:,:,:,2) = 0.0_prec ! Set v=0
     call this%solution%UpdateDevice()
     call this%CalculateTendency()
     call this%dSdt%UpdateHost()
