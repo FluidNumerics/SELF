@@ -161,13 +161,13 @@ contains
   subroutine sourcemethod_LinearShallowWater2D(this)
     implicit none
     class(LinearShallowWater2D),intent(inout) :: this
-    return
-    ! call sourcemethod_LinearShallowWater2D_gpu(this%solution%interior_gpu, &
-    !                                          this%source%interior_gpu, &
-    !                                          this%fCori%interior_gpu, &
-    !                                          this%solution%interp%N, &
-    !                                          this%solution%nelem, &
-    !                                          this%solution%nvar)
+
+    call sourcemethod_LinearShallowWater2D_gpu(this%solution%interior_gpu, &
+                                               this%source%interior_gpu, &
+                                               this%fCori%interior_gpu, &
+                                               this%solution%interp%N, &
+                                               this%solution%nelem, &
+                                               this%solution%nvar)
 
   endsubroutine sourcemethod_LinearShallowWater2D
 
