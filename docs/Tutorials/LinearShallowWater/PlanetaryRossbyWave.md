@@ -50,14 +50,4 @@ The remaining parameters for the problem are as follows
 * $\beta = 10^{-11} m^{-1} s^{-1}$
 * $H = 1000 m$
 
-## Runtimes
-
-To benchmark this example, we run the simulation for 10 days of simulation time, using a time-step of a half-second.
-The solution after 10 days looks like the image shown below.
-
-![Rossby Wave Initial Condition](./rossbywave_day10.png){ align=center }
-
-```
-$SELF_PREFIX/examples/LinearShallowWater_Rossbywave -dt 0.5 -tn 172800 -int "rk3"
-```
 
