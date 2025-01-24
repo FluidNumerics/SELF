@@ -45,7 +45,7 @@ module self_LinearShallowWater2D_t
     procedure :: flux2d => flux2d_LinearShallowWater2D_t
     procedure :: riemannflux2d => riemannflux2d_LinearShallowWater2D_t
     procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_LinearShallowWater2D_t
-    ! procedure :: sourcemethod => sourcemethod_LinearShallowWater2D_t
+    procedure :: sourcemethod => sourcemethod_LinearShallowWater2D_t
     ! Custom methods
     generic,public :: SetCoriolis => SetCoriolis_fplane_LinearShallowWater2D_t, &
       SetCoriolis_betaplane_LinearShallowWater2D_t
@@ -94,7 +94,7 @@ contains
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   iel=1:this%mesh%nElem)
-      this%fCori%interior(i,j,1,iel) = f0
+      this%fCori%interior(i,j,iel,1) = f0
     enddo
     call this%fCori%UpdateDevice()
 

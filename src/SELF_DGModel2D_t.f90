@@ -554,7 +554,6 @@ contains
     call this%SetBoundaryCondition() ! User-supplied
 
     if(this%gradient_enabled) then
-      call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
