@@ -71,11 +71,12 @@ module self_LinearShallowWater2D
   endinterface
 
   interface
-    subroutine sourcemethod_LinearShallowWater2D_gpu(solution,source,fCori,N,nel,nvar) &
+    subroutine sourcemethod_LinearShallowWater2D_gpu(solution,source,fCori,Cd,N,nel,nvar) &
       bind(c,name="sourcemethod_LinearShallowWater2D_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: solution,source,fCori
+      real(c_prec),value :: Cd
       integer(c_int),value :: N,nel,nvar
     endsubroutine sourcemethod_LinearShallowWater2D_gpu
   endinterface
@@ -165,6 +166,7 @@ contains
     call sourcemethod_LinearShallowWater2D_gpu(this%solution%interior_gpu, &
                                                this%source%interior_gpu, &
                                                this%fCori%interior_gpu, &
+                                               this%Cd, &
                                                this%solution%interp%N, &
                                                this%solution%nelem, &
                                                this%solution%nvar)

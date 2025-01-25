@@ -144,25 +144,25 @@ extern "C"
   }
 }
 
-__global__ void sourcemethod_LinearShallowWater2D_gpukernel(real *solution, real *source, real *fCori, int ndof){
+__global__ void sourcemethod_LinearShallowWater2D_gpukernel(real *solution, real *source, real *fCori, real Cd, int ndof){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
     real u = solution[idof];
     real v = solution[idof + ndof];
 
-    source[idof] = fCori[idof]*v; // du/dt = fv
-    source[idof+ndof] = -fCori[idof]*u;   // dv/dt  = -fu
+    source[idof] = fCori[idof]*v - Cd*u; // du/dt = fv - Cd*u
+    source[idof+ndof] = -fCori[idof]*u - Cd*v;   // dv/dt  = -fu - Cd*v
 
   }
 
 }
 extern "C"
 {
-  void sourcemethod_LinearShallowWater2D_gpu(real *solution, real *source, real *fCori, int N, int nel, int nvar){
+  void sourcemethod_LinearShallowWater2D_gpu(real *solution, real *source, real *fCori, real Cd, int N, int nel, int nvar){
     int ndof = (N+1)*(N+1)*nel;
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block +1;
-    sourcemethod_LinearShallowWater2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,source,fCori,ndof);
+    sourcemethod_LinearShallowWater2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,source,fCori,Cd,ndof);
   }
 }
