@@ -35,7 +35,7 @@ module self_LinearShallowWater2D
     procedure :: setboundarycondition => setboundarycondition_LinearShallowWater2D
     procedure :: boundaryflux => boundaryflux_LinearShallowWater2D
     procedure :: fluxmethod => fluxmethod_LinearShallowWater2D
-    ! 'procedure :: sourcemethod => sourcemethod_LinearShallowWater2D
+    procedure :: sourcemethod => sourcemethod_LinearShallowWater2D
 
   endtype LinearShallowWater2D
 
@@ -68,6 +68,16 @@ module self_LinearShallowWater2D
       real(c_prec),value :: g,H
       integer(c_int),value :: N,nel,nvar
     endsubroutine fluxmethod_LinearShallowWater2D_gpu
+  endinterface
+
+  interface
+    subroutine sourcemethod_LinearShallowWater2D_gpu(solution,source,fCori,N,nel,nvar) &
+      bind(c,name="sourcemethod_LinearShallowWater2D_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: solution,source,fCori
+      integer(c_int),value :: N,nel,nvar
+    endsubroutine sourcemethod_LinearShallowWater2D_gpu
   endinterface
 
 contains
@@ -148,12 +158,17 @@ contains
 
   endsubroutine fluxmethod_LinearShallowWater2D
 
-  ! subroutine sourcemethod_LinearShallowWater2D(this)
-  !   implicit none
-  !   class(LinearShallowWater2D),intent(inout) :: this
+  subroutine sourcemethod_LinearShallowWater2D(this)
+    implicit none
+    class(LinearShallowWater2D),intent(inout) :: this
 
-  !   return
+    call sourcemethod_LinearShallowWater2D_gpu(this%solution%interior_gpu, &
+                                               this%source%interior_gpu, &
+                                               this%fCori%interior_gpu, &
+                                               this%solution%interp%N, &
+                                               this%solution%nelem, &
+                                               this%solution%nvar)
 
-  ! endsubroutine sourcemethod_LinearShallowWater2D
+  endsubroutine sourcemethod_LinearShallowWater2D
 
 endmodule self_LinearShallowWater2D

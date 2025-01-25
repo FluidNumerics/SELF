@@ -31,11 +31,18 @@ $$
     \end{pmatrix}
 $$
 
-where $g$ is acceleration due to gravity and $H$ is uniform resting fluid depth. The source term is set to zero.
+where $g$ is acceleration due to gravity and $H$ is uniform resting fluid depth. The source term includes a coriolis force
 
 $$
-    \vec{q} = \vec{0}
+    \vec{q} = 
+        \begin{pmatrix}
+        -fv \\ 
+        fu \\ 
+        0
+    \end{pmatrix}
 $$
+
+where $f$ is the coriolis parameter.
 
 To track stability of the Euler equation, the total entropy function is
 
@@ -45,6 +52,81 @@ $$
 
 ## Implementation
 The 2D Linear Shallow Water model is implemented as a type extension of the `DGModel2d` class. The `LinearShallowWater2D_t` class adds parameters for acceleration due to gravity and the uniform resting fluid depth. It also overrides `SetMetaData`, `entropy_func`, `flux2d`, and `riemannflux2d` type-bound procedures.
+
+### Defining the coriolis parameter and geostrophic velocities
+The `LinearShallowWater2D` class has a generic method (`SetCoriolis`) that can be used for defining the coriolis parameter at each location in the model domain. The `SetCoriolis` method can be used for either setting an $f$ or $beta$ plane.
+
+#### Setting up an f-plane
+Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define a constant value for the coriolis parameter using the following
+```fortran
+type(LinearShallowWater2D) :: modelobj
+real(prec), parameter :: f0 = 10.0_prec*(-4)
+...
+
+  call modelobj%SetCoriolis(f0)
+
+```
+
+#### Setting up a beta-plane
+Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define the coriolis so that it varies with the `y` coordinate in the geometry using
+```fortran
+type(LinearShallowWater2D) :: modelobj
+real(prec), parameter :: f0 = 10.0_prec*(-4)
+real(prec), parameter :: beta = 10.0_prec*(-11) 
+...
+
+  call modelobj%SetCoriolis(f0,beta)
+
+```
+
+#### Setting arbitrary spatially varying coriolis parameter
+Perhaps you find that f-plane and beta-plane scenarios are just too boring, or their not an appropriate model for what you're considering. In this case, you can easily set the `fCori%interior` attribute of the `LinearShallowWater2D` class directly
+
+
+```fortran
+type(LinearShallowWater2D) :: modelobj
+integer :: iel
+integer :: i
+integer :: j
+
+do concurrent(i=1:modelobj%solution%N+1,j=1:modelobj%solution%N+1,iel=1:modelobj%mesh%nElem)
+    x = modelobj%geometry%x%interior(i,j,1,iel,1) ! Get the x-coordinate
+    y = modelobj%geometry%x%interior(i,j,1,iel,2) ! Get the y-coordinate
+    this%fCori%interior(i,j,1,iel) =  ! Define the coriolis parameter here as a function of x and y
+enddo
+call this%fCori%UpdateDevice()
+```
+
+#### Defining Geostrophic velocities
+With the `fCori` attribute defined, you can define geostrophic velocities from an initial condition for the free-surface height.
+
+!!! note
+    Setting geostrophic velocities is only valid when $f \neq 0$ everywhere in the domain.
+
+To define geostrophic velocities, you can simply use the `DiagnoseGeostrophicVelocity` procedure. This will 
+
+* Reset the velocity field to zero,
+* Calculate the free-surface height gradients using the `CalculateTendency` method
+* Compute the `u` and `v` variables using geostrophic balance
+
+As an example,
+
+```fortran
+type(LinearShallowWater2D) :: modelobj
+real(prec), parameter :: f0 = 10.0_prec*(-4)
+real(prec), parameter :: beta = 10.0_prec*(-11) 
+...
+
+  call modelobj%SetCoriolis(f0,beta)  
+
+  ! Set the free-surface height using an equation string
+  call modelobj%solution%SetEquation(3,'f = 0.01*exp( -( (x-500000.0)^2 + (y-500000.0)^2 )/(2.0*(10.0^10)) )')
+  call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+
+  ! Calculate u and v from the free surface height using geostrophy
+  call modelobj%DiagnoseGeostrophicVelocity()
+
+```
 
 ### Riemann Solver
 The `LinearShallowWater2D` class is defined using the advective form.

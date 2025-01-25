@@ -113,6 +113,8 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
+    call this%AdditionalInit()
+
     call this%SetMetadata()
 
   endsubroutine Init_DGModel2D_t
@@ -145,6 +147,7 @@ contains
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
+    call this%AdditionalFree()
 
   endsubroutine Free_DGModel2D_t
 
@@ -551,7 +554,6 @@ contains
     call this%SetBoundaryCondition() ! User-supplied
 
     if(this%gradient_enabled) then
-      call this%solution%AverageSides()
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
