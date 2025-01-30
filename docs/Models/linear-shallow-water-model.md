@@ -223,6 +223,6 @@ call mesh%StructuredMesh(nxPerTile=5,nyPerTile=5,&
 
 For examples, see any of the following
 
-* [Gravity waves in closed square domain](../Tutorials/LinearShallowWater/LinearShallowWater.md)
+* [Gravity waves in closed square domain](../Tutorials/LinearShallowWater/ReflectingWave.md)
 * [Kelvin waves in a closed circular rotating domain (f-plane)](../Tutorials/LinearShallowWater/KelvinWaves.md)
 * [Planetary Rossby waves in an open square domain (beta-plane)](../Tutorials/LinearShallowWater/PlanetaryRossbyWave.md)

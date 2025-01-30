@@ -1,4 +1,4 @@
-# Linear Shallow Water No Normal Flow Tutorial
+# Reflecting Wave
 
 This tutorial will walk you through using an example program that uses the `LinearShallowWater2D` class to run a simulation with the linear shallow water equations in 2-D. This example is configured using the built in structured mesh generator with no normal flow boundary conditions on all domain boundaries.
 
