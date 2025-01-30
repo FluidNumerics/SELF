@@ -82,15 +82,18 @@ $$
 
 The model is integrated forward in time using $3^{rd}$ order Runge-Kutta with a time step of $\Delta t = 0.5 s$. 
 
-<p align="center">
-  <img height="440px" src="img/shallow-water.0000.png" />
-  Free surface height (<code>eta</code>) at time <code>t=0</code>.
-</p>
+<figure markdown="span">
+  ![Initial condition](./img/shallow-water.0000.png){ width="500" }
+  <figcaption>  Free surface height (<code>eta</code>) at time <code>t=0</code>.
+  </figcaption>
+</figure>
 
-<p align="center">
-  <img height="440px" src="img/shallow-water.0019.png" />
-  Free surface height (<code>eta</code>) at time <code>t=1</code>.
-</p>
+<figure markdown="span">
+  ![Gravity wave reflection](./img/shallow-water.0019.png){ width="500" }
+  <figcaption>  Free surface height (<code>eta</code>) at time <code>t=1</code>.
+  </figcaption>
+</figure>
+
 
 ## How we implement this
 You can find the example file for this demo in the `examples/linear_shallow_water2d_nonormalflow.f90` file. This file uses the `LinearShallowWater2D` module from `src/SELF_LinearShallowWater2D_t.f90`.
@@ -243,14 +246,9 @@ Running this program should output twenty `shallow-water.00XX.tec` in the build 
 
 ## Running this example
 
-<p align="center">
-  <div align="center">
-    <img height="360px" src="img/shallow-water.gif" />
-  </div>
-  <div align="center">
-    Free surface height (<code>eta</code>) for the full duration (1 second) of the problem.
-  </div>
-</p>
+<figure markdown="span">
+ ![Geostrophic adjustment releasing unbalanced flows](./img/shallow-water.gif){ width="500" }
+</figure>
 
 !!! note
     To run this example, you must first [install SELF](../../GettingStarted/install.md) . We assume that SELF is installed in path referenced by the `SELF_ROOT` environment variable.

@@ -34,9 +34,9 @@ program linear_shallow_water2d_kelvinwaves
   integer,parameter :: controlDegree = 7 ! Degree of control polynomial
   integer,parameter :: targetDegree = 16 ! Degree of target polynomial
   real(prec),parameter :: dt = 0.0025_prec ! Time-step size
-  real(prec),parameter :: endtime = 30.0_prec ! (s);
+  real(prec),parameter :: endtime = 1.0_prec !30.0_prec ! (s);
   real(prec),parameter :: f0 = 10.0_prec ! reference coriolis parameter (1/s)
-  real(prec),parameter :: Cd = 0.5_prec ! Linear drag coefficient (1/s)
+  real(prec),parameter :: Cd = 0.25_prec ! Linear drag coefficient (1/s)
   real(prec),parameter :: iointerval = 0.05 ! Write files 20 times per characteristic time scale
   real(prec) :: r
   real(prec) :: e0,ef ! Initial and final entropy
@@ -78,20 +78,7 @@ program linear_shallow_water2d_kelvinwaves
   call modelobj%solution%SetEquation(3,'f = 0.001*exp( -( (x-1.0)^2 + y^2 )/0.02 ) ')
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
 
-  ! do iel = 1,modelobj%mesh%nElem
-  !   do j = 1,modelobj%solution%N+1
-  !     do i = 1,modelobj%solution%N+1
-  !       call random_number(r)
-  !       modelobj%solution%interior(i,j,iel,3) = modelobj%solution%interior(i,j,iel,3)*(1.0_prec+1.0_prec*(r-0.5))
-  !      ! modelobj%solution%interior(i,j,iel,3) = 0.0001_prec*(r-0.5)
-
-  !     enddo
-  !   enddo
-  ! enddo
-  ! call modelobj%solution%UpdateDevice()
-
   call modelobj%SetCoriolis(f0)
-  ! call modelobj%DiagnoseGeostrophicVelocity()
 
   call modelobj%WriteModel()
   call modelobj%IncrementIOCounter()

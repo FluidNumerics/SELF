@@ -35,8 +35,6 @@ $$
     \eta(t=0) = 0.01e^{ -( (x^2 + y^2 )/(2.0*10.0^{10}) )}
 $$
 
-![Rossby Wave Initial Condition](./rossbywave_initialcondition.png){ align=center }
-
 The initial velocity field is calculated by using the pressure gradient force and using geostrophic balance; in SELF, this is handled by the `LinearShallowWater % DiagnoseGeostrophicVelocity` type bound procedure after setting the initial free surface height.
 
 ### Boundary Conditions

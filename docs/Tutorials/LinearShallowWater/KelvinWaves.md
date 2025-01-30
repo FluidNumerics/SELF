@@ -43,14 +43,32 @@ $$
 
 This initial condition is initially out of balance, which causes an erruption of unbalanced flows, including gravity waves, inertia gravity waves, and kelvin waves. The Kelvin waves are the result of the unbalanced flow up against the no-normal flow wall. Since the coriolis parameter is positive in this demonstration, the Kelvin waves propagate with the boundary (the "coast") on its right. For this circular domain, the Kelvin waves propagate in a counter-clockwise directtion. 
 
-<p align="center">
-  <img height="440px" src="./img/kelvin-wave-initial-erruption.png" />
-  Free surface height (<code>eta</code>) shortly after the initial condition. Here, we see a train of gravity waves propagating into the domain and a single peak Kelvin wave traveling along the boundary in a counter-clockwise direction. The initial disturbance is now adjusted into geostrophic balance.
-</p>
+<figure markdown="span">
+  ![Geostrophic adjustment releasing unbalanced flows](./img/kelvin-wave-initial-erruption.png){ width="500" }
+  <figcaption>  Free surface height (<code>eta</code>) shortly after the initial condition. Here, we see a train of gravity waves propagating into the domain and a single peak Kelvin wave traveling along the boundary in a counter-clockwise direction. The initial disturbance is now adjusted into geostrophic balance.
+  </figcaption>
+</figure>
 
 The release of energy into the unbalanced flows allows the initial disturbance to come into geostrophic balance. As a result, in the vicinity of the initial disturbance, we see a stationary high pressure signal that remains in geostrophic balance.
 
 
 
 
+## Running this example
 
+To run this example, simply execute
+
+```shell
+# Set WORKSPACE to the path to the SELF source code
+export WORKSPACE=/path/to/SELF
+${SELF_ROOT}/examples/linear_shallow_water2d_kelvinwaves
+```
+
+This will run the simulation from $t=0$ to $t=1.0$ and write model output at intervals of $Δ t_{io} = 0.05$. Model output can be visualized using `pyself` in python
+From the SELF source code directory
+
+```shell
+# Assuming you are in the SELF source code directory
+pip install . --upgrade
+```
+You can use the `examples/shallow_water_plot.py` script to plot the model output and generate movie of the free surface height.
