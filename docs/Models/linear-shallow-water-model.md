@@ -57,7 +57,7 @@ The 2D Linear Shallow Water model is implemented as a type extension of the `DGM
 The `LinearShallowWater2D` class has a generic method (`SetCoriolis`) that can be used for defining the coriolis parameter at each location in the model domain. The `SetCoriolis` method can be used for either setting an $f$ or $beta$ plane.
 
 #### Setting up an f-plane
-Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define a constant value for the coriolis parameter using the following
+Assuming you've created interpolant, mesh, geometry objects, and model objects you can define a constant value for the coriolis parameter using the following
 ```fortran
 type(LinearShallowWater2D) :: modelobj
 real(prec), parameter :: f0 = 10.0_prec*(-4)
@@ -68,7 +68,7 @@ real(prec), parameter :: f0 = 10.0_prec*(-4)
 ```
 
 #### Setting up a beta-plane
-Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define the coriolis so that it varies with the `y` coordinate in the geometry using
+Assuming you've created interpolant, mesh, geometry objects, and model objects you can define the coriolis so that it varies with the `y` coordinate in the geometry using
 ```fortran
 type(LinearShallowWater2D) :: modelobj
 real(prec), parameter :: f0 = 10.0_prec*(-4)
@@ -80,7 +80,7 @@ real(prec), parameter :: beta = 10.0_prec*(-11)
 ```
 
 #### Setting arbitrary spatially varying coriolis parameter
-Perhaps you find that f-plane and beta-plane scenarios are just too boring, or their not an appropriate model for what you're considering. In this case, you can easily set the `fCori%interior` attribute of the `LinearShallowWater2D` class directly
+Perhaps you find that f-plane and beta-plane scenarios are just too boring, or they're not an appropriate model for what you're considering. In this case, you can easily set the `fCori%interior` attribute of the `LinearShallowWater2D` class directly
 
 
 ```fortran
@@ -129,7 +129,7 @@ real(prec), parameter :: beta = 10.0_prec*(-11)
 ```
 
 ### Setting the Drag coefficient
-Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define a constant value for the linear drag coefficient by setting the constant parameter `Cd`, e.g. 
+Assuming you've created interpolant, mesh, geometry objects, and model objects you can define a constant value for the linear drag coefficient by setting the constant parameter `Cd`, e.g. 
 
 ```fortran
 type(LinearShallowWater2D) :: modelobj

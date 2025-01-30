@@ -41,7 +41,7 @@ $$
     \eta(t=0) = 0.001e^{ -( ( (x-1.0)^2 + y^2 )/(0.02) )}
 $$
 
-This initial condition is initially out of balance, which causes an erruption of unbalanced flows, including gravity waves, inertia gravity waves, and kelvin waves. The Kelvin waves are the result of the unbalanced flow up against the no-normal flow wall. Since the coriolis parameter is positive in this demonstration, the Kelvin waves propagate with the boundary (the "coast") on its right. For this circular domain, the Kelvin waves propagate in a counter-clockwise directtion. 
+This initial condition is initially out of balance, which causes an erruption of unbalanced flows, including gravity waves, inertia gravity waves, and Kelvin waves. The Kelvin waves are the result of the unbalanced flow up against the no-normal flow wall. Since the coriolis parameter is positive in this demonstration, the Kelvin waves propagate with the boundary (the "coast") on its right. For this circular domain, the Kelvin waves propagate in a counter-clockwise directtion. 
 
 <figure markdown="span">
   ![Geostrophic adjustment releasing unbalanced flows](./img/kelvin-wave-initial-erruption.png){ width="500" }
