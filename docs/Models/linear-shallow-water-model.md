@@ -36,15 +36,15 @@ where $g$ is acceleration due to gravity and $H$ is uniform resting fluid depth.
 $$
     \vec{q} = 
         \begin{pmatrix}
-        -fv \\ 
-        fu \\ 
+        -fv - C_d u\\ 
+        fu - C_d v\\ 
         0
     \end{pmatrix}
 $$
 
-where $f$ is the coriolis parameter.
+where $f$ is the coriolis parameter and $C_d$ is the linear drag coefficient.
 
-To track stability of the Euler equation, the total entropy function is
+To track stability of the shallow water equations, the total entropy function is taken to be the total (kinetic plus potential) energy
 
 $$
     e = \frac{1}{2} \int_V H u^2 + H v^2 + g \eta^2 \hspace{1mm} dV
@@ -57,7 +57,7 @@ The 2D Linear Shallow Water model is implemented as a type extension of the `DGM
 The `LinearShallowWater2D` class has a generic method (`SetCoriolis`) that can be used for defining the coriolis parameter at each location in the model domain. The `SetCoriolis` method can be used for either setting an $f$ or $beta$ plane.
 
 #### Setting up an f-plane
-Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define a constant value for the coriolis parameter using the following
+Assuming you've created interpolant, mesh, geometry objects, and model objects you can define a constant value for the coriolis parameter using the following
 ```fortran
 type(LinearShallowWater2D) :: modelobj
 real(prec), parameter :: f0 = 10.0_prec*(-4)
@@ -68,7 +68,7 @@ real(prec), parameter :: f0 = 10.0_prec*(-4)
 ```
 
 #### Setting up a beta-plane
-Assuming you've created interpolant ,mesh, geometry objects, and model objects you can define the coriolis so that it varies with the `y` coordinate in the geometry using
+Assuming you've created interpolant, mesh, geometry objects, and model objects you can define the coriolis so that it varies with the `y` coordinate in the geometry using
 ```fortran
 type(LinearShallowWater2D) :: modelobj
 real(prec), parameter :: f0 = 10.0_prec*(-4)
@@ -80,7 +80,7 @@ real(prec), parameter :: beta = 10.0_prec*(-11)
 ```
 
 #### Setting arbitrary spatially varying coriolis parameter
-Perhaps you find that f-plane and beta-plane scenarios are just too boring, or their not an appropriate model for what you're considering. In this case, you can easily set the `fCori%interior` attribute of the `LinearShallowWater2D` class directly
+Perhaps you find that f-plane and beta-plane scenarios are just too boring, or they're not an appropriate model for what you're considering. In this case, you can easily set the `fCori%interior` attribute of the `LinearShallowWater2D` class directly
 
 
 ```fortran
@@ -128,6 +128,17 @@ real(prec), parameter :: beta = 10.0_prec*(-11)
 
 ```
 
+### Setting the Drag coefficient
+Assuming you've created interpolant, mesh, geometry objects, and model objects you can define a constant value for the linear drag coefficient by setting the constant parameter `Cd`, e.g. 
+
+```fortran
+type(LinearShallowWater2D) :: modelobj
+real(prec), parameter :: fCd = 0.25
+...
+
+  modelobj % Cd = Cd ! Set the drag coefficient
+
+```
 ### Riemann Solver
 The `LinearShallowWater2D` class is defined using the advective form.
 The Riemann solver for the hyperbolic part of the shallow water equations is the local Lax-Friedrichs upwind Riemann solver
@@ -212,4 +223,6 @@ call mesh%StructuredMesh(nxPerTile=5,nyPerTile=5,&
 
 For examples, see any of the following
 
-* [`examples/LinearShallowWater2D.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/LinearShallowWater2D.f90) - Implements the 2D shallow water equations with no normal flow boundary conditions
+* [Gravity waves in closed square domain](../Tutorials/LinearShallowWater/ReflectingWave.md)
+* [Kelvin waves in a closed circular rotating domain (f-plane)](../Tutorials/LinearShallowWater/KelvinWaves.md)
+* [Planetary Rossby waves in an open square domain (beta-plane)](../Tutorials/LinearShallowWater/PlanetaryRossbyWave.md)

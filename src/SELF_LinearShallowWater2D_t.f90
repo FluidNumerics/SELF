@@ -34,6 +34,7 @@ module self_LinearShallowWater2D_t
   type,extends(dgmodel2d) :: LinearShallowWater2D_t
     real(prec) :: H = 0.0_prec ! uniform resting depth
     real(prec) :: g = 0.0_prec ! acceleration due to gravity
+    real(prec) :: Cd = 0.0_prec ! Linear drag coefficient (1/s)
     type(MappedScalar2D) :: fCori ! The coriolis parameter
 
   contains
@@ -246,8 +247,8 @@ contains
 
       s = this%solution%interior(i,j,iel,1:this%nvar)
 
-      this%source%interior(i,j,iel,1) = this%fCori%interior(i,j,iel,1)*s(2) ! du/dt = f*v
-      this%source%interior(i,j,iel,2) = -this%fCori%interior(i,j,iel,1)*s(1) ! dv/dt = -f*u
+      this%source%interior(i,j,iel,1) = this%fCori%interior(i,j,iel,1)*s(2)-this%Cd*s(1) ! du/dt = f*v - Cd*u
+      this%source%interior(i,j,iel,2) = -this%fCori%interior(i,j,iel,1)*s(1)-this%Cd*s(2) ! dv/dt = -f*u - Cd*v
 
     enddo
 
