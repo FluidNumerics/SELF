@@ -24,13 +24,13 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module self_LinearEuler3D
+module self_GFDLES3D
 
-  use self_LinearEuler3D_t
+  use self_GFDLES3D_t
 
   implicit none
 
-  type,extends(LinearEuler3D_t) :: LinearEuler3D
-  endtype LinearEuler3D
+  type,extends(GFDLES3D_t) :: GFDLES3D
+  endtype GFDLES3D
 
-endmodule self_LinearEuler3D
+endmodule self_GFDLES3D

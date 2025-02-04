@@ -1,0 +1,531 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "blank",
+    "title": "SELF Model Configuration",
+    "description": "Schema for conservation law solvers with the Spectral Element Library in Fortran",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "Version of SELF associated with this schema",
+            "type": "string",
+            "default": "v0.0.0"
+        },
+        "model_name": {
+            "description": "Name of the model to run with",
+            "type": "string",
+            "enum": [
+                "burgers-1d",
+                "linear-shallow-water-2d",
+                "gfdles-3d"
+            ]
+        },
+        "geometry": {
+            "description": "Configurations related to the mesh and quadrature",
+            "type": "object",
+            "properties": {
+                "mesh_file": {
+                    "description": "Fully qualified path to a mesh file.",
+                    "type": "string",
+                    "default": ""
+                },
+                "uniform_boundary_condition": {
+                    "description": "If provided, all boundary conditions will be set to this value.",
+                    "type": "string",
+                    "default": "",
+                    "enum": [
+                        "",
+                        "no_normal_flow",
+                        "radiation",
+                        "prescribed"
+                    ]
+                },
+                "control_degree": {
+                    "description": "Polynomial degree for the control grid quadrature.",
+                    "type": "integer",
+                    "default": 7
+                },
+                "control_quadrature": {
+                    "description": "The quadrature type for the control points.",
+                    "type": "string",
+                    "enum": [
+                        "gauss",
+                        "gauss-lobatto",
+                        "chebyshev-gauss",
+                        "chebyshev-gauss-lobatto"
+                    ],
+                    "default": "gauss"
+                },
+                "target_degree": {
+                    "description": "Polynomial degree for the target grid quadrature.",
+                    "type": "integer",
+                    "default": 10
+                },
+                "target_quadrature": {
+                    "description": "The quadrature type for the target points.",
+                    "type": "string",
+                    "enum": [
+                        "uniform",
+                        "gauss",
+                        "gauss-lobatto",
+                        "chebyshev-gauss",
+                        "chebyshev-gauss-lobatto"
+                    ],
+                    "default": "uniform"
+                },
+                "nX": {
+                    "description": "Number of points in the x-direction for structured grid generation.",
+                    "type": "integer",
+                    "default": 3
+                },
+                "nY": {
+                    "description": "Number of points in the y-direction for structured grid generation.",
+                    "type": "integer",
+                    "default": 3
+                },
+                "x0": {
+                    "description": "First point in the x-direction for structured grid generation.",
+                    "type": "number",
+                    "default": 0
+                },
+                "xN": {
+                    "description": "Last point in the x-direction for structured grid generation.",
+                    "type": "number",
+                    "default": 1
+                },
+                "y0": {
+                    "description": "First point in the y-direction for structured grid generation.",
+                    "type": "number",
+                    "default": 0
+                },
+                "yN": {
+                    "description": "Last point in the y-direction for structured grid generation.",
+                    "type": "number",
+                    "default": 0
+                }
+            }
+        },
+        "time_options": {
+            "description": "Configuration  for the time integration.",
+            "type": "object",
+            "properties": {
+                "integrator": {
+                    "description": "Type of time integrator to use to forward step the model.",
+                    "type": "string",
+                    "enum": [
+                        "euler",
+                        "rk2",
+                        "rk3",
+                        "rk4"
+                    ],
+                    "default": "euler"
+                },
+                "dt": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "The size of the time step for a time integrator expressed in units.time ."
+                },
+                "cfl_max": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "The maximum CFL number for time integration. If non-zero, dt will be calculated using cfl_max and the mesh."
+                },
+                "start_time": {
+                    "description": "The value for the initial time in units.time .",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "duration": {
+                    "description": "The length of the simulation in units.time .",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "io_interval": {
+                    "description": "The amount of time between model state ouput in units.time . If set to 0, only the first and last state will be output.",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "update_interval": {
+                    "description": "The number of time steps between model parameter updates. (For interactivity)",
+                    "type": "number",
+                    "minimum": 50
+                }
+            }
+        },
+        "units": {
+            "description": "",
+            "type": "object",
+            "properties": {
+                "time": {
+                    "description": "The units for time",
+                    "type": "string",
+                    "enum": [
+                        "ns",
+                        "ms",
+                        "s",
+                        "Ks",
+                        "Ms",
+                        "Gs"
+                    ],
+                    "default": "s"
+                },
+                "length": {
+                    "description": "The units for length",
+                    "type": "string",
+                    "enum": [
+                        "nm",
+                        "mm",
+                        "cm",
+                        "m",
+                        "Km"
+                    ],
+                    "default": "m"
+                },
+                "mass": {
+                    "description": "The units for mass",
+                    "type": "string",
+                    "enum": [
+                        "mg",
+                        "g",
+                        "kg"
+                    ],
+                    "default": "kg"
+                }
+            }
+        },
+        "burgers-1d": {
+            "description": "Parameters for the burgers 1d solver",
+            "type": "object",
+            "properties": {
+                "u0": {
+                    "type": "string",
+                    "description": "Initial condition.",
+                    "default": "u=0"
+                },
+                "uL": {
+                    "type": "string",
+                    "description": "Left boundary condition.",
+                    "default": "u=0"
+                },
+                "uR": {
+                    "type": "string",
+                    "description": "Right boundary condition.",
+                    "default": "u=0"
+                },
+                "uxL": {
+                    "type": "string",
+                    "description": "Left boundary condition for the gradient.",
+                    "default": "u=0"
+                },
+                "uxR": {
+                    "type": "string",
+                    "description": "Right boundary condition for the gradient.",
+                    "default": "u=0"
+                },
+                "viscosity": {
+                    "type": "number",
+                    "description": "Viscosity of the fluid.",
+                    "default": "u=0"
+                }
+            }
+        },
+        "gfdles-3d": {
+            "description": "Parameters for the compressible navier-stokes (2d) solver",
+            "type": "object",
+            "properties": {
+                "sgs_closure": {
+                    "description": "Parameters for sub-grid scale closure",
+                    "type": "object",
+                    "properties": {
+                        "model": {
+                            "description": "The SGS model to use for closure",
+                            "type": "string",
+                            "enum": [
+                                "none",
+                                "constant_del2"
+                            ],
+                            "default": "constant_del2"
+                        },
+                        "gradient_variables": {
+                            "description": "The type of variables to use for gradient calculations for SGS fluxes",
+                            "type": "string",
+                            "enum": [
+                                "conservative",
+                                "primitive",
+                                "entropy"
+                            ],
+                            "default": "primitive"
+                        }
+                    }
+                },
+                "split_form": {
+                    "description": "The formulation of the hyperbolic fluxes to use",
+                    "type": "string",
+                    "enum": [
+                        "conservative"
+                    ],
+                    "default": "conservative"
+                },
+                "environment": {
+                    "description": "Settings for environmental parameters",
+                    "type": "object",
+                    "properties": {
+                        "potential": {
+                            "description": "An equation that describes the potential force. The gradient of this field is the potential force in the momentum equations",
+                            "type": "string",
+                            "default": ""
+                        }
+                    }
+                },
+                "fluid": {
+                    "description": "Settings for fluid parameters",
+                    "type": "object",
+                    "properties": {
+                        "Cp": {
+                            "description": "Heat capacity at constant pressure",
+                            "type": "number",
+                            "default": 1.005
+                        },
+                        "Cv": {
+                            "description": "Heat capacity at constant volume",
+                            "type": "number",
+                            "default": 0.718
+                        },
+                        "R": {
+                            "description": "Ideal gas constant",
+                            "type": "number",
+                            "default": 287
+                        },
+                        "rho": {
+                            "description": "Default density",
+                            "type": "number",
+                            "default": 1.2754
+                        },
+                        "T": {
+                            "description": "Default temperature",
+                            "type": "number",
+                            "default": 273
+                        },
+                        "energy": {
+                            "description": "Default internal energy",
+                            "type": "number",
+                            "default": 117526.5
+                        },
+                        "equation_of_state": {
+                            "description": "Equation of state",
+                            "type": "string",
+                            "enum": [
+                                "ideal_gas",
+                                "linear_gibbs_seawater"
+                            ],
+                            "default": "ideal_gas"
+                        },
+                        "viscosity": {
+                            "description": "The constant value of the dynamic viscosity expressed using units consistent with units attributes",
+                            "type": "number",
+                            "default": 0
+                        },
+                        "thermal_diffusivity": {
+                            "description": "The constant value of the thermal diffusivity expressed using units consistent with units attributes",
+                            "type": "number",
+                            "default": 0
+                        }
+                    }
+                },
+                "initial_conditions": {
+                    "description": "Settings for the fluid initial conditions. Assumes primitive variables are set.",
+                    "type": "object",
+                    "properties": {
+                        "hydrostatic_adjustment": {
+                            "type": "boolean",
+                            "description": "Enable hydrostatic adjustment before starting forward integration.",
+                            "default": false
+                        },
+                        "static_state": {
+                            "type": "boolean",
+                            "description": "Set the fluid state to the static parameters in fluid attribute at the beginning. If set to true, supplied equations or fields from file are added to the static state.",
+                            "default": false
+                        },
+                        "file": {
+                            "type": "string",
+                            "description": "File to read initial conditions from. Assumes conservative variables are defined in the file.",
+                            "default": ""
+                        },
+                        "u": {
+                            "type": "string",
+                            "description": "Equation for the x-velocity component initial condition.",
+                            "default": "u=0"
+                        },
+                        "v": {
+                            "type": "string",
+                            "description": "Equation for the y-velocity component initial condition.",
+                            "default": "v=0"
+                        },
+                        "rho": {
+                            "type": "string",
+                            "description": "Equation for the density field initial condition.",
+                            "default": "r=0"
+                        },
+                        "T": {
+                            "type": "string",
+                            "description": "Equation for the temperature field initial condition.",
+                            "default": "u=0"
+                        }
+                    }
+                },
+                "boundary_conditions": {
+                    "description": "Settings for prescribed fluid boundary conditions. Assumes primitive variables are set.",
+                    "type": "object",
+                    "properties": {
+                        "time_dependent": {
+                            "type": "boolean",
+                            "description": "Enable time dependent boundary conditions.",
+                            "default": false
+                        },
+                        "dt": {
+                            "type": "number",
+                            "description": "The time interval at which the boundary conditions are re-evaluated. Linear interpolation is done in-between.",
+                            "default": 0
+                        },
+                        "from_initial_conditions": {
+                            "type": "boolean",
+                            "description": "Obtain the boundary conditions from the initial conditions.",
+                            "default": false
+                        },
+                        "u": {
+                            "type": "string",
+                            "description": "Equation for the x-velocity component.",
+                            "default": "u=0"
+                        },
+                        "v": {
+                            "type": "string",
+                            "description": "Equation for the y-velocity component.",
+                            "default": "v=0"
+                        },
+                        "rho": {
+                            "type": "string",
+                            "description": "Equation for the density field.",
+                            "default": "r=0"
+                        },
+                        "T": {
+                            "type": "string",
+                            "description": "Equation for the temperature field.",
+                            "default": "u=0"
+                        }
+                    }
+                }
+            }
+        },
+        "linear-shallow-water-2d": {
+            "description": "Parameters for the linear-shallow-water-2d solver",
+            "type": "object",
+            "properties": {
+                "environment": {
+                    "description": "Settings for environmental parameters",
+                    "type": "object",
+                    "properties": {
+                        "g": {
+                            "description": "Acceleration of gravity",
+                            "type": "number",
+                            "default": 1.0
+                        },
+                        "H": {
+                            "description": "Resting fluid depth (constant)",
+                            "type": "number",
+                            "default": 1.0
+                        },
+                        "Cd": {
+                            "description": "Linear drag coefficient",
+                            "type": "number",
+                            "default": 0.0
+                        },
+                        "f0": {
+                            "description": "Constant coriolis parameter",
+                            "type": "number",
+                            "default": 0.0
+                        },
+                        "beta": {
+                            "description": "Rate of change of coriolis parameter with latitude (y)",
+                            "type": "number",
+                            "default": 0.0
+                        }
+
+                    }
+                },
+                "initial_conditions": {
+                    "description": "Settings for the fluid initial conditions.",
+                    "type": "object",
+                    "properties": {
+                        "geostrophic_balance": {
+                            "type": "boolean",
+                            "description": "When the coriolis parameter is non-zero within the model domain, determines if the velocity fields are calculated from the free surface height.",
+                            "default": false
+                        },
+                        "file": {
+                            "type": "string",
+                            "description": "File to read initial conditions from. Assumes conservative variables are defined in the file.",
+                            "default": ""
+                        },
+                        "u": {
+                            "type": "string",
+                            "description": "Equation for the x-velocity component initial condition.",
+                            "default": "u=0"
+                        },
+                        "v": {
+                            "type": "string",
+                            "description": "Equation for the y-velocity component initial condition.",
+                            "default": "v=0"
+                        },
+                        "eta": {
+                            "type": "string",
+                            "description": "Equation for the free-surface height.",
+                            "default": "r=0"
+                        }
+                    }
+                },
+                "boundary_conditions": {
+                    "description": "Settings for prescribed fluid boundary conditions.",
+                    "type": "object",
+                    "properties": {
+                        "time_dependent": {
+                            "type": "boolean",
+                            "description": "Enable time dependent boundary conditions.",
+                            "default": false
+                        },
+                        "dt": {
+                            "type": "number",
+                            "description": "The time interval at which the boundary conditions are re-evaluated. Linear interpolation is done in-between.",
+                            "default": 0
+                        },
+                        "from_initial_conditions": {
+                            "type": "boolean",
+                            "description": "Obtain the boundary conditions from the initial conditions.",
+                            "default": false
+                        },
+                        "u": {
+                            "type": "string",
+                            "description": "Equation for the x-velocity component.",
+                            "default": "u=0"
+                        },
+                        "v": {
+                            "type": "string",
+                            "description": "Equation for the y-velocity component.",
+                            "default": "v=0"
+                        },
+                        "eta": {
+                            "type": "string",
+                            "description": "Equation for the free surface height field",
+                            "default": "r=0"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "required": [
+        "version",
+        "model_name",
+        "geometry",
+        "time_options",
+        "units"
+    ]
+}

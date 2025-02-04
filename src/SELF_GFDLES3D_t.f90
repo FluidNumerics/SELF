@@ -76,6 +76,7 @@ module self_GFDLES3D_t
   type,extends(dgmodel3D) :: GFDLES3D_t
     type(MappedScalar3D)   :: primitive
     type(MappedScalar3D)   :: diagnostics
+    integer :: ndiagnostics
 
     ! Model parameters
     real(prec) :: p0 = 10.0_prec**(5) ! Reference pressure for potential temperature ()
@@ -87,6 +88,7 @@ module self_GFDLES3D_t
     real(prec) :: kappa = 0.0_prec ! Thermal diffusivity
     real(prec) :: g = 9.81_prec ! gravitational acceleration (z-direction only)
 
+    logical :: sgs_enabled = .false.
   contains
 
     ! Setup / Book-keeping methods
@@ -105,10 +107,10 @@ module self_GFDLES3D_t
     procedure :: PreTendency => PreTendency_GFDLES3D_t
 
     ! Model method overrides
-    procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_GFDLES3D_t
-    procedure :: pbc2d_NoNormalFlow => pbc2d_NoNormalFlow_GFDLES3D_t
+    !procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_GFDLES3D_t
+    !procedure :: pbc2d_NoNormalFlow => pbc2d_NoNormalFlow_GFDLES3D_t
 
-    procedure :: SourceMethod => sourcemethod_GFDLES3D_t
+    !procedure :: SourceMethod => sourcemethod_GFDLES3D_t
     procedure :: entropy_func => entropy_func_GFDLES3D_t
     procedure :: flux3D => flux3D_GFDLES3D_t
     procedure :: riemannflux3D => riemannflux3D_GFDLES3D_t
@@ -117,7 +119,7 @@ module self_GFDLES3D_t
     procedure :: ReportUserMetrics => ReportUserMetrics_GFDLES3D_t
     procedure :: PrimitiveToConservative => PrimitiveToConservative_GFDLES3D_t
     procedure,private :: pressure
-    procedure,private :: temperature
+    !procedure,private :: temperature
     procedure,private :: speedofsound
 
     ! Example Initial Conditions
@@ -152,6 +154,7 @@ contains
     class(GFDLES3D_t),intent(inout) :: this
 
     this%nvar = 5
+    this%ndiagnostics = 4
 
   endsubroutine SetNumberOfVariables_GFDLES3D_t
 
@@ -239,8 +242,8 @@ contains
     write(modelTime,"(ES16.7E3)") this%t
 
     do ivar = 1,this%nvar
-      write(maxv,"(ES16.7E3)") maxval(this%primitive%interior(:,:,:,ivar))
-      write(minv,"(ES16.7E3)") minval(this%primitive%interior(:,:,:,ivar))
+      write(maxv,"(ES16.7E3)") maxval(this%primitive%interior(:,:,:,:,ivar))
+      write(minv,"(ES16.7E3)") minval(this%primitive%interior(:,:,:,:,ivar))
 
       ! Write the output to STDOUT
       open(output_unit,ENCODING='utf-8')
@@ -252,8 +255,8 @@ contains
     enddo
 
     do ivar = 1,this%ndiagnostics
-      write(maxv,"(ES16.7E3)") maxval(this%diagnostics%interior(:,:,:,ivar))
-      write(minv,"(ES16.7E3)") minval(this%diagnostics%interior(:,:,:,ivar))
+      write(maxv,"(ES16.7E3)") maxval(this%diagnostics%interior(:,:,:,:,ivar))
+      write(minv,"(ES16.7E3)") minval(this%diagnostics%interior(:,:,:,:,ivar))
 
       ! Write the output to STDOUT
       open(output_unit,ENCODING='utf-8')
@@ -273,7 +276,7 @@ contains
     implicit none
     class(GFDLES3D_t),intent(inout) :: this
     ! local
-    integer :: i,j,k,iEl,j,e2,bcid
+    integer :: i,j,k,iEl,e2,bcid
     real(prec) :: nhat(1:3)
 
     do concurrent(k=1:6,iel=1:this%mesh%nElem)
@@ -289,7 +292,7 @@ contains
               nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
 
               this%primitive%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Prescribed(this%primitive%boundary(i,j,k,iEl,1:this%nvar),nhat)
+                this%hbc3d_Prescribed(this%primitive%boundary(i,j,k,iEl,1:this%nvar),this%t)
             enddo
           enddo
 
@@ -318,289 +321,290 @@ contains
       endif
 
     enddo
+
+  endsubroutine setprimitiveboundarycondition_GFDLES3D_t
+  subroutine PreTendency_GFDLES3D_t(this)
+    implicit none
+    class(GFDLES3D_t),intent(inout) :: this
+
+    if(this%sgs_enabled) then
+      call this%ConservativeToPrimitive()
+      call this%primitive%BoundaryInterp()
+      call this%primitive%SideExchange(this%mesh)
+
+      call this%SetPrimitiveBoundaryCondition()
+
+      call this%primitive%AverageSides()
+
+      ! Compute the gradient of the primitive variables
+      ! and store the result in the solutionGradient property.
+      call this%primitive%MappedDGGradient(this%solutionGradient%interior)
+      call this%solutionGradient%BoundaryInterp()
+      call this%solutionGradient%SideExchange(this%mesh)
+      call this%SetGradientBoundaryCondition()
+      call this%solutionGradient%AverageSides()
+    endif
+
+  endsubroutine PreTendency_GFDLES3D_t
+
+  subroutine CalculateDiagnostics_GFDLES3D_t(this)
+    implicit none
+    class(GFDLES3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iEl
+    real(prec) :: c,e,ke
+    real(prec) :: s(1:this%nvar)
+
+    do concurrent(i=1:this%diagnostics%N+1,j=1:this%diagnostics%N+1, &
+                  k=1:this%diagnostics%N+1,iel=1:this%mesh%nElem)
+      s(1:this%nvar) = this%solution%interior(i,j,k,iEl,1:this%nvar)
+      c = this%speedofsound(s)
+      ke = 0.5_prec*(s(2)**2+s(3)**2+s(4)**2)/s(1) ! kinetic energy (kg⋅m²⋅s⁻²)
+      this%diagnostics%interior(i,j,k,iEl,1) = c ! Speed of sound
+      this%diagnostics%interior(i,j,k,iEl,2) = this%pressure(s) ! Pressure (total)
+      this%diagnostics%interior(i,j,k,iEl,3) = ke ! kinetic energy
+      this%diagnostics%interior(i,j,k,iEl,4) = (sqrt(ke)+c)*this%dt/sqrt(this%geometry%J%interior(i,j,k,iEl,1)) ! CFL number
     enddo
 
-    endsubroutine setprimitiveboundarycondition_GFDLES3D_t
-    subroutine PreTendency_GFDLES3D_t(this)
-      implicit none
-      class(GFDLES3D_t),intent(inout) :: this
+  endsubroutine CalculateDiagnostics_GFDLES3D_t
 
-      if(this%primitive_gradient_enabled) then
-        call this%ConservativeToPrimitive()
-        call this%primitive%BoundaryInterp()
-        call this%primitive%SideExchange(this%mesh)
+  subroutine ConservativeToPrimitive_GFDLES3D_t(this)
+    implicit none
+    class(GFDLES3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iEl
+    real(prec) :: s(1:this%nvar)
 
-        call this%SetPrimitiveBoundaryCondition()
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%diagnostics%N+1,iel=1:this%mesh%nElem)
+      s(1:this%nvar) = this%solution%interior(i,j,k,iEl,1:this%nvar)
+      this%primitive%interior(i,j,k,iEl,1) = s(1) ! density
+      this%primitive%interior(i,j,k,iEl,2) = s(2)/s(1) ! x-velocity
+      this%primitive%interior(i,j,k,iEl,3) = s(3)/s(1) ! y-velocity
+      this%primitive%interior(i,j,k,iEl,4) = s(4)/s(1) ! z-velocity
+      this%primitive%interior(i,j,k,iEl,5) = s(5)/s(1) ! Potential temperature
+    enddo
 
-        call this%primitive%AverageSides()
+  endsubroutine ConservativeToPrimitive_GFDLES3D_t
 
-        ! Compute the gradient of the primitive variables
-        ! and store the result in the solutionGradient property.
-        call this%primitive%MappedDGGradient(this%solutionGradient%interior)
-        call this%solutionGradient%BoundaryInterp()
-        call this%solutionGradient%SideExchange(this%mesh)
-        call this%SetGradientBoundaryCondition()
-        call this%solutionGradient%AverageSides()
-      endif
+  subroutine PrimitiveToConservative_GFDLES3D_t(this)
+    implicit none
+    class(GFDLES3D_t),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iEl
+    real(prec) :: s(1:this%nvar)
 
-    endsubroutine PreTendency_GFDLES3D_t
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%diagnostics%N+1,iel=1:this%mesh%nElem)
+      s(1:this%nvar) = this%primitive%interior(i,j,k,iEl,1:this%nvar)
+      this%solution%interior(i,j,k,iEl,1) = s(1) ! density
+      this%solution%interior(i,j,k,iEl,2) = s(2)*s(1) ! x-momentum
+      this%solution%interior(i,j,k,iEl,3) = s(3)*s(1) ! y-momentum
+      this%solution%interior(i,j,k,iEl,4) = s(4)*s(1) ! z-momentum
+      this%solution%interior(i,j,k,iEl,5) = s(5)*s(1) ! Density weighted Potential temperature
+    enddo
 
-    subroutine CalculateDiagnostics_GFDLES3D_t(this)
-      implicit none
-      class(GFDLES3D_t),intent(inout) :: this
-      ! Local
-      integer :: i,j,k,iEl
-      real(prec) :: c,e,ke
-      real(prec) :: s(1:this%nvar)
+  endsubroutine PrimitiveToConservative_GFDLES3D_t
 
-      do concurrent(i=1:this%diagnostics%N+1,j=1:this%diagnostics%N+1, &
-                    k=1:this%diagnostics%N+1,iel=1:this%mesh%nElem)
-        s(1:this%nvar) = this%solution%interior(i,j,k,iEl,1:this%nvar)
-        c = this%speedofsound(s)
-        ke = 0.5_prec*(s(2)**2+s(3)**2+s(4)**2)/s(1) ! kinetic energy (kg⋅m²⋅s⁻²)
-        this%diagnostics%interior(i,j,k,iEl,1) = c ! Speed of sound
-        this%diagnostics%interior(i,j,k,iEl,2) = this%pressure(s) ! Pressure (total)
-        this%diagnostics%interior(i,j,k,iEl,3) = ke ! kinetic energy
-        this%diagnostics%interior(i,j,k,iEl,4) = (sqrt(ke)+c)*this%dt/sqrt(this%geometry%J%interior(i,j,iEl,1)) ! CFL number
-      enddo
-
-    endsubroutine CalculateDiagnostics_GFDLES3D_t
-
-    subroutine ConservativeToPrimitive_GFDLES3D_t(this)
-      implicit none
-      class(GFDLES3D_t),intent(inout) :: this
-      ! Local
-      integer :: i,j,k,El
-      real(prec) :: s(1:this%nvar)
-
-      do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                    k=1:this%diagnostics%N+1,iel=1:this%mesh%nElem)
-        s(1:this%nvar) = this%solution%interior(i,j,iEl,1:this%nvar)
-        this%primitive%interior(i,j,k,iEl,1) = s(1) ! density
-        this%primitive%interior(i,j,k,iEl,2) = s(2)/s(1) ! x-velocity
-        this%primitive%interior(i,j,k,iEl,3) = s(3)/s(1) ! y-velocity
-        this%primitive%interior(i,j,k,iEl,4) = s(4)/s(1) ! z-velocity
-        this%primitive%interior(i,j,k,iEl,5) = s(5)/s(1) ! Potential temperature
-      enddo
-
-    endsubroutine ConservativeToPrimitive_GFDLES3D_t
-
-    subroutine PrimitiveToConservative_GFDLES3D_t(this)
-      implicit none
-      class(GFDLES3D_t),intent(inout) :: this
-      ! Local
-      integer :: i,j,k,El
-      real(prec) :: s(1:this%nvar)
-
-      do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                    k=1:this%diagnostics%N+1,iel=1:this%mesh%nElem)
-        s(1:this%nvar) = this%primitive%interior(i,j,iEl,1:this%nvar)
-        this%solution%interior(i,j,k,iEl,1) = s(1) ! density
-        this%solution%interior(i,j,k,iEl,2) = s(2)*s(1) ! x-momentum
-        this%solution%interior(i,j,k,iEl,3) = s(3)*s(1) ! y-momentum
-        this%solution%interior(i,j,k,iEl,4) = s(4)*s(1) ! z-momentum
-        this%solution%interior(i,j,k,iEl,5) = s(5)*s(1) ! Density weighted Potential temperature
-      enddo
-
-    endsubroutine PrimitiveToConservative_GFDLES3D_t
-
-    pure function entropy_func_GFDLES3D_t(this,s) result(e)
+  pure function entropy_func_GFDLES3D_t(this,s) result(e)
     !! The entropy function is the sum of kinetic and internal energy
     !! For the linear model, this is
     !!
     !! \begin{equation}
     !!   e = \frac{1}{2} \left( \rho_0*( u^2 + v^2 ) + \frac{P^2}{\rho_0 c^2} \right)
-      class(GFDLES3D_t),intent(in) :: this
-      real(prec),intent(in) :: s(1:this%nvar)
-      real(prec) :: e
-      ! Local
-      real(prec) :: ke,ie,pe
+    class(GFDLES3D_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec) :: e
+    ! Local
+    real(prec) :: ke,ie,pe
 
-      ke = 0.5_prec*(s(2)*s(2)+s(3)*(3)+s(4)*s(4))/s(1) ! kinetic energy
-      !pe = s(1)*this%g*z Potential energy
-      ie = this%Cv*s(5)*(this%pressure(s)/this%p0)**(this%R/this%Cp) ! internal energy = rho*Cv*T
+    ke = 0.5_prec*(s(2)*s(2)+s(3)*(3)+s(4)*s(4))/s(1) ! kinetic energy
+    !pe = s(1)*this%g*z Potential energy
+    ie = this%Cv*s(5)*(this%pressure(s)/this%p0)**(this%R/this%Cp) ! internal energy = rho*Cv*T
 
-      e = ke+e
-    endfunction entropy_func_GFDLES3D_t
+    e = ke+e
+  endfunction entropy_func_GFDLES3D_t
 
-    ! pure function hbc3D_NoNormalFlow_GFDLES3D_t(this,s,nhat) result(exts)
-    !   class(GFDLES3D_t),intent(in) :: this
-    !   real(prec),intent(in) :: s(1:this%nvar)
-    !   real(prec),intent(in) :: nhat(1:2)
-    !   real(prec) :: exts(1:this%nvar)
-    !   ! Local
-    !   integer :: ivar
+  ! pure function hbc3D_NoNormalFlow_GFDLES3D_t(this,s,nhat) result(exts)
+  !   class(GFDLES3D_t),intent(in) :: this
+  !   real(prec),intent(in) :: s(1:this%nvar)
+  !   real(prec),intent(in) :: nhat(1:2)
+  !   real(prec) :: exts(1:this%nvar)
+  !   ! Local
+  !   integer :: ivar
 
-    !   exts(1) = s(1) ! density
-    !   exts(2) = (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
-    !   exts(3) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
-    !   exts(4) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! w
-    !   exts(5) = s(4) ! p
+  !   exts(1) = s(1) ! density
+  !   exts(2) = (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
+  !   exts(3) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
+  !   exts(4) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! w
+  !   exts(5) = s(4) ! p
 
-    ! endfunction hbc3D_NoNormalFlow_GFDLES3D_t
+  ! endfunction hbc3D_NoNormalFlow_GFDLES3D_t
 
-    pure function pressure(this,s) result(p)
-      class(GFDLES3D_t),intent(in) :: this
-      real(prec),intent(in) :: s(1:this%nvar)
-      real(prec) :: p
+  pure function pressure(this,s) result(p)
+    class(GFDLES3D_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec) :: p
 
-      p = (this%R*s(5)*(this%p0)**(-this%R/this%Cp))**(this%gamma)
+    p = (this%R*s(5)*(this%p0)**(-this%R/this%Cp))**(this%gamma)
 
-    endfunction pressure
+  endfunction pressure
 
-    !  pure function temperature(this, s) result(t)
-    !     class(GFDLES3D_t), intent(in) :: this
-    !     real(prec), intent(in) :: s(1:this%nvar)
-    !     real(prec) :: t
+  !  pure function temperature(this, s) result(t)
+  !     class(GFDLES3D_t), intent(in) :: this
+  !     real(prec), intent(in) :: s(1:this%nvar)
+  !     real(prec) :: t
 
-    !     t = (s(4) - 0.5_prec*(s(2)**2 + s(3)**2)/s(1))/(s(1)*this%Cv) ! temperature = e/Cv
+  !     t = (s(4) - 0.5_prec*(s(2)**2 + s(3)**2)/s(1))/(s(1)*this%Cv) ! temperature = e/Cv
 
-    !  end function temperature
+  !  end function temperature
 
-    pure function speedofsound(this,s) result(c)
-      class(GFDLES3D_t),intent(in) :: this
-      real(prec),intent(in) :: s(1:this%nvar)
-      real(prec) :: c
+  pure function speedofsound(this,s) result(c)
+    class(GFDLES3D_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec) :: c
 
-      c = sqrt(this%gamma*this%pressure(s)/s(1))
+    c = sqrt(this%gamma*this%pressure(s)/s(1))
 
-    endfunction speedofsound
+  endfunction speedofsound
 
-    pure function flux3d_GFDLES3D_t(this,s,dsdx) result(flux)
-      class(GFDLES3D_t),intent(in) :: this
-      real(prec),intent(in) :: s(1:this%nvar)
-      real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
-      real(prec) :: flux(1:this%nvar,1:2)
-      ! Local
-      real(prec) :: p,nu,kappa,u,v,w
-      real(prec) :: tau_11,tau_12,tau_13
-      real(prec) :: tau_22,tau_23
-      real(prec) :: tau_33
+  pure function flux3d_GFDLES3D_t(this,s,dsdx) result(flux)
+    class(GFDLES3D_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: flux(1:this%nvar,1:3)
+    ! Local
+    real(prec) :: p,nu,kappa,u,v,w
+    real(prec) :: tau_11,tau_12,tau_13
+    real(prec) :: tau_22,tau_23
+    real(prec) :: tau_33
 
-      ! Computes the pressure for an ideal gas
-      p = this%pressure(s)
-      u = s(2)/s(1)
-      v = s(3)/s(1)
-      w = s(4)/s(1)
-      ! LEFT OFF HERE !!
-      flux(1,1) = s(2) ! density, x flux ; rho*u
-      flux(1,2) = s(3) ! density, y flux ; rho*v
-      flux(2,1) = s(2)*u+p ! x-momentum, x flux; \rho*u*u + p
-      flux(2,2) = s(2)*v ! x-momentum, y flux; \rho*u*v
-      flux(3,1) = s(2)*u ! y-momentum, x flux; \rho*v*u
-      flux(3,2) = s(3)*v+p ! y-momentum, y flux; \rho*v*v + p
-      flux(4,1) = (s(4)+p)*s(2)/s(1) ! total energy, x flux : (\rho*E + p)*u
-      flux(4,2) = (s(4)+p)*s(3)/s(1) ! total energy, y flux : (\rho*E + p)*v
+    ! Computes the pressure for an ideal gas
+    p = this%pressure(s)
+    u = s(2)/s(1)
+    v = s(3)/s(1)
+    w = s(4)/s(1)
+    ! LEFT OFF HERE !!
+    flux(1,1) = s(2) ! density, x flux ; rho*u
+    flux(1,2) = s(3) ! density, y flux ; rho*v
+    flux(1,3) = s(3) ! density, z flux ; rho*w
 
-      if(this%primitive_gradient_enabled) then
-        ! Viscous and difussive terms
-        ! Recall that the solutionGradient now contains
-        ! the primitive variable gradients
-        ! Calculate the stress tensor
-        nu = this%nu
-        kappa = this%kappa
-        tau_11 = 4.0_prec*dsdx(2,1)/3.0_prec-2.0_prec*dsdx(3,2)/3.0_prec
-        tau_12 = dsdx(2,2)+dsdx(3,1)
-        !tau_21 = tau_12
-        tau_22 = 4.0_prec*dsdx(3,2)/3.0_prec-2.0_prec*dsdx(2,1)/3.0_prec
+    flux(2,1) = s(2)*u+p ! x-momentum, x flux; \rho*u*u + p
+    flux(2,2) = s(2)*v ! x-momentum, y flux; \rho*u*v
+    flux(3,1) = s(2)*u ! y-momentum, x flux; \rho*v*u
+    flux(3,2) = s(3)*v+p ! y-momentum, y flux; \rho*v*v + p
+    flux(4,1) = (s(4)+p)*s(2)/s(1) ! total energy, x flux : (\rho*E + p)*u
+    flux(4,2) = (s(4)+p)*s(3)/s(1) ! total energy, y flux : (\rho*E + p)*v
 
-        flux(2,1) = flux(2,1)-nu*tau_11 ! x-momentum, x flux
-        flux(2,2) = flux(2,2)-nu*tau_12 ! x-momentum, y flux (-tau_21*nu = -tau_12*nu)
-        flux(3,1) = flux(3,1)-nu*tau_12 ! y-momentum, x flux
-        flux(3,2) = flux(3,2)-nu*tau_22 ! y-momentum, y flux
-        flux(4,1) = flux(4,1)-(kappa*dsdx(4,1)+u*tau_11+v*tau_12) ! total energy, x flux = -(kappa*dTdx + u*tau_11 + v*tau_12)
-        flux(4,2) = flux(4,2)-(kappa*dsdx(4,2)+u*tau_11+v*tau_12) ! total energy, y flux = -(kappa*dTdy + u*tau_12 + v*tau_22)
-      endif
+    if(this%sgs_enabled) then
+      ! Viscous and difussive terms
+      ! Recall that the solutionGradient now contains
+      ! the primitive variable gradients
+      ! Calculate the stress tensor
+      nu = this%nu
+      kappa = this%kappa
+      tau_11 = 4.0_prec*dsdx(2,1)/3.0_prec-2.0_prec*dsdx(3,2)/3.0_prec
+      tau_12 = dsdx(2,2)+dsdx(3,1)
+      !tau_21 = tau_12
+      tau_22 = 4.0_prec*dsdx(3,2)/3.0_prec-2.0_prec*dsdx(2,1)/3.0_prec
 
-    endfunction flux3d_GFDLES3D_t
+      flux(2,1) = flux(2,1)-nu*tau_11 ! x-momentum, x flux
+      flux(2,2) = flux(2,2)-nu*tau_12 ! x-momentum, y flux (-tau_21*nu = -tau_12*nu)
+      flux(3,1) = flux(3,1)-nu*tau_12 ! y-momentum, x flux
+      flux(3,2) = flux(3,2)-nu*tau_22 ! y-momentum, y flux
+      flux(4,1) = flux(4,1)-(kappa*dsdx(4,1)+u*tau_11+v*tau_12) ! total energy, x flux = -(kappa*dTdx + u*tau_11 + v*tau_12)
+      flux(4,2) = flux(4,2)-(kappa*dsdx(4,2)+u*tau_11+v*tau_12) ! total energy, y flux = -(kappa*dTdy + u*tau_12 + v*tau_22)
+    endif
 
-    pure function riemannflux3D_GFDLES3D_t(this,sL,sR,dsdx,nhat) result(flux)
+  endfunction flux3d_GFDLES3D_t
+
+  pure function riemannflux3D_GFDLES3D_t(this,sL,sR,dsdx,nhat) result(flux)
     !! Uses a local lax-friedrich's upwind flux
     !! The max eigenvalue is taken as the sound speed
-      class(GFDLES3D_t),intent(in) :: this
-      real(prec),intent(in) :: sL(1:this%nvar)
-      real(prec),intent(in) :: sR(1:this%nvar)
-      real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
-      real(prec),intent(in) :: nhat(1:3)
-      real(prec) :: flux(1:this%nvar)
-      ! Local
-      real(prec) :: fL(1:this%nvar)
-      real(prec) :: fR(1:this%nvar)
-      real(prec) :: u,v,w,p,c,rho0
+    class(GFDLES3D_t),intent(in) :: this
+    real(prec),intent(in) :: sL(1:this%nvar)
+    real(prec),intent(in) :: sR(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
+    real(prec),intent(in) :: nhat(1:3)
+    real(prec) :: flux(1:this%nvar)
+    ! Local
+    real(prec) :: fL(1:this%nvar)
+    real(prec) :: fR(1:this%nvar)
+    real(prec) :: u,v,w,p,c,rho0
 
-      u = sL(2)
-      v = sL(3)
-      w = sL(4)
-      p = sL(5)
-      rho0 = this%rho0
-      c = this%c
-      fL(1) = rho0*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! density
-      fL(2) = p*nhat(1)/rho0 ! u
-      fL(3) = p*nhat(2)/rho0 ! v
-      fL(4) = p*nhat(3)/rho0 ! w
-      fL(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
+    u = sL(2)
+    v = sL(3)
+    w = sL(4)
+    p = sL(5)
+    rho0 = 1.0 !this%rho0
+    c = 1.0 !this%c
+    fL(1) = rho0*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! density
+    fL(2) = p*nhat(1)/rho0 ! u
+    fL(3) = p*nhat(2)/rho0 ! v
+    fL(4) = p*nhat(3)/rho0 ! w
+    fL(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
 
-      u = sR(2)
-      v = sR(3)
-      w = sR(4)
-      p = sR(5)
-      fR(1) = rho0*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! density
-      fR(2) = p*nhat(1)/rho0 ! u
-      fR(3) = p*nhat(2)/rho0 ! v'
-      fR(4) = p*nhat(3)/rho0 ! w
-      fR(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
+    u = sR(2)
+    v = sR(3)
+    w = sR(4)
+    p = sR(5)
+    fR(1) = rho0*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! density
+    fR(2) = p*nhat(1)/rho0 ! u
+    fR(3) = p*nhat(2)/rho0 ! v'
+    fR(4) = p*nhat(3)/rho0 ! w
+    fR(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
 
-      flux(1:5) = 0.5_prec*(fL(1:5)+fR(1:5))+c*(sL(1:5)-sR(1:5))
+    flux(1:5) = 0.5_prec*(fL(1:5)+fR(1:5))+c*(sL(1:5)-sR(1:5))
 
-    endfunction riemannflux3D_GFDLES3D_t
+  endfunction riemannflux3D_GFDLES3D_t
 
-    subroutine SphericalSoundWave_GFDLES3D_t(this,rhoprime,Lr,x0,y0,z0)
-    !! This subroutine sets the initial condition for a weak blast wave
-    !! problem. The initial condition is given by
-    !!
-    !! \begin{equation}
-    !! \begin{aligned}
-    !! \rho &= \rho_0 + \rho' \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_r^2} \right)
-    !! u &= 0 \\
-    !! v &= 0 \\
-    !! E &= \frac{P_0}{\gamma - 1} + E \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_e^2} \right)
-    !! \end{aligned}
-    !! \end{equation}
-    !!
-      implicit none
-      class(GFDLES3D_t),intent(inout) :: this
-      real(prec),intent(in) ::  rhoprime,Lr,x0,y0,z0
-      ! Local
-      integer :: i,j,k,iEl
-      real(prec) :: x,y,z,rho,r,E
+  ! subroutine SphericalSoundWave_GFDLES3D_t(this,rhoprime,Lr,x0,y0,z0)
+  ! !! This subroutine sets the initial condition for a weak blast wave
+  ! !! problem. The initial condition is given by
+  ! !!
+  ! !! \begin{equation}
+  ! !! \begin{aligned}
+  ! !! \rho &= \rho_0 + \rho' \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_r^2} \right)
+  ! !! u &= 0 \\
+  ! !! v &= 0 \\
+  ! !! E &= \frac{P_0}{\gamma - 1} + E \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_e^2} \right)
+  ! !! \end{aligned}
+  ! !! \end{equation}
+  ! !!
+  !   implicit none
+  !   class(GFDLES3D_t),intent(inout) :: this
+  !   real(prec),intent(in) ::  rhoprime,Lr,x0,y0,z0
+  !   ! Local
+  !   integer :: i,j,k,iEl
+  !   real(prec) :: x,y,z,rho,r,E
 
-      print*,__FILE__," : Configuring weak blast wave initial condition. "
-      print*,__FILE__," : rhoprime = ",rhoprime
-      print*,__FILE__," : Lr = ",Lr
-      print*,__FILE__," : x0 = ",x0
-      print*,__FILE__," : y0 = ",y0
-      print*,__FILE__," : z0 = ",z0
+  !   print*,__FILE__," : Configuring weak blast wave initial condition. "
+  !   print*,__FILE__," : rhoprime = ",rhoprime
+  !   print*,__FILE__," : Lr = ",Lr
+  !   print*,__FILE__," : x0 = ",x0
+  !   print*,__FILE__," : y0 = ",y0
+  !   print*,__FILE__," : z0 = ",z0
 
-      do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                    k=1:this%solution%N+1,iel=1:this%mesh%nElem)
-        x = this%geometry%x%interior(i,j,k,iEl,1,1)-x0
-        y = this%geometry%x%interior(i,j,k,iEl,1,2)-y0
-        z = this%geometry%x%interior(i,j,k,iEl,1,3)-z0
-        r = sqrt(x**2+y**2+z**2)
+  !   do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+  !                 k=1:this%solution%N+1,iel=1:this%mesh%nElem)
+  !     x = this%geometry%x%interior(i,j,k,iEl,1,1)-x0
+  !     y = this%geometry%x%interior(i,j,k,iEl,1,2)-y0
+  !     z = this%geometry%x%interior(i,j,k,iEl,1,3)-z0
+  !     r = sqrt(x**2+y**2+z**2)
 
-        rho = (rhoprime)*exp(-log(2.0_prec)*r**2/Lr**2)
+  !     rho = (rhoprime)*exp(-log(2.0_prec)*r**2/Lr**2)
 
-        this%solution%interior(i,j,k,iEl,1) = rho
-        this%solution%interior(i,j,k,iEl,2) = 0.0_prec
-        this%solution%interior(i,j,k,iEl,3) = 0.0_prec
-        this%solution%interior(i,j,k,iEl,4) = 0.0_prec
-        this%solution%interior(i,j,k,iEl,5) = rho*this%c*this%c
+  !     this%solution%interior(i,j,k,iEl,1) = rho
+  !     this%solution%interior(i,j,k,iEl,2) = 0.0_prec
+  !     this%solution%interior(i,j,k,iEl,3) = 0.0_prec
+  !     this%solution%interior(i,j,k,iEl,4) = 0.0_prec
+  !     this%solution%interior(i,j,k,iEl,5) = rho*this%c*this%c
 
-      enddo
+  !   enddo
 
-      call this%ReportMetrics()
-      call this%solution%UpdateDevice()
+  !   call this%ReportMetrics()
+  !   call this%solution%UpdateDevice()
 
-    endsubroutine SphericalSoundWave_GFDLES3D_t
+  ! endsubroutine SphericalSoundWave_GFDLES3D_t
 
-  endmodule self_GFDLES3D_t
+endmodule self_GFDLES3D_t

@@ -250,6 +250,12 @@ contains
       this%source%interior(i,j,iel,1) = this%fCori%interior(i,j,iel,1)*s(2)-this%Cd*s(1) ! du/dt = f*v - Cd*u
       this%source%interior(i,j,iel,2) = -this%fCori%interior(i,j,iel,1)*s(1)-this%Cd*s(2) ! dv/dt = -f*u - Cd*v
 
+      ! newsignal = 0.0
+      ! do n = 1,nnotes
+      !   newsignal = newsignal + A(n)*exp( -( (x-this%xc(n))**2 +(y-this%yc(n))**2 )/(2.0*this%Lr(n)**2) )
+      ! enddo
+      ! this%source%interior(i,j,iel,3) = w1*this%source%interior(i,j,iel,3)+ w2*newsignal
+
     enddo
 
   endsubroutine sourcemethod_LinearShallowWater2D_t

@@ -25,26 +25,7 @@
 # 
 #  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
-file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
-if(SELF_ENABLE_GPU)
-    file(GLOB SELF_BACKEND_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/gpu/*.f*")
-    file(GLOB SELF_BACKEND_CPPSRC "${CMAKE_CURRENT_SOURCE_DIR}/gpu/*.cpp*")
-
-    if(hip_FOUND)
-      set_source_files_properties(${SELF_BACKEND_CPPSRC} PROPERTIES LANGUAGE HIP)
-    else()
-      set_source_files_properties(${SELF_BACKEND_CPPSRC} PROPERTIES LANGUAGE CUDA)
-    endif()
-else()
-    file(GLOB SELF_BACKEND_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/cpu/*.f*")
-endif()
-
-file(GLOB SELF_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-
-if(JSONFORTRAN_LIBRARIES)
-  file(GLOB SELF_JSON_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/json/*.f*")
-  file(APPEND SELF_FSRC "${SELF_JSON_FSRC}")
-endif()
+file(GLOB SELF_PYINT_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
 
 # Enable pre-processing for source code
 set_source_files_properties(
@@ -52,10 +33,6 @@ set_source_files_properties(
   PROPERTIES Fortran_PREPROCESS ON
 )
 
-set_source_files_properties(
-  ${SELF_BACKEND_FSRC}
-  PROPERTIES Fortran_PREPROCESS ON
-)
 
 set_source_files_properties(
   ${SELF_MODEL_FSRC}
@@ -64,34 +41,34 @@ set_source_files_properties(
 
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
-add_library(self SHARED ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC})
+add_library(self_interface SHARED ${SELF_PYINT_FSRC})
 #set_target_properties(self PROPERTIES OUTPUT_NAME "self") 
-
-target_link_libraries(self PUBLIC
+target_link_libraries(self_interface PUBLIC
+                        self
                         ${FEQPARSE_LIBRARIES}
                         HDF5::HDF5
                         ${MPI_Fortran_LIBRARIES}
                         ${BACKEND_LIBRARIES}
                         ${JSONFORTRAN_LIBRARIES})
 
-target_include_directories(self PUBLIC
+target_include_directories(self_interface PUBLIC
                         ${FEQPARSE_INCLUDE_DIRS}
                         ${HDF5_INCLUDE_DIRS}
                         ${MPI_Fortran_INCLUDE_DIRS}
                         ${JSONFORTRAN_INCLUDE_DIRS})
 
-target_compile_options(self PUBLIC -fPIC)    
+target_compile_options(self_interface PUBLIC -fPIC)    
 
-set_target_properties(self PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties(self PROPERTIES PUBLIC_HEADER ${SELF_HEADERS})
+set_target_properties(self_interface PROPERTIES LINKER_LANGUAGE Fortran)
 
-install(TARGETS self
+install(TARGETS self_interface
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)
 
+# if(JSONFORTRAN_LIBRARIES)
 # add_library(self-python SHARED ${SELF_FSRC} ${SELF_BACKEND_CPPSRC} ${SELF_BACKEND_FSRC})
 # target_link_libraries(self PUBLIC
 #                         ${FEQPARSE_LIBRARIES}
