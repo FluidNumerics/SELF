@@ -26,6 +26,7 @@
 
 cmake_minimum_required(VERSION 3.21)
 cmake_policy(VERSION 3.21...3.27)
+include(CMakePrintHelpers)
 
 # C Language is needed in order to verify Fortran compiler is C-interoperable
 project(SELF VERSION 1.0.0
@@ -38,7 +39,7 @@ option(SELF_ENABLE_EXAMPLES "Option to enable build of examples. (Default On)"  
 option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
-
+option(SELF_ENABLE_MODELINTERFACE "Option to enable the model interface and JSON config class for SELF (Default Off)" OFF)
 set(SELF_MPIEXEC_NUMPROCS "2" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
 set(SELF_MPIEXEC_OPTIONS "" CACHE STRING "Any additional options, such as binding options, to use for MPI tests.Only used when launching test programs via ctest. Defaults to nothing")
 
@@ -132,9 +133,17 @@ find_package(MPI COMPONENTS Fortran C REQUIRED)
 find_package(HDF5 REQUIRED Fortran)
 
 # JSON-Fortran
-find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran OPTIONAL)
-find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+if(SELF_ENABLE_MODELINTERFACE)
+    find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
+    find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+else()
+    # Allow the JSON Config class to be built if jsonfortran is found
+    find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran OPTIONAL)
+    find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+endif()
 
+cmake_print_variables(JSONFORTRAN_LIBRARIES)
+cmake_print_variables(JSONFORTRAN_INCLUDE_DIRS)
 
 # FEQ-Parse
 find_library(FEQPARSE_LIBRARIES NAMES feqparse REQUIRED)
@@ -225,6 +234,10 @@ endif()
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+
+if(SELF_ENABLE_MODELINTERFACE)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/src/interface)
+endif()
 
 if(SELF_ENABLE_TESTING)
     enable_testing()

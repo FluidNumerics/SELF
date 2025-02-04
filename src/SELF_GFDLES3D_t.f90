@@ -422,7 +422,7 @@ contains
     !pe = s(1)*this%g*z Potential energy
     ie = this%Cv*s(5)*(this%pressure(s)/this%p0)**(this%R/this%Cp) ! internal energy = rho*Cv*T
 
-    e = ke+e
+    e = ke+ie
   endfunction entropy_func_GFDLES3D_t
 
   ! pure function hbc3D_NoNormalFlow_GFDLES3D_t(this,s,nhat) result(exts)
