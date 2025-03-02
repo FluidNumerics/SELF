@@ -38,6 +38,7 @@ option(SELF_ENABLE_EXAMPLES "Option to enable build of examples. (Default On)"  
 option(SELF_ENABLE_GPU "Option to enable GPU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_APU "Option to enable APU backend. Requires either CUDA or HIP. (Default Off)"  OFF)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
+option(SELF_ENABLE_PYTHON "Option to enable Python interface. (Default Off)"  OFF)
 
 set(SELF_MPIEXEC_NUMPROCS "2" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
 set(SELF_MPIEXEC_OPTIONS "" CACHE STRING "Any additional options, such as binding options, to use for MPI tests.Only used when launching test programs via ctest. Defaults to nothing")
@@ -131,11 +132,6 @@ find_package(MPI COMPONENTS Fortran C REQUIRED)
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)
 
-# JSON-Fortran
-find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran OPTIONAL)
-find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
-
-
 # FEQ-Parse
 find_library(FEQPARSE_LIBRARIES NAMES feqparse REQUIRED)
 find_path(FEQPARSE_INCLUDE_DIRS feqparse.mod)
@@ -225,6 +221,13 @@ endif()
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+
+if(SELF_ENABLE_PYTHON)
+    # JSON-Fortran
+    find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
+    find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/src/python)
+endif()
 
 if(SELF_ENABLE_TESTING)
     enable_testing()

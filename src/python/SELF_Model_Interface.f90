@@ -79,6 +79,7 @@ contains
     endselect
 
   endfunction GetBCFlagForChar
+
   subroutine Initialize(config_file)
     implicit none
     character(LEN=*),intent(in) :: config_file

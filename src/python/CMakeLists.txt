@@ -29,13 +29,7 @@ file(GLOB SELF_PYINT_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
 
 # Enable pre-processing for source code
 set_source_files_properties(
-  ${SELF_FSRC}
-  PROPERTIES Fortran_PREPROCESS ON
-)
-
-
-set_source_files_properties(
-  ${SELF_MODEL_FSRC}
+  ${SELF_PYINT_FSRC}
   PROPERTIES Fortran_PREPROCESS ON
 )
 
