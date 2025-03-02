@@ -34,6 +34,8 @@ module self_LinearShallowWater2D_t
   type,extends(dgmodel2d) :: LinearShallowWater2D_t
     real(prec) :: H = 0.0_prec ! uniform resting depth
     real(prec) :: g = 0.0_prec ! acceleration due to gravity
+    real(prec) :: f0 = 0.0_prec ! reference coriolis parameter (1/s) [for conveniently setting fCori]
+    real(prec) :: beta = 0.0_prec ! reference coriolis parameter variation with latitude (1/ms) [for conveniently setting fCori]
     real(prec) :: Cd = 0.0_prec ! Linear drag coefficient (1/s)
     type(MappedScalar2D) :: fCori ! The coriolis parameter
 

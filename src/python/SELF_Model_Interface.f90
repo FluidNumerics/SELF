@@ -1,5 +1,5 @@
 
-module SELF_ModelInterface
+module SELF_Model_Interface
 
   ! Core
   use SELF_Constants
@@ -8,7 +8,6 @@ module SELF_ModelInterface
   use SELF_Geometry_1D
   use SELF_Geometry_2D
   use SELF_Geometry_3D
-  use SELF_MappedData
   use SELF_JSON_Config
 
   ! Models
@@ -25,7 +24,7 @@ module SELF_ModelInterface
 
   implicit none
 
-  !type(SELFConfig) :: config
+  type(SELFConfig) :: config
   type(Lagrange),target,private :: interp
   !type(MPILayer),target :: decomp
 
@@ -48,9 +47,10 @@ module SELF_ModelInterface
 
   integer,parameter,private :: MODEL_NAME_LENGTH = 50
 
-  ! TO DO : Set character length
-  character(LEN=),private :: model_configuration_file
-  public :: Initialize,ForwardStep,WritePickupFile, !GetSolution, Finalize
+  character(LEN=500),private :: model_configuration_file
+
+  ! Interfaces
+  public :: Initialize,ForwardStep,WritePickupFile !, !GetSolution, Finalize
   private :: GetBCFlagForChar,Init2DWorkspace,UpdateParameters,InitLinearShallowWater2D
 
 contains
@@ -79,6 +79,28 @@ contains
     endselect
 
   endfunction GetBCFlagForChar
+
+  function GetQFlagForChar(charFlag) result(intFlag)
+    !! This method is used to return the integer flag from a char for boundary conditions
+    !!
+    implicit none
+    character(*),intent(in) :: charFlag
+    integer :: intFlag
+
+    select case(UpperCase(trim(charFlag)))
+
+    case("GAUSS")
+      intFlag = GAUSS
+
+    case("GAUSS-LOBATTO")
+      intFlag = GAUSS_LOBATTO
+
+    case DEFAULT
+      intFlag = 0
+
+    endselect
+
+  endfunction GetQFlagForChar
 
   subroutine Initialize(config_file)
     implicit none
@@ -118,17 +140,17 @@ contains
     call config%Get("geometry.control_degree",controlDegree)
     call config%Get("geometry.target_degree",targetDegree)
     call config%Get("geometry.control_quadrature",qChar)
-    controlQuadrature = GetIntForChar(trim(qChar))
+    controlQuadrature = GetQFlagForChar(trim(qChar))
     call config%Get("geometry.target_quadrature",qChar)
-    targetQuadrature = GetIntForChar(trim(qChar))
+    targetQuadrature = GetQFlagForChar(trim(qChar))
     call config%Get("geometry.mesh_file",meshfile)
     call config%Get("geometry.uniform_boundary_condition",uniformBoundaryCondition)
     bcFlag = GetBCFlagForChar(uniformBoundaryCondition)
 
-    INFO("Mesh file : "//trim(meshfile))
+    print*,"Using Mesh file : "//trim(meshfile)
     ! Read in mesh file and set the public mesh pointer to selfMesh2D
     call selfMesh2D%Read_HOPr(trim(meshfile))
-    call mesh%ResetBoundaryConditionType(bcFlag)
+    call selfMesh2D%ResetBoundaryConditionType(bcFlag)
 
     selfMesh => selfMesh2D
 
@@ -210,13 +232,13 @@ contains
     ! Reload config
     call UpdateParameters()
 
-    call config%Get("time_options.io_interval",ioInterval)
+    call config%Get("time_options.update_interval",updateInterval)
     call config%Get("time_options.dt",dt)
 
-    this%dt = dt
-    targetTime = this%t+dt*real(updateInterval,prec)
-    call this%timeIntegrator(targetTime)
-    this%t = targetTime
+    selfModel%dt = dt
+    targetTime = selfModel%t+dt*real(updateInterval,prec)
+    call selfModel%timeIntegrator(targetTime)
+    selfModel%t = targetTime
 
   endsubroutine ForwardStep
 
@@ -250,4 +272,4 @@ endmodule SELF_Model_Interface
 !   ! CALL selfMesh % Free()
 !   ! CALL interp % Free()
 
-endmodule SELF_Model_Interface
+! endmodule SELF_Model_Interface
