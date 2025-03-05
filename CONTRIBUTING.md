@@ -37,3 +37,27 @@ fprettify  './src/' --config-file ./fprettify.config --recursive --case 1 1 1 1
 fprettify  './test/' --config-file ./fprettify.config --recursive --case 1 1 1 1
 fprettify  './examples/' --config-file ./fprettify.config --recursive --case 1 1 1 1
 ```
+
+## Testing code
+The `FluidNumerics/SELF` main repository has CI implemented to execute all tests under the `test/` and `examples/` subdirectories. If you are adding new features, make sure that you include new tests and examples that exercise your contribution completely. By "completely" we mean that all new lines of code are exercises **and** you have sufficiently sophisticated tests to cover the range of possible inputs and scenarios you intend to support.
+
+You can test locally on your system after building the code. Suppose you've built the code with the following commands
+
+```shell
+mkdir ~/SELF/build
+cd ~/SELF/build
+cmake {CMAKE_OPTIONS} ~/SELF/
+make -j
+```
+
+You can then use `ctest` to run all of the tests from your build directory
+
+```shell
+ctest ~/SELF/build
+```
+
+At the least, we ask that you verify that all tests pass on *your* system, since that likely matters most to you. In our CI environment, we will test on a variety of platforms to ensure SELF passes tests on systems we want to support. 
+
+### Cluster Access
+If you contribute code that resolves issues labeled with "free compute reward", you can reach out to support@fluidnumerics.com to request an account on [Fluid Numerics' Galapagos Cluster](https://galapagos.fluidnumerics.com). This will provide you with access to a variety of GPU accelerator platforms for testing in addition to a variety of curated software environments managed by Fluid Numerics. Fluid Numerics provides these accounts to help lower the barrier to entry in being a contributor on the SELF repository and to promote collaboration with the broader community. 
+
