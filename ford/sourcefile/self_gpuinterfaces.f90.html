@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_GPUInterfaces.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_GPUInterfaces.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.1% of total for source files.">139 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_GPUInterfaces.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_GPUInterfaces.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_gpuinterfaces.html">SELF_GPUInterfaces</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_gpuinterfaces.f90.html#src">SELF_GPUInterfaces.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_gpuinterfaces.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_gpuinterfacesf90EfferentGraph" width="431pt" height="32pt"
+ viewBox="0.00 0.00 431.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_gpuinterfaces.f90~~EfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>sourcefile~~self_gpuinterfaces.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 427,-28 427,4 -4,4"/>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<polygon fill="none" stroke="black" points="423,-24 284,-24 284,0 423,0 423,-24"/>
+<text text-anchor="middle" x="353.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_GPUInterfaces.f90</text>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="248,-24 163,-24 163,0 248,0 248,-24"/>
+<text text-anchor="middle" x="205.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M283.78,-12C275.25,-12 266.64,-12 258.42,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="258.26,-8.5 248.26,-12 258.26,-15.5 258.26,-8.5"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="127,-24 0,-24 0,0 127,0 127,-24"/>
+<text text-anchor="middle" x="63.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M162.87,-12C154.82,-12 146.17,-12 137.45,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="137.22,-8.5 127.22,-12 137.22,-15.5 137.22,-8.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_gpuinterfaces.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefileself_gpuinterfacesf90AfferentGraph" width="343pt" height="494pt"
+ viewBox="0.00 0.00 343.00 494.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 490)">
+<title>sourcefile~~self_gpuinterfaces.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-490 339,-490 339,4 -4,4"/>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node1" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<polygon fill="none" stroke="black" points="139,-255 0,-255 0,-231 139,-231 139,-255"/>
+<text text-anchor="middle" x="69.5" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_GPUInterfaces.f90</text>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node2" class="node">
+<title>sourcefile~self_mappedscalar_3d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/self_mappedscalar_3d.f90~2.html" xlink:title="SELF_MappedScalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="335,-486 175,-486 175,-462 335,-462 335,-486"/>
+<text text-anchor="middle" x="255" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge1" class="edge">
+<title>sourcefile~self_mappedscalar_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M189.19,-461.86C184.1,-459.42 179.29,-456.5 175,-453 113.76,-403.03 85.31,-308.11 75.13,-265.13"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="78.5,-264.13 72.88,-255.15 71.67,-265.67 78.5,-264.13"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node3" class="node">
+<title>sourcefile~self_vector_2d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/self_vector_2d.f90~2.html" xlink:title="SELF_Vector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="314,-444 196,-444 196,-420 314,-420 314,-444"/>
+<text text-anchor="middle" x="255" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge4" class="edge">
+<title>sourcefile~self_vector_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M195.98,-422.08C188.5,-419.26 181.27,-415.64 175,-411 123.48,-372.88 91.55,-301.08 78.02,-264.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="81.24,-263.57 74.55,-255.36 74.66,-265.95 81.24,-263.57"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node4" class="node">
+<title>sourcefile~self_scalar_3d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/self_scalar_3d.f90~2.html" xlink:title="SELF_Scalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="314,-402 196,-402 196,-378 314,-378 314,-402"/>
+<text text-anchor="middle" x="255" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge5" class="edge">
+<title>sourcefile~self_scalar_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M195.71,-378.97C188.43,-376.33 181.34,-373.05 175,-369 132.63,-341.89 98.9,-292.04 82.11,-263.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="85.13,-262.08 77.08,-255.19 79.07,-265.59 85.13,-262.08"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node5" class="node">
+<title>sourcefile~self_vector_3d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/self_vector_3d.f90~2.html" xlink:title="SELF_Vector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="314,-360 196,-360 196,-336 314,-336 314,-360"/>
+<text text-anchor="middle" x="255" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge3" class="edge">
+<title>sourcefile~self_vector_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M196.83,-335.87C189.31,-333.39 181.84,-330.46 175,-327 141.63,-310.11 108.98,-281.34 89.3,-262.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="91.75,-259.74 82.17,-255.2 86.83,-264.72 91.75,-259.74"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node6" class="node">
+<title>sourcefile~self_mappedscalar_2d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/self_mappedscalar_2d.f90~2.html" xlink:title="SELF_MappedScalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="335,-318 175,-318 175,-294 335,-294 335,-318"/>
+<text text-anchor="middle" x="255" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge2" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M204.84,-293.93C194.9,-291.21 184.56,-288.18 175,-285 152.2,-277.42 127.21,-267.44 107.38,-259.11"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="108.67,-255.85 98.1,-255.17 105.94,-262.3 108.67,-255.85"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node7" class="node">
+<title>sourcefile~self_mappedvector_2d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/self_mappedvector_2d.f90~2.html" xlink:title="SELF_MappedVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="335,-276 175,-276 175,-252 335,-252 335,-276"/>
+<text text-anchor="middle" x="255" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge6" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M174.85,-254.94C166.27,-253.96 157.55,-252.96 148.98,-251.98"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="149.35,-248.5 139.01,-250.84 148.55,-255.46 149.35,-248.5"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node8" class="node">
+<title>sourcefile~self_mappedvector_3d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/self_mappedvector_3d.f90~2.html" xlink:title="SELF_MappedVector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="335,-234 175,-234 175,-210 335,-210 335,-234"/>
+<text text-anchor="middle" x="255" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge7" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M174.85,-231.06C166.27,-232.04 157.55,-233.04 148.98,-234.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="148.55,-230.54 139.01,-235.16 149.35,-237.5 148.55,-230.54"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node9" class="node">
+<title>sourcefile~self_scalar_2d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/self_scalar_2d.f90~2.html" xlink:title="SELF_Scalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="314,-192 196,-192 196,-168 314,-168 314,-192"/>
+<text text-anchor="middle" x="255" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge8" class="edge">
+<title>sourcefile~self_scalar_2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M204.84,-192.07C194.9,-194.79 184.56,-197.82 175,-201 152.2,-208.58 127.21,-218.56 107.38,-226.89"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="105.94,-223.7 98.1,-230.83 108.67,-230.15 105.94,-223.7"/>
+</g>
+<!-- sourcefile~self_scalar_1d.f90~3 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node10" class="node">
+<title>sourcefile~self_scalar_1d.f90~3</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/self_scalar_1d.f90~3.html" xlink:title="SELF_Scalar_1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="314,-150 196,-150 196,-126 314,-126 314,-150"/>
+<text text-anchor="middle" x="255" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_1d.f90~3&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge9" class="edge">
+<title>sourcefile~self_scalar_1d.f90~3&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M196.83,-150.13C189.31,-152.61 181.84,-155.54 175,-159 141.63,-175.89 108.98,-204.66 89.3,-223.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="86.83,-221.28 82.17,-230.8 91.75,-226.26 86.83,-221.28"/>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node11" class="node">
+<title>sourcefile~self_dgmodel1d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node11"><a xlink:href=".././sourcefile/self_dgmodel1d.f90~2.html" xlink:title="SELF_DGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="318.5,-108 191.5,-108 191.5,-84 318.5,-84 318.5,-108"/>
+<text text-anchor="middle" x="255" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge10" class="edge">
+<title>sourcefile~self_dgmodel1d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M192.84,-108.11C186.57,-110.55 180.5,-113.48 175,-117 132.63,-144.11 98.9,-193.96 82.11,-222.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="79.07,-220.41 77.08,-230.81 85.13,-223.92 79.07,-220.41"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node12" class="node">
+<title>sourcefile~self_dgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node12"><a xlink:href=".././sourcefile/self_dgmodel2d.f90~2.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="318.5,-66 191.5,-66 191.5,-42 318.5,-42 318.5,-66"/>
+<text text-anchor="middle" x="255" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge11" class="edge">
+<title>sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M191.13,-65.88C185.39,-68.37 179.91,-71.37 175,-75 123.48,-113.12 91.55,-184.92 78.02,-221.05"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="74.66,-220.05 74.55,-230.64 81.24,-222.43 74.66,-220.05"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node13" class="node">
+<title>sourcefile~self_dgmodel3d.f90~2</title>
+<g id="a_sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_node13"><a xlink:href=".././sourcefile/self_dgmodel3d.f90~2.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="318.5,-24 191.5,-24 191.5,0 318.5,0 318.5,-24"/>
+<text text-anchor="middle" x="255" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_gpuinterfaces.f90~~AfferentGraph_edge12" class="edge">
+<title>sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M191.15,-23.23C185.35,-25.84 179.84,-29.05 175,-33 113.76,-82.97 85.31,-177.89 75.13,-220.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="71.67,-220.33 72.88,-230.85 78.5,-221.87 71.67,-220.33"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_gpuinterfaces.html">SELF_GPUInterfaces</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_gpuinterfaces.f90.html#src">SELF_GPUInterfaces.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_GPUInterfaces</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="nb">  </span><span class="k">use </span><span class="n">SELF_GPU</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a>
+<a id="ln-32" name="ln-32" href="#ln-32"></a><span class="w">  </span><span class="c">! Data</span>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">  </span><span class="k">interface</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="k">    subroutine </span><span class="n">Average_gpu</span><span class="p">(</span><span class="n">favg</span><span class="p">,</span><span class="n">f1</span><span class="p">,</span><span class="n">f2</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span><span class="w"> </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Average_gpu&quot;</span><span class="p">)</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">favg</span><span class="p">,</span><span class="n">f1</span><span class="p">,</span><span class="n">f2</span>
+<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">Average_gpu</span>
+<a id="ln-40" name="ln-40" href="#ln-40"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-41" name="ln-41" href="#ln-41"></a>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="k">  interface</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a><span class="k">    subroutine </span><span class="n">BoundaryInterp_2D_gpu</span><span class="p">(</span><span class="n">bMatrix_dev</span><span class="p">,</span><span class="n">f_dev</span><span class="p">,</span><span class="n">bf_dev</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;BoundaryInterp_2D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-47" name="ln-47" href="#ln-47"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bMatrix_dev</span><span class="p">,</span><span class="n">f_dev</span><span class="p">,</span><span class="n">bf_dev</span>
+<a id="ln-48" name="ln-48" href="#ln-48"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">BoundaryInterp_2D_gpu</span>
+<a id="ln-50" name="ln-50" href="#ln-50"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-51" name="ln-51" href="#ln-51"></a>
+<a id="ln-52" name="ln-52" href="#ln-52"></a><span class="k">  interface</span>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="k">    subroutine </span><span class="n">BoundaryInterp_3D_gpu</span><span class="p">(</span><span class="n">bMatrix_dev</span><span class="p">,</span><span class="n">f_dev</span><span class="p">,</span><span class="n">bf_dev</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;BoundaryInterp_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bMatrix_dev</span><span class="p">,</span><span class="n">f_dev</span><span class="p">,</span><span class="n">bf_dev</span>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">BoundaryInterp_3D_gpu</span>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="k">  interface</span>
+<a id="ln-63" name="ln-63" href="#ln-63"></a><span class="k">    subroutine </span><span class="n">Divergence_2D_gpu</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">dmat</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-64" name="ln-64" href="#ln-64"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Divergence_2D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-66" name="ln-66" href="#ln-66"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-67" name="ln-67" href="#ln-67"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">dmat</span>
+<a id="ln-68" name="ln-68" href="#ln-68"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-69" name="ln-69" href="#ln-69"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">Divergence_2D_gpu</span>
+<a id="ln-70" name="ln-70" href="#ln-70"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-71" name="ln-71" href="#ln-71"></a>
+<a id="ln-72" name="ln-72" href="#ln-72"></a><span class="k">  interface</span>
+<a id="ln-73" name="ln-73" href="#ln-73"></a><span class="k">    subroutine </span><span class="n">Divergence_3D_gpu</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">dmat</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-74" name="ln-74" href="#ln-74"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Divergence_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-75" name="ln-75" href="#ln-75"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-76" name="ln-76" href="#ln-76"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-77" name="ln-77" href="#ln-77"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">dmat</span>
+<a id="ln-78" name="ln-78" href="#ln-78"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-79" name="ln-79" href="#ln-79"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">Divergence_3D_gpu</span>
+<a id="ln-80" name="ln-80" href="#ln-80"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-81" name="ln-81" href="#ln-81"></a>
+<a id="ln-82" name="ln-82" href="#ln-82"></a><span class="w">  </span><span class="c">! MappedData</span>
+<a id="ln-83" name="ln-83" href="#ln-83"></a>
+<a id="ln-84" name="ln-84" href="#ln-84"></a><span class="w">  </span><span class="c">! Model</span>
+<a id="ln-85" name="ln-85" href="#ln-85"></a><span class="w">  </span><span class="k">interface</span>
+<a id="ln-86" name="ln-86" href="#ln-86"></a><span class="k">    subroutine </span><span class="n">UpdateSolution_gpu</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span><span class="n">dsdt</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span><span class="w"> </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;UpdateSolution_gpu&quot;</span><span class="p">)</span>
+<a id="ln-87" name="ln-87" href="#ln-87"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-88" name="ln-88" href="#ln-88"></a><span class="nb">      </span><span class="k">use </span><span class="n">SELF_Constants</span>
+<a id="ln-89" name="ln-89" href="#ln-89"></a><span class="w">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">solution</span><span class="p">,</span><span class="n">dsdt</span>
+<a id="ln-90" name="ln-90" href="#ln-90"></a><span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="n">c_prec</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dt</span>
+<a id="ln-91" name="ln-91" href="#ln-91"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-92" name="ln-92" href="#ln-92"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">UpdateSolution_gpu</span>
+<a id="ln-93" name="ln-93" href="#ln-93"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-94" name="ln-94" href="#ln-94"></a>
+<a id="ln-95" name="ln-95" href="#ln-95"></a><span class="k">  interface</span>
+<a id="ln-96" name="ln-96" href="#ln-96"></a><span class="k">    subroutine </span><span class="n">UpdateGRK_gpu</span><span class="p">(</span><span class="n">grk</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">dsdt</span><span class="p">,</span><span class="n">rk_a</span><span class="p">,</span><span class="n">rk_g</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span><span class="w"> </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;UpdateGRK_gpu&quot;</span><span class="p">)</span>
+<a id="ln-97" name="ln-97" href="#ln-97"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-98" name="ln-98" href="#ln-98"></a><span class="nb">      </span><span class="k">use </span><span class="n">SELF_Constants</span>
+<a id="ln-99" name="ln-99" href="#ln-99"></a><span class="w">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">grk</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">dsdt</span>
+<a id="ln-100" name="ln-100" href="#ln-100"></a><span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="n">c_prec</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rk_a</span><span class="p">,</span><span class="n">rk_g</span><span class="p">,</span><span class="n">dt</span>
+<a id="ln-101" name="ln-101" href="#ln-101"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-102" name="ln-102" href="#ln-102"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">UpdateGRK_gpu</span>
+<a id="ln-103" name="ln-103" href="#ln-103"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-104" name="ln-104" href="#ln-104"></a>
+<a id="ln-105" name="ln-105" href="#ln-105"></a><span class="k">  interface</span>
+<a id="ln-106" name="ln-106" href="#ln-106"></a><span class="k">    subroutine </span><span class="n">CalculateDSDt_gpu</span><span class="p">(</span><span class="n">fluxDivergence</span><span class="p">,</span><span class="n">source</span><span class="p">,</span><span class="n">dsdt</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span><span class="w"> </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;CalculateDSDt_gpu&quot;</span><span class="p">)</span>
+<a id="ln-107" name="ln-107" href="#ln-107"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-108" name="ln-108" href="#ln-108"></a><span class="nb">      </span><span class="k">use </span><span class="n">SELF_Constants</span>
+<a id="ln-109" name="ln-109" href="#ln-109"></a><span class="w">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fluxDivergence</span><span class="p">,</span><span class="n">source</span><span class="p">,</span><span class="n">dsdt</span>
+<a id="ln-110" name="ln-110" href="#ln-110"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-111" name="ln-111" href="#ln-111"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">CalculateDSDt_gpu</span>
+<a id="ln-112" name="ln-112" href="#ln-112"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-113" name="ln-113" href="#ln-113"></a>
+<a id="ln-114" name="ln-114" href="#ln-114"></a><span class="k">  interface</span>
+<a id="ln-115" name="ln-115" href="#ln-115"></a><span class="k">    subroutine </span><span class="n">GradientNormal_1D_gpu</span><span class="p">(</span><span class="n">fbn</span><span class="p">,</span><span class="n">fbavg</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span><span class="w"> </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;GradientNormal_1d_gpu&quot;</span><span class="p">)</span>
+<a id="ln-116" name="ln-116" href="#ln-116"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-117" name="ln-117" href="#ln-117"></a><span class="nb">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fbn</span><span class="p">,</span><span class="n">fbavg</span>
+<a id="ln-118" name="ln-118" href="#ln-118"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-119" name="ln-119" href="#ln-119"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">GradientNormal_1D_gpu</span>
+<a id="ln-120" name="ln-120" href="#ln-120"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-121" name="ln-121" href="#ln-121"></a>
+<a id="ln-122" name="ln-122" href="#ln-122"></a><span class="k">  interface</span>
+<a id="ln-123" name="ln-123" href="#ln-123"></a><span class="k">    subroutine </span><span class="n">SideExchange_2D_gpu</span><span class="p">(</span><span class="n">extboundary</span><span class="p">,</span><span class="n">boundary</span><span class="p">,</span><span class="n">sideinfo</span><span class="p">,</span><span class="n">elemToRank</span><span class="p">,</span><span class="n">rankid</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-124" name="ln-124" href="#ln-124"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;SideExchange_2D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-125" name="ln-125" href="#ln-125"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-126" name="ln-126" href="#ln-126"></a><span class="nb">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extboundary</span><span class="p">,</span><span class="n">boundary</span><span class="p">,</span><span class="n">sideinfo</span><span class="p">,</span><span class="n">elemToRank</span>
+<a id="ln-127" name="ln-127" href="#ln-127"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rankId</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-128" name="ln-128" href="#ln-128"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">SideExchange_2D_gpu</span>
+<a id="ln-129" name="ln-129" href="#ln-129"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-130" name="ln-130" href="#ln-130"></a>
+<a id="ln-131" name="ln-131" href="#ln-131"></a><span class="k">  interface</span>
+<a id="ln-132" name="ln-132" href="#ln-132"></a><span class="k">    subroutine </span><span class="n">ApplyFlip_2D_gpu</span><span class="p">(</span><span class="n">extBoundary</span><span class="p">,</span><span class="n">sideInfo</span><span class="p">,</span><span class="n">elemToRank</span><span class="p">,</span><span class="n">rankId</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-133" name="ln-133" href="#ln-133"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ApplyFlip_2D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-134" name="ln-134" href="#ln-134"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-135" name="ln-135" href="#ln-135"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-136" name="ln-136" href="#ln-136"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extBoundary</span><span class="p">,</span><span class="n">sideInfo</span><span class="p">,</span><span class="n">elemToRank</span>
+<a id="ln-137" name="ln-137" href="#ln-137"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rankId</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-138" name="ln-138" href="#ln-138"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">ApplyFlip_2D_gpu</span>
+<a id="ln-139" name="ln-139" href="#ln-139"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-140" name="ln-140" href="#ln-140"></a>
+<a id="ln-141" name="ln-141" href="#ln-141"></a><span class="k">  interface</span>
+<a id="ln-142" name="ln-142" href="#ln-142"></a><span class="k">    subroutine </span><span class="n">DG_BoundaryContribution_2D_gpu</span><span class="p">(</span><span class="n">bmatrix</span><span class="p">,</span><span class="n">qweights</span><span class="p">,</span><span class="n">bf</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-143" name="ln-143" href="#ln-143"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;DG_BoundaryContribution_2D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-144" name="ln-144" href="#ln-144"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-145" name="ln-145" href="#ln-145"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-146" name="ln-146" href="#ln-146"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bmatrix</span><span class="p">,</span><span class="n">qweights</span><span class="p">,</span><span class="n">bf</span><span class="p">,</span><span class="n">df</span>
+<a id="ln-147" name="ln-147" href="#ln-147"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span>
+<a id="ln-148" name="ln-148" href="#ln-148"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">DG_BoundaryContribution_2D_gpu</span>
+<a id="ln-149" name="ln-149" href="#ln-149"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-150" name="ln-150" href="#ln-150"></a>
+<a id="ln-151" name="ln-151" href="#ln-151"></a><span class="k">  interface</span>
+<a id="ln-152" name="ln-152" href="#ln-152"></a><span class="k">    subroutine </span><span class="n">JacobianWeight_2D_gpu</span><span class="p">(</span><span class="n">scalar</span><span class="p">,</span><span class="n">J</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-153" name="ln-153" href="#ln-153"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;JacobianWeight_2D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-154" name="ln-154" href="#ln-154"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-155" name="ln-155" href="#ln-155"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-156" name="ln-156" href="#ln-156"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">scalar</span><span class="p">,</span><span class="n">J</span>
+<a id="ln-157" name="ln-157" href="#ln-157"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-158" name="ln-158" href="#ln-158"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">JacobianWeight_2D_gpu</span>
+<a id="ln-159" name="ln-159" href="#ln-159"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-160" name="ln-160" href="#ln-160"></a>
+<a id="ln-161" name="ln-161" href="#ln-161"></a><span class="k">  interface</span>
+<a id="ln-162" name="ln-162" href="#ln-162"></a><span class="k">    subroutine </span><span class="n">SideExchange_3D_gpu</span><span class="p">(</span><span class="n">extboundary</span><span class="p">,</span><span class="n">boundary</span><span class="p">,</span><span class="n">sideinfo</span><span class="p">,</span><span class="n">elemToRank</span><span class="p">,</span><span class="n">rankid</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-163" name="ln-163" href="#ln-163"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;SideExchange_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-164" name="ln-164" href="#ln-164"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-165" name="ln-165" href="#ln-165"></a><span class="nb">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extboundary</span><span class="p">,</span><span class="n">boundary</span><span class="p">,</span><span class="n">sideinfo</span><span class="p">,</span><span class="n">elemToRank</span>
+<a id="ln-166" name="ln-166" href="#ln-166"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rankId</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-167" name="ln-167" href="#ln-167"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">SideExchange_3D_gpu</span>
+<a id="ln-168" name="ln-168" href="#ln-168"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-169" name="ln-169" href="#ln-169"></a>
+<a id="ln-170" name="ln-170" href="#ln-170"></a><span class="k">  interface</span>
+<a id="ln-171" name="ln-171" href="#ln-171"></a><span class="k">    subroutine </span><span class="n">ApplyFlip_3D_gpu</span><span class="p">(</span><span class="n">extBoundary</span><span class="p">,</span><span class="n">sideInfo</span><span class="p">,</span><span class="n">elemToRank</span><span class="p">,</span><span class="n">rankId</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-172" name="ln-172" href="#ln-172"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ApplyFlip_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-173" name="ln-173" href="#ln-173"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-174" name="ln-174" href="#ln-174"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-175" name="ln-175" href="#ln-175"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extBoundary</span><span class="p">,</span><span class="n">sideInfo</span><span class="p">,</span><span class="n">elemToRank</span>
+<a id="ln-176" name="ln-176" href="#ln-176"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rankId</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-177" name="ln-177" href="#ln-177"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">ApplyFlip_3D_gpu</span>
+<a id="ln-178" name="ln-178" href="#ln-178"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-179" name="ln-179" href="#ln-179"></a>
+<a id="ln-180" name="ln-180" href="#ln-180"></a><span class="k">  interface</span>
+<a id="ln-181" name="ln-181" href="#ln-181"></a><span class="k">    subroutine </span><span class="n">DG_BoundaryContribution_3D_gpu</span><span class="p">(</span><span class="n">bmatrix</span><span class="p">,</span><span class="n">qweights</span><span class="p">,</span><span class="n">bf</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-182" name="ln-182" href="#ln-182"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;DG_BoundaryContribution_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-183" name="ln-183" href="#ln-183"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-184" name="ln-184" href="#ln-184"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-185" name="ln-185" href="#ln-185"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bmatrix</span><span class="p">,</span><span class="n">qweights</span><span class="p">,</span><span class="n">bf</span><span class="p">,</span><span class="n">df</span>
+<a id="ln-186" name="ln-186" href="#ln-186"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span>
+<a id="ln-187" name="ln-187" href="#ln-187"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">DG_BoundaryContribution_3D_gpu</span>
+<a id="ln-188" name="ln-188" href="#ln-188"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-189" name="ln-189" href="#ln-189"></a>
+<a id="ln-190" name="ln-190" href="#ln-190"></a><span class="k">  interface</span>
+<a id="ln-191" name="ln-191" href="#ln-191"></a><span class="k">    subroutine </span><span class="n">JacobianWeight_3D_gpu</span><span class="p">(</span><span class="n">scalar</span><span class="p">,</span><span class="n">J</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-192" name="ln-192" href="#ln-192"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;JacobianWeight_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-193" name="ln-193" href="#ln-193"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-194" name="ln-194" href="#ln-194"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-195" name="ln-195" href="#ln-195"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">scalar</span><span class="p">,</span><span class="n">J</span>
+<a id="ln-196" name="ln-196" href="#ln-196"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span>
+<a id="ln-197" name="ln-197" href="#ln-197"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">JacobianWeight_3D_gpu</span>
+<a id="ln-198" name="ln-198" href="#ln-198"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-199" name="ln-199" href="#ln-199"></a>
+<a id="ln-200" name="ln-200" href="#ln-200"></a><span class="k">endmodule </span><span class="n">SELF_GPUInterfaces</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2025 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2025-03-05 17:23            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

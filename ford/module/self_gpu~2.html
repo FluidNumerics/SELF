@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_GPU &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_GPU 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.6% of total for modules and submodules.">70 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_GPU.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_gpu.f90.html'>SELF_GPU.f90</a></li>
+     <li class="active">SELF_GPU</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
+  <div id="inters-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipfree">hipFree</a>
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipgetdevicecount">hipGetDeviceCount</a>
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipmalloc">hipMalloc</a>
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipmemcpy">hipMemcpy</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_gpu~2.html#proc-gpuavailable">GPUAvailable</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_gpu~2.html#proc-gpucheck">gpuCheck</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+    <li><a href='../module/self_gpu_enums~2.html'>SELF_GPU_enums</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_gpu~2~~UsesGraph Pages: 1 -->
+<svg id="moduleself_gpu2UsesGraph" width="335pt" height="52pt"
+ viewBox="0.00 0.00 335.00 52.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_gpu~2~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 48)">
+<title>module~~self_gpu~2~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-48 331,-48 331,4 -4,4"/>
+<!-- module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsesGraph_node1" class="node">
+<title>module~self_gpu~2</title>
+<polygon fill="none" stroke="black" points="327,-44 262,-44 262,-20 327,-20 327,-44"/>
+<text text-anchor="middle" x="294.5" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_GPU</text>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_gpu~2~~UsesGraph_node2" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_gpu~2~~UsesGraph_node2"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="84,-44 0,-44 0,-20 84,-20 84,-44"/>
+<text text-anchor="middle" x="42" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_gpu~2~~UsesGraph_edge1" class="edge">
+<title>module~self_gpu~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M261.91,-32.56C250.58,-32.74 237.72,-32.91 226,-33 178.89,-33.35 167.11,-33.31 120,-33 111.73,-32.95 102.96,-32.86 94.42,-32.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="94.2,-29.26 84.16,-32.63 94.11,-36.26 94.2,-29.26"/>
+</g>
+<!-- module~self_gpu_enums~2 -->
+<g id="module~~self_gpu~2~~UsesGraph_node3" class="node">
+<title>module~self_gpu_enums~2</title>
+<g id="a_module~~self_gpu~2~~UsesGraph_node3"><a xlink:href=".././module/self_gpu_enums~2.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-24 120,-24 120,0 226,0 226,-24"/>
+<text text-anchor="middle" x="173" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_gpu~2~~UsesGraph_edge2" class="edge">
+<title>module~self_gpu~2&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M261.79,-26.69C253.85,-25.36 245.06,-23.89 236.2,-22.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="236.64,-18.94 226.2,-20.74 235.49,-25.84 236.64,-18.94"/>
+</g>
+<!-- module~self_gpu_enums~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_gpu~2~~UsesGraph_edge3" class="edge">
+<title>module~self_gpu_enums~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M119.9,-20.08C111.45,-21.39 102.7,-22.74 94.27,-24.05"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="93.53,-20.62 84.19,-25.61 94.6,-27.54 93.53,-20.62"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_gpu~2~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_gpu2UsedByGraph" width="641pt" height="450pt"
+ viewBox="0.00 0.00 641.00 449.92" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_gpu~2~~UsedByGraph" class="graph" transform="scale(0.27 0.27) rotate(0) translate(4 1638.45)">
+<title>module~~self_gpu~2~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1638.45 2336,-1638.45 2336,4 -4,4"/>
+<!-- module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node1" class="node">
+<title>module~self_gpu~2</title>
+<polygon fill="none" stroke="black" points="65,-631.45 0,-631.45 0,-607.45 65,-607.45 65,-631.45"/>
+<text text-anchor="middle" x="32.5" y="-617.05" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_GPU</text>
+</g>
+<!-- module~self_mappedvector_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node2" class="node">
+<title>module~self_mappedvector_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node2"><a xlink:href=".././module/self_mappedvector_3d.html" xlink:title="SELF_MappedVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-184.45 1437,-184.45 1437,-160.45 1577,-160.45 1577,-184.45"/>
+<text text-anchor="middle" x="1507" y="-170.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge1" class="edge">
+<title>module~self_mappedvector_3d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1436.96,-174.36C1335.31,-176.58 1139.48,-178.52 973.5,-166.45"/>
+</g>
+<!-- module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_node16" class="node">
+<title>module~self_gpuinterfaces</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node16"><a xlink:href=".././module/self_gpuinterfaces.html" xlink:title="SELF_GPUInterfaces">
+<polygon fill="#337ab7" stroke="#337ab7" points="584,-380.45 466,-380.45 466,-356.45 584,-356.45 584,-380.45"/>
+<text text-anchor="middle" x="525" y="-366.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge44" class="edge">
+<title>module~self_mappedvector_3d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1463.39,-184.5C1454.6,-187.24 1445.44,-190.29 1437,-193.45 1387.07,-212.13 1380.65,-238.25 1327.5,-242.45"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1325.5,-242.45C1244.42,-248.84 1222.93,-230.34 1142.5,-242.45"/>
+</g>
+<!-- module~self_mappedvector_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node43" class="node">
+<title>module~self_mappedvector_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node43"><a xlink:href=".././module/self_mappedvector_3d_t.html" xlink:title="SELF_MappedVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1401,-688.45 1252,-688.45 1252,-664.45 1401,-664.45 1401,-688.45"/>
+<text text-anchor="middle" x="1326.5" y="-674.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d&#45;&gt;module~self_mappedvector_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge110" class="edge">
+<title>module~self_mappedvector_3d&#45;&gt;module~self_mappedvector_3d_t</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M1448.16,-184.61C1444.04,-187.05 1440.24,-189.96 1437,-193.45 1372.7,-262.59 1338.13,-568.62 1329.61,-654.17"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="1326.11,-654.02 1328.62,-664.31 1333.07,-654.7 1326.11,-654.02"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_gpu~2~~UsedByGraph_node3" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node3"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-380.45 101,-380.45 101,-356.45 195,-356.45 195,-380.45"/>
+<text text-anchor="middle" x="148" y="-366.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge2" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M117.69,-380.57C111.48,-384.26 105.47,-388.85 101,-394.45 51.6,-456.3 38.31,-553.71 34.77,-597.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="31.27,-597.04 34.05,-607.27 38.25,-597.54 31.27,-597.04"/>
+</g>
+<!-- module~self_mappedscalar_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node4" class="node">
+<title>module~self_mappedscalar_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node4"><a xlink:href=".././module/self_mappedscalar_2d.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-515.45 1437,-515.45 1437,-491.45 1577,-491.45 1577,-515.45"/>
+<text text-anchor="middle" x="1507" y="-501.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge3" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M827,-448.45C747.99,-427.38 724.97,-440.84 644,-429.45 591.25,-422.02 579.27,-407.97 526,-408.45"/>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge48" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1468.05,-491.4C1413.13,-474.67 1308.01,-445.24 1216,-434.45 1082.69,-418.8 1047.78,-423.5 914,-434.45 875.84,-437.57 866.54,-455.95 829,-448.45"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M827,-448.45C738.79,-424.93 808.14,-324.38 742,-261.45 725.38,-245.63 716.94,-242.54 694,-242.45"/>
+</g>
+<!-- module~self_mappedscalar_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node38" class="node">
+<title>module~self_mappedscalar_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node38"><a xlink:href=".././module/self_mappedscalar_2d_t.html" xlink:title="SELF_MappedScalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1401,-1048.45 1252,-1048.45 1252,-1024.45 1401,-1024.45 1401,-1048.45"/>
+<text text-anchor="middle" x="1326.5" y="-1034.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge90" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M1498.84,-515.54C1484.37,-540.63 1451.76,-600.6 1437,-655.45 1416.11,-733.08 1452.55,-953.75 1401,-1015.45 1400.28,-1016.31 1399.52,-1017.14 1398.73,-1017.94"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="1396.49,-1015.25 1390.93,-1024.27 1400.9,-1020.69 1396.49,-1015.25"/>
+</g>
+<!-- module~self_vector_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node5" class="node">
+<title>module~self_vector_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node5"><a xlink:href=".././module/self_vector_2d.html" xlink:title="SELF_Vector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-378.45 644.5,-378.45 644.5,-354.45 741.5,-354.45 741.5,-378.45"/>
+<text text-anchor="middle" x="693" y="-364.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge4" class="edge">
+<title>module~self_vector_2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M662.28,-378.54C629.5,-390.79 574.9,-408.01 526,-408.45"/>
+</g>
+<!-- module~self_vector_2d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge53" class="edge">
+<title>module~self_vector_2d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M644.43,-367.02C628.88,-367.21 611.29,-367.42 594.51,-367.62"/>
+<polygon fill="#002eff" stroke="#002eff" points="594.15,-364.12 584.19,-367.74 594.24,-371.12 594.15,-364.12"/>
+</g>
+<!-- module~self_vector_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node34" class="node">
+<title>module~self_vector_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node34"><a xlink:href=".././module/self_vector_2d_t.html" xlink:title="SELF_Vector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578,-650.45 472,-650.45 472,-626.45 578,-626.45 578,-650.45"/>
+<text text-anchor="middle" x="525" y="-636.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_2d&#45;&gt;module~self_vector_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge83" class="edge">
+<title>module~self_vector_2d&#45;&gt;module~self_vector_2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M653.71,-378.66C650.02,-381.09 646.67,-383.99 644,-387.45 580.82,-469.38 677.59,-540.88 608,-617.45 602.45,-623.55 595.39,-627.99 587.74,-631.2"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="586.48,-627.93 578.2,-634.53 588.79,-634.54 586.48,-627.93"/>
+</g>
+<!-- module~self_mappedvector_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node6" class="node">
+<title>module~self_mappedvector_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node6"><a xlink:href=".././module/self_mappedvector_2d~2.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-104.45 1437,-104.45 1437,-80.45 1577,-80.45 1577,-104.45"/>
+<text text-anchor="middle" x="1507" y="-90.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge5" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1436.91,-90.66C1362.44,-90.7 1241.31,-96.51 1142.5,-128.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1140.5,-128.45C1067.65,-150.53 1049.35,-172.86 973.5,-166.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M971.5,-166.45C847.46,-155.96 810.95,-85.81 694,-128.45"/>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge43" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1140.5,-128.45C1054.99,-156.08 1062.18,-227.89 973.5,-242.45"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M971.5,-242.45C849.79,-262.42 817.33,-242.95 694,-242.45"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M692,-242.45C622.96,-241.6 564.61,-312.03 539.37,-347.94"/>
+<polygon fill="#002eff" stroke="#002eff" points="536.44,-346.03 533.69,-356.26 542.22,-349.98 536.44,-346.03"/>
+</g>
+<!-- module~self_mappedvector_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node27" class="node">
+<title>module~self_mappedvector_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node27"><a xlink:href=".././module/self_mappedvector_2d_t.html" xlink:title="SELF_MappedVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1401,-1006.45 1252,-1006.45 1252,-982.45 1401,-982.45 1401,-1006.45"/>
+<text text-anchor="middle" x="1326.5" y="-992.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge67" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#ffe500" stroke-dasharray="5,2" d="M1484.08,-104.57C1467.97,-114.78 1447.19,-130.99 1437,-151.45 1378.62,-268.62 1423.26,-610.44 1401,-739.45 1385.76,-827.74 1351.26,-929.04 1335.56,-972.63"/>
+<polygon fill="#ffe500" stroke="#ffe500" points="1332.21,-971.61 1332.08,-982.2 1338.78,-974 1332.21,-971.61"/>
+</g>
+<!-- module~self_mappedscalar_1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node7" class="node">
+<title>module~self_mappedscalar_1d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node7"><a xlink:href=".././module/self_mappedscalar_1d~2.html" xlink:title="SELF_MappedScalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1396.5,-1474.45 1256.5,-1474.45 1256.5,-1450.45 1396.5,-1450.45 1396.5,-1474.45"/>
+<text text-anchor="middle" x="1326.5" y="-1460.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge6" class="edge">
+<title>module~self_mappedscalar_1d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.68,-1474.51C1207.06,-1500.42 1004.27,-1560.2 829,-1574.45"/>
+</g>
+<!-- module~self_mappedscalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node26" class="node">
+<title>module~self_mappedscalar_1d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node26"><a xlink:href=".././module/self_mappedscalar_1d_t.html" xlink:title="SELF_MappedScalar_1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1216,-1432.45 1067,-1432.45 1067,-1408.45 1216,-1408.45 1216,-1432.45"/>
+<text text-anchor="middle" x="1141.5" y="-1418.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d~2&#45;&gt;module~self_mappedscalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge65" class="edge">
+<title>module~self_mappedscalar_1d~2&#45;&gt;module~self_mappedscalar_1d_t</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M1273.06,-1450.41C1251.81,-1445.53 1227.1,-1439.86 1204.93,-1434.77"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="1205.48,-1431.31 1194.95,-1432.48 1203.91,-1438.13 1205.48,-1431.31"/>
+</g>
+<!-- module~self_tensor_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node8" class="node">
+<title>module~self_tensor_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node8"><a xlink:href=".././module/self_tensor_2d~2.html" xlink:title="SELF_Tensor_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="742,-1310.45 644,-1310.45 644,-1286.45 742,-1286.45 742,-1310.45"/>
+<text text-anchor="middle" x="693" y="-1296.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge7" class="edge">
+<title>module~self_tensor_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M663.72,-1310.53C657.21,-1313.39 650.34,-1316.47 644,-1319.45 627.8,-1327.03 624.27,-1330.01 608,-1337.45 481.71,-1395.2 454.03,-1491.91 319.5,-1457.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M317.5,-1457.45C229.97,-1433.78 205.38,-1413.45 149,-1342.45"/>
+</g>
+<!-- module~self_tensor_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node33" class="node">
+<title>module~self_tensor_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node33"><a xlink:href=".././module/self_tensor_2d_t.html" xlink:title="SELF_Tensor_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578.5,-998.45 471.5,-998.45 471.5,-974.45 578.5,-974.45 578.5,-998.45"/>
+<text text-anchor="middle" x="525" y="-984.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_2d~2&#45;&gt;module~self_tensor_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge81" class="edge">
+<title>module~self_tensor_2d~2&#45;&gt;module~self_tensor_2d_t</title>
+<path fill="none" stroke="#00ffb2" stroke-dasharray="5,2" d="M659.86,-1286.39C653.77,-1282.76 648.05,-1278.17 644,-1272.45 584.99,-1189.06 661.58,-1132.41 608,-1045.45 596.98,-1027.56 578.31,-1013.49 561.57,-1003.58"/>
+<polygon fill="#00ffb2" stroke="#00ffb2" points="562.96,-1000.35 552.53,-998.51 559.54,-1006.46 562.96,-1000.35"/>
+</g>
+<!-- module~self_vector_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node9" class="node">
+<title>module~self_vector_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node9"><a xlink:href=".././module/self_vector_3d~2.html" xlink:title="SELF_Vector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-294.45 644.5,-294.45 644.5,-270.45 741.5,-270.45 741.5,-294.45"/>
+<text text-anchor="middle" x="693" y="-280.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge8" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M655.94,-294.5C651.57,-296.99 647.45,-299.94 644,-303.45 614.94,-332.98 639.66,-362.72 608,-389.45 579.41,-413.57 563.41,-408.11 526,-408.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M524,-408.45C433.11,-409.26 408.79,-391.49 319.5,-408.45"/>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge52" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M663.38,-294.46C656.95,-297.3 650.2,-300.39 644,-303.45 613.26,-318.6 579.04,-337.7 555.41,-351.27"/>
+<polygon fill="#002eff" stroke="#002eff" points="553.5,-348.33 546.59,-356.36 557,-354.39 553.5,-348.33"/>
+</g>
+<!-- module~self_vector_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node35" class="node">
+<title>module~self_vector_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node35"><a xlink:href=".././module/self_vector_3d_t.html" xlink:title="SELF_Vector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578,-566.45 472,-566.45 472,-542.45 578,-542.45 578,-566.45"/>
+<text text-anchor="middle" x="525" y="-552.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_vector_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge85" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_vector_3d_t</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M655.12,-294.46C650.99,-296.94 647.14,-299.91 644,-303.45 607.31,-344.76 630.77,-372.1 608,-422.45 589.08,-464.26 559.1,-508.79 541.11,-533.96"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="538.09,-532.16 535.07,-542.32 543.76,-536.26 538.09,-532.16"/>
+</g>
+<!-- module~self_scalar_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node10" class="node">
+<title>module~self_scalar_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node10"><a xlink:href=".././module/self_scalar_2d~2.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-420.45 644.5,-420.45 644.5,-396.45 741.5,-396.45 741.5,-420.45"/>
+<text text-anchor="middle" x="693" y="-406.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge9" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M644.42,-408.22C611.23,-408.12 565.91,-408.09 526,-408.45"/>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge49" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M644.43,-396.98C626.16,-392.58 605.06,-387.5 585.78,-382.85"/>
+<polygon fill="#002eff" stroke="#002eff" points="586.43,-379.41 575.89,-380.47 584.79,-386.21 586.43,-379.41"/>
+</g>
+<!-- module~self_scalar_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node37" class="node">
+<title>module~self_scalar_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node37"><a xlink:href=".././module/self_scalar_2d_t.html" xlink:title="SELF_Scalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578,-842.45 472,-842.45 472,-818.45 578,-818.45 578,-842.45"/>
+<text text-anchor="middle" x="525" y="-828.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d~2&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge88" class="edge">
+<title>module~self_scalar_2d~2&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#0019ff" stroke-dasharray="5,2" d="M688.16,-420.5C679.34,-448.5 657.39,-520.24 644,-581.45 622.55,-679.52 673.59,-728.43 608,-804.45 602.46,-810.87 595.34,-815.72 587.62,-819.38"/>
+<polygon fill="#0019ff" stroke="#0019ff" points="586.28,-816.15 578.34,-823.16 588.92,-822.63 586.28,-816.15"/>
+</g>
+<!-- module~self_mappedscalar_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node11" class="node">
+<title>module~self_mappedscalar_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node11"><a xlink:href=".././module/self_mappedscalar_3d~2.html" xlink:title="SELF_MappedScalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-226.45 1437,-226.45 1437,-202.45 1577,-202.45 1577,-226.45"/>
+<text text-anchor="middle" x="1507" y="-212.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge10" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1436.67,-211.4C1363.54,-208.46 1244.93,-204.45 1142.5,-204.45 1142.5,-204.45 1142.5,-204.45 827,-204.45 693.22,-204.45 643.34,-140.21 526,-204.45"/>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge50" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1444.32,-226.51C1410.06,-232.61 1366.59,-239.36 1327.5,-242.45"/>
+</g>
+<!-- module~self_mappedscalar_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node39" class="node">
+<title>module~self_mappedscalar_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node39"><a xlink:href=".././module/self_mappedscalar_3d_t.html" xlink:title="SELF_MappedScalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1401,-730.45 1252,-730.45 1252,-706.45 1401,-706.45 1401,-730.45"/>
+<text text-anchor="middle" x="1326.5" y="-716.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_mappedscalar_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge92" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_mappedscalar_3d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1502.46,-226.64C1491.58,-264.4 1458.13,-382.8 1437,-482.45 1416.9,-577.22 1465.55,-625.2 1401,-697.45 1400.23,-698.31 1399.42,-699.14 1398.58,-699.94"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1396.14,-697.4 1390.33,-706.26 1400.4,-702.96 1396.14,-697.4"/>
+</g>
+<!-- module~self_scalar_1d~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node12" class="node">
+<title>module~self_scalar_1d~3</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node12"><a xlink:href=".././module/self_scalar_1d~3.html" xlink:title="SELF_Scalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-1116.45 644.5,-1116.45 644.5,-1092.45 741.5,-1092.45 741.5,-1116.45"/>
+<text text-anchor="middle" x="693" y="-1102.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_1d~3&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge11" class="edge">
+<title>module~self_scalar_1d~3&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M688.03,-1116.66C675.76,-1153.6 637.54,-1262.91 608,-1284.45 524.92,-1345.01 219.35,-1417.42 149,-1342.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M147,-1342.45C57.62,-1229.88 37.57,-751.59 34.12,-641.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="37.61,-641.58 33.81,-631.69 30.62,-641.79 37.61,-641.58"/>
+</g>
+<!-- module~self_scalar_1d~3&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge45" class="edge">
+<title>module~self_scalar_1d~3&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M652.9,-1092.18C649.46,-1089.77 646.38,-1086.89 644,-1083.45 556.76,-957.36 701.76,-515.76 608,-394.45 603.98,-389.25 598.93,-385.07 593.31,-381.72"/>
+<polygon fill="#002eff" stroke="#002eff" points="594.59,-378.44 584.08,-377.09 591.45,-384.7 594.59,-378.44"/>
+</g>
+<!-- module~self_scalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node31" class="node">
+<title>module~self_scalar_1d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node31"><a xlink:href=".././module/self_scalar_1d_t.html" xlink:title="SELF_Scalar_1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578,-1078.45 472,-1078.45 472,-1054.45 578,-1054.45 578,-1078.45"/>
+<text text-anchor="middle" x="525" y="-1064.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_1d~3&#45;&gt;module~self_scalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge77" class="edge">
+<title>module~self_scalar_1d~3&#45;&gt;module~self_scalar_1d_t</title>
+<path fill="none" stroke="#00ff19" stroke-dasharray="5,2" d="M644.43,-1093.56C626.89,-1089.54 606.75,-1084.93 588.11,-1080.66"/>
+<polygon fill="#00ff19" stroke="#00ff19" points="588.76,-1077.22 578.23,-1078.4 587.2,-1084.05 588.76,-1077.22"/>
+</g>
+<!-- module~self_dgmodel3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node13" class="node">
+<title>module~self_dgmodel3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node13"><a xlink:href=".././module/self_dgmodel3d~2.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1902.5,-554.45 1795.5,-554.45 1795.5,-530.45 1902.5,-530.45 1902.5,-554.45"/>
+<text text-anchor="middle" x="1849" y="-540.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge12" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1846.74,-530.4C1840.28,-475.09 1805.79,-243.54 1672,-132.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1670,-132.45C1631.97,-100.87 1623.79,-87.38 1577,-71.45 1471.73,-35.59 1438.71,-52.45 1327.5,-52.45 1327.5,-52.45 1327.5,-52.45 1140.5,-52.45 1002.06,-52.45 960.34,-8.67 829,-52.45"/>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge47" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1670,-132.45C1630.27,-98.97 1488.01,-141.61 1437,-151.45 1302.48,-177.39 1277.97,-222.05 1142.5,-242.45"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1140.5,-242.45C1066.48,-247.92 1046.43,-228.66 973.5,-242.45"/>
+</g>
+<!-- module~self_dgmodel3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node58" class="node">
+<title>module~self_dgmodel3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node58"><a xlink:href=".././module/self_dgmodel3d_t.html" xlink:title="SELF_DGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1729,-709.45 1613,-709.45 1613,-685.45 1729,-685.45 1729,-709.45"/>
+<text text-anchor="middle" x="1671" y="-695.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge135" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#6b00ff" stroke-dasharray="5,2" d="M1834.19,-554.61C1803.6,-581.55 1729.97,-646.4 1693.38,-678.62"/>
+<polygon fill="#6b00ff" stroke="#6b00ff" points="1690.94,-676.1 1685.75,-685.34 1695.56,-681.36 1690.94,-676.1"/>
+</g>
+<!-- module~self_dgmodel1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node14" class="node">
+<title>module~self_dgmodel1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node14"><a xlink:href=".././module/self_dgmodel1d.html" xlink:title="SELF_DGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1724.5,-1512.45 1617.5,-1512.45 1617.5,-1488.45 1724.5,-1488.45 1724.5,-1512.45"/>
+<text text-anchor="middle" x="1671" y="-1498.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge13" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1629.17,-1512.56C1623.5,-1515.07 1617.94,-1518.01 1613,-1521.45 1592.81,-1535.48 1594.84,-1546.53 1577,-1563.45 1548.93,-1590.05 1546.11,-1609.9 1508,-1616.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1506,-1616.45C1208.88,-1667.44 1129.78,-1554.12 829,-1574.45"/>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge51" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M1668.25,-1488.29C1660.61,-1434.99 1629.91,-1216.64 1613,-1036.45 1601.47,-913.61 1628.97,-594.33 1577,-482.45 1512.18,-342.9 1480.89,-230.34 1327.5,-242.45"/>
+</g>
+<!-- module~self_mesh_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node25" class="node">
+<title>module~self_mesh_1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node25"><a xlink:href=".././module/self_mesh_1d.html" xlink:title="SELF_Mesh_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="873.5,-1470.45 782.5,-1470.45 782.5,-1446.45 873.5,-1446.45 873.5,-1470.45"/>
+<text text-anchor="middle" x="828" y="-1456.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge62" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M1506,-1502.45C1244.14,-1474.69 1174.9,-1514.1 914,-1478.45 903.97,-1477.08 893.4,-1475.06 883.24,-1472.83"/>
+<polygon fill="#ff4c00" stroke="#ff4c00" points="883.79,-1469.36 873.26,-1470.54 882.22,-1476.19 883.79,-1469.36"/>
+</g>
+<!-- module~self_dgmodel1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node47" class="node">
+<title>module~self_dgmodel1d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node47"><a xlink:href=".././module/self_dgmodel1d_t.html" xlink:title="SELF_DGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1565,-1554.45 1449,-1554.45 1449,-1530.45 1565,-1530.45 1565,-1554.45"/>
+<text text-anchor="middle" x="1507" y="-1540.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge119" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#fff100" stroke-dasharray="5,2" d="M1623.58,-1512.48C1605.11,-1517.27 1583.68,-1522.82 1564.33,-1527.84"/>
+<polygon fill="#fff100" stroke="#fff100" points="1563.23,-1524.51 1554.43,-1530.41 1564.99,-1531.29 1563.23,-1524.51"/>
+</g>
+<!-- module~self_mappedscalar_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node55" class="node">
+<title>module~self_mappedscalar_1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node55"><a xlink:href=".././module/self_mappedscalar_1d.html" xlink:title="SELF_MappedScalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1396.5,-1432.45 1256.5,-1432.45 1256.5,-1408.45 1396.5,-1408.45 1396.5,-1432.45"/>
+<text text-anchor="middle" x="1326.5" y="-1418.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_mappedscalar_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge130" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_mappedscalar_1d</title>
+<path fill="none" stroke="#0086ff" stroke-dasharray="5,2" d="M1617.32,-1504.22C1585.57,-1505.72 1544.36,-1506.3 1508,-1502.45"/>
+<path fill="none" stroke="#0086ff" stroke-dasharray="5,2" d="M1506,-1502.45C1452.33,-1496.76 1450.66,-1462.58 1401,-1441.45 1396.24,-1439.42 1391.22,-1437.52 1386.14,-1435.76"/>
+<polygon fill="#0086ff" stroke="#0086ff" points="1386.92,-1432.34 1376.33,-1432.55 1384.74,-1438.99 1386.92,-1432.34"/>
+</g>
+<!-- module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node15" class="node">
+<title>module~self_lagrange~3</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node15"><a xlink:href=".././module/self_lagrange~3.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-940.45 101,-940.45 101,-916.45 195,-916.45 195,-940.45"/>
+<text text-anchor="middle" x="148" y="-926.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~3&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge14" class="edge">
+<title>module~self_lagrange~3&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M142.55,-916.33C125.42,-869.7 63.6,-701.4 41.46,-641.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="44.65,-639.65 37.92,-631.47 38.08,-642.07 44.65,-639.65"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge15" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M465.86,-380C424.95,-388.08 368.9,-399.07 319.5,-408.45"/>
+</g>
+<!-- module~self_advection_diffusion_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node17" class="node">
+<title>module~self_advection_diffusion_1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node17"><a xlink:href=".././module/self_advection_diffusion_1d.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="2132.5,-1634.45 1973.5,-1634.45 1973.5,-1610.45 2132.5,-1610.45 2132.5,-1634.45"/>
+<text text-anchor="middle" x="2053" y="-1620.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge16" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1848,-1616.45C1697.93,-1598.78 1656.25,-1587.18 1508,-1616.45"/>
+</g>
+<!-- module~self_dgmodel1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node63" class="node">
+<title>module~self_dgmodel1d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node63"><a xlink:href=".././module/self_dgmodel1d~2.html" xlink:title="SELF_DGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1724.5,-1554.45 1617.5,-1554.45 1617.5,-1530.45 1724.5,-1530.45 1724.5,-1554.45"/>
+<text text-anchor="middle" x="1671" y="-1540.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge152" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1973.1,-1623.29C1935.68,-1622.88 1890.42,-1621.2 1850,-1616.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1848,-1616.45C1792.18,-1609.87 1733.1,-1579.54 1699.56,-1559.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1701.17,-1556.7 1690.8,-1554.56 1697.57,-1562.7 1701.17,-1556.7"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node71" class="node">
+<title>module~self_advection_diffusion_1d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node71"><a xlink:href=".././module/self_advection_diffusion_1d_t.html" xlink:title="self_advection_diffusion_1d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1933,-1466.45 1765,-1466.45 1765,-1442.45 1933,-1442.45 1933,-1466.45"/>
+<text text-anchor="middle" x="1849" y="-1452.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge183" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1981.19,-1610.4C1976.76,-1607.92 1972.63,-1604.96 1969,-1601.45 1927.19,-1560.9 1974.81,-1516 1933,-1475.45 1931.87,-1474.35 1930.68,-1473.3 1929.46,-1472.31"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1931.06,-1469.17 1920.81,-1466.49 1927.16,-1474.98 1931.06,-1469.17"/>
+</g>
+<!-- module~self_dgmodel2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node18" class="node">
+<title>module~self_dgmodel2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node18"><a xlink:href=".././module/self_dgmodel2d.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1902.5,-181.45 1795.5,-181.45 1795.5,-157.45 1902.5,-157.45 1902.5,-181.45"/>
+<text text-anchor="middle" x="1849" y="-167.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge17" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1833.51,-157.28C1788.44,-120.74 1645.53,-14.45 1508,-14.45 1508,-14.45 1508,-14.45 1325.5,-14.45 1169.06,-14.45 1126.6,17.71 973.5,-14.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M971.5,-14.45C907.73,-29.62 890.68,-30.25 829,-52.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M827,-52.45C805.57,-60.16 798.38,-57.28 778,-67.45 736.71,-88.03 737.4,-112.79 694,-128.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M692,-128.45C615.67,-155.98 596.17,-163.7 526,-204.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M524,-204.45C412.98,-268.91 445.63,-384.5 319.5,-408.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M317.5,-408.45C194.79,-431.74 87.84,-551.15 49.03,-599.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="46.06,-597.4 42.59,-607.41 51.54,-601.75 46.06,-597.4"/>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge46" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M971.5,-14.45C950.15,-18.5 660.27,-214.04 644,-228.45 601.69,-265.9 561.24,-318.84 540.47,-347.7"/>
+<polygon fill="#002eff" stroke="#002eff" points="537.39,-346 534.44,-356.18 543.09,-350.06 537.39,-346"/>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node62" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node62"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1729,-1027.45 1613,-1027.45 1613,-1003.45 1729,-1003.45 1729,-1027.45"/>
+<text text-anchor="middle" x="1671" y="-1013.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge149" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0050" stroke-dasharray="5,2" d="M1844.91,-181.55C1833.51,-226.41 1793.02,-387.47 1765,-521.45 1746.78,-608.57 1745.39,-630.96 1729,-718.45 1709.72,-821.36 1685.89,-944.16 1676.3,-993.41"/>
+<polygon fill="#ff0050" stroke="#ff0050" points="1672.85,-992.8 1674.37,-1003.29 1679.72,-994.14 1672.85,-992.8"/>
+</g>
+<!-- module~self_tensor_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node19" class="node">
+<title>module~self_tensor_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node19"><a xlink:href=".././module/self_tensor_3d.html" xlink:title="SELF_Tensor_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="742,-614.45 644,-614.45 644,-590.45 742,-590.45 742,-614.45"/>
+<text text-anchor="middle" x="693" y="-600.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge19" class="edge">
+<title>module~self_tensor_3d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M688.31,-590.25C674.58,-547.58 622.19,-407.59 526,-408.45"/>
+</g>
+<!-- module~self_tensor_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node24" class="node">
+<title>module~self_tensor_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node24"><a xlink:href=".././module/self_tensor_3d_t.html" xlink:title="SELF_Tensor_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578.5,-692.45 471.5,-692.45 471.5,-668.45 578.5,-668.45 578.5,-692.45"/>
+<text text-anchor="middle" x="525" y="-678.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;module~self_tensor_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge59" class="edge">
+<title>module~self_tensor_3d&#45;&gt;module~self_tensor_3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M677.46,-614.64C661.41,-627.52 634.35,-647.57 608,-659.45 601.79,-662.24 595.14,-664.72 588.41,-666.89"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="587.11,-663.63 578.54,-669.87 589.13,-670.33 587.11,-663.63"/>
+</g>
+<!-- module~self_scalar_1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node20" class="node">
+<title>module~self_scalar_1d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node20"><a xlink:href=".././module/self_scalar_1d~2.html" xlink:title="SELF_Scalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-1508.45 644.5,-1508.45 644.5,-1484.45 741.5,-1484.45 741.5,-1508.45"/>
+<text text-anchor="middle" x="693" y="-1494.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_1d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge18" class="edge">
+<title>module~self_scalar_1d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M644.2,-1499.74C610.91,-1501.23 565.57,-1501.66 526,-1496.45"/>
+</g>
+<!-- module~self_scalar_1d~2&#45;&gt;module~self_scalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge75" class="edge">
+<title>module~self_scalar_1d~2&#45;&gt;module~self_scalar_1d_t</title>
+<path fill="none" stroke="#00ff19" stroke-dasharray="5,2" d="M685.02,-1484.3C674.58,-1465.6 654.92,-1428.35 644,-1394.45 617.11,-1310.98 639.41,-1282.32 608,-1200.45 591.31,-1156.94 560.37,-1111.82 541.64,-1086.62"/>
+<polygon fill="#00ff19" stroke="#00ff19" points="544.38,-1084.44 535.57,-1078.57 538.8,-1088.66 544.38,-1084.44"/>
+</g>
+<!-- module~self_mesh_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node21" class="node">
+<title>module~self_mesh_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node21"><a xlink:href=".././module/self_mesh_3d.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1018,-1246.45 927,-1246.45 927,-1222.45 1018,-1222.45 1018,-1246.45"/>
+<text text-anchor="middle" x="972.5" y="-1232.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge20" class="edge">
+<title>module~self_mesh_3d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M959.41,-1246.59C941.88,-1264.05 908.21,-1297.05 878,-1323.45 874.35,-1326.63 746.29,-1430.2 742,-1432.45 697.64,-1455.65 575.63,-1502.98 526,-1496.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M524,-1496.45C432.21,-1484.82 408.82,-1481.59 319.5,-1457.45"/>
+</g>
+<!-- module~self_mesh_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node30" class="node">
+<title>module~self_mesh_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node30"><a xlink:href=".././module/self_mesh_3d_t.html" xlink:title="SELF_Mesh_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="878,-1234.45 778,-1234.45 778,-1210.45 878,-1210.45 878,-1234.45"/>
+<text text-anchor="middle" x="828" y="-1220.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge74" class="edge">
+<title>module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M926.8,-1230.68C914.63,-1229.66 901.25,-1228.53 888.4,-1227.45"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="888.5,-1223.94 878.24,-1226.59 887.91,-1230.92 888.5,-1223.94"/>
+</g>
+<!-- module~self_mesh_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node22" class="node">
+<title>module~self_mesh_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node22"><a xlink:href=".././module/self_mesh_2d~2.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1018,-1436.45 927,-1436.45 927,-1412.45 1018,-1412.45 1018,-1436.45"/>
+<text text-anchor="middle" x="972.5" y="-1422.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge21" class="edge">
+<title>module~self_mesh_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M936.56,-1436.58C928.65,-1440.28 920.63,-1444.89 914,-1450.45 862.78,-1493.35 894.98,-1563.91 829,-1574.45"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M827,-1574.45C744.97,-1587.54 724.15,-1558.26 644,-1536.45 590.57,-1521.9 580.94,-1503.41 526,-1496.45"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node32" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node32"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="878,-1314.45 778,-1314.45 778,-1290.45 878,-1290.45 878,-1314.45"/>
+<text text-anchor="middle" x="828" y="-1300.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d~2&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge79" class="edge">
+<title>module~self_mesh_2d~2&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M930.28,-1412.4C924.57,-1409.89 918.96,-1406.92 914,-1403.45 882.81,-1381.61 856.31,-1345.59 841.54,-1322.98"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="844.45,-1321.03 836.13,-1314.47 838.54,-1324.79 844.45,-1321.03"/>
+</g>
+<!-- module~self_scalar_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node23" class="node">
+<title>module~self_scalar_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node23"><a xlink:href=".././module/self_scalar_3d~2.html" xlink:title="SELF_Scalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-336.45 644.5,-336.45 644.5,-312.45 741.5,-312.45 741.5,-336.45"/>
+<text text-anchor="middle" x="693" y="-322.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge22" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M658.82,-336.48C653.63,-339.05 648.49,-342.04 644,-345.45 623.87,-360.71 629.46,-376.1 608,-389.45 576.23,-409.2 563.41,-408.11 526,-408.45"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge54" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M646.64,-336.47C626.42,-341.83 602.42,-348.19 581.17,-353.82"/>
+<polygon fill="#002eff" stroke="#002eff" points="580.07,-350.49 571.31,-356.44 581.87,-357.26 580.07,-350.49"/>
+</g>
+<!-- module~self_scalar_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node41" class="node">
+<title>module~self_scalar_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node41"><a xlink:href=".././module/self_scalar_3d_t.html" xlink:title="SELF_Scalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="578,-608.45 472,-608.45 472,-584.45 578,-584.45 578,-608.45"/>
+<text text-anchor="middle" x="525" y="-594.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_scalar_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge97" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_scalar_3d_t</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M653.71,-336.66C650.02,-339.09 646.67,-341.99 644,-345.45 580.82,-427.38 677.59,-498.88 608,-575.45 602.45,-581.55 595.39,-585.99 587.74,-589.2"/>
+<polygon fill="#ff00e5" stroke="#ff00e5" points="586.48,-585.93 578.2,-592.53 588.79,-592.54 586.48,-585.93"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge23" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M474.25,-668.42C415.84,-654.56 326.03,-634.21 319.5,-638.45"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_node42" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node42"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="353,-842.45 284,-842.45 284,-818.45 353,-818.45 353,-842.45"/>
+<text text-anchor="middle" x="318.5" y="-828.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge100" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M507.61,-692.47C471.79,-718.74 386.34,-781.42 344.06,-812.43"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="341.96,-809.63 335.97,-818.37 346.1,-815.27 341.96,-809.63"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge24" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M814.81,-1470.6C799.39,-1485.03 771.31,-1508.27 742,-1517.45 700.43,-1530.46 684.36,-1533.83 644,-1517.45 623.32,-1509.05 624.82,-1497.11 608,-1482.45 573.15,-1452.07 571.57,-1426.25 526,-1418.45"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_scalar_1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge57" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_scalar_1d~2</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M784.92,-1470.47C772.55,-1474 758.87,-1477.91 745.95,-1481.6"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="744.92,-1478.26 736.26,-1484.37 746.84,-1484.99 744.92,-1478.26"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge106" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M793.4,-1446.4C787.4,-1442.8 781.84,-1438.22 778,-1432.45 681.29,-1287.18 836.66,-1188.05 742,-1041.45 704.86,-983.93 668.83,-996.87 608,-965.45 519.24,-919.6 412.09,-871.23 356.7,-846.73"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="357.86,-843.42 347.3,-842.58 355.03,-849.82 357.86,-843.42"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_node64" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node64"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="728.5,-1352.45 657.5,-1352.45 657.5,-1328.45 728.5,-1328.45 728.5,-1352.45"/>
+<text text-anchor="middle" x="693" y="-1338.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge157" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M797.64,-1446.43C790.66,-1442.66 783.62,-1438 778,-1432.45 754.24,-1408.95 765.66,-1390.04 742,-1366.45 738.82,-1363.27 735.17,-1360.38 731.33,-1357.78"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="733.11,-1354.77 722.75,-1352.55 729.47,-1360.74 733.11,-1354.77"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge26" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M1124.14,-1408.24C1103.63,-1393.77 1066.8,-1370.48 1031,-1361.45 883.71,-1324.29 844.48,-1397.67 694,-1418.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M692,-1418.45C618.4,-1423.6 598.88,-1429.92 526,-1418.45"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_scalar_1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge56" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_scalar_1d~2</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M971.5,-1464.45C930.06,-1471.8 919.76,-1474.17 878,-1479.45 836,-1484.75 788.4,-1489.1 752.14,-1492.08"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="751.44,-1488.62 741.75,-1492.92 752,-1495.6 751.44,-1488.62"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge63" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M1102.09,-1432.49C1068.5,-1442.56 1018.22,-1456.51 973.5,-1464.45"/>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M971.5,-1464.45C942.87,-1469.53 910.53,-1468.68 883.9,-1466.28"/>
+<polygon fill="#ff4c00" stroke="#ff4c00" points="883.92,-1462.77 873.62,-1465.26 883.22,-1469.73 883.92,-1462.77"/>
+</g>
+<!-- module~self_geometry_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node36" class="node">
+<title>module~self_geometry_1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node36"><a xlink:href=".././module/self_geometry_1d.html" xlink:title="SELF_Geometry_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1031,-1394.45 914,-1394.45 914,-1370.45 1031,-1370.45 1031,-1394.45"/>
+<text text-anchor="middle" x="972.5" y="-1380.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_geometry_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge86" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_geometry_1d</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1087.66,-1408.42C1071.28,-1404.7 1053.08,-1400.55 1036.11,-1396.69"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1036.81,-1393.26 1026.28,-1394.46 1035.26,-1400.09 1036.81,-1393.26"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge25" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M1140.5,-916.45C990.06,-876.68 592.13,-924.54 442,-965.45 383.32,-981.44 379.44,-1036.77 319.5,-1026.45"/>
+</g>
+<!-- module~self_geometry_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node40" class="node">
+<title>module~self_geometry_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node40"><a xlink:href=".././module/self_geometry_2d.html" xlink:title="SELF_Geometry_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1200,-1006.45 1083,-1006.45 1083,-982.45 1200,-982.45 1200,-1006.45"/>
+<text text-anchor="middle" x="1141.5" y="-992.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge95" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1251.86,-994.45C1238.17,-994.45 1223.92,-994.45 1210.41,-994.45"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1210.24,-990.95 1200.24,-994.45 1210.24,-997.95 1210.24,-990.95"/>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node45" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node45"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1018,-1166.45 927,-1166.45 927,-1142.45 1018,-1142.45 1018,-1166.45"/>
+<text text-anchor="middle" x="972.5" y="-1152.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge114" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff5000" stroke-dasharray="5,2" d="M1140.5,-1076.45C1107.17,-1084.81 1097.35,-1084.32 1067,-1100.45 1049.1,-1109.95 1048.36,-1117.97 1031,-1128.45 1025.4,-1131.83 1019.28,-1135.04 1013.19,-1137.99"/>
+<polygon fill="#ff5000" stroke="#ff5000" points="1011.33,-1135 1003.73,-1142.38 1014.27,-1141.35 1011.33,-1135"/>
+</g>
+<!-- module~self_tensor_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node46" class="node">
+<title>module~self_tensor_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node46"><a xlink:href=".././module/self_tensor_2d.html" xlink:title="SELF_Tensor_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1021.5,-1048.45 923.5,-1048.45 923.5,-1024.45 1021.5,-1024.45 1021.5,-1048.45"/>
+<text text-anchor="middle" x="972.5" y="-1034.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge117" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#ffa100" stroke-dasharray="5,2" d="M1277.11,-1006.55C1268.63,-1009.16 1259.97,-1012.14 1252,-1015.45 1200.54,-1036.79 1196.53,-1062.88 1142.5,-1076.45"/>
+<path fill="none" stroke="#ffa100" stroke-dasharray="5,2" d="M1140.5,-1076.45C1117.48,-1082.23 1058.48,-1065.34 1017.18,-1051.75"/>
+<polygon fill="#ffa100" stroke="#ffa100" points="1018.2,-1048.4 1007.61,-1048.56 1015.99,-1055.04 1018.2,-1048.4"/>
+</g>
+<!-- module~self_vector_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node48" class="node">
+<title>module~self_vector_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node48"><a xlink:href=".././module/self_vector_2d~2.html" xlink:title="SELF_Vector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1021,-888.45 924,-888.45 924,-864.45 1021,-864.45 1021,-888.45"/>
+<text text-anchor="middle" x="972.5" y="-874.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge121" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d~2</title>
+<path fill="none" stroke="#bbff00" stroke-dasharray="5,2" d="M1303.14,-982.4C1269.39,-964.8 1202.94,-932.42 1142.5,-916.45"/>
+<path fill="none" stroke="#bbff00" stroke-dasharray="5,2" d="M1140.5,-916.45C1104.35,-906.89 1063.53,-897.1 1031.3,-889.59"/>
+<polygon fill="#bbff00" stroke="#bbff00" points="1031.69,-886.09 1021.16,-887.24 1030.11,-892.91 1031.69,-886.09"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_node60" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node60"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="608,-1233.45 442,-1233.45 442,-1209.45 608,-1209.45 608,-1233.45"/>
+<text text-anchor="middle" x="525" y="-1219.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge140" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M1140.5,-1076.45C1005.23,-1110.41 957.56,-1060.37 829,-1114.45"/>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M827,-1114.45C778.21,-1133.8 789.46,-1174.02 742,-1196.45 703.93,-1214.43 658.03,-1221.49 618.35,-1223.73"/>
+<polygon fill="#ff00f1" stroke="#ff00f1" points="617.96,-1220.24 608.14,-1224.21 618.29,-1227.24 617.96,-1220.24"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node28" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node28"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="406,-1233.45 231,-1233.45 231,-1209.45 406,-1209.45 406,-1233.45"/>
+<text text-anchor="middle" x="318.5" y="-1219.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge27" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M310.47,-1209.23C284.57,-1164.18 194.19,-1007.02 161.18,-949.63"/>
+<polygon fill="#0073ff" stroke="#0073ff" points="164.08,-947.64 156.06,-940.71 158.01,-951.13 164.08,-947.64"/>
+</g>
+<!-- module~self_geometry_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node29" class="node">
+<title>module~self_geometry_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node29"><a xlink:href=".././module/self_geometry_3d.html" xlink:title="SELF_Geometry_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1200,-688.45 1083,-688.45 1083,-664.45 1200,-664.45 1200,-688.45"/>
+<text text-anchor="middle" x="1141.5" y="-674.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge28" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M1135.14,-664.39C1118.06,-627.81 1060.86,-518.65 973.5,-486.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M971.5,-486.45C912.08,-464.54 892.2,-482.31 829,-486.45"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge102" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M1082.95,-678.79C1036.98,-681.25 971.05,-686.13 914,-695.45 738.78,-724.06 701.8,-765.64 526,-790.45"/>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M524,-790.45C467.87,-795.58 404.32,-809.28 363.17,-819.22"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="362.09,-815.88 353.21,-821.66 363.75,-822.68 362.09,-815.88"/>
+</g>
+<!-- module~self_vector_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node49" class="node">
+<title>module~self_vector_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node49"><a xlink:href=".././module/self_vector_3d.html" xlink:title="SELF_Vector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="876.5,-538.45 779.5,-538.45 779.5,-514.45 876.5,-514.45 876.5,-538.45"/>
+<text text-anchor="middle" x="828" y="-524.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_vector_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge122" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_vector_3d</title>
+<path fill="none" stroke="#6bff00" stroke-dasharray="5,2" d="M971.5,-486.45C952.33,-479.38 901.97,-496.53 866.59,-510.54"/>
+<polygon fill="#6bff00" stroke="#6bff00" points="865.01,-507.4 857.04,-514.38 867.62,-513.89 865.01,-507.4"/>
+</g>
+<!-- module~self_scalar_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node54" class="node">
+<title>module~self_scalar_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node54"><a xlink:href=".././module/self_scalar_3d.html" xlink:title="SELF_Scalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1021,-648.45 924,-648.45 924,-624.45 1021,-624.45 1021,-648.45"/>
+<text text-anchor="middle" x="972.5" y="-634.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_scalar_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge127" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_scalar_3d</title>
+<path fill="none" stroke="#00d6ff" stroke-dasharray="5,2" d="M1090.39,-664.44C1071.74,-659.98 1050.42,-654.87 1031.15,-650.25"/>
+<polygon fill="#00d6ff" stroke="#00d6ff" points="1031.82,-646.81 1021.28,-647.89 1030.19,-653.62 1031.82,-646.81"/>
+</g>
+<!-- module~self_tensor_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node57" class="node">
+<title>module~self_tensor_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node57"><a xlink:href=".././module/self_tensor_3d~2.html" xlink:title="SELF_Tensor_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1021.5,-728.45 923.5,-728.45 923.5,-704.45 1021.5,-704.45 1021.5,-728.45"/>
+<text text-anchor="middle" x="972.5" y="-714.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_tensor_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge132" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_tensor_3d~2</title>
+<path fill="none" stroke="#1a00ff" stroke-dasharray="5,2" d="M1090.39,-688.45C1071.82,-692.89 1050.61,-697.98 1031.4,-702.58"/>
+<polygon fill="#1a00ff" stroke="#1a00ff" points="1030.47,-699.2 1021.56,-704.93 1032.1,-706.01 1030.47,-699.2"/>
+</g>
+<!-- module~self_mesh_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node61" class="node">
+<title>module~self_mesh_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node61"><a xlink:href=".././module/self_mesh_3d~2.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1018,-846.45 927,-846.45 927,-822.45 1018,-822.45 1018,-846.45"/>
+<text text-anchor="middle" x="972.5" y="-832.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge144" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00a1" stroke-dasharray="5,2" d="M1090.64,-688.61C1081.92,-692.53 1073.56,-697.68 1067,-704.45 1032.95,-739.56 1063.97,-772.31 1031,-808.45 1027.97,-811.77 1024.43,-814.69 1020.63,-817.26"/>
+<polygon fill="#ff00a1" stroke="#ff00a1" points="1018.83,-814.26 1011.97,-822.34 1022.37,-820.3 1018.83,-814.26"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge29" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M692,-1258.45C649.31,-1267.09 355.32,-1405.22 319.5,-1380.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M317.5,-1380.45C166.45,-1281.04 150.33,-1027.78 148.99,-950.91"/>
+<polygon fill="#0073ff" stroke="#0073ff" points="152.49,-950.47 148.88,-940.51 145.49,-950.54 152.49,-950.47"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge138" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M787.74,-1234.5C761.43,-1242.23 725.89,-1251.99 694,-1258.45"/>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M692,-1258.45C686.59,-1259.54 630.87,-1246.73 585.45,-1235.89"/>
+<polygon fill="#ff00f1" stroke="#ff00f1" points="586.18,-1232.47 575.64,-1233.54 584.55,-1239.27 586.18,-1232.47"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge154" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M797.27,-1234.48C790.38,-1238.23 783.46,-1242.88 778,-1248.45 753.22,-1273.69 767.72,-1295.15 742,-1319.45 740.56,-1320.8 739.02,-1322.08 737.41,-1323.29"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="735.43,-1320.4 728.84,-1328.69 739.17,-1326.31 735.43,-1320.4"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge30" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M471.6,-1055.43C430.36,-1046.94 371.4,-1035.22 319.5,-1026.45"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge105" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M503.3,-1054.35C485.75,-1043.47 460.55,-1026.34 442,-1007.45 393.18,-957.72 350.49,-886.53 330.9,-851.52"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="333.9,-849.71 326,-842.65 327.77,-853.1 333.9,-849.71"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge31" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M692,-1380.45C616.61,-1387.18 600.6,-1431.23 526,-1418.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M524,-1418.45C432.88,-1402.83 396.72,-1431.27 319.5,-1380.45"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge141" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M801.35,-1314.49C793.6,-1318.54 785.24,-1323.33 778,-1328.45 760.27,-1340.97 760.4,-1349.93 742,-1361.45 722.55,-1373.62 716.85,-1378.4 694,-1380.45"/>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M692,-1380.45C669.15,-1382.49 659.54,-1378.33 644,-1361.45 606.59,-1320.78 647.9,-1280.67 608,-1242.45 606.87,-1241.37 605.7,-1240.34 604.48,-1239.36"/>
+<polygon fill="#ff00f1" stroke="#ff00f1" points="606.16,-1236.28 595.9,-1233.64 602.28,-1242.1 606.16,-1236.28"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge162" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M784.92,-1314.47C770.2,-1318.67 753.63,-1323.41 738.71,-1327.67"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="737.34,-1324.42 728.68,-1330.54 739.26,-1331.15 737.34,-1324.42"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge32" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M481.42,-998.45C431,-1012.02 350,-1031.6 319.5,-1026.45"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge107" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M471.92,-974.33C461.57,-970.73 451.1,-966.17 442,-960.45 395.33,-931.11 354.41,-879.84 333.75,-851.23"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="336.42,-848.93 327.78,-842.8 330.7,-852.98 336.42,-848.93"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge33" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M483.47,-626.35C439.38,-615.76 368.63,-606.54 319.5,-638.45"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge98" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M471.77,-646.01C461.33,-649.08 450.85,-653.39 442,-659.45 385.24,-698.27 345.71,-772.49 328.76,-809.04"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="325.51,-807.73 324.59,-818.28 331.89,-810.61 325.51,-807.73"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge34" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M471.83,-565.93C461.81,-568.66 451.48,-571.85 442,-575.45 384.76,-597.18 370.85,-605.1 319.5,-638.45"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge103" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M471.72,-560.55C461.04,-563.7 450.49,-568.41 442,-575.45 412.91,-599.55 422.26,-618.34 406,-652.45 378.93,-709.22 346.35,-775.82 329.97,-809.16"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="326.71,-807.87 325.44,-818.39 332.99,-810.96 326.71,-807.87"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge35" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M922.27,-1394.49C894.78,-1401.31 859.93,-1410.13 829,-1418.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M827,-1418.45C769.92,-1433.8 752.56,-1410.36 694,-1418.45"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_scalar_1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge55" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_scalar_1d~2</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M827,-1418.45C804.44,-1424.51 797.84,-1425.12 778,-1437.45 759.56,-1448.9 759.68,-1457.85 742,-1470.45 737.67,-1473.53 732.94,-1476.51 728.18,-1479.28"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="726.15,-1476.41 719.12,-1484.34 729.56,-1482.53 726.15,-1476.41"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge60" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M932.98,-1394.52C926.48,-1397.12 919.92,-1400.1 914,-1403.45 896.11,-1413.55 895.15,-1421.13 878,-1432.45 873.28,-1435.56 868.14,-1438.61 863.03,-1441.47"/>
+<polygon fill="#ff4c00" stroke="#ff4c00" points="861.09,-1438.54 853.95,-1446.37 864.42,-1444.7 861.09,-1438.54"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge104" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M964.95,-1370.16C953.28,-1347.86 928.76,-1299 914,-1255.45 891.31,-1188.46 913.74,-1161.47 878,-1100.45 800.33,-967.84 749.94,-943.35 608,-884.45 596.74,-879.77 441.04,-851.9 363.18,-838.13"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="363.64,-834.66 353.19,-836.37 362.43,-841.55 363.64,-834.66"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge36" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M507.03,-842.45C489.99,-854.79 463.28,-874.9 442,-894.45 383.04,-948.57 398.42,-1039.79 319.5,-1026.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M317.5,-1026.45C258.02,-1016.39 199.68,-972.83 169.73,-947.29"/>
+<polygon fill="#0073ff" stroke="#0073ff" points="171.9,-944.54 162.06,-940.61 167.3,-949.82 171.9,-944.54"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge108" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M471.87,-830.45C438.38,-830.45 395.36,-830.45 363.57,-830.45"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="363.26,-826.95 353.26,-830.45 363.26,-833.95 363.26,-826.95"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge37" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M1140.5,-1114.45C1066.54,-1120.72 1047.56,-1119.29 973.5,-1114.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M971.5,-1114.45C864.69,-1107.45 847.46,-1059.74 742,-1041.45 556.87,-1009.34 504.14,-1061.25 319.5,-1026.45"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge93" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1273.06,-1024.41C1251.81,-1019.53 1227.1,-1013.86 1204.93,-1008.77"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1205.48,-1005.31 1194.95,-1006.48 1203.91,-1012.13 1205.48,-1005.31"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge111" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff5000" stroke-dasharray="5,2" d="M1140.5,-1114.45C1098.91,-1117.98 1052.85,-1129.61 1019.66,-1139.43"/>
+<polygon fill="#ff5000" stroke="#ff5000" points="1018.36,-1136.17 1009.8,-1142.41 1020.38,-1142.87 1018.36,-1136.17"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge116" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#ffa100" stroke-dasharray="5,2" d="M1140.5,-1114.45C1083.67,-1119.27 1025.02,-1079.56 994.63,-1055"/>
+<polygon fill="#ffa100" stroke="#ffa100" points="996.76,-1052.22 986.84,-1048.52 992.29,-1057.6 996.76,-1052.22"/>
+</g>
+<!-- module~self_scalar_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node50" class="node">
+<title>module~self_scalar_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node50"><a xlink:href=".././module/self_scalar_2d.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1021,-1006.45 924,-1006.45 924,-982.45 1021,-982.45 1021,-1006.45"/>
+<text text-anchor="middle" x="972.5" y="-992.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge124" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#1aff00" stroke-dasharray="5,2" d="M1307.82,-1048.54C1276.29,-1069.04 1207.54,-1108.92 1142.5,-1114.45"/>
+<path fill="none" stroke="#1aff00" stroke-dasharray="5,2" d="M1140.5,-1114.45C1106.26,-1117.35 1092.85,-1113.09 1067,-1090.45 1039.19,-1066.08 1058.39,-1040.29 1031,-1015.45 1029.67,-1014.24 1028.27,-1013.11 1026.81,-1012.04"/>
+<polygon fill="#1aff00" stroke="#1aff00" points="1028.27,-1008.82 1017.92,-1006.57 1024.61,-1014.79 1028.27,-1008.82"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge139" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M971.5,-1114.45C908.3,-1110.31 887.38,-1089.89 829,-1114.45"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge38" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M1140.5,-718.45C1091.16,-716.21 1080.21,-733.21 1031,-737.45 844.39,-753.51 488.19,-714.51 442,-701.45 383.09,-684.79 370.85,-605.1 319.5,-638.45"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge72" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1273.06,-706.41C1251.81,-701.53 1227.1,-695.86 1204.93,-690.77"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1205.48,-687.31 1194.95,-688.48 1203.91,-694.13 1205.48,-687.31"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_scalar_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge128" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_scalar_3d</title>
+<path fill="none" stroke="#00d6ff" stroke-dasharray="5,2" d="M1251.56,-719.97C1218.22,-720.26 1178.36,-720.07 1142.5,-718.45"/>
+<path fill="none" stroke="#00d6ff" stroke-dasharray="5,2" d="M1140.5,-718.45C1083.87,-715.88 1026.4,-678.3 995.86,-654.91"/>
+<polygon fill="#00d6ff" stroke="#00d6ff" points="998.01,-652.15 987.98,-648.73 993.69,-657.66 998.01,-652.15"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_tensor_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge133" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_tensor_3d~2</title>
+<path fill="none" stroke="#1a00ff" stroke-dasharray="5,2" d="M1140.5,-718.45C1104.43,-716.81 1063.94,-716.29 1031.86,-716.19"/>
+<polygon fill="#1a00ff" stroke="#1a00ff" points="1031.76,-712.69 1021.76,-716.17 1031.75,-719.69 1031.76,-712.69"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge143" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M1302.39,-730.48C1280.49,-741.63 1246.49,-758.28 1216,-770.45 1184.08,-783.18 1175.76,-785.82 1142.5,-794.45"/>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M1140.5,-794.45C1068.66,-813.08 1039.12,-759.76 973.5,-794.45"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge147" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00a1" stroke-dasharray="5,2" d="M1140.5,-794.45C1103.1,-804.15 1060.77,-814.28 1028.09,-821.91"/>
+<polygon fill="#ff00a1" stroke="#ff00a1" points="1027.21,-818.52 1018.27,-824.2 1028.8,-825.34 1027.21,-818.52"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge39" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M971.5,-954.45C944.73,-951.69 937.34,-960.04 914,-973.45 891.89,-986.15 765.85,-1116.42 742,-1125.45 616.31,-1173.03 569.41,-1130.23 442,-1087.45 384.34,-1068.08 379.47,-1036.59 319.5,-1026.45"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge99" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M1096.12,-982.44C1062.63,-973.72 1015.43,-962.14 973.5,-954.45"/>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M971.5,-954.45C944.26,-949.44 938.29,-943.75 914,-930.45 896.92,-921.09 895.33,-914.34 878,-905.45 731.59,-830.28 689.9,-775.46 526,-790.45"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge112" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff5000" stroke-dasharray="5,2" d="M1124.75,-1006.47C1108.84,-1019.16 1084.2,-1040.37 1067,-1062.45 1046.47,-1088.8 1055.49,-1105.72 1031,-1128.45 1027.38,-1131.81 1023.24,-1134.79 1018.89,-1137.43"/>
+<polygon fill="#ff5000" stroke="#ff5000" points="1016.89,-1134.53 1009.75,-1142.36 1020.22,-1140.69 1016.89,-1134.53"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge115" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#ffa100" stroke-dasharray="5,2" d="M1092.64,-1006.48C1073.52,-1011.29 1051.31,-1016.88 1031.3,-1021.91"/>
+<polygon fill="#ffa100" stroke="#ffa100" points="1030.21,-1018.57 1021.36,-1024.41 1031.91,-1025.36 1030.21,-1018.57"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_vector_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge120" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_vector_2d~2</title>
+<path fill="none" stroke="#bbff00" stroke-dasharray="5,2" d="M1123.26,-982.26C1093.88,-961.5 1033.97,-919.17 999.49,-894.81"/>
+<polygon fill="#bbff00" stroke="#bbff00" points="1001.09,-891.65 990.9,-888.74 997.05,-897.37 1001.09,-891.65"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge123" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#1aff00" stroke-dasharray="5,2" d="M1082.56,-994.45C1065.94,-994.45 1047.83,-994.45 1031.23,-994.45"/>
+<polygon fill="#1aff00" stroke="#1aff00" points="1031.11,-990.95 1021.11,-994.45 1031.11,-997.95 1031.11,-990.95"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge40" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M471.74,-596.83C427.89,-599.44 365.25,-608.74 319.5,-638.45"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge101" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M471.72,-603.22C461.16,-606.34 450.66,-610.87 442,-617.45 407.83,-643.41 351.71,-760.12 329.24,-808.9"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="325.96,-807.68 324.98,-818.23 332.32,-810.59 325.96,-807.68"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge41" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M296.84,-842.46C267.28,-859.65 212.75,-891.37 178.82,-911.1"/>
+<polygon fill="#0073ff" stroke="#0073ff" points="176.72,-908.28 169.83,-916.33 180.23,-914.33 176.72,-908.28"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge42" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M1313.81,-664.19C1276.79,-626.41 1157.15,-511.87 1031,-472.45 945.1,-445.6 918.8,-480.57 829,-486.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M827,-486.45C654.72,-492.4 599.75,-463.93 442,-533.45 376.38,-562.36 379.5,-599.18 319.5,-638.45"/>
+<path fill="none" stroke="#0073ff" stroke-dasharray="5,2" d="M317.5,-638.45C217.21,-703.51 169.4,-850.74 154.41,-906.49"/>
+<polygon fill="#0073ff" stroke="#0073ff" points="150.97,-905.81 151.84,-916.37 157.74,-907.57 150.97,-905.81"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge70" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1251.86,-676.45C1238.17,-676.45 1223.92,-676.45 1210.41,-676.45"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1210.24,-672.95 1200.24,-676.45 1210.24,-679.95 1210.24,-672.95"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge142" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M1271.63,-688.47C1264.8,-690.96 1258.09,-693.92 1252,-697.45 1232.69,-708.63 1235.1,-720.91 1216,-732.45 1186.59,-750.22 1174.55,-744.04 1142.5,-756.45"/>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M1140.5,-756.45C1069.51,-783.93 1040.8,-758.88 973.5,-794.45"/>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M971.5,-794.45C947.7,-807.02 934.71,-796.25 914,-813.45 792.19,-914.61 858.65,-1018.37 742,-1125.45 697.26,-1166.51 632.08,-1192.17 585.03,-1206.52"/>
+<polygon fill="#ff00f1" stroke="#ff00f1" points="583.87,-1203.22 575.28,-1209.42 585.86,-1209.93 583.87,-1203.22"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge146" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00a1" stroke-dasharray="5,2" d="M1140.5,-756.45C1108.45,-768.85 1097.35,-764.32 1067,-780.45 1049.1,-789.95 1048.36,-797.97 1031,-808.45 1025.4,-811.83 1019.28,-815.04 1013.19,-817.99"/>
+<polygon fill="#ff00a1" stroke="#ff00a1" points="1011.33,-815 1003.73,-822.38 1014.27,-821.35 1011.33,-815"/>
+</g>
+<!-- module~self_domaindecomposition~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node44" class="node">
+<title>module~self_domaindecomposition~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node44"><a xlink:href=".././module/self_domaindecomposition~2.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="608,-1275.45 442,-1275.45 442,-1251.45 608,-1251.45 608,-1275.45"/>
+<text text-anchor="middle" x="525" y="-1261.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition~2&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge69" class="edge">
+<title>module~self_domaindecomposition~2&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M465.4,-1251.41C441.23,-1246.45 413.05,-1240.66 387.93,-1235.5"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="388.61,-1232.07 378.11,-1233.48 387.2,-1238.92 388.61,-1232.07"/>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge78" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M957.7,-1166.7C945.37,-1178.08 927.26,-1195.86 914,-1213.45 894.59,-1239.2 901.16,-1254 878,-1276.45 874.72,-1279.62 870.98,-1282.51 867.05,-1285.12"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="865.07,-1282.22 858.28,-1290.36 868.66,-1288.23 865.07,-1282.22"/>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge80" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t</title>
+<path fill="none" stroke="#00ffb2" stroke-dasharray="5,2" d="M923.18,-1030.27C876.76,-1024.4 804.63,-1015.45 742,-1008.45 690.5,-1002.68 632.02,-996.76 588.91,-992.52"/>
+<polygon fill="#00ffb2" stroke="#00ffb2" points="589.14,-989.03 578.85,-991.53 588.46,-995.99 589.14,-989.03"/>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge61" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4c00" stroke-dasharray="5,2" d="M1448.64,-1550.08C1340.71,-1562.26 1101.41,-1578.83 914,-1516.45 889.61,-1508.33 865.78,-1491 849.59,-1477.39"/>
+<polygon fill="#ff4c00" stroke="#ff4c00" points="851.7,-1474.6 841.85,-1470.68 847.11,-1479.88 851.7,-1474.6"/>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_mappedscalar_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge129" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_mappedscalar_1d</title>
+<path fill="none" stroke="#0086ff" stroke-dasharray="5,2" d="M1459.04,-1530.33C1451.06,-1526.78 1443.32,-1522.24 1437,-1516.45 1409.74,-1491.46 1429.26,-1465.29 1401,-1441.45 1399.44,-1440.13 1397.8,-1438.9 1396.1,-1437.74"/>
+<polygon fill="#0086ff" stroke="#0086ff" points="1397.56,-1434.54 1387.15,-1432.58 1394.06,-1440.6 1397.56,-1434.54"/>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;module~self_vector_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge82" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;module~self_vector_2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M927.08,-864.32C922.34,-861.87 917.86,-858.94 914,-855.45 886.61,-830.6 904.49,-806.25 878,-780.45 796.69,-701.24 665.42,-664.33 588.24,-648.66"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="588.67,-645.18 578.19,-646.68 587.32,-652.05 588.67,-645.18"/>
+</g>
+<!-- module~self_vector_3d&#45;&gt;module~self_vector_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge84" class="edge">
+<title>module~self_vector_3d&#45;&gt;module~self_vector_3d_t</title>
+<path fill="none" stroke="#00b2ff" stroke-dasharray="5,2" d="M779.31,-530.88C727.65,-535.69 645.05,-543.37 588.3,-548.65"/>
+<polygon fill="#00b2ff" stroke="#00b2ff" points="587.65,-545.2 578.02,-549.61 588.3,-552.17 587.65,-545.2"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge87" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#0019ff" stroke-dasharray="5,2" d="M944.18,-982.32C887.81,-957.32 762.16,-901.79 742,-894.45 688.82,-875.06 626.73,-857.14 582.81,-845.22"/>
+<polygon fill="#0019ff" stroke="#0019ff" points="583.45,-841.77 572.89,-842.55 581.63,-848.53 583.45,-841.77"/>
+</g>
+<!-- module~self_mappedscalar_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node51" class="node">
+<title>module~self_mappedscalar_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node51"><a xlink:href=".././module/self_mappedscalar_2d~2.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-1048.45 1437,-1048.45 1437,-1024.45 1577,-1024.45 1577,-1048.45"/>
+<text text-anchor="middle" x="1507" y="-1034.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge89" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M1436.99,-1036.45C1428.53,-1036.45 1419.81,-1036.45 1411.16,-1036.45"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="1411.06,-1032.95 1401.06,-1036.45 1411.06,-1039.95 1411.06,-1032.95"/>
+</g>
+<!-- module~self_mappedscalar_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node52" class="node">
+<title>module~self_mappedscalar_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node52"><a xlink:href=".././module/self_mappedscalar_3d.html" xlink:title="SELF_MappedScalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-730.45 1437,-730.45 1437,-706.45 1577,-706.45 1577,-730.45"/>
+<text text-anchor="middle" x="1507" y="-716.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d&#45;&gt;module~self_mappedscalar_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge91" class="edge">
+<title>module~self_mappedscalar_3d&#45;&gt;module~self_mappedscalar_3d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1436.99,-718.45C1428.53,-718.45 1419.81,-718.45 1411.16,-718.45"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1411.06,-714.95 1401.06,-718.45 1411.06,-721.95 1411.06,-714.95"/>
+</g>
+<!-- module~self_scalar_1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node53" class="node">
+<title>module~self_scalar_1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node53"><a xlink:href=".././module/self_scalar_1d.html" xlink:title="SELF_Scalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="741.5,-1074.45 644.5,-1074.45 644.5,-1050.45 741.5,-1050.45 741.5,-1074.45"/>
+<text text-anchor="middle" x="693" y="-1060.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_1d&#45;&gt;module~self_scalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge76" class="edge">
+<title>module~self_scalar_1d&#45;&gt;module~self_scalar_1d_t</title>
+<path fill="none" stroke="#00ff19" stroke-dasharray="5,2" d="M644.43,-1063.59C626.97,-1064.01 606.93,-1064.5 588.37,-1064.94"/>
+<polygon fill="#00ff19" stroke="#00ff19" points="588.14,-1061.45 578.23,-1065.19 588.31,-1068.44 588.14,-1061.45"/>
+</g>
+<!-- module~self_scalar_3d&#45;&gt;module~self_scalar_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge96" class="edge">
+<title>module~self_scalar_3d&#45;&gt;module~self_scalar_3d_t</title>
+<path fill="none" stroke="#ff00e5" stroke-dasharray="5,2" d="M933.42,-624.4C888.29,-610.81 810.56,-589.55 742,-581.45 698.75,-576.33 687.47,-578.69 644,-581.45 625.83,-582.6 606.17,-584.73 588.21,-587.04"/>
+<polygon fill="#ff00e5" stroke="#ff00e5" points="587.6,-583.59 578.14,-588.38 588.52,-590.53 587.6,-583.59"/>
+</g>
+<!-- module~self_mappedscalar_1d&#45;&gt;module~self_mappedscalar_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge64" class="edge">
+<title>module~self_mappedscalar_1d&#45;&gt;module~self_mappedscalar_1d_t</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M1256.32,-1420.45C1246.45,-1420.45 1236.21,-1420.45 1226.1,-1420.45"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="1226.06,-1416.95 1216.06,-1420.45 1226.06,-1423.95 1226.06,-1416.95"/>
+</g>
+<!-- module~self_mappedvector_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node56" class="node">
+<title>module~self_mappedvector_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node56"><a xlink:href=".././module/self_mappedvector_3d~2.html" xlink:title="SELF_MappedVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-688.45 1437,-688.45 1437,-664.45 1577,-664.45 1577,-688.45"/>
+<text text-anchor="middle" x="1507" y="-674.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge109" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t</title>
+<path fill="none" stroke="#ff004c" stroke-dasharray="5,2" d="M1436.99,-676.45C1428.53,-676.45 1419.81,-676.45 1411.16,-676.45"/>
+<polygon fill="#ff004c" stroke="#ff004c" points="1411.06,-672.95 1401.06,-676.45 1411.06,-679.95 1411.06,-672.95"/>
+</g>
+<!-- module~self_tensor_3d~2&#45;&gt;module~self_tensor_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge58" class="edge">
+<title>module~self_tensor_3d~2&#45;&gt;module~self_tensor_3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M923.4,-712.56C842.38,-706.01 678.73,-692.79 588.77,-685.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="588.96,-682.02 578.71,-684.7 588.39,-689 588.96,-682.02"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge71" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1649.82,-685.29C1631.54,-675.04 1603.5,-661.15 1577,-655.45 1435.79,-625.04 1395.8,-641.78 1252,-655.45 1236.43,-656.92 1219.78,-659.56 1204.28,-662.48"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1203.43,-659.08 1194.29,-664.43 1204.77,-665.95 1203.43,-659.08"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge126" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d</title>
+<path fill="none" stroke="#00ff86" stroke-dasharray="5,2" d="M1612.88,-704.85C1604.57,-705.93 1595.89,-707.05 1587.23,-708.17"/>
+<polygon fill="#00ff86" stroke="#00ff86" points="1586.57,-704.73 1577.1,-709.49 1587.47,-711.67 1586.57,-704.73"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge131" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2</title>
+<path fill="none" stroke="#0035ff" stroke-dasharray="5,2" d="M1612.88,-690.04C1604.57,-688.96 1595.89,-687.84 1587.23,-686.72"/>
+<polygon fill="#0035ff" stroke="#0035ff" points="1587.47,-683.22 1577.1,-685.4 1586.57,-690.16 1587.47,-683.22"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge145" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00a1" stroke-dasharray="5,2" d="M1647.28,-709.53C1628.81,-718.9 1601.83,-731.59 1577,-739.45 1381.03,-801.47 1135.91,-824.03 1028.37,-831.33"/>
+<polygon fill="#ff00a1" stroke="#ff00a1" points="1027.83,-827.86 1018.09,-832.01 1028.3,-834.84 1027.83,-827.86"/>
+</g>
+<!-- module~self_mappedvector_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node59" class="node">
+<title>module~self_mappedvector_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node59"><a xlink:href=".././module/self_mappedvector_2d.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1577,-1006.45 1437,-1006.45 1437,-982.45 1577,-982.45 1577,-1006.45"/>
+<text text-anchor="middle" x="1507" y="-992.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge66" class="edge">
+<title>module~self_mappedvector_2d&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#ffe500" stroke-dasharray="5,2" d="M1436.99,-994.45C1428.53,-994.45 1419.81,-994.45 1411.16,-994.45"/>
+<polygon fill="#ffe500" stroke="#ffe500" points="1411.06,-990.95 1401.06,-994.45 1411.06,-997.95 1411.06,-990.95"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge68" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M441.71,-1221.45C433.42,-1221.45 424.95,-1221.45 416.53,-1221.45"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="416.3,-1217.95 406.3,-1221.45 416.3,-1224.95 416.3,-1217.95"/>
+</g>
+<!-- module~self_mesh_3d~2&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge73" class="edge">
+<title>module~self_mesh_3d~2&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M926.74,-844.98C921.88,-847.71 917.46,-851.13 914,-855.45 837.44,-950.92 914.85,-1011.74 878,-1128.45 869.56,-1155.17 853.83,-1183.36 842.46,-1201.82"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="839.49,-1199.96 837.13,-1210.28 845.42,-1203.69 839.49,-1199.96"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge94" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1649.82,-1003.29C1631.54,-993.04 1603.5,-979.15 1577,-973.45 1435.79,-943.04 1395.8,-959.78 1252,-973.45 1236.43,-974.92 1219.78,-977.56 1204.28,-980.48"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1203.43,-977.08 1194.29,-982.43 1204.77,-983.95 1203.43,-977.08"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge113" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff5000" stroke-dasharray="5,2" d="M1647.27,-1027.49C1628.79,-1036.85 1601.81,-1049.52 1577,-1057.45 1381.1,-1120.02 1135.95,-1143.45 1028.38,-1151.13"/>
+<polygon fill="#ff5000" stroke="#ff5000" points="1027.83,-1147.66 1018.1,-1151.85 1028.32,-1154.64 1027.83,-1147.66"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge125" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d~2</title>
+<path fill="none" stroke="#00ff35" stroke-dasharray="5,2" d="M1612.88,-1022.85C1604.57,-1023.93 1595.89,-1025.05 1587.23,-1026.17"/>
+<polygon fill="#00ff35" stroke="#00ff35" points="1586.57,-1022.73 1577.1,-1027.49 1587.47,-1029.67 1586.57,-1022.73"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge136" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d</title>
+<path fill="none" stroke="#bb00ff" stroke-dasharray="5,2" d="M1612.88,-1008.04C1604.57,-1006.96 1595.89,-1005.84 1587.23,-1004.72"/>
+<polygon fill="#bb00ff" stroke="#bb00ff" points="1587.47,-1001.22 1577.1,-1003.4 1586.57,-1008.16 1587.47,-1001.22"/>
+</g>
+<!-- module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge118" class="edge">
+<title>module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#fff100" stroke-dasharray="5,2" d="M1617.4,-1542.45C1603.95,-1542.45 1589.29,-1542.45 1575.21,-1542.45"/>
+<polygon fill="#fff100" stroke="#fff100" points="1575.09,-1538.95 1565.09,-1542.45 1575.09,-1545.95 1575.09,-1538.95"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge137" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00f1" stroke-dasharray="5,2" d="M657.05,-1328.8C652.31,-1326.22 647.78,-1323.13 644,-1319.45 616.96,-1293.07 637.09,-1266.55 608,-1242.45 606.43,-1241.14 604.79,-1239.92 603.09,-1238.78"/>
+<polygon fill="#ff00f1" stroke="#ff00f1" points="604.58,-1235.59 594.17,-1233.64 601.09,-1241.66 604.58,-1235.59"/>
+</g>
+<!-- module~self_dgmodel3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node65" class="node">
+<title>module~self_dgmodel3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node65"><a xlink:href=".././module/self_dgmodel3d.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1902.5,-1133.45 1795.5,-1133.45 1795.5,-1109.45 1902.5,-1109.45 1902.5,-1133.45"/>
+<text text-anchor="middle" x="1849" y="-1119.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge134" class="edge">
+<title>module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#6b00ff" stroke-dasharray="5,2" d="M1842.92,-1109.21C1818.48,-1050.34 1712.85,-795.86 1681.08,-719.31"/>
+<polygon fill="#6b00ff" stroke="#6b00ff" points="1684.16,-717.62 1677.1,-709.73 1677.7,-720.3 1684.16,-717.62"/>
+</g>
+<!-- module~self_dgmodel2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node66" class="node">
+<title>module~self_dgmodel2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node66"><a xlink:href=".././module/self_dgmodel2d~2.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1902.5,-1214.45 1795.5,-1214.45 1795.5,-1190.45 1902.5,-1190.45 1902.5,-1214.45"/>
+<text text-anchor="middle" x="1849" y="-1200.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge148" class="edge">
+<title>module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0050" stroke-dasharray="5,2" d="M1827.87,-1190.44C1810.17,-1179.31 1784.3,-1161.62 1765,-1142.45 1731.51,-1109.16 1700.86,-1062.95 1684.48,-1036.43"/>
+<polygon fill="#ff0050" stroke="#ff0050" points="1687.3,-1034.33 1679.11,-1027.61 1681.32,-1037.97 1687.3,-1034.33"/>
+</g>
+<!-- module~self_nulldgmodel1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node67" class="node">
+<title>module~self_nulldgmodel1d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node67"><a xlink:href=".././module/self_nulldgmodel1d_t.html" xlink:title="self_NullDGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1914,-1508.45 1784,-1508.45 1784,-1484.45 1914,-1484.45 1914,-1508.45"/>
+<text text-anchor="middle" x="1849" y="-1494.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge151" class="edge">
+<title>module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1801.76,-1508.53C1779.12,-1514.45 1751.69,-1521.62 1727.89,-1527.84"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1726.72,-1524.53 1717.93,-1530.44 1728.49,-1531.3 1726.72,-1524.53"/>
+</g>
+<!-- module~self_nulldgmodel1d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge159" class="edge">
+<title>module~self_nulldgmodel1d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1799.78,-1484.41C1752.16,-1472.6 1684.65,-1456.13 1672,-1454.45"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node68" class="node">
+<title>module~self_advection_diffusion_2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node68"><a xlink:href=".././module/self_advection_diffusion_2d_t.html" xlink:title="self_advection_diffusion_2d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2137,-1172.45 1969,-1172.45 1969,-1148.45 2137,-1148.45 2137,-1172.45"/>
+<text text-anchor="middle" x="2053" y="-1158.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge155" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1968.95,-1160.31C1932.45,-1160.39 1889.1,-1160.68 1850,-1161.45"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge173" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1994.11,-1172.48C1968.69,-1177.77 1938.79,-1183.98 1912.82,-1189.38"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1911.79,-1186.02 1902.71,-1191.49 1913.22,-1192.88 1911.79,-1186.02"/>
+</g>
+<!-- module~self_lineareuler2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node69" class="node">
+<title>module~self_lineareuler2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node69"><a xlink:href=".././module/self_lineareuler2d_t.html" xlink:title="self_LinearEuler2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2114,-1340.45 1992,-1340.45 1992,-1316.45 2114,-1316.45 2114,-1340.45"/>
+<text text-anchor="middle" x="2053" y="-1326.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge156" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1991.81,-1337.17C1951.13,-1343.98 1896.55,-1354.92 1850,-1370.45"/>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge171" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1991.78,-1316.85C1983.9,-1314.29 1976.1,-1311.19 1969,-1307.45 1927.36,-1285.48 1888.3,-1246.07 1866.92,-1222.28"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1869.36,-1219.75 1860.12,-1214.57 1864.11,-1224.38 1869.36,-1219.75"/>
+</g>
+<!-- module~self_nulldgmodel3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node70" class="node">
+<title>module~self_nulldgmodel3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node70"><a xlink:href=".././module/self_nulldgmodel3d_t.html" xlink:title="self_NullDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2118,-1298.45 1988,-1298.45 1988,-1274.45 2118,-1274.45 2118,-1298.45"/>
+<text text-anchor="middle" x="2053" y="-1284.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge158" class="edge">
+<title>module~self_nulldgmodel3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1996.51,-1298.52C1987.2,-1301.1 1977.74,-1304.08 1969,-1307.45 1913.15,-1328.94 1906.77,-1351.51 1850,-1370.45"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1848,-1370.45C1811.9,-1382.49 1799.72,-1375.87 1765,-1391.45 1719.45,-1411.88 1721.49,-1461.05 1672,-1454.45"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1670,-1454.45C1574.99,-1441.77 918.78,-1228.89 829,-1262.45"/>
+</g>
+<!-- module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge169" class="edge">
+<title>module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2030.62,-1274.27C2012.34,-1263 1986.33,-1244.79 1969,-1223.45 1945.44,-1194.43 1961.2,-1171.98 1933,-1147.45 1926.84,-1142.09 1919.59,-1137.84 1911.97,-1134.46"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1913.14,-1131.16 1902.56,-1130.76 1910.58,-1137.67 1913.14,-1131.16"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge150" class="edge">
+<title>module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1782.79,-1466.45C1776.53,-1468.91 1770.48,-1471.88 1765,-1475.45 1743.25,-1489.61 1749.98,-1506.15 1729,-1521.45 1726.91,-1522.97 1724.7,-1524.39 1722.41,-1525.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1720.58,-1522.72 1713.27,-1530.39 1723.77,-1528.96 1720.58,-1522.72"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge164" class="edge">
+<title>module~self_advection_diffusion_1d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1764.88,-1458.95C1735.43,-1459.36 1702.14,-1458.46 1672,-1454.45"/>
+</g>
+<!-- module~self_burgers1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node72" class="node">
+<title>module~self_burgers1d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node72"><a xlink:href=".././module/self_burgers1d_t.html" xlink:title="self_Burgers1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1900.5,-1424.45 1797.5,-1424.45 1797.5,-1400.45 1900.5,-1400.45 1900.5,-1424.45"/>
+<text text-anchor="middle" x="1849" y="-1410.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge153" class="edge">
+<title>module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1797.41,-1417.4C1785.74,-1420.55 1774.09,-1425.55 1765,-1433.45 1733.1,-1461.15 1759.4,-1492.1 1729,-1521.45 1727.75,-1522.65 1726.42,-1523.79 1725.03,-1524.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1723.04,-1521.99 1716.53,-1530.35 1726.83,-1527.88 1723.04,-1521.99"/>
+</g>
+<!-- module~self_burgers1d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge166" class="edge">
+<title>module~self_burgers1d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1799.23,-1424.53C1748.27,-1437.09 1675.23,-1454.88 1672,-1454.45"/>
+</g>
+<!-- module~self_nulldgmodel2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node73" class="node">
+<title>module~self_nulldgmodel2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node73"><a xlink:href=".././module/self_nulldgmodel2d_t.html" xlink:title="self_NullDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2118,-1382.45 1988,-1382.45 1988,-1358.45 2118,-1358.45 2118,-1382.45"/>
+<text text-anchor="middle" x="2053" y="-1368.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge160" class="edge">
+<title>module~self_nulldgmodel2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1987.56,-1360.22C1947.04,-1356.26 1894.25,-1355.69 1850,-1370.45"/>
+</g>
+<!-- module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge170" class="edge">
+<title>module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1987.7,-1358.67C1981.13,-1356.17 1974.76,-1353.13 1969,-1349.45 1918.36,-1317.06 1879.3,-1255.82 1861.14,-1223.56"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1864.07,-1221.62 1856.19,-1214.54 1857.94,-1224.99 1864.07,-1221.62"/>
+</g>
+<!-- module~self_linearshallowwater2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node74" class="node">
+<title>module~self_linearshallowwater2d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node74"><a xlink:href=".././module/self_linearshallowwater2d_t.html" xlink:title="self_LinearShallowWater2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2136.5,-1214.45 1969.5,-1214.45 1969.5,-1190.45 2136.5,-1190.45 2136.5,-1214.45"/>
+<text text-anchor="middle" x="2053" y="-1200.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge161" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2004.76,-1190.37C1954.9,-1178.07 1879.52,-1160.87 1850,-1161.45"/>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge172" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1969.26,-1202.45C1950.31,-1202.45 1930.49,-1202.45 1912.56,-1202.45"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1912.53,-1198.95 1902.53,-1202.45 1912.53,-1205.95 1912.53,-1198.95"/>
+</g>
+<!-- module~self_advection_diffusion_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node75" class="node">
+<title>module~self_advection_diffusion_3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node75"><a xlink:href=".././module/self_advection_diffusion_3d_t.html" xlink:title="self_advection_diffusion_3d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2137,-1046.45 1969,-1046.45 1969,-1022.45 2137,-1022.45 2137,-1046.45"/>
+<text text-anchor="middle" x="2053" y="-1032.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge163" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1968.86,-1045.57C1910.21,-1055.31 1830.72,-1072.41 1765,-1100.45 1719.53,-1119.84 1720.44,-1151.58 1672,-1161.45"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1670,-1161.45C1340.53,-1231.32 1226.55,-1087.99 914,-1213.45 894.67,-1221.2 895.95,-1232.87 878,-1243.45 857.87,-1255.3 850.88,-1254.27 829,-1262.45"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M827,-1262.45C805.11,-1270.59 797.39,-1268.43 778,-1281.45 758.68,-1294.41 761.04,-1306.07 742,-1319.45 739.92,-1320.91 737.71,-1322.3 735.44,-1323.63"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="733.67,-1320.61 726.46,-1328.37 736.94,-1326.8 733.67,-1320.61"/>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge167" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2027.97,-1046.47C2011.37,-1054.81 1988.8,-1066.21 1969,-1076.45 1952.93,-1084.75 1949.7,-1088.49 1933,-1095.45 1923.59,-1099.36 1913.37,-1103.02 1903.43,-1106.29"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1902.08,-1103.05 1893.61,-1109.42 1904.2,-1109.71 1902.08,-1103.05"/>
+</g>
+<!-- module~self_lineareuler3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_node76" class="node">
+<title>module~self_lineareuler3d_t</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node76"><a xlink:href=".././module/self_lineareuler3d_t.html" xlink:title="self_LinearEuler3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2114,-1109.45 1992,-1109.45 1992,-1085.45 2114,-1085.45 2114,-1109.45"/>
+<text text-anchor="middle" x="2053" y="-1095.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge165" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2029.11,-1109.47C1992.42,-1127.64 1917.68,-1160.12 1850,-1161.45"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1848,-1161.45C1769.79,-1162.98 1748.65,-1145.83 1672,-1161.45"/>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge168" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1991.94,-1104.58C1967,-1107.54 1938.05,-1110.98 1912.83,-1113.98"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1912.15,-1110.54 1902.63,-1115.19 1912.98,-1117.49 1912.15,-1110.54"/>
+</g>
+<!-- module~self_nulldgmodel3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node77" class="node">
+<title>module~self_nulldgmodel3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node77"><a xlink:href=".././module/self_nulldgmodel3d.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2313,-1340.45 2192,-1340.45 2192,-1316.45 2313,-1316.45 2313,-1340.45"/>
+<text text-anchor="middle" x="2252.5" y="-1326.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge180" class="edge">
+<title>module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M2194.9,-1316.41C2171.66,-1311.47 2144.58,-1305.71 2120.41,-1300.57"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="2121.11,-1297.14 2110.6,-1298.48 2119.66,-1303.99 2121.11,-1297.14"/>
+</g>
+<!-- module~self_advection_diffusion_3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node78" class="node">
+<title>module~self_advection_diffusion_3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node78"><a xlink:href=".././module/self_advection_diffusion_3d~2.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="2332,-1004.45 2173,-1004.45 2173,-980.45 2332,-980.45 2332,-1004.45"/>
+<text text-anchor="middle" x="2252.5" y="-990.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge191" class="edge">
+<title>module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M2194.9,-1004.48C2171.66,-1009.42 2144.58,-1015.18 2120.41,-1020.32"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="2119.66,-1016.9 2110.6,-1022.41 2121.11,-1023.75 2119.66,-1016.9"/>
+</g>
+<!-- module~self_nulldgmodel1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node79" class="node">
+<title>module~self_nulldgmodel1d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node79"><a xlink:href=".././module/self_nulldgmodel1d~2.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2113.5,-1592.45 1992.5,-1592.45 1992.5,-1568.45 2113.5,-1568.45 2113.5,-1592.45"/>
+<text text-anchor="middle" x="2053" y="-1578.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge174" class="edge">
+<title>module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1996.51,-1568.37C1987.2,-1565.79 1977.74,-1562.81 1969,-1559.45 1936.64,-1546.99 1901.84,-1527.82 1878.28,-1513.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1879.9,-1510.79 1869.52,-1508.66 1876.31,-1516.8 1879.9,-1510.79"/>
+</g>
+<!-- module~self_advection_diffusion_2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node80" class="node">
+<title>module~self_advection_diffusion_2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node80"><a xlink:href=".././module/self_advection_diffusion_2d.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="2332,-1172.45 2173,-1172.45 2173,-1148.45 2332,-1148.45 2332,-1172.45"/>
+<text text-anchor="middle" x="2252.5" y="-1158.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge177" class="edge">
+<title>module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M2172.88,-1160.45C2164.45,-1160.45 2155.82,-1160.45 2147.24,-1160.45"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="2147.21,-1156.95 2137.21,-1160.45 2147.21,-1163.95 2147.21,-1156.95"/>
+</g>
+<!-- module~self_nulldgmodel3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node81" class="node">
+<title>module~self_nulldgmodel3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node81"><a xlink:href=".././module/self_nulldgmodel3d~2.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2313,-1298.45 2192,-1298.45 2192,-1274.45 2313,-1274.45 2313,-1298.45"/>
+<text text-anchor="middle" x="2252.5" y="-1284.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge181" class="edge">
+<title>module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M2191.98,-1286.45C2171.97,-1286.45 2149.39,-1286.45 2128.38,-1286.45"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="2128.22,-1282.95 2118.22,-1286.45 2128.22,-1289.95 2128.22,-1282.95"/>
+</g>
+<!-- module~self_linearshallowwater2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node82" class="node">
+<title>module~self_linearshallowwater2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node82"><a xlink:href=".././module/self_linearshallowwater2d~2.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2331.5,-1256.45 2173.5,-1256.45 2173.5,-1232.45 2331.5,-1232.45 2331.5,-1256.45"/>
+<text text-anchor="middle" x="2252.5" y="-1242.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge188" class="edge">
+<title>module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M2194.9,-1232.41C2171.66,-1227.47 2144.58,-1221.71 2120.41,-1216.57"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="2121.11,-1213.14 2110.6,-1214.48 2119.66,-1219.99 2121.11,-1213.14"/>
+</g>
+<!-- module~self_nulldgmodel1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node83" class="node">
+<title>module~self_nulldgmodel1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node83"><a xlink:href=".././module/self_nulldgmodel1d.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2113.5,-1550.45 1992.5,-1550.45 1992.5,-1526.45 2113.5,-1526.45 2113.5,-1550.45"/>
+<text text-anchor="middle" x="2053" y="-1536.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge175" class="edge">
+<title>module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1994.11,-1526.41C1970.34,-1521.47 1942.65,-1515.71 1917.93,-1510.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1918.4,-1507.09 1907.89,-1508.48 1916.97,-1513.95 1918.4,-1507.09"/>
+</g>
+<!-- module~self_advection_diffusion_3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node84" class="node">
+<title>module~self_advection_diffusion_3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node84"><a xlink:href=".././module/self_advection_diffusion_3d.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="2332,-962.45 2173,-962.45 2173,-938.45 2332,-938.45 2332,-962.45"/>
+<text text-anchor="middle" x="2252.5" y="-948.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge190" class="edge">
+<title>module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M2199.87,-962.47C2190.8,-965.09 2181.54,-968.09 2173,-971.45 2140.73,-984.12 2105.91,-1003.25 2082.32,-1017.11"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="2080.37,-1014.2 2073.56,-1022.32 2083.94,-1020.22 2080.37,-1014.2"/>
+</g>
+<!-- module~self_nulldgmodel2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node85" class="node">
+<title>module~self_nulldgmodel2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node85"><a xlink:href=".././module/self_nulldgmodel2d.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2313,-1508.45 2192,-1508.45 2192,-1484.45 2313,-1484.45 2313,-1508.45"/>
+<text text-anchor="middle" x="2252.5" y="-1494.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge186" class="edge">
+<title>module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M2191.97,-1486.84C2185.08,-1483.97 2178.55,-1480.25 2173,-1475.45 2142.29,-1448.86 2167.89,-1417.82 2137,-1391.45 2133.97,-1388.86 2130.67,-1386.58 2127.18,-1384.58"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="2128.7,-1381.43 2118.18,-1380.15 2125.61,-1387.71 2128.7,-1381.43"/>
+</g>
+<!-- module~self_lineareuler2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node86" class="node">
+<title>module~self_lineareuler2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node86"><a xlink:href=".././module/self_lineareuler2d~2.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2309,-1424.45 2196,-1424.45 2196,-1400.45 2309,-1400.45 2309,-1424.45"/>
+<text text-anchor="middle" x="2252.5" y="-1410.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge178" class="edge">
+<title>module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2195.69,-1402.01C2187.74,-1399.27 2179.92,-1395.8 2173,-1391.45 2152.19,-1378.35 2157.9,-1362.4 2137,-1349.45 2132.87,-1346.89 2128.45,-1344.64 2123.87,-1342.67"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="2124.89,-1339.31 2114.3,-1338.99 2122.38,-1345.84 2124.89,-1339.31"/>
+</g>
+<!-- module~self_linearshallowwater2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node87" class="node">
+<title>module~self_linearshallowwater2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node87"><a xlink:href=".././module/self_linearshallowwater2d.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2331.5,-1214.45 2173.5,-1214.45 2173.5,-1190.45 2331.5,-1190.45 2331.5,-1214.45"/>
+<text text-anchor="middle" x="2252.5" y="-1200.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge189" class="edge">
+<title>module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M2173.44,-1202.45C2164.67,-1202.45 2155.67,-1202.45 2146.73,-1202.45"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="2146.68,-1198.95 2136.68,-1202.45 2146.68,-1205.95 2146.68,-1198.95"/>
+</g>
+<!-- module~self_lineareuler3d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node88" class="node">
+<title>module~self_lineareuler3d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node88"><a xlink:href=".././module/self_lineareuler3d~2.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2309,-1088.45 2196,-1088.45 2196,-1064.45 2309,-1064.45 2309,-1088.45"/>
+<text text-anchor="middle" x="2252.5" y="-1074.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge192" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M2195.96,-1082.35C2173.8,-1084.71 2148.02,-1087.45 2124.55,-1089.94"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="2123.88,-1086.49 2114.31,-1091.03 2124.62,-1093.46 2123.88,-1086.49"/>
+</g>
+<!-- module~self_advection_diffusion_2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node89" class="node">
+<title>module~self_advection_diffusion_2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node89"><a xlink:href=".././module/self_advection_diffusion_2d~2.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="2332,-1130.45 2173,-1130.45 2173,-1106.45 2332,-1106.45 2332,-1130.45"/>
+<text text-anchor="middle" x="2252.5" y="-1116.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge176" class="edge">
+<title>module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M2194.9,-1130.48C2171.66,-1135.42 2144.58,-1141.18 2120.41,-1146.32"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="2119.66,-1142.9 2110.6,-1148.41 2121.11,-1149.75 2119.66,-1142.9"/>
+</g>
+<!-- module~self_lineareuler2d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node90" class="node">
+<title>module~self_lineareuler2d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node90"><a xlink:href=".././module/self_lineareuler2d.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2309,-1382.45 2196,-1382.45 2196,-1358.45 2309,-1358.45 2309,-1382.45"/>
+<text text-anchor="middle" x="2252.5" y="-1368.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge179" class="edge">
+<title>module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2195.96,-1358.63C2172.49,-1353.64 2144.98,-1347.79 2120.44,-1342.58"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="2121,-1339.12 2110.49,-1340.46 2119.55,-1345.96 2121,-1339.12"/>
+</g>
+<!-- module~self_burgers1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node91" class="node">
+<title>module~self_burgers1d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node91"><a xlink:href=".././module/self_burgers1d~2.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2100,-1466.45 2006,-1466.45 2006,-1442.45 2100,-1442.45 2100,-1466.45"/>
+<text text-anchor="middle" x="2053" y="-1452.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge184" class="edge">
+<title>module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2005.91,-1444.86C1977.77,-1439.01 1941.46,-1431.46 1910.96,-1425.12"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1911.36,-1421.63 1900.86,-1423.02 1909.93,-1428.48 1911.36,-1421.63"/>
+</g>
+<!-- module~self_nulldgmodel2d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node92" class="node">
+<title>module~self_nulldgmodel2d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node92"><a xlink:href=".././module/self_nulldgmodel2d~2.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2313,-1466.45 2192,-1466.45 2192,-1442.45 2313,-1442.45 2313,-1466.45"/>
+<text text-anchor="middle" x="2252.5" y="-1452.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge187" class="edge">
+<title>module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M2191.59,-1442.53C2185.07,-1440.05 2178.73,-1437.05 2173,-1433.45 2152.19,-1420.35 2157.9,-1404.4 2137,-1391.45 2134,-1389.59 2130.85,-1387.89 2127.59,-1386.35"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="2128.77,-1383.05 2118.19,-1382.38 2126.04,-1389.49 2128.77,-1383.05"/>
+</g>
+<!-- module~self_lineareuler3d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node93" class="node">
+<title>module~self_lineareuler3d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node93"><a xlink:href=".././module/self_lineareuler3d.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2309,-1046.45 2196,-1046.45 2196,-1022.45 2309,-1022.45 2309,-1046.45"/>
+<text text-anchor="middle" x="2252.5" y="-1032.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge193" class="edge">
+<title>module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M2204.01,-1046.51C2193.74,-1049.3 2182.97,-1052.36 2173,-1055.45 2147.02,-1063.49 2118.26,-1073.61 2095.52,-1081.9"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="2094.03,-1078.72 2085.85,-1085.45 2096.44,-1085.29 2094.03,-1078.72"/>
+</g>
+<!-- module~self_advection_diffusion_1d~2 -->
+<g id="module~~self_gpu~2~~UsedByGraph_node94" class="node">
+<title>module~self_advection_diffusion_1d~2</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node94"><a xlink:href=".././module/self_advection_diffusion_1d~2.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="2132.5,-1508.45 1973.5,-1508.45 1973.5,-1484.45 2132.5,-1484.45 2132.5,-1508.45"/>
+<text text-anchor="middle" x="2053" y="-1494.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge182" class="edge">
+<title>module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1994.11,-1484.41C1970.34,-1479.47 1942.65,-1473.71 1917.93,-1468.57"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1918.4,-1465.09 1907.89,-1466.48 1916.97,-1471.95 1918.4,-1465.09"/>
+</g>
+<!-- module~self_burgers1d -->
+<g id="module~~self_gpu~2~~UsedByGraph_node95" class="node">
+<title>module~self_burgers1d</title>
+<g id="a_module~~self_gpu~2~~UsedByGraph_node95"><a xlink:href=".././module/self_burgers1d.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2100,-1424.45 2006,-1424.45 2006,-1400.45 2100,-1400.45 2100,-1424.45"/>
+<text text-anchor="middle" x="2053" y="-1410.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_gpu~2~~UsedByGraph_edge185" class="edge">
+<title>module~self_burgers1d&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2005.91,-1412.45C1977.77,-1412.45 1941.46,-1412.45 1910.96,-1412.45"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1910.86,-1408.95 1900.86,-1412.45 1910.86,-1415.95 1910.86,-1408.95"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_gpu2UsedByGraph = svgPanZoom('#moduleself_gpu2UsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
+  <div id="inters-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipfree">hipFree</a>
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipgetdevicecount">hipGetDeviceCount</a>
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipmalloc">hipMalloc</a>
+      <a class="list-group-item" href="../module/self_gpu~2.html#interface-hipmemcpy">hipMemcpy</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_gpu~2.html#proc-gpuavailable">GPUAvailable</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_gpu~2.html#proc-gpucheck">gpuCheck</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+    <section>
+   <h2>Interfaces</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-hipfree"></span><h3>public interface <a href='../interface/hipfree.html'>hipFree</a>  </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public function hipFree_(ptr) bind(c,name="hipFree")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>ptr</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer(kind=kind(hipSuccess))</small></h4>  
+
+    </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-hipgetdevicecount"></span><h3>public interface <a href='../interface/hipgetdevicecount.html'>hipGetDeviceCount</a>  </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public function hipGetDeviceCount_(count) bind(c,name="hipGetDeviceCount")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int)</td>
+<td></td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>count</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer(kind=kind(hipSuccess))</small></h4>  
+
+    </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-hipmalloc"></span><h3>public interface <a href='../interface/hipmalloc.html'>hipMalloc</a>  </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public function hipMalloc_(ptr, mySize) bind(c,name="hipMalloc")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+<td></td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ptr</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_size_t),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>mySize</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer(kind=kind(hipSuccess))</small></h4>  
+
+    </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-hipmemcpy"></span><h3>public interface <a href='../interface/hipmemcpy.html'>hipMemcpy</a>  </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public function hipMemcpy_(dest, src, sizeBytes, myKind) bind(c,name="hipMemcpy")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>dest</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>src</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_size_t),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>sizeBytes</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=kind(hipMemcpyHostToHost)),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>myKind</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer(kind=kind(hipSuccess))</small></h4>  
+
+    </li>
+  </ul>
+</div>
+
+    </section>
+  <br>
+
+    
+    
+ 
+    <section>
+    <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-gpuavailable"></span><h3>public function <a href='../proc/gpuavailable.html'>GPUAvailable</a>() result(avail)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <em>None</em>
+<h4>Return Value <small>logical</small></h4>  
+
+  </div>
+  </div>
+
+    </section>
+    <br>
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-gpucheck"></span><h3>public subroutine <a href='../proc/gpucheck.html'>gpuCheck</a>(gpuError_t)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=kind(hipSuccess))</td>
+<td></td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>gpuError_t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2025 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2025-03-05 17:23            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

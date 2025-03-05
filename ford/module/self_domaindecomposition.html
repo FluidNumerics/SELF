@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_DomainDecomposition &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_DomainDecomposition 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for modules and submodules.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DomainDecomposition.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_domaindecomposition.f90.html'>SELF_DomainDecomposition.f90</a></li>
+     <li class="active">SELF_DomainDecomposition</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_domaindecomposition.html#type-domaindecomposition">DomainDecomposition</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_domaindecomposition_t.html'>SELF_DomainDecomposition_t</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_domaindecomposition~~UsesGraph Pages: 1 -->
+<svg id="moduleself_domaindecompositionUsesGraph" width="641pt" height="233pt"
+ viewBox="0.00 0.00 641.00 233.43" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_domaindecomposition~~UsesGraph" class="graph" transform="scale(0.59 0.59) rotate(0) translate(4 394.03)">
+<title>module~~self_domaindecomposition~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-394.03 1089,-394.03 1089,4 -4,4"/>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node1" class="node">
+<title>module~self_domaindecomposition</title>
+<polygon fill="none" stroke="black" points="1085,-171.57 919,-171.57 919,-147.57 1085,-147.57 1085,-171.57"/>
+<text text-anchor="middle" x="1002" y="-157.17" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_DomainDecomposition</text>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node2" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node2"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="883,-171.57 708,-171.57 708,-147.57 883,-147.57 883,-171.57"/>
+<text text-anchor="middle" x="795.5" y="-157.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge1" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M918.71,-159.57C910.42,-159.57 901.95,-159.57 893.53,-159.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="893.3,-156.07 883.3,-159.57 893.3,-163.07 893.3,-156.07"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node3" class="node">
+<title>mpi</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node3"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-369.57 156,-369.57 156,-345.57 210,-345.57 210,-369.57"/>
+<text text-anchor="middle" x="183" y="-355.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge2" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-239.57C519.08,-265.15 507.55,-313.53 403,-340.57 340.24,-356.8 264.27,-358.97 220.3,-358.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.15,-355.09 210.1,-358.46 220.06,-362.09 220.15,-355.09"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node4" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node4"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="403,-251.57 272,-251.57 272,-227.57 403,-227.57 403,-251.57"/>
+<text text-anchor="middle" x="337.5" y="-237.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge4" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-239.57C553.83,-255.21 471.53,-253.13 413.36,-248.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="413.42,-244.88 403.16,-247.5 412.82,-251.85 413.42,-244.88"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node5" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node5"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-73.57 5,-73.57 5,-49.57 89,-49.57 89,-73.57"/>
+<text text-anchor="middle" x="47" y="-59.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge6" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M782.15,-147.43C743.12,-110.43 617.57,-1.57 491.5,-1.57 491.5,-1.57 491.5,-1.57 336.5,-1.57 244.33,-1.57 218.63,4.7 130,-20.57 111.11,-25.95 91.38,-35.67 76.01,-44.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="73.95,-41.44 67.05,-49.47 77.46,-47.5 73.95,-41.44"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node6" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node6"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="231,-171.57 135,-171.57 135,-147.57 231,-147.57 231,-171.57"/>
+<text text-anchor="middle" x="183" y="-157.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge5" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M775.77,-171.73C745.66,-190.5 683.98,-225.81 626,-239.57"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-239.57C567.74,-252.92 592.99,-165.83 542,-138.57 461.89,-95.74 428.63,-108.29 338.5,-119.57"/>
+</g>
+<!-- module~self_lagrange~3 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node7" class="node">
+<title>module~self_lagrange~3</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node7"><a xlink:href=".././module/self_lagrange~3.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="672,-171.57 578,-171.57 578,-147.57 672,-147.57 672,-171.57"/>
+<text text-anchor="middle" x="625" y="-157.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~3 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge3" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~3</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M707.78,-159.57C699.16,-159.57 690.58,-159.57 682.39,-159.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="682.26,-156.07 672.26,-159.57 682.26,-163.07 682.26,-156.07"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge8" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M314.25,-227.37C293.95,-216.3 263.08,-199.61 236,-185.57 230.12,-182.52 223.84,-179.32 217.74,-176.26"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="218.92,-172.93 208.41,-171.59 215.79,-179.19 218.92,-172.93"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node8" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node8"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-270.57 0,-270.57 0,-246.57 94,-246.57 94,-270.57"/>
+<text text-anchor="middle" x="47" y="-256.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge7" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M304.14,-227.46C266.55,-214.03 206.78,-194.84 184,-199.57"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge10" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M165.57,-147.55C142.36,-130.58 99.8,-99.45 72.76,-79.67"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="74.7,-76.76 64.57,-73.68 70.57,-82.41 74.7,-76.76"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge9" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M154.52,-171.63C146.37,-175.64 137.6,-180.41 130,-185.57 106.54,-201.46 82.67,-223.52 66.78,-239.21"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="64.25,-236.8 59.66,-246.35 69.2,-241.75 64.25,-236.8"/>
+</g>
+<!-- module~self_lagrange~3&#45;&gt;iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge15" class="edge">
+<title>module~self_lagrange~3&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M489.5,-81.57C424.73,-63.99 405.09,-89.92 338.5,-81.57"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M336.5,-81.57C269.25,-73.13 251.78,-82.15 184,-81.57"/>
+</g>
+<!-- module~self_lagrange~3&#45;&gt;module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge14" class="edge">
+<title>module~self_lagrange~3&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M489.5,-81.57C422.71,-63.45 407.17,-110.97 338.5,-119.57"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M336.5,-119.57C299.65,-124.18 259.03,-135.13 228.99,-144.42"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="227.71,-141.15 219.22,-147.49 229.81,-147.83 227.71,-141.15"/>
+</g>
+<!-- module~self_lagrange~3&#45;&gt;iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge13" class="edge">
+<title>module~self_lagrange~3&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M612.94,-171.96C582.8,-204.95 495.22,-295.45 403,-340.57 334.62,-374.02 311.64,-370.07 236,-378.57 189.18,-383.83 171.66,-400.56 130,-378.57 90.65,-357.8 66.6,-308.7 55.45,-280.16"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="58.68,-278.82 51.92,-270.66 52.12,-281.26 58.68,-278.82"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node9" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node9"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="542,-171.57 439,-171.57 439,-147.57 542,-147.57 542,-171.57"/>
+<text text-anchor="middle" x="490.5" y="-157.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~3&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge11" class="edge">
+<title>module~self_lagrange~3&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M577.66,-159.57C569.49,-159.57 560.87,-159.57 552.37,-159.57"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="552.11,-156.07 542.11,-159.57 552.11,-163.07 552.11,-156.07"/>
+</g>
+<!-- module~self_gpu~2 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node10" class="node">
+<title>module~self_gpu~2</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node10"><a xlink:href=".././module/self_gpu~2.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="370,-53.57 305,-53.57 305,-29.57 370,-29.57 370,-53.57"/>
+<text text-anchor="middle" x="337.5" y="-39.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~3&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge12" class="edge">
+<title>module~self_lagrange~3&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M609.32,-147.28C586.09,-128.72 538.64,-94.36 491.5,-81.57"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M489.5,-81.57C452.46,-71.52 410.24,-60.36 379.87,-52.38"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="380.61,-48.96 370.05,-49.81 378.84,-55.73 380.61,-48.96"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge18" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M472.14,-171.67C455.04,-183.29 427.93,-200.88 403,-213.57 395.96,-217.15 388.31,-220.59 380.82,-223.74"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="379.41,-220.54 371.48,-227.56 382.06,-227.02 379.41,-220.54"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge20" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M474.85,-147.44C449.18,-127.3 393.54,-88.47 338.5,-81.57"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge22" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M466.09,-147.48C436.73,-133.71 384.65,-113.79 338.5,-119.57"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge17" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M445.31,-171.66C431.82,-174.98 416.88,-178.29 403,-180.57 306.59,-196.36 279.66,-179.71 184,-199.57"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node11" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node11"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="374,-331.57 301,-331.57 301,-307.57 374,-307.57 374,-331.57"/>
+<text text-anchor="middle" x="337.5" y="-317.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge16" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M484.7,-171.71C473.9,-197.59 445.27,-258.65 403,-293.57 397.24,-298.32 390.5,-302.3 383.58,-305.6"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="381.92,-302.5 374.12,-309.68 384.69,-308.93 381.92,-302.5"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node12" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node12"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="389.5,-171.57 285.5,-171.57 285.5,-147.57 389.5,-147.57 389.5,-171.57"/>
+<text text-anchor="middle" x="337.5" y="-157.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge19" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M438.8,-159.57C426.29,-159.57 412.76,-159.57 399.81,-159.57"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="399.58,-156.07 389.58,-159.57 399.58,-163.07 399.58,-156.07"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node14" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-289.57 156,-289.57 156,-265.57 210,-265.57 210,-289.57"/>
+<text text-anchor="middle" x="183" y="-275.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge21" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M483.39,-171.58C471.42,-193.72 442.52,-240.49 403,-260.57 344.49,-290.29 265.68,-287.73 220.3,-282.86"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="220.67,-279.38 210.33,-281.7 219.86,-286.34 220.67,-279.38"/>
+</g>
+<!-- module~self_gpu~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge23" class="edge">
+<title>module~self_gpu~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M308.69,-53.61C278.54,-65.53 228.75,-81.95 184,-81.57"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M182,-81.57C154.4,-81.33 123.95,-77.11 99.06,-72.6"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="99.59,-69.14 89.11,-70.74 98.3,-76.02 99.59,-69.14"/>
+</g>
+<!-- module~self_gpu_enums~2 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_node13" class="node">
+<title>module~self_gpu_enums~2</title>
+<g id="a_module~~self_domaindecomposition~~UsesGraph_node13"><a xlink:href=".././module/self_gpu_enums~2.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="236,-53.57 130,-53.57 130,-29.57 236,-29.57 236,-53.57"/>
+<text text-anchor="middle" x="183" y="-39.17" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge24" class="edge">
+<title>module~self_gpu~2&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M304.9,-41.57C287.96,-41.57 266.48,-41.57 246.34,-41.57"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="246.27,-38.07 236.27,-41.57 246.27,-45.07 246.27,-38.07"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge27" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M300.75,-328.48C276.56,-334.5 244.71,-342.44 220.39,-348.5"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.33,-345.16 210.47,-350.97 221.02,-351.95 219.33,-345.16"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge28" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M320.02,-307.44C305.91,-296.41 285.75,-279.09 272,-260.57 249.96,-230.88 261.93,-211.92 236,-185.57 232.81,-182.32 229.13,-179.41 225.23,-176.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.84,-173.71 216.45,-171.66 223.29,-179.75 226.84,-173.71"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge25" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M300.71,-319.71C258.96,-319.02 188.22,-315.16 130,-298.57 111.46,-293.28 92.01,-283.98 76.71,-275.67"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="78.2,-272.5 67.76,-270.68 74.78,-278.61 78.2,-272.5"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge26" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M300.75,-309.72C276.56,-303.06 244.71,-294.29 220.39,-287.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="221.04,-284.14 210.47,-284.86 219.18,-290.89 221.04,-284.14"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge30" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M285.3,-159.57C271.23,-159.57 255.89,-159.57 241.49,-159.57"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="241.21,-156.07 231.21,-159.57 241.21,-163.07 241.21,-156.07"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge29" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M295.35,-171.6C264.81,-180.22 222.06,-191.67 184,-199.57"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M182,-199.57C143.87,-207.48 103.39,-227.05 77.03,-241.49"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="75.01,-238.61 67.99,-246.55 78.42,-244.72 75.01,-238.61"/>
+</g>
+<!-- module~self_gpu_enums~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_domaindecomposition~~UsesGraph_edge31" class="edge">
+<title>module~self_gpu_enums~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M129.81,-49.36C119.67,-50.87 109.05,-52.45 98.95,-53.96"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="98.43,-50.5 89.06,-55.44 99.47,-57.42 98.43,-50.5"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_domaindecompositionUsesGraph = svgPanZoom('#moduleself_domaindecompositionUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_domaindecomposition~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_domaindecompositionUsedByGraph" width="641pt" height="274pt"
+ viewBox="0.00 0.00 641.00 274.08" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_domaindecomposition~~UsedByGraph" class="graph" transform="scale(0.34 0.34) rotate(0) translate(4 796)">
+<title>module~~self_domaindecomposition~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-796 1867,-796 1867,4 -4,4"/>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node1" class="node">
+<title>module~self_domaindecomposition</title>
+<polygon fill="none" stroke="black" points="166,-398 0,-398 0,-374 166,-374 166,-398"/>
+<text text-anchor="middle" x="83" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_DomainDecomposition</text>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node2" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node2"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="273,-398 202,-398 202,-374 273,-374 273,-398"/>
+<text text-anchor="middle" x="237.5" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge1" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M201.9,-386C194.04,-386 185.34,-386 176.32,-386"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="176.03,-382.5 166.03,-386 176.03,-389.5 176.03,-382.5"/>
+</g>
+<!-- module~self_mesh_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node3" class="node">
+<title>module~self_mesh_3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node3"><a xlink:href=".././module/self_mesh_3d_t.html" xlink:title="SELF_Mesh_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="409,-665 309,-665 309,-641 409,-641 409,-665"/>
+<text text-anchor="middle" x="359" y="-650.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge2" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M341.82,-665.28C314.05,-685.68 258.39,-723.42 238.5,-714"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M236.5,-714C117.37,-657.58 91.07,-473.18 85.47,-408.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="88.93,-408.01 84.66,-398.31 81.95,-408.55 88.93,-408.01"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge8" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M349.63,-640.77C339.24,-625.24 321.38,-597.42 309,-572 281.05,-514.6 256.7,-443.1 245.33,-407.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="248.6,-406.53 242.23,-398.07 241.93,-408.66 248.6,-406.53"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node4" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node4"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="409,-154 309,-154 309,-130 409,-130 409,-154"/>
+<text text-anchor="middle" x="359" y="-139.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge5" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M308.91,-141.1C285.85,-142.84 259,-148.19 238.5,-162"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge16" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M352.07,-154.1C333.04,-192.96 273.29,-314.97 248.96,-364.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="245.72,-363.31 244.46,-373.83 252,-366.39 245.72,-363.31"/>
+</g>
+<!-- module~self_mappedscalar_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node5" class="node">
+<title>module~self_mappedscalar_2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node5"><a xlink:href=".././module/self_mappedscalar_2d_t.html" xlink:title="SELF_MappedScalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="932,-92 783,-92 783,-68 932,-68 932,-92"/>
+<text text-anchor="middle" x="857.5" y="-77.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge3" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M795.2,-67.94C759.71,-62.3 714.16,-57.35 673.5,-60"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M671.5,-60C474.21,-72.87 400.01,-47.96 238.5,-162"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M236.5,-162C159.47,-214.04 110.49,-319.21 92.16,-364.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="88.85,-363.32 88.43,-373.91 95.36,-365.9 88.85,-363.32"/>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node12" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node12"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="549,-154 458,-154 458,-130 549,-130 549,-154"/>
+<text text-anchor="middle" x="503.5" y="-139.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge41" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ffc700" stroke-dasharray="5,2" d="M671.5,-60C637.83,-62.2 626.63,-61.15 598,-79 577.14,-92.01 582.21,-106.99 562,-121 559.74,-122.56 557.36,-124.03 554.89,-125.39"/>
+<polygon fill="#ffc700" stroke="#ffc700" points="553.12,-122.36 545.69,-129.92 556.21,-128.64 553.12,-122.36"/>
+</g>
+<!-- module~self_geometry_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node52" class="node">
+<title>module~self_geometry_2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node52"><a xlink:href=".././module/self_geometry_2d.html" xlink:title="SELF_Geometry_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="731,-112 614,-112 614,-88 731,-88 731,-112"/>
+<text text-anchor="middle" x="672.5" y="-97.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge79" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M782.86,-88.05C769.17,-89.54 754.92,-91.1 741.41,-92.58"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="740.8,-89.12 731.24,-93.69 741.56,-96.08 740.8,-89.12"/>
+</g>
+<!-- module~self_mappedvector_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node6" class="node">
+<title>module~self_mappedvector_2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node6"><a xlink:href=".././module/self_mappedvector_2d_t.html" xlink:title="SELF_MappedVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="932,-193 783,-193 783,-169 932,-169 932,-193"/>
+<text text-anchor="middle" x="857.5" y="-178.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge4" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M671.5,-182C665.49,-181.66 243.49,-158.64 238.5,-162"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge44" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ffc700" stroke-dasharray="5,2" d="M782.99,-183.47C749.55,-184.06 709.5,-184.03 673.5,-182"/>
+<path fill="none" stroke="#ffc700" stroke-dasharray="5,2" d="M671.5,-182C629.01,-179.61 581.99,-167.45 548.69,-157.16"/>
+<polygon fill="#ffc700" stroke="#ffc700" points="549.41,-153.71 538.82,-154.04 547.3,-160.39 549.41,-153.71"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge81" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M821.43,-168.98C809.16,-164.54 795.37,-159.3 783,-154 756.36,-142.58 726.93,-127.95 705.3,-116.8"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="706.73,-113.6 696.24,-112.1 703.5,-119.81 706.73,-113.6"/>
+</g>
+<!-- module~self_mappedvector_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node7" class="node">
+<title>module~self_mappedvector_3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node7"><a xlink:href=".././module/self_mappedvector_3d_t.html" xlink:title="SELF_MappedVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="932,-684 783,-684 783,-660 932,-660 932,-684"/>
+<text text-anchor="middle" x="857.5" y="-669.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge6" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M812.1,-684.01C766.96,-695.88 700.02,-712.5 673.5,-714"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M671.5,-714C479.36,-724.87 412.42,-796.37 238.5,-714"/>
+</g>
+<!-- module~self_mesh_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node29" class="node">
+<title>module~self_mesh_3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node29"><a xlink:href=".././module/self_mesh_3d~2.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="549,-644 458,-644 458,-620 549,-620 549,-644"/>
+<text text-anchor="middle" x="503.5" y="-629.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge67" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00c7" stroke-dasharray="5,2" d="M782.99,-680.09C749.38,-682.13 709.19,-682.24 673.5,-676"/>
+<path fill="none" stroke="#ff00c7" stroke-dasharray="5,2" d="M671.5,-676C630.95,-668.91 585.86,-656.77 552.76,-647.03"/>
+<polygon fill="#ff00c7" stroke="#ff00c7" points="553.48,-643.59 542.9,-644.1 551.48,-650.3 553.48,-643.59"/>
+</g>
+<!-- module~self_geometry_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node42" class="node">
+<title>module~self_geometry_3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node42"><a xlink:href=".././module/self_geometry_3d.html" xlink:title="SELF_Geometry_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="731,-648 614,-648 614,-624 731,-624 731,-648"/>
+<text text-anchor="middle" x="672.5" y="-633.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge73" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M795.31,-659.96C778.02,-656.56 759.11,-652.84 741.46,-649.37"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="741.71,-645.85 731.23,-647.36 740.36,-652.72 741.71,-645.85"/>
+</g>
+<!-- module~self_mappedscalar_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node8" class="node">
+<title>module~self_mappedscalar_3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node8"><a xlink:href=".././module/self_mappedscalar_3d_t.html" xlink:title="SELF_MappedScalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="932,-726 783,-726 783,-702 932,-702 932,-726"/>
+<text text-anchor="middle" x="857.5" y="-711.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge7" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M782.77,-709.75C749.29,-708.91 709.27,-709.43 673.5,-714"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge68" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00c7" stroke-dasharray="5,2" d="M803.02,-701.97C766.62,-694 717.29,-683.66 673.5,-676"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge75" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M803.6,-701.9C796.48,-699.41 789.42,-696.46 783,-693 764.42,-682.98 765.27,-672.59 747,-662 740.48,-658.22 733.32,-654.85 726.1,-651.9"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="726.88,-648.45 716.29,-648.13 724.37,-654.98 726.88,-648.45"/>
+</g>
+<!-- module~self_lineareuler2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node9" class="node">
+<title>module~self_lineareuler2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node9"><a xlink:href=".././module/self_lineareuler2d_t.html" xlink:title="self_LinearEuler2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1645,-150 1523,-150 1523,-126 1645,-126 1645,-150"/>
+<text text-anchor="middle" x="1584" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge10" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1522.6,-148.4C1514.66,-151.14 1506.9,-154.61 1500,-159 1478.68,-172.56 1485.47,-189.68 1464,-203 1431.84,-222.94 1418,-214.04 1381,-222"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1379,-222C1376.55,-222.53 1205.5,-261.79 1203,-262"/>
+</g>
+<!-- module~self_dgmodel2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node65" class="node">
+<title>module~self_dgmodel2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node65"><a xlink:href=".././module/self_dgmodel2d~2.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1433.5,-194 1326.5,-194 1326.5,-170 1433.5,-170 1433.5,-194"/>
+<text text-anchor="middle" x="1380" y="-179.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge94" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1527.8,-150.02C1501.8,-155.69 1470.67,-162.47 1443.77,-168.33"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1442.72,-164.97 1433.69,-170.52 1444.21,-171.81 1442.72,-164.97"/>
+</g>
+<!-- module~self_mesh_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node10" class="node">
+<title>module~self_mesh_1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node10"><a xlink:href=".././module/self_mesh_1d.html" xlink:title="SELF_Mesh_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="404.5,-398 313.5,-398 313.5,-374 404.5,-374 404.5,-398"/>
+<text text-anchor="middle" x="359" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge11" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M313.16,-386C303.44,-386 293.14,-386 283.41,-386"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="283.13,-382.5 273.13,-386 283.13,-389.5 283.13,-382.5"/>
+</g>
+<!-- module~self_nulldgmodel1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node11" class="node">
+<title>module~self_nulldgmodel1d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node11"><a xlink:href=".././module/self_nulldgmodel1d_t.html" xlink:title="self_NullDGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1445,-465 1315,-465 1315,-441 1445,-441 1445,-465"/>
+<text text-anchor="middle" x="1380" y="-450.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge13" class="edge">
+<title>module~self_nulldgmodel1d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1368.02,-465.23C1342.22,-492.55 1274.5,-556.33 1203,-558"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1201,-558C1048.82,-561.56 1010.72,-558 858.5,-558 858.5,-558 858.5,-558 502.5,-558 392.27,-558 292,-451.43 254.31,-406.06"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="256.85,-403.63 247.81,-398.09 251.42,-408.06 256.85,-403.63"/>
+</g>
+<!-- module~self_dgmodel1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node60" class="node">
+<title>module~self_dgmodel1d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node60"><a xlink:href=".././module/self_dgmodel1d~2.html" xlink:title="SELF_DGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1255.5,-398 1148.5,-398 1148.5,-374 1255.5,-374 1255.5,-398"/>
+<text text-anchor="middle" x="1202" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge85" class="edge">
+<title>module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1347.13,-440.87C1318.22,-429.86 1275.45,-413.58 1244,-401.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1245.23,-398.33 1234.64,-398.04 1242.74,-404.87 1245.23,-398.33"/>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge23" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M457.8,-142C445.63,-142 432.25,-142 419.4,-142"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="419.24,-138.5 409.24,-142 419.24,-145.5 419.24,-138.5"/>
+</g>
+<!-- module~self_mappedvector_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node13" class="node">
+<title>module~self_mappedvector_3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node13"><a xlink:href=".././module/self_mappedvector_3d.html" xlink:title="SELF_MappedVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-708 968,-708 968,-684 1108,-684 1108,-708"/>
+<text text-anchor="middle" x="1038" y="-693.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d&#45;&gt;module~self_mappedvector_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge30" class="edge">
+<title>module~self_mappedvector_3d&#45;&gt;module~self_mappedvector_3d_t</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M967.99,-686.72C959.53,-685.58 950.81,-684.41 942.16,-683.25"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="942.44,-679.75 932.06,-681.89 941.51,-686.69 942.44,-679.75"/>
+</g>
+<!-- module~self_nulldgmodel2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node14" class="node">
+<title>module~self_nulldgmodel2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node14"><a xlink:href=".././module/self_nulldgmodel2d_t.html" xlink:title="self_NullDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1649,-87 1519,-87 1519,-63 1649,-63 1649,-87"/>
+<text text-anchor="middle" x="1584" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge14" class="edge">
+<title>module~self_nulldgmodel2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1556.51,-87.12C1532.68,-97.67 1496.53,-112.83 1464,-123 1390.93,-145.84 1362.26,-122.66 1296,-161 1243.18,-191.56 1263.81,-256.99 1203,-262"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1201,-262C1049.29,-274.49 1010.72,-262 858.5,-262 858.5,-262 858.5,-262 502.5,-262 404.47,-262 303.73,-332.91 260.44,-367.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="258.12,-364.86 252.57,-373.88 262.53,-370.29 258.12,-364.86"/>
+</g>
+<!-- module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge93" class="edge">
+<title>module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1553.09,-87C1536.6,-94.37 1516.24,-104.74 1500,-117 1481.18,-131.22 1483.93,-143.38 1464,-156 1457.68,-160 1450.71,-163.42 1443.56,-166.35"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1441.89,-163.23 1433.76,-170.03 1444.35,-169.79 1441.89,-163.23"/>
+</g>
+<!-- module~self_mappedscalar_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node15" class="node">
+<title>module~self_mappedscalar_2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node15"><a xlink:href=".././module/self_mappedscalar_2d.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-70 968,-70 968,-46 1108,-46 1108,-70"/>
+<text text-anchor="middle" x="1038" y="-55.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge26" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M967.99,-66.51C959.53,-67.55 950.81,-68.62 942.16,-69.69"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="941.56,-66.24 932.06,-70.93 942.41,-73.18 941.56,-66.24"/>
+</g>
+<!-- module~self_nulldgmodel3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node16" class="node">
+<title>module~self_nulldgmodel3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node16"><a xlink:href=".././module/self_nulldgmodel3d_t.html" xlink:title="self_NullDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1649,-652 1519,-652 1519,-628 1649,-628 1649,-652"/>
+<text text-anchor="middle" x="1584" y="-637.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge12" class="edge">
+<title>module~self_nulldgmodel3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1518.76,-644.37C1459.37,-646.32 1369.46,-643.9 1296,-619 1249.18,-603.13 1252.41,-556.69 1203,-558"/>
+</g>
+<!-- module~self_dgmodel3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node63" class="node">
+<title>module~self_dgmodel3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node63"><a xlink:href=".././module/self_dgmodel3d.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1433.5,-610 1326.5,-610 1326.5,-586 1433.5,-586 1433.5,-610"/>
+<text text-anchor="middle" x="1380" y="-595.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge92" class="edge">
+<title>module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1525.11,-627.96C1499.69,-622.68 1469.79,-616.46 1443.82,-611.06"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1444.22,-607.57 1433.71,-608.96 1442.79,-614.42 1444.22,-607.57"/>
+</g>
+<!-- module~self_mappedscalar_2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node17" class="node">
+<title>module~self_mappedscalar_2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node17"><a xlink:href=".././module/self_mappedscalar_2d~2.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-112 968,-112 968,-88 1108,-88 1108,-112"/>
+<text text-anchor="middle" x="1038" y="-97.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge25" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M967.99,-92.27C959.53,-91.32 950.81,-90.34 942.16,-89.37"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="942.39,-85.88 932.06,-88.24 941.61,-92.83 942.39,-85.88"/>
+</g>
+<!-- module~self_mappedvector_2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node18" class="node">
+<title>module~self_mappedvector_2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node18"><a xlink:href=".././module/self_mappedvector_2d~2.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-192 968,-192 968,-168 1108,-168 1108,-192"/>
+<text text-anchor="middle" x="1038" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge28" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M967.99,-180.39C959.53,-180.43 950.81,-180.48 942.16,-180.53"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="942.04,-177.03 932.06,-180.59 942.08,-184.03 942.04,-177.03"/>
+</g>
+<!-- module~self_mappedscalar_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node19" class="node">
+<title>module~self_mappedscalar_3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node19"><a xlink:href=".././module/self_mappedscalar_3d.html" xlink:title="SELF_MappedScalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-750 968,-750 968,-726 1108,-726 1108,-750"/>
+<text text-anchor="middle" x="1038" y="-735.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d&#45;&gt;module~self_mappedscalar_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge31" class="edge">
+<title>module~self_mappedscalar_3d&#45;&gt;module~self_mappedscalar_3d_t</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M967.99,-728.72C959.53,-727.58 950.81,-726.41 942.16,-725.25"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="942.44,-721.75 932.06,-723.89 941.51,-728.69 942.44,-721.75"/>
+</g>
+<!-- module~self_advection_diffusion_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node20" class="node">
+<title>module~self_advection_diffusion_3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node20"><a xlink:href=".././module/self_advection_diffusion_3d_t.html" xlink:title="self_advection_diffusion_3d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1668,-570 1500,-570 1500,-546 1668,-546 1668,-570"/>
+<text text-anchor="middle" x="1584" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge17" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1499.9,-556.08C1463.4,-555.74 1420.05,-556 1381,-558"/>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge90" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1522.39,-570C1497.57,-574.92 1468.86,-580.6 1443.81,-585.56"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1442.82,-582.19 1433.69,-587.57 1444.18,-589.06 1442.82,-582.19"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node21" class="node">
+<title>module~self_advection_diffusion_1d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node21"><a xlink:href=".././module/self_advection_diffusion_1d_t.html" xlink:title="self_advection_diffusion_1d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1464,-316 1296,-316 1296,-292 1464,-292 1464,-316"/>
+<text text-anchor="middle" x="1380" y="-301.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge18" class="edge">
+<title>module~self_advection_diffusion_1d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1331.9,-291.99C1282.01,-279.39 1209.52,-261.46 1203,-262"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge84" class="edge">
+<title>module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1353.03,-316.1C1322.53,-330.31 1271.79,-353.95 1237.88,-369.75"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1236.38,-366.59 1228.79,-373.98 1239.33,-372.93 1236.38,-366.59"/>
+</g>
+<!-- module~self_mappedscalar_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node22" class="node">
+<title>module~self_mappedscalar_3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node22"><a xlink:href=".././module/self_mappedscalar_3d~2.html" xlink:title="SELF_MappedScalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-792 968,-792 968,-768 1108,-768 1108,-792"/>
+<text text-anchor="middle" x="1038" y="-777.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_mappedscalar_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge32" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_mappedscalar_3d_t</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M995.2,-767.97C986.17,-765.18 976.73,-762.11 968,-759 943.32,-750.2 916.07,-739 894.93,-729.98"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="896.24,-726.74 885.67,-726.01 893.48,-733.17 896.24,-726.74"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node23" class="node">
+<title>module~self_advection_diffusion_2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node23"><a xlink:href=".././module/self_advection_diffusion_2d_t.html" xlink:title="self_advection_diffusion_2d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1668,-234 1500,-234 1500,-210 1668,-210 1668,-234"/>
+<text text-anchor="middle" x="1584" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge9" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1499.61,-214.15C1462.86,-212.7 1419.4,-213.73 1381,-222"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge96" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1522.39,-210C1497.57,-205.08 1468.86,-199.4 1443.81,-194.44"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1444.18,-190.94 1433.69,-192.43 1442.82,-197.81 1444.18,-190.94"/>
+</g>
+<!-- module~self_mappedvector_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node24" class="node">
+<title>module~self_mappedvector_3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node24"><a xlink:href=".././module/self_mappedvector_3d~2.html" xlink:title="SELF_MappedVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-666 968,-666 968,-642 1108,-642 1108,-666"/>
+<text text-anchor="middle" x="1038" y="-651.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge29" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M967.99,-660.96C959.53,-661.81 950.81,-662.69 942.16,-663.56"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="941.66,-660.1 932.06,-664.58 942.36,-667.06 941.66,-660.1"/>
+</g>
+<!-- module~self_burgers1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node25" class="node">
+<title>module~self_burgers1d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node25"><a xlink:href=".././module/self_burgers1d_t.html" xlink:title="self_Burgers1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1431.5,-274 1328.5,-274 1328.5,-250 1431.5,-250 1431.5,-274"/>
+<text text-anchor="middle" x="1380" y="-259.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge20" class="edge">
+<title>module~self_burgers1d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1328.46,-259.81C1293.23,-258.81 1245.18,-258.53 1203,-262"/>
+</g>
+<!-- module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge87" class="edge">
+<title>module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1328.28,-268.09C1316.87,-271.22 1305.37,-275.93 1296,-283 1270.56,-302.19 1281.41,-321.4 1260,-345 1252.04,-353.78 1241.9,-361.8 1232.39,-368.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1230.32,-365.56 1223.91,-374 1234.18,-371.39 1230.32,-365.56"/>
+</g>
+<!-- module~self_mappedvector_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node26" class="node">
+<title>module~self_mappedvector_2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node26"><a xlink:href=".././module/self_mappedvector_2d.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1108,-234 968,-234 968,-210 1108,-210 1108,-234"/>
+<text text-anchor="middle" x="1038" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge27" class="edge">
+<title>module~self_mappedvector_2d&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M984.41,-209.92C964.52,-205.35 941.7,-200.11 921,-195.35"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="921.55,-191.89 911.02,-193.06 919.99,-198.71 921.55,-191.89"/>
+</g>
+<!-- module~self_linearshallowwater2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node27" class="node">
+<title>module~self_linearshallowwater2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node27"><a xlink:href=".././module/self_linearshallowwater2d_t.html" xlink:title="self_LinearShallowWater2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1667.5,-192 1500.5,-192 1500.5,-168 1667.5,-168 1667.5,-192"/>
+<text text-anchor="middle" x="1584" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge15" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1524.17,-192C1483.85,-200.29 1429.15,-211.63 1381,-222"/>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge95" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1500.26,-180.82C1481.31,-181.01 1461.49,-181.2 1443.56,-181.38"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1443.49,-177.88 1433.53,-181.48 1443.56,-184.88 1443.49,-177.88"/>
+</g>
+<!-- module~self_lineareuler3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node28" class="node">
+<title>module~self_lineareuler3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node28"><a xlink:href=".././module/self_lineareuler3d_t.html" xlink:title="self_LinearEuler3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1645,-528 1523,-528 1523,-504 1645,-504 1645,-528"/>
+<text text-anchor="middle" x="1584" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge19" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1533.94,-528.01C1484.08,-539.89 1410.15,-556.5 1381,-558"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1379,-558C1300.88,-562.01 1281.19,-555.93 1203,-558"/>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge91" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1522.61,-527.28C1514.75,-529.89 1507.01,-533.08 1500,-537 1480.52,-547.89 1483.17,-560.58 1464,-572 1457.25,-576.02 1449.82,-579.48 1442.25,-582.45"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1440.85,-579.23 1432.65,-585.94 1443.24,-585.81 1440.85,-579.23"/>
+</g>
+<!-- module~self_mesh_3d~2&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge21" class="edge">
+<title>module~self_mesh_3d~2&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M457.8,-638.59C445.63,-640.38 432.25,-642.35 419.4,-644.25"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="418.63,-640.82 409.24,-645.74 419.65,-647.75 418.63,-640.82"/>
+</g>
+<!-- module~self_mesh_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node30" class="node">
+<title>module~self_mesh_3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node30"><a xlink:href=".././module/self_mesh_3d.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="549,-686 458,-686 458,-662 549,-662 549,-686"/>
+<text text-anchor="middle" x="503.5" y="-671.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge22" class="edge">
+<title>module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M457.8,-667.41C445.63,-665.62 432.25,-663.65 419.4,-661.75"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="419.65,-658.25 409.24,-660.26 418.63,-665.18 419.65,-658.25"/>
+</g>
+<!-- module~self_mesh_2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node31" class="node">
+<title>module~self_mesh_2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node31"><a xlink:href=".././module/self_mesh_2d~2.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="549,-112 458,-112 458,-88 549,-88 549,-112"/>
+<text text-anchor="middle" x="503.5" y="-97.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d~2&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge24" class="edge">
+<title>module~self_mesh_2d~2&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M461.67,-112.04C445.72,-116.74 427.26,-122.18 410.49,-127.12"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="409.44,-123.78 400.84,-129.96 411.42,-130.49 409.44,-123.78"/>
+</g>
+<!-- module~self_nulldgmodel3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node32" class="node">
+<title>module~self_nulldgmodel3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node32"><a xlink:href=".././module/self_nulldgmodel3d.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1844,-695 1723,-695 1723,-671 1844,-671 1844,-695"/>
+<text text-anchor="middle" x="1783.5" y="-680.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge47" class="edge">
+<title>module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#2cff00" stroke-dasharray="5,2" d="M1727.22,-670.96C1703.35,-665.77 1675.25,-659.65 1650.35,-654.23"/>
+<polygon fill="#2cff00" stroke="#2cff00" points="1650.78,-650.74 1640.26,-652.03 1649.29,-657.58 1650.78,-650.74"/>
+</g>
+<!-- module~self_advection_diffusion_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node33" class="node">
+<title>module~self_advection_diffusion_3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node33"><a xlink:href=".././module/self_advection_diffusion_3d~2.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1863,-611 1704,-611 1704,-587 1863,-587 1863,-611"/>
+<text text-anchor="middle" x="1783.5" y="-596.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge52" class="edge">
+<title>module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#00ffdd" stroke-dasharray="5,2" d="M1724.58,-586.98C1702.07,-582.3 1676.13,-576.92 1652.76,-572.07"/>
+<polygon fill="#00ffdd" stroke="#00ffdd" points="1653.42,-568.63 1642.92,-570.02 1652,-575.48 1653.42,-568.63"/>
+</g>
+<!-- module~self_dgmodel1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node34" class="node">
+<title>module~self_dgmodel1d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node34"><a xlink:href=".././module/self_dgmodel1d_t.html" xlink:title="SELF_DGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1096,-398 980,-398 980,-374 1096,-374 1096,-398"/>
+<text text-anchor="middle" x="1038" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge36" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4200" stroke-dasharray="5,2" d="M984.91,-398.05C968.11,-401.5 949.35,-404.89 932,-407 743.2,-429.94 694.14,-440.46 504.5,-426"/>
+</g>
+<!-- module~self_mappedscalar_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node62" class="node">
+<title>module~self_mappedscalar_1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node62"><a xlink:href=".././module/self_mappedscalar_1d.html" xlink:title="SELF_MappedScalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="927.5,-398 787.5,-398 787.5,-374 927.5,-374 927.5,-398"/>
+<text text-anchor="middle" x="857.5" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_mappedscalar_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge88" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_mappedscalar_1d</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M979.54,-386C966.25,-386 951.89,-386 937.85,-386"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="937.71,-382.5 927.71,-386 937.71,-389.5 937.71,-382.5"/>
+</g>
+<!-- module~self_mappedscalar_1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node35" class="node">
+<title>module~self_mappedscalar_1d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node35"><a xlink:href=".././module/self_mappedscalar_1d_t.html" xlink:title="SELF_MappedScalar_1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="747,-398 598,-398 598,-374 747,-374 747,-398"/>
+<text text-anchor="middle" x="672.5" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge38" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4200" stroke-dasharray="5,2" d="M633.24,-398.05C592.07,-410.5 529.17,-427.88 504.5,-426"/>
+<path fill="none" stroke="#ff4200" stroke-dasharray="5,2" d="M502.5,-426C466.63,-423.26 427.38,-411.56 399.17,-401.51"/>
+<polygon fill="#ff4200" stroke="#ff4200" points="400.27,-398.19 389.67,-398.04 397.87,-404.76 400.27,-398.19"/>
+</g>
+<!-- module~self_geometry_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node45" class="node">
+<title>module~self_geometry_1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node45"><a xlink:href=".././module/self_geometry_1d.html" xlink:title="SELF_Geometry_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="562,-398 445,-398 445,-374 562,-374 562,-398"/>
+<text text-anchor="middle" x="503.5" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_geometry_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge76" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_geometry_1d</title>
+<path fill="none" stroke="#00ffc8" stroke-dasharray="5,2" d="M597.77,-386C589.25,-386 580.61,-386 572.18,-386"/>
+<polygon fill="#00ffc8" stroke="#00ffc8" points="572.04,-382.5 562.04,-386 572.04,-389.5 572.04,-382.5"/>
+</g>
+<!-- module~self_nulldgmodel1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node36" class="node">
+<title>module~self_nulldgmodel1d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node36"><a xlink:href=".././module/self_nulldgmodel1d~2.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1644.5,-486 1523.5,-486 1523.5,-462 1644.5,-462 1644.5,-486"/>
+<text text-anchor="middle" x="1584" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge39" class="edge">
+<title>module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff8500" stroke-dasharray="5,2" d="M1523.49,-467.81C1502.09,-465.59 1477.69,-463.05 1455.2,-460.71"/>
+<polygon fill="#ff8500" stroke="#ff8500" points="1455.33,-457.21 1445.02,-459.66 1454.6,-464.17 1455.33,-457.21"/>
+</g>
+<!-- module~self_nulldgmodel3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node37" class="node">
+<title>module~self_nulldgmodel3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node37"><a xlink:href=".././module/self_nulldgmodel3d~2.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1844,-653 1723,-653 1723,-629 1844,-629 1844,-653"/>
+<text text-anchor="middle" x="1783.5" y="-638.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge48" class="edge">
+<title>module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#2cff00" stroke-dasharray="5,2" d="M1722.98,-640.7C1702.97,-640.6 1680.39,-640.48 1659.38,-640.38"/>
+<polygon fill="#2cff00" stroke="#2cff00" points="1659.23,-636.88 1649.22,-640.33 1659.2,-643.88 1659.23,-636.88"/>
+</g>
+<!-- module~self_advection_diffusion_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node38" class="node">
+<title>module~self_advection_diffusion_2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node38"><a xlink:href=".././module/self_advection_diffusion_2d.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1863,-318 1704,-318 1704,-294 1863,-294 1863,-318"/>
+<text text-anchor="middle" x="1783.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge56" class="edge">
+<title>module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#0058ff" stroke-dasharray="5,2" d="M1722.19,-293.93C1715.81,-291.48 1709.61,-288.53 1704,-285 1683.19,-271.9 1688.9,-255.95 1668,-243 1665.16,-241.24 1662.17,-239.62 1659.1,-238.14"/>
+<polygon fill="#0058ff" stroke="#0058ff" points="1660.19,-234.81 1649.62,-234.1 1657.44,-241.24 1660.19,-234.81"/>
+</g>
+<!-- module~self_linearshallowwater2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node39" class="node">
+<title>module~self_linearshallowwater2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node39"><a xlink:href=".././module/self_linearshallowwater2d~2.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1862.5,-234 1704.5,-234 1704.5,-210 1862.5,-210 1862.5,-234"/>
+<text text-anchor="middle" x="1783.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge61" class="edge">
+<title>module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#b100ff" stroke-dasharray="5,2" d="M1725.9,-209.96C1702.66,-205.02 1675.58,-199.26 1651.41,-194.12"/>
+<polygon fill="#b100ff" stroke="#b100ff" points="1652.11,-190.69 1641.6,-192.04 1650.66,-197.54 1652.11,-190.69"/>
+</g>
+<!-- module~self_nulldgmodel1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node40" class="node">
+<title>module~self_nulldgmodel1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node40"><a xlink:href=".././module/self_nulldgmodel1d.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1644.5,-444 1523.5,-444 1523.5,-420 1644.5,-420 1644.5,-444"/>
+<text text-anchor="middle" x="1584" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge40" class="edge">
+<title>module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff8500" stroke-dasharray="5,2" d="M1523.49,-438.19C1502.09,-440.41 1477.69,-442.95 1455.2,-445.29"/>
+<polygon fill="#ff8500" stroke="#ff8500" points="1454.6,-441.83 1445.02,-446.34 1455.33,-448.79 1454.6,-441.83"/>
+</g>
+<!-- module~self_advection_diffusion_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node41" class="node">
+<title>module~self_advection_diffusion_3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node41"><a xlink:href=".././module/self_advection_diffusion_3d.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1863,-569 1704,-569 1704,-545 1863,-545 1863,-569"/>
+<text text-anchor="middle" x="1783.5" y="-554.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge51" class="edge">
+<title>module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#00ffdd" stroke-dasharray="5,2" d="M1703.88,-557.4C1695.45,-557.44 1686.82,-557.48 1678.24,-557.53"/>
+<polygon fill="#00ffdd" stroke="#00ffdd" points="1678.2,-554.03 1668.21,-557.58 1678.23,-561.03 1678.2,-554.03"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge65" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00c7" stroke-dasharray="5,2" d="M613.56,-634.61C595.92,-634.19 576.6,-633.73 559.18,-633.31"/>
+<polygon fill="#ff00c7" stroke="#ff00c7" points="559.25,-629.81 549.17,-633.07 559.08,-636.81 559.25,-629.81"/>
+</g>
+<!-- module~self_nulldgmodel2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node43" class="node">
+<title>module~self_nulldgmodel2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node43"><a xlink:href=".././module/self_nulldgmodel2d.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1844,-66 1723,-66 1723,-42 1844,-42 1844,-66"/>
+<text text-anchor="middle" x="1783.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge45" class="edge">
+<title>module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#b1ff00" stroke-dasharray="5,2" d="M1722.98,-60.33C1702.97,-62.46 1680.39,-64.86 1659.38,-67.09"/>
+<polygon fill="#b1ff00" stroke="#b1ff00" points="1658.79,-63.63 1649.22,-68.17 1659.53,-70.59 1658.79,-63.63"/>
+</g>
+<!-- module~self_lineareuler2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node44" class="node">
+<title>module~self_lineareuler2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node44"><a xlink:href=".././module/self_lineareuler2d~2.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1840,-150 1727,-150 1727,-126 1840,-126 1840,-150"/>
+<text text-anchor="middle" x="1783.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge33" class="edge">
+<title>module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1726.96,-138C1704.8,-138 1679.02,-138 1655.55,-138"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1655.31,-134.5 1645.31,-138 1655.31,-141.5 1655.31,-134.5"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge35" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4200" stroke-dasharray="5,2" d="M444.95,-386C434.98,-386 424.63,-386 414.73,-386"/>
+<polygon fill="#ff4200" stroke="#ff4200" points="414.61,-382.5 404.61,-386 414.61,-389.5 414.61,-382.5"/>
+</g>
+<!-- module~self_linearshallowwater2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node46" class="node">
+<title>module~self_linearshallowwater2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node46"><a xlink:href=".././module/self_linearshallowwater2d.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1862.5,-192 1704.5,-192 1704.5,-168 1862.5,-168 1862.5,-192"/>
+<text text-anchor="middle" x="1783.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge62" class="edge">
+<title>module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#b100ff" stroke-dasharray="5,2" d="M1704.44,-180C1695.67,-180 1686.67,-180 1677.73,-180"/>
+<polygon fill="#b100ff" stroke="#b100ff" points="1677.68,-176.5 1667.68,-180 1677.68,-183.5 1677.68,-176.5"/>
+</g>
+<!-- module~self_dgmodel1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node47" class="node">
+<title>module~self_dgmodel1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node47"><a xlink:href=".././module/self_dgmodel1d.html" xlink:title="SELF_DGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1255.5,-336 1148.5,-336 1148.5,-312 1255.5,-312 1255.5,-336"/>
+<text text-anchor="middle" x="1202" y="-321.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge37" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff4200" stroke-dasharray="5,2" d="M1148.27,-312.81C1116.68,-307.27 1075.65,-302.13 1039,-304"/>
+<path fill="none" stroke="#ff4200" stroke-dasharray="5,2" d="M1037,-304C772.84,-317.48 705.09,-316.89 445,-365 435.02,-366.85 424.47,-369.16 414.32,-371.56"/>
+<polygon fill="#ff4200" stroke="#ff4200" points="413.23,-368.23 404.34,-373.99 414.88,-375.03 413.23,-368.23"/>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge70" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#ff6d00" stroke-dasharray="5,2" d="M1169.38,-336.1C1143.85,-345.87 1107.72,-359.7 1079.98,-370.32"/>
+<polygon fill="#ff6d00" stroke="#ff6d00" points="1078.63,-367.09 1070.54,-373.93 1081.13,-373.62 1078.63,-367.09"/>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_mappedscalar_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge89" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_mappedscalar_1d</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1037,-304C983.1,-306.75 981.66,-343.87 932,-365 927.24,-367.03 922.22,-368.92 917.14,-370.68"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="915.74,-367.46 907.33,-373.89 917.92,-374.11 915.74,-367.46"/>
+</g>
+<!-- module~self_dgmodel3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node48" class="node">
+<title>module~self_dgmodel3d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node48"><a xlink:href=".././module/self_dgmodel3d_t.html" xlink:title="SELF_DGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1260,-666 1144,-666 1144,-642 1260,-642 1260,-666"/>
+<text text-anchor="middle" x="1202" y="-651.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge50" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d</title>
+<path fill="none" stroke="#00ff9b" stroke-dasharray="5,2" d="M1186.07,-666.21C1168.38,-680.16 1137.57,-702.88 1108,-717 1103.88,-718.96 1099.54,-720.8 1095.12,-722.49"/>
+<polygon fill="#00ff9b" stroke="#00ff9b" points="1093.61,-719.31 1085.38,-725.98 1095.98,-725.9 1093.61,-719.31"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge57" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2</title>
+<path fill="none" stroke="#0016ff" stroke-dasharray="5,2" d="M1143.88,-654C1135.57,-654 1126.89,-654 1118.23,-654"/>
+<polygon fill="#0016ff" stroke="#0016ff" points="1118.1,-650.5 1108.1,-654 1118.1,-657.5 1118.1,-650.5"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge66" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff00c7" stroke-dasharray="5,2" d="M1153.94,-641.97C1139.31,-638.61 1123.06,-635.26 1108,-633 998.02,-616.49 969.71,-613.4 858.5,-614"/>
+<path fill="none" stroke="#ff00c7" stroke-dasharray="5,2" d="M856.5,-614C741.64,-611.44 712.41,-604.46 598,-615 585.43,-616.16 572.01,-618.14 559.39,-620.36"/>
+<polygon fill="#ff00c7" stroke="#ff00c7" points="558.67,-616.93 549.46,-622.17 559.92,-623.82 558.67,-616.93"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge74" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M856.5,-614C818.2,-614.21 775.71,-619.03 741.33,-624.11"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="740.75,-620.65 731.39,-625.61 741.8,-627.57 740.75,-620.65"/>
+</g>
+<!-- module~self_advection_diffusion_1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node49" class="node">
+<title>module~self_advection_diffusion_1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node49"><a xlink:href=".././module/self_advection_diffusion_1d.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1663.5,-402 1504.5,-402 1504.5,-378 1663.5,-378 1663.5,-402"/>
+<text text-anchor="middle" x="1584" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge54" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ddff" stroke-dasharray="5,2" d="M1527.03,-377.9C1517.87,-375.33 1508.58,-372.37 1500,-369 1467.11,-356.1 1431.89,-335.98 1408.37,-321.55"/>
+<polygon fill="#00ddff" stroke="#00ddff" points="1409.99,-318.44 1399.65,-316.13 1406.3,-324.38 1409.99,-318.44"/>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge86" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1504.26,-389.17C1433.59,-388.43 1331.2,-387.35 1265.87,-386.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1265.75,-383.16 1255.71,-386.55 1265.67,-390.16 1265.75,-383.16"/>
+</g>
+<!-- module~self_lineareuler3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node50" class="node">
+<title>module~self_lineareuler3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node50"><a xlink:href=".././module/self_lineareuler3d~2.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1840,-527 1727,-527 1727,-503 1840,-503 1840,-527"/>
+<text text-anchor="middle" x="1783.5" y="-512.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge63" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#f300ff" stroke-dasharray="5,2" d="M1726.96,-515.28C1704.8,-515.39 1679.02,-515.52 1655.55,-515.64"/>
+<polygon fill="#f300ff" stroke="#f300ff" points="1655.29,-512.14 1645.31,-515.69 1655.33,-519.14 1655.29,-512.14"/>
+</g>
+<!-- module~self_lineareuler2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node51" class="node">
+<title>module~self_lineareuler2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node51"><a xlink:href=".././module/self_lineareuler2d.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1840,-108 1727,-108 1727,-84 1840,-84 1840,-108"/>
+<text text-anchor="middle" x="1783.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge34" class="edge">
+<title>module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1726.96,-107.81C1703.49,-112.8 1675.98,-118.65 1651.44,-123.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1650.55,-120.48 1641.49,-125.99 1652,-127.33 1650.55,-120.48"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge42" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ffc700" stroke-dasharray="5,2" d="M623.64,-112.04C603.52,-117.1 579.99,-123.02 559.18,-128.25"/>
+<polygon fill="#ffc700" stroke="#ffc700" points="558.06,-124.92 549.21,-130.76 559.76,-131.71 558.06,-124.92"/>
+</g>
+<!-- module~self_nulldgmodel2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node53" class="node">
+<title>module~self_nulldgmodel2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node53"><a xlink:href=".././module/self_nulldgmodel2d~2.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1844,-24 1723,-24 1723,0 1844,0 1844,-24"/>
+<text text-anchor="middle" x="1783.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge46" class="edge">
+<title>module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#b1ff00" stroke-dasharray="5,2" d="M1735.01,-24.07C1724.74,-26.85 1713.97,-29.91 1704,-33 1678.02,-41.05 1649.26,-51.16 1626.52,-59.45"/>
+<polygon fill="#b1ff00" stroke="#b1ff00" points="1625.03,-56.27 1616.85,-63 1627.44,-62.84 1625.03,-56.27"/>
+</g>
+<!-- module~self_advection_diffusion_2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node54" class="node">
+<title>module~self_advection_diffusion_2d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node54"><a xlink:href=".././module/self_advection_diffusion_2d~2.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1863,-276 1704,-276 1704,-252 1863,-252 1863,-276"/>
+<text text-anchor="middle" x="1783.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge55" class="edge">
+<title>module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#0058ff" stroke-dasharray="5,2" d="M1725.9,-251.96C1702.66,-247.02 1675.58,-241.26 1651.41,-236.12"/>
+<polygon fill="#0058ff" stroke="#0058ff" points="1652.11,-232.69 1641.6,-234.04 1650.66,-239.54 1652.11,-232.69"/>
+</g>
+<!-- module~self_burgers1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node55" class="node">
+<title>module~self_burgers1d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node55"><a xlink:href=".././module/self_burgers1d~2.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1631,-276 1537,-276 1537,-252 1631,-252 1631,-276"/>
+<text text-anchor="middle" x="1584" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge58" class="edge">
+<title>module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#2c00ff" stroke-dasharray="5,2" d="M1536.91,-263.54C1508.77,-263.27 1472.46,-262.91 1441.96,-262.6"/>
+<polygon fill="#2c00ff" stroke="#2c00ff" points="1441.89,-259.1 1431.86,-262.5 1441.82,-266.1 1441.89,-259.1"/>
+</g>
+<!-- module~self_lineareuler3d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node56" class="node">
+<title>module~self_lineareuler3d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node56"><a xlink:href=".././module/self_lineareuler3d.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1840,-485 1727,-485 1727,-461 1840,-461 1840,-485"/>
+<text text-anchor="middle" x="1783.5" y="-470.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge64" class="edge">
+<title>module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#f300ff" stroke-dasharray="5,2" d="M1727.22,-485.04C1703.35,-490.23 1675.25,-496.35 1650.35,-501.77"/>
+<polygon fill="#f300ff" stroke="#f300ff" points="1649.29,-498.42 1640.26,-503.97 1650.78,-505.26 1649.29,-498.42"/>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node57" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node57"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1260,-152 1144,-152 1144,-128 1260,-128 1260,-152"/>
+<text text-anchor="middle" x="1202" y="-137.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge43" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ffc700" stroke-dasharray="5,2" d="M856.5,-140C751.49,-133.46 628.52,-136.62 559.24,-139.39"/>
+<polygon fill="#ffc700" stroke="#ffc700" points="558.85,-135.91 549.01,-139.82 559.14,-142.9 558.85,-135.91"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge49" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d~2</title>
+<path fill="none" stroke="#00ff16" stroke-dasharray="5,2" d="M1152.39,-128C1135.17,-123.75 1115.61,-118.92 1097.64,-114.48"/>
+<polygon fill="#00ff16" stroke="#00ff16" points="1098.4,-111.06 1087.85,-112.06 1096.72,-117.86 1098.4,-111.06"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge60" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d</title>
+<path fill="none" stroke="#6e00ff" stroke-dasharray="5,2" d="M1185.68,-152.03C1167.88,-165.53 1137.2,-187.32 1108,-201 1103.87,-202.93 1099.52,-204.74 1095.09,-206.42"/>
+<polygon fill="#6e00ff" stroke="#6e00ff" points="1093.59,-203.24 1085.34,-209.89 1095.93,-209.84 1093.59,-203.24"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge80" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1143.98,-141.87C1075.97,-143.68 958.84,-145.41 858.5,-140"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M856.5,-140C810.22,-137.12 758.72,-125.04 722.17,-114.9"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="722.85,-111.45 712.28,-112.1 720.95,-118.19 722.85,-111.45"/>
+</g>
+<!-- module~self_advection_diffusion_1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node58" class="node">
+<title>module~self_advection_diffusion_1d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node58"><a xlink:href=".././module/self_advection_diffusion_1d~2.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1663.5,-360 1504.5,-360 1504.5,-336 1663.5,-336 1663.5,-360"/>
+<text text-anchor="middle" x="1584" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge53" class="edge">
+<title>module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ddff" stroke-dasharray="5,2" d="M1527.8,-335.98C1502.53,-330.47 1472.4,-323.91 1446.03,-318.17"/>
+<polygon fill="#00ddff" stroke="#00ddff" points="1446.65,-314.72 1436.13,-316.01 1445.16,-321.56 1446.65,-314.72"/>
+</g>
+<!-- module~self_burgers1d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node59" class="node">
+<title>module~self_burgers1d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node59"><a xlink:href=".././module/self_burgers1d.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1631,-318 1537,-318 1537,-294 1631,-294 1631,-318"/>
+<text text-anchor="middle" x="1584" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge59" class="edge">
+<title>module~self_burgers1d&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#2c00ff" stroke-dasharray="5,2" d="M1536.91,-295.96C1508.77,-289.83 1472.46,-281.92 1441.96,-275.28"/>
+<polygon fill="#2c00ff" stroke="#2c00ff" points="1442.37,-271.79 1431.86,-273.08 1440.88,-278.63 1442.37,-271.79"/>
+</g>
+<!-- module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge69" class="edge">
+<title>module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#ff6d00" stroke-dasharray="5,2" d="M1148.4,-386C1134.95,-386 1120.29,-386 1106.21,-386"/>
+<polygon fill="#ff6d00" stroke="#ff6d00" points="1106.09,-382.5 1096.09,-386 1106.09,-389.5 1106.09,-382.5"/>
+</g>
+<!-- module~self_mappedscalar_1d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node61" class="node">
+<title>module~self_mappedscalar_1d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node61"><a xlink:href=".././module/self_mappedscalar_1d~2.html" xlink:title="SELF_MappedScalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="927.5,-356 787.5,-356 787.5,-332 927.5,-332 927.5,-356"/>
+<text text-anchor="middle" x="857.5" y="-341.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d~2&#45;&gt;module~self_mappedscalar_1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge72" class="edge">
+<title>module~self_mappedscalar_1d~2&#45;&gt;module~self_mappedscalar_1d_t</title>
+<path fill="none" stroke="#ffa300" stroke-dasharray="5,2" d="M804.06,-356.04C782.81,-360.91 758.1,-366.58 735.93,-371.67"/>
+<polygon fill="#ffa300" stroke="#ffa300" points="734.91,-368.31 725.95,-373.96 736.48,-375.14 734.91,-368.31"/>
+</g>
+<!-- module~self_mappedscalar_1d&#45;&gt;module~self_mappedscalar_1d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge71" class="edge">
+<title>module~self_mappedscalar_1d&#45;&gt;module~self_mappedscalar_1d_t</title>
+<path fill="none" stroke="#ffa300" stroke-dasharray="5,2" d="M787.32,-386C777.45,-386 767.21,-386 757.1,-386"/>
+<polygon fill="#ffa300" stroke="#ffa300" points="757.06,-382.5 747.06,-386 757.06,-389.5 757.06,-382.5"/>
+</g>
+<!-- module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge77" class="edge">
+<title>module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1341.24,-610.01C1314.77,-618.44 1279.17,-629.76 1250.73,-638.81"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1249.47,-635.54 1241,-641.91 1251.59,-642.21 1249.47,-635.54"/>
+</g>
+<!-- module~self_dgmodel3d~2 -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node64" class="node">
+<title>module~self_dgmodel3d~2</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node64"><a xlink:href=".././module/self_dgmodel3d~2.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1433.5,-690 1326.5,-690 1326.5,-666 1433.5,-666 1433.5,-690"/>
+<text text-anchor="middle" x="1380" y="-675.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge78" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1326.19,-670.8C1308.6,-668.4 1288.75,-665.69 1270.21,-663.16"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1270.44,-659.66 1260.06,-661.78 1269.5,-666.6 1270.44,-659.66"/>
+</g>
+<!-- module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge82" class="edge">
+<title>module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff00a3" stroke-dasharray="5,2" d="M1328.57,-169.96C1308.22,-165.11 1284.58,-159.47 1263.33,-154.4"/>
+<polygon fill="#ff00a3" stroke="#ff00a3" points="1263.98,-150.95 1253.44,-152.04 1262.36,-157.76 1263.98,-150.95"/>
+</g>
+<!-- module~self_dgmodel2d -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_node66" class="node">
+<title>module~self_dgmodel2d</title>
+<g id="a_module~~self_domaindecomposition~~UsedByGraph_node66"><a xlink:href=".././module/self_dgmodel2d.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1433.5,-114 1326.5,-114 1326.5,-90 1433.5,-90 1433.5,-114"/>
+<text text-anchor="middle" x="1380" y="-99.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_domaindecomposition~~UsedByGraph_edge83" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff00a3" stroke-dasharray="5,2" d="M1326.19,-113.4C1308.09,-117.31 1287.6,-121.73 1268.6,-125.84"/>
+<polygon fill="#ff00a3" stroke="#ff00a3" points="1267.86,-122.41 1258.83,-127.95 1269.34,-129.26 1267.86,-122.41"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_domaindecompositionUsedByGraph = svgPanZoom('#moduleself_domaindecompositionUsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_domaindecomposition.html#type-domaindecomposition">DomainDecomposition</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-domaindecomposition"></span><h3>type, public, extends(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>) :: <a href='../type/domaindecomposition.html'>DomainDecomposition</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-elemtorank"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:)</td><td>::</td>
+  <td><strong>elemToRank</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-initialized"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>initialized</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-maxmsg"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>maxMsg</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mpicomm"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mpiComm</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mpienabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mpiEnabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mpiprec"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mpiPrec</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-msgcount"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>msgCount</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nranks"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nRanks</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-offsetelem"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:)</td><td>::</td>
+  <td><strong>offSetElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rankid"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>rankId</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-requests"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>requests</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-stats"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>stats</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-finalizempiexchangeasync'>FinalizeMPIExchangeAsync</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-free~2'>Free</a></strong>  => Free_DomainDecomposition_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-generatedecomposition'>GenerateDecomposition</a></strong>  => GenerateDecomposition_DomainDecomposition_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-init~2'>Init</a></strong>  => Init_DomainDecomposition_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/domaindecomposition_t.html#boundprocedure-setelemtorank'>SetElemToRank</a></strong>  => SetElemToRank_DomainDecomposition_t </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2025 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2025-03-05 17:23            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

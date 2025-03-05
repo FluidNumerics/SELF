@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Read_DGModel3D_t &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Read_DGModel3D_t
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.2% of total for procedures.">25 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DGModel3D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_dgmodel3d_t.f90.html'>SELF_DGModel3D_t.f90</a></li>
+     <li><a href='../module/self_dgmodel3d_t.html'>SELF_DGModel3D_t</a></li>
+     <li class="active">Read_DGModel3D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/read_dgmodel3d_t.html#src">Read_DGModel3D_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine Read_DGModel3D_t(this, fileName)</h2>
+    
+
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-this~104"></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-filename~3"></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~read_dgmodel3d_t~~CallsGraph Pages: 1 -->
+<svg id="procread_dgmodel3d_tCallsGraph" width="641pt" height="841pt"
+ viewBox="0.00 0.00 641.00 840.53" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~read_dgmodel3d_t~~CallsGraph" class="graph" transform="scale(0.96 0.96) rotate(0) translate(4 868)">
+<title>proc~~read_dgmodel3d_t~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-868 661,-868 661,4 -4,4"/>
+<!-- proc~read_dgmodel3d_t -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node1" class="node">
+<title>proc~read_dgmodel3d_t</title>
+<polygon fill="none" stroke="black" points="118,-360 0,-360 0,-336 118,-336 118,-360"/>
+<text text-anchor="middle" x="59" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50">Read_DGModel3D_t</text>
+</g>
+<!-- interface~open_hdf5 -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node2" class="node">
+<title>interface~open_hdf5</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node2"><a xlink:href=".././interface/open_hdf5.html" xlink:title="Open_HDF5">
+<polygon fill="#a7506f" stroke="#a7506f" points="243.5,-759 167.5,-759 167.5,-735 243.5,-735 243.5,-759"/>
+<text text-anchor="middle" x="205.5" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Open_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~read_dgmodel3d_t&#45;&gt;interface~open_hdf5 -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge1" class="edge">
+<title>proc~read_dgmodel3d_t&#45;&gt;interface~open_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M64.48,-360.38C85.01,-417.05 170.12,-652.08 196.6,-725.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="193.37,-726.55 200.07,-734.77 199.95,-724.17 193.37,-726.55"/>
+</g>
+<!-- proc~close_hdf5 -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node3" class="node">
+<title>proc~close_hdf5</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node3"><a xlink:href=".././proc/close_hdf5.html" xlink:title="Close_HDF5">
+<polygon fill="#d9534f" stroke="#d9534f" points="243.5,-66 167.5,-66 167.5,-42 243.5,-42 243.5,-66"/>
+<text text-anchor="middle" x="205.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Close_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~read_dgmodel3d_t&#45;&gt;proc~close_hdf5 -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge2" class="edge">
+<title>proc~read_dgmodel3d_t&#45;&gt;proc~close_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M66.03,-335.74C88.2,-290.63 165.43,-133.49 193.88,-75.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="197.18,-76.83 198.45,-66.31 190.9,-73.74 197.18,-76.83"/>
+</g>
+<!-- interface~readarray_hdf5 -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node4" class="node">
+<title>interface~readarray_hdf5</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node4"><a xlink:href=".././interface/readarray_hdf5.html" xlink:title="ReadArray_HDF5">
+<polygon fill="#a7506f" stroke="#a7506f" points="257,-360 154,-360 154,-336 257,-336 257,-360"/>
+<text text-anchor="middle" x="205.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~read_dgmodel3d_t&#45;&gt;interface~readarray_hdf5 -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge3" class="edge">
+<title>proc~read_dgmodel3d_t&#45;&gt;interface~readarray_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M118.36,-348C126.71,-348 135.32,-348 143.72,-348"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="143.83,-351.5 153.83,-348 143.83,-344.5 143.83,-351.5"/>
+</g>
+<!-- proc~open_hdf5_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node5" class="node">
+<title>proc~open_hdf5_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node5"><a xlink:href=".././proc/open_hdf5_serial.html" xlink:title="Open_HDF5_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="447,-812 337,-812 337,-788 447,-788 447,-812"/>
+<text text-anchor="middle" x="392" y="-797.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Open_HDF5_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~open_hdf5&#45;&gt;proc~open_hdf5_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge4" class="edge">
+<title>interface~open_hdf5&#45;&gt;proc~open_hdf5_serial</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M243.84,-757.73C271.27,-765.61 308.89,-776.41 339.23,-785.13"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="338.64,-788.6 349.21,-788 340.57,-781.87 338.64,-788.6"/>
+</g>
+<!-- proc~open_hdf5_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node13" class="node">
+<title>proc~open_hdf5_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node13"><a xlink:href=".././proc/open_hdf5_parallel.html" xlink:title="Open_HDF5_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="452.5,-759 331.5,-759 331.5,-735 452.5,-735 452.5,-759"/>
+<text text-anchor="middle" x="392" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Open_HDF5_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~open_hdf5&#45;&gt;proc~open_hdf5_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge5" class="edge">
+<title>interface~open_hdf5&#45;&gt;proc~open_hdf5_parallel</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M243.84,-747C265.96,-747 294.71,-747 320.92,-747"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="321.2,-750.5 331.2,-747 321.2,-743.5 321.2,-750.5"/>
+</g>
+<!-- h5fclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node7" class="node">
+<title>h5fclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="425.5,-24 358.5,-24 358.5,0 425.5,0 425.5,-24"/>
+<text text-anchor="middle" x="392" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5fclose_f</text>
+</g>
+<!-- proc~close_hdf5&#45;&gt;h5fclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge6" class="edge">
+<title>proc~close_hdf5&#45;&gt;h5fclose_f</title>
+<path fill="none" stroke="#00ff00" d="M243.92,-44.68C259.12,-40.96 276.88,-36.68 293,-33 311.15,-28.85 331.25,-24.5 348.5,-20.85"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="349.22,-24.27 358.28,-18.78 347.78,-17.42 349.22,-24.27"/>
+</g>
+<!-- h5close_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node8" class="node">
+<title>h5close_f</title>
+<polygon fill="#777777" stroke="#777777" points="423.5,-66 360.5,-66 360.5,-42 423.5,-42 423.5,-66"/>
+<text text-anchor="middle" x="392" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5close_f</text>
+</g>
+<!-- proc~close_hdf5&#45;&gt;h5close_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge7" class="edge">
+<title>proc~close_hdf5&#45;&gt;h5close_f</title>
+<path fill="none" stroke="#00ff00" d="M243.84,-54C274.68,-54 318.39,-54 350.16,-54"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="350.44,-57.5 360.44,-54 350.44,-50.5 350.44,-57.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node6" class="node">
+<title>proc~readarray_hdf5_real_r2_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node6"><a xlink:href=".././proc/readarray_hdf5_real_r2_serial.html" xlink:title="ReadArray_HDF5_real_r2_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="482,-150 302,-150 302,-126 482,-126 482,-150"/>
+<text text-anchor="middle" x="392" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r2_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r2_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge8" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r2_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M208.31,-335.51C213.95,-301.39 234.46,-205.98 293,-159 294.63,-157.69 296.32,-156.46 298.06,-155.3"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="300.24,-158.09 307.18,-150.09 296.77,-152.01 300.24,-158.09"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node9" class="node">
+<title>proc~readarray_hdf5_real_r4_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node9"><a xlink:href=".././proc/readarray_hdf5_real_r4_serial.html" xlink:title="ReadArray_HDF5_real_r4_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="482,-108 302,-108 302,-84 482,-84 482,-108"/>
+<text text-anchor="middle" x="392" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r4_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r4_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge9" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r4_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M207.14,-335.95C209.85,-297.5 223.77,-176.72 293,-117 294.36,-115.83 295.77,-114.72 297.22,-113.66"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="299.32,-116.48 305.96,-108.23 295.62,-110.53 299.32,-116.48"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node10" class="node">
+<title>proc~readarray_hdf5_int32_r1_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node10"><a xlink:href=".././proc/readarray_hdf5_int32_r1_serial.html" xlink:title="ReadArray_HDF5_int32_r1_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="485.5,-360 298.5,-360 298.5,-336 485.5,-336 485.5,-360"/>
+<text text-anchor="middle" x="392" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_int32_r1_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r1_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge10" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r1_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M257.4,-348C267.1,-348 277.57,-348 288.23,-348"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="288.49,-351.5 298.49,-348 288.49,-344.5 288.49,-351.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node11" class="node">
+<title>proc~readarray_hdf5_real_r1_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node11"><a xlink:href=".././proc/readarray_hdf5_real_r1_parallel.html" xlink:title="ReadArray_HDF5_real_r1_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-402 296.5,-402 296.5,-378 487.5,-378 487.5,-402"/>
+<text text-anchor="middle" x="392" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r1_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r1_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge11" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r1_parallel</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M254.94,-360C267.33,-363.01 280.65,-366.18 293,-369 302.96,-371.28 313.51,-373.61 323.85,-375.86"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="323.17,-379.3 333.68,-377.99 324.65,-372.45 323.17,-379.3"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node12" class="node">
+<title>proc~readarray_hdf5_int32_r1_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node12"><a xlink:href=".././proc/readarray_hdf5_int32_r1_parallel.html" xlink:title="ReadArray_HDF5_int32_r1_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="491,-612 293,-612 293,-588 491,-588 491,-612"/>
+<text text-anchor="middle" x="392" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_int32_r1_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r1_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge12" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r1_parallel</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M207.14,-360.05C209.85,-398.5 223.77,-519.28 293,-579 294.36,-580.17 295.77,-581.28 297.22,-582.34"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="295.62,-585.47 305.96,-587.77 299.32,-579.52 295.62,-585.47"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node14" class="node">
+<title>proc~readarray_hdf5_real_r1_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node14"><a xlink:href=".././proc/readarray_hdf5_real_r1_serial.html" xlink:title="ReadArray_HDF5_real_r1_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="482,-318 302,-318 302,-294 482,-294 482,-318"/>
+<text text-anchor="middle" x="392" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r1_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r1_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge13" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r1_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M254.94,-336C267.33,-332.99 280.65,-329.82 293,-327 302.96,-324.72 313.51,-322.39 323.85,-320.14"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="324.65,-323.55 333.68,-318.01 323.17,-316.7 324.65,-323.55"/>
+</g>
+<!-- proc~readarray_hdf5_real_r5_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node15" class="node">
+<title>proc~readarray_hdf5_real_r5_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node15"><a xlink:href=".././proc/readarray_hdf5_real_r5_serial.html" xlink:title="ReadArray_HDF5_real_r5_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="482,-276 302,-276 302,-252 482,-252 482,-276"/>
+<text text-anchor="middle" x="392" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r5_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r5_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge14" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r5_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M219.46,-335.81C235.48,-321.44 264.17,-297.89 293,-285 297.96,-282.78 303.18,-280.79 308.5,-279.01"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="309.66,-282.31 318.18,-276.01 307.6,-275.62 309.66,-282.31"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node16" class="node">
+<title>proc~readarray_hdf5_real_r3_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node16"><a xlink:href=".././proc/readarray_hdf5_real_r3_serial.html" xlink:title="ReadArray_HDF5_real_r3_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="482,-234 302,-234 302,-210 482,-210 482,-234"/>
+<text text-anchor="middle" x="392" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r3_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r3_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge15" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r3_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M212.94,-335.66C225.28,-313.35 254.46,-266.44 293,-243 295.99,-241.18 299.11,-239.52 302.33,-238"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="303.77,-241.19 311.63,-234.09 301.05,-234.74 303.77,-241.19"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node17" class="node">
+<title>proc~readarray_hdf5_int32_r2_serial</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node17"><a xlink:href=".././proc/readarray_hdf5_int32_r2_serial.html" xlink:title="ReadArray_HDF5_int32_r2_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="485.5,-192 298.5,-192 298.5,-168 485.5,-168 485.5,-192"/>
+<text text-anchor="middle" x="392" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_int32_r2_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r2_serial -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge16" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r2_serial</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M209.95,-335.81C218.68,-307.29 244.49,-236 293,-201 295.1,-199.49 297.28,-198.08 299.54,-196.76"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="301.23,-199.83 308.55,-192.18 298.05,-193.6 301.23,-199.83"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node18" class="node">
+<title>proc~readarray_hdf5_real_r2_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node18"><a xlink:href=".././proc/readarray_hdf5_real_r2_parallel.html" xlink:title="ReadArray_HDF5_real_r2_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-570 296.5,-570 296.5,-546 487.5,-546 487.5,-570"/>
+<text text-anchor="middle" x="392" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r2_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r2_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge17" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r2_parallel</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M208.31,-360.49C213.95,-394.61 234.46,-490.02 293,-537 294.63,-538.31 296.32,-539.54 298.06,-540.7"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="296.77,-543.99 307.18,-545.91 300.24,-537.91 296.77,-543.99"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node19" class="node">
+<title>proc~readarray_hdf5_real_r3_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node19"><a xlink:href=".././proc/readarray_hdf5_real_r3_parallel.html" xlink:title="ReadArray_HDF5_real_r3_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-528 296.5,-528 296.5,-504 487.5,-504 487.5,-528"/>
+<text text-anchor="middle" x="392" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r3_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r3_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge18" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r3_parallel</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M209.95,-360.19C218.68,-388.71 244.49,-460 293,-495 295.1,-496.51 297.28,-497.92 299.54,-499.24"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="298.05,-502.4 308.55,-503.82 301.23,-496.17 298.05,-502.4"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node20" class="node">
+<title>proc~readarray_hdf5_real_r4_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node20"><a xlink:href=".././proc/readarray_hdf5_real_r4_parallel.html" xlink:title="ReadArray_HDF5_real_r4_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-486 296.5,-486 296.5,-462 487.5,-462 487.5,-486"/>
+<text text-anchor="middle" x="392" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_real_r4_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r4_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge19" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_real_r4_parallel</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M212.94,-360.34C225.28,-382.65 254.46,-429.56 293,-453 295.99,-454.82 299.11,-456.48 302.33,-458"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="301.05,-461.26 311.63,-461.91 303.77,-454.81 301.05,-461.26"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node21" class="node">
+<title>proc~readarray_hdf5_int32_r2_parallel</title>
+<g id="a_proc~~read_dgmodel3d_t~~CallsGraph_node21"><a xlink:href=".././proc/readarray_hdf5_int32_r2_parallel.html" xlink:title="ReadArray_HDF5_int32_r2_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="491,-444 293,-444 293,-420 491,-420 491,-444"/>
+<text text-anchor="middle" x="392" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ReadArray_HDF5_int32_r2_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r2_parallel -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge20" class="edge">
+<title>interface~readarray_hdf5&#45;&gt;proc~readarray_hdf5_int32_r2_parallel</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M219.46,-360.19C235.48,-374.56 264.17,-398.11 293,-411 297.96,-413.22 303.18,-415.21 308.5,-416.99"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="307.6,-420.38 318.18,-419.99 309.66,-413.69 307.6,-420.38"/>
+</g>
+<!-- h5open_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node22" class="node">
+<title>h5open_f</title>
+<polygon fill="#777777" stroke="#777777" points="623,-864 561,-864 561,-840 623,-840 623,-864"/>
+<text text-anchor="middle" x="592" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5open_f</text>
+</g>
+<!-- proc~open_hdf5_serial&#45;&gt;h5open_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge21" class="edge">
+<title>proc~open_hdf5_serial&#45;&gt;h5open_f</title>
+<path fill="none" stroke="#ff0000" d="M438.92,-812.06C472.73,-820.94 518.27,-832.9 550.68,-841.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="550.15,-844.89 560.71,-844.05 551.93,-838.12 550.15,-844.89"/>
+</g>
+<!-- h5fopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node23" class="node">
+<title>h5fopen_f</title>
+<polygon fill="#777777" stroke="#777777" points="625,-822 559,-822 559,-798 625,-798 625,-822"/>
+<text text-anchor="middle" x="592" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5fopen_f</text>
+</g>
+<!-- proc~open_hdf5_serial&#45;&gt;h5fopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge22" class="edge">
+<title>proc~open_hdf5_serial&#45;&gt;h5fopen_f</title>
+<path fill="none" stroke="#ff0000" d="M447.1,-802.73C479.16,-804.35 519.19,-806.37 548.88,-807.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="548.76,-811.37 558.93,-808.38 549.12,-804.38 548.76,-811.37"/>
+</g>
+<!-- h5fcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node33" class="node">
+<title>h5fcreate_f</title>
+<polygon fill="#777777" stroke="#777777" points="628.5,-780 555.5,-780 555.5,-756 628.5,-756 628.5,-780"/>
+<text text-anchor="middle" x="592" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5fcreate_f</text>
+</g>
+<!-- proc~open_hdf5_serial&#45;&gt;h5fcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge23" class="edge">
+<title>proc~open_hdf5_serial&#45;&gt;h5fcreate_f</title>
+<path fill="none" stroke="#ff0000" d="M447.1,-791.26C477.93,-786.27 516.13,-780.1 545.42,-775.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="546.07,-778.81 555.39,-773.76 544.96,-771.9 546.07,-778.81"/>
+</g>
+<!-- h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node24" class="node">
+<title>h5dread_f</title>
+<polygon fill="#777777" stroke="#777777" points="625,-234 559,-234 559,-210 625,-210 625,-234"/>
+<text text-anchor="middle" x="592" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dread_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r2_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge25" class="edge">
+<title>proc~readarray_hdf5_real_r2_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#ff5900" d="M471.79,-150.02C478.51,-152.48 485.02,-155.44 491,-159 512.13,-171.57 506.57,-187.33 527,-201 533.7,-205.48 541.43,-209.07 549.15,-211.92"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="548.25,-215.31 558.84,-215.16 550.46,-208.67 548.25,-215.31"/>
+</g>
+<!-- h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node25" class="node">
+<title>h5kind_to_type</title>
+<polygon fill="#777777" stroke="#777777" points="638.5,-192 545.5,-192 545.5,-168 638.5,-168 638.5,-192"/>
+<text text-anchor="middle" x="592" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5kind_to_type</text>
+</g>
+<!-- proc~readarray_hdf5_real_r2_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge27" class="edge">
+<title>proc~readarray_hdf5_real_r2_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#ff5900" d="M449.74,-150.04C476.59,-155.73 508.55,-162.51 535.27,-168.18"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="534.73,-171.64 545.24,-170.29 536.18,-164.79 534.73,-171.64"/>
+</g>
+<!-- h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node32" class="node">
+<title>h5dopen_f</title>
+<polygon fill="#777777" stroke="#777777" points="626.5,-318 557.5,-318 557.5,-294 626.5,-294 626.5,-318"/>
+<text text-anchor="middle" x="592" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dopen_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r2_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge24" class="edge">
+<title>proc~readarray_hdf5_real_r2_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#ff5900" d="M478.82,-150.12C483.21,-152.62 487.31,-155.55 491,-159 533.54,-198.78 486.62,-243.03 527,-285 532.71,-290.93 540.11,-295.19 547.85,-298.24"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="546.77,-301.57 557.37,-301.41 548.98,-294.93 546.77,-301.57"/>
+</g>
+<!-- h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node34" class="node">
+<title>h5dclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="627,-276 557,-276 557,-252 627,-252 627,-276"/>
+<text text-anchor="middle" x="592" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dclose_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r2_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge26" class="edge">
+<title>proc~readarray_hdf5_real_r2_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#ff5900" d="M477.38,-150.21C482.24,-152.67 486.83,-155.57 491,-159 522.36,-184.81 497.05,-215.57 527,-243 532.82,-248.33 540.02,-252.31 547.47,-255.28"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="546.36,-258.6 556.95,-258.53 548.63,-251.98 546.36,-258.6"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge29" class="edge">
+<title>proc~readarray_hdf5_real_r4_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#96ff00" d="M477.38,-108.21C482.24,-110.67 486.83,-113.57 491,-117 522.36,-142.81 497.05,-173.57 527,-201 533.32,-206.79 541.27,-210.99 549.4,-214.03"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="548.34,-217.36 558.93,-217.09 550.48,-210.7 548.34,-217.36"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge31" class="edge">
+<title>proc~readarray_hdf5_real_r4_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#96ff00" d="M463.76,-108.04C473.08,-110.53 482.38,-113.49 491,-117 519.02,-128.41 547.93,-147.57 567.41,-161.77"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="565.55,-164.75 575.66,-167.9 569.72,-159.13 565.55,-164.75"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge28" class="edge">
+<title>proc~readarray_hdf5_real_r4_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#96ff00" d="M479.54,-108.1C483.69,-110.61 487.55,-113.55 491,-117 545,-171 475.94,-228.22 527,-285 532.56,-291.18 539.97,-295.55 547.77,-298.63"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="546.79,-302 557.38,-301.8 548.97,-295.35 546.79,-302"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge30" class="edge">
+<title>proc~readarray_hdf5_real_r4_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#96ff00" d="M478.82,-108.12C483.21,-110.62 487.31,-113.55 491,-117 533.54,-156.78 486.62,-201.03 527,-243 532.53,-248.75 539.66,-252.92 547.13,-255.96"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="546.11,-259.31 556.7,-259.22 548.37,-252.68 546.11,-259.31"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge33" class="edge">
+<title>proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#3cff00" d="M477.38,-335.79C482.24,-333.33 486.83,-330.43 491,-327 522.36,-301.19 497.05,-270.43 527,-243 533.32,-237.21 541.27,-233.01 549.4,-229.97"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="550.48,-233.3 558.93,-226.91 548.34,-226.64 550.48,-233.3"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge35" class="edge">
+<title>proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#3cff00" d="M478.82,-335.88C483.21,-333.38 487.31,-330.45 491,-327 533.54,-287.22 486.62,-242.97 527,-201 529.79,-198.1 532.99,-195.59 536.44,-193.44"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="538.18,-196.48 545.43,-188.76 534.94,-190.27 538.18,-196.48"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge32" class="edge">
+<title>proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#3cff00" d="M449.74,-335.96C480.78,-329.38 518.65,-321.35 547.36,-315.26"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="548.44,-318.61 557.49,-313.11 546.98,-311.76 548.44,-318.61"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge34" class="edge">
+<title>proc~readarray_hdf5_int32_r1_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#3cff00" d="M471.79,-335.98C478.51,-333.52 485.02,-330.56 491,-327 512.13,-314.43 506.57,-298.67 527,-285 533.15,-280.89 540.16,-277.52 547.25,-274.79"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="548.57,-278.04 556.87,-271.45 546.27,-271.43 548.57,-278.04"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge41" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#00ff1e" d="M478.82,-377.88C483.21,-375.38 487.31,-372.45 491,-369 533.54,-329.22 486.62,-284.97 527,-243 533,-236.76 540.88,-232.37 549.06,-229.29"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="550.22,-232.59 558.69,-226.24 548.1,-225.92 550.22,-232.59"/>
+</g>
+<!-- h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node26" class="node">
+<title>h5screate_simple_f</title>
+<polygon fill="#777777" stroke="#777777" points="649.5,-444 534.5,-444 534.5,-420 649.5,-420 649.5,-444"/>
+<text text-anchor="middle" x="592" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5screate_simple_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge36" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#00ff1e" d="M449.74,-402.04C473.04,-406.98 500.19,-412.74 524.42,-417.88"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="523.74,-421.31 534.25,-419.96 525.2,-414.46 523.74,-421.31"/>
+</g>
+<!-- h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node27" class="node">
+<title>h5pcreate_f</title>
+<polygon fill="#777777" stroke="#777777" points="630,-696 554,-696 554,-672 630,-672 630,-696"/>
+<text text-anchor="middle" x="592" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pcreate_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge37" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#00ff1e" d="M480.27,-402.1C484.18,-404.62 487.79,-407.57 491,-411 568.18,-493.72 454.3,-576.31 527,-663 531.54,-668.42 537.51,-672.45 543.98,-675.44"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="543.11,-678.86 553.7,-679.13 545.59,-672.31 543.11,-678.86"/>
+</g>
+<!-- h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node28" class="node">
+<title>h5dget_space_f</title>
+<polygon fill="#777777" stroke="#777777" points="640,-402 544,-402 544,-378 640,-378 640,-402"/>
+<text text-anchor="middle" x="592" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dget_space_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge38" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dget_space_f</title>
+<path fill="none" stroke="#00ff1e" d="M487.65,-390C503.33,-390 519.16,-390 533.55,-390"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="533.76,-393.5 543.76,-390 533.76,-386.5 533.76,-393.5"/>
+</g>
+<!-- h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node29" class="node">
+<title>h5sselect_hyperslab_f</title>
+<polygon fill="#777777" stroke="#777777" points="657,-360 527,-360 527,-336 657,-336 657,-360"/>
+<text text-anchor="middle" x="592" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5sselect_hyperslab_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge39" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#00ff1e" d="M449.74,-377.96C473.04,-373.02 500.19,-367.26 524.42,-362.12"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="525.2,-365.54 534.25,-360.04 523.74,-358.69 525.2,-365.54"/>
+</g>
+<!-- h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node30" class="node">
+<title>h5dget_type_f</title>
+<polygon fill="#777777" stroke="#777777" points="636,-612 548,-612 548,-588 636,-588 636,-612"/>
+<text text-anchor="middle" x="592" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dget_type_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge40" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dget_type_f</title>
+<path fill="none" stroke="#00ff1e" d="M479.54,-402.1C483.69,-404.61 487.55,-407.55 491,-411 545,-465 475.94,-522.22 527,-579 530.3,-582.67 534.24,-585.69 538.54,-588.19"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="537.21,-591.44 547.74,-592.62 540.24,-585.13 537.21,-591.44"/>
+</g>
+<!-- h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node31" class="node">
+<title>h5pclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="627,-654 557,-654 557,-630 627,-630 627,-654"/>
+<text text-anchor="middle" x="592" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pclose_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge42" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#00ff1e" d="M480.15,-402.21C484.09,-404.7 487.75,-407.61 491,-411 556.56,-479.33 465.15,-549.3 527,-621 532.38,-627.23 539.63,-631.62 547.33,-634.72"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="546.25,-638.05 556.84,-637.88 548.46,-631.41 546.25,-638.05"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge44" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#00ff1e" d="M471.79,-377.98C478.51,-375.52 485.02,-372.56 491,-369 512.13,-356.43 506.57,-340.67 527,-327 533.21,-322.84 540.32,-319.45 547.48,-316.7"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="548.89,-319.92 557.2,-313.34 546.6,-313.3 548.89,-319.92"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge47" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#00ff1e" d="M477.38,-377.79C482.24,-375.33 486.83,-372.43 491,-369 522.36,-343.19 497.05,-312.43 527,-285 532.82,-279.67 540.02,-275.69 547.47,-272.72"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="548.63,-276.02 556.95,-269.47 546.36,-269.4 548.63,-276.02"/>
+</g>
+<!-- h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node35" class="node">
+<title>h5sclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="626,-570 558,-570 558,-546 626,-546 626,-570"/>
+<text text-anchor="middle" x="592" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5sclose_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge43" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#00ff1e" d="M478.82,-402.12C483.21,-404.62 487.31,-407.55 491,-411 533.54,-450.78 486.62,-495.03 527,-537 532.76,-542.99 540.26,-547.27 548.09,-550.34"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="547.11,-553.7 557.7,-553.5 549.29,-547.05 547.11,-553.7"/>
+</g>
+<!-- h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node36" class="node">
+<title>h5pset_dxpl_mpio_f</title>
+<polygon fill="#777777" stroke="#777777" points="651,-528 533,-528 533,-504 651,-504 651,-528"/>
+<text text-anchor="middle" x="592" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pset_dxpl_mpio_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge45" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#00ff1e" d="M477.38,-402.21C482.24,-404.67 486.83,-407.57 491,-411 522.36,-436.81 497.05,-467.57 527,-495 528.46,-496.33 530,-497.58 531.61,-498.75"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="529.79,-501.74 540.15,-503.96 533.43,-495.76 529.79,-501.74"/>
+</g>
+<!-- h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node37" class="node">
+<title>h5tclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="625.5,-486 558.5,-486 558.5,-462 625.5,-462 625.5,-486"/>
+<text text-anchor="middle" x="592" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5tclose_f</text>
+</g>
+<!-- proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge46" class="edge">
+<title>proc~readarray_hdf5_real_r1_parallel&#45;&gt;h5tclose_f</title>
+<path fill="none" stroke="#00ff1e" d="M471.79,-402.02C478.51,-404.48 485.02,-407.44 491,-411 512.13,-423.57 506.57,-439.33 527,-453 533.56,-457.39 541.11,-460.92 548.67,-463.75"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="547.59,-467.08 558.18,-466.96 549.83,-460.45 547.59,-467.08"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge53" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#00ff78" d="M480.84,-587.75C484.55,-585.26 487.97,-582.36 491,-579 591.52,-467.41 432.54,-359.76 527,-243 532.66,-236 540.71,-231.31 549.2,-228.17"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="550.3,-231.5 558.86,-225.25 548.28,-224.8 550.3,-231.5"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge48" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#00ff78" d="M478.82,-587.88C483.21,-585.38 487.31,-582.45 491,-579 533.54,-539.22 486.62,-494.97 527,-453 528.06,-451.89 529.19,-450.85 530.36,-449.85"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="532.5,-452.63 538.74,-444.07 528.52,-446.87 532.5,-452.63"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge49" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#00ff78" d="M416.34,-612.04C442.77,-625.43 487.34,-647.24 527,-663 532.5,-665.19 538.33,-667.33 544.14,-669.36"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="543.24,-672.75 553.83,-672.66 545.49,-666.12 543.24,-672.75"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge50" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dget_space_f</title>
+<path fill="none" stroke="#00ff78" d="M479.54,-587.9C483.69,-585.39 487.55,-582.45 491,-579 545,-525 475.94,-467.78 527,-411 529.38,-408.35 532.1,-406.04 535.04,-404.02"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="536.84,-407.02 543.83,-399.05 533.4,-400.93 536.84,-407.02"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge51" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#00ff78" d="M480.15,-587.79C484.09,-585.3 487.75,-582.39 491,-579 556.56,-510.67 465.15,-440.7 527,-369 527.86,-368 528.77,-367.05 529.72,-366.15"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="531.89,-368.9 537.72,-360.06 527.65,-363.33 531.89,-368.9"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge52" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dget_type_f</title>
+<path fill="none" stroke="#00ff78" d="M491.13,-600C507.09,-600 523.09,-600 537.45,-600"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="537.6,-603.5 547.6,-600 537.6,-596.5 537.6,-603.5"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge54" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#00ff78" d="M449.74,-612.04C480.58,-618.58 518.15,-626.55 546.79,-632.62"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="546.4,-636.12 556.91,-634.77 547.85,-629.27 546.4,-636.12"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge56" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#00ff78" d="M480.27,-587.9C484.18,-585.38 487.79,-582.43 491,-579 568.18,-496.28 454.3,-413.69 527,-327 532.4,-320.57 539.8,-316.09 547.66,-312.98"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="548.94,-316.24 557.37,-309.82 546.78,-309.58 548.94,-316.24"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge59" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#00ff78" d="M480.35,-587.97C484.24,-585.44 487.83,-582.47 491,-579 579.84,-481.85 443.43,-386.71 527,-285 532.28,-278.58 539.56,-274.1 547.33,-270.99"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="548.53,-274.28 556.94,-267.82 546.34,-267.63 548.53,-274.28"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge55" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#00ff78" d="M449.74,-587.96C480.88,-581.36 518.89,-573.3 547.64,-567.2"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="548.72,-570.55 557.78,-565.05 547.27,-563.7 548.72,-570.55"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge57" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#00ff78" d="M471.79,-587.98C478.51,-585.52 485.02,-582.56 491,-579 512.13,-566.43 506.57,-550.67 527,-537 529.54,-535.3 532.23,-533.73 535.02,-532.27"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="536.55,-535.42 544.15,-528.03 533.6,-529.07 536.55,-535.42"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge58" class="edge">
+<title>proc~readarray_hdf5_int32_r1_parallel&#45;&gt;h5tclose_f</title>
+<path fill="none" stroke="#00ff78" d="M477.38,-587.79C482.24,-585.33 486.83,-582.43 491,-579 522.36,-553.19 497.05,-522.43 527,-495 533.13,-489.39 540.79,-485.27 548.66,-482.25"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="549.87,-485.54 558.27,-479.09 547.68,-478.89 549.87,-485.54"/>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5open_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge60" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5open_f</title>
+<path fill="none" stroke="#00ffd1" d="M450.71,-759.01C464.77,-763.72 479.16,-770.18 491,-779 513.54,-795.8 504.47,-814.19 527,-831 534.07,-836.28 542.54,-840.27 550.96,-843.27"/>
+<polygon fill="#00ffd1" stroke="#00ffd1" points="550.15,-846.69 560.74,-846.37 552.26,-840.01 550.15,-846.69"/>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5fopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge62" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5fopen_f</title>
+<path fill="none" stroke="#00ffd1" d="M431.18,-759.15C464.93,-769.89 514.08,-785.53 548.95,-796.62"/>
+<polygon fill="#00ffd1" stroke="#00ffd1" points="548.24,-800.07 558.83,-799.76 550.36,-793.4 548.24,-800.07"/>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge61" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#00ffd1" d="M431.18,-734.85C463.39,-724.6 509.64,-709.89 544.11,-698.92"/>
+<polygon fill="#00ffd1" stroke="#00ffd1" points="545.48,-702.16 553.95,-695.79 543.36,-695.49 545.48,-702.16"/>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge63" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#00ffd1" d="M409.59,-734.73C434.18,-716.99 482.25,-683.98 527,-663 533.33,-660.03 540.2,-657.3 547,-654.87"/>
+<polygon fill="#00ffd1" stroke="#00ffd1" points="548.52,-658.05 556.86,-651.51 546.26,-651.42 548.52,-658.05"/>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5fcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge64" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5fcreate_f</title>
+<path fill="none" stroke="#00ffd1" d="M452.68,-753.33C482.36,-756.48 517.68,-760.22 545.19,-763.14"/>
+<polygon fill="#00ffd1" stroke="#00ffd1" points="545.02,-766.64 555.33,-764.22 545.76,-759.68 545.02,-766.64"/>
+</g>
+<!-- h5pset_fapl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_node38" class="node">
+<title>h5pset_fapl_mpio_f</title>
+<polygon fill="#777777" stroke="#777777" points="649.5,-738 534.5,-738 534.5,-714 649.5,-714 649.5,-738"/>
+<text text-anchor="middle" x="592" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pset_fapl_mpio_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5pset_fapl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge65" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5pset_fapl_mpio_f</title>
+<path fill="none" stroke="#00ffd1" d="M452.68,-740.67C475.29,-738.27 501.17,-735.53 524.39,-733.06"/>
+<polygon fill="#00ffd1" stroke="#00ffd1" points="524.92,-736.53 534.5,-731.99 524.19,-729.57 524.92,-736.53"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge67" class="edge">
+<title>proc~readarray_hdf5_real_r1_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#00d1ff" d="M471.79,-293.98C478.51,-291.52 485.02,-288.56 491,-285 512.13,-272.43 506.57,-256.67 527,-243 533.7,-238.52 541.43,-234.93 549.15,-232.08"/>
+<polygon fill="#00d1ff" stroke="#00d1ff" points="550.46,-235.33 558.84,-228.84 548.25,-228.69 550.46,-235.33"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge69" class="edge">
+<title>proc~readarray_hdf5_real_r1_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#00d1ff" d="M477.38,-293.79C482.24,-291.33 486.83,-288.43 491,-285 522.36,-259.19 497.05,-228.43 527,-201 529.79,-198.44 532.91,-196.19 536.21,-194.22"/>
+<polygon fill="#00d1ff" stroke="#00d1ff" points="537.98,-197.24 545.33,-189.61 534.82,-191 537.98,-197.24"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge66" class="edge">
+<title>proc~readarray_hdf5_real_r1_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#00d1ff" d="M482.15,-306C504.67,-306 527.88,-306 547.04,-306"/>
+<polygon fill="#00d1ff" stroke="#00d1ff" points="547.25,-309.5 557.25,-306 547.25,-302.5 547.25,-309.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r1_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge68" class="edge">
+<title>proc~readarray_hdf5_real_r1_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#00d1ff" d="M449.74,-293.96C480.58,-287.42 518.15,-279.45 546.79,-273.38"/>
+<polygon fill="#00d1ff" stroke="#00d1ff" points="547.85,-276.73 556.91,-271.23 546.4,-269.88 547.85,-276.73"/>
+</g>
+<!-- proc~readarray_hdf5_real_r5_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge71" class="edge">
+<title>proc~readarray_hdf5_real_r5_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#0078ff" d="M449.74,-251.96C481.43,-245.24 520.23,-237.01 549.14,-230.88"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="549.87,-234.3 558.93,-228.8 548.42,-227.45 549.87,-234.3"/>
+</g>
+<!-- proc~readarray_hdf5_real_r5_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge73" class="edge">
+<title>proc~readarray_hdf5_real_r5_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#0078ff" d="M471.79,-251.98C478.51,-249.52 485.02,-246.56 491,-243 512.13,-230.43 506.57,-214.67 527,-201 529.91,-199.06 533.01,-197.28 536.22,-195.66"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="537.8,-198.78 545.48,-191.49 534.93,-192.4 537.8,-198.78"/>
+</g>
+<!-- proc~readarray_hdf5_real_r5_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge70" class="edge">
+<title>proc~readarray_hdf5_real_r5_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#0078ff" d="M449.74,-276.04C480.78,-282.62 518.65,-290.65 547.36,-296.74"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="546.98,-300.24 557.49,-298.89 548.44,-293.39 546.98,-300.24"/>
+</g>
+<!-- proc~readarray_hdf5_real_r5_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge72" class="edge">
+<title>proc~readarray_hdf5_real_r5_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#0078ff" d="M482.15,-264C504.5,-264 527.52,-264 546.6,-264"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="546.77,-267.5 556.77,-264 546.77,-260.5 546.77,-267.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge75" class="edge">
+<title>proc~readarray_hdf5_real_r3_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#001dff" d="M482.15,-222C505.3,-222 529.17,-222 548.63,-222"/>
+<polygon fill="#001dff" stroke="#001dff" points="548.67,-225.5 558.67,-222 548.67,-218.5 548.67,-225.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge77" class="edge">
+<title>proc~readarray_hdf5_real_r3_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#001dff" d="M449.74,-209.96C476.59,-204.27 508.55,-197.49 535.27,-191.82"/>
+<polygon fill="#001dff" stroke="#001dff" points="536.18,-195.21 545.24,-189.71 534.73,-188.36 536.18,-195.21"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge74" class="edge">
+<title>proc~readarray_hdf5_real_r3_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#001dff" d="M471.79,-234.02C478.51,-236.48 485.02,-239.44 491,-243 512.13,-255.57 506.57,-271.33 527,-285 533.21,-289.16 540.32,-292.55 547.48,-295.3"/>
+<polygon fill="#001dff" stroke="#001dff" points="546.6,-298.7 557.2,-298.66 548.89,-292.08 546.6,-298.7"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge76" class="edge">
+<title>proc~readarray_hdf5_real_r3_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#001dff" d="M449.74,-234.04C480.58,-240.58 518.15,-248.55 546.79,-254.62"/>
+<polygon fill="#001dff" stroke="#001dff" points="546.4,-258.12 556.91,-256.77 547.85,-251.27 546.4,-258.12"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge79" class="edge">
+<title>proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#3c00ff" d="M449.74,-192.04C481.43,-198.76 520.23,-206.99 549.14,-213.12"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="548.42,-216.55 558.93,-215.2 549.87,-209.7 548.42,-216.55"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5kind_to_type -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge81" class="edge">
+<title>proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5kind_to_type</title>
+<path fill="none" stroke="#3c00ff" d="M485.62,-180C502.47,-180 519.56,-180 534.94,-180"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="535.29,-183.5 545.29,-180 535.29,-176.5 535.29,-183.5"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge78" class="edge">
+<title>proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#3c00ff" d="M477.38,-192.21C482.24,-194.67 486.83,-197.57 491,-201 522.36,-226.81 497.05,-257.57 527,-285 532.88,-290.39 540.17,-294.39 547.7,-297.37"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="546.69,-300.73 557.28,-300.63 548.94,-294.1 546.69,-300.73"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge80" class="edge">
+<title>proc~readarray_hdf5_int32_r2_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#3c00ff" d="M471.79,-192.02C478.51,-194.48 485.02,-197.44 491,-201 512.13,-213.57 506.57,-229.33 527,-243 533.15,-247.11 540.16,-250.48 547.25,-253.21"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="546.27,-256.57 556.87,-256.55 548.57,-249.96 546.27,-256.57"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge87" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#9500ff" d="M480.35,-545.97C484.24,-543.44 487.83,-540.47 491,-537 579.84,-439.85 443.43,-344.71 527,-243 532.72,-236.04 540.79,-231.37 549.28,-228.24"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="550.38,-231.56 558.94,-225.32 548.35,-224.86 550.38,-231.56"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge82" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#9500ff" d="M477.38,-545.79C482.24,-543.33 486.83,-540.43 491,-537 522.36,-511.19 497.05,-480.43 527,-453 528.46,-451.67 530,-450.42 531.61,-449.25"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="533.43,-452.24 540.15,-444.04 529.79,-446.26 533.43,-452.24"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge83" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#9500ff" d="M477.38,-570.21C482.24,-572.67 486.83,-575.57 491,-579 522.36,-604.81 497.05,-635.57 527,-663 532.04,-667.62 538.12,-671.22 544.49,-674.03"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="543.37,-677.35 553.96,-677.61 545.84,-670.8 543.37,-677.35"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge84" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dget_space_f</title>
+<path fill="none" stroke="#9500ff" d="M478.82,-545.88C483.21,-543.38 487.31,-540.45 491,-537 533.54,-497.22 486.62,-452.97 527,-411 529.35,-408.56 531.99,-406.4 534.82,-404.49"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="536.77,-407.41 543.81,-399.48 533.37,-401.29 536.77,-407.41"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge85" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#9500ff" d="M479.54,-545.9C483.69,-543.39 487.55,-540.45 491,-537 545,-483 475.94,-425.78 527,-369 527.9,-368 528.85,-367.04 529.84,-366.13"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="532.19,-368.75 538.18,-360.01 528.05,-363.11 532.19,-368.75"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge86" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dget_type_f</title>
+<path fill="none" stroke="#9500ff" d="M449.74,-570.04C477.4,-575.9 510.48,-582.92 537.68,-588.69"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="537.28,-592.18 547.79,-590.83 538.73,-585.33 537.28,-592.18"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge88" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#9500ff" d="M471.79,-570.02C478.51,-572.48 485.02,-575.44 491,-579 512.13,-591.57 506.57,-607.33 527,-621 533.15,-625.11 540.16,-628.48 547.25,-631.21"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="546.27,-634.57 556.87,-634.55 548.57,-627.96 546.27,-634.57"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge90" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#9500ff" d="M480.15,-545.79C484.09,-543.3 487.75,-540.39 491,-537 556.56,-468.67 465.15,-398.7 527,-327 532.43,-320.7 539.78,-316.29 547.56,-313.19"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="548.77,-316.48 557.18,-310.03 546.58,-309.83 548.77,-316.48"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge93" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#9500ff" d="M480.27,-545.9C484.18,-543.38 487.79,-540.43 491,-537 568.18,-454.28 454.3,-371.69 527,-285 532.29,-278.69 539.51,-274.27 547.19,-271.16"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="548.32,-274.48 556.7,-268 546.11,-267.84 548.32,-274.48"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge89" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#9500ff" d="M487.65,-558C508.76,-558 530.14,-558 547.93,-558"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="547.96,-561.5 557.96,-558 547.96,-554.5 547.96,-561.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge91" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#9500ff" d="M449.74,-545.96C473.04,-541.02 500.19,-535.26 524.42,-530.12"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="525.2,-533.54 534.25,-528.04 523.74,-526.69 525.2,-533.54"/>
+</g>
+<!-- proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge92" class="edge">
+<title>proc~readarray_hdf5_real_r2_parallel&#45;&gt;h5tclose_f</title>
+<path fill="none" stroke="#9500ff" d="M471.79,-545.98C478.51,-543.52 485.02,-540.56 491,-537 512.13,-524.43 506.57,-508.67 527,-495 533.56,-490.61 541.11,-487.08 548.67,-484.25"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="549.83,-487.55 558.18,-481.04 547.59,-480.92 549.83,-487.55"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge99" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#f000ff" d="M480.27,-503.9C484.18,-501.38 487.79,-498.43 491,-495 568.18,-412.28 454.3,-329.69 527,-243 532.73,-236.16 540.73,-231.54 549.14,-228.41"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="550.17,-231.76 558.7,-225.48 548.12,-225.06 550.17,-231.76"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge94" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#f000ff" d="M471.79,-503.98C478.51,-501.52 485.02,-498.56 491,-495 512.13,-482.43 506.57,-466.67 527,-453 529.54,-451.3 532.23,-449.73 535.02,-448.27"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="536.55,-451.42 544.15,-444.03 533.6,-445.07 536.55,-451.42"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge95" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#f000ff" d="M478.82,-528.12C483.21,-530.62 487.31,-533.55 491,-537 533.54,-576.78 486.62,-621.03 527,-663 531.79,-667.98 537.79,-671.78 544.17,-674.68"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="543.11,-678.03 553.71,-678.32 545.61,-671.49 543.11,-678.03"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge96" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dget_space_f</title>
+<path fill="none" stroke="#f000ff" d="M477.38,-503.79C482.24,-501.33 486.83,-498.43 491,-495 522.36,-469.19 497.05,-438.43 527,-411 529.34,-408.86 531.9,-406.93 534.61,-405.21"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="536.54,-408.14 543.69,-400.33 533.23,-401.98 536.54,-408.14"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge97" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#f000ff" d="M478.82,-503.88C483.21,-501.38 487.31,-498.45 491,-495 533.54,-455.22 486.62,-410.97 527,-369 528.06,-367.89 529.19,-366.85 530.36,-365.85"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="532.5,-368.63 538.74,-360.07 528.52,-362.87 532.5,-368.63"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge98" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dget_type_f</title>
+<path fill="none" stroke="#f000ff" d="M471.79,-528.02C478.51,-530.48 485.02,-533.44 491,-537 512.13,-549.57 506.57,-565.33 527,-579 530.55,-581.38 534.4,-583.5 538.38,-585.4"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="537.26,-588.73 547.83,-589.43 540.01,-582.29 537.26,-588.73"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge100" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#f000ff" d="M477.38,-528.21C482.24,-530.67 486.83,-533.57 491,-537 522.36,-562.81 497.05,-593.57 527,-621 532.82,-626.33 540.02,-630.31 547.47,-633.28"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="546.36,-636.6 556.95,-636.53 548.63,-629.98 546.36,-636.6"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge102" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#f000ff" d="M479.54,-503.9C483.69,-501.39 487.55,-498.45 491,-495 545,-441 475.94,-383.78 527,-327 532.56,-320.82 539.97,-316.45 547.77,-313.37"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="548.97,-316.65 557.38,-310.2 546.79,-310 548.97,-316.65"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge105" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#f000ff" d="M480.15,-503.79C484.09,-501.3 487.75,-498.39 491,-495 556.56,-426.67 465.15,-356.7 527,-285 532.38,-278.77 539.63,-274.38 547.33,-271.28"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="548.46,-274.59 556.84,-268.12 546.25,-267.95 548.46,-274.59"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge101" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#f000ff" d="M449.74,-528.04C480.88,-534.64 518.89,-542.7 547.64,-548.8"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="547.27,-552.3 557.78,-550.95 548.72,-545.45 547.27,-552.3"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge103" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#f000ff" d="M487.65,-516C499.45,-516 511.33,-516 522.62,-516"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="522.81,-519.5 532.81,-516 522.81,-512.5 522.81,-519.5"/>
+</g>
+<!-- proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge104" class="edge">
+<title>proc~readarray_hdf5_real_r3_parallel&#45;&gt;h5tclose_f</title>
+<path fill="none" stroke="#f000ff" d="M449.74,-503.96C481.09,-497.32 519.39,-489.19 548.2,-483.08"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="549.3,-486.42 558.36,-480.92 547.85,-479.58 549.3,-486.42"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge111" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#ff00b4" d="M480.15,-461.79C484.09,-459.3 487.75,-456.39 491,-453 556.56,-384.67 465.15,-314.7 527,-243 532.83,-236.24 540.86,-231.65 549.28,-228.53"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="550.31,-231.88 558.84,-225.6 548.25,-225.18 550.31,-231.88"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge106" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#ff00b4" d="M449.74,-461.96C473.04,-457.02 500.19,-451.26 524.42,-446.12"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="525.2,-449.54 534.25,-444.04 523.74,-442.69 525.2,-449.54"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge107" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#ff00b4" d="M479.54,-486.1C483.69,-488.61 487.55,-491.55 491,-495 545,-549 475.94,-606.22 527,-663 531.68,-668.2 537.66,-672.12 544.08,-675.06"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="543.12,-678.44 553.71,-678.73 545.61,-671.9 543.12,-678.44"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge108" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dget_space_f</title>
+<path fill="none" stroke="#ff00b4" d="M471.79,-461.98C478.51,-459.52 485.02,-456.56 491,-453 512.13,-440.43 506.57,-424.67 527,-411 529.54,-409.3 532.23,-407.73 535.02,-406.27"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="536.55,-409.42 544.15,-402.03 533.6,-403.07 536.55,-409.42"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge109" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#ff00b4" d="M477.38,-461.79C482.24,-459.33 486.83,-456.43 491,-453 522.36,-427.19 497.05,-396.43 527,-369 528.46,-367.67 530,-366.42 531.61,-365.25"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="533.43,-368.24 540.15,-360.04 529.79,-362.26 533.43,-368.24"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge110" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dget_type_f</title>
+<path fill="none" stroke="#ff00b4" d="M477.38,-486.21C482.24,-488.67 486.83,-491.57 491,-495 522.36,-520.81 497.05,-551.57 527,-579 530.53,-582.24 534.57,-584.97 538.87,-587.29"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="537.42,-590.48 547.97,-591.48 540.35,-584.12 537.42,-590.48"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge112" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#ff00b4" d="M478.82,-486.12C483.21,-488.62 487.31,-491.55 491,-495 533.54,-534.78 486.62,-579.03 527,-621 532.53,-626.75 539.66,-630.92 547.13,-633.96"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="546.11,-637.31 556.7,-637.22 548.37,-630.68 546.11,-637.31"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge114" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#ff00b4" d="M478.82,-461.88C483.21,-459.38 487.31,-456.45 491,-453 533.54,-413.22 486.62,-368.97 527,-327 532.71,-321.07 540.11,-316.81 547.85,-313.76"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="548.98,-317.07 557.37,-310.59 546.77,-310.43 548.98,-317.07"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge117" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#ff00b4" d="M479.54,-461.9C483.69,-459.39 487.55,-456.45 491,-453 545,-399 475.94,-341.78 527,-285 532.39,-279.01 539.51,-274.72 547.05,-271.65"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="548.36,-274.9 556.71,-268.39 546.12,-268.27 548.36,-274.9"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge113" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#ff00b4" d="M471.79,-486.02C478.51,-488.48 485.02,-491.44 491,-495 512.13,-507.57 506.57,-523.33 527,-537 533.35,-541.25 540.62,-544.69 547.94,-547.47"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="547.26,-550.94 557.86,-550.86 549.52,-544.31 547.26,-550.94"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge115" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#ff00b4" d="M449.74,-486.04C473.04,-490.98 500.19,-496.74 524.42,-501.88"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="523.74,-505.31 534.25,-503.96 525.2,-498.46 523.74,-505.31"/>
+</g>
+<!-- proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge116" class="edge">
+<title>proc~readarray_hdf5_real_r4_parallel&#45;&gt;h5tclose_f</title>
+<path fill="none" stroke="#ff00b4" d="M487.65,-474C508.93,-474 530.47,-474 548.35,-474"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="548.42,-477.5 558.42,-474 548.42,-470.5 548.42,-477.5"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dread_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge123" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dread_f</title>
+<path fill="none" stroke="#ff005a" d="M479.54,-419.9C483.69,-417.39 487.55,-414.45 491,-411 545,-357 475.94,-299.78 527,-243 532.84,-236.5 540.73,-232.01 548.97,-228.9"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="550.21,-232.18 558.71,-225.85 548.12,-225.5 550.21,-232.18"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge118" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#ff005a" d="M491.13,-432C502.4,-432 513.69,-432 524.41,-432"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="524.5,-435.5 534.5,-432 524.5,-428.5 524.5,-435.5"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge119" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#ff005a" d="M480.15,-444.21C484.09,-446.7 487.75,-449.61 491,-453 556.56,-521.33 465.15,-591.3 527,-663 531.62,-668.35 537.63,-672.35 544.11,-675.33"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="543.25,-678.75 553.84,-679.01 545.73,-672.2 543.25,-678.75"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dget_space_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge120" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dget_space_f</title>
+<path fill="none" stroke="#ff005a" d="M449.74,-419.96C476.19,-414.35 507.59,-407.69 534.06,-402.08"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="534.89,-405.48 543.94,-399.98 533.43,-398.63 534.89,-405.48"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge121" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#ff005a" d="M471.79,-419.98C478.51,-417.52 485.02,-414.56 491,-411 512.13,-398.43 506.57,-382.67 527,-369 529.54,-367.3 532.23,-365.73 535.02,-364.27"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="536.55,-367.42 544.15,-360.03 533.6,-361.07 536.55,-367.42"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dget_type_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge122" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dget_type_f</title>
+<path fill="none" stroke="#ff005a" d="M478.82,-444.12C483.21,-446.62 487.31,-449.55 491,-453 533.54,-492.78 486.62,-537.03 527,-579 530.37,-582.5 534.33,-585.42 538.61,-587.85"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="537.19,-591.06 547.73,-592.19 540.2,-584.74 537.19,-591.06"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge124" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#ff005a" d="M479.54,-444.1C483.69,-446.61 487.55,-449.55 491,-453 545,-507 475.94,-564.22 527,-621 532.39,-626.99 539.51,-631.28 547.05,-634.35"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="546.12,-637.73 556.71,-637.61 548.36,-631.1 546.12,-637.73"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dopen_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge126" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dopen_f</title>
+<path fill="none" stroke="#ff005a" d="M477.38,-419.79C482.24,-417.33 486.83,-414.43 491,-411 522.36,-385.19 497.05,-354.43 527,-327 532.88,-321.61 540.17,-317.61 547.7,-314.63"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="548.94,-317.9 557.28,-311.37 546.69,-311.27 548.94,-317.9"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge129" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#ff005a" d="M478.82,-419.88C483.21,-417.38 487.31,-414.45 491,-411 533.54,-371.22 486.62,-326.97 527,-285 532.53,-279.25 539.66,-275.08 547.13,-272.04"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="548.37,-275.32 556.7,-268.78 546.11,-268.69 548.37,-275.32"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge125" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#ff005a" d="M477.38,-444.21C482.24,-446.67 486.83,-449.57 491,-453 522.36,-478.81 497.05,-509.57 527,-537 533.07,-542.56 540.64,-546.65 548.43,-549.66"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="547.35,-552.99 557.94,-552.82 549.56,-546.34 547.35,-552.99"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge127" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#ff005a" d="M471.79,-444.02C478.51,-446.48 485.02,-449.44 491,-453 512.13,-465.57 506.57,-481.33 527,-495 529.54,-496.7 532.23,-498.27 535.02,-499.73"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="533.6,-502.93 544.15,-503.97 536.55,-496.58 533.6,-502.93"/>
+</g>
+<!-- proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5tclose_f -->
+<g id="proc~~read_dgmodel3d_t~~CallsGraph_edge128" class="edge">
+<title>proc~readarray_hdf5_int32_r2_parallel&#45;&gt;h5tclose_f</title>
+<path fill="none" stroke="#ff005a" d="M449.74,-444.04C481.09,-450.68 519.39,-458.81 548.2,-464.92"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="547.85,-468.42 558.36,-467.08 549.3,-461.58 547.85,-468.42"/>
+</g>
+</g>
+</svg>
+</div><script>var panprocread_dgmodel3d_tCallsGraph = svgPanZoom('#procread_dgmodel3d_tCallsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/read_dgmodel3d_t.html#src">Read_DGModel3D_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Read_DGModel3D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">fileName</span><span class="p">)</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">DGModel3D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileName</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">solOffset</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">firstElem</span><span class="p">,</span><span class="n">ivar</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      call </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span><span class="n">H5F_ACC_RDWR_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                     </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      call </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span><span class="n">H5F_ACC_RDWR_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="k">    if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">firstElem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">      </span><span class="n">solOffset</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">firstElem</span><span class="o">/</span><span class="p">)</span>
+<span class="w">      </span><span class="k">do </span><span class="n">ivar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span>
+<span class="w">        </span><span class="k">call </span><span class="n">ReadArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                            </span><span class="s1">&#39;/controlgrid/solution/&#39;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">meta</span><span class="p">(</span><span class="n">ivar</span><span class="p">)%</span><span class="n">name</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(:,:,:,:,</span><span class="n">ivar</span><span class="p">),</span><span class="n">solOffset</span><span class="p">)</span>
+<span class="w">      </span><span class="k">enddo</span>
+<span class="k">    else</span>
+<span class="k">      do </span><span class="n">ivar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span>
+<span class="w">        </span><span class="k">call </span><span class="n">ReadArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                            </span><span class="s1">&#39;/controlgrid/solution/&#39;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">meta</span><span class="p">(</span><span class="n">ivar</span><span class="p">)%</span><span class="n">name</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(:,:,:,:,</span><span class="n">ivar</span><span class="p">))</span>
+<span class="w">      </span><span class="k">enddo</span>
+<span class="k">    endif</span>
+
+<span class="k">    call </span><span class="n">Close_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">)</span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Read_DGModel3D_t</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2025 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2025-03-05 17:23            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
