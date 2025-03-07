@@ -1,16 +1,16 @@
 # Spectral Element Library in Fortran
 
 ## SELF
-The Spectral Element Library in Fortran (SELF) is an object oriented suite of Fortran modules that enable researchers to implement conservation law solvers using Spectral Element Methods. One goal of this project is to help dispel the notion that Fortran codes are ancient monoliths designed for a single (potentially unknown) purpose. The other goal is to make it easy to explore high order conservation law solvers on a broad range of compute platforms.
+The Spectral Element Library in Fortran (SELF) is an object oriented suite of Fortran modules that enable researchers to implement conservation law solvers using Spectral Element Methods. One goal of this project is to help dispel the notion that Fortran codes are ancient monoliths designed for a single (potentially unknown) purpose. The other goal is to facilitate the exploration of high order conservation law solvers across a wide range of applications and compute platforms.
 
 SELF is built with modern compute architecture in mind. Our intention is to enable scientific software developers to build SELF for personal workstations, GPU and multi-GPU accelerated platforms, and HPC clusters. SELF can be built with optional GPU acceleration provided by either CUDA & CUBLAS or HIP & HIPBLAS. With GPU-Aware MPI installed, you can also run SELF applications on multi-GPU platforms.
 
 
 ## Models
-SELF provides a few pre-canned models for 1-D, 2-D, and 3-D simulations. The specific models based on a generic Discontinuous Galerkin framework that is used to solve a conservation law of the form
+SELF provides a few pre-canned models for 1-D, 2-D, and 3-D simulations. The specific models are based on a generic Discontinuous Galerkin framework, and is used to solve a conservation law of the form
 
 \begin{equation}
-\vec{s}_t + \nabla \cdot \overleftrightarrow{f} = \vec{q}
+\vec{s}_t + \nabla \cdot \overleftrightarrow{f} = \vec{q},
 \end{equation}
 
 where $\vec{s}$ is a vector of solution variables, $\overleftrightarrow{f}$ is the conservative flux, and $\vec{q}$ are non-conservative source terms. The conservative fluxes are assumed to be functions of the solution variables and their gradients. Effectively, this means that SELF can be used to solve hyperbolic and weakly parabolic partial differential equations. 
