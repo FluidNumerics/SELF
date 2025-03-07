@@ -2,65 +2,6 @@
 
 
 ## Install with Spack
-The easiest way to get started is to use the spack package manager. On a Linux platform, set up spack
-
-```
-git clone https://github.com/spack/spack ~/spack
-source ~/spack/share/spack/setup-env.sh
-```
-
-Allow spack to locate your compilers (make sure you have C, C++, and Fortran compilers installed!)
-
-```
-spack compiler find
-```
-
-SELF comes with a spack environment file that defines the dependencies that are required for SELF. The versions listed in this environment file are the specific versions we regularly test against. To get this environment file, clone the SELF repository
-
-```
-git clone https://github.com/fluidnumerics/SELF/ ~/SELF/
-```
-
-**If you have a preferred compiler** you would like for spack to use, you can use `spack config add`, e.g.
-
-```
-spack -e ~/SELF/share/spack-env config add packages:all:require:["'%gcc@12.2.0'"]
-```
-
-The example above will force packages to be built with version 12.2.0 of gfortran from the `gcc` compiler set. 
-
-!!! note
-    If you do not set a preferred compiler, spack will pick one based on the available compilers found using `spack compiler find`
-
-To reduce build time, import existing packages on your system
-```
-spack external find --not-buildable
-```
-
-Next, install SELF's dependencies (OpenMPI, HDF5, and feq-parse)
-```
-spack -e ~/SELF/share/spack-env install --no-check-signature
-```
-
-Then, install SELF
-```
-cd ~/SELF
-spack env activate ~/SELF/share/spack-env
-mkdir ~/SELF/build
-cd ~/SELF/build
-cmake -DCMAKE_INSTALL_PREFIX=${HOME}/opt/self ../
-make
-make install
-```
-
-If you'd like to run the tests included with SELF, to verify your installation, you can use `ctest`.
-
-```
-cd ${HOME}/opt/self/test
-ctest
-```
-
-### Once v0.0.1 is released 
 The easiest way to get started is to use the [spack package manager](https://spack.io). The spack package manager provides you with an easy command line interface to install research software from source code with all of its dependencies. 
 
 !!! note
@@ -93,9 +34,13 @@ Next, install SELF and it's dependencies
 spack install self
 ```
 
+!!! note
+    Currently, GPU Accelerated and multithreaded builds of SELF are not supported through the Spack package manager. We are currently working on a few issues we encountered related to these features while integrating with Spack.
+
 By default, this will install SELF with the following features
 * Double precision floating point arithmetic
-* No unit tests and no examples
+* No unit tests
+* Examples will be installed
 * No multi-threading, CPU-only
 
 You can view documentation on all possible variants using
@@ -104,38 +49,23 @@ You can view documentation on all possible variants using
 spack info self
 ```
 
-### Enable Multithreading
-Many of the computationally intensive methods in SELF are written using the `do concurrent` structure. We have provided the variant `+multithreading` which will enable multithreading for all `do concurrent` blocks. You can install SELF with multithreading using
+You can find the installation path for SELF by using `spack location -i self`. 
 
-```shell
-spack install self+multithreading
+To view the list of included examples :
+
+```
+ls $(spack location -i self)/test
 ```
 
-If you are using the GNU compiler suite, the number of threads used for `do concurrent` blocks is determined during build time. Because of this, we have provided the `nthreads` option, which defaults to 4. You can change this option to a value more sensible for your platform, e.g.
+To run a given example, you can do the following
 
-```shell
-spack install self+multithreading nthreads=16 % gcc
 ```
-
-The `%gcc` here indicates that you intend to build SELF with the GNU compilers.
-
-### Enable Nvidia GPU Acceleration
-SELF provides GPU accelerated implementations of all methods that are used in forward stepping conservation law solvers. On Nvidia GPU platforms, you can take advantage of this using the `+cuda` variant : 
-
-```shell
-spack install self+cuda
+spack load self
+$(spack location -i self)/test/burgers1d_shock
 ```
-This will also ensure that the MPI flavor that is used is GPU aware. You can specify the GPU architecture using the `gpu_arch` build option, e.g. for A100 GPUs
-
-```shell 
-spack install self+cuda gpu_arch=sm_80
-```
-
-!!! note
-    AMD GPU-Aware MPI is currently not available in Spack. This means that these steps will not allow you to build SELF for multi-GPU platforms with AMD GPUs. See [Advanced Installation](#advanced-installation) for details on how to install for AMD GPU platforms.
-
 
 ## Advanced Installation
+You can use these instructions for installing SELF on GPU accelerated platforms or with multithreading enabled, or in cases where you do not wish to use the spack package manager.
 
 ### Dependencies
 The Spectral Element Library in Fortran can be built provided the following dependencies are met
