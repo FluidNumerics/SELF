@@ -1,0 +1,8 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  script: |
+    docker build -f docker/x86_64/Dockerfile \
+                 -t 'us-docker.pkg.dev/$PROJECT_ID/self/self-x86_64:$REF_NAME'
+  automapSubstitutions: true
+images:
+- 'us-docker.pkg.dev/$PROJECT_ID/self/self-x86_64:$REF_NAME'
