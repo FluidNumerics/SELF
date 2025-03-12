@@ -1,22 +1,25 @@
 import json
 from typing import Optional, Dict, Any
+import os
+
 
 class SelfModelConfig:
-    def __init__(self, config_file: Optional[str] = None, case_directory: Optional[str] = None):
+    def __init__(
+        self, config_file: Optional[str] = None, case_directory: Optional[str] = None
+    ):
         """Initialize the SELF model configuration from a JSON file or defaults."""
         self.config = self.default_config()
 
         self.config_file = config_file
-        
+
         if config_file:
             self.load_config(config_file)
 
         if case_directory:
             self.case_directory = case_directory
+            os.makedirs(self.case_directory, exist_ok=True)
         else:
-            self.case_directory = "."
-
-        
+            self.case_directory = os.getcwd()
 
     @staticmethod
     def default_config() -> Dict[str, Any]:
@@ -39,7 +42,7 @@ class SelfModelConfig:
                 "nTz": 1,
                 "dx": 0.02,
                 "dy": 0.02,
-                "dz": 0.02
+                "dz": 0.02,
             },
             "time_options": {
                 "integrator": "euler",
@@ -48,13 +51,9 @@ class SelfModelConfig:
                 "start_time": 0.0,
                 "duration": 1.0,
                 "io_interval": 0.1,
-                "update_interval": 50
+                "update_interval": 50,
             },
-            "units": {
-                "time": "s",
-                "length": "m",
-                "mass": "kg"
-            },
+            "units": {"time": "s", "length": "m", "mass": "kg"},
             "linear-shallow-water-2d": {
                 "g": 1.0,
                 "H": 1.0,
@@ -63,10 +62,10 @@ class SelfModelConfig:
                 "beta": 0.0,
                 "initial_conditions": {
                     "geostrophic_balance": false,
-                    "file": ""
+                    "file": "",
                     "u": 0.0,
                     "v": 0.0,
-                    "eta": 0.0
+                    "eta": 0.0,
                 },
                 "boundary_conditions": {
                     "time_deppendent": false,
@@ -74,19 +73,19 @@ class SelfModelConfig:
                     "from_initial_conditions": false,
                     "u": 0.0,
                     "v": 0.0,
-                    "eta": 0.0
-                }
-            }
+                    "eta": 0.0,
+                },
+            },
         }
 
     def load_config(self, file_path: str):
-        """Load configuration from a JSON file."""
+        """Load configuration from a JSON file"""
         with open(file_path, "r") as f:
             self.config.update(json.load(f))
 
-    def save_config(self, file_path: str):
-        """Save configuration to a JSON file."""
-        with open(file_path, "w") as f:
+    def save_config(self):
+        """Save configuration to a JSON file in the self.case_directory."""
+        with open(f"{self.case_directory}/model_input.json", "w") as f:
             json.dump(self.config, f, indent=4)
 
     def set_parameter(self, section: str, key: str, value: Any):

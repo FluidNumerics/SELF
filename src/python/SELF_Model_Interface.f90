@@ -19,8 +19,7 @@ module SELF_Model_Interface
 
   ! External
   use iso_fortran_env
-!   use HDF5
-!   use FEQParse
+  use iso_c_binding
 
   implicit none
 
@@ -47,11 +46,11 @@ module SELF_Model_Interface
 
   integer,parameter,private :: MODEL_NAME_LENGTH = 50
 
-  character(LEN=500),private :: model_configuration_file
+  character(c_char,len=500),private :: model_configuration_file
 
   ! Interfaces
-  public :: Initialize,ForwardStep,WritePickupFile !, !GetSolution, Finalize
-  private :: GetBCFlagForChar,Init2DWorkspace,UpdateParameters,InitLinearShallowWater2D
+  public :: Initialize,ForwardStep,WritePickupFile,UpdateParameters !, !GetSolution, Finalize
+  private :: GetBCFlagForChar,Init2DWorkspace,InitLinearShallowWater2D
 
 contains
 
@@ -102,11 +101,11 @@ contains
 
   endfunction GetQFlagForChar
 
-  subroutine Initialize(config_file)
+  subroutine Initialize(config_file) bind(C,name="Initialize")
     implicit none
-    character(LEN=*),intent(in) :: config_file
+    character(kind=c_char,len=*),intent(in) :: config_file
     ! local
-    character(LEN=MODEL_NAME_LENGTH) :: modelname
+    character(len=MODEL_NAME_LENGTH) :: modelname
 
     call config%Init(config_file)
     model_configuration_file = config_file
@@ -183,18 +182,26 @@ contains
 
   endsubroutine InitLinearShallowWater2D
 
-  subroutine WritePickupFile()
+  subroutine WritePickupFile(case_directory) bind(C,name="WritePickupFile")
     implicit none
+    character(kind=c_char,len=*),intent(in) :: case_directory
+    ! Local
+    character(LEN=self_FileNameLength) :: pickupFile
+    character(13) :: timeStampString
+
+    write(timeStampString,'(I13.13)') this%ioIterate
+    pickupFile = case_directory//'/solution.'//timeStampString//'.h5'
 
     select type(selfModel)
 
     type is(LinearShallowWater2D)
-      call selfModel%WriteModel()
+      call selfModel%WriteModel(pickupfile)
 
     endselect
+
   endsubroutine WritePickupFile
 
-  subroutine UpdateParameters()
+  subroutine UpdateParameters() bind(c,name="UpdateParameters")
     implicit none
 
     call config%Free()
@@ -222,54 +229,22 @@ contains
 
   endsubroutine UpdateParameters
 
-  subroutine ForwardStep()
+  function ForwardStep(dt,updateInterval) result(err) bind(c,name="ForwardStep")
     implicit none
-
-    real(prec) :: dt
+    real(c_double) :: dt
+    real(c_double) :: updateInterval
+    integer(c_int) :: err
+    ! Local
     real(prec) :: targetTime
-    integer :: updateInterval
 
-    ! Reload config
-    call UpdateParameters()
-
-    call config%Get("time_options.update_interval",updateInterval)
-    call config%Get("time_options.dt",dt)
-
-    selfModel%dt = dt
-    targetTime = selfModel%t+dt*real(updateInterval,prec)
+    selfModel%dt = real(dt,prec)
+    targetTime = selfModel%t+selfModel%dt*real(updateInterval,prec)
     call selfModel%timeIntegrator(targetTime)
     selfModel%t = targetTime
 
-  endsubroutine ForwardStep
+    ! To do, check solution validity
+    err = 0
+
+  endfunction ForwardStep
 
 endmodule SELF_Model_Interface
-
-! program SELF
-
-!   use SELF_Main
-
-!   implicit none
-!   ! Public
-
-!   call InitializeSELF()
-
-!   ! Show us which model we're running
-!   call selfModel % PrintType()
-
-!   ! Set the model initial conditions
-!   call selfModel % SetInitialConditions(config)
-
-!   ! Do the initial file IO
-!   call FileIO()
-!   ! Main time integration loop
-!   call MainLoop()
-!   ! Do the last file IO
-!   call FileIO()
-
-!   ! Clean up [TO DO]
-!   ! CALL selfModel % Free()
-!   ! CALL selfGeometry % Free()
-!   ! CALL selfMesh % Free()
-!   ! CALL interp % Free()
-
-! endmodule SELF_Model_Interface
