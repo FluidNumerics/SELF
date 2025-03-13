@@ -12,9 +12,9 @@ module SELF_Model_Interface
 
   ! Models
   use SELF_Model
-  !use SELF_DGModel1D
+  use SELF_DGModel1D
   use SELF_DGModel2D
-  ! use SELF_DGModel3D
+  use SELF_DGModel3D
   use self_LinearShallowWater2D
 
   ! External
@@ -49,7 +49,7 @@ module SELF_Model_Interface
   character(c_char,len=500),private :: model_configuration_file
 
   ! Interfaces
-  public :: Initialize,ForwardStep,WritePickupFile,UpdateParameters !, !GetSolution, Finalize
+  public :: Initialize,ForwardStep,WritePickupFile,UpdateParameters,GetSolution,GetPrecision,GetVariableName,Finalize
   private :: GetBCFlagForChar,Init2DWorkspace,InitLinearShallowWater2D
 
 contains
@@ -123,6 +123,22 @@ contains
 
   endsubroutine Initialize
 
+  subroutine Finalize() bind(C,name="Finalize")
+    implicit none
+
+    call config%Free()
+    call selfModel%Free()
+    selfModel => null()
+
+    ! Free the interpolant
+    call interp%Free()
+
+    ! Free the mesh
+
+    ! Free the geometry
+
+  endsubroutine Finalize
+
   subroutine Init2DWorkspace()
     implicit none
     ! Local
@@ -182,30 +198,30 @@ contains
 
   endsubroutine InitLinearShallowWater2D
 
-  subroutine WritePickupFile(case_directory) bind(C,name="WritePickupFile")
+  function WritePickupFile(case_directory) result(pickupFile) bind(C,name="WritePickupFile")
     implicit none
-    character(kind=c_char,len=*),intent(in) :: case_directory
-    ! Local
+    character(kind=c_char,len=*) :: case_directory
     character(LEN=self_FileNameLength) :: pickupFile
+    ! Local
     character(13) :: timeStampString
 
     write(timeStampString,'(I13.13)') this%ioIterate
     pickupFile = case_directory//'/solution.'//timeStampString//'.h5'
+    call selfModel%WriteModel(pickupfile)
 
-    select type(selfModel)
-
-    type is(LinearShallowWater2D)
-      call selfModel%WriteModel(pickupfile)
-
-    endselect
-
-  endsubroutine WritePickupFile
+  endfunction WritePickupFile
 
   subroutine UpdateParameters() bind(c,name="UpdateParameters")
     implicit none
+    character(len=self_IntegratorTypeCharLength) :: timeIntegrator
 
     call config%Free()
     call config%Init(model_configuration_file)
+
+    ! Set the time integrator
+    call config%Get("time_options.integrator",timeIntegrator)
+    call selfModel%SetTimeIntegrator(trim(timeIntegrator))
+
     select type(selfModel)
 
     type is(LinearShallowWater2D)
@@ -231,8 +247,8 @@ contains
 
   function ForwardStep(dt,updateInterval) result(err) bind(c,name="ForwardStep")
     implicit none
-    real(c_double) :: dt
-    real(c_double) :: updateInterval
+    real(c_prec) :: dt
+    real(c_prec) :: updateInterval
     integer(c_int) :: err
     ! Local
     real(prec) :: targetTime
@@ -246,5 +262,61 @@ contains
     err = 0
 
   endfunction ForwardStep
+
+  function GetPrecision() result(precision) bind(c,name="GetPrecision")
+    integer(c_int) :: precision
+
+    precision = prec
+
+  endfunction GetPrecision
+
+  subroutine GetSolution(solution,solshape,ndim) bind(C,name="GetSolution")
+    type(c_ptr),intent(out) :: solution ! Pointer to data
+    integer(c_int),intent(out) :: solshape(5) ! Shape array (max 4D)
+    integer(c_int),intent(out) :: ndim ! Number of dimensions (3, 4, 5)
+
+    select type(selfModel)
+
+    class is(DGModel1D)
+      solshape(1:3) = shape(selfModel%solution%interior)
+      solshape(4:5) = 0
+      ndim = 3
+      call selfModel%solution%UpdateHost()
+      solution = c_loc(selfModel%solution%interior)
+
+    class is(DGModel2D)
+      solshape(1:4) = shape(selfModel%solution%interior)
+      solshape(5) = 0
+      ndim = 4
+      call selfModel%solution%UpdateHost()
+      solution = c_loc(selfModel%solution%interior)
+
+    class is(DGModel3D)
+      solshape(1:5) = shape(selfModel%solution%interior)
+      ndim = 5
+      call selfModel%solution%UpdateHost()
+      solution = c_loc(selfModel%solution%interior)
+
+    endselect
+
+  endsubroutine GetSolution
+
+  function GetVariableName() result(name) bind(c,name="GetVariableName")
+    character(kind=c_char,len=*) :: name
+
+    select type(selfModel)
+
+    class is(SELF_DGModel1D)
+      name = selfModel%solution%meta(ivar)%name
+
+    class is(SELF_DGModel2D)
+      name = selfModel%solution%meta(ivar)%name
+
+    class is(SELF_DGModel3D)
+      name = selfModel%solution%meta(ivar)%name
+
+    endselect
+
+  endfunction GetVariableName
 
 endmodule SELF_Model_Interface

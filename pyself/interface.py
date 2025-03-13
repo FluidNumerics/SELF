@@ -36,10 +36,15 @@ class SelfModel:
                 raise Exception(f"Could not load the library {lib}")
 
         self._configure_interface()
+        self._precision = self._lib.GetPrecision()
+        # self._dtype = {4: np.float32, 8: np.float64}[self._precision]
+        # self._cprec = {4: c_float, 8: c_double}[self._precision]
 
         self._initialized = False
 
     def _configure_interface(self):
+        """Private method to configure the interface to the Fortran library"""
+
         self._lib.Initialize.argtypes = [c_char_p]
         self._lib.Initialize.restype = None
 
@@ -49,24 +54,61 @@ class SelfModel:
         self._lib.ForwardStep.argtypes = [c_double, c_double]  # No arguments
         self._lib.ForwardStep.restype = c_int  # Function returns an integer
 
-        self.lib.WritePickupFile.argtypes = [c_char_p]
-        self.lib.WritePickupFile.restype = None
+        self._lib.WritePickupFile.argtypes = [c_char_p]
+        self._lib.WritePickupFile.restype = c_char_p
 
-        # self.lib.get_solution.argtypes = [c_void_p]
-        # self.lib.get_solution.restype = POINTER(c_double)
+        self._lib.GetSolution.argtypes = [
+            POINTER(c_void_p),
+            POINTER(c_int * 5),
+            POINTER(c_int),
+        ]
+        self._lib.GetSolution.restype = None  # Subroutine, no return
 
-        # self.lib.finalize.argtypes = [c_void_p]
-        # self.lib.finalize.restype = None
+        self._lib.GetPrecision.argtypes = []  # No arguments
+        self._lib.GetPrecision.restype = c_int  # Function returns an integer
 
-    # def report_parameters(self):
+        self.lib.Finalize.argtypes = []
+        self.lib.Finalize.restype = None
+
+    def report_config(self):
+        """Print the configuration to the console."""
+        print("=" * 40)
+        print(" Model Configuration ".center(40, "="))
+        print("=" * 40)
+
+        print("\n[Model]")
+        model_name = self.config.config["model_name"]
+        print(f"  SELF Configuration Version : {self.config.config['version']}")
+        print(f"  Model Name : {model_name}")
+        print(f"  Case Directory : {self.config.case_directory}")
+        print(f"  Config File : {self._config_file}")
+        print(f"  Precision : {self._precision}")
+        print(f"  Initialized : {self._initialized}")
+
+        print("\n[Geometry]")
+        for key, value in self.config.config["time_options"].items():
+            print(f"  {key.replace('_', ' ').capitalize()} : {value}")
+
+        print("\n[Time Options]")
+        for key, value in self.config.config["time_options"].items():
+            print(f"  {key.replace('_', ' ').capitalize()} : {value}")
+
+        print("\n[{model_name}]")
+        for key, value in self.config.config[model_name].items():
+            print(json.dumps(value, indent=4))
 
     def set_parameter(self, section: str, key: str, value: Any):
+        """Set a specific parameter within the model configuration."""
         self.config.set_parameter(section, key, value)
 
     def get_parameter(self, section: str, key: str, value: Any):
+        """Retrieve a specific parameter from the model configuration."""
         return self.config.get_parameter(section, key)
 
     def update_parameters(self):
+        """Push the configuration to the model by writing the configuration
+        to file and calling the Fortran-side UpdateParameters function."""
+
         self.config.save_config()
         if self._initialized:
             self._lib.UpdateParameters()
@@ -75,7 +117,26 @@ class SelfModel:
                 "Configuration file saved, but not pushed to model. Model is not initialized"
             )
 
+    def set_time_integrator(self, integrator: str):
+        """Set the time integrator in the configuration file. The
+        selfModel.config attribut is updated and saved to the case directory
+        json file.
+
+        Parameters:
+        -----------
+        integrator (str): the time integrator to use. Must be one of
+                          'euler', 'rk2', 'rk3', or 'rk4'
+        """
+
+        self.config.set_parameter("time_options", "integrator", integrator)
+        self.config.save_config()
+
     def initialize_model(self):
+        """Initialize the model by calling the Fortran Initialize function.
+        On the Fortran side this allocates memory and sets up the appropriate
+        data structures for the model, based on the configuration file.
+        On exit, the self._initialized flag is set to True."""
+
         if not self._initialized:
             # Save the config to the case directory
             self.config.save_config()
@@ -87,19 +148,64 @@ class SelfModel:
         else:
             raise Exception("Model is already initialized")
 
+    def finalize_model(self):
+        """Finalize the model by calling the Fortran Finalize function.
+        On the Fortran side this deallocates memory and cleans up the model.
+        On exit, the self._initialized flag is set to False."""
+
+        if self._initialized:
+            self._lib.Finalize()
+            self._initialized = False
+        else:
+            raise Exception("Model is not initialized")
+
     def forward_step(self, dt, update_interval):
+        """Advance the model forward in time by calling the Fortran ForwardStep function.
+        The function takes two arguments: the time step dt and the number of time steps to take.
+        The function returns an error code, which is 0 if the function executed successfully.
+        The time integrator is controlled by the configuration file in the
+        time_options.integrator setting"""
+
         if not self._initialized:
             self.initialize_model()
 
-        err = self._lib.ForwardStep(c_double(dt), c_double(update_interval))
+        if self._precision == 4:
+            err = self._lib.ForwardStep(c_float(dt), c_float(update_interval))
+        else:
+            err = self._lib.ForwardStep(c_double(dt), c_double(update_interval))
+
+        return err
+
+    def write_pickup_file(self):
+        if not self._initialized:
+            raise Exception("Model is not initialized")
+        self._lib.WritePickupFile(self.config.case_directory.encode("utf-8"))
+
+    def get_solution(self):
+        if not self._initialized:
+            raise Exception("Model is not initialized")
+
+        # Get the solution
+        solution_ptr = c_void_p()
+        shape = (c_int * 5)()
+        rank = c_int()
+        precision = c_int()
+        self._lib.GetSolution(byref(solution_ptr), shape, byref(rank))
+
+        # Extract shape values
+        dim = [shape[i] for i in range(rank.value)]  # Extract only relevant dimensions
+
+        # Convert void pointer to float or double pointer
+        if self._precision == 4:
+            data_ptr = ctypes.cast(solution_ptr, POINTER(c_float))
+        else:
+            data_ptr = ctypes.cast(solution_ptr, POINTER(c_double))
+
+        # Convert to NumPy array (handling column-major storage)
+        solution = np.ctypeslib.as_array(
+            data_ptr, shape=tuple(reversed(dim))
+        )  # Reverse shape for row-major order
 
         # To do:  error handling
 
-    # def write_pickup_file(self):
-
-    # def get_solution(self):
-
-    # def finalize(self):
-
-    # def run(self):
-    #     print("Running SELF model..."
+        return solution

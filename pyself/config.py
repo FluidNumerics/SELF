@@ -98,10 +98,3 @@ class SelfModelConfig:
     def get_parameter(self, section: str, key: str) -> Any:
         """Retrieve a specific parameter value."""
         return self.config.get(section, {}).get(key, None)
-
-
-# Example Usage
-config = SelfModelConfig()
-config.set_parameter("geometry", "nX", 10)
-config.set_parameter("time_options", "dt", 0.005)
-print(config.generate_fortran_input())

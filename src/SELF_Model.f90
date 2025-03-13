@@ -112,6 +112,8 @@ module SELF_Model
 
   contains
 
+    procedure(SELF_FreeModel),deferred :: Free
+
     procedure :: IncrementIOCounter
 
     procedure :: PrintType => PrintType_Model
@@ -191,6 +193,14 @@ module SELF_Model
     procedure :: GetSimulationTime
 
   endtype Model
+
+  interface
+    subroutine SELF_FreeModel(this)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+    endsubroutine SELF_FreeModel
+  endinterface
 
   interface
     subroutine SELF_timeIntegrator(this,tn)
