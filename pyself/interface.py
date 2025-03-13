@@ -5,9 +5,20 @@ from pyself.config import SelfModelConfig
 
 
 ## Add ctypes interface to fortran library
-from ctypes import CDLL, c_int, c_double, c_char_p, POINTER, c_void_p
+from ctypes import (
+    CDLL,
+    c_int,
+    c_double,
+    c_char_p,
+    POINTER,
+    c_void_p,
+    create_string_buffer,
+)
+import numpy as np
 from ctypes.util import find_library
 import os
+
+_VAR_BUFFER_SIZE = 256
 
 
 class SelfModel:
@@ -15,6 +26,10 @@ class SelfModel:
         self.case_directory = case_directory
         self.config = config
         self._config_file = f"{self.config.case_directory}/model_input.json"
+        self._solution = None
+        self._mesh = None
+        self._geometry = None
+        self._last_pickup_file = None
 
         if lib is None:
             try:
@@ -46,7 +61,7 @@ class SelfModel:
         """Private method to configure the interface to the Fortran library"""
 
         self._lib.Initialize.argtypes = [c_char_p]
-        self._lib.Initialize.restype = None
+        self._lib.Initialize.restype = c_int
 
         self._lib.UpdateParameters.argtypes = []
         self._lib.UpdateParameters.restype = None
@@ -54,8 +69,8 @@ class SelfModel:
         self._lib.ForwardStep.argtypes = [c_double, c_double]  # No arguments
         self._lib.ForwardStep.restype = c_int  # Function returns an integer
 
-        self._lib.WritePickupFile.argtypes = [c_char_p]
-        self._lib.WritePickupFile.restype = c_char_p
+        self._lib.WritePickupFile.argtypes = [c_char_p, c_char_p]
+        self._lib.WritePickupFile.restype = None
 
         self._lib.GetSolution.argtypes = [
             POINTER(c_void_p),
@@ -63,6 +78,9 @@ class SelfModel:
             POINTER(c_int),
         ]
         self._lib.GetSolution.restype = None  # Subroutine, no return
+
+        self._lib.GetVariableName.argtypes = [c_int, c_char_p]
+        self._lib.GetVariableName.restype = None
 
         self._lib.GetPrecision.argtypes = []  # No arguments
         self._lib.GetPrecision.restype = c_int  # Function returns an integer
@@ -141,7 +159,11 @@ class SelfModel:
             # Save the config to the case directory
             self.config.save_config()
             # Call the initialize model function
-            self._lib.Initialize(self._config_file.encode("utf-8"))
+            error = self._lib.Initialize(self._config_file.encode("utf-8"))
+            if error != 0:
+                raise Exception(
+                    f"Model returned error code {error} for model_name = {self.config.config['model_name']}"
+                )
 
             # To do, print out model parameters, nicely formatted
             self._initialized = True
@@ -177,9 +199,33 @@ class SelfModel:
         return err
 
     def write_pickup_file(self):
+        """Write the pickup file by calling the Fortran WritePickupFile function.
+        The function takes a case directory as an argument and returns the name of the pickup file.
+        The pickup file is written to the case directory and follows the format "solution.X.h5", where
+        "X" is a 13-digit zero padded integer that corresponds to the iterate number in the simulation.
+
+        Returns:
+        --------
+        pickup_file (str): the name of the pickup file that was written to disk.
+
+        """
         if not self._initialized:
             raise Exception("Model is not initialized")
-        self._lib.WritePickupFile(self.config.case_directory.encode("utf-8"))
+
+        # Prepare input and output buffers
+        case_directory = self.config.case_directory.encode(
+            "utf-8"
+        )  # Convert string to bytes (null-terminated)
+        pickup_file_buffer = create_string_buffer(buffer_size)  # Preallocated buffer
+
+        # Call the Fortran subroutine
+        self._lib.WritePickupFile(case_directory, pickup_file_buffer)
+
+        pickup_file = pickup_file_buffer.value.decode("utf-8").strip()
+        self._last_pickup_file = pickup_file
+
+        # Convert to Python string (remove null terminator and spaces)
+        return pickup_file
 
     def get_solution(self):
         if not self._initialized:
@@ -206,6 +252,14 @@ class SelfModel:
             data_ptr, shape=tuple(reversed(dim))
         )  # Reverse shape for row-major order
 
+        self._solution = solution  # Create a pointer to the data
+
         # To do:  error handling
 
         return solution
+
+    def _get_variable_name(self, ivar):
+        variable_name_buffer = create_string_buffer(_VAR_BUFFER_SIZE)
+        self._lib.GetVariableName(c_int(ivar), variable_name_buffer)
+
+        return variable_name_buffer.value.decode("utf-8").strip()

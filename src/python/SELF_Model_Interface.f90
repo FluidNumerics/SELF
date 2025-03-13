@@ -4,10 +4,18 @@ module SELF_Model_Interface
   ! Core
   use SELF_Constants
   use SELF_SupportRoutines
+  use SELF_Metadata
+
   use SELF_Mesh
+  use SELF_Mesh_1D
+  use SELF_Mesh_2D
+  use SELF_Mesh_3D
+
+  use SELF_Geometry
   use SELF_Geometry_1D
   use SELF_Geometry_2D
   use SELF_Geometry_3D
+
   use SELF_JSON_Config
 
   ! Models
@@ -15,7 +23,18 @@ module SELF_Model_Interface
   use SELF_DGModel1D
   use SELF_DGModel2D
   use SELF_DGModel3D
-  use self_LinearShallowWater2D
+
+  use SELF_Burgers1D
+  !use SELF_Burgers1D_Interface
+
+  use SELF_LinearShallowWater2D
+  use SELF_LinearShallowWater2D_Interface
+
+  use SELF_LinearEuler2D
+  !use SELF_LinearEuler2D_Interface
+
+  use SELF_LinearEuler3D
+  !use SELF_LinearEuler3D_Interface
 
   ! External
   use iso_fortran_env
@@ -27,189 +46,153 @@ module SELF_Model_Interface
   type(Lagrange),target,private :: interp
   !type(MPILayer),target :: decomp
 
+  ! ========================================== !
+  !             Top level pointers             !
+  ! ========================================== !
   class(Model),pointer,private :: selfModel
   class(SEMMesh),pointer,private :: selfMesh
-  !class(SEMGeometry),pointer,private :: selfGeometry
+  class(SEMGeometry),pointer,private :: selfGeometry
 
   ! Mesh
-  ! type(Mesh1D),target,private :: selfMesh1D
+  type(Mesh1D),target,private :: selfMesh1D
   type(Mesh2D),target,private :: selfMesh2D
+  type(Mesh3D),target,private :: selfMesh3D
 
   ! Geometry
-  ! type(Geometry1D),target,private :: selfGeometry1D
+  type(Geometry1D),target,private :: selfGeometry1D
   type(SEMQuad),target,private :: selfGeometry2D
+  type(SEMHex),target,private :: selfGeometry3D
 
   ! Models
-  ! type(Burgers1D),target,private :: selfBurgers1D
-  ! type(CompressibleIdealGas2D),target,private :: selfCompressibleIdealGas2D
+  type(Burgers1D),target,private :: selfBurgers1D
   type(LinearShallowWater2D),target,private :: selfLinearShallowWater2D
+  type(LinearEuler2D),target,private :: selfLinearEuler2D
+  type(LinearEuler3D),target,private :: selfLinearEuler3D
 
   integer,parameter,private :: MODEL_NAME_LENGTH = 50
 
-  character(c_char,len=500),private :: model_configuration_file
+  character(kind=c_char,len=750),private :: model_configuration_file
 
   ! Interfaces
   public :: Initialize,ForwardStep,WritePickupFile,UpdateParameters,GetSolution,GetPrecision,GetVariableName,Finalize
-  private :: GetBCFlagForChar,Init2DWorkspace,InitLinearShallowWater2D
-
+  private :: GetBCFlagForChar,Init2DWorkspace
 contains
 
-  function GetBCFlagForChar(charFlag) result(intFlag)
-    !! This method is used to return the integer flag from a char for boundary conditions
-    !!
-    implicit none
-    character(*),intent(in) :: charFlag
-    integer :: intFlag
+  ! =================================================================
+  !                      Public methods
+  ! =================================================================
 
-    select case(UpperCase(trim(charFlag)))
-
-    case("PRESCRIBED")
-      intFlag = SELF_BC_PRESCRIBED
-
-    case("RADIATION")
-      intFlag = SELF_BC_RADIATION
-
-    case("NO_NORMAL_FLOW")
-      intFlag = SELF_BC_NONORMALFLOW
-
-    case DEFAULT
-      intFlag = 0
-
-    endselect
-
-  endfunction GetBCFlagForChar
-
-  function GetQFlagForChar(charFlag) result(intFlag)
-    !! This method is used to return the integer flag from a char for boundary conditions
-    !!
-    implicit none
-    character(*),intent(in) :: charFlag
-    integer :: intFlag
-
-    select case(UpperCase(trim(charFlag)))
-
-    case("GAUSS")
-      intFlag = GAUSS
-
-    case("GAUSS-LOBATTO")
-      intFlag = GAUSS_LOBATTO
-
-    case DEFAULT
-      intFlag = 0
-
-    endselect
-
-  endfunction GetQFlagForChar
-
-  subroutine Initialize(config_file) bind(C,name="Initialize")
+  function Initialize(config_file) result(error) bind(C,name="Initialize")
     implicit none
     character(kind=c_char,len=*),intent(in) :: config_file
+    integer(c_int) :: error
     ! local
     character(len=MODEL_NAME_LENGTH) :: modelname
 
     call config%Init(config_file)
     model_configuration_file = config_file
 
+    call config%Get("model_name",modelname)
+
     ! Select the model
     select case(trim(modelname))
+
+    case("burgers-1d")
+
+      print*,"Not implemented yet"
+      error = -1
+      ! call Init1DWorkspace()
+      ! call Init_Burgers1D(selfBurgers1D,selfGeometry1D,selfMesh1D)
+      ! selfModel => selfBurgers1D
+      ! error = 0
 
     case("linear-shallow-water-2d")
 
       call Init2DWorkspace()
-      call InitLinearShallowWater2D()
+      call Init_LinearShallowWater2D(selfLinearShallowWater2D,selfGeometry2D,selfMesh2D)
+      selfModel => selfLinearShallowWater2D
+      error = 0
+
+    case("linear-euler-2d")
+
+      print*,"Not implemented yet"
+      error = -1
+      ! call Init2DWorkspace()
+      ! call Init_LinearEuler2D(selfLinearEuler2D,selfGeometry2D,selfMesh2D)
+      ! selfModel => selfLinearEuler2D
+      ! error = 0
+
+    case("linear-euler-3d")
+
+      print*,"Not implemented yet"
+      error = -1
+      ! call Init2DWorkspace()
+      ! call Init_LinearEuler2D(selfLinearEuler2D,selfGeometry2D,selfMesh2D)
+      ! selfModel => selfLinearEuler2D
+      ! error = 0
+
+    case("gfdles-3d")
+
+      print*,"Not implemented yet"
+      error = -1
+      ! call Init2DWorkspace()
+      ! call Init_LinearEuler2D(selfLinearEuler2D,selfGeometry2D,selfMesh2D)
+      ! selfModel => selfLinearEuler2D
+      ! error = 0
 
     case default
+
     endselect
 
-  endsubroutine Initialize
+    ! Point the mesh and geometry top level pointers to the appropriate mesh and geometry objects
+    select type(selfModel)
+
+    class is(DGModel1D)
+      selfMesh => selfMesh1D
+      selfGeometry => selfGeometry1D
+
+    class is(DGModel2D)
+      selfMesh => selfMesh2D
+      selfGeometry => selfGeometry2D
+
+    class is(DGModel3D)
+      selfMesh => selfMesh3D
+      selfGeometry => selfGeometry3D
+
+    endselect
+
+    call UpdateParameters()
+
+  endfunction Initialize
 
   subroutine Finalize() bind(C,name="Finalize")
     implicit none
 
     call config%Free()
     call selfModel%Free()
-    selfModel => null()
-
-    ! Free the interpolant
+    call selfMesh%Free()
+    call selfGeometry%Free()
     call interp%Free()
 
-    ! Free the mesh
-
-    ! Free the geometry
+    ! Nullify the top level pointers
+    selfModel => null()
+    selfMesh => null()
+    selfGeometry => null()
 
   endsubroutine Finalize
 
-  subroutine Init2DWorkspace()
+  subroutine WritePickupFile(case_directory,pickupFile) bind(C,name="WritePickupFile")
     implicit none
-    ! Local
-    logical :: mpiRequested
-    character(LEN=self_QuadratureTypeCharLength) :: qChar
-    character(LEN=MODEL_NAME_LENGTH) :: meshfile
-    character(LEN=MODEL_NAME_LENGTH) :: uniformBoundaryCondition
-    integer :: controlQuadrature
-    integer :: controlDegree
-    integer :: targetDegree
-    integer :: targetQuadrature
-    integer :: bcFlag
-
-    call config%Get("geometry.control_degree",controlDegree)
-    call config%Get("geometry.target_degree",targetDegree)
-    call config%Get("geometry.control_quadrature",qChar)
-    controlQuadrature = GetQFlagForChar(trim(qChar))
-    call config%Get("geometry.target_quadrature",qChar)
-    targetQuadrature = GetQFlagForChar(trim(qChar))
-    call config%Get("geometry.mesh_file",meshfile)
-    call config%Get("geometry.uniform_boundary_condition",uniformBoundaryCondition)
-    bcFlag = GetBCFlagForChar(uniformBoundaryCondition)
-
-    print*,"Using Mesh file : "//trim(meshfile)
-    ! Read in mesh file and set the public mesh pointer to selfMesh2D
-    call selfMesh2D%Read_HOPr(trim(meshfile))
-    call selfMesh2D%ResetBoundaryConditionType(bcFlag)
-
-    selfMesh => selfMesh2D
-
-    ! Create an interpolant
-    call interp%Init(controlDegree, &
-                     controlQuadrature, &
-                     targetDegree, &
-                     targetQuadrature)
-
-    ! Generate geometry (metric terms) from the mesh elements
-    call selfGeometry2D%Init(interp,selfMesh2D%nElem)
-    call selfGeometry2D%GenerateFromMesh(selfMesh2D)
-
-!    selfGeometry => selfGeometry2D
-
-  endsubroutine Init2DWorkspace
-
-  subroutine InitLinearShallowWater2D()
-    implicit none
-
-    print*,"Model set to Linear Shallow Water (2D)"
-
-    call selfLinearShallowWater2D%Init(selfMesh2D,selfGeometry2D)
-    selfLinearShallowWater2D%prescribed_bcs_enabled = .false. ! Disables prescribed boundary condition block for gpu accelerated implementations
-    selfLinearShallowWater2D%tecplot_enabled = .false. ! Disables tecplot output
-
-    call UpdateParameters()
-
-    selfModel => selfLinearShallowWater2D
-
-  endsubroutine InitLinearShallowWater2D
-
-  function WritePickupFile(case_directory) result(pickupFile) bind(C,name="WritePickupFile")
-    implicit none
-    character(kind=c_char,len=*) :: case_directory
-    character(LEN=self_FileNameLength) :: pickupFile
+    character(kind=c_char,len=*),intent(in) :: case_directory
+    character(kind=c_char,len=*),intent(out) :: pickupFile
     ! Local
     character(13) :: timeStampString
 
-    write(timeStampString,'(I13.13)') this%ioIterate
-    pickupFile = case_directory//'/solution.'//timeStampString//'.h5'
-    call selfModel%WriteModel(pickupfile)
+    write(timeStampString,'(I13.13)') selfModel%ioIterate
+    pickupFile = trim(case_directory)//'/solution.'//timeStampString//'.h5'
+    call selfModel%WriteModel(trim(pickupfile))
 
-  endfunction WritePickupFile
+  endsubroutine WritePickupFile
 
   subroutine UpdateParameters() bind(c,name="UpdateParameters")
     implicit none
@@ -224,22 +207,12 @@ contains
 
     select type(selfModel)
 
+    type is(Burgers1D)
+      print*,"Not implemented yet"
+      !call UpdateParameters_Burgers1D(selfModel,config)
     type is(LinearShallowWater2D)
 
-      call config%Get("linear-shallow-water-2d.environment.g", &
-                      selfLinearShallowWater2D%g)
-
-      call config%Get("linear-shallow-water-2d.environment.H", &
-                      selfLinearShallowWater2D%H)
-
-      call config%Get("linear-shallow-water-2d.environment.Cd", &
-                      selfLinearShallowWater2D%Cd)
-
-      call config%Get("linear-shallow-water-2d.environment.f0", &
-                      selfLinearShallowWater2D%f0)
-
-      call config%Get("linear-shallow-water-2d.environment.beta", &
-                      selfLinearShallowWater2D%beta)
+      call UpdateParameters_LinearShallowWater2D(selfModel,config)
 
     endselect
 
@@ -301,22 +274,118 @@ contains
 
   endsubroutine GetSolution
 
-  function GetVariableName() result(name) bind(c,name="GetVariableName")
-    character(kind=c_char,len=*) :: name
+  subroutine GetVariableName(ivar,name) bind(c,name="GetVariableName")
+    integer(c_int),intent(in) :: ivar
+    character(kind=c_char,len=*),intent(out) :: name
 
     select type(selfModel)
 
-    class is(SELF_DGModel1D)
+    class is(DGModel1D)
       name = selfModel%solution%meta(ivar)%name
 
-    class is(SELF_DGModel2D)
+    class is(DGModel2D)
       name = selfModel%solution%meta(ivar)%name
 
-    class is(SELF_DGModel3D)
+    class is(DGModel3D)
       name = selfModel%solution%meta(ivar)%name
 
     endselect
 
-  endfunction GetVariableName
+  endsubroutine GetVariableName
+
+  ! =================================================================
+  !                      Private methods
+  ! =================================================================
+
+  function GetBCFlagForChar(charFlag) result(intFlag)
+    !! This method is used to return the integer flag from a char for boundary conditions
+    !!
+    implicit none
+    character(*),intent(in) :: charFlag
+    integer :: intFlag
+
+    select case(UpperCase(trim(charFlag)))
+
+    case("PRESCRIBED")
+      intFlag = SELF_BC_PRESCRIBED
+
+    case("RADIATION")
+      intFlag = SELF_BC_RADIATION
+
+    case("NO_NORMAL_FLOW")
+      intFlag = SELF_BC_NONORMALFLOW
+
+    case DEFAULT
+      intFlag = 0
+
+    endselect
+
+  endfunction GetBCFlagForChar
+
+  function GetQFlagForChar(charFlag) result(intFlag)
+    !! This method is used to return the integer flag from a char for boundary conditions
+    !!
+    implicit none
+    character(*),intent(in) :: charFlag
+    integer :: intFlag
+
+    select case(UpperCase(trim(charFlag)))
+
+    case("GAUSS")
+      intFlag = GAUSS
+
+    case("GAUSS-LOBATTO")
+      intFlag = GAUSS_LOBATTO
+
+    case DEFAULT
+      intFlag = 0
+
+    endselect
+
+  endfunction GetQFlagForChar
+
+  subroutine Init2DWorkspace()
+    implicit none
+    ! Local
+    logical :: mpiRequested
+    character(len=self_QuadratureTypeCharLength) :: qChar
+    character(len=MODEL_NAME_LENGTH) :: meshfile
+    character(len=MODEL_NAME_LENGTH) :: uniformBoundaryCondition
+    integer :: controlQuadrature
+    integer :: controlDegree
+    integer :: targetDegree
+    integer :: targetQuadrature
+    integer :: bcFlag
+
+    call config%Get("geometry.control_degree",controlDegree)
+    call config%Get("geometry.target_degree",targetDegree)
+    call config%Get("geometry.control_quadrature",qChar)
+    controlQuadrature = GetQFlagForChar(trim(qChar))
+    call config%Get("geometry.target_quadrature",qChar)
+    targetQuadrature = GetQFlagForChar(trim(qChar))
+    call config%Get("geometry.mesh_file",meshfile)
+    call config%Get("geometry.uniform_boundary_condition",uniformBoundaryCondition)
+    bcFlag = GetBCFlagForChar(uniformBoundaryCondition)
+
+    print*,"Using Mesh file : "//trim(meshfile)
+    ! Read in mesh file and set the public mesh pointer to selfMesh2D
+    call selfMesh2D%Read_HOPr(trim(meshfile))
+    call selfMesh2D%ResetBoundaryConditionType(bcFlag)
+
+    selfMesh => selfMesh2D
+
+    ! Create an interpolant
+    call interp%Init(controlDegree, &
+                     controlQuadrature, &
+                     targetDegree, &
+                     targetQuadrature)
+
+    ! Generate geometry (metric terms) from the mesh elements
+    call selfGeometry2D%Init(interp,selfMesh2D%nElem)
+    call selfGeometry2D%GenerateFromMesh(selfMesh2D)
+
+!    selfGeometry => selfGeometry2D
+
+  endsubroutine Init2DWorkspace
 
 endmodule SELF_Model_Interface

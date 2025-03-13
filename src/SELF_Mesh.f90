@@ -32,7 +32,7 @@ module SELF_Mesh
 
   implicit none
 
-  type :: SEMMesh
+  type,abstract :: SEMMesh
     integer :: nGeo
     integer :: nElem
     integer :: nGlobalElem
@@ -44,7 +44,19 @@ module SELF_Mesh
     integer :: nBCs
     integer :: quadrature
     type(DomainDecomposition) :: decomp
+
+  contains
+    procedure(SELF_FreeMesh),deferred :: Free
+
   endtype SEMMesh
+
+  interface
+    subroutine SELF_FreeMesh(this)
+      import SEMMesh
+      implicit none
+      class(SEMMesh),intent(inout) :: this
+    endsubroutine SELF_FreeMesh
+  endinterface
 
   ! Element Types - From Table 4.1 of https://www.hopr-project.org/externals/Meshformat.pdf
   integer,parameter :: selfLineLinear = 1
