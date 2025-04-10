@@ -1,6 +1,7 @@
 import json
 from typing import Optional, Dict, Any
 import os
+from ._version import version
 
 
 class SelfModelConfig:
@@ -25,7 +26,7 @@ class SelfModelConfig:
     def default_config() -> Dict[str, Any]:
         """Return default configuration based on the JSON schema."""
         return {
-            "version": "v0.0.0",
+            "version": version,
             "model_name": "linear-shallow-water-2d",
             "geometry": {
                 "mesh_file": "",
@@ -61,16 +62,16 @@ class SelfModelConfig:
                 "f0": 0.0,
                 "beta": 0.0,
                 "initial_conditions": {
-                    "geostrophic_balance": false,
+                    "geostrophic_balance": False,
                     "file": "",
                     "u": 0.0,
                     "v": 0.0,
                     "eta": 0.0,
                 },
                 "boundary_conditions": {
-                    "time_deppendent": false,
+                    "time_dependent": False,
                     "dt": 0.0,
-                    "from_initial_conditions": false,
+                    "from_initial_conditions": False,
                     "u": 0.0,
                     "v": 0.0,
                     "eta": 0.0,

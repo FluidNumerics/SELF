@@ -2,7 +2,7 @@
 #
 
 import pyself.lagrange as lagrange
-
+import numpy as np
 
 # class semline:
 #     def __init__(self):
@@ -64,9 +64,9 @@ class semquad:
 
         self.daskChunkSize = 1000  # number of elements per dask chunk
 
-    def set_coordinates(self, x, y):
-        self.x = x
-        self.y = y
+    def set_coordinates(self, x: np.array, y: np.array):
+        self.x = da.from_array(x, chunks=(self.daskChunkSize, N, N))
+        self.y = da.from_array(y, chunks=(self.daskChunkSize, N, N))
         self.nElem = x.shape[0]
 
     def set_units(self, units):

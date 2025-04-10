@@ -232,14 +232,10 @@ endif()
 if(SELF_ENABLE_TESTING)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
-    if(SELF_ENABLE_EXAMPLES)
-        add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
-    endif()
-else()
-    if(SELF_ENABLE_EXAMPLES)
-        enable_testing()
-        add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
-    endif()
+endif()
+
+if(SELF_ENABLE_EXAMPLES)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
 endif()
 
 

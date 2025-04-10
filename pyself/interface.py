@@ -2,7 +2,10 @@
 
 
 from pyself.config import SelfModelConfig
-
+from pyself.model import model2d, model3d
+from pyself.geometry import semquad, semhex
+from pyself import lagrange
+from pyself._utils.library import find_library_full_path
 
 ## Add ctypes interface to fortran library
 from ctypes import (
@@ -17,27 +20,46 @@ from ctypes import (
 import numpy as np
 from ctypes.util import find_library
 import os
+from typing import Union, Any
 
 _VAR_BUFFER_SIZE = 256
 
+MODEL_TO_TYPE = {
+    # "burgers-1d": model1d,
+    "linear-shallow-water-2d": model2d,
+    "linear-euler-2d": model2d,
+    "linear-euler-3d": model3d,
+    "gfdles-3d": model3d,
+}
+
 
 class SelfModel:
-    def __init__(self, config: SelfModelConfig = SelfModelConfig(), lib: str = None):
+    def __init__(
+        self,
+        modeldata: Union[model2d, model3d] = None,
+        config: SelfModelConfig = SelfModelConfig(),
+        case_directory: str = os.getcwd(),
+        lib: str = None,
+    ):
         self.case_directory = case_directory
         self.config = config
         self._config_file = f"{self.config.case_directory}/model_input.json"
-        self._solution = None
-        self._mesh = None
-        self._geometry = None
+
+        self._modeldata = modeldata  # Either a model2d or model3d object
+
         self._last_pickup_file = None
 
         if lib is None:
-            try:
-                self._lib = CDLL(find_lib("self_interface"))
-            except:
+            _lib = find_library_full_path("self_interface")
+            if _lib is None:
                 raise Exception(
                     "Could not find the libself_interface.so library. Ensure your LD_LIBRARY_PATH includes the path for libself_interface.so"
                 )
+            else:
+                try:
+                    self._lib = CDLL(_lib)
+                except:
+                    raise Exception(f"Could not load the library {lib}")
         else:
             # Library ust be libself_interface.so
             if not lib.endswith("libself_interface.so"):
@@ -52,8 +74,8 @@ class SelfModel:
 
         self._configure_interface()
         self._precision = self._lib.GetPrecision()
-        # self._dtype = {4: np.float32, 8: np.float64}[self._precision]
-        # self._cprec = {4: c_float, 8: c_double}[self._precision]
+        self._dtype = {4: np.float32, 8: np.float64}[self._precision]
+        self._cprec = {4: c_float, 8: c_double}[self._precision]
 
         self._initialized = False
 
@@ -79,8 +101,17 @@ class SelfModel:
         ]
         self._lib.GetSolution.restype = None  # Subroutine, no return
 
+        self._lib.SetSolution.argtypes = [
+            POINTER(c_void_p),
+            POINTER(c_int * 5),
+        ]
+        self._lib.SetSolution.restype = None  # Subroutine, no return
+
         self._lib.GetVariableName.argtypes = [c_int, c_char_p]
         self._lib.GetVariableName.restype = None
+
+        self._lib.GetVariableUnits.argtypes = [c_int, c_char_p]
+        self._lib.GetVariableUnits.restype = None
 
         self._lib.GetPrecision.argtypes = []  # No arguments
         self._lib.GetPrecision.restype = c_int  # Function returns an integer
@@ -165,7 +196,11 @@ class SelfModel:
                     f"Model returned error code {error} for model_name = {self.config.config['model_name']}"
                 )
 
-            # To do, print out model parameters, nicely formatted
+            # Initialize the _modeldata object
+            self._modeldata = MODEL_TO_TYPE[self.config.config["model_name"]]()
+            x, y = self.get_coordinates()
+            self._modeldata.set_coordinates(x, y)
+
             self._initialized = True
         else:
             raise Exception("Model is already initialized")
@@ -228,6 +263,15 @@ class SelfModel:
         return pickup_file
 
     def get_solution(self):
+        """
+        Obtains the solution data from the Fortran model and stores it in the _modeldata attribute.
+        The solution data is returned as a model2d or model3d object, depending on the model configuration.
+
+        Returns:
+        --------
+        modeldata (model2d or model3d): the model data object containing the solution
+
+        """
         if not self._initialized:
             raise Exception("Model is not initialized")
 
@@ -242,24 +286,123 @@ class SelfModel:
         dim = [shape[i] for i in range(rank.value)]  # Extract only relevant dimensions
 
         # Convert void pointer to float or double pointer
-        if self._precision == 4:
-            data_ptr = ctypes.cast(solution_ptr, POINTER(c_float))
-        else:
-            data_ptr = ctypes.cast(solution_ptr, POINTER(c_double))
+        data_ptr = ctypes.cast(solution_ptr, POINTER(self._cprec))
 
         # Convert to NumPy array (handling column-major storage)
         solution = np.ctypeslib.as_array(
             data_ptr, shape=tuple(reversed(dim))
         )  # Reverse shape for row-major order
 
-        self._solution = solution  # Create a pointer to the data
+        # Store the results in the _modeldata object
+        names = [self._get_variable_name(i) for i in range(dim[0])]
+        units = [self._get_variable_units(i) for i in range(dim[0])]
+        self._modeldata.set_solution(solution, names, units)
 
-        # To do:  error handling
+        return self._modeldata
 
-        return solution
+    def _validate_solution_data(self, data: np.ndarray):
+        """
+        Validate the solution data against the expected shape and type.
+        The function checks if the data is a NumPy array and if its shape matches
+        the expected dimensions for the model.
+
+        Parameters:
+        ----------
+        data (np.ndarray): the solution data to validate
+
+        Raises:
+        -------
+        ValueError: if the data is not a NumPy array or if its shape does not match the expected dimensions
+
+        """
+        if not self._initialized:
+            raise Exception("Model is not initialized")
+
+        if not isinstance(data, np.ndarray):
+            raise ValueError("Solution data must be a NumPy array")
+
+        # Check the shape of the data
+        expected_shape = self._modeldata.shape()
+        if data.shape != expected_shape:
+            raise ValueError(
+                f"Solution data shape {data.shape} does not match expected shape {expected_shape}"
+            )
+
+    def set_solution(self, data: np.ndarray):
+        """
+        Sets the _modeldata attribute with the provided solution data and pushes the
+        data to the Fortran model. The function validates the data shape and type
+        before setting it in the model. The data is expected to be a NumPy array
+        with the same shape as the model's expected solution shape.
+
+        Parameters:
+        ----------
+        data (np.ndarray): the solution data to set in the model
+
+        """
+        if not self._initialized:
+            raise Exception("Model is not initialized")
+
+        self._validate_solution_data(data)
+
+        # Set the solution data in the _modeldata object
+        self._modeldata.set_solution(data)
+
+        # Get a void pointer to the data
+        data_ptr = np.asfortranarray(data, dtype=self._dtype).ctypes.data_as(c_void_p)
+        # Shape handling: up to 5D, pad with 1s if needed
+        shape = list(np_array.shape)
+        shape_5d = shape + [1] * (5 - ndim)  # Pad to 5 elements
+        shape_array = (c_int * 5)(*shape_5d)
+        self_lib.SetSolution(data_ptr, shape_array)
+
+        return self._modeldata
+
+    def get_coordinates(self):
+        """
+        Obtains the coordinates data from the Fortran model and stores it in the _modeldata attribute.
+        The coordinates data is returned as a semquad or semhex object, depending on the model configuration.
+
+        Returns:
+        --------
+        x (np.ndarray): x-coordinates of the mesh
+        y (np.ndarray): y-coordinates of the mesh
+
+        """
+        if not self._initialized:
+            raise Exception("Model is not initialized")
+
+        # Get the coordinates
+        x_ptr = c_void_p()
+        shape = (c_int * 5)()
+        rank = c_int()
+        precision = c_int()
+        self._lib.GetGeometryCoordinates(byref(x_ptr), shape, byref(rank))
+
+        # Extract shape values
+        dim = [shape[i] for i in range(rank.value)]
+
+        # Convert void pointer to float or double pointer
+        if self._precision == 4:
+            data_ptr = ctypes.cast(x_ptr, POINTER(c_float))
+        else:
+            data_ptr = ctypes.cast(x_ptr, POINTER(c_double))
+
+        # Convert to NumPy array (handling column-major storage)
+        xy = np.ctypeslib.as_array(
+            data_ptr, shape=tuple(reversed(dim))
+        )  # Reverse shape for row-major order
+
+        return xy[0, ...].flatten(), xy[1, ...].flatten()
 
     def _get_variable_name(self, ivar):
         variable_name_buffer = create_string_buffer(_VAR_BUFFER_SIZE)
         self._lib.GetVariableName(c_int(ivar), variable_name_buffer)
 
         return variable_name_buffer.value.decode("utf-8").strip()
+
+    def _get_variable_units(self, ivar):
+        variable_units_buffer = create_string_buffer(_VAR_BUFFER_SIZE)
+        self._lib.GetVariableUnits(c_int(ivar), variable_units_buffer)
+
+        return variable_units_buffer.value.decode("utf-8").strip()

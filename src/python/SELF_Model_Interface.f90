@@ -74,7 +74,16 @@ module SELF_Model_Interface
   character(kind=c_char,len=750),private :: model_configuration_file
 
   ! Interfaces
-  public :: Initialize,ForwardStep,WritePickupFile,UpdateParameters,GetSolution,GetPrecision,GetVariableName,Finalize
+  public :: Initialize
+  public :: ForwardStep
+  public :: WritePickupFile
+  public :: UpdateParameters
+  public :: GetSolution
+  public :: SetSolution
+  public :: GetPrecision
+  public :: GetVariableName
+  public :: GetVariableUnits
+  public :: Finalize
   private :: GetBCFlagForChar,Init2DWorkspace
 contains
 
@@ -274,6 +283,28 @@ contains
 
   endsubroutine GetSolution
 
+  subroutine SetSolution(solution,solshape) bind(C,name="SetSolution")
+    type(c_ptr),intent(in) :: solution ! Pointer to data
+    integer(c_int),intent(in) :: solshape(5) ! Shape array (max 4D)
+
+    select type(selfModel)
+
+    class is(DGModel1D)
+      call c_f_pointer(solution,selfModel%solution%interior,solshape(1:3))
+      call selfModel%solution%UpdateDevice()
+
+    class is(DGModel2D)
+      call c_f_pointer(solution,selfModel%solution%interior,solshape(1:4))
+      call selfModel%solution%UpdateDevice()
+
+    class is(DGModel3D)
+      call c_f_pointer(solution,selfModel%solution%interior,solshape(1:5))
+      call selfModel%solution%UpdateDevice()
+
+    endselect
+
+  endsubroutine SetSolution
+
   subroutine GetVariableName(ivar,name) bind(c,name="GetVariableName")
     integer(c_int),intent(in) :: ivar
     character(kind=c_char,len=*),intent(out) :: name
@@ -292,6 +323,25 @@ contains
     endselect
 
   endsubroutine GetVariableName
+
+  subroutine GetVariableUnits(ivar,name) bind(c,name="GetVariableUnits")
+    integer(c_int),intent(in) :: ivar
+    character(kind=c_char,len=*),intent(out) :: name
+
+    select type(selfModel)
+
+    class is(DGModel1D)
+      name = selfModel%solution%meta(ivar)%units
+
+    class is(DGModel2D)
+      name = selfModel%solution%meta(ivar)%units
+
+    class is(DGModel3D)
+      name = selfModel%solution%meta(ivar)%units
+
+    endselect
+
+  endsubroutine GetVariableUnits
 
   ! =================================================================
   !                      Private methods
