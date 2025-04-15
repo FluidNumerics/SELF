@@ -160,9 +160,15 @@ module SELF_Model
     procedure :: hbc2d_Prescribed => hbc2d_Prescribed_Model
     procedure :: hbc2d_Radiation => hbc2d_Generic_Model
     procedure :: hbc2d_NoNormalFlow => hbc2d_Generic_Model
+    procedure :: hbc2d_Inflow => hbc2d_Generic_Model
+    procedure :: hbc2d_Outflow => hbc2d_Generic_Model
+    procedure :: hbc2d_NoSlip => hbc2d_Generic_Model
     procedure :: hbc3d_Prescribed => hbc3d_Prescribed_Model
     procedure :: hbc3d_Radiation => hbc3d_Generic_Model
     procedure :: hbc3d_NoNormalFlow => hbc3d_Generic_Model
+    procedure :: hbc3d_Inflow => hbc3d_Generic_Model
+    procedure :: hbc3d_Outflow => hbc3d_Generic_Model
+    procedure :: hbc3d_NoSlip => hbc3d_Generic_Model
 
     ! Boundary condition functions (parabolic)
     procedure :: pbc1d_Prescribed => pbc1d_Prescribed_Model
@@ -171,9 +177,13 @@ module SELF_Model
     procedure :: pbc2d_Prescribed => pbc2d_Prescribed_Model
     procedure :: pbc2d_Radiation => pbc2d_Generic_Model
     procedure :: pbc2d_NoNormalFlow => pbc2d_Generic_Model
+    procedure :: pbc2d_Stress => pbc2d_Generic_Model
+    procedure :: pbc2d_NoStress => pbc2d_Generic_Model
     procedure :: pbc3d_Prescribed => pbc3d_Prescribed_Model
     procedure :: pbc3d_Radiation => pbc3d_Generic_Model
     procedure :: pbc3d_NoNormalFlow => pbc3d_Generic_Model
+    procedure :: pbc3d_Stress => pbc3d_Generic_Model
+    procedure :: pbc3d_NoStress => pbc3d_Generic_Model
 
     procedure :: ReportEntropy => ReportEntropy_Model
     procedure :: ReportMetrics => ReportMetrics_Model

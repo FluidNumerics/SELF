@@ -481,6 +481,39 @@ contains
             enddo
           enddo
 
+        elseif(bcid == SELF_BC_INFLOW) then
+
+          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
+              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                this%hbc3d_Inflow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
+            enddo
+          enddo
+
+        elseif(bcid == SELF_BC_OUTFLOW) then
+
+          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
+              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                this%hbc3d_Outflow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
+            enddo
+          enddo
+
+        elseif(bcid == SELF_BC_NOSLIP) then
+
+          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
+              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+                this%hbc3d_NoSlip(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
+            enddo
+          enddo
+
         endif
       endif
 
