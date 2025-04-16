@@ -1,0 +1,123 @@
+name: 8xMI300X Benchmarks
+
+on: workflow_dispatch
+
+jobs:
+  setup-and-deploy-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      runner_label: ${{ steps.set-label.outputs.label }}
+    steps:
+
+    - name: Set a unique label for the runner
+      id: set-label
+      run: echo "label=shadeform-${{ github.run_id }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+    - name: Generate base64-encoded startup script
+      id: generate-script
+      env:
+        GH_REPO: ${{ github.repository }}
+        RUNNER_TOKEN: ${{ secrets.SHADEFORM_RUNNER_TOKEN }}
+        RUNNER_LABEL: ${{ steps.set-label.outputs.label }}
+      run: |
+        cat << EOF > setup.sh
+        #!/bin/bash
+        set -ex
+        apt-get update && apt-get install -y curl unzip libicu-dev tmux
+
+        cd /root
+        mkdir -p actions-runner && cd actions-runner
+
+        RUNNER_VERSION="2.315.0"
+        curl -L -o runner.tar.gz "https://github.com/actions/runner/releases/download/v\${RUNNER_VERSION}/actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz"
+        tar xzf runner.tar.gz
+
+        ./config.sh --url "https://github.com/${GH_REPO}" \
+                    --token "${RUNNER_TOKEN}" \
+                    --labels "${RUNNER_LABEL}" \
+                    --unattended --replace
+
+        tmux new-session -d -s runner "./run.sh"
+        EOF
+
+        base64 -w 0 setup.sh > encoded_script.b64
+        echo "ENCODED_SCRIPT<<EOF" >> $GITHUB_ENV
+        cat encoded_script.b64 >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Provision Shadeform instance with startup script
+      id: create-instance
+      env:
+        ENCODED_SCRIPT: ${{ env.ENCODED_SCRIPT }}
+        SHADEFORM_API_KEY: ${{ secrets.SHADEFORM_API_KEY }}
+        SHADEFORM_SSH_KEY_ID: ${{ secrets.SHADEFORM_SSH_KEY_ID }}
+      run: |
+        RESPONSE=$(curl -s -X POST 'https://api.shadeform.ai/v1/instances/create' \
+          -H "x-api-key: ${SHADEFORM_API_KEY}" \
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"cloud\": \"hotaisle\",
+            \"name\": \"shadeform-runner-${{ github.run_id }}\",
+            \"os\": \"ubuntu22.04_rocm6.2.4\",
+            \"shade_cloud\": true,
+            \"shade_instance_type\": \"MI300Xx8\",
+            \"region\": \"grandrapids-usa-1\",
+            \"ssh_key_id\": \"${SHADEFORM_SSH_KEY_ID}\",
+            \"launch_configuration\": {
+              \"type\": \"script\",
+              \"script_configuration\": {
+                \"base64_script\": \"${ENCODED_SCRIPT}\"
+              }
+            }
+          }")
+
+        echo "$RESPONSE" > instance.json
+        echo "INSTANCE_ID=$(jq -r '.instance.id' instance.json)" >> $GITHUB_ENV
+
+    - name: Wait for runner registration
+      run: |
+        echo "Waiting 60s for the Shadeform instance to boot and register..."
+        sleep 60
+
+  run-job:
+    needs: setup-and-deploy-runner
+    runs-on: ${{ needs.setup-and-deploy-runner.outputs.runner_label }}
+    steps:
+      - name: Confirm GPU availability
+        run: rocminfo || echo "Fallback GPU not detected"
+
+      - name: Run tests or CI steps
+        run: |
+          echo "Running benchmarks"
+          # TO DO: Add your benchmark commands here
+
+  cleanup:
+    needs: [setup-and-deploy-runner, run-job]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - name: Unregister GitHub runner
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO: ${{ github.repository }}
+        LABEL: ${{ needs.setup-and-deploy-runner.outputs.runner_label }}
+      run: |
+        RUNNER_ID=$(curl -s -H "Authorization: token $GH_TOKEN" \
+          https://api.github.com/repos/$REPO/actions/runners \
+          | jq ".runners[] | select(.name == \"$LABEL\") | .id")
+
+        if [ -n "$RUNNER_ID" ]; then
+          curl -X DELETE -H "Authorization: token $GH_TOKEN" \
+            https://api.github.com/repos/$REPO/actions/runners/$RUNNER_ID
+        else
+          echo "Runner not found or already removed"
+        fi
+
+    - name: Teardown Shadeform instance
+      env:
+        SHADEFORM_API_KEY: ${{ secrets.SHADEFORM_API_KEY }}
+        INSTANCE_ID: ${{ env.INSTANCE_ID }}
+      run: |
+        curl -X POST "https://api.shadeform.ai/v1/instances/$INSTANCE_ID/delete" \
+          -H "x-api-key: $SHADEFORM_API_KEY" \
+          -H 'Content-Type: application/json'
