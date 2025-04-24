@@ -177,13 +177,15 @@ module SELF_Model
     procedure :: pbc2d_Prescribed => pbc2d_Prescribed_Model
     procedure :: pbc2d_Radiation => pbc2d_Generic_Model
     procedure :: pbc2d_NoNormalFlow => pbc2d_Generic_Model
-    procedure :: pbc2d_Stress => pbc2d_Generic_Model
-    procedure :: pbc2d_NoStress => pbc2d_Generic_Model
+    procedure :: pbc2d_Inflow => pbc2d_Generic_Model
+    procedure :: pbc2d_Outflow => pbc2d_Generic_Model
+    procedure :: pbc2d_NoSlip => pbc2d_Generic_Model
     procedure :: pbc3d_Prescribed => pbc3d_Prescribed_Model
     procedure :: pbc3d_Radiation => pbc3d_Generic_Model
     procedure :: pbc3d_NoNormalFlow => pbc3d_Generic_Model
-    procedure :: pbc3d_Stress => pbc3d_Generic_Model
-    procedure :: pbc3d_NoStress => pbc3d_Generic_Model
+    procedure :: pbc3d_Inflow => pbc3d_Generic_Model
+    procedure :: pbc3d_Outflow => pbc3d_Generic_Model
+    procedure :: pbc3d_NoSlip => pbc3d_Generic_Model
 
     procedure :: ReportEntropy => ReportEntropy_Model
     procedure :: ReportMetrics => ReportMetrics_Model

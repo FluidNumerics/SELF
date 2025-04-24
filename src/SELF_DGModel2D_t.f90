@@ -566,7 +566,7 @@ contains
           do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
             nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
               this%pbc2d_Inflow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
@@ -575,7 +575,7 @@ contains
           do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
             nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
               this%pbc2d_Outflow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
@@ -584,7 +584,7 @@ contains
           do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
             nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
-            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
               this%pbc2d_noslip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
