@@ -575,6 +575,45 @@ contains
             enddo
           enddo
 
+        elseif(bcid == SELF_BC_INFLOW) then
+
+          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
+              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+
+              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                this%pbc3d_Inflow(dsdx,nhat)
+            enddo
+          enddo
+
+        elseif(bcid == SELF_BC_OUTFLOW) then
+
+          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
+              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+
+              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                this%pbc3d_Outflow(dsdx,nhat)
+            enddo
+          enddo
+
+        elseif(bcid == SELF_BC_NOSLIP) then
+
+          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
+              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+
+              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+
+              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+                this%pbc3d_NoSlip(dsdx,nhat)
+            enddo
+          enddo
+
         endif
       endif
 
