@@ -30,6 +30,7 @@ program burgers1d_constant
   use self_burgers1d
 
   implicit none
+  integer,parameter :: SELF_BC_PRESCRIBED = 1 ! Provide a parameter for tagging a prescribed boundary condition
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'euler'
   integer,parameter :: nelem = 50
   integer,parameter :: controlDegree = 7
@@ -64,6 +65,11 @@ program burgers1d_constant
   ! Initialize the model
   call modelobj%Init(mesh,geometry)
   modelobj%gradient_enabled = .true.
+
+  ! Register boundary conditions
+  call modelobj%boundaryconditions%RegisterBoundaryCondition(SELF_BC_PRESCRIBED,'prescribed',Burgers1d_prescribed)
+  call modelobj%boundaryconditions%RegisterBoundaryCondition(SELF_BC_PRESCRIBED,'prescribed',Burgers1d_gradient_prescribed)
+
   !Set the diffusivity
   modelobj%nu = nu
 
@@ -105,5 +111,45 @@ program burgers1d_constant
   call mesh%free()
   call geometry%free()
   call interp%free()
+
+contains
+  pure function Burgers1d_prescribed(this,s,dsdx,x,t,nhat) result(extstate)
+  !! This function is called to set the boundary condition
+  !! for the Burgers1D model. The function is called
+  !! at the boundary nodes of the mesh. The function
+  !! returns the value of the state variable at the
+  !! boundary nodes.
+    use SELF_Constants,only:prec
+    use self_Burgers1D
+    implicit none
+    class(self_Burgers1D),intent(inout) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:this%ndim)
+    real(prec),intent(in) :: x(1:this%ndim)
+    real(prec),intent(in) :: nhat(1:this%ndim)
+    real(prec),intent(in) :: t
+    real(prec) :: extstate(1:this%nvar)
+
+    extstate(1:this%nvar) = 1.0_prec
+
+  endfunction Burgers1d_prescribed
+
+  pure function Burgers1d_gradient_prescribed(this,s,dsdx,x,t,nhat) result(extstate)
+    ! This function is used to set the gradient of the prescribed boundary condition
+    ! to zero. This is necessary for the prescribed boundary condition to work correctly.
+    use SELF_Constants,only:prec
+    use self_Burgers1D
+    implicit none
+    class(self_Burgers1D),intent(inout) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec),intent(in) :: dsdx(1:this%nvar,1:this%ndim)
+    real(prec),intent(in) :: x(1:this%ndim)
+    real(prec),intent(in) :: nhat(1:this%ndim)
+    real(prec),intent(in) :: t
+    real(prec) :: extstate(1:this%nvar,1:this%ndim)
+
+    extstate(1:this%nvar,1:this%ndim) = 0.0_prec
+
+  endfunction Burgers1d_gradient_prescribed
 
 endprogram burgers1d_constant

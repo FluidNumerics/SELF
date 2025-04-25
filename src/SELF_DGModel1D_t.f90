@@ -91,6 +91,7 @@ contains
 
     this%mesh => mesh
     this%geometry => geometry
+    this%ndim = 1
     call this%SetNumberOfVariables()
 
     call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
@@ -105,6 +106,8 @@ contains
     call this%solutionGradient%AssociateGeometry(geometry)
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%boundaryconditions%Init()
 
     call this%AdditionalInit()
 
@@ -145,6 +148,7 @@ contains
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
+    call this%boundaryconditions%Free()
     call this%AdditionalFree()
 
   endsubroutine Free_DGModel1D_t
@@ -325,56 +329,29 @@ contains
     ! local
     integer :: ivar
     integer :: N,nelem
-    real(prec) :: x
+    real(prec) :: x(1),nhat(1),s(1:this%nvar),dsdx(1:this%nvar,1),t
+    type(SELF_BoundaryCondition),pointer :: bc
 
     nelem = this%geometry%nelem ! number of elements in the mesh
     N = this%solution%interp%N ! polynomial degree
 
-    ! left-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
+    ! Left boundary condition
+    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
+    x = this%geometry%x%boundary(1,1)
+    s = this%solution%boundary(1,1,1:this%nvar)
+    dsdx = this%solutionGradient%boundary(1,1,1:this%nvar)
+    t = this%t
+    nhat = -1.0_prec
+    this%solution%extBoundary(1,1,1:this%nvar) = bc%bcFunc(s,dsdx,x,t,nhat)
 
-      x = this%geometry%x%boundary(1,1,1)
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_Radiation(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_NoNormalFlow(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solution%extBoundary(1,1,1:this%nvar) = this%solution%boundary(2,nelem,1:this%nvar)
-
-    endif
-
-    ! right-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(2,nelem,1)
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_Radiation(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_NoNormalFlow(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = this%solution%boundary(1,1,1:this%nvar)
-
-    endif
+    ! Right boundary condition
+    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
+    x = this%geometry%x%boundary(2,nelem)
+    s = this%solution%boundary(2,nelem,1:this%nvar)
+    dsdx = this%solutionGradient%boundary(2,nelem,1:this%nvar)
+    t = this%t
+    nhat = 1.0_prec
+    this%solution%extBoundary(2,nelem,1:this%nvar) = bc%bcFunc(s,dsdx,x,t,nhat)
 
   endsubroutine setboundarycondition_DGModel1D_t
 
@@ -387,56 +364,30 @@ contains
     implicit none
     class(DGModel1D_t),intent(inout) :: this
     ! local
-    real(prec) :: x
+    real(prec) :: x(1),nhat(1),s(1:this%nvar),dsdx(1:this%nvar,1),t
+    real(prec) :: exts(1:this%nvar,1)
     integer :: nelem
 
     nelem = this%geometry%nelem ! number of elements in the mesh
+    ! Left boundary condition
+    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
+    x = this%geometry%x%boundary(1,1)
+    s = this%solution%boundary(1,1,1:this%nvar)
+    dsdx = this%solutionGradient%boundary(1,1,1:this%nvar)
+    t = this%t
+    nhat = -1.0_prec
+    exts = bc%bcFunc(s,dsdx,x,t,nhat)
+    this%solutiongradient%extBoundary(1,1,1:this%nvar) = exts(1:this%nvar,1)
 
-    ! left-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(1,1,1)
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_Radiation(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = this%solutionGradient%boundary(2,nelem,1:this%nvar)
-
-    endif
-
-    ! right-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(2,nelem,1)
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_Radiation(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = this%solutionGradient%boundary(1,1,1:this%nvar)
-
-    endif
+    ! Right boundary condition
+    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
+    x = this%geometry%x%boundary(2,nelem)
+    s = this%solution%boundary(2,nelem,1:this%nvar)
+    dsdx = this%solutionGradient%boundary(2,nelem,1:this%nvar)
+    t = this%t
+    nhat = 1.0_prec
+    exts = bc%bcFunc(s,dsdx,x,t,nhat)
+    this%solutiongradient%extBoundary(2,nelem,1:this%nvar) = exts(1:this%nvar,1)
 
   endsubroutine setgradientboundarycondition_DGModel1D_t
 
