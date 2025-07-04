@@ -336,22 +336,22 @@ contains
     N = this%solution%interp%N ! polynomial degree
 
     ! Left boundary condition
-    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
-    x = this%geometry%x%boundary(1,1)
+    bc => this%boundaryconditions%GetBCForID(this%mesh%bcid(1))
+    x = this%geometry%x%boundary(1,1,1)
     s = this%solution%boundary(1,1,1:this%nvar)
-    dsdx = this%solutionGradient%boundary(1,1,1:this%nvar)
+    dsdx(1:this%nvar,1) = this%solutionGradient%boundary(1,1,1:this%nvar)
     t = this%t
     nhat = -1.0_prec
-    this%solution%extBoundary(1,1,1:this%nvar) = bc%bcFunc(s,dsdx,x,t,nhat)
+    this%solution%extBoundary(1,1,1:this%nvar) = bc%bcFunction(s,dsdx,x,t,nhat,this%nvar,1)
 
     ! Right boundary condition
-    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
-    x = this%geometry%x%boundary(2,nelem)
+    bc => this%boundaryconditions%GetBCForID(this%mesh%bcid(1))
+    x = this%geometry%x%boundary(2,nelem,1)
     s = this%solution%boundary(2,nelem,1:this%nvar)
-    dsdx = this%solutionGradient%boundary(2,nelem,1:this%nvar)
+    dsdx(1:this%nvar,1) = this%solutionGradient%boundary(2,nelem,1:this%nvar)
     t = this%t
     nhat = 1.0_prec
-    this%solution%extBoundary(2,nelem,1:this%nvar) = bc%bcFunc(s,dsdx,x,t,nhat)
+    this%solution%extBoundary(2,nelem,1:this%nvar) = bc%bcFunction(s,dsdx,x,t,nhat,this%nvar,1)
 
   endsubroutine setboundarycondition_DGModel1D_t
 
@@ -367,26 +367,27 @@ contains
     real(prec) :: x(1),nhat(1),s(1:this%nvar),dsdx(1:this%nvar,1),t
     real(prec) :: exts(1:this%nvar,1)
     integer :: nelem
+    type(SELF_BoundaryCondition),pointer :: bc
 
     nelem = this%geometry%nelem ! number of elements in the mesh
     ! Left boundary condition
-    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
-    x = this%geometry%x%boundary(1,1)
+    bc => this%boundaryconditions%GetBCForID(this%mesh%bcid(1))
+    x(1) = this%geometry%x%boundary(1,1,1)
     s = this%solution%boundary(1,1,1:this%nvar)
-    dsdx = this%solutionGradient%boundary(1,1,1:this%nvar)
+    dsdx(1:this%nvar,1) = this%solutionGradient%boundary(1,1,1:this%nvar)
     t = this%t
     nhat = -1.0_prec
-    exts = bc%bcFunc(s,dsdx,x,t,nhat)
+    exts = bc%bcgFunction(s,dsdx,x,t,nhat,this%nvar,1)
     this%solutiongradient%extBoundary(1,1,1:this%nvar) = exts(1:this%nvar,1)
 
     ! Right boundary condition
-    bcFunc = this%boundaryconditions%GetNodeForBCID(this%mesh%bcid(1))
-    x = this%geometry%x%boundary(2,nelem)
+    bc => this%boundaryconditions%GetBCForID(this%mesh%bcid(1))
+    x(1) = this%geometry%x%boundary(2,nelem,1)
     s = this%solution%boundary(2,nelem,1:this%nvar)
-    dsdx = this%solutionGradient%boundary(2,nelem,1:this%nvar)
+    dsdx(1:this%nvar,1) = this%solutionGradient%boundary(2,nelem,1:this%nvar)
     t = this%t
     nhat = 1.0_prec
-    exts = bc%bcFunc(s,dsdx,x,t,nhat)
+    exts = bc%bcgFunction(s,dsdx,x,t,nhat,this%nvar,1)
     this%solutiongradient%extBoundary(2,nelem,1:this%nvar) = exts(1:this%nvar,1)
 
   endsubroutine setgradientboundarycondition_DGModel1D_t
