@@ -44,7 +44,7 @@ module self_CIGLES3D_t
 !!
 !! \begin{equation}
 !! \overleftrightarrow{f} = \begin{pmatrix}
-!!     \rho u \hat{x} + \rho v \hat{y} + \rho w \hat{z} \\
+!!      \rho u \hat{x} + \rho v \hat{y} + \rho w \hat{z} \\
 !!      \vec{u} \rho u + \frac{p}{\rho_0} \hat{x} \\
 !!      \vec{u} \rho v + \frac{p}{\rho_0} \hat{y} \\
 !!      \vec{u} \rho w + \frac{p}{\rho_0} \hat{z} \\
