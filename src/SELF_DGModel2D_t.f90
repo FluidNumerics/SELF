@@ -585,7 +585,7 @@ contains
             nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
             this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
-              this%pbc2d_noslip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+              this%pbc2d_NoSlip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
         endif
