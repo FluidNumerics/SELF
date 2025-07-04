@@ -503,7 +503,7 @@ contains
             nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
 
             this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-              this%hbc2d_noslip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+              this%hbc2d_NoSlip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
         endif
