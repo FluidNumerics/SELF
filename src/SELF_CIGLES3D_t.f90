@@ -79,7 +79,7 @@ module self_CIGLES3D_t
     integer :: ndiagnostics
 
     ! Model parameters
-    real(prec) :: p0 = 10.0_prec**(5) ! Reference pressure for potential temperature ()
+    real(prec) :: p0 = 10.0_prec**(5) ! Reference pressure for potential temperature (Pa)
     real(prec) :: Cp = 1.005_prec*10.0_prec**(3) ! Specific heat at constant pressure (J/kg-K)
     real(prec) :: Cv = 0.718_prec*10.0_prec**(3) ! Specific heat at constant volume (J/kg-K)
     real(prec) :: R = 287.04_prec ! Gas constant (Cp - Cv)
