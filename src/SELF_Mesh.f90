@@ -96,9 +96,13 @@ module SELF_Mesh
   integer,parameter :: SELF_BC_PRESCRIBED = 100
   integer,parameter :: SELF_BC_RADIATION = 101
   integer,parameter :: SELF_BC_NONORMALFLOW = 102
+  integer,parameter :: SELF_BC_INFLOW = 103
+  integer,parameter :: SELF_BC_OUTFLOW = 104
+  integer,parameter :: SELF_BC_NOSLIP = 105
 
   ! Conditions on the solution gradients
   integer,parameter :: SELF_BC_PRESCRIBED_STRESS = 200
-  integer,parameter :: SELF_BC_NOSTRESS = 201
+  integer,parameter :: SELF_BC_NOSTRESS = 201 ! Defaults to setting the external gradient field as the negative of the internal gradient field so the average is zero.
+  integer,parameter :: SELF_BC_STRESS = 202 ! Defaults to prolonging the internal gradient field to the external gradient field
 
 endmodule SELF_Mesh

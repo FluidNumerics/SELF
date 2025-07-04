@@ -479,6 +479,33 @@ contains
               this%hbc2d_NoNormalFlow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
+        elseif(bcid == SELF_BC_INFLOW) then
+
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              this%hbc2d_Inflow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
+
+        elseif(bcid == SELF_BC_OUTFLOW) then
+
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              this%hbc2d_Outflow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
+
+        elseif(bcid == SELF_BC_NOSLIP) then
+
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              this%hbc2d_NoSlip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
+
         endif
       endif
 
@@ -532,6 +559,33 @@ contains
 
             this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
               this%pbc2d_NoNormalFlow(dsdx,nhat)
+          enddo
+
+        elseif(bcid == SELF_BC_INFLOW) then
+
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              this%pbc2d_Inflow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
+
+        elseif(bcid == SELF_BC_OUTFLOW) then
+
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              this%pbc2d_Outflow(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
+          enddo
+
+        elseif(bcid == SELF_BC_NOSLIP) then
+
+          do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              this%pbc2d_NoSlip(this%solution%boundary(i,j,iEl,1:this%nvar),nhat)
           enddo
 
         endif

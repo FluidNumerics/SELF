@@ -90,7 +90,8 @@ module SELF_Mesh_3D_t
 !    2 - Global Side ID
 !    3 - Neighbor Element ID
 !    4 - 10*( neighbor local side )  + flip
-!    5 - Boundary Condition ID
+!    5 - Boundary Condition ID (hyperbolic part)
+!    6 - Boundary Condition ID (parabolic part) ! TODO
 !
 !
 ! ========================================================================= !

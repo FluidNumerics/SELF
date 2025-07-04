@@ -308,49 +308,7 @@ contains
                             this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
                             hipMemcpyDeviceToHost))
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
-
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Prescribed(x,this%t)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Radiation(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        endif
-      endif
-
-    enddo
+    call setboundarycondition_DGModel3D_t(this)
 
     call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
                             c_loc(this%solution%extBoundary), &
@@ -378,53 +336,7 @@ contains
                             this%solutiongradient%extboundary_gpu,sizeof(this%solutiongradient%extboundary), &
                             hipMemcpyDeviceToHost))
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
-
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Prescribed(x,this%t)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Radiation(dsdx,nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_NoNormalFlow(dsdx,nhat)
-            enddo
-          enddo
-
-        endif
-      endif
-
-    enddo
+    call setgradientboundarycondition_DGModel3D_t(this)
 
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
                             c_loc(this%solutiongradient%extBoundary), &
