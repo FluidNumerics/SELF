@@ -103,7 +103,6 @@ module SELF_Mesh_2D_t
     integer,pointer,dimension(:,:) :: CGNSCornerMap
     integer,pointer,dimension(:,:) :: CGNSSideMap
     integer,pointer,dimension(:,:) :: BCType
-    character(LEN=255),allocatable :: BCNames(:)
 
   contains
     procedure,public :: Init => Init_Mesh2D_t
@@ -113,6 +112,7 @@ module SELF_Mesh_2D_t
     generic,public :: StructuredMesh => UniformStructuredMesh_Mesh2D_t
     procedure,private :: UniformStructuredMesh_Mesh2D_t
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D_t
+    procedure,public :: RegisterBoundaryCondition => RegisterBoundaryCondition_Mesh2D_t
 
     procedure,public :: Read_HOPr => Read_HOPr_Mesh2D_t
 
@@ -153,8 +153,6 @@ contains
     allocate(this%CGNSSideMap(1:2,1:4))
     allocate(this%BCType(1:4,1:nBCs))
 
-    allocate(this%BCNames(1:nBCs))
-
     ! Create lookup tables to assist with connectivity generation
     this%CGNSCornerMap(1:2,1) = (/1,1/)
     this%CGNSCornerMap(1:2,2) = (/nGeo+1,1/)
@@ -188,7 +186,6 @@ contains
     deallocate(this%CGNSCornerMap)
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
-    deallocate(this%BCNames)
     call this%decomp%Free()
 
   endsubroutine Free_Mesh2D_t
@@ -484,7 +481,6 @@ contains
     integer,dimension(:,:),allocatable :: hopr_sideInfo
     real(prec),dimension(:,:),allocatable :: hopr_nodeCoords
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
-    integer,dimension(:,:),allocatable :: bcType
 
     call this%decomp%init()
 
@@ -504,16 +500,6 @@ contains
     print*,__FILE__//' : Mesh geometry degree = ',nGeo
     print*,__FILE__//' : N Boundary conditions = ',nBCs
     print*,__FILE__//' : N Unique Sides (3D) = ',nUniqueSides3D
-
-    ! Read BCType
-    allocate(bcType(1:4,1:nBCS))
-
-    if(this%decomp%mpiEnabled) then
-      offset(:) = 0
-      call ReadArray_HDF5(fileId,'BCType',bcType,offset)
-    else
-      call ReadArray_HDF5(fileId,'BCType',bcType)
-    endif
 
     ! Read local subarray of ElemInfo
     print*,__FILE__//' : Generating Domain Decomposition'
@@ -578,6 +564,12 @@ contains
     print*,__FILE__//' : Rank ',this%decomp%rankId+1,' Allocating memory for mesh'
     print*,__FILE__//' : Rank ',this%decomp%rankId+1,' n local sides  : ',nLocalSides2D
     call this%Init(nGeo,nLocalElems,nLocalSides2D,nLocalNodes2D,nBCs)
+    if(this%decomp%mpiEnabled) then
+      offset(:) = 0
+      call ReadArray_HDF5(fileId,'BCType',this%bcType,offset)
+    else
+      call ReadArray_HDF5(fileId,'BCType',this%bcType)
+    endif
     this%nUniqueSides = nUniqueSides2D ! Store the number of sides in the global mesh
 
     ! Copy data from local arrays into this
@@ -626,6 +618,53 @@ contains
     call this%UpdateDevice()
 
   endsubroutine Read_HOPr_Mesh2D_t
+
+  subroutine RegisterBoundaryCondition_Mesh2D_t(mesh,bcid,bcname,bcfunc)
+    implicit none
+    class(Mesh2D_t),intent(inout) :: mesh
+    integer,intent(in) :: bcid
+    character(*),intent(in) :: bcname
+    procedure(SELF_bcMethod),pointer,intent(in) :: bcfunc
+    ! Local
+    integer :: iel,j
+    integer :: e2,localbcid,nsides
+    type(BoundaryCondition),pointer :: bc
+
+    nsides = 0
+    do iel = 1,mesh%nElem
+      do j = 1,4
+        e2 = mesh%sideInfo(3,j,iel) ! Neighboring Element ID
+        localbcid = mesh%sideInfo(5,j,iel) ! Boundary Condition ID
+        if(e2 == 0 .and. localbcid == bcid) then
+          nsides = nsides+1
+        endif
+      enddo
+    enddo
+
+    if(nsides == 0) then
+      print*,"(RegisterBoundaryCondition) : WARNING : No sides found with BC ID ",bcid
+    else
+      print*,"(RegisterBoundaryCondition) : INFO : Registering BC ID ",bcid," named '",trim(bcname),"' with ",nsides," sides."
+      call mesh%stateBCs%RegisterBoundaryCondition(bcid,bcname,bcfunc,nsides)
+    endif
+
+    ! Now, we capture the list of elements and local sides for this boundary condition
+    nsides = 0
+    bc => this%stateBCs%GetBCForID(bcid)
+    do iel = 1,mesh%nElem
+      do j = 1,4
+        e2 = mesh%sideInfo(3,j,iel) ! Neighboring Element ID
+        ! See comment from https://hopr.readthedocs.io/en/latest/userguide/meshformat.html#side-information-sideinfo
+        localbcid = mesh%sideInfo(5,j,iel) ! Boundary Condition ID ! TO DO: Verify that we don't need to get mesh%bctype(bcid)
+        if(e2 == 0 .and. localbcid == bcid) then
+          nsides = nsides+1
+          bc%elements(nsides) = iel
+          bc%sides(nsides) = j
+        endif
+      enddo
+    enddo
+
+  endsubroutine RegisterBoundaryCondition_Mesh2D_t
 
   subroutine RecalculateFlip_Mesh2D_t(this)
     implicit none

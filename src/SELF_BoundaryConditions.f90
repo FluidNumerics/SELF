@@ -28,29 +28,26 @@ module SELF_BoundaryConditions
 
   use SELF_SupportRoutines
   use SELF_Metadata
+  use SELF_Model
 
   implicit none
   integer,parameter :: SELF_BCNAME_LENGTH = 32
 
-  enum,bind(c)
-    enumerator :: SELF_BC_STATE_CONTEXT = 0
-    enumerator :: SELF_BC_GRADIENT_CONTEXT = 1
-  endenum
-
-  type SELF_BoundaryCondition
-    procedure(SELF_BCFunction),pointer :: bcFunction => null() ! For state BCs
-    procedure(SELF_BCgFunction),pointer :: bcgFunction => null() ! For gradient BCs
+  type BoundaryCondition
+    procedure(SELF_bcMethod),pointer :: bcMethod => null() !
     integer :: bcid
     character(SELF_BCNAME_LENGTH) :: bcname
-    integer :: context_enum
-    type(SELF_BoundaryCondition),pointer :: next => null()
-    type(SELF_BoundaryCondition),pointer :: prev => null()
-  endtype SELF_BoundaryCondition
+    integer :: nBoundaries ! Number of boundaries this BC applies to
+    integer,allocatable :: elements(:) ! List of elements this BC applies to
+    integer,allocatable :: sides(:) ! List of local sides this BC applies to
+    type(BoundaryCondition),pointer :: next => null()
+    type(BoundaryCondition),pointer :: prev => null()
+  endtype BoundaryCondition
 
-  type SELF_BoundaryConditionList
-    type(SELF_BoundaryCondition),pointer :: current => null()
-    type(SELF_BoundaryCondition),pointer :: head => null()
-    type(SELF_BoundaryCondition),pointer :: tail => null()
+  type BoundaryConditionList
+    type(BoundaryCondition),pointer :: current => null()
+    type(BoundaryCondition),pointer :: head => null()
+    type(BoundaryCondition),pointer :: tail => null()
     integer :: nbc
 
   contains
@@ -59,42 +56,20 @@ module SELF_BoundaryConditions
     procedure,private :: MoveNext
     procedure,private :: rewind
     procedure,public :: GetBCForID
-    generic,public :: RegisterBoundaryCondition => RegisterBCFunction,RegisterBCGFunction
-    procedure,private :: RegisterBCFunction
-    procedure,private :: RegisterBCGFunction
+    generic,public :: RegisterBoundaryCondition => RegisterbcMethod
+    procedure,private :: RegisterbcMethod
 
-  endtype SELF_BoundaryConditionList
-
-  interface
-    pure function SELF_BCFunction(this,s,dsdx,x,t,nhat,nvar,ndim) result(extstate)
-      use SELF_Constants,only:prec
-      import SELF_BoundaryCondition
-      implicit none
-      class(SELF_BoundaryCondition),intent(in) :: this
-      integer,intent(in) :: nvar,ndim
-      real(prec),intent(in) :: s(1:nvar)
-      real(prec),intent(in) :: dsdx(1:nvar,1:ndim)
-      real(prec),intent(in) :: x(1:ndim)
-      real(prec),intent(in) :: nhat(1:ndim)
-      real(prec),intent(in) :: t
-      real(prec) :: extstate(1:nvar)
-    endfunction SELF_BCFunction
-  endinterface
+  endtype BoundaryConditionList
 
   interface
-    pure function SELF_BCGFunction(this,s,dsdx,x,t,nhat,nvar,ndim) result(extstate)
+    subroutine SELF_bcMethod(this,mymodel)
       use SELF_Constants,only:prec
-      import SELF_BoundaryCondition
+      use SELF_Model,only:Model
+      import BoundaryCondition
       implicit none
-      class(SELF_BoundaryCondition),intent(in) :: this
-      integer,intent(in) :: nvar,ndim
-      real(prec),intent(in) :: s(1:nvar)
-      real(prec),intent(in) :: dsdx(1:nvar,1:ndim)
-      real(prec),intent(in) :: x(1:ndim)
-      real(prec),intent(in) :: nhat(1:ndim)
-      real(prec),intent(in) :: t
-      real(prec) :: extstate(1:nvar,1:ndim)
-    endfunction SELF_BCGFunction
+      class(BoundaryCondition),intent(in) :: this
+      class(Model),intent(inout) :: mymodel
+    endsubroutine SELF_bcMethod
   endinterface
 
 contains
@@ -104,7 +79,7 @@ contains
 ! ////////////////////////////////////////////// !
 
   subroutine Init_BCList(list)
-    class(SELF_BoundaryConditionList),intent(inout) :: list
+    class(BoundaryConditionList),intent(inout) :: list
     list%head => null()
     list%tail => null()
     list%current => null()
@@ -112,13 +87,15 @@ contains
   endsubroutine Init_BCList
 
   subroutine Free_BCList(list)
-    class(SELF_BoundaryConditionList),intent(inout) :: list
+    class(BoundaryConditionList),intent(inout) :: list
     type(SELF_BoundaryCondition),pointer :: node,next_node
 
     node => list%head
     do while(associated(node))
       next_node => node%next
-      nullify(node%bcFunction)
+      nullify(node%bcMethod)
+      if allocated(node%elements) deallocate(node%elements)
+      if allocated(node%sides) deallocate(node%sides)
       deallocate(node)
       node => next_node
     enddo
@@ -127,7 +104,7 @@ contains
   endsubroutine Free_BCList
 
   subroutine MoveNext(list)
-    class(SELF_BoundaryConditionList),intent(inout) :: list
+    class(BoundaryConditionList),intent(inout) :: list
     if(associated(list%current%next)) then
       list%current => list%current%next
     else
@@ -136,14 +113,14 @@ contains
   endsubroutine MoveNext
 
   subroutine rewind(list)
-    class(SELF_BoundaryConditionList),intent(inout) :: list
+    class(BoundaryConditionList),intent(inout) :: list
     list%current => list%head
   endsubroutine rewind
 
   function GetBCForID(list,bcid) result(node)
     !! This function returns the node associated with the given bcid
     !! and context. If the bcid is not found, a null pointer is returned.
-    class(SELF_BoundaryConditionList),intent(in) :: list
+    class(BoundaryConditionList),intent(in) :: list
     integer,intent(in) :: bcid
     type(SELF_BoundaryCondition),pointer :: node
 
@@ -161,16 +138,17 @@ contains
 
   endfunction GetBCForID
 
-  subroutine RegisterBCFunction(list,bcid,bcname,bcfunc)
+  subroutine RegisterbcMethod(list,bcid,bcname,bcfunc,nboundaries)
     !! Register a boundary condition function
     !! with the given bcid and bcname. If the bcid
     !! is already registered, the function is updated.
     !! The function is expected to be a pointer to a
-    !! SELF_BCFunction type.
-    class(SELF_BoundaryConditionList),intent(inout) :: list
+    !! SELF_bcMethod type.
+    class(BoundaryConditionList),intent(inout) :: list
     integer,intent(in) :: bcid
     character(*),intent(in) :: bcname
-    procedure(SELF_BCFunction),pointer,intent(in) :: bcfunc
+    procedure(SELF_bcMethod),pointer,intent(in) :: bcfunc
+    integer,intent(in) :: nboundaries
     ! Local
     type(SELF_BoundaryCondition),pointer :: bc
 
@@ -180,12 +158,15 @@ contains
       ! If the bcid is already registered, we do not register it again
       print*,"Boundary condition with ID ",bcid," is already registered."
       print*,"Assigning new function to existing BC"
-      bc%bcFunction => bcfunc
+      bc%bcMethod => bcfunc
     else
       allocate(bc)
       bc%bcid = bcid
       bc%bcname = trim(bcname)
-      bc%bcFunction => bcfunc
+      bc%bcMethod => bcfunc
+      allocate(bc%elements(1:nboundaries))
+      allocate(bc%sides(1:nboundaries))
+      bc%nBoundaries = nboundaries
       nullify(bc%next)
       nullify(bc%prev)
 
@@ -206,7 +187,7 @@ contains
 
     endif
 
-  endsubroutine RegisterBCFunction
+  endsubroutine RegisterbcMethod
 
   subroutine RegisterBCGFunction(list,bcid,bcname,bcgfunc)
     !! Register a boundary condition function
@@ -214,7 +195,7 @@ contains
     !! is already registered, the function is updated.
     !! The function is expected to be a pointer to a
     !! SELF_BCGFunction type.
-    class(SELF_BoundaryConditionList),intent(inout) :: list
+    class(BoundaryConditionList),intent(inout) :: list
     integer,intent(in) :: bcid
     character(*),intent(in) :: bcname
     procedure(SELF_BCGFunction),pointer,intent(in) :: bcgfunc

@@ -458,15 +458,17 @@ contains
         e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
 
         if(e2 == 0) then
-          bc = this%boundaryconditions%GetNodeForBCID(bcid)
-          ! Get the boundary normals on cell edges from the mesh geometry
-          nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
-          x = this%geometry%x%boundary(i,j,iEl,1,1:2)
-          s = this%solution%boundary(i,j,iEl,1:this%nvar)
-          dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+          bc => this%boundaryconditions%GetBCForID(bcid)
+          do concurrent(i=1:this%solution%N+1)
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+            x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+            s = this%solution%boundary(i,j,iEl,1:this%nvar)
+            dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
 
-          this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-            bc%bcFunc(s,dsdx,x,this%t,nhat)
+            this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
+              bc%bcFunction(s,dsdx,x,this%t,nhat,this%nvar,2)
+          enddo
         endif
 
       enddo
@@ -491,15 +493,17 @@ contains
         e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
 
         if(e2 == 0) then
-          bc = this%boundaryconditions%GetNodeForBCID(bcid)
-          ! Get the boundary normals on cell edges from the mesh geometry
-          nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
-          x = this%geometry%x%boundary(i,j,iEl,1,1:2)
-          s = this%solution%boundary(i,j,iEl,1:this%nvar)
-          dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
+          bc => this%boundaryconditions%GetBCForID(bcid)
+          do concurrent(i=1:this%solution%N+1)
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nhat%boundary(i,j,iEl,1,1:2)
+            x = this%geometry%x%boundary(i,j,iEl,1,1:2)
+            s = this%solution%boundary(i,j,iEl,1:this%nvar)
+            dsdx = this%solutiongradient%boundary(i,j,iEl,1:this%nvar,1:2)
 
-          this%solution%extBoundary(i,j,iEl,1:this%nvar) = &
-            bc%bcgFunc(s,dsdx,x,this%t,nhat)
+            this%solutiongradient%extBoundary(i,j,iEl,1:this%nvar,1:2) = &
+              bc%bcgFunction(s,dsdx,x,this%t,nhat,this%nvar,2)
+          enddo
         endif
       enddo
     enddo

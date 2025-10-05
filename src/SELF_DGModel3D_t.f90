@@ -454,17 +454,18 @@ contains
         e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
         if(e2 == 0) then
+          bc => this%boundaryconditions%GetBCForID(bcid)
 
-          bc = this%boundaryconditions%GetNodeForBCID(bcid)
-          ! Get the boundary normals on cell edges from the mesh geometry
-          nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-          x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
-          s = this%solution%boundary(i,j,k,iEl,1:this%nvar)
-          dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
+          do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1)
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+            x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
+            s = this%solution%boundary(i,j,k,iEl,1:this%nvar)
+            dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
 
-          this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-            bc%bcFunc(s,dsdx,x,this%t,nhat)
-
+            this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+              bc%bcFunction(s,dsdx,x,this%t,nhat,this%nvar,3)
+          enddo
         endif
 
       enddo
@@ -483,23 +484,25 @@ contains
     real(prec) :: nhat(1:3),x(1:3),s(1:this%nvar),dsdx(1:this%nvar,1:3)
     type(SELF_BoundaryCondition),pointer :: bc
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
+    do iel = 1,this%mesh%nElem
+      do k = 1,6
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+        if(e2 == 0) then
+          bc => this%boundaryconditions%GetBCForID(bcid)
+          do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1)
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+            x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
+            s = this%solution%boundary(i,j,k,iEl,1:this%nvar)
+            dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
 
-      if(e2 == 0) then
-        bc = this%boundaryconditions%GetNodeForBCID(bcid)
-        ! Get the boundary normals on cell edges from the mesh geometry
-        nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-        x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
-        s = this%solution%boundary(i,j,k,iEl,1:this%nvar)
-        dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-        this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-          bc%bcgFunc(s,dsdx,x,this%t,nhat)
-      endif
-
+            this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+              bc%bcgFunction(s,dsdx,x,this%t,nhat,this%nvar,3)
+          enddo
+        endif
+      enddo
     enddo
 
   endsubroutine setgradientboundarycondition_DGModel3D_t

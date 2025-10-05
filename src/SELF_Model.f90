@@ -101,7 +101,6 @@ module SELF_Model
 
     ! Time integration attributes
     procedure(SELF_timeIntegrator),pointer :: timeIntegrator => Euler_timeIntegrator
-    type(SELF_BoundaryConditionList) :: boundaryconditions
     real(prec) :: dt
     real(prec) :: t
     integer :: ioIterate = 0

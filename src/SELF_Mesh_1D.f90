@@ -45,16 +45,12 @@ module SELF_Mesh_1D
     integer,pointer,dimension(:,:) :: elemInfo
     real(prec),pointer,dimension(:) :: nodeCoords
     integer,pointer,dimension(:) :: globalNodeIDs
-    integer,pointer,dimension(:,:) :: BCType
-    character(LEN=255),allocatable :: BCNames(:)
-    integer,dimension(2) :: bcid = 0 ! Boundary conditions for the left and right endpoints
 
   contains
     procedure,public :: Init => Init_Mesh1D
     procedure,public :: Free => Free_Mesh1D
     generic,public :: StructuredMesh => UniformBlockMesh_Mesh1D
     procedure,private ::  UniformBlockMesh_Mesh1D
-    procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh1D
 
     procedure,public  :: Write_Mesh => Write_Mesh1D
 
@@ -77,13 +73,12 @@ contains
     this%nUniqueNodes = 0
     this%nBCs = nBCs
     this%bcid = 0
-
+    call this%stateBCs%init()
+    call this%gradientBCs%init()
     allocate(this%elemInfo(1:4,1:nElem))
     allocate(this%nodeCoords(1:nNodes))
     allocate(this%globalNodeIDs(1:nNodes))
-    allocate(this%BCType(1:4,1:nBCs))
 
-    allocate(this%BCNames(1:nBCs))
     call this%decomp%Init()
 
   endsubroutine Init_Mesh1D
@@ -97,11 +92,11 @@ contains
     this%nCornerNodes = 0
     this%nUniqueNodes = 0
     this%nBCs = 0
+    call this%stateBCs%free()
+    call this%gradientBCs%free()
     deallocate(this%elemInfo)
     deallocate(this%nodeCoords)
     deallocate(this%globalNodeIDs)
-    deallocate(this%BCType)
-    deallocate(this%BCNames)
     call this%decomp%Free()
 
   endsubroutine Free_Mesh1D
@@ -166,21 +161,6 @@ contains
 
   endsubroutine UniformBlockMesh_Mesh1D
 
-  subroutine ResetBoundaryConditionType_Mesh1D(this,leftbc,rightbc)
-    !! This method can be used to reset all of the boundary elements
-    !! boundary condition type to the desired value.
-    !!
-    !! Note that ALL physical boundaries will be set to have this boundary
-    !! condition
-    implicit none
-    class(Mesh1D),intent(inout) :: this
-    integer,intent(in) ::leftbc,rightbc
-
-    this%bcid(1) = leftbc
-    this%bcid(2) = rightbc
-
-  endsubroutine ResetBoundaryConditionType_Mesh1D
-
   subroutine Write_Mesh1D(this,meshFile)
     ! Writes mesh output in HOPR format (serial IO only)
     implicit none
@@ -195,7 +175,7 @@ contains
     call WriteAttribute_HDF5(fileId,'Ngeo',this%nGeo)
     call WriteAttribute_HDF5(fileId,'nBCs',this%nBCs)
 
-    call WriteArray_HDF5(fileId,'BCType',this%bcType)
+    !call WriteArray_HDF5(fileId,'BCType',this%bcType)
 
     ! Read local subarray of ElemInfo
     call WriteArray_HDF5(fileId,'ElemInfo',this%elemInfo)

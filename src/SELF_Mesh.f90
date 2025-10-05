@@ -29,6 +29,7 @@ module SELF_Mesh
   use SELF_Constants
   use SELF_DomainDecomposition
   use iso_c_binding
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -44,9 +45,12 @@ module SELF_Mesh
     integer :: nBCs
     integer :: quadrature
     type(DomainDecomposition) :: decomp
+    type(BoundaryConditionList) :: stateBCs
+    type(BoundaryConditionList) :: gradientBCs
 
   contains
     procedure(SELF_FreeMesh),deferred :: Free
+    procedure(SELF_EnumerateBoundaryConditions),deferred :: EnumerateBoundaryConditions
 
   endtype SEMMesh
 
@@ -56,6 +60,14 @@ module SELF_Mesh
       implicit none
       class(SEMMesh),intent(inout) :: this
     endsubroutine SELF_FreeMesh
+  endinterface
+
+  interface
+    subroutine SELF_EnumerateBoundaryConditions(this)
+      import SEMMesh
+      implicit none
+      class(SEMMesh),intent(inout) :: this
+    endsubroutine SELF_EnumerateBoundaryConditions
   endinterface
 
   ! Element Types - From Table 4.1 of https://www.hopr-project.org/externals/Meshformat.pdf
@@ -87,18 +99,5 @@ module SELF_Mesh
   integer,parameter :: SELF_MESH_ISM_V2_3D = 2
   integer,parameter :: SELF_MESH_HOPR_2D = 3
   integer,parameter :: SELF_MESH_HOPR_3D = 4
-
-! //////////////////////////////////////////////// !
-!   Boundary Condition parameters
-!
-
-  ! Conditions on the solution
-  integer,parameter :: SELF_BC_PRESCRIBED = 100
-  integer,parameter :: SELF_BC_RADIATION = 101
-  integer,parameter :: SELF_BC_NONORMALFLOW = 102
-
-  ! Conditions on the solution gradients
-  integer,parameter :: SELF_BC_PRESCRIBED_STRESS = 200
-  integer,parameter :: SELF_BC_NOSTRESS = 201
 
 endmodule SELF_Mesh
