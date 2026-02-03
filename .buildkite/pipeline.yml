@@ -1,57 +1,21 @@
 steps:
-  - label: ":nvidia: Build & Test V100"
+  - label: ":nvidia: Build & Test MI210"
+    key: "test-mi210"
     command: |
-      srun --container-image=docker://higherordermethods/selfish_x86_sm72:latest \
+      srun --partition=main \
+           --gres=gpu:v100:4 \
+           --time=01:00:00 \
+           --nodes=1 \
+           --ntasks-per-node=4 \
+           --cpus-per-task=8
+           --container-image=docker://higherordermethods/selfish:latest-x86-rocm643-sm72 \
            --container-mounts=${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
            --container-workdir=/workspace \
            bash -c "cmake -B build -S . && cmake --build build && ctest --test-dir build --output-on-failure"
-    env:
-      BUILDKITE_SLURM_PARTITION: "main"
-      BUILDKITE_SLURM_GRES: "gpu:v100:4"
-      BUILDKITE_SLURM_TIME: "01:00:00"
-      BUILDKITE_SLURM_NODES: "1"
-      BUILDKITE_SLURM_CPUS_PER_TASK: "8"
-      BUILDKITE_SLURM_NTASKS_PER_NODE: "4"
-
     agents:
       queue: "galapagos"
       slurm: "true"
 
-  - label: ":amd: Build & Test MI210"
-    command: |
-      srun --container-image=docker://higherordermethods/selfish_x86_gfx906:latest \
-           --container-mounts=${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
-           --container-workdir=/workspace \
-           bash -c "cmake -B build -S . && cmake --build build && ctest --test-dir build --output-on-failure"
-    env:
-      BUILDKITE_SLURM_PARTITION: "main"
-      BUILDKITE_SLURM_GRES: "gpu:mi210:4"
-      BUILDKITE_SLURM_TIME: "01:00:00"
-      BUILDKITE_SLURM_NODES: "1"
-      BUILDKITE_SLURM_CPUS_PER_TASK: "8"
-      BUILDKITE_SLURM_NTASKS_PER_NODE: "4"
-    agents:
-      queue: "galapagos"
-      slurm: "true"
-
-  - label: ":amd: Build & Test MI300A"
-    command: |
-      srun --container-image=docker://higherordermethods/selfish_x86_gfx906:latest \
-           --container-mounts=${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
-           --container-workdir=/workspace \
-           bash -c "cmake -B build -S . && cmake --build build && ctest --test-dir build --output-on-failure"
-    env:
-      BUILDKITE_SLURM_PARTITION: "main"
-      BUILDKITE_SLURM_GRES: "gpu:mi300a:4"
-      BUILDKITE_SLURM_TIME: "01:00:00"
-      BUILDKITE_SLURM_NODES: "1"
-      BUILDKITE_SLURM_CPUS_PER_TASK: "8"
-      BUILDKITE_SLURM_NTASKS_PER_NODE: "4"
-    agents:
-      queue: "galapagos"
-      slurm: "true"
-
- # Optional: Upload test results as artifacts
   - wait
   
   - label: ":package: Collect Artifacts"
