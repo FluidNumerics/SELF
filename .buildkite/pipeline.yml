@@ -1,5 +1,5 @@
 steps:
-  - label: ":nvidia: Build & Test MI210"
+  - label: ":AMD: Build & Test MI210"
     key: "test-mi210"
     command: |
       srun --partition=main \
@@ -7,7 +7,7 @@ steps:
            --time=01:00:00 \
            --nodes=1 \
            --ntasks-per-node=4 \
-           --cpus-per-task=8
+           --cpus-per-task=8 \
            --container-image=docker://higherordermethods/selfish:latest-x86-rocm643-sm72 \
            --container-mounts=${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
            --container-workdir=/workspace \
