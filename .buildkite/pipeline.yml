@@ -2,23 +2,40 @@ steps:
   - label: ":AMD: Build & Test MI210"
     key: "test-mi210"
     command: |
-      cmake -B build -S .
-      cmake --build build
-      ctest --test-dir build --output-on-failure
+       mkdir -p /workspace/build
+       cd /workspace/build
+       cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
+             -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+             -DSELF_ENABLE_GPU=${ENABLE_GPU} \
+             -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
+             -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
+             -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
+             -DSELF_ENABLE_TESTING=${ENABLE_TESTING} \
+             -DCMAKE_HIP_ARCHITECTURES=${GPU_ARCH} \
+             -DSELF_ENABLE_EXAMPLES=${ENABLE_EXAMPLES} \
+             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+             -DSELF_ENABLE_INTERFACE=${ENABLE_INTERFACE} \
+             /workspace/
+        make -j
+        ctest --test-dir /workspace/build --output-on-failure
+    env:
+      BUILD_TYPE: "debug"
+      ENABLE_GPU: "ON"
+      ENABLE_INTERFACE: "OFF"
+      ENABLE_DOUBLE_PRECISION: "ON"
+      ENABLE_MULTITHREADING: "ON"
+      NTHREADS: 8
+      GPU_ARCH: "gfx90a"
+      GCOV: "gcov"
+      RUN_TESTS: "ON"
+      ENABLE_TESTING: "ON"
+      ENABLE_EXAMPLES: "ON"
     agents:
       queue: "galapagos"
       slurm_partition: "main"
-      slurm_gres: "gpu:mi210:4"
+      slurm_gres: "gpu:mi210:2"
       slurm_time: "01:00:00"
       slurm_nodes: 1
-      slurm_ntasks_per_node: 4
+      slurm_ntasks_per_node: 2
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
-
-  - wait
-  
-  - label: ":package: Collect Artifacts"
-    command: |
-      buildkite-agent artifact upload "build/Testing/**/*"
-    agents:
-      queue: "galapagos"
