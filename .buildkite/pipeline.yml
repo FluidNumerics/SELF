@@ -2,19 +2,18 @@ steps:
   - label: ":AMD: Build & Test MI210"
     key: "test-mi210"
     command: |
-      srun --partition=main \
-           --gres=gpu:mi210:4 \
-           --time=01:00:00 \
-           --nodes=1 \
-           --ntasks-per-node=4 \
-           --cpus-per-task=8 \
-           --container-image=docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a \
-           --container-mounts=${BUILDKITE_BUILD_CHECKOUT_PATH}:/workspace \
-           --container-workdir=/workspace \
-           bash -c "cmake -B build -S . && cmake --build build && ctest --test-dir build --output-on-failure"
+      cmake -B build -S .
+      cmake --build build
+      ctest --test-dir build --output-on-failure
     agents:
       queue: "galapagos"
-      slurm: "true"
+      slurm_partition: "main"
+      slurm_gres: "gpu:mi210:4"
+      slurm_time: "01:00:00"
+      slurm_nodes: 1
+      slurm_ntasks_per_node: 4
+      slurm_cpus_per_task: 8
+      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
 
   - wait
   
