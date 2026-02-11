@@ -2,9 +2,10 @@ steps:
   - label: ":AMD: Build & Test MI210"
     key: "test-mi210"
     command: |
+       . /opt/spack-environment/activate.sh
        mkdir -p /workspace/build
        cd /workspace/build
-       cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
+       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
              -DSELF_ENABLE_GPU=${ENABLE_GPU} \
              -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
@@ -34,7 +35,6 @@ steps:
       NTHREADS: 8
       GPU_ARCH: "gfx90a"
       GCOV: "gcov"
-      RUN_TESTS: "ON"
       ENABLE_TESTING: "ON"
       ENABLE_EXAMPLES: "ON"
     agents:
