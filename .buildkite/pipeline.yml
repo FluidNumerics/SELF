@@ -2,7 +2,8 @@ steps:
   - label: ":AMD: Build & Test MI210"
     key: "test-mi210"
     command: |
-       . /opt/spack-environment/activate.sh
+       source /opt/spack-environment/activate.sh
+       env
        mkdir -p /workspace/build
        cd /workspace/build
        FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
@@ -27,6 +28,7 @@ steps:
       slurm_ntasks_per_node: 2
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
+      WORKSPACE: "/workspace"
       BUILD_TYPE: "debug"
       ENABLE_GPU: "ON"
       ENABLE_INTERFACE: "OFF"
