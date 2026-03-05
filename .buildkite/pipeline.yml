@@ -48,9 +48,7 @@ steps:
       ./codecov -t "$${CODECOV_TOKEN}" \
                 -f "$${BUILDKITE_BUILD_CHECKOUT_PATH}/coverage.info" \
                 -F buildkite-rocm-mi210
-    plugins:
-      - cluster-secrets#v1.0.1:
-          env:
-            CODECOV_TOKEN: CODECOV_TOKEN
+    secrets:
+      - CODECOV_TOKEN
     agents:
       queue: "galapagos"
