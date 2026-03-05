@@ -59,7 +59,7 @@ contains
     type(SEMHex),target :: geometry
     type(MappedVector3D) :: f
     type(MappedScalar3D) :: df
-    integer :: i,j,k,iel,e2,s2
+    integer :: i,j,k,iel,e2
     real(prec) :: nhat(1:3),nmag,fx,fy,fz
     integer :: bcids(1:6)
 

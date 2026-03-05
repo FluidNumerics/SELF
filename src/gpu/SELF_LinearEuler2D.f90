@@ -76,7 +76,7 @@ contains
     implicit none
     class(LinearEuler2D),intent(inout) :: this
 
-    return
+    if (.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine sourcemethod_LinearEuler2D
 

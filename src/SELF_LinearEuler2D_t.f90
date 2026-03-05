@@ -126,8 +126,6 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
     exts(1) = s(1) ! density
     exts(2) = (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
@@ -150,6 +148,7 @@ contains
     flux(3,2) = s(4)/this%rho0 ! y-velocity, y flux; p/rho0
     flux(4,1) = this%c*this%c*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
     flux(4,2) = this%c*this%c*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
+    if (.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux2d_LinearEuler2D_t
 
@@ -186,6 +185,7 @@ contains
     fR(4) = rho0*c*c*(u*nhat(1)+v*nhat(2)) ! pressure
 
     flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+c*(sL(1:4)-sR(1:4))
+    if (.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearEuler2D_t
 
@@ -207,7 +207,7 @@ contains
     real(prec),intent(in) ::  rhoprime,Lr,x0,y0
     ! Local
     integer :: i,j,iEl
-    real(prec) :: x,y,rho,r,E
+    real(prec) :: x,y,rho,r
 
     print*,__FILE__," : Configuring weak blast wave initial condition. "
     print*,__FILE__," : rhoprime = ",rhoprime

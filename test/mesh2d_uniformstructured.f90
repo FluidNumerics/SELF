@@ -54,7 +54,6 @@ contains
     type(Lagrange),target :: interp
     type(Mesh2D),target :: mesh
     type(SEMQuad),target :: geometry
-    character(LEN=255) :: WORKSPACE
     integer :: bcids(1:4)
 
     ! Create an interpolant

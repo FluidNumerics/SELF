@@ -78,6 +78,7 @@ contains
     ! Local
     integer :: iVar
 
+    if (.false.) this%N = int(time) ! suppress unused-dummy-argument warning
     do ivar = 1,this%nvar
       this%interior(:,:,ivar) = this%eqn(ivar)%evaluate(this%geometry%x%interior)
     enddo
@@ -136,9 +137,6 @@ contains
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
-    ! Local
-    integer :: iEl,iVar,i,ii
-    real(prec) :: dfloc
 
     call this%Derivative(df)
     call JacobianWeight_1D_gpu(df,this%geometry%dxds%interior_gpu,this%N,this%nVar,this%nelem)
@@ -149,9 +147,6 @@ contains
     implicit none
     class(MappedScalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
-    ! Local
-    integer :: iEl,iVar,i,ii
-    real(prec) :: dfloc
 
     call self_blas_matrixop_1d(this%interp%dgMatrix_gpu, &
                                this%interior_gpu, &

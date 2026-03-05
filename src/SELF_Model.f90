@@ -278,20 +278,20 @@ contains
   subroutine AdditionalInit_Model(this)
     implicit none
     class(Model),intent(inout) :: this
-    return
+    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine AdditionalInit_Model
 
   subroutine AdditionalFree_Model(this)
     implicit none
     class(Model),intent(inout) :: this
-    return
+    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine AdditionalFree_Model
 
   subroutine AdditionalOutput_Model(this,fileid)
     implicit none
     class(Model),intent(inout) :: this
     integer(HID_T),intent(in) :: fileid
-    return
+    if (.false.) this%nvar = int(fileid) ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine AdditionalOutput_Model
 
   subroutine PrintType_Model(this)
@@ -299,6 +299,7 @@ contains
     class(Model),intent(in) :: this
 
     print*,__FILE__//" : Model : No model type"
+    if (.false.) write(*,*) this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine PrintType_Model
 
@@ -313,7 +314,7 @@ contains
     implicit none
     class(Model),intent(inout) :: this
 
-    return
+    if (.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine PreTendency_Model
 
@@ -323,6 +324,7 @@ contains
     real(prec) :: e
 
     e = 0.0_prec
+    if (.false.) e = e + s(1) ! suppress unused-dummy-argument warning
 
   endfunction entropy_func_Model
 
@@ -333,12 +335,11 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar)
     real(prec),intent(in) :: nhat
     real(prec) :: flux(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      flux(ivar) = 0.0_prec
-    enddo
+    flux = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux = sL + sR + dsdx; flux(1) = flux(1) + nhat
+    end if
 
   endfunction riemannflux1d_Model
 
@@ -349,12 +350,11 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: flux(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      flux(ivar) = 0.0_prec
-    enddo
+    flux = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux = sL + sR; flux(1) = flux(1) + dsdx(1,1) + nhat(1)
+    end if
 
   endfunction riemannflux2d_Model
 
@@ -365,12 +365,11 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
     real(prec),intent(in) :: nhat(1:3)
     real(prec) :: flux(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      flux(ivar) = 0.0_prec
-    enddo
+    flux = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux = sL + sR; flux(1) = flux(1) + dsdx(1,1) + nhat(1)
+    end if
 
   endfunction riemannflux3d_Model
 
@@ -379,12 +378,9 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar)
     real(prec) :: flux(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      flux(ivar) = 0.0_prec
-    enddo
+    flux = 0.0_prec
+    if (.false.) flux = s + dsdx ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction flux1d_Model
 
@@ -393,12 +389,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
     real(prec) :: flux(1:this%nvar,1:2)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      flux(ivar,1:2) = 0.0_prec
-    enddo
+    flux = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux(:,1) = s; flux(1,:) = flux(1,:) + dsdx(1,:)
+    end if
 
   endfunction flux2d_Model
 
@@ -407,12 +402,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
     real(prec) :: flux(1:this%nvar,1:3)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      flux(ivar,1:3) = 0.0_prec
-    enddo
+    flux = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux(:,1) = s; flux(1,:) = flux(1,:) + dsdx(1,:)
+    end if
 
   endfunction flux3d_Model
 
@@ -421,12 +415,9 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar)
     real(prec) :: source(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      source(ivar) = 0.0_prec
-    enddo
+    source = 0.0_prec
+    if (.false.) source = s + dsdx ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction source1d_Model
 
@@ -435,12 +426,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
     real(prec) :: source(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      source(ivar) = 0.0_prec
-    enddo
+    source = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      source = s; source(1) = source(1) + dsdx(1,1)
+    end if
 
   endfunction source2d_Model
 
@@ -449,12 +439,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
     real(prec) :: source(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      source(ivar) = 0.0_prec
-    enddo
+    source = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      source = s; source(1) = source(1) + dsdx(1,1)
+    end if
 
   endfunction source3d_Model
 
@@ -463,12 +452,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: nhat
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
+    exts = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      exts = s; exts(1) = exts(1) + nhat
+    end if
 
   endfunction hbc1d_Generic_Model
 
@@ -477,12 +465,9 @@ contains
     real(prec),intent(in) :: x
     real(prec),intent(in) :: t
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
+    exts = 0.0_prec
+    if (.false.) exts(1) = exts(1) + x + t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction hbc1d_Prescribed_Model
 
@@ -491,12 +476,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
+    exts = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      exts = s; exts(1) = exts(1) + nhat(1)
+    end if
 
   endfunction hbc2d_Generic_Model
 
@@ -505,12 +489,9 @@ contains
     real(prec),intent(in) :: x(1:2)
     real(prec),intent(in) :: t
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
+    exts = 0.0_prec
+    if (.false.) exts(1) = exts(1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction hbc2d_Prescribed_Model
 
@@ -519,12 +500,11 @@ contains
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: nhat(1:3)
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
+    exts = 0.0_prec
+    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      exts = s; exts(1) = exts(1) + nhat(1)
+    end if
 
   endfunction hbc3d_Generic_Model
 
@@ -533,12 +513,9 @@ contains
     real(prec),intent(in) :: x(1:3)
     real(prec),intent(in) :: t
     real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
+    exts = 0.0_prec
+    if (.false.) exts(1) = exts(1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction hbc3d_Prescribed_Model
 
@@ -547,12 +524,9 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar)
     real(prec),intent(in) :: nhat
     real(prec) :: extDsdx(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      extDsdx(ivar) = dsdx(ivar)
-    enddo
+    extDsdx = dsdx
+    if (.false.) extDsdx(1) = extDsdx(1) + nhat ! suppress unused-dummy-argument warning for default implementation
 
   endfunction pbc1d_Generic_Model
 
@@ -561,12 +535,9 @@ contains
     real(prec),intent(in) :: x
     real(prec),intent(in) :: t
     real(prec) :: extDsdx(1:this%nvar)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      extDsdx(ivar) = 0.0_prec
-    enddo
+    extDsdx = 0.0_prec
+    if (.false.) extDsdx(1) = extDsdx(1) + x + t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction pbc1d_Prescribed_Model
 
@@ -575,12 +546,9 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: extDsdx(1:this%nvar,1:2)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:2) = dsdx(ivar,1:2)
-    enddo
+    extDsdx = dsdx
+    if (.false.) extDsdx(1,1) = extDsdx(1,1) + nhat(1) ! suppress unused-dummy-argument warning for default implementation
 
   endfunction pbc2d_Generic_Model
 
@@ -589,12 +557,9 @@ contains
     real(prec),intent(in) :: x(1:2)
     real(prec),intent(in) :: t
     real(prec) :: extDsdx(1:this%nvar,1:2)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:2) = 0.0_prec
-    enddo
+    extDsdx = 0.0_prec
+    if (.false.) extDsdx(1,1) = extDsdx(1,1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction pbc2d_Prescribed_Model
 
@@ -603,12 +568,9 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
     real(prec),intent(in) :: nhat(1:3)
     real(prec) :: extDsdx(1:this%nvar,1:3)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:3) = dsdx(ivar,1:3)
-    enddo
+    extDsdx = dsdx
+    if (.false.) extDsdx(1,1) = extDsdx(1,1) + nhat(1) ! suppress unused-dummy-argument warning for default implementation
 
   endfunction pbc3d_Generic_Model
 
@@ -617,12 +579,9 @@ contains
     real(prec),intent(in) :: x(1:3)
     real(prec),intent(in) :: t
     real(prec) :: extDsdx(1:this%nvar,1:3)
-    ! Local
-    integer :: ivar
 
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:3) = 0.0_prec
-    enddo
+    extDsdx = 0.0_prec
+    if (.false.) extDsdx(1,1) = extDsdx(1,1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction pbc3d_Prescribed_Model
 
@@ -721,6 +680,7 @@ contains
     write(entropy,"(ES16.7E3)") this%entropy
 
     ! Write the output to STDOUT
+    str = '' ! initialize allocatable string to suppress false-positive uninitialized warning
     open(output_unit,ENCODING='utf-8')
     write(output_unit,'(1x,A," : ")',ADVANCE='no') __FILE__
     str = 'tᵢ ='//trim(modelTime)
@@ -735,7 +695,7 @@ contains
       !! report their own custom metrics after file io
     implicit none
     class(Model),intent(inout) :: this
-    return
+    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine ReportMetrics_Model
 
   subroutine ReportUserMetrics_Model(this)
@@ -743,7 +703,7 @@ contains
     !! report their own custom metrics after file io
     implicit none
     class(Model),intent(inout) :: this
-    return
+    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine ReportUserMetrics_Model
 
   ! ////////////////////////////////////// !

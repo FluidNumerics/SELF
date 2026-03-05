@@ -92,10 +92,6 @@ contains
     type(Mesh3D),intent(in),target :: mesh
     type(SEMHex),intent(in),target :: geometry
     ! Local
-    integer :: ivar
-    character(LEN=3) :: ivarChar
-    character(LEN=25) :: varname
-
     this%mesh => mesh
     this%geometry => geometry
     call this%SetNumberOfVariables()
