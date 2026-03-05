@@ -7,12 +7,12 @@ steps:
       cd /workspace/build
       set -x
       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
-            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-            -DSELF_ENABLE_GPU=${ENABLE_GPU} \
-            -DSELF_ENABLE_TESTING=${ENABLE_TESTING} \
-            -DCMAKE_HIP_ARCHITECTURES=${TARGET_GPU_ARCH} \
-            -DSELF_ENABLE_EXAMPLES=${ENABLE_EXAMPLES} \
-            -DSELF_ENABLE_INTERFACE=${ENABLE_INTERFACE} \
+            -DCMAKE_BUILD_TYPE="debug" \
+            -DSELF_ENABLE_GPU=ON \
+            -DSELF_ENABLE_TESTING=ON \
+            -DCMAKE_HIP_ARCHITECTURES="gfx90a" \
+            -DSELF_ENABLE_EXAMPLES=ON \
+            -DSELF_ENABLE_INTERFACE=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             /workspace/
       set +x
@@ -27,12 +27,5 @@ steps:
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
       WORKSPACE: "/workspace"
-      BUILD_TYPE: "debug"
-      ENABLE_GPU: "ON"
-      ENABLE_INTERFACE: "OFF"
-      TARGET_GPU_ARCH: "gfx90a"
-      GCOV: "gcov"
-      ENABLE_TESTING: "ON"
-      ENABLE_EXAMPLES: "ON"
     agents:
       queue: "galapagos"
