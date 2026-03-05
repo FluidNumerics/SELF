@@ -180,7 +180,6 @@ contains
     integer :: e1,s1,e2,s2
     integer :: i,i2
     integer :: r2,flip,ivar
-    integer :: globalSideId
     real(prec) :: extBuff(1:this%interp%N+1)
 
     do ivar = 1,this%nvar

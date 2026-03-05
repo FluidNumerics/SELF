@@ -52,9 +52,6 @@ contains
     integer,intent(in) :: nSides
     integer,intent(in) :: nNodes
     integer,intent(in) :: nBCs
-    ! Local
-    integer :: i,j,k,l
-
     this%nElem = nElem
     this%nGlobalElem = nElem
     this%nGeo = nGeo

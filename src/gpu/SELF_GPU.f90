@@ -40,7 +40,7 @@ module SELF_GPU
         use iso_c_binding
         use SELF_GPU_enums
         implicit none
-        integer(kind(hipSuccess)) :: hipGetDeviceCount_
+        integer(c_int) :: hipGetDeviceCount_
         integer(c_int) :: count
       endfunction
       endinterface
@@ -54,7 +54,7 @@ module SELF_GPU
             use iso_c_binding
             use SELF_GPU_enums
             implicit none
-            integer(kind(hipSuccess)) :: hipSetDevice_
+            integer(c_int) :: hipSetDevice_
             integer(c_int),value :: device_id
           endfunction
           endinterface
@@ -67,7 +67,7 @@ module SELF_GPU
                 use iso_c_binding
                 use SELF_GPU_enums
                 implicit none
-                integer(kind(hipSuccess)) :: hipMalloc_
+                integer(c_int) :: hipMalloc_
                 type(c_ptr) :: ptr
                 integer(c_size_t),value :: mySize
               endfunction
@@ -82,7 +82,7 @@ module SELF_GPU
                     use iso_c_binding
                     use SELF_GPU_enums
                     implicit none
-                    integer(kind(hipSuccess)) :: hipFree_
+                    integer(c_int) :: hipFree_
                     type(c_ptr),value :: ptr
                   endfunction
                   endinterface hipFree
@@ -96,19 +96,20 @@ module SELF_GPU
                         use iso_c_binding
                         use SELF_GPU_enums
                         implicit none
-                        integer(kind(hipSuccess)) :: hipMemcpy_
+                        integer(c_int) :: hipMemcpy_
                         type(c_ptr),value :: dest
                         type(c_ptr),value :: src
                         integer(c_size_t),value :: sizeBytes
-                        integer(kind(hipMemcpyHostToHost)),value :: myKind
+                        integer(c_int),value :: myKind
                       endfunction hipMemcpy_
                       endinterface hipMemcpy
 
                       contains
 
                       subroutine gpuCheck(gpuError_t)
+                        use iso_c_binding
                         implicit none
-                        integer(kind(hipSuccess)) :: gpuError_t
+                        integer(c_int) :: gpuError_t
 
                         if(gpuError_t /= hipSuccess) then
                           write(*,*) "GPU ERROR: Error code = ",gpuError_t

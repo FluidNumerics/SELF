@@ -132,9 +132,6 @@ contains
     integer,intent(in) :: nSides
     integer,intent(in) :: nNodes
     integer,intent(in) :: nBCs
-    ! Local
-    integer :: i,j,l
-
     this%nGeo = nGeo
     this%nElem = nElem
     this%nGlobalElem = nElem
@@ -196,9 +193,7 @@ contains
   subroutine UpdateDevice_Mesh2D_t(this)
     implicit none
     class(Mesh2D_t),intent(inout) :: this
-
-    return
-
+    if (.false.) this%nElem = this%nElem ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Mesh2D_t
 
   subroutine ResetBoundaryConditionType_Mesh2D_t(this,bcid)
@@ -644,15 +639,8 @@ contains
     integer :: nid2(1:2,1:4,1:this%nElem)
     integer :: nloc1(1:2)
     integer :: nloc2(1:2)
-    integer :: n1
-    integer :: n1Global
-    integer :: n2
-    integer :: n2Global
-    integer :: c1
-    integer :: c2
     integer :: i,j
     integer :: l
-    integer :: nShifts
     integer :: neighborRank
     integer :: rankId
     integer :: offset

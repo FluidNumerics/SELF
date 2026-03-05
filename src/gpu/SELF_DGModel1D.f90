@@ -152,7 +152,7 @@ contains
     implicit none
     class(DGModel1D),intent(inout) :: this
     ! Local
-    integer :: iel,i,ivar
+    integer :: iel,i
     real(prec) :: e,s(1:this%solution%nvar),J
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
@@ -180,7 +180,6 @@ contains
     implicit none
     class(DGModel1D),intent(inout) :: this
     ! local
-    integer :: ivar
     integer :: N,nelem
     real(prec) :: x
 
@@ -252,7 +251,6 @@ contains
     implicit none
     class(DGModel1D),intent(inout) :: this
     ! local
-    integer :: ivar
     integer :: nelem
     real(prec) :: x
 

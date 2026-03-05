@@ -162,10 +162,6 @@ contains
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
     ! Local
-    integer :: e1,e2,s1,s2,e2Global
-    integer :: flip,bcid
-    integer :: i1,i2,ivar,idir
-    integer :: neighborRank
     integer :: offset
 
     offset = mesh%decomp%offsetElem(mesh%decomp%rankid+1)
@@ -193,10 +189,6 @@ contains
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(c_ptr),intent(out) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
-
     ! Contravariant projection
     call ContravariantProjection_2D_gpu(this%interior_gpu, &
                                         this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)

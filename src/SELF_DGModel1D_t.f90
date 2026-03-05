@@ -299,7 +299,7 @@ contains
     implicit none
     class(DGModel1D_t),intent(inout) :: this
     ! Local
-    integer :: iel,i,ivar
+    integer :: iel,i
     real(prec) :: e,s(1:this%solution%nvar),J
 
     e = 0.0_prec
@@ -323,7 +323,6 @@ contains
     implicit none
     class(DGModel1D_t),intent(inout) :: this
     ! local
-    integer :: ivar
     integer :: N,nelem
     real(prec) :: x
 
@@ -627,10 +626,6 @@ contains
     character(*),intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
-    integer(HID_T) :: solOffset(1:3)
-    integer :: firstElem
-    integer :: N
-
     call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
     call ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this%solution%interior)
     call Close_HDF5(fileId)
@@ -643,14 +638,12 @@ contains
     class(DGModel1D_t),intent(inout) :: this
     character(*),intent(in),optional :: filename
     ! Local
-    character(8) :: zoneID
     integer :: fUnit
     integer :: iEl,i,iVar
     character(LEN=self_FileNameLength) :: tecFile
     character(LEN=self_TecplotHeaderLength) :: tecHeader
     character(LEN=self_FormatLength) :: fmat
     character(13) :: timeStampString
-    character(5) :: rankString
     type(Scalar1D) :: solution
     type(Scalar1D) :: x
     type(Lagrange),target :: interp

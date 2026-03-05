@@ -16,7 +16,7 @@ module SELF_GPUBLAS
         use iso_c_binding
         use SELF_GPU_enums
         implicit none
-        integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasCreate_
+        integer(c_int) :: hipblasCreate_
         type(c_ptr) :: handle
       endfunction
       endinterface
@@ -30,7 +30,7 @@ module SELF_GPUBLAS
             use iso_c_binding
             use SELF_GPU_enums
             implicit none
-            integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasDestroy_
+            integer(c_int) :: hipblasDestroy_
             type(c_ptr),value :: handle
           endfunction
           endinterface
@@ -44,10 +44,10 @@ module SELF_GPUBLAS
                 use iso_c_binding
                 use SELF_GPU_enums
                 implicit none
-                integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasSgemm_
+                integer(c_int) :: hipblasSgemm_
                 type(c_ptr),value :: handle
-                integer(kind(HIPBLAS_OP_N)),value :: transa
-                integer(kind(HIPBLAS_OP_N)),value :: transb
+                integer(c_int),value :: transa
+                integer(c_int),value :: transb
                 integer(c_int),value :: m
                 integer(c_int),value :: n
                 integer(c_int),value :: k
@@ -71,10 +71,10 @@ module SELF_GPUBLAS
                     use iso_c_binding
                     use SELF_GPU_enums
                     implicit none
-                    integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasDgemm_
+                    integer(c_int) :: hipblasDgemm_
                     type(c_ptr),value :: handle
-                    integer(kind(HIPBLAS_OP_N)),value :: transa
-                    integer(kind(HIPBLAS_OP_N)),value :: transb
+                    integer(c_int),value :: transa
+                    integer(c_int),value :: transb
                     integer(c_int),value :: m
                     integer(c_int),value :: n
                     integer(c_int),value :: k
@@ -102,9 +102,9 @@ module SELF_GPUBLAS
                         use iso_c_binding
                         use SELF_GPU_enums
                         implicit none
-                        integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasSgemvStridedBatched_
+                        integer(c_int) :: hipblasSgemvStridedBatched_
                         type(c_ptr),value :: handle
-                        integer(kind(HIPBLAS_OP_N)),value :: trans
+                        integer(c_int),value :: trans
                         integer(c_int),value :: m
                         integer(c_int),value :: n
                         real(c_float) :: alpha
@@ -136,9 +136,9 @@ module SELF_GPUBLAS
                             use iso_c_binding
                             use SELF_GPU_enums
                             implicit none
-                            integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasDgemvStridedBatched_
+                            integer(c_int) :: hipblasDgemvStridedBatched_
                             type(c_ptr),value :: handle
-                            integer(kind(HIPBLAS_OP_N)),value :: trans
+                            integer(c_int),value :: trans
                             integer(c_int),value :: m
                             integer(c_int),value :: n
                             real(c_double) :: alpha
@@ -168,8 +168,9 @@ module SELF_GPUBLAS
 
                           subroutine hipblasCheck(hipblasError_t)
                             use SELF_GPU_enums
+                            use iso_c_binding
                             implicit none
-                            integer(kind(HIPBLAS_STATUS_SUCCESS)) :: hipblasError_t
+                            integer(c_int) :: hipblasError_t
 
                             if(hipblasError_t /= HIPBLAS_STATUS_SUCCESS) then
                               write(*,*) "GPUBLAS ERROR: Error code = ",hipblasError_t

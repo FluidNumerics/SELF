@@ -45,7 +45,6 @@ program LinearShallowWater2D_nonormalflow
   integer :: bcids(1:4)
   type(Mesh2D),target :: mesh
   type(SEMQuad),target :: geometry
-  character(LEN=255) :: WORKSPACE
 
   ! Set no normal flow boundary conditions
   bcids(1:4) = [SELF_BC_NONORMALFLOW, & ! South

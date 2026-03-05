@@ -92,10 +92,6 @@ contains
     type(Mesh2D),intent(in),target :: mesh
     type(SEMQuad),intent(in),target :: geometry
     ! Local
-    integer :: ivar
-    character(LEN=3) :: ivarChar
-    character(LEN=25) :: varname
-
     this%mesh => mesh
     this%geometry => geometry
     call this%SetNumberOfVariables()
@@ -650,7 +646,7 @@ contains
     integer(HID_T) :: fileId
     integer(HID_T) :: solOffset(1:3)
     integer :: firstElem
-    integer :: N,ivar
+    integer :: ivar
 
     if(this%mesh%decomp%mpiEnabled) then
       call Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId, &
