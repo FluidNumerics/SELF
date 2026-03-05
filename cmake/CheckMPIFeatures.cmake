@@ -99,5 +99,3 @@ function(CheckMPIFeatures)
     list(REMOVE_ITEM CMAKE_REQUIRED_DEFINITIONS -DHAVE_MPI_EXT)
   endif()
 endfunction()
-
-CheckMPIFeatures()
