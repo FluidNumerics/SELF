@@ -5,18 +5,17 @@ steps:
       source /opt/spack-environment/activate.sh
       mkdir -p /workspace/build
       cd /workspace/build
+      set -x
       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
             -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
             -DSELF_ENABLE_GPU=${ENABLE_GPU} \
-            -DSELF_ENABLE_MULTITHREADING=${ENABLE_MULTITHREADING} \
-            -DSELF_MULTITHREADING_NTHREADS=${NTHREADS} \
-            -DSELF_ENABLE_DOUBLE_PRECISION=${ENABLE_DOUBLE_PRECISION} \
             -DSELF_ENABLE_TESTING=${ENABLE_TESTING} \
-            -DCMAKE_HIP_ARCHITECTURES=${GPU_ARCH} \
+            -DCMAKE_HIP_ARCHITECTURES=${TARGET_GPU_ARCH} \
             -DSELF_ENABLE_EXAMPLES=${ENABLE_EXAMPLES} \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DSELF_ENABLE_INTERFACE=${ENABLE_INTERFACE} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             /workspace/
+      set +x
       make -j
       ctest --test-dir /workspace/build --output-on-failure
     env:
@@ -31,10 +30,7 @@ steps:
       BUILD_TYPE: "debug"
       ENABLE_GPU: "ON"
       ENABLE_INTERFACE: "OFF"
-      ENABLE_DOUBLE_PRECISION: "ON"
-      ENABLE_MULTITHREADING: "ON"
-      NTHREADS: 8
-      GPU_ARCH: "gfx90a"
+      TARGET_GPU_ARCH: "gfx90a"
       GCOV: "gcov"
       ENABLE_TESTING: "ON"
       ENABLE_EXAMPLES: "ON"
