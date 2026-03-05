@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Scalar2D &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Scalar2D
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 2.0% of total for derived types.</p>Including implementation: 240 statements,  0.4% of total for derived types.">21 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Scalar_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_scalar_2d.f90.html'>SELF_Scalar_2D.f90</a></li>
+     <li><a href='../module/self_scalar_2d.html'>SELF_Scalar_2D</a></li>
+     <li class="active">Scalar2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/scalar2d.html#variable-m~2">M</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-n~2">N</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-avgboundary">avgBoundary</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-avgboundary_gpu~2">avgBoundary_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-backend~2">backend</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-blas_handle~3">blas_handle</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundary">boundary</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundary_gpu~2">boundary_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundarynormal">boundarynormal</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundarynormal_gpu">boundarynormal_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-eqn">eqn</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-extboundary">extBoundary</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-extboundary_gpu~2">extBoundary_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interior">interior</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interior_gpu~2">interior_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interp">interp</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interpwork">interpWork</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-meta">meta</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-nelem">nElem</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-nvar">nVar</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-averagesides~3">AverageSides</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-boundaryinterp~3">BoundaryInterp</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-free~6">Free</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gradient~14">Gradient</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gradient_scalar2d">Gradient_Scalar2D</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gridinterp~18">GridInterp</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gridinterp_scalar2d">GridInterp_Scalar2D</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-init~6">Init</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setdescription">SetDescription</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setequation~22">SetEquation</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setname">SetName</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setunits">SetUnits</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-updatedevice~3">UpdateDevice</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-updatehost~3">UpdateHost</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-writehdf5~20">WriteHDF5</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/scalar2d.html#src">Scalar2D</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/scalar2d_t.html'>Scalar2D_t</a>) :: Scalar2D</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~scalar2d~~InheritsGraph Pages: 1 -->
+<svg id="typescalar2dInheritsGraph" width="641pt" height="71pt"
+ viewBox="0.00 0.00 641.00 71.12" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~scalar2d~~InheritsGraph" class="graph" transform="scale(0.43 0.43) rotate(0) translate(4 160.87)">
+<title>type~~scalar2d~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-160.87 1482,-160.87 1482,4 -4,4"/>
+<!-- type~scalar2d -->
+<g id="type~~scalar2d~~InheritsGraph_node1" class="node">
+<title>type~scalar2d</title>
+<polygon fill="none" stroke="black" points="1478,-156.87 1417,-156.87 1417,-132.87 1478,-132.87 1478,-156.87"/>
+<text text-anchor="middle" x="1447.5" y="-142.47" font-family="Helvetica,sans-Serif" font-size="10.50">Scalar2D</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~scalar2d~~InheritsGraph_node2" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-119.87 0,-119.87 0,-95.87 54,-95.87 54,-119.87"/>
+<text text-anchor="middle" x="27" y="-105.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~scalar2d&#45;&gt;c_ptr -->
+<g id="type~~scalar2d~~InheritsGraph_edge1" class="edge">
+<title>type~scalar2d&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1398,-144.87C1352.01,-134.66 1339.11,-144.87 1292,-144.87 1292,-144.87 1292,-144.87 495,-144.87 320.13,-144.87 275.26,-149.55 102,-125.87"/>
+<text text-anchor="middle" x="897" y="-147.27" font-family="Helvetica,sans-Serif" font-size="9.50">blas_handle, interior_gpu, boundary_gpu, boundarynormal_gpu, extBoundary_gpu, avgBoundary_gpu, interpWork</text>
+</g>
+<!-- type~scalar2d_t -->
+<g id="type~~scalar2d~~InheritsGraph_node3" class="node">
+<title>type~scalar2d_t</title>
+<g id="a_type~~scalar2d~~InheritsGraph_node3"><a xlink:href=".././type/scalar2d_t.html" xlink:title="Scalar2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1380,-106.87 1310,-106.87 1310,-82.87 1380,-82.87 1380,-106.87"/>
+<text text-anchor="middle" x="1345" y="-92.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~scalar2d&#45;&gt;type~scalar2d_t -->
+<g id="type~~scalar2d~~InheritsGraph_edge2" class="edge">
+<title>type~scalar2d&#45;&gt;type~scalar2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1416.89,-146.86C1410.91,-146.71 1404.72,-146.14 1399,-144.87"/>
+<path fill="none" stroke="#ff0000" d="M1398,-144.87C1393.61,-143.89 1377.74,-128.24 1364.68,-114.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1366.86,-111.92 1357.42,-107.11 1361.8,-116.76 1366.86,-111.92"/>
+</g>
+<!-- type~self_dataobj -->
+<g id="type~~scalar2d~~InheritsGraph_node4" class="node">
+<title>type~self_dataobj</title>
+<g id="a_type~~scalar2d~~InheritsGraph_node4"><a xlink:href=".././type/self_dataobj.html" xlink:title="SELF_DataObj">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1273,-95.87 1186,-95.87 1186,-71.87 1273,-71.87 1273,-95.87"/>
+<text text-anchor="middle" x="1229.5" y="-81.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataObj</text>
+</a>
+</g>
+</g>
+<!-- type~scalar2d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~scalar2d~~InheritsGraph_edge3" class="edge">
+<title>type~scalar2d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#00ffff" d="M1309.95,-91.57C1301.6,-90.76 1292.46,-89.88 1283.46,-89"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1283.68,-85.51 1273.39,-88.03 1283,-92.48 1283.68,-85.51"/>
+</g>
+<!-- type~lagrange -->
+<g id="type~~scalar2d~~InheritsGraph_node5" class="node">
+<title>type~lagrange</title>
+<g id="a_type~~scalar2d~~InheritsGraph_node5"><a xlink:href=".././type/lagrange.html" xlink:title="Lagrange">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="593,-116.87 529,-116.87 529,-92.87 593,-92.87 593,-116.87"/>
+<text text-anchor="middle" x="561" y="-102.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~lagrange -->
+<g id="type~~scalar2d~~InheritsGraph_edge4" class="edge">
+<title>type~self_dataobj&#45;&gt;type~lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1185.79,-85.22C1065.03,-89.02 722.16,-99.82 603.23,-103.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="602.97,-100.08 593.08,-103.89 603.19,-107.07 602.97,-100.08"/>
+<text text-anchor="middle" x="897" y="-105.27" font-family="Helvetica,sans-Serif" font-size="9.50">interp</text>
+</g>
+<!-- EquationParser -->
+<g id="type~~scalar2d~~InheritsGraph_node6" class="node">
+<title>EquationParser</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="608,-74.87 514,-74.87 514,-50.87 608,-50.87 608,-74.87"/>
+<text text-anchor="middle" x="561" y="-60.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EquationParser</text>
+</g>
+<!-- type~self_dataobj&#45;&gt;EquationParser -->
+<g id="type~~scalar2d~~InheritsGraph_edge6" class="edge">
+<title>type~self_dataobj&#45;&gt;EquationParser</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1185.98,-75.24C1179.97,-74.28 1173.84,-73.45 1168,-72.87 966.58,-53.03 725.73,-57.36 618.41,-60.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="618.02,-57.25 608.14,-61.07 618.25,-64.25 618.02,-57.25"/>
+<text text-anchor="middle" x="897" y="-75.27" font-family="Helvetica,sans-Serif" font-size="9.50">eqn</text>
+</g>
+<!-- type~metadata -->
+<g id="type~~scalar2d~~InheritsGraph_node7" class="node">
+<title>type~metadata</title>
+<g id="a_type~~scalar2d~~InheritsGraph_node7"><a xlink:href=".././type/metadata.html" xlink:title="Metadata">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="592.5,-32.87 529.5,-32.87 529.5,-8.87 592.5,-8.87 592.5,-32.87"/>
+<text text-anchor="middle" x="561" y="-18.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Metadata</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~metadata -->
+<g id="type~~scalar2d~~InheritsGraph_edge5" class="edge">
+<title>type~self_dataobj&#45;&gt;type~metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1214.75,-71.57C1203.19,-62.05 1185.74,-49.57 1168,-43.87 964.22,21.64 701.91,-2.39 602.56,-15.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="602.09,-11.6 592.63,-16.36 603,-18.54 602.09,-11.6"/>
+<text text-anchor="middle" x="897" y="-46.27" font-family="Helvetica,sans-Serif" font-size="9.50">meta</text>
+</g>
+<!-- type~lagrange&#45;&gt;c_ptr -->
+<g id="type~~scalar2d~~InheritsGraph_edge7" class="edge">
+<title>type~lagrange&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M495,-106.87C340.84,-99.17 301.92,-109.41 148,-120.87 127.49,-122.4 122.42,-128.32 102,-125.87"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M100,-125.87C88.05,-124.24 75.22,-121.39 63.74,-118.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="64.63,-115.05 54.06,-115.85 62.82,-121.82 64.63,-115.05"/>
+<text text-anchor="middle" x="312.5" y="-123.27" font-family="Helvetica,sans-Serif" font-size="9.50">qWeights_gpu, iMatrix_gpu, dMatrix_gpu, dgMatrix_gpu, bMatrix_gpu</text>
+</g>
+<!-- type~lagrange_t -->
+<g id="type~~scalar2d~~InheritsGraph_node8" class="node">
+<title>type~lagrange_t</title>
+<g id="a_type~~scalar2d~~InheritsGraph_node8"><a xlink:href=".././type/lagrange_t.html" xlink:title="Lagrange_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="349,-70.87 276,-70.87 276,-46.87 349,-46.87 349,-70.87"/>
+<text text-anchor="middle" x="312.5" y="-56.47" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- type~lagrange&#45;&gt;type~lagrange_t -->
+<g id="type~~scalar2d~~InheritsGraph_edge8" class="edge">
+<title>type~lagrange&#45;&gt;type~lagrange_t</title>
+<path fill="none" stroke="#ff0000" d="M528.74,-106.86C518.32,-107.26 506.66,-107.4 496,-106.87"/>
+<path fill="none" stroke="#ff0000" d="M495,-106.87C482.38,-106.24 487.95,-91.16 477,-84.87 441.09,-64.24 393.8,-58.6 359.33,-57.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="359.12,-54.1 349.06,-57.44 359,-61.1 359.12,-54.1"/>
+</g>
+<!-- type~lagrange_t&#45;&gt;c_ptr -->
+<g id="type~~scalar2d~~InheritsGraph_edge9" class="edge">
+<title>type~lagrange_t&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M275.72,-64.23C242.56,-69.27 191.88,-77.18 148,-84.87 119.79,-89.82 87.96,-95.94 64.17,-100.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="63.3,-97.23 54.17,-102.61 64.66,-104.1 63.3,-97.23"/>
+<text text-anchor="middle" x="101" y="-101.27" font-family="Helvetica,sans-Serif" font-size="9.50">blas_handle</text>
+</g>
+</g>
+</svg>
+</div><script>var pantypescalar2dInheritsGraph = svgPanZoom('#typescalar2dInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~scalar2d~~InheritedByGraph Pages: 1 -->
+<svg id="typescalar2dInheritedByGraph" width="641pt" height="146pt"
+ viewBox="0.00 0.00 641.00 146.33" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~scalar2d~~InheritedByGraph" class="graph" transform="scale(0.45 0.45) rotate(0) translate(4 322)">
+<title>type~~scalar2d~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-322 1424,-322 1424,4 -4,4"/>
+<!-- type~scalar2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node1" class="node">
+<title>type~scalar2d</title>
+<polygon fill="none" stroke="black" points="61,-155 0,-155 0,-131 61,-131 61,-155"/>
+<text text-anchor="middle" x="30.5" y="-140.6" font-family="Helvetica,sans-Serif" font-size="10.50">Scalar2D</text>
+</g>
+<!-- type~semquad -->
+<g id="type~~scalar2d~~InheritedByGraph_node2" class="node">
+<title>type~semquad</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node2"><a xlink:href=".././type/semquad.html" xlink:title="SEMQuad">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="203,-188 139,-188 139,-164 203,-164 203,-188"/>
+<text text-anchor="middle" x="171" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMQuad</text>
+</a>
+</g>
+</g>
+<!-- type~semquad&#45;&gt;type~scalar2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge1" class="edge">
+<title>type~semquad&#45;&gt;type~scalar2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M138.92,-168.59C118.81,-163.8 92.47,-157.53 70.9,-152.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="71.59,-148.96 61.06,-150.04 69.97,-155.76 71.59,-148.96"/>
+<text text-anchor="middle" x="100" y="-165.4" font-family="Helvetica,sans-Serif" font-size="9.50">nScale, J</text>
+</g>
+<!-- type~mappedscalar2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node3" class="node">
+<title>type~mappedscalar2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node3"><a xlink:href=".././type/mappedscalar2d_t.html" xlink:title="MappedScalar2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="398,-157 285,-157 285,-133 398,-133 398,-157"/>
+<text text-anchor="middle" x="341.5" y="-142.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d_t&#45;&gt;type~scalar2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge2" class="edge">
+<title>type~mappedscalar2d_t&#45;&gt;type~scalar2d</title>
+<path fill="none" stroke="#ff0000" d="M284.9,-144.64C223.49,-144.24 126.11,-143.61 71.69,-143.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="71.42,-139.76 61.4,-143.19 71.38,-146.76 71.42,-139.76"/>
+</g>
+<!-- type~mappedscalar2d_t&#45;&gt;type~semquad -->
+<g id="type~~scalar2d~~InheritedByGraph_edge3" class="edge">
+<title>type~mappedscalar2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M284.84,-150.53C264.61,-153.05 241.65,-156.49 221,-161 218.36,-161.58 215.66,-162.23 212.95,-162.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="211.87,-159.59 203.17,-165.62 213.74,-166.34 211.87,-159.59"/>
+<text text-anchor="middle" x="244" y="-163.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedvector2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node4" class="node">
+<title>type~mappedvector2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node4"><a xlink:href=".././type/mappedvector2d_t.html" xlink:title="MappedVector2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="398,-237 285,-237 285,-213 398,-213 398,-237"/>
+<text text-anchor="middle" x="341.5" y="-222.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector2d_t&#45;&gt;type~semquad -->
+<g id="type~~scalar2d~~InheritedByGraph_edge4" class="edge">
+<title>type~mappedvector2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M284.76,-215.57C264.42,-211.43 241.41,-205.91 221,-199 215.55,-197.15 209.9,-194.87 204.46,-192.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="205.53,-189.11 194.99,-188.09 202.59,-195.47 205.53,-189.11"/>
+<text text-anchor="middle" x="244" y="-213.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node5" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node5"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="932,-197 847,-197 847,-173 932,-173 932,-197"/>
+<text text-anchor="middle" x="889.5" y="-182.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~semquad -->
+<g id="type~~scalar2d~~InheritedByGraph_edge5" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M846.88,-184.48C720.08,-182.88 339.51,-178.1 213.23,-176.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="213.24,-173.02 203.19,-176.39 213.15,-180.02 213.24,-173.02"/>
+<text text-anchor="middle" x="439" y="-181.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedscalar2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node6" class="node">
+<title>type~mappedscalar2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node6"><a xlink:href=".././type/mappedscalar2d.html" xlink:title="MappedScalar2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="584,-115 480,-115 480,-91 584,-91 584,-115"/>
+<text text-anchor="middle" x="532" y="-100.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mappedscalar2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge12" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mappedscalar2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M861.64,-172.89C851.55,-168.69 839.9,-164.22 829,-161 730.45,-131.87 702.8,-137 602,-117 599.39,-116.48 596.73,-115.95 594.04,-115.41"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="594.73,-111.98 584.23,-113.45 593.35,-118.85 594.73,-111.98"/>
+<text text-anchor="middle" x="715.5" y="-163.4" font-family="Helvetica,sans-Serif" font-size="9.50">solution, source, fluxDivergence, dSdt, workSol</text>
+</g>
+<!-- type~mappedvector2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node10" class="node">
+<title>type~mappedvector2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node10"><a xlink:href=".././type/mappedvector2d.html" xlink:title="MappedVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="584,-279 480,-279 480,-255 584,-255 584,-279"/>
+<text text-anchor="middle" x="532" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mappedvector2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge18" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mappedvector2d</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M846.89,-194.82C840.89,-196.23 834.79,-197.65 829,-199 747.8,-217.88 654,-239.38 594.13,-253.06"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="593.06,-249.71 584.09,-255.35 594.62,-256.53 593.06,-249.71"/>
+<text text-anchor="middle" x="715.5" y="-252.4" font-family="Helvetica,sans-Serif" font-size="9.50">solutionGradient, flux</text>
+</g>
+<!-- type~mappedscalar2d&#45;&gt;type~mappedscalar2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge6" class="edge">
+<title>type~mappedscalar2d&#45;&gt;type~mappedscalar2d_t</title>
+<path fill="none" stroke="#00ffff" d="M500.33,-115.09C493.58,-117.9 486.51,-120.96 480,-124 461.81,-132.5 459.96,-142.78 440,-145"/>
+<path fill="none" stroke="#00ffff" d="M438,-145C428.46,-146.06 418.35,-146.65 408.42,-146.91"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="408.11,-143.42 398.16,-147.08 408.22,-150.41 408.11,-143.42"/>
+</g>
+<!-- type~mappedscalar2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node7" class="node">
+<title>type~mappedscalar2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node7"><a xlink:href=".././type/mappedscalar2d~2.html" xlink:title="MappedScalar2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="584,-157 480,-157 480,-133 584,-133 584,-157"/>
+<text text-anchor="middle" x="532" y="-142.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d~2&#45;&gt;type~mappedscalar2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge7" class="edge">
+<title>type~mappedscalar2d~2&#45;&gt;type~mappedscalar2d_t</title>
+<path fill="none" stroke="#00ffff" d="M479.87,-143.01C466.84,-143.05 452.88,-143.56 440,-145"/>
+</g>
+<!-- type~mappedvector2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node8" class="node">
+<title>type~mappedvector2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node8"><a xlink:href=".././type/mappedvector2d~2.html" xlink:title="MappedVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="584,-237 480,-237 480,-213 584,-213 584,-237"/>
+<text text-anchor="middle" x="532" y="-222.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector2d~2&#45;&gt;type~mappedvector2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge9" class="edge">
+<title>type~mappedvector2d~2&#45;&gt;type~mappedvector2d_t</title>
+<path fill="none" stroke="#ff0000" d="M479.87,-226.99C466.84,-226.95 452.88,-226.44 440,-225"/>
+<path fill="none" stroke="#ff0000" d="M438,-225C428.46,-223.94 418.35,-223.35 408.42,-223.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="408.22,-219.59 398.16,-222.92 408.11,-226.58 408.22,-219.59"/>
+</g>
+<!-- type~dgmodel2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node9" class="node">
+<title>type~dgmodel2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node9"><a xlink:href=".././type/dgmodel2d.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1067,-197 991,-197 991,-173 1067,-173 1067,-197"/>
+<text text-anchor="middle" x="1029" y="-182.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge10" class="edge">
+<title>type~dgmodel2d&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#7fff00" d="M990.79,-183.06C981.51,-183.11 971.61,-183.62 962.5,-185"/>
+</g>
+<!-- type~mappedvector2d&#45;&gt;type~mappedvector2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge8" class="edge">
+<title>type~mappedvector2d&#45;&gt;type~mappedvector2d_t</title>
+<path fill="none" stroke="#ff0000" d="M500.33,-254.91C493.58,-252.1 486.51,-249.04 480,-246 461.81,-237.5 459.96,-227.22 440,-225"/>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node11" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node11"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1247.5,-88 1104.5,-88 1104.5,-64 1247.5,-64 1247.5,-88"/>
+<text text-anchor="middle" x="1176" y="-73.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~mappedscalar2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge13" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~mappedscalar2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1124.93,-88.05C1111.92,-92.02 1098.16,-96.99 1086,-103"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1085,-103C1042.03,-124.23 729.17,-112.28 594.44,-106.04"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="594.43,-102.54 584.28,-105.57 594.11,-109.53 594.43,-102.54"/>
+<text text-anchor="middle" x="961.5" y="-117.4" font-family="Helvetica,sans-Serif" font-size="9.50">fCori</text>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge14" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#cbff00" d="M1085,-103C1059.66,-115.52 1084.57,-141.86 1067,-164 1066.42,-164.73 1065.8,-165.45 1065.16,-166.14"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1062.72,-163.62 1057.38,-172.77 1067.26,-168.94 1062.72,-163.62"/>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node12" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node12"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1067,-155 991,-155 991,-131 1067,-131 1067,-155"/>
+<text text-anchor="middle" x="1029" y="-140.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge11" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#7fff00" d="M1005.83,-155.01C1000.88,-157.85 995.71,-160.94 991,-164 977.8,-172.56 978.06,-182.64 962.5,-185"/>
+<path fill="none" stroke="#7fff00" d="M960.5,-185C954.65,-185.89 948.49,-186.44 942.36,-186.75"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="942,-183.26 932.11,-187.06 942.21,-190.25 942,-183.26"/>
+</g>
+<!-- type~lineareuler2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node13" class="node">
+<title>type~lineareuler2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node13"><a xlink:href=".././type/lineareuler2d_t.html" xlink:title="LinearEuler2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1225,-166 1127,-166 1127,-142 1225,-142 1225,-166"/>
+<text text-anchor="middle" x="1176" y="-151.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge15" class="edge">
+<title>type~lineareuler2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#cbff00" d="M1144.79,-166.12C1131.56,-172.21 1116.28,-180.35 1104,-190 1094.33,-197.59 1098.08,-213.3 1086,-211"/>
+<path fill="none" stroke="#cbff00" d="M1085,-211C1075.88,-209.26 1066.54,-205.65 1058.2,-201.66"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1059.77,-198.54 1049.28,-197.07 1056.57,-204.76 1059.77,-198.54"/>
+</g>
+<!-- type~linearshallowwater2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node14" class="node">
+<title>type~linearshallowwater2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node14"><a xlink:href=".././type/linearshallowwater2d~2.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1419.5,-66 1285.5,-66 1285.5,-42 1419.5,-42 1419.5,-66"/>
+<text text-anchor="middle" x="1352.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge20" class="edge">
+<title>type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#0066ff" d="M1285.17,-50.99C1278.98,-51.61 1272.84,-52.58 1267,-54"/>
+</g>
+<!-- type~linearshallowwater2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node15" class="node">
+<title>type~linearshallowwater2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node15"><a xlink:href=".././type/linearshallowwater2d.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1419.5,-24 1285.5,-24 1285.5,0 1419.5,0 1419.5,-24"/>
+<text text-anchor="middle" x="1352.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge19" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#0066ff" d="M1302.12,-24.14C1296.11,-26.6 1290.25,-29.53 1285,-33 1274.74,-39.78 1278.94,-51.09 1267,-54"/>
+<path fill="none" stroke="#0066ff" d="M1266,-54C1256.04,-56.43 1245.46,-59.03 1235.19,-61.56"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1234.36,-58.16 1225.49,-63.95 1236.03,-64.95 1234.36,-58.16"/>
+</g>
+<!-- type~nulldgmodel2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node16" class="node">
+<title>type~nulldgmodel2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node16"><a xlink:href=".././type/nulldgmodel2d_t.html" xlink:title="NullDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1229,-265 1123,-265 1123,-241 1229,-241 1229,-265"/>
+<text text-anchor="middle" x="1176" y="-250.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge16" class="edge">
+<title>type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#cbff00" d="M1122.66,-241.32C1116.11,-238.77 1109.72,-235.7 1104,-232 1093.68,-225.32 1098.08,-213.3 1086,-211"/>
+</g>
+<!-- type~advection_diffusion_2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_node17" class="node">
+<title>type~advection_diffusion_2d_t</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node17"><a xlink:href=".././type/advection_diffusion_2d_t.html" xlink:title="advection_diffusion_2d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1248,-223 1104,-223 1104,-199 1248,-199 1248,-223"/>
+<text text-anchor="middle" x="1176" y="-208.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~scalar2d~~InheritedByGraph_edge17" class="edge">
+<title>type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#cbff00" d="M1103.85,-213.39C1097.78,-212.87 1091.77,-212.1 1086,-211"/>
+</g>
+<!-- type~nulldgmodel2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node18" class="node">
+<title>type~nulldgmodel2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node18"><a xlink:href=".././type/nulldgmodel2d.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1401,-318 1304,-318 1304,-294 1401,-294 1401,-318"/>
+<text text-anchor="middle" x="1352.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge23" class="edge">
+<title>type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#0066ff" d="M1308,-293.94C1300.22,-291.31 1292.27,-288.31 1285,-285 1276.47,-281.12 1276.23,-275.66 1267,-274"/>
+</g>
+<!-- type~advection_diffusion_2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node19" class="node">
+<title>type~advection_diffusion_2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node19"><a xlink:href=".././type/advection_diffusion_2d.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1420,-234 1285,-234 1285,-210 1420,-210 1420,-234"/>
+<text text-anchor="middle" x="1352.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge25" class="edge">
+<title>type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M1284.6,-221.27C1278.64,-221.43 1272.71,-221.66 1267,-222"/>
+</g>
+<!-- type~advection_diffusion_2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node20" class="node">
+<title>type~advection_diffusion_2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node20"><a xlink:href=".././type/advection_diffusion_2d~2.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1420,-192 1285,-192 1285,-168 1420,-168 1420,-192"/>
+<text text-anchor="middle" x="1352.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge26" class="edge">
+<title>type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M1302.12,-192.14C1296.11,-194.6 1290.25,-197.53 1285,-201 1274.74,-207.78 1279.27,-221.27 1267,-222"/>
+<path fill="none" stroke="#cc00ff" d="M1266,-222C1263.48,-222.15 1260.93,-222.24 1258.35,-222.27"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1258.38,-218.77 1248.34,-222.13 1258.29,-225.77 1258.38,-218.77"/>
+</g>
+<!-- type~lineareuler2d -->
+<g id="type~~scalar2d~~InheritedByGraph_node21" class="node">
+<title>type~lineareuler2d</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node21"><a xlink:href=".././type/lineareuler2d.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1397,-150 1308,-150 1308,-126 1397,-126 1397,-150"/>
+<text text-anchor="middle" x="1352.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge21" class="edge">
+<title>type~lineareuler2d&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1307.72,-134.58C1294.52,-134.46 1280.06,-135.25 1267,-138"/>
+</g>
+<!-- type~lineareuler2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node22" class="node">
+<title>type~lineareuler2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node22"><a xlink:href=".././type/lineareuler2d~2.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1397,-108 1308,-108 1308,-84 1397,-84 1397,-108"/>
+<text text-anchor="middle" x="1352.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge22" class="edge">
+<title>type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1307.7,-106C1299.78,-108.85 1291.87,-112.46 1285,-117 1274.74,-123.78 1279.03,-135.47 1267,-138"/>
+<path fill="none" stroke="#ff0000" d="M1266,-138C1256.09,-140.08 1245.53,-142.13 1235.26,-144.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1234.35,-140.64 1225.14,-145.88 1235.6,-147.53 1234.35,-140.64"/>
+</g>
+<!-- type~nulldgmodel2d~2 -->
+<g id="type~~scalar2d~~InheritedByGraph_node23" class="node">
+<title>type~nulldgmodel2d~2</title>
+<g id="a_type~~scalar2d~~InheritedByGraph_node23"><a xlink:href=".././type/nulldgmodel2d~2.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1401,-276 1304,-276 1304,-252 1401,-252 1401,-276"/>
+<text text-anchor="middle" x="1352.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~scalar2d~~InheritedByGraph_edge24" class="edge">
+<title>type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#0066ff" d="M1303.98,-274.55C1291.88,-275.88 1278.92,-276.14 1267,-274"/>
+<path fill="none" stroke="#0066ff" d="M1266,-274C1255.58,-272.13 1244.55,-269.81 1233.93,-267.4"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1234.45,-263.92 1223.91,-265.07 1232.86,-270.74 1234.45,-263.92"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypescalar2dInheritedByGraph = svgPanZoom('#typescalar2dInheritedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/scalar2d.html#variable-m~2">M</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-n~2">N</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-avgboundary">avgBoundary</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-avgboundary_gpu~2">avgBoundary_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-backend~2">backend</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-blas_handle~3">blas_handle</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundary">boundary</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundary_gpu~2">boundary_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundarynormal">boundarynormal</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-boundarynormal_gpu">boundarynormal_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-eqn">eqn</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-extboundary">extBoundary</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-extboundary_gpu~2">extBoundary_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interior">interior</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interior_gpu~2">interior_gpu</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interp">interp</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-interpwork">interpWork</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-meta">meta</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-nelem">nElem</a>
+      <a class="list-group-item" href="../type/scalar2d.html#variable-nvar">nVar</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-averagesides~3">AverageSides</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-boundaryinterp~3">BoundaryInterp</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-free~6">Free</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gradient~14">Gradient</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gradient_scalar2d">Gradient_Scalar2D</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gridinterp~18">GridInterp</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-gridinterp_scalar2d">GridInterp_Scalar2D</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-init~6">Init</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setdescription">SetDescription</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setequation~22">SetEquation</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setname">SetName</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-setunits">SetUnits</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-updatedevice~3">UpdateDevice</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-updatehost~3">UpdateHost</a>
+      <a class="list-group-item" href="../type/scalar2d.html#boundprocedure-writehdf5~20">WriteHDF5</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/scalar2d.html#src">Scalar2D</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-m~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>M</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-n~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-avgboundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>avgBoundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-avgboundary_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>avgBoundary_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-backend~2"></span>character(len=3),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>backend</strong></td><td> =</td><td>"gpu"</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-blas_handle~3"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>blas_handle</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>boundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundary_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>boundary_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundarynormal"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>boundarynormal</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundarynormal_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>boundarynormal_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-eqn"></span>type(EquationParser),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>eqn</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-extboundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>extBoundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-extboundary_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>extBoundary_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>interior</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior_gpu~2"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>interior_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interp"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>interp</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interpwork"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>interpWork</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-meta"></span>type(<a href='../type/metadata.html'>Metadata</a>),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>meta</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-averagesides~3"></span><h3>procedure, public :: <strong>AverageSides</strong>  => <a href='../proc/averagesides_scalar2d.html'>AverageSides_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/averagesides_scalar2d.html'>AverageSides_Scalar2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-boundaryinterp~3"></span><h3>procedure, public :: <strong>BoundaryInterp</strong>  => <a href='../proc/boundaryinterp_scalar2d.html'>BoundaryInterp_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/boundaryinterp_scalar2d.html'>BoundaryInterp_Scalar2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~6"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_scalar2d.html'>Free_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_scalar2d.html'>Free_Scalar2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-gradient~14"></span><h3>generic, public :: <strong>Gradient</strong>  => <a href='../type/scalar2d_t.html#boundprocedure-gradient_scalar2d_t'>Gradient_Scalar2D_t</a>, <a href='../type/scalar2d.html#boundprocedure-gradient_scalar2d'>Gradient_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/gradient_scalar2d_t.html'>Gradient_Scalar2D_t</a>(this, df)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d_t.html'>Scalar2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>df</strong>(1:this%N+1,1:this%N+1,1:this%nelem,1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/gradient_scalar2d.html'>Gradient_Scalar2D</a>(this, df)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>df</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-gradient_scalar2d"></span><h3>procedure, private :: <strong>Gradient_Scalar2D</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/gradient_scalar2d.html'>Gradient_Scalar2D</a>(this, df)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>df</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-gridinterp~18"></span><h3>generic, public :: <strong>GridInterp</strong>  => <a href='../type/scalar2d_t.html#boundprocedure-gridinterp_scalar2d_t'>GridInterp_Scalar2D_t</a>, <a href='../type/scalar2d.html#boundprocedure-gridinterp_scalar2d'>GridInterp_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/gridinterp_scalar2d_t.html'>GridInterp_Scalar2D_t</a>(this, f)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d_t.html'>Scalar2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>f</strong>(1:this%M+1,1:this%M+1,1:this%nelem,1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/gridinterp_scalar2d.html'>GridInterp_Scalar2D</a>(this, f)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>f</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-gridinterp_scalar2d"></span><h3>procedure, private :: <strong>GridInterp_Scalar2D</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/gridinterp_scalar2d.html'>GridInterp_Scalar2D</a>(this, f)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>f</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~6"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_scalar2d.html'>Init_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_scalar2d.html'>Init_Scalar2D</a>(this, interp, nVar, nElem)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setdescription"></span><h3>procedure, public :: <strong>SetDescription</strong>  => <a href='../proc/setdescription_dataobj.html'>SetDescription_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setdescription_dataobj.html'>SetDescription_DataObj</a>(this, ivar, description)</h3>
+<p>Set the description of the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>description</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setequation~22"></span><h3>generic, public :: <strong>SetEquation</strong>  => <a href='../type/self_dataobj.html#boundprocedure-setequation_dataobj'>SetEquation_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setequation_dataobj.html'>SetEquation_DataObj</a>(this, ivar, eqnChar)</h3>
+<p>Sets the equation parser for the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqnChar</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setname"></span><h3>procedure, public :: <strong>SetName</strong>  => <a href='../proc/setname_dataobj.html'>SetName_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setname_dataobj.html'>SetName_DataObj</a>(this, ivar, name)</h3>
+<p>Set the name of the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>name</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setunits"></span><h3>procedure, public :: <strong>SetUnits</strong>  => <a href='../proc/setunits_dataobj.html'>SetUnits_DataObj</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setunits_dataobj.html'>SetUnits_DataObj</a>(this, ivar, units)</h3>
+<p>Set the units of the <code>ivar-th</code> variable</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/self_dataobj.html'>SELF_DataObj</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ivar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>units</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice~3"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_scalar2d.html'>UpdateDevice_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatedevice_scalar2d.html'>UpdateDevice_Scalar2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatehost~3"></span><h3>procedure, public :: <strong>UpdateHost</strong>  => <a href='../proc/updatehost_scalar2d.html'>UpdateHost_Scalar2D</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatehost_scalar2d.html'>UpdateHost_Scalar2D</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d.html'>Scalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writehdf5~20"></span><h3>generic, public :: <strong>WriteHDF5</strong>  => <a href='../type/scalar2d_t.html#boundprocedure-writehdf5_mpi_scalar2d_t'>WriteHDF5_MPI_Scalar2D_t</a>, <a href='../type/scalar2d_t.html#boundprocedure-writehdf5_scalar2d_t'>WriteHDF5_Scalar2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/writehdf5_mpi_scalar2d_t.html'>WriteHDF5_MPI_Scalar2D_t</a>(this, fileId, group, elemoffset, nglobalelem)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d_t.html'>Scalar2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=HID_T),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileId</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>group</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>elemoffset</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nglobalelem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/writehdf5_scalar2d_t.html'>WriteHDF5_Scalar2D_t</a>(this, fileId, group)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/scalar2d_t.html'>Scalar2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=HID_T),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileId</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>group</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">Scalar2D_t</span><span class="p">),</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Scalar2D</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gpu&quot;</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">blas_handle</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">interior_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">boundary_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">boundarynormal_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extBoundary_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">avgBoundary_gpu</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">interpWork</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_Scalar2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_Scalar2D</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateHost</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateHost_Scalar2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateDevice</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateDevice_Scalar2D</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BoundaryInterp</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">BoundaryInterp_Scalar2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AverageSides</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AverageSides_Scalar2D</span>
+<span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">GridInterp</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">GridInterp_Scalar2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">GridInterp_Scalar2D</span>
+<span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Gradient</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Gradient_Scalar2D</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Gradient_Scalar2D</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">Scalar2D</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-03-05 21:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

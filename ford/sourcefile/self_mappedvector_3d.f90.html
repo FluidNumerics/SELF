@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_MappedVector_3D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_MappedVector_3D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.0% of total for source files.">122 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_MappedVector_3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_MappedVector_3D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mappedvector_3d~2.html">SELF_MappedVector_3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_mappedvector_3d.f90.html#src">SELF_MappedVector_3D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_mappedvector_3d.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_mappedvector_3df90EfferentGraph" width="641pt" height="291pt"
+ viewBox="0.00 0.00 641.00 291.36" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph" class="graph" transform="scale(0.3 0.3) rotate(0) translate(4 954.18)">
+<title>sourcefile~~self_mappedvector_3d.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-954.18 2104,-954.18 2104,4 -4,4"/>
+<!-- sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_mappedvector_3d.f90</title>
+<polygon fill="none" stroke="black" points="2100,-462.14 1940,-462.14 1940,-438.14 2100,-438.14 2100,-462.14"/>
+<text text-anchor="middle" x="2020" y="-447.74" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_MappedVector_3D.f90</text>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_mappedvector_3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_mappedvector_3d_t.f90.html" xlink:title="SELF_MappedVector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1904,-675.14 1735,-675.14 1735,-651.14 1904,-651.14 1904,-675.14"/>
+<text text-anchor="middle" x="1819.5" y="-660.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_mappedvector_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_mappedvector_3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2007.76,-462.2C1974.95,-497.42 1879.07,-600.3 1838.72,-643.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1836.12,-641.25 1831.86,-650.95 1841.24,-646.02 1836.12,-641.25"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_gpuinterfaces.f90.html" xlink:title="SELF_GPUInterfaces.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1043.5,-253.14 904.5,-253.14 904.5,-229.14 1043.5,-229.14 1043.5,-253.14"/>
+<text text-anchor="middle" x="974" y="-238.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1629.5,-237.14C1422.95,-212.1 1177.04,-224.93 1053.74,-234.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1053.34,-230.78 1043.64,-235.04 1053.88,-237.76 1053.34,-230.78"/>
+</g>
+<!-- sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_gpublas.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_gpublas.f90.html" xlink:title="SELF_GPUBLAS.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1030.5,-173.14 917.5,-173.14 917.5,-149.14 1030.5,-149.14 1030.5,-173.14"/>
+<text text-anchor="middle" x="974" y="-158.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUBLAS.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2005.93,-438.13C1959.45,-396.54 1796.12,-260.03 1631.5,-237.14"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1629.5,-237.14C1429.83,-170.95 1373.14,-166.75 1163,-157.14"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1161,-157.14C1121.28,-154.18 1076.66,-155 1041.08,-156.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1040.64,-153.16 1030.83,-157.15 1040.99,-160.15 1040.64,-153.16"/>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="443.5,-253.14 358.5,-253.14 358.5,-229.14 443.5,-229.14 443.5,-253.14"/>
+<text text-anchor="middle" x="401" y="-238.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1161,-157.14C1118.66,-153.98 1109.29,-143.94 1067,-140.14 984.66,-132.76 962.72,-127.68 881,-140.14 732.1,-162.85 707.84,-231.99 557.5,-241.14"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-241.14C521.65,-241.32 483.6,-241.32 453.85,-241.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="453.7,-237.78 443.7,-241.26 453.69,-244.78 453.7,-237.78"/>
+</g>
+<!-- sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_mesh_3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_mesh_3d.f90.html" xlink:title="SELF_Mesh_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1526,-791.14 1414,-791.14 1414,-767.14 1526,-767.14 1526,-791.14"/>
+<text text-anchor="middle" x="1470" y="-776.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1814.44,-675.27C1799.1,-718.64 1739.94,-865.11 1631.5,-895.14"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1629.5,-895.14C1566.18,-912.68 1508.39,-838.11 1483.68,-800.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1486.42,-797.94 1478.12,-791.36 1480.51,-801.68 1486.42,-797.94"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-867.14 881,-867.14 881,-843.14 1067,-843.14 1067,-867.14"/>
+<text text-anchor="middle" x="974" y="-852.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1469,-895.14C1404.78,-876.45 1384.86,-903.54 1318.5,-895.14"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1316.5,-895.14C1288.96,-891.66 1280.13,-891.49 1257,-876.14 1236.51,-862.55 1243.34,-844.42 1221,-834.14 1173.35,-812.23 1155.27,-829.88 1103,-834.14 1084.26,-835.67 1064.13,-838.43 1045.51,-841.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1044.91,-838.02 1035.63,-843.12 1046.07,-844.92 1044.91,-838.02"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_geometry_3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_geometry_3d.f90.html" xlink:title="SELF_Geometry_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1699,-675.14 1562,-675.14 1562,-651.14 1699,-651.14 1699,-675.14"/>
+<text text-anchor="middle" x="1630.5" y="-660.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1734.85,-663.14C1726.34,-663.14 1717.73,-663.14 1709.29,-663.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1709.1,-659.64 1699.1,-663.14 1709.1,-666.64 1709.1,-659.64"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-619.14 0,-619.14 0,-595.14 116,-595.14 116,-619.14"/>
+<text text-anchor="middle" x="58" y="-604.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1316.5,-895.14C1248.66,-887.92 1231.08,-890.78 1163,-895.14"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-639.14 499,-639.14 499,-615.14 614,-615.14 614,-639.14"/>
+<text text-anchor="middle" x="556.5" y="-624.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1629.5,-895.14C1561.61,-913.95 1538.64,-914.83 1471,-895.14"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1469,-895.14C1422.25,-881.53 1420.55,-857.81 1378,-834.14 1207.97,-739.56 1168.86,-679.78 975,-663.14"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M904.22,-241.14C859.79,-241.14 800.73,-241.14 748.5,-241.14"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="291,-171.14 164,-171.14 164,-147.14 291,-147.14 291,-171.14"/>
+<text text-anchor="middle" x="227.5" y="-156.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M400,-159.14C367.69,-157.29 331.89,-157.01 301.4,-157.3"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="301.23,-153.8 291.27,-157.42 301.31,-160.8 301.23,-153.8"/>
+</g>
+<!-- sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M917.42,-162.93C815.25,-165.78 590.78,-169.99 402,-159.14"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M400,-159.14C321.94,-153.4 294.24,-76.66 228.5,-119.14"/>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M374.69,-229.04C345.1,-214.89 295.96,-191.4 262.91,-175.6"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="264.16,-172.31 253.63,-171.16 261.14,-178.63 264.16,-172.31"/>
+</g>
+<!-- sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1459.25,-766.91C1417.68,-715.59 1249.1,-515.36 1067,-410.14 1015.36,-380.3 617.1,-238.86 557.5,-241.14"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_mesh_3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_mesh_3d_t.f90.html" xlink:title="SELF_Mesh_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1378,-867.14 1257,-867.14 1257,-843.14 1378,-843.14 1378,-867.14"/>
+<text text-anchor="middle" x="1317.5" y="-852.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_mesh_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_mesh_3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1445.15,-791.19C1419.98,-803.9 1380.12,-824.03 1351.84,-838.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1350.08,-835.27 1342.73,-842.9 1353.24,-841.52 1350.08,-835.27"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-867.14 650,-867.14 650,-843.14 845,-843.14 845,-867.14"/>
+<text text-anchor="middle" x="747.5" y="-852.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M880.72,-855.14C872.38,-855.14 863.88,-855.14 855.43,-855.14"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="855.16,-851.64 845.16,-855.14 855.16,-858.64 855.16,-851.64"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1612.84,-675.34C1584.82,-695.84 1528.15,-737.32 1495.56,-761.17"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1493.44,-758.38 1487.44,-767.11 1497.58,-764.03 1493.44,-758.38"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1469,-663.14C1414.72,-648.08 1031.3,-775.36 975,-777.14"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M973,-777.14C785.52,-786.9 745.23,-701.14 557.5,-701.14 557.5,-701.14 557.5,-701.14 400,-701.14 287.29,-701.14 259.24,-682.84 152,-648.14 131.6,-641.54 109.62,-631.97 92.15,-623.74"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="93.48,-620.49 82.94,-619.33 90.45,-626.81 93.48,-620.49"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1161,-663.14C1078.76,-654.79 1057.56,-667.3 975,-663.14"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M973,-663.14C829.23,-655.9 793.21,-653.74 650,-639.14 641.66,-638.29 632.92,-637.3 624.27,-636.25"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="624.54,-632.75 614.19,-635 623.68,-639.7 624.54,-632.75"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_tensor_3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_tensor_3d.f90.html" xlink:title="SELF_Tensor_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1221,-331.14 1103,-331.14 1103,-307.14 1221,-307.14 1221,-331.14"/>
+<text text-anchor="middle" x="1162" y="-316.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_tensor_3d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1316.5,-319.14C1287.14,-297.11 1244.93,-298.78 1212.2,-305.04"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1211.44,-301.62 1202.38,-307.1 1212.88,-308.47 1211.44,-301.62"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-790.14 152,-790.14 152,-766.14 303,-766.14 303,-790.14"/>
+<text text-anchor="middle" x="227.5" y="-775.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M973,-777.14C829.07,-779.53 793.05,-785.03 650,-801.14 608.68,-805.8 599.03,-813.08 557.5,-815.14"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M555.5,-815.14C466.42,-817.94 364.49,-803.59 298.44,-791.95"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="299.02,-788.5 288.56,-790.18 297.78,-795.39 299.02,-788.5"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_scalar_3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_scalar_3d.f90.html" xlink:title="SELF_Scalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1221,-209.14 1103,-209.14 1103,-185.14 1221,-185.14 1221,-209.14"/>
+<text text-anchor="middle" x="1162" y="-194.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_scalar_3d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1623.76,-651.1C1599.94,-602.2 1504.22,-415.81 1378,-305.14 1327.71,-261.05 1256.23,-229.87 1209.73,-212.69"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1210.8,-209.35 1200.2,-209.24 1208.41,-215.94 1210.8,-209.35"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="792,-521.14 703,-521.14 703,-497.14 792,-497.14 792,-521.14"/>
+<text text-anchor="middle" x="747.5" y="-506.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1469,-663.14C1337.75,-627.53 1298.25,-677.37 1163,-663.14"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1161,-663.14C1111.37,-659.05 1111.79,-623.93 1067,-602.14 973.22,-556.52 945.99,-552.16 845,-526.14 831.21,-522.59 816.13,-519.55 802.07,-517.05"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="802.49,-513.57 792.04,-515.34 801.31,-520.47 802.49,-513.57"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_vector_3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_vector_3d.f90.html" xlink:title="SELF_Vector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1221,-289.14 1103,-289.14 1103,-265.14 1221,-265.14 1221,-289.14"/>
+<text text-anchor="middle" x="1162" y="-274.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_vector_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_vector_3d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1561.76,-670.89C1533.28,-672.17 1500.08,-671.03 1471,-663.14"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1469,-663.14C1327.12,-624.65 1474.8,-455.78 1378,-345.14 1359,-323.42 1341.58,-336.47 1318.5,-319.14"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1316.5,-319.14C1291.89,-300.67 1259.64,-290.32 1231.06,-284.53"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1231.59,-281.06 1221.12,-282.66 1230.3,-287.94 1231.59,-281.06"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M516.18,-615.01C509.65,-611.45 503.54,-606.91 499,-601.14 447.49,-535.64 484.7,-497.6 463,-417.14 447.73,-360.51 423.48,-295.78 410.64,-262.86"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="413.81,-261.36 406.89,-253.33 407.29,-263.92 413.81,-261.36"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M523.75,-615.06C493.11,-604.32 445.15,-589.91 402,-587.14"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-639.14 339,-639.14 339,-615.14 463,-615.14 463,-639.14"/>
+<text text-anchor="middle" x="401" y="-624.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M498.78,-627.14C490.43,-627.14 481.74,-627.14 473.15,-627.14"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="473.13,-623.64 463.13,-627.14 473.13,-630.64 473.13,-623.64"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1116.14,-307.12C1111.38,-304.65 1106.86,-301.69 1103,-298.14 1074.88,-272.32 1092.07,-248.94 1067,-220.14 1051.65,-202.52 1029.77,-188.19 1011.2,-178.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1012.6,-174.85 1002.12,-173.31 1009.35,-181.05 1012.6,-174.85"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1111.58,-307.11C1074.28,-298.5 1021.72,-287.37 975,-281.14"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1102.76,-320.09C1066.09,-320.45 1017.76,-320.5 975,-319.14"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_tensor_3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_tensor_3d_t.f90.html" xlink:title="SELF_Tensor_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-635.14 910.5,-635.14 910.5,-611.14 1037.5,-611.14 1037.5,-635.14"/>
+<text text-anchor="middle" x="974" y="-620.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_tensor_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_tensor_3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1156.22,-331.42C1143.77,-362.8 1108.4,-447.93 1067,-512.14 1044.87,-546.46 1013.58,-582.12 993.79,-603.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="991.1,-601.23 986.82,-610.93 996.21,-606.02 991.1,-601.23"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M210.76,-766.03C195.24,-753.81 171.13,-734.1 152,-715.14 122.99,-686.39 92.72,-649.81 74.88,-627.45"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="77.42,-625.02 68.46,-619.35 71.93,-629.36 77.42,-625.02"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1110.17,-209.17C1087.11,-214.62 1059.65,-221.12 1035.53,-226.82"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1034.69,-223.43 1025.76,-229.13 1036.3,-230.24 1034.69,-223.43"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1102.91,-185.9C1083.22,-182.09 1061.08,-177.8 1040.82,-173.88"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1041.22,-170.39 1030.74,-171.93 1039.89,-177.27 1041.22,-170.39"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1102.96,-200.63C1046.24,-204.34 957.51,-210.95 881,-220.14 821.8,-227.25 808.12,-241.14 748.5,-241.14"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M746.5,-241.14C662.5,-240.52 641.44,-237.92 557.5,-241.14"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1129.74,-185.11C1120.82,-181.16 1111.29,-176.41 1103,-171.14 1085.18,-159.82 1086.7,-147.74 1067,-140.14 719.17,-6.04 541.6,83.18 228.5,-119.14"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M226.5,-119.14C199.96,-140.66 175.5,-113.34 152,-138.14 89.44,-204.17 65.83,-500.88 60.34,-584.9"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="56.84,-584.69 59.7,-594.89 63.83,-585.14 56.84,-584.69"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_scalar_3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_scalar_3d_t.f90.html" xlink:title="SELF_Scalar_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-443.14 910.5,-443.14 910.5,-419.14 1037.5,-419.14 1037.5,-443.14"/>
+<text text-anchor="middle" x="974" y="-428.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_scalar_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_scalar_3d_t.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1146.23,-209.56C1133.57,-220.77 1115.46,-238.21 1103,-256.14 1081.45,-287.17 1088.19,-301.87 1067,-333.14 1046.43,-363.5 1016.45,-393.51 996.36,-412.17"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="993.94,-409.64 988.93,-418.97 998.67,-414.8 993.94,-409.64"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M368.27,-615.11C334.24,-603.31 278.33,-587.08 228.5,-587.14"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M386.26,-639.24C356.53,-665.42 286.05,-727.47 250.22,-759.02"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="247.5,-756.75 242.31,-765.98 252.13,-762 247.5,-756.75"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-463.14 181,-463.14 181,-439.14 274,-439.14 274,-463.14"/>
+<text text-anchor="middle" x="227.5" y="-448.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M388.21,-615.05C359.08,-585.15 283.49,-507.58 247.76,-470.91"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="249.86,-468.04 240.37,-463.32 244.84,-472.93 249.86,-468.04"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-639.14 165.5,-639.14 165.5,-615.14 289.5,-615.14 289.5,-639.14"/>
+<text text-anchor="middle" x="227.5" y="-624.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M338.57,-627.14C325.98,-627.14 312.63,-627.14 299.73,-627.14"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="299.5,-623.64 289.5,-627.14 299.5,-630.64 299.5,-623.64"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1161,-777.14C1133.2,-774.83 1127.12,-787.12 1103,-801.14 1085.48,-811.33 1085.09,-819.99 1067,-829.14 1058.65,-833.37 1049.51,-836.99 1040.33,-840.08"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1039.27,-836.74 1030.79,-843.1 1041.38,-843.42 1039.27,-836.74"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1284.75,-867.22C1254.11,-877.96 1206.15,-892.38 1163,-895.14"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1161,-895.14C1078.5,-900.43 1057.15,-885.88 975,-895.14"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1302.03,-842.87C1276.14,-822.1 1219.3,-781.82 1163,-777.14"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1161,-777.14C1076.92,-770.16 1059.36,-813.74 975,-815.14"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M973,-815.14C809.64,-817.86 639.67,-694.05 579.89,-645.92"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="581.84,-643 571.88,-639.39 577.42,-648.42 581.84,-643"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-815.14C662.9,-806.91 641.4,-810.98 557.5,-815.14"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M973,-815.14C873.25,-817.55 847.8,-824.92 748.5,-815.14"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-815.14C697.37,-810.3 691.34,-787.12 650,-760.14 580.02,-714.48 552.19,-712.58 499,-648.14 475.46,-619.63 490.08,-598.32 463,-573.14 441.66,-553.3 429.52,-558.7 402,-549.14"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1207.5,-867.14 1116.5,-867.14 1116.5,-843.14 1207.5,-843.14 1207.5,-867.14"/>
+<text text-anchor="middle" x="1162" y="-852.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1256.71,-855.14C1243.95,-855.14 1230.54,-855.14 1217.97,-855.14"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1217.65,-851.64 1207.65,-855.14 1217.65,-858.64 1217.65,-851.64"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M400,-857.14C324.43,-847.17 293.8,-896.46 228.5,-857.14"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M226.5,-857.14C190.55,-835.5 178.39,-831.77 152,-799.14 108.33,-745.15 78.74,-667.26 66.03,-629.43"/>
+<polygon fill="#003fff" stroke="#003fff" points="69.21,-627.88 62.77,-619.47 62.55,-630.06 69.21,-627.88"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M673.45,-843.03C664.96,-839.5 656.89,-834.97 650,-829.14 593.24,-781.11 569.51,-690.88 561.25,-649.23"/>
+<polygon fill="#003fff" stroke="#003fff" points="564.67,-648.48 559.4,-639.3 557.79,-649.77 564.67,-648.48"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M649.66,-861.76C580.44,-865.02 485.21,-866.5 402,-857.14"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M400,-857.14C344.15,-849.77 286,-816.7 253.81,-795.75"/>
+<polygon fill="#003fff" stroke="#003fff" points="255.71,-792.81 245.44,-790.2 251.84,-798.64 255.71,-792.81"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M702.74,-501.44C676.97,-497.1 643.7,-491.82 614,-488.14 520.12,-476.51 496.52,-473.06 402,-469.14"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M727.35,-521.24C707.67,-533.81 676.28,-554.25 650,-573.14 633.54,-584.97 631.32,-590.61 614,-601.14 608.49,-604.49 602.48,-607.69 596.49,-610.63"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="594.74,-607.59 587.19,-615.02 597.73,-613.92 594.74,-607.59"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M715.29,-521.16C653.86,-543 513.52,-583.88 402,-549.14"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-521.14 499.5,-521.14 499.5,-497.14 613.5,-497.14 613.5,-521.14"/>
+<text text-anchor="middle" x="556.5" y="-506.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M702.66,-509.14C679.27,-509.14 650,-509.14 623.88,-509.14"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="623.66,-505.64 613.66,-509.14 623.66,-512.64 623.66,-505.64"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1102.91,-265.9C1085.2,-262.47 1065.52,-258.66 1047.01,-255.08"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1047.64,-251.64 1037.16,-253.17 1046.31,-258.51 1047.64,-251.64"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1141.45,-264.95C1108.29,-244.27 1040.93,-202.26 1002.85,-178.51"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1004.63,-175.5 994.29,-173.17 1000.92,-181.44 1004.63,-175.5"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1102.94,-282.96C1066.12,-285.52 1017.58,-286.82 975,-281.14"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M973,-281.14C922.77,-274.45 799.17,-241.14 748.5,-241.14"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1119.21,-289.16C1073.36,-301.88 1002.63,-320.02 975,-319.14"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M973,-319.14C639.76,-308.55 527.03,-262.68 228.5,-411.14"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M226.5,-411.14C195.33,-425.14 178.82,-408.97 152,-430.14 100.67,-470.67 74.52,-547.41 64.29,-585.11"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="60.83,-584.51 61.72,-595.07 67.61,-586.26 60.83,-584.51"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node26" class="node">
+<title>sourcefile~self_vector_3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_node26"><a xlink:href=".././sourcefile/self_vector_3d_t.f90.html" xlink:title="SELF_Vector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-503.14 910.5,-503.14 910.5,-479.14 1037.5,-479.14 1037.5,-503.14"/>
+<text text-anchor="middle" x="974" y="-488.74" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_vector_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_vector_3d_t.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1113.99,-289.25C1109.9,-291.69 1106.13,-294.62 1103,-298.14 1056.31,-350.68 1112.27,-398.37 1067,-452.14 1058.71,-461.99 1047.51,-469.4 1035.76,-474.96"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1034.08,-471.88 1026.28,-479.04 1036.85,-478.31 1034.08,-471.88"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M213.36,-463.38C184.37,-490.38 114.76,-555.22 79.79,-587.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="77.01,-585.58 72.08,-594.96 81.79,-590.7 77.01,-585.58"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M910.28,-422.04C804.04,-408.62 582.61,-389.37 402,-431.14"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M400,-431.14C323.43,-436.29 297.21,-376.97 228.5,-411.14"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M929.55,-443.19C913.04,-449.32 894.88,-458.08 881,-470.14 857.53,-490.55 867.07,-508.23 845,-530.14 809.66,-565.24 795.17,-569.73 748.5,-587.14"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M746.5,-587.14C724.37,-595.4 669.38,-606.68 624.39,-615.15"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="623.56,-611.75 614.37,-617.03 624.84,-618.63 623.56,-611.75"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M945.9,-443.29C920.24,-454.51 880.46,-471.21 845,-483.14 831.24,-487.77 816.16,-492.15 802.1,-495.95"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="800.84,-492.67 792.07,-498.61 802.64,-499.43 800.84,-492.67"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M400,-431.14C361.89,-439.96 318.07,-444.98 284.26,-447.79"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="283.8,-444.32 274.11,-448.59 284.35,-451.29 283.8,-444.32"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M910.44,-427.57C844.21,-425.66 737.39,-427.99 650,-455.14 625.05,-462.9 599.62,-478.41 581.76,-490.82"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="579.25,-488.31 573.15,-496.98 583.32,-494.01 579.25,-488.31"/>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M524.73,-521.26C486.85,-535.47 424.74,-556.23 402,-549.14"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M555.5,-587.14C488.14,-576.34 470.08,-591.5 402,-587.14"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M400,-587.14C323.93,-582.27 304.72,-587.04 228.5,-587.14"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M226.5,-587.14C193.35,-587.19 156.76,-591.1 126.26,-595.46"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="125.55,-592.03 116.17,-596.95 126.57,-598.95 125.55,-592.03"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M746.5,-625.14C706.07,-623.42 660.73,-623.82 624.59,-624.7"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="624.08,-621.21 614.18,-624.97 624.26,-628.21 624.08,-621.21"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M910.49,-612.54C899.96,-608.84 889.65,-603.86 881,-597.14 855.83,-577.6 870.29,-554.53 845,-535.14 832.57,-525.62 816.92,-519.58 801.85,-515.75"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="802.61,-512.33 792.08,-513.54 801.06,-519.16 802.61,-512.33"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M910.07,-625.43C865.05,-626.65 803.02,-627.46 748.5,-625.14"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M746.5,-625.14C660.9,-621.5 642.1,-600.71 557.5,-587.14"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M555.5,-587.14C486.1,-576.02 468.39,-572.2 402,-549.14"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M919.44,-611.05C906.57,-607.32 893.06,-602.7 881,-597.14 863.53,-589.1 862.69,-580.68 845,-573.14 763.34,-538.38 736.61,-549.52 650,-530.14 640.36,-527.99 630.15,-525.69 620.18,-523.43"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="620.84,-519.99 610.32,-521.19 619.3,-526.82 620.84,-519.99"/>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1116.45,-855.14C1104.43,-855.14 1090.91,-855.14 1077.12,-855.14"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1077.05,-851.64 1067.05,-855.14 1077.05,-858.64 1077.05,-851.64"/>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1122.3,-867.23C1085.01,-877.97 1026.78,-892.4 975,-895.14"/>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M973,-895.14C642.15,-912.69 512.33,-1028.06 228.5,-857.14"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M165.08,-619.81C152.48,-618.3 139.16,-616.71 126.36,-615.19"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="126.58,-611.69 116.24,-613.98 125.75,-618.64 126.58,-611.69"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M939.85,-479.11C914.31,-470.51 877.93,-459.69 845,-455.14 692.65,-434.13 652.47,-449.21 499,-459.14 455.75,-461.94 445.26,-471.73 402,-469.14"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M400,-469.14C354.1,-461.9 347.07,-444.86 303,-430.14 270.59,-419.32 259.1,-395.93 228.5,-411.14"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge79" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M947.06,-503.18C905.58,-522.21 821.58,-559.88 748.5,-587.14"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M910.46,-496.16C876.51,-498.88 834.96,-502.21 802.44,-504.82"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="801.91,-501.35 792.22,-505.64 802.47,-508.33 801.91,-501.35"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M910.23,-483.23C865.28,-478 803.27,-471.65 748.5,-469.14"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M746.5,-469.14C636.29,-464.09 603.76,-453.54 499,-488.14 450.64,-504.11 450.55,-564.51 402,-549.14"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M400,-549.14C344.04,-529.71 285.5,-491.87 253.36,-469.32"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="255.19,-466.33 245.01,-463.4 251.14,-472.04 255.19,-466.33"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M746.5,-469.14C695.14,-466.79 637.52,-481.6 599.55,-493.86"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="598.25,-490.6 589.86,-497.07 600.45,-497.25 598.25,-490.6"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_mappedvector_3df90EfferentGraph = svgPanZoom('#sourcefileself_mappedvector_3df90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_mappedvector_3d.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefileself_mappedvector_3df90AfferentGraph" width="641pt" height="162pt"
+ viewBox="0.00 0.00 641.00 162.26" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph" class="graph" transform="scale(0.67 0.67) rotate(0) translate(4 238)">
+<title>sourcefile~~self_mappedvector_3d.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-238 952,-238 952,4 -4,4"/>
+<!-- sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node1" class="node">
+<title>sourcefile~self_mappedvector_3d.f90</title>
+<polygon fill="none" stroke="black" points="160,-108 0,-108 0,-84 160,-84 160,-108"/>
+<text text-anchor="middle" x="80" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_MappedVector_3D.f90</text>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node2" class="node">
+<title>sourcefile~self_dgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/self_dgmodel3d_t.f90.html" xlink:title="SELF_DGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="332,-108 196,-108 196,-84 332,-84 332,-108"/>
+<text text-anchor="middle" x="264" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge1" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedvector_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M195.75,-96C187.45,-96 178.87,-96 170.31,-96"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="170.29,-92.5 160.29,-96 170.29,-99.5 170.29,-92.5"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node3" class="node">
+<title>sourcefile~self_dgmodel3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/self_dgmodel3d.f90.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="495,-129 368,-129 368,-105 495,-105 495,-129"/>
+<text text-anchor="middle" x="431.5" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge2" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M367.93,-109.06C359.51,-107.99 350.79,-106.89 342.16,-105.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="342.44,-102.3 332.08,-104.51 341.56,-109.24 342.44,-102.3"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node4" class="node">
+<title>sourcefile~self_dgmodel3d.f90~2</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/self_dgmodel3d.f90~2.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="495,-87 368,-87 368,-63 495,-63 495,-87"/>
+<text text-anchor="middle" x="431.5" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge3" class="edge">
+<title>sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M367.93,-82.94C359.51,-84.01 350.79,-85.11 342.16,-86.21"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="341.56,-82.76 332.08,-87.49 342.44,-89.7 341.56,-82.76"/>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node5" class="node">
+<title>sourcefile~self_nulldgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/self_nulldgmodel3d_t.f90.html" xlink:title="SELF_NullDGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="707,-192 550,-192 550,-168 707,-168 707,-192"/>
+<text text-anchor="middle" x="628.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge4" class="edge">
+<title>sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M589.9,-167.85C558.37,-157.67 513.2,-143.07 479.33,-132.13"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="480.24,-128.75 469.65,-129 478.09,-135.41 480.24,-128.75"/>
+</g>
+<!-- sourcefile~self_lineareuler3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node6" class="node">
+<title>sourcefile~self_lineareuler3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/self_lineareuler3d_t.f90.html" xlink:title="SELF_LinearEuler3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="703,-129 554,-129 554,-105 703,-105 703,-129"/>
+<text text-anchor="middle" x="628.5" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge5" class="edge">
+<title>sourcefile~self_lineareuler3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M553.78,-117C537.94,-117 521.21,-117 505.41,-117"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="505.17,-113.5 495.17,-117 505.17,-120.5 505.17,-113.5"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node7" class="node">
+<title>sourcefile~self_advection_diffusion_3d_t.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/self_advection_diffusion_3d_t.f90.html" xlink:title="SELF_advection_diffusion_3d_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="726,-66 531,-66 531,-42 726,-42 726,-66"/>
+<text text-anchor="middle" x="628.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_3d_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge6" class="edge">
+<title>sourcefile~self_advection_diffusion_3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M589.9,-66.15C558.37,-76.33 513.2,-90.93 479.33,-101.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="478.09,-98.59 469.65,-105 480.24,-105.25 478.09,-98.59"/>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node8" class="node">
+<title>sourcefile~self_nulldgmodel3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/self_nulldgmodel3d.f90.html" xlink:title="SELF_NullDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="929,-234 781,-234 781,-210 929,-210 929,-234"/>
+<text text-anchor="middle" x="855" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge7" class="edge">
+<title>sourcefile~self_nulldgmodel3d.f90&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M789.67,-209.96C762.9,-204.96 731.65,-199.11 703.89,-193.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="704.32,-190.44 693.84,-192.04 703.03,-197.32 704.32,-190.44"/>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90~2 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node9" class="node">
+<title>sourcefile~self_lineareuler3d.f90~2</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/self_lineareuler3d.f90~2.html" xlink:title="SELF_LinearEuler3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="925,-150 785,-150 785,-126 925,-126 925,-150"/>
+<text text-anchor="middle" x="855" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90~2&#45;&gt;sourcefile~self_lineareuler3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge10" class="edge">
+<title>sourcefile~self_lineareuler3d.f90~2&#45;&gt;sourcefile~self_lineareuler3d_t.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M784.81,-131.53C762.15,-129.41 736.73,-127.03 713.13,-124.82"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="713.41,-121.33 703.13,-123.89 712.76,-128.3 713.41,-121.33"/>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node10" class="node">
+<title>sourcefile~self_lineareuler3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/self_lineareuler3d.f90.html" xlink:title="SELF_LinearEuler3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="925,-108 785,-108 785,-84 925,-84 925,-108"/>
+<text text-anchor="middle" x="855" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90&#45;&gt;sourcefile~self_lineareuler3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge9" class="edge">
+<title>sourcefile~self_lineareuler3d.f90&#45;&gt;sourcefile~self_lineareuler3d_t.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M784.81,-102.47C762.15,-104.59 736.73,-106.97 713.13,-109.18"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="712.76,-105.7 703.13,-110.11 713.41,-112.67 712.76,-105.7"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90~2 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node11" class="node">
+<title>sourcefile~self_advection_diffusion_3d.f90~2</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node11"><a xlink:href=".././sourcefile/self_advection_diffusion_3d.f90~2.html" xlink:title="SELF_advection_diffusion_3d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="948,-66 762,-66 762,-42 948,-42 948,-66"/>
+<text text-anchor="middle" x="855" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_3d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge12" class="edge">
+<title>sourcefile~self_advection_diffusion_3d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M761.72,-54C753.38,-54 744.88,-54 736.43,-54"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="736.16,-50.5 726.16,-54 736.16,-57.5 736.16,-50.5"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node12" class="node">
+<title>sourcefile~self_advection_diffusion_3d.f90</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node12"><a xlink:href=".././sourcefile/self_advection_diffusion_3d.f90.html" xlink:title="SELF_advection_diffusion_3d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="948,-24 762,-24 762,0 948,0 948,-24"/>
+<text text-anchor="middle" x="855" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_3d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge11" class="edge">
+<title>sourcefile~self_advection_diffusion_3d.f90&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M789.67,-24.04C762.9,-29.04 731.65,-34.89 703.89,-40.08"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="703.03,-36.68 693.84,-41.96 704.32,-43.56 703.03,-36.68"/>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90~2 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node13" class="node">
+<title>sourcefile~self_nulldgmodel3d.f90~2</title>
+<g id="a_sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_node13"><a xlink:href=".././sourcefile/self_nulldgmodel3d.f90~2.html" xlink:title="SELF_NullDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="929,-192 781,-192 781,-168 929,-168 929,-192"/>
+<text text-anchor="middle" x="855" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90~2&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_mappedvector_3d.f90~~AfferentGraph_edge8" class="edge">
+<title>sourcefile~self_nulldgmodel3d.f90~2&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M780.8,-180C760.57,-180 738.4,-180 717.42,-180"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="717.24,-176.5 707.24,-180 717.24,-183.5 717.24,-176.5"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_mappedvector_3df90AfferentGraph = svgPanZoom('#sourcefileself_mappedvector_3df90AfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mappedvector_3d~2.html">SELF_MappedVector_3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_mappedvector_3d.f90.html#src">SELF_MappedVector_3D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_MappedVector_3D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_MappedVector_3D_t</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPU</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPUInterfaces</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPUBLAS</span>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">  </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a>
+<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="nb">  </span><span class="k">implicit none</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a>
+<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">MappedVector3D_t</span><span class="p">),</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MappedVector3D</span>
+<a id="ln-38" name="ln-38" href="#ln-38"></a>
+<a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">  </span><span class="k">contains</span>
+<a id="ln-40" name="ln-40" href="#ln-40"></a>
+<a id="ln-41" name="ln-41" href="#ln-41"></a><span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SideExchange</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SideExchange_MappedVector3D</span>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MPIExchangeAsync</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">MPIExchangeAsync_MappedVector3D</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MappedDivergence</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">MappedDivergence_MappedVector3D</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MappedDivergence_MappedVector3D</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a>
+<a id="ln-47" name="ln-47" href="#ln-47"></a><span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MappedDGDivergence</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">MappedDGDivergence_MappedVector3D</span>
+<a id="ln-48" name="ln-48" href="#ln-48"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MappedDGDivergence_MappedVector3D</span>
+<a id="ln-49" name="ln-49" href="#ln-49"></a>
+<a id="ln-50" name="ln-50" href="#ln-50"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetInteriorFromEquation</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetInteriorFromEquation_MappedVector3D</span>
+<a id="ln-51" name="ln-51" href="#ln-51"></a>
+<a id="ln-52" name="ln-52" href="#ln-52"></a><span class="w">  </span><span class="k">endtype </span><span class="n">MappedVector3D</span>
+<a id="ln-53" name="ln-53" href="#ln-53"></a>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">  </span><span class="k">interface</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="k">    subroutine </span><span class="n">ContravariantProjection_3D_gpu</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">dsdx</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ContravariantProjection_3D_gpu&quot;</span><span class="p">)</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="nb">      </span><span class="k">implicit none</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a><span class="k">      type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="n">dsdx</span>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">ContravariantProjection_3D_gpu</span>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-63" name="ln-63" href="#ln-63"></a>
+<a id="ln-64" name="ln-64" href="#ln-64"></a><span class="k">contains</span>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="k">  subroutine </span><span class="n">SetInteriorFromEquation_MappedVector3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">geometry</span><span class="p">,</span><span class="nb">time</span><span class="p">)</span>
+<a id="ln-66" name="ln-66" href="#ln-66"></a><span class="w">    </span><span class="c">!!  Sets the this % interior attribute using the eqn attribute,</span>
+<a id="ln-67" name="ln-67" href="#ln-67"></a><span class="w">    </span><span class="c">!!  geometry (for physical positions), and provided simulation time.</span>
+<a id="ln-68" name="ln-68" href="#ln-68"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-69" name="ln-69" href="#ln-69"></a><span class="k">    class</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-70" name="ln-70" href="#ln-70"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">geometry</span>
+<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="nb">time</span>
+<a id="ln-72" name="ln-72" href="#ln-72"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-73" name="ln-73" href="#ln-73"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">iVar</span>
+<a id="ln-74" name="ln-74" href="#ln-74"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span>
+<a id="ln-75" name="ln-75" href="#ln-75"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">y</span>
+<a id="ln-76" name="ln-76" href="#ln-76"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">z</span>
+<a id="ln-77" name="ln-77" href="#ln-77"></a>
+<a id="ln-78" name="ln-78" href="#ln-78"></a><span class="w">    </span><span class="k">do </span><span class="n">iVar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nVar</span>
+<a id="ln-79" name="ln-79" href="#ln-79"></a><span class="w">      </span><span class="k">do </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nElem</span>
+<a id="ln-80" name="ln-80" href="#ln-80"></a><span class="w">        </span><span class="k">do </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-81" name="ln-81" href="#ln-81"></a><span class="w">          </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-82" name="ln-82" href="#ln-82"></a><span class="w">            </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-83" name="ln-83" href="#ln-83"></a>
+<a id="ln-84" name="ln-84" href="#ln-84"></a><span class="w">              </span><span class="c">! Get the mesh positions</span>
+<a id="ln-85" name="ln-85" href="#ln-85"></a><span class="w">              </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geometry</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-86" name="ln-86" href="#ln-86"></a><span class="w">              </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geometry</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-87" name="ln-87" href="#ln-87"></a><span class="w">              </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geometry</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<a id="ln-88" name="ln-88" href="#ln-88"></a>
+<a id="ln-89" name="ln-89" href="#ln-89"></a><span class="w">              </span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-90" name="ln-90" href="#ln-90"></a><span class="w">                </span><span class="n">this</span><span class="p">%</span><span class="n">eqn</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">iVar</span><span class="o">-</span><span class="mi">1</span><span class="p">))%</span><span class="n">Evaluate</span><span class="p">((</span><span class="o">/</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="nb">time</span><span class="o">/</span><span class="p">))</span>
+<a id="ln-91" name="ln-91" href="#ln-91"></a>
+<a id="ln-92" name="ln-92" href="#ln-92"></a><span class="w">              </span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-93" name="ln-93" href="#ln-93"></a><span class="w">                </span><span class="n">this</span><span class="p">%</span><span class="n">eqn</span><span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">iVar</span><span class="o">-</span><span class="mi">1</span><span class="p">))%</span><span class="n">Evaluate</span><span class="p">((</span><span class="o">/</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="nb">time</span><span class="o">/</span><span class="p">))</span>
+<a id="ln-94" name="ln-94" href="#ln-94"></a>
+<a id="ln-95" name="ln-95" href="#ln-95"></a><span class="w">              </span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-96" name="ln-96" href="#ln-96"></a><span class="w">                </span><span class="n">this</span><span class="p">%</span><span class="n">eqn</span><span class="p">(</span><span class="mi">3</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">iVar</span><span class="o">-</span><span class="mi">1</span><span class="p">))%</span><span class="n">Evaluate</span><span class="p">((</span><span class="o">/</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="nb">time</span><span class="o">/</span><span class="p">))</span>
+<a id="ln-97" name="ln-97" href="#ln-97"></a>
+<a id="ln-98" name="ln-98" href="#ln-98"></a><span class="w">            </span><span class="k">enddo</span>
+<a id="ln-99" name="ln-99" href="#ln-99"></a><span class="k">          enddo</span>
+<a id="ln-100" name="ln-100" href="#ln-100"></a><span class="k">        enddo</span>
+<a id="ln-101" name="ln-101" href="#ln-101"></a><span class="k">      enddo</span>
+<a id="ln-102" name="ln-102" href="#ln-102"></a><span class="k">    enddo</span>
+<a id="ln-103" name="ln-103" href="#ln-103"></a>
+<a id="ln-104" name="ln-104" href="#ln-104"></a><span class="k">    call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-105" name="ln-105" href="#ln-105"></a>
+<a id="ln-106" name="ln-106" href="#ln-106"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetInteriorFromEquation_MappedVector3D</span>
+<a id="ln-107" name="ln-107" href="#ln-107"></a>
+<a id="ln-108" name="ln-108" href="#ln-108"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">MPIExchangeAsync_MappedVector3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh</span><span class="p">)</span>
+<a id="ln-109" name="ln-109" href="#ln-109"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-110" name="ln-110" href="#ln-110"></a><span class="k">    class</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-111" name="ln-111" href="#ln-111"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+<a id="ln-112" name="ln-112" href="#ln-112"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-113" name="ln-113" href="#ln-113"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">e1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e2</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">idir</span>
+<a id="ln-114" name="ln-114" href="#ln-114"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">globalSideId</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">tag</span>
+<a id="ln-115" name="ln-115" href="#ln-115"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iError</span>
+<a id="ln-116" name="ln-116" href="#ln-116"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">msgCount</span>
+<a id="ln-117" name="ln-117" href="#ln-117"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">boundary</span><span class="p">(:,:,:,:,:,:)</span>
+<a id="ln-118" name="ln-118" href="#ln-118"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extboundary</span><span class="p">(:,:,:,:,:,:)</span>
+<a id="ln-119" name="ln-119" href="#ln-119"></a>
+<a id="ln-120" name="ln-120" href="#ln-120"></a><span class="w">    </span><span class="n">msgCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<a id="ln-121" name="ln-121" href="#ln-121"></a><span class="w">    </span><span class="k">call </span><span class="nb">c_f_pointer</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="n">boundary</span><span class="p">,[</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<a id="ln-122" name="ln-122" href="#ln-122"></a><span class="w">    </span><span class="k">call </span><span class="nb">c_f_pointer</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">extboundary_gpu</span><span class="p">,</span><span class="n">extboundary</span><span class="p">,[</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<a id="ln-123" name="ln-123" href="#ln-123"></a>
+<a id="ln-124" name="ln-124" href="#ln-124"></a><span class="w">    </span><span class="k">do </span><span class="n">idir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span>
+<a id="ln-125" name="ln-125" href="#ln-125"></a><span class="w">      </span><span class="k">do </span><span class="n">ivar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span>
+<a id="ln-126" name="ln-126" href="#ln-126"></a><span class="w">        </span><span class="k">do </span><span class="n">e1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nElem</span>
+<a id="ln-127" name="ln-127" href="#ln-127"></a><span class="w">          </span><span class="k">do </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span>
+<a id="ln-128" name="ln-128" href="#ln-128"></a>
+<a id="ln-129" name="ln-129" href="#ln-129"></a><span class="w">            </span><span class="n">e2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span><span class="w"> </span><span class="c">! Neighbor Element</span>
+<a id="ln-130" name="ln-130" href="#ln-130"></a><span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">e2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-131" name="ln-131" href="#ln-131"></a><span class="k">              </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">elemToRank</span><span class="p">(</span><span class="n">e2</span><span class="p">)</span><span class="w"> </span><span class="c">! Neighbor Rank</span>
+<a id="ln-132" name="ln-132" href="#ln-132"></a>
+<a id="ln-133" name="ln-133" href="#ln-133"></a><span class="w">              </span><span class="k">if</span><span class="p">(</span><span class="n">r2</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-134" name="ln-134" href="#ln-134"></a>
+<a id="ln-135" name="ln-135" href="#ln-135"></a><span class="k">                </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span>
+<a id="ln-136" name="ln-136" href="#ln-136"></a><span class="w">                </span><span class="n">globalSideId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">abs</span><span class="p">(</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">))</span>
+<a id="ln-137" name="ln-137" href="#ln-137"></a><span class="w">                </span><span class="c">! create unique tag for each side and each variable</span>
+<a id="ln-138" name="ln-138" href="#ln-138"></a><span class="w">                </span><span class="n">tag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">globalsideid</span><span class="o">+</span><span class="n">mesh</span><span class="p">%</span><span class="n">nUniqueSides</span><span class="o">*</span><span class="p">(</span><span class="n">ivar</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="p">(</span><span class="n">idir</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<a id="ln-139" name="ln-139" href="#ln-139"></a>
+<a id="ln-140" name="ln-140" href="#ln-140"></a><span class="w">                </span><span class="n">msgCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msgCount</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-141" name="ln-141" href="#ln-141"></a><span class="w">                </span><span class="k">call </span><span class="n">MPI_IRECV</span><span class="p">(</span><span class="n">extBoundary</span><span class="p">(:,:,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">idir</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-142" name="ln-142" href="#ln-142"></a><span class="w">                               </span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-143" name="ln-143" href="#ln-143"></a><span class="w">                               </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiPrec</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-144" name="ln-144" href="#ln-144"></a><span class="w">                               </span><span class="n">r2</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-145" name="ln-145" href="#ln-145"></a><span class="w">                               </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-146" name="ln-146" href="#ln-146"></a><span class="w">                               </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">requests</span><span class="p">(</span><span class="n">msgCount</span><span class="p">),</span><span class="n">iError</span><span class="p">)</span>
+<a id="ln-147" name="ln-147" href="#ln-147"></a>
+<a id="ln-148" name="ln-148" href="#ln-148"></a><span class="w">                </span><span class="n">msgCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msgCount</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-149" name="ln-149" href="#ln-149"></a><span class="w">                </span><span class="k">call </span><span class="n">MPI_ISEND</span><span class="p">(</span><span class="n">boundary</span><span class="p">(:,:,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">idir</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-150" name="ln-150" href="#ln-150"></a><span class="w">                               </span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-151" name="ln-151" href="#ln-151"></a><span class="w">                               </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiPrec</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-152" name="ln-152" href="#ln-152"></a><span class="w">                               </span><span class="n">r2</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-153" name="ln-153" href="#ln-153"></a><span class="w">                               </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiComm</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-154" name="ln-154" href="#ln-154"></a><span class="w">                               </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">requests</span><span class="p">(</span><span class="n">msgCount</span><span class="p">),</span><span class="n">iError</span><span class="p">)</span>
+<a id="ln-155" name="ln-155" href="#ln-155"></a><span class="w">              </span><span class="k">endif</span>
+<a id="ln-156" name="ln-156" href="#ln-156"></a><span class="k">            endif</span>
+<a id="ln-157" name="ln-157" href="#ln-157"></a>
+<a id="ln-158" name="ln-158" href="#ln-158"></a><span class="k">          enddo</span>
+<a id="ln-159" name="ln-159" href="#ln-159"></a><span class="k">        enddo</span>
+<a id="ln-160" name="ln-160" href="#ln-160"></a><span class="k">      enddo</span>
+<a id="ln-161" name="ln-161" href="#ln-161"></a><span class="k">    enddo</span>
+<a id="ln-162" name="ln-162" href="#ln-162"></a>
+<a id="ln-163" name="ln-163" href="#ln-163"></a><span class="k">    </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">msgCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msgCount</span>
+<a id="ln-164" name="ln-164" href="#ln-164"></a>
+<a id="ln-165" name="ln-165" href="#ln-165"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">MPIExchangeAsync_MappedVector3D</span>
+<a id="ln-166" name="ln-166" href="#ln-166"></a>
+<a id="ln-167" name="ln-167" href="#ln-167"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">SideExchange_MappedVector3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh</span><span class="p">)</span>
+<a id="ln-168" name="ln-168" href="#ln-168"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-169" name="ln-169" href="#ln-169"></a><span class="k">    class</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-170" name="ln-170" href="#ln-170"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+<a id="ln-171" name="ln-171" href="#ln-171"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-172" name="ln-172" href="#ln-172"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">offset</span>
+<a id="ln-173" name="ln-173" href="#ln-173"></a>
+<a id="ln-174" name="ln-174" href="#ln-174"></a><span class="w">    </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">offsetElem</span><span class="p">(</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-175" name="ln-175" href="#ln-175"></a>
+<a id="ln-176" name="ln-176" href="#ln-176"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-177" name="ln-177" href="#ln-177"></a><span class="k">      call </span><span class="n">this</span><span class="p">%</span><span class="n">MPIExchangeAsync</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+<a id="ln-178" name="ln-178" href="#ln-178"></a><span class="w">    </span><span class="k">endif</span>
+<a id="ln-179" name="ln-179" href="#ln-179"></a><span class="k">    call </span><span class="n">SideExchange_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">extboundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-180" name="ln-180" href="#ln-180"></a><span class="w">                             </span><span class="n">this</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideinfo_gpu</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">elemToRank_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-181" name="ln-181" href="#ln-181"></a><span class="w">                             </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankid</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-182" name="ln-182" href="#ln-182"></a>
+<a id="ln-183" name="ln-183" href="#ln-183"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">mpiEnabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-184" name="ln-184" href="#ln-184"></a><span class="k">      call </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">FinalizeMPIExchangeAsync</span><span class="p">()</span>
+<a id="ln-185" name="ln-185" href="#ln-185"></a><span class="w">      </span><span class="c">! Apply side flips for data exchanged with MPI</span>
+<a id="ln-186" name="ln-186" href="#ln-186"></a><span class="w">      </span><span class="k">call </span><span class="n">ApplyFlip_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">extboundary_gpu</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">sideInfo_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-187" name="ln-187" href="#ln-187"></a><span class="w">                            </span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">elemToRank_gpu</span><span class="p">,</span><span class="n">mesh</span><span class="p">%</span><span class="n">decomp</span><span class="p">%</span><span class="n">rankId</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-188" name="ln-188" href="#ln-188"></a><span class="w">                            </span><span class="n">offset</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-189" name="ln-189" href="#ln-189"></a><span class="w">    </span><span class="k">endif</span>
+<a id="ln-190" name="ln-190" href="#ln-190"></a>
+<a id="ln-191" name="ln-191" href="#ln-191"></a><span class="k">  endsubroutine </span><span class="n">SideExchange_MappedVector3D</span>
+<a id="ln-192" name="ln-192" href="#ln-192"></a>
+<a id="ln-193" name="ln-193" href="#ln-193"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">MappedDivergence_MappedVector3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">df</span><span class="p">)</span>
+<a id="ln-194" name="ln-194" href="#ln-194"></a><span class="w">    </span><span class="c">! Strong Form Operator</span>
+<a id="ln-195" name="ln-195" href="#ln-195"></a><span class="w">    </span><span class="c">!    !</span>
+<a id="ln-196" name="ln-196" href="#ln-196"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-197" name="ln-197" href="#ln-197"></a><span class="k">    class</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-198" name="ln-198" href="#ln-198"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">df</span>
+<a id="ln-199" name="ln-199" href="#ln-199"></a>
+<a id="ln-200" name="ln-200" href="#ln-200"></a><span class="w">    </span><span class="c">! Contravariant projection</span>
+<a id="ln-201" name="ln-201" href="#ln-201"></a><span class="w">    </span><span class="k">call </span><span class="n">ContravariantProjection_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-202" name="ln-202" href="#ln-202"></a><span class="w">                                        </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">dsdx</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-203" name="ln-203" href="#ln-203"></a>
+<a id="ln-204" name="ln-204" href="#ln-204"></a><span class="w">    </span><span class="k">call </span><span class="n">Divergence_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dMatrix_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-205" name="ln-205" href="#ln-205"></a><span class="w">                           </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-206" name="ln-206" href="#ln-206"></a>
+<a id="ln-207" name="ln-207" href="#ln-207"></a><span class="w">    </span><span class="k">call </span><span class="n">JacobianWeight_3D_gpu</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">J</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-208" name="ln-208" href="#ln-208"></a>
+<a id="ln-209" name="ln-209" href="#ln-209"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">MappedDivergence_MappedVector3D</span>
+<a id="ln-210" name="ln-210" href="#ln-210"></a>
+<a id="ln-211" name="ln-211" href="#ln-211"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">MappedDGDivergence_MappedVector3D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">df</span><span class="p">)</span>
+<a id="ln-212" name="ln-212" href="#ln-212"></a><span class="w">      </span><span class="c">!! Computes the divergence of a 3-D vector using the weak form</span>
+<a id="ln-213" name="ln-213" href="#ln-213"></a><span class="w">      </span><span class="c">!! On input, the  attribute of the vector</span>
+<a id="ln-214" name="ln-214" href="#ln-214"></a><span class="w">      </span><span class="c">!! is assigned and the  attribute is set to the physical</span>
+<a id="ln-215" name="ln-215" href="#ln-215"></a><span class="w">      </span><span class="c">!! directions of the vector. This method will project the vector</span>
+<a id="ln-216" name="ln-216" href="#ln-216"></a><span class="w">      </span><span class="c">!! onto the contravariant basis vectors.</span>
+<a id="ln-217" name="ln-217" href="#ln-217"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-218" name="ln-218" href="#ln-218"></a><span class="k">    class</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-219" name="ln-219" href="#ln-219"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">df</span>
+<a id="ln-220" name="ln-220" href="#ln-220"></a>
+<a id="ln-221" name="ln-221" href="#ln-221"></a><span class="w">    </span><span class="c">! Contravariant projection</span>
+<a id="ln-222" name="ln-222" href="#ln-222"></a><span class="w">    </span><span class="k">call </span><span class="n">ContravariantProjection_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-223" name="ln-223" href="#ln-223"></a><span class="w">                                        </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">dsdx</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-224" name="ln-224" href="#ln-224"></a>
+<a id="ln-225" name="ln-225" href="#ln-225"></a><span class="w">    </span><span class="k">call </span><span class="n">Divergence_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dgMatrix_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-226" name="ln-226" href="#ln-226"></a><span class="w">                           </span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-227" name="ln-227" href="#ln-227"></a>
+<a id="ln-228" name="ln-228" href="#ln-228"></a><span class="w">    </span><span class="c">! Boundary terms</span>
+<a id="ln-229" name="ln-229" href="#ln-229"></a><span class="w">    </span><span class="k">call </span><span class="n">DG_BoundaryContribution_3D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">bmatrix_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">qweights_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-230" name="ln-230" href="#ln-230"></a><span class="w">                                        </span><span class="n">this</span><span class="p">%</span><span class="n">boundarynormal_gpu</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-231" name="ln-231" href="#ln-231"></a>
+<a id="ln-232" name="ln-232" href="#ln-232"></a><span class="w">    </span><span class="k">call </span><span class="n">JacobianWeight_3D_gpu</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">J</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-233" name="ln-233" href="#ln-233"></a>
+<a id="ln-234" name="ln-234" href="#ln-234"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">MappedDGDivergence_MappedVector3D</span>
+<a id="ln-235" name="ln-235" href="#ln-235"></a>
+<a id="ln-236" name="ln-236" href="#ln-236"></a><span class="k">endmodule </span><span class="n">SELF_MappedVector_3D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-03-05 21:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

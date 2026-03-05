@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>self_advection_diffusion_2d_t &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>self_advection_diffusion_2d_t 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.4% of total for modules and submodules.">51 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_advection_diffusion_2d_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_advection_diffusion_2d_t.f90.html'>SELF_advection_diffusion_2d_t.f90</a></li>
+     <li class="active">self_advection_diffusion_2d_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#type-advection_diffusion_2d_t">advection_diffusion_2d_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#proc-entropy_func_advection_diffusion_2d_t">entropy_func_advection_diffusion_2d_t</a>
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#proc-flux2d_advection_diffusion_2d_t">flux2d_advection_diffusion_2d_t</a>
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#proc-riemannflux2d_advection_diffusion_2d_t">riemannflux2d_advection_diffusion_2d_t</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+    <li><a href='../module/self_dgmodel2d.html'>SELF_DGModel2D</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_advection_diffusion_2d_t~~UsesGraph Pages: 1 -->
+<svg id="moduleself_advection_diffusion_2d_tUsesGraph" width="641pt" height="502pt"
+ viewBox="0.00 0.00 641.00 501.76" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph" class="graph" transform="scale(0.26 0.26) rotate(0) translate(4 1947.48)">
+<title>module~~self_advection_diffusion_2d_t~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1947.48 2489,-1947.48 2489,4 -4,4"/>
+<!-- module~self_advection_diffusion_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node1" class="node">
+<title>module~self_advection_diffusion_2d_t</title>
+<polygon fill="none" stroke="black" points="2485,-767.43 2317,-767.43 2317,-743.43 2485,-743.43 2485,-767.43"/>
+<text text-anchor="middle" x="2401" y="-753.03" font-family="Helvetica,sans-Serif" font-size="10.50">self_advection_diffusion_2d_t</text>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node2" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node2"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1195.5,-900.43 1124.5,-900.43 1124.5,-876.43 1195.5,-876.43 1195.5,-900.43"/>
+<text text-anchor="middle" x="1160" y="-886.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge1" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2316.91,-757.66C2171.78,-762.21 1883.85,-774.42 1846,-800.43 1815.53,-821.37 1838.23,-851.55 1810,-875.43 1757.38,-919.94 1706.23,-866.42 1661,-918.43 1586.75,-1003.79 1710.47,-1096.3 1625,-1170.43 1440.12,-1330.78 1391.31,-934.19 1345,-905.43 1303.22,-879.48 1245.5,-878.52 1205.91,-881.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1205.36,-878.45 1195.75,-882.92 1206.05,-885.42 1205.36,-878.45"/>
+</g>
+<!-- module~self_dgmodel2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node3" class="node">
+<title>module~self_dgmodel2d</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node3"><a xlink:href=".././module/self_dgmodel2d.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2281,-747.43 2174,-747.43 2174,-723.43 2281,-723.43 2281,-747.43"/>
+<text text-anchor="middle" x="2227.5" y="-733.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge2" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2316.76,-745.72C2308.15,-744.72 2299.5,-743.71 2291.16,-742.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2291.51,-739.25 2281.17,-741.57 2290.7,-746.21 2291.51,-739.25"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node6" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node6"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-1052.43 130,-1052.43 130,-1028.43 226,-1028.43 226,-1052.43"/>
+<text text-anchor="middle" x="178" y="-1038.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge3" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-928.43C967.94,-926.96 809.17,-961.95 786.5,-966.43"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node7" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node7"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-1032.43 5,-1032.43 5,-1008.43 89,-1008.43 89,-1032.43"/>
+<text text-anchor="middle" x="47" y="-1018.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge4" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1131.26,-900.48C1098.66,-913.38 1042.7,-931.6 993,-928.43"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-928.43C946.71,-925.6 936.63,-906.17 909,-871.43 882.18,-837.71 906.17,-808.92 873,-781.43 778.72,-703.27 444.78,-658 328.5,-696.43"/>
+</g>
+<!-- module~self_domaindecomposition~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node9" class="node">
+<title>module~self_domaindecomposition~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node9"><a xlink:href=".././module/self_domaindecomposition~2.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1075,-862.43 909,-862.43 909,-838.43 1075,-838.43 1075,-862.43"/>
+<text text-anchor="middle" x="992" y="-848.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge5" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1124.2,-880.46C1104.24,-875.89 1078.58,-870.02 1055.25,-864.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1055.95,-861.25 1045.42,-862.43 1054.39,-868.07 1055.95,-861.25"/>
+</g>
+<!-- module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node4" class="node">
+<title>module~self_gpu~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node4"><a xlink:href=".././module/self_gpu~2.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="513,-398.43 448,-398.43 448,-374.43 513,-374.43 513,-398.43"/>
+<text text-anchor="middle" x="480.5" y="-384.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge7" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2224.14,-723.15C2205.53,-627.88 2078.66,-10.43 1917,-10.43 1917,-10.43 1917,-10.43 1565.5,-10.43 1445.72,-10.43 1415.35,-20.52 1296,-10.43"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1294,-10.43C1023.25,16.62 926.76,-3.09 698,-150.43 604.63,-210.56 525.16,-320.53 494.75,-365.96"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="491.77,-364.12 489.17,-374.39 497.6,-367.98 491.77,-364.12"/>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node5" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node5"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2138,-827.43 2022,-827.43 2022,-803.43 2138,-803.43 2138,-827.43"/>
+<text text-anchor="middle" x="2080" y="-813.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge8" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2204.4,-747.58C2179.69,-761.17 2139.5,-783.27 2111.73,-798.53"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2109.91,-795.54 2102.83,-803.43 2113.28,-801.68 2109.91,-795.54"/>
+</g>
+<!-- module~self_gpuinterfaces -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node8" class="node">
+<title>module~self_gpuinterfaces</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node8"><a xlink:href=".././module/self_gpuinterfaces.html" xlink:title="SELF_GPUInterfaces">
+<polygon fill="#337ab7" stroke="#337ab7" points="1051,-176.43 933,-176.43 933,-152.43 1051,-152.43 1051,-176.43"/>
+<text text-anchor="middle" x="992" y="-162.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge6" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1294,-10.43C1176.34,5.81 1056.62,-99.84 1011.62,-144.83"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1008.85,-142.66 1004.33,-152.24 1013.84,-147.56 1008.85,-142.66"/>
+</g>
+<!-- module~self_gpu~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge9" class="edge">
+<title>module~self_gpu~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M447.71,-378.84C415.91,-372.94 366.39,-368.45 328.5,-386.43"/>
+</g>
+<!-- module~self_gpu_enums~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node10" class="node">
+<title>module~self_gpu_enums~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node10"><a xlink:href=".././module/self_gpu_enums~2.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="380.5,-449.43 274.5,-449.43 274.5,-425.43 380.5,-425.43 380.5,-449.43"/>
+<text text-anchor="middle" x="327.5" y="-435.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge10" class="edge">
+<title>module~self_gpu~2&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M447.85,-397.12C426.34,-404.39 397.56,-414.1 373.65,-422.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="372.43,-418.9 364.08,-425.41 374.67,-425.53 372.43,-418.9"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node11" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-1477.43 151,-1477.43 151,-1453.43 205,-1453.43 205,-1477.43"/>
+<text text-anchor="middle" x="178" y="-1463.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge11" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M614,-1924.43C454.34,-1893.45 374.11,-1942.25 262,-1824.43 214.91,-1774.94 188.62,-1558.16 181.2,-1487.66"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="184.68,-1487.24 180.17,-1477.65 177.72,-1487.96 184.68,-1487.24"/>
+</g>
+<!-- module~self_mappedvector_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node12" class="node">
+<title>module~self_mappedvector_2d~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node12"><a xlink:href=".././module/self_mappedvector_2d~2.html" xlink:title="SELF_MappedVector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1986,-706.43 1846,-706.43 1846,-682.43 1986,-682.43 1986,-706.43"/>
+<text text-anchor="middle" x="1916" y="-692.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge13" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedvector_2d~2</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2071.03,-803.35C2056.58,-782.37 2024,-739.18 1986,-715.43 1983.19,-713.67 1980.22,-712.05 1977.15,-710.56"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1978.3,-707.25 1967.74,-706.47 1975.51,-713.66 1978.3,-707.25"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node13" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="646.5,-1440.43 583.5,-1440.43 583.5,-1416.43 646.5,-1416.43 646.5,-1440.43"/>
+<text text-anchor="middle" x="615" y="-1426.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge12" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1915,-814.43C1792.07,-809.63 1413.66,-1696.51 1296,-1732.43"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1294,-1732.43C1240.82,-1744.16 1124.71,-1644.68 1075,-1622.43 910.56,-1548.81 857.62,-1556.98 698,-1473.43 680.96,-1464.51 678.8,-1458.79 662,-1449.43 659.33,-1447.94 656.53,-1446.47 653.68,-1445.03"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="655.1,-1441.83 644.57,-1440.61 652.04,-1448.13 655.1,-1441.83"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node16" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node16"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-1628.43 262,-1628.43 262,-1604.43 393,-1604.43 393,-1628.43"/>
+<text text-anchor="middle" x="327.5" y="-1614.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge14" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1159,-1732.43C1115.1,-1733.34 1115,-1766.32 1075,-1784.43 880.71,-1872.4 819.11,-1989.51 616,-1924.43"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M614,-1924.43C537.74,-1909.63 543.25,-1857.56 481.5,-1810.43"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node17" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node17"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-1400.43 291,-1400.43 291,-1376.43 364,-1376.43 364,-1400.43"/>
+<text text-anchor="middle" x="327.5" y="-1386.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge15" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1159,-1732.43C1085.24,-1733.97 1066.69,-1735.99 993,-1732.43"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M991,-1732.43C758.12,-1721.18 740.61,-1582.56 532,-1478.43 488.34,-1456.64 473.64,-1460.12 429,-1440.43 404.95,-1429.82 378.58,-1416.09 358.89,-1405.41"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="360.53,-1402.31 350.08,-1400.59 357.17,-1408.46 360.53,-1402.31"/>
+</g>
+<!-- module~self_mappedscalar_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node18" class="node">
+<title>module~self_mappedscalar_2d</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node18"><a xlink:href=".././module/self_mappedscalar_2d.html" xlink:title="SELF_MappedScalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1986,-748.43 1846,-748.43 1846,-724.43 1986,-724.43 1986,-748.43"/>
+<text text-anchor="middle" x="1916" y="-734.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge16" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mappedscalar_2d</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2054.04,-803.26C2026.37,-789.77 1981.59,-767.93 1950.79,-752.91"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1952.24,-749.72 1941.72,-748.48 1949.17,-756.01 1952.24,-749.72"/>
+</g>
+<!-- module~self_mesh_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node19" class="node">
+<title>module~self_mesh_2d~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node19"><a xlink:href=".././module/self_mesh_2d~2.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1472,-610.43 1381,-610.43 1381,-586.43 1472,-586.43 1472,-610.43"/>
+<text text-anchor="middle" x="1426.5" y="-596.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge17" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_mesh_2d~2</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M2021.97,-816.63C1990.91,-816.89 1951.81,-816.59 1917,-814.43"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1915,-814.43C1875.3,-811.97 1871.51,-787.95 1846,-757.43 1825.07,-732.39 1834.8,-714.65 1810,-693.43 1743.32,-636.38 1710.16,-645.62 1625,-624.43 1577.61,-612.63 1522.41,-605.94 1482.43,-602.31"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1482.62,-598.81 1472.36,-601.43 1482.01,-605.79 1482.62,-598.81"/>
+</g>
+<!-- module~self_geometry_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node20" class="node">
+<title>module~self_geometry_2d</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node20"><a xlink:href=".././module/self_geometry_2d.html" xlink:title="SELF_Geometry_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1625,-823.43 1508,-823.43 1508,-799.43 1625,-799.43 1625,-823.43"/>
+<text text-anchor="middle" x="1566.5" y="-809.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge18" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1915,-814.43C1817.83,-808.85 1705.14,-809.11 1635.07,-810.07"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1635,-806.57 1625.05,-810.21 1635.1,-813.57 1635,-806.57"/>
+</g>
+<!-- module~self_model -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node21" class="node">
+<title>module~self_model</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node21"><a xlink:href=".././module/self_model.html" xlink:title="SELF_Model">
+<polygon fill="#337ab7" stroke="#337ab7" points="823.5,-1744.43 747.5,-1744.43 747.5,-1720.43 823.5,-1720.43 823.5,-1744.43"/>
+<text text-anchor="middle" x="785.5" y="-1730.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_model -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge19" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M991,-1732.43C937.22,-1729.83 875.4,-1730.31 833.93,-1731.13"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="833.77,-1727.64 823.84,-1731.35 833.91,-1734.64 833.77,-1727.64"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node22" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node22"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-1482.43 568,-1482.43 568,-1458.43 662,-1458.43 662,-1482.43"/>
+<text text-anchor="middle" x="615" y="-1468.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge20" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1294,-1732.43C1238.27,-1752.14 1220.1,-1733.6 1161,-1732.43"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1159,-1732.43C1046.54,-1730.2 796.73,-1577.33 698,-1523.43 678.42,-1512.74 657.29,-1499.03 641.39,-1488.23"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="643.36,-1485.34 633.14,-1482.57 639.4,-1491.11 643.36,-1485.34"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge21" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M129.7,-1033.1C119.88,-1031.57 109.48,-1029.96 99.52,-1028.42"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="99.76,-1024.91 89.34,-1026.84 98.68,-1031.83 99.76,-1024.91"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node14" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node14"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-1284.43 0,-1284.43 0,-1260.43 94,-1260.43 94,-1284.43"/>
+<text text-anchor="middle" x="47" y="-1270.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge22" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M170.25,-1052.58C149.39,-1090.08 85.84,-1204.38 59.56,-1251.64"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="56.49,-1249.96 54.69,-1260.4 62.61,-1253.36 56.49,-1249.96"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge24" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M932.59,-153.64C890.57,-148.42 833.28,-146.61 786.5,-164.43"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge23" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M955.2,-152.43C914.69,-140.02 846.53,-122.69 786.5,-124.43"/>
+</g>
+<!-- module~self_domaindecomposition~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge27" class="edge">
+<title>module~self_domaindecomposition~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M971.24,-838.37C953.35,-826.73 927.11,-807.77 909,-786.43 887.38,-760.95 900.74,-739.05 873,-720.43 772.44,-652.92 441.31,-652.36 328.5,-696.43"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M326.5,-696.43C297.46,-706.03 284.54,-699.75 262,-720.43 234.46,-745.7 254.37,-772.1 226,-796.43 209.46,-810.62 196.81,-797.87 179,-810.43"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M177,-810.43C108.67,-858.6 69.5,-955.57 54.78,-998.79"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="51.44,-997.73 51.63,-1008.33 58.09,-999.93 51.44,-997.73"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node15" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node15"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="873,-938.43 698,-938.43 698,-914.43 873,-914.43 873,-938.43"/>
+<text text-anchor="middle" x="785.5" y="-924.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition~2&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge25" class="edge">
+<title>module~self_domaindecomposition~2&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M945.01,-862.52C933.03,-866.34 920.31,-871 909,-876.43 891.66,-884.75 890.4,-892.24 873,-900.43 864.37,-904.49 854.95,-908.1 845.61,-911.22"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="844.4,-907.94 835.94,-914.31 846.53,-914.6 844.4,-907.94"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node23" class="node">
+<title>mpi</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node23"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-972.43 151,-972.43 151,-948.43 205,-948.43 205,-972.43"/>
+<text text-anchor="middle" x="178" y="-958.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition~2&#45;&gt;mpi -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge26" class="edge">
+<title>module~self_domaindecomposition~2&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M908.97,-844.84C771.36,-838.14 486.97,-835.89 262,-910.43 240.31,-917.62 218.27,-931.26 202.35,-942.47"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="200.22,-939.7 194.19,-948.4 204.33,-945.36 200.22,-939.7"/>
+</g>
+<!-- module~self_gpu_enums~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge28" class="edge">
+<title>module~self_gpu_enums~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M274.15,-440.47C243.3,-444.76 205.29,-454.7 179,-477.43"/>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge30" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1425.5,-124.43C1310.48,-100.14 1278.56,-124.08 1161,-124.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1159,-124.43C1075.78,-126.83 864.3,-134.79 786.5,-164.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M784.5,-164.43C746.7,-177.18 730.1,-164.74 698,-188.43 643.64,-228.55 679.38,-293.02 616,-316.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M614,-316.43C576.01,-330.46 535.24,-353.3 509.11,-369.06"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="507.22,-366.11 500.5,-374.31 510.86,-372.09 507.22,-366.11"/>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge31" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1913.65,-682.37C1906.36,-619.22 1869.77,-327 1810,-262.43 1786.66,-237.21 1761.26,-262.26 1736.5,-238.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1734.5,-238.43C1629.63,-137.51 1569.53,-156.23 1427.5,-124.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1425.5,-124.43C1077.04,-34.88 910.4,82.38 616,-124.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M614,-124.43C536.7,-171.09 556.64,-228.36 481.5,-278.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M479.5,-278.43C410.84,-324.18 403.04,-351.06 328.5,-386.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M326.5,-386.43C297.94,-399.98 289.2,-400.32 262,-416.43 222.61,-439.75 212.55,-446.28 179,-477.43"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M177,-477.43C98.18,-550.6 59.06,-905.14 50.05,-998.08"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="46.57,-997.8 49.1,-1008.08 53.53,-998.46 46.57,-997.8"/>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge32" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1159,-124.43C1115.34,-124.56 1066.98,-137.78 1033.78,-148.98"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1032.28,-145.79 1023.98,-152.38 1034.57,-152.41 1032.28,-145.79"/>
+</g>
+<!-- module~self_gpublas~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node24" class="node">
+<title>module~self_gpublas~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node24"><a xlink:href=".././module/self_gpublas~2.html" xlink:title="SELF_GPUBLAS">
+<polygon fill="#337ab7" stroke="#337ab7" points="527,-478.43 434,-478.43 434,-454.43 527,-454.43 527,-478.43"/>
+<text text-anchor="middle" x="480.5" y="-464.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUBLAS</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_gpublas~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge29" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_gpublas~2</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1734.5,-238.43C1633.18,-147.04 1563.94,-238.43 1427.5,-238.43 1427.5,-238.43 1427.5,-238.43 1294,-238.43 1027.59,-238.43 943.35,-198.62 698,-302.43 686.96,-307.1 542,-433.81 532,-440.43 527.1,-443.67 521.75,-446.81 516.41,-449.72"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="514.77,-446.63 507.55,-454.38 518.03,-452.83 514.77,-446.63"/>
+</g>
+<!-- module~self_mappedvector_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node30" class="node">
+<title>module~self_mappedvector_2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node30"><a xlink:href=".././module/self_mappedvector_2d_t.html" xlink:title="SELF_MappedVector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1810,-726.43 1661,-726.43 1661,-702.43 1810,-702.43 1810,-726.43"/>
+<text text-anchor="middle" x="1735.5" y="-712.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge33" class="edge">
+<title>module~self_mappedvector_2d~2&#45;&gt;module~self_mappedvector_2d_t</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1845.99,-702.16C1837.53,-703.11 1828.81,-704.09 1820.16,-705.06"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1819.61,-701.6 1810.06,-706.19 1820.39,-708.55 1819.61,-701.6"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge38" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M326.5,-964.43C277.8,-968.45 228.87,-1000.51 201.4,-1021.69"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="198.93,-1019.18 193.27,-1028.13 203.28,-1024.67 198.93,-1019.18"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge37" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M723.17,-914.4C569.86,-884.38 181.93,-808.64 179,-810.43"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge35" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M614,-964.43C478.32,-1076.08 568.42,-1369.37 532,-1440.43 493.45,-1515.64 407.74,-1572.46 360.78,-1599.31"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="358.94,-1596.33 351.94,-1604.27 362.37,-1602.43 358.94,-1596.33"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge36" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M697.68,-931.37C669.33,-936.59 639.2,-946.39 616,-964.43"/>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M614,-964.43C563.92,-1003.38 391.5,-956.95 328.5,-964.43"/>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M326.5,-964.43C288.59,-967.56 245.03,-965.71 215.13,-963.61"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="215.39,-960.12 205.16,-962.86 214.87,-967.1 215.39,-960.12"/>
+</g>
+<!-- module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node26" class="node">
+<title>module~self_lagrange~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node26"><a xlink:href=".././module/self_lagrange~2.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-1072.43 568,-1072.43 568,-1048.43 662,-1048.43 662,-1072.43"/>
+<text text-anchor="middle" x="615" y="-1058.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge34" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M767.33,-938.59C749.68,-951.22 721.54,-971.71 698,-990.43 677.04,-1007.1 653.9,-1027 637.56,-1041.31"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="634.88,-1039.01 629.68,-1048.24 639.5,-1044.26 634.88,-1039.01"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge39" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M321.82,-1604.03C310,-1572.19 278.66,-1484.78 262,-1409.43 235.97,-1291.65 260.05,-1256.14 226,-1140.43 217.58,-1111.8 202.04,-1081.05 191.14,-1061.32"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="194.17,-1059.57 186.21,-1052.57 188.07,-1063 194.17,-1059.57"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge40" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M325.6,-1628.59C320.75,-1685.77 293.59,-1923.52 179,-1886.43"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M177,-1886.43C60.14,-1848.6 49.06,-1400.88 48.08,-1294.84"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="51.58,-1294.62 48.01,-1284.65 44.58,-1294.67 51.58,-1294.62"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge43" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M320.06,-1376.39C307.75,-1353.1 280.46,-1300.04 262,-1253.43 242.59,-1204.42 245.25,-1189.5 226,-1140.43 215.09,-1112.63 200.07,-1081.65 189.97,-1061.65"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="192.97,-1059.84 185.31,-1052.52 186.74,-1063.02 192.97,-1059.84"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge41" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M303.45,-1400.46C278.7,-1413.38 239.19,-1434.01 211.33,-1448.55"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="209.62,-1445.5 202.37,-1453.23 212.86,-1451.7 209.62,-1445.5"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge44" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M309.39,-1376.15C282.94,-1357.95 229.83,-1324.43 179,-1310.43"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge42" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M319.18,-1376.27C305.63,-1353.2 276.7,-1301.09 262,-1253.43 230.99,-1152.88 268.2,-1115.82 226,-1019.43 219.64,-1004.9 208.78,-990.91 199.09,-980.2"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="201.42,-977.57 192.02,-972.7 196.33,-982.38 201.42,-977.57"/>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge46" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1734.5,-276.43C1676.99,-239.74 1495.72,-276.43 1427.5,-276.43 1427.5,-276.43 1427.5,-276.43 1294,-276.43 1265.13,-276.43 813.86,-155.2 786.5,-164.43"/>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge47" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1734.5,-276.43C1728.39,-272.44 1479.3,-289.19 1472,-289.43 1450.51,-290.14 718.28,-295.28 698,-302.43 678.88,-309.17 678.75,-319.02 662,-330.43 606.5,-368.23 592.66,-378.63 532,-407.43 528.28,-409.19 396.91,-457.14 393,-458.43 364.62,-467.8 358.34,-475.84 328.5,-477.43"/>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M326.5,-477.43C261.04,-480.98 227.04,-432.83 179,-477.43"/>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge48" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1857.57,-724.37C1853.3,-721.92 1849.36,-718.97 1846,-715.43 1776.74,-642.54 1819.57,-333.07 1736.5,-276.43"/>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1734.5,-276.43C1719.98,-266.53 1445.07,-200.43 1427.5,-200.43 1427.5,-200.43 1427.5,-200.43 1294,-200.43 1213.49,-200.43 1121.71,-187.57 1060.88,-177.23"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1061.47,-173.78 1051.02,-175.52 1060.28,-180.67 1061.47,-173.78"/>
+</g>
+<!-- module~self_mappedscalar_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node27" class="node">
+<title>module~self_mappedscalar_2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node27"><a xlink:href=".././module/self_mappedscalar_2d_t.html" xlink:title="SELF_MappedScalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1810,-866.43 1661,-866.43 1661,-842.43 1810,-842.43 1810,-866.43"/>
+<text text-anchor="middle" x="1735.5" y="-852.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge45" class="edge">
+<title>module~self_mappedscalar_2d&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M1875.98,-748.51C1865.9,-752.33 1855.28,-757 1846,-762.43 1811.04,-782.89 1776.16,-814.64 1755.47,-834.98"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1752.87,-832.63 1748.26,-842.17 1757.81,-837.59 1752.87,-832.63"/>
+</g>
+<!-- module~self_mesh_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge50" class="edge">
+<title>module~self_mesh_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#0024ff" stroke-dasharray="5,2" d="M1413.43,-586.4C1371.14,-545.03 1224.16,-407.56 1075,-342.43 887.75,-260.66 805.76,-240.67 616,-316.43"/>
+</g>
+<!-- module~self_mesh_2d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge49" class="edge">
+<title>module~self_mesh_2d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0024ff" stroke-dasharray="5,2" d="M1421.04,-586.42C1397.32,-524.66 1279.41,-241.8 1075,-143.43 959.21,-87.71 914.95,-120.7 786.5,-124.43"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node25" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node25"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1345,-938.43 1245,-938.43 1245,-914.43 1345,-914.43 1345,-938.43"/>
+<text text-anchor="middle" x="1295" y="-924.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d~2&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge51" class="edge">
+<title>module~self_mesh_2d~2&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#0024ff" stroke-dasharray="5,2" d="M1421.59,-610.85C1410.64,-645.25 1378.34,-744.47 1345,-824.43 1333.11,-852.95 1317.34,-884.92 1306.94,-905.34"/>
+<polygon fill="#0024ff" stroke="#0024ff" points="1303.76,-903.88 1302.31,-914.37 1309.98,-907.07 1303.76,-903.88"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge57" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1425.5,-810.43C1355.2,-817.16 1398.8,-901.68 1345,-947.43 1327.21,-962.56 1316.44,-955.13 1296,-966.43"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1294,-966.43C1235.46,-998.8 1059.78,-962.66 993,-966.43"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge55" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1560.7,-823.53C1520.96,-923.23 1243.45,-1608.93 1075,-1746.43 1015.5,-1794.99 978.04,-1760.78 909,-1794.43 891.26,-1803.08 891.78,-1814.36 873,-1820.43 798.99,-1844.36 775.63,-1825.15 698,-1820.43 661.35,-1818.2 652.27,-1816.13 616,-1810.43"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_mesh_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge59" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_mesh_2d~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1556.73,-799.19C1545.27,-783.12 1524.72,-753.94 1508,-728.43 1483.12,-690.46 1455.56,-645.21 1440,-619.35"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1442.99,-617.52 1434.84,-610.75 1436.98,-621.12 1442.99,-617.52"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge52" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1294,-966.43C1267.1,-981.3 1191.7,-1005.87 1161,-1004.43"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node28" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node28"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="820,-1284.43 751,-1284.43 751,-1260.43 820,-1260.43 820,-1284.43"/>
+<text text-anchor="middle" x="785.5" y="-1270.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_data -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge53" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1425.5,-810.43C1342.34,-818.95 1396.1,-914.27 1345,-980.43 1253.22,-1099.24 1210.66,-1119.11 1075,-1183.43 992.12,-1222.73 887.74,-1249.89 829.98,-1263.14"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="829.08,-1259.75 820.1,-1265.38 830.63,-1266.58 829.08,-1259.75"/>
+</g>
+<!-- module~self_vector_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node29" class="node">
+<title>module~self_vector_2d~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node29"><a xlink:href=".././module/self_vector_2d~2.html" xlink:title="SELF_Vector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1208.5,-512.43 1111.5,-512.43 1111.5,-488.43 1208.5,-488.43 1208.5,-512.43"/>
+<text text-anchor="middle" x="1160" y="-498.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_vector_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge54" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_vector_2d~2</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1507.92,-807.86C1483.1,-807.14 1453.8,-807.37 1427.5,-810.43"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1425.5,-810.43C1372.19,-816.63 1383.32,-758.01 1345,-720.43 1303.15,-679.38 1277.34,-683.32 1245,-634.43 1215.92,-590.47 1244.28,-560.59 1209,-521.43 1208.11,-520.44 1207.16,-519.5 1206.17,-518.6"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1207.97,-515.57 1197.83,-512.49 1203.83,-521.22 1207.97,-515.57"/>
+</g>
+<!-- module~self_scalar_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node31" class="node">
+<title>module~self_scalar_2d</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node31"><a xlink:href=".././module/self_scalar_2d.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1208.5,-554.43 1111.5,-554.43 1111.5,-530.43 1208.5,-530.43 1208.5,-554.43"/>
+<text text-anchor="middle" x="1160" y="-540.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge56" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1425.5,-810.43C1383.19,-815.35 1382.08,-779.39 1345,-758.43 1323.89,-746.5 1315.74,-748.51 1296,-734.43"/>
+</g>
+<!-- module~self_tensor_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node32" class="node">
+<title>module~self_tensor_2d</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node32"><a xlink:href=".././module/self_tensor_2d.html" xlink:title="SELF_Tensor_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1209,-782.43 1111,-782.43 1111,-758.43 1209,-758.43 1209,-782.43"/>
+<text text-anchor="middle" x="1160" y="-768.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge58" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1425.5,-810.43C1365.92,-817.36 1355.79,-777.17 1296,-772.43"/>
+</g>
+<!-- module~self_model&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge60" class="edge">
+<title>module~self_model&#45;&gt;HDF5</title>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M614,-1616.43C561.41,-1589.93 538.85,-1629.81 481.5,-1616.43"/>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M479.5,-1616.43C387.07,-1594.87 423.17,-1472.2 328.5,-1465.43"/>
+</g>
+<!-- module~self_model&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge61" class="edge">
+<title>module~self_model&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M775.26,-1720.39C757.73,-1697 719.47,-1643.22 698,-1592.43 672.48,-1532.07 703.95,-1499.78 662,-1449.43 660.1,-1447.15 657.91,-1445.11 655.52,-1443.28"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="657.19,-1440.2 646.86,-1437.85 653.48,-1446.13 657.19,-1440.2"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge62" class="edge">
+<title>module~self_model&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M479.5,-1616.43C455.15,-1610.75 427.99,-1609.3 403.48,-1609.72"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="403.06,-1606.23 393.16,-1610.01 403.25,-1613.23 403.06,-1606.23"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge63" class="edge">
+<title>module~self_model&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M747.29,-1725.89C731.28,-1721.93 712.86,-1715.79 698,-1706.43 652.21,-1677.6 665.04,-1639.3 616,-1616.43"/>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M614,-1616.43C521.03,-1573.07 508.4,-1543.38 429,-1478.43 400.32,-1454.97 368.71,-1426.13 348.74,-1407.53"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="350.88,-1404.74 341.19,-1400.46 346.1,-1409.85 350.88,-1404.74"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge64" class="edge">
+<title>module~self_model&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M772.58,-1720.3C754.91,-1701.9 721.33,-1665.39 698,-1630.43 666.87,-1583.78 639.04,-1523.79 625.22,-1492.17"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="628.26,-1490.39 621.08,-1482.59 621.83,-1493.16 628.26,-1490.39"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge65" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M479.5,-1426.43C411.03,-1415.63 397.69,-1469.49 328.5,-1465.43"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge66" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M586.49,-1458.33C560.15,-1447.47 518.97,-1432.34 481.5,-1426.43"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M479.5,-1426.43C443.51,-1420.75 403.57,-1410.52 373.81,-1402.11"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="374.7,-1398.72 364.13,-1399.33 372.77,-1405.45 374.7,-1398.72"/>
+</g>
+<!-- module~self_gpublas~2&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge68" class="edge">
+<title>module~self_gpublas~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M464.36,-478.49C423.62,-511.93 311.41,-610.56 262,-720.43 213.97,-827.23 272.12,-873.8 226,-981.43 219.75,-996.01 208.89,-1010 199.19,-1020.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="196.43,-1018.52 192.09,-1028.19 201.51,-1023.34 196.43,-1018.52"/>
+</g>
+<!-- module~self_gpublas~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge69" class="edge">
+<title>module~self_gpublas~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M433.95,-470.63C404.01,-473.17 363.96,-476.16 328.5,-477.43"/>
+</g>
+<!-- module~self_gpublas~2&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge67" class="edge">
+<title>module~self_gpublas~2&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M433.79,-457.65C420.17,-455.04 405.02,-452.13 390.55,-449.35"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="391.15,-445.9 380.67,-447.45 389.83,-452.77 391.15,-445.9"/>
+</g>
+<!-- module~self_gpublas~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge70" class="edge">
+<title>module~self_gpublas~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M466.88,-478.5C414.93,-528.99 216.39,-730.42 130,-939.43 83.72,-1051.39 59.21,-1195.75 51.09,-1250.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="47.62,-1249.82 49.65,-1260.22 54.55,-1250.83 47.62,-1249.82"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge71" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1251.92,-914.41C1237.2,-910.2 1220.63,-905.47 1205.71,-901.2"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="1206.26,-897.72 1195.68,-898.34 1204.34,-904.45 1206.26,-897.72"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge77" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1244.71,-923.54C1219.5,-922.97 1188.42,-923.7 1161,-928.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1159,-928.43C1084.42,-941.31 1068.57,-962.17 993,-966.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M991,-966.43C900.26,-971.54 876.15,-951.49 786.5,-966.43"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge75" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1287.61,-914.41C1277.74,-895.56 1258.5,-857.75 1245,-824.43 1226.01,-777.53 1240.9,-755.7 1209,-716.43 1076.78,-553.67 995.33,-525.48 786.5,-506.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M784.5,-506.43C626.52,-497.66 586.77,-499.49 429,-487.43 384.24,-484.01 373.36,-475.82 328.5,-477.43"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge78" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition~2</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1281.39,-914.27C1259.22,-894.08 1210.87,-855.19 1161,-848.43"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge73" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1260.97,-938.54C1254.85,-942.15 1249.1,-946.72 1245,-952.43 1187.45,-1032.54 1235.28,-1076.35 1209,-1171.43 1165.84,-1327.58 1156.2,-1370.24 1075,-1510.43 1015.72,-1612.78 966.37,-1615 909,-1718.43 885.68,-1760.47 911.98,-1792.29 873,-1820.43 774.87,-1891.26 425.84,-1882.34 328.5,-1810.43"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge74" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1262.71,-938.53C1256.18,-942.2 1249.82,-946.8 1245,-952.43 1213.19,-989.58 1227.75,-1011.25 1209,-1056.43 1156.89,-1182.01 1135.33,-1209.59 1075,-1331.43 1002.15,-1478.56 969.53,-1508.82 909,-1661.43 888.31,-1713.58 916.09,-1746.5 873,-1782.43 784.76,-1856.01 729.41,-1828.88 616,-1810.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M614,-1810.43C555.83,-1801.28 528.31,-1846.16 481.5,-1810.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M479.5,-1810.43C414.44,-1760.78 362.13,-1676.66 339.97,-1637.57"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="342.92,-1635.68 334.99,-1628.65 336.81,-1639.09 342.92,-1635.68"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge76" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1264.64,-938.44C1257.66,-942.21 1250.62,-946.88 1245,-952.43 1221.24,-975.92 1236.41,-999.33 1209,-1018.43 1053.29,-1126.93 973.82,-1049.93 786.5,-1080.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M784.5,-1080.43C738.61,-1088.18 736.01,-1112.58 698,-1139.43 693.71,-1142.46 397.59,-1359.88 393,-1362.43 386.54,-1366.02 379.49,-1369.38 372.49,-1372.41"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="370.93,-1369.27 363.04,-1376.34 373.62,-1375.73 370.93,-1369.27"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge72" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1159,-928.43C1115.73,-935.9 1115.1,-962.54 1075,-980.43 1040.32,-995.9 1030.74,-1000.21 993,-1004.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M991,-1004.43C900.67,-1014.52 877.28,-1008.93 786.5,-1004.43"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M784.5,-1004.43C733.5,-1001.9 677.95,-1026.09 645.09,-1043.48"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="643.16,-1040.55 636.05,-1048.4 646.51,-1046.7 643.16,-1040.55"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge79" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M604.98,-1048.43C594.02,-1033.1 576.01,-1005.34 568,-978.43 500.26,-750.87 621.76,-665.24 532,-445.43 525.85,-430.36 514.27,-416.39 503.75,-405.82"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="506.02,-403.15 496.37,-398.77 501.18,-408.21 506.02,-403.15"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge82" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M326.5,-1040.43C296.82,-1038.45 263.71,-1038.27 236.38,-1038.66"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="236.16,-1035.16 226.22,-1038.84 236.28,-1042.16 236.16,-1035.16"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge81" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M567.52,-1057.07C511.03,-1053.02 412.78,-1046.04 328.5,-1040.43"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M326.5,-1040.43C281.09,-1035.91 271.39,-1024.12 226,-1019.43 183.56,-1015.04 172.67,-1019.17 130,-1019.43 120.17,-1019.49 109.68,-1019.59 99.6,-1019.7"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="99.25,-1016.21 89.29,-1019.83 99.34,-1023.21 99.25,-1016.21"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge80" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M606.9,-1072.52C597.64,-1088.4 581.1,-1117.23 568,-1142.43 550.95,-1175.24 558.82,-1191.97 532,-1217.43 496.02,-1251.58 472.28,-1236.19 429,-1260.43 411.78,-1270.07 411.41,-1279.32 393,-1286.43 303.72,-1320.91 271.27,-1335.84 179,-1310.43"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M177,-1310.43C150.22,-1303.33 120.56,-1294.64 96.43,-1287.37"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="97.38,-1284 86.8,-1284.46 95.35,-1290.7 97.38,-1284"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node33" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node33"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-1208.43 429,-1208.43 429,-1184.43 532,-1184.43 532,-1208.43"/>
+<text text-anchor="middle" x="480.5" y="-1194.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge83" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M607,-1072.76C594.3,-1094.31 565.63,-1139.3 532,-1168.43 527.44,-1172.38 522.23,-1176.02 516.93,-1179.28"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="514.95,-1176.38 508.02,-1184.39 518.43,-1182.45 514.95,-1176.38"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge88" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1666.59,-866.55C1664.6,-868.01 1662.72,-869.63 1661,-871.43 1601.46,-933.41 1655.74,-981.17 1625,-1061.43 1607.35,-1107.52 1603.54,-1122.71 1567.5,-1156.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1565.5,-1156.43C1501.61,-1216.19 873.39,-1032.28 786.5,-1042.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M784.5,-1042.43C744.73,-1045.55 734.46,-1050.24 698,-1066.43 658.56,-1083.94 657.87,-1128.89 616,-1118.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M614,-1118.43C577.82,-1109.39 345.68,-1069.09 236.1,-1050.23"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="236.66,-1046.77 226.21,-1048.52 235.47,-1053.67 236.66,-1046.77"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge87" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1294,-810.43C1218.1,-780 1192.06,-802.16 1111,-791.43 1058.34,-784.46 1043.27,-789.6 993,-772.43"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge92" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1565.5,-966.43C1484.65,-992.16 1452.07,-963.77 1381,-917.43 1359.55,-903.44 1367.32,-885 1345,-872.43 1273.14,-831.96 1242.72,-859.5 1161,-848.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1159,-848.43C1135.33,-844.73 1109.53,-843.65 1085.48,-843.87"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1085.23,-840.37 1075.29,-844.04 1085.34,-847.37 1085.23,-840.37"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge84" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1565.5,-1156.43C1405.82,-1281.08 1400.22,-1373.57 1209,-1440.43 1011.85,-1509.36 754.87,-1461.53 656.61,-1438.69"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="657.32,-1435.26 646.79,-1436.37 655.71,-1442.07 657.32,-1435.26"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge90" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1728.87,-842.26C1715.07,-813.7 1676.9,-741.63 1625,-700.43 1580.98,-665.48 1557.59,-678.89 1508,-652.43 1488.39,-641.97 1467.59,-627.93 1452.04,-616.78"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1453.69,-613.66 1443.54,-610.61 1449.58,-619.32 1453.69,-613.66"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge91" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1687.54,-842.34C1667.8,-837.26 1644.68,-831.3 1624.03,-825.98"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1624.67,-822.54 1614.11,-823.43 1622.92,-829.31 1624.67,-822.54"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge85" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1565.5,-966.43C1519.81,-979.6 1518.03,-1006.49 1472,-1018.43 1374.34,-1043.76 1345.55,-1026.75 1245,-1018.43 1207.28,-1015.31 1198.81,-1006.2 1161,-1004.43"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge86" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1718,-842.2C1697.36,-827.53 1660.39,-803.3 1625,-790.43 1555.3,-765.09 1356.37,-777.5 1296,-734.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1294,-734.43C1271.33,-716.39 1260.58,-715.86 1245,-691.43 1214.38,-643.4 1244.8,-612.74 1209,-568.43 1206.6,-565.45 1203.76,-562.77 1200.68,-560.36"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1202.36,-557.27 1192.11,-554.61 1198.46,-563.09 1202.36,-557.27"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge89" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1684.88,-866.55C1676.34,-870.1 1667.98,-874.64 1661,-880.43 1636.47,-900.77 1648.95,-921.42 1625,-942.43 1604.18,-960.69 1594.21,-959.11 1567.5,-966.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1565.5,-966.43C1455.35,-996.64 1445.38,-888.93 1345,-834.43 1323.69,-822.86 1319.28,-817.23 1296,-810.43"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1294,-810.43C1269.72,-800.69 1242.13,-792.03 1218.4,-785.27"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1219.05,-781.82 1208.48,-782.49 1217.17,-788.56 1219.05,-781.82"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge97" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M771.92,-1260.29C734.57,-1224.34 626.22,-1120.72 616,-1118.43"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge96" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M768.2,-1260.26C729.65,-1232.33 628.8,-1164.2 532,-1140.43 379.52,-1102.98 323.72,-1215.34 179,-1154.43"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M177,-1154.43C124.77,-1128.02 81.83,-1071.84 61.21,-1041.28"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="63.97,-1039.1 55.54,-1032.68 58.13,-1042.95 63.97,-1039.1"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge95" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M750.84,-1276.35C733.53,-1279.8 712.98,-1286.28 698,-1298.43 672.05,-1319.48 688.85,-1344.55 662,-1364.43 577.02,-1427.34 528.53,-1376.75 429,-1412.43 381.47,-1429.47 378.91,-1468.38 328.5,-1465.43"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M326.5,-1465.43C288.74,-1462.73 245.4,-1463.15 215.52,-1463.98"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="215.04,-1460.5 205.15,-1464.3 215.26,-1467.49 215.04,-1460.5"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge93" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M750.84,-1275.23C733.1,-1278.34 712.14,-1284.86 698,-1298.43 662.71,-1332.3 693.32,-1364.85 662,-1402.43 659.57,-1405.35 656.72,-1408.01 653.65,-1410.41"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="651.46,-1407.66 645.15,-1416.17 655.39,-1413.45 651.46,-1407.66"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge98" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M750.86,-1280.25C734.52,-1284.61 714.83,-1290.74 698,-1298.43 658.75,-1316.36 658.88,-1345.59 616,-1350.43"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M614,-1350.43C555.48,-1357.04 538.34,-1335.03 481.5,-1350.43"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge99" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M760.68,-1284.54C741.2,-1295.59 714.31,-1313.64 698,-1336.43 667.33,-1379.29 696.97,-1409.99 662,-1449.43 661.24,-1450.28 660.44,-1451.1 659.61,-1451.89"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="657.16,-1449.36 651.31,-1458.18 661.39,-1454.94 657.16,-1449.36"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge94" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M750.81,-1270.17C732.83,-1267.22 711.66,-1260.7 698,-1246.43 652.98,-1199.4 694.8,-1160.67 662,-1104.43 656.49,-1094.98 648.36,-1086.26 640.46,-1079.11"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="642.63,-1076.36 632.75,-1072.53 638.08,-1081.68 642.63,-1076.36"/>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge100" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M784.5,-316.43C710.47,-305.15 685.66,-288.94 616,-316.43"/>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge104" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1111.2,-511.79C1060.64,-524.1 978.69,-544.89 909,-566.43 597.85,-662.62 479.4,-667.94 262,-910.43 238.38,-936.77 245.12,-951.66 226,-981.43 217.2,-995.13 205.87,-1009.43 196.53,-1020.53"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="193.7,-1018.45 189.86,-1028.32 199.02,-1023 193.7,-1018.45"/>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge103" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1154.75,-488.21C1145.05,-462.29 1118.69,-401.77 1075,-372.43 1044.17,-351.73 1028.04,-368.72 993,-356.43"/>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M991,-356.43C903.61,-325.77 878.06,-330.37 786.5,-316.43"/>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M784.5,-316.43C650.33,-295.99 595.96,-205.5 481.5,-278.43"/>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge105" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1152.9,-488.07C1128.13,-437.95 1035,-249.44 1003.49,-185.67"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="1006.55,-183.96 998.99,-176.54 1000.28,-187.06 1006.55,-183.96"/>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;module~self_gpublas~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge101" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;module~self_gpublas~2</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M991,-356.43C909.58,-325.86 702.97,-469.08 616,-468.43"/>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M614,-468.43C588.86,-467.8 561.03,-467.34 537.39,-467.03"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="537.23,-463.52 527.19,-466.9 537.14,-470.52 537.23,-463.52"/>
+</g>
+<!-- module~self_vector_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node35" class="node">
+<title>module~self_vector_2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node35"><a xlink:href=".././module/self_vector_2d_t.html" xlink:title="SELF_Vector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045,-1132.43 939,-1132.43 939,-1108.43 1045,-1108.43 1045,-1132.43"/>
+<text text-anchor="middle" x="992" y="-1118.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_2d~2&#45;&gt;module~self_vector_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge102" class="edge">
+<title>module~self_vector_2d~2&#45;&gt;module~self_vector_2d_t</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1120.42,-512.43C1116.78,-514.9 1113.52,-517.86 1111,-521.43 1047.08,-611.85 1115.53,-915.38 1075,-1018.43 1061.93,-1051.66 1034.01,-1082.52 1014.39,-1101.41"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="1011.97,-1098.88 1007.08,-1108.27 1016.76,-1103.99 1011.97,-1098.88"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge110" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1660.91,-713.47C1631.81,-713.34 1598.07,-713.5 1567.5,-714.43"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1565.5,-714.43C1385.66,-719.88 1317.72,-642.06 1161,-730.43"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1159,-730.43C1137.95,-739.56 1130.09,-736.7 1111,-749.43 1091.91,-762.16 1095.23,-775.61 1075,-786.43 1000.61,-826.2 403.42,-885.67 328.5,-924.43"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge109" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1728.8,-702.08C1693.94,-628.21 1501.19,-243.52 1209,-110.43 1169.36,-92.38 1154.55,-109.49 1111,-110.43 966.68,-113.54 930.81,-120.59 786.5,-124.43"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M784.5,-124.43C709.64,-122.38 677.28,-81.38 616,-124.43"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge114" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_domaindecomposition~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1159,-730.43C1139.01,-741.7 1127.79,-733.79 1111,-749.43 1083.95,-774.64 1102.92,-800.18 1075,-824.43 1070.77,-828.1 1066.02,-831.26 1061,-833.97"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1059.23,-830.93 1051.7,-838.38 1062.24,-837.25 1059.23,-830.93"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge106" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1725.18,-726.58C1709.68,-747.36 1678.55,-791.55 1661,-833.43 1635.01,-895.47 1664.16,-925.74 1625,-980.43 1456.16,-1216.19 1343.41,-1221.68 1075,-1331.43 928.03,-1391.53 738.71,-1416.34 656.78,-1424.76"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="656.24,-1421.3 646.64,-1425.78 656.94,-1428.27 656.24,-1421.3"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge112" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_mesh_2d~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1713.39,-702.39C1682.42,-685.31 1622.42,-654.35 1567.5,-638.43"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1565.5,-638.43C1536.82,-630.11 1504.79,-620.83 1478.81,-613.3"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1479.75,-609.93 1469.17,-610.5 1477.8,-616.65 1479.75,-609.93"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge113" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1713.69,-726.52C1684.36,-743.56 1630.7,-774.72 1597.19,-794.18"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1595.2,-791.29 1588.31,-799.34 1598.72,-797.34 1595.2,-791.29"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge107" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1725.37,-726.74C1707.88,-749.72 1667.57,-799.76 1625,-832.43 1450.51,-966.32 1380.87,-999.27 1161,-1004.43"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1159,-1004.43C1085.27,-1007.16 1066.32,-996.24 993,-1004.43"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge108" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_vector_2d~2</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1565.5,-638.43C1486.33,-615.47 1459.5,-644.6 1381,-619.43 1297.22,-592.57 1287.63,-560.89 1209,-521.43 1205.86,-519.85 1202.57,-518.27 1199.25,-516.73"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1200.46,-513.43 1189.91,-512.49 1197.57,-519.81 1200.46,-513.43"/>
+</g>
+<!-- module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge111" class="edge">
+<title>module~self_mappedvector_2d_t&#45;&gt;module~self_tensor_2d</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1565.5,-714.43C1443.29,-723.11 1418.14,-782.12 1296,-772.43"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1294,-772.43C1269.47,-771.55 1242.39,-771.05 1219.1,-770.78"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1219.07,-767.28 1209.03,-770.67 1218.99,-774.28 1219.07,-767.28"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge116" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1122.26,-530.29C1118.1,-527.83 1114.21,-524.9 1111,-521.43 1078.04,-485.86 1111.25,-450.65 1075,-418.43 1065.24,-409.75 628.15,-311.64 616,-316.43"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge119" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1120.93,-554.52C998.49,-594.49 606.66,-730.94 328.5,-924.43"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M326.5,-924.43C299.05,-938.63 287.43,-932.86 262,-950.43 233.97,-969.79 208.5,-1000.19 193.38,-1020.21"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="190.49,-1018.23 187.37,-1028.35 196.12,-1022.39 190.49,-1018.23"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge118" class="edge">
+<title>module~self_scalar_2d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M991,-506.43C900.98,-493.91 877.01,-514.69 786.5,-506.43"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge120" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1121.32,-530.4C1117.42,-527.93 1113.85,-524.97 1111,-521.43 1060.07,-458.25 1100.15,-419.58 1075,-342.43 1055.79,-283.5 1022.4,-218.31 1004.74,-185.61"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1007.66,-183.65 999.79,-176.54 1001.51,-187 1007.66,-183.65"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_gpublas~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge115" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_gpublas~2</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1111.35,-530.45C1078.32,-522.55 1033.23,-512.57 993,-506.43"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M991,-506.43C825.4,-481.16 783.47,-472.62 616,-468.43"/>
+</g>
+<!-- module~self_scalar_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node36" class="node">
+<title>module~self_scalar_2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node36"><a xlink:href=".././module/self_scalar_2d_t.html" xlink:title="SELF_Scalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045,-1322.43 939,-1322.43 939,-1298.43 1045,-1298.43 1045,-1322.43"/>
+<text text-anchor="middle" x="992" y="-1308.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge117" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1154.81,-554.48C1145.25,-582.5 1121.85,-654.38 1111,-716.43 1075.16,-921.49 1141.5,-986.16 1075,-1183.43 1060.96,-1225.07 1030.21,-1266.57 1010.61,-1290.3"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1007.72,-1288.3 1003.95,-1298.2 1013.07,-1292.81 1007.72,-1288.3"/>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge124" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1126.79,-758.42C1120.71,-754.79 1115.01,-750.19 1111,-744.43 1046.36,-651.58 1153.59,-573.81 1075,-492.43 998.34,-413.05 645.33,-392.52 523.21,-387.75"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="523.26,-384.25 513.13,-387.37 522.99,-391.25 523.26,-384.25"/>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge126" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1152.43,-782.48C1140.14,-803.83 1111.59,-848.22 1075,-871.43 1010.64,-912.25 975.97,-878.04 909,-914.43 889.93,-924.79 892.26,-937.42 873,-947.43 838.07,-965.57 825.11,-958.8 786.5,-966.43"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M784.5,-966.43C555.11,-1011.37 493.44,-993.65 262,-1026.43 253.68,-1027.61 244.91,-1028.96 236.31,-1030.36"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="235.63,-1026.92 226.34,-1032 236.77,-1033.83 235.63,-1026.92"/>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge125" class="edge">
+<title>module~self_tensor_2d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1110.98,-778.81C1077.19,-782.84 1031.34,-784.53 993,-772.43"/>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M991,-772.43C925.44,-751.75 933.7,-704.69 873,-672.43 855.32,-663.03 194.15,-464.33 179,-477.43"/>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge123" class="edge">
+<title>module~self_tensor_2d&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1151.01,-782.68C1139.83,-800.5 1119.92,-835 1111,-867.43 1056.13,-1066.86 1130.52,-1132.18 1075,-1331.43 1030.93,-1489.58 969.53,-1508.82 909,-1661.43 888.31,-1713.58 914.47,-1744.64 873,-1782.43 783.56,-1863.94 354.95,-1943.39 179,-1886.43"/>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_gpublas~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge122" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_gpublas~2</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1136.5,-758.32C1128.45,-753.96 1119.31,-748.99 1111,-744.43 1055.81,-714.1 678.93,-470.68 616,-468.43"/>
+</g>
+<!-- module~self_tensor_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node34" class="node">
+<title>module~self_tensor_2d_t</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node34"><a xlink:href=".././module/self_tensor_2d_t.html" xlink:title="SELF_Tensor_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045.5,-1174.43 938.5,-1174.43 938.5,-1150.43 1045.5,-1150.43 1045.5,-1174.43"/>
+<text text-anchor="middle" x="992" y="-1160.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge121" class="edge">
+<title>module~self_tensor_2d&#45;&gt;module~self_tensor_2d_t</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1151.42,-782.44C1140.57,-800.26 1120.84,-835.07 1111,-867.43 1093.14,-926.19 1115.74,-1095.48 1075,-1141.43 1069.65,-1147.46 1062.83,-1151.87 1055.42,-1155.08"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1054.01,-1151.87 1045.77,-1158.53 1056.37,-1158.46 1054.01,-1151.87"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge133" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M428.82,-1185.62C399,-1178.46 360.91,-1167.9 328.5,-1154.43"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge131" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M453.14,-1208.53C445.16,-1212.57 436.52,-1217.36 429,-1222.43 411.49,-1234.23 412.45,-1245.21 393,-1253.43 305.04,-1290.59 267.57,-1308.11 179,-1272.43"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M177,-1272.43C83.81,-1234.89 57.19,-1096.62 50.25,-1042.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="53.73,-1042.01 49.08,-1032.48 46.77,-1042.82 53.73,-1042.01"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge127" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M470.09,-1208.55C447.97,-1236.39 389.89,-1305.75 328.5,-1348.43"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-1348.43C301.96,-1365.49 287.04,-1351.12 262,-1367.43 231.27,-1387.45 205.76,-1422.2 191.45,-1444.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="188.34,-1442.86 186.02,-1453.2 194.28,-1446.57 188.34,-1442.86"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge129" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M177,-1272.43C154.29,-1263.28 127.45,-1261.95 104.15,-1263.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="103.75,-1259.94 94.07,-1264.24 104.32,-1266.92 103.75,-1259.94"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge130" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M476.48,-1208.5C466.43,-1248.02 432.59,-1376.86 393,-1479.43 376.8,-1521.4 353.44,-1568.48 339.72,-1595.08"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="336.48,-1593.73 334.98,-1604.22 342.69,-1596.96 336.48,-1593.73"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge132" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M467.71,-1208.77C456.5,-1221.06 439.79,-1240.84 429,-1260.43 405.8,-1302.53 426.24,-1327.7 393,-1362.43 387.54,-1368.13 380.66,-1372.62 373.45,-1376.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="372.02,-1372.94 364.21,-1380.1 374.78,-1379.38 372.02,-1372.94"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_node37" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsesGraph_node37"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-1244.43 275.5,-1244.43 275.5,-1220.43 379.5,-1220.43 379.5,-1244.43"/>
+<text text-anchor="middle" x="327.5" y="-1230.03" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge128" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M428.8,-1208.52C416.03,-1211.56 402.2,-1214.86 389.01,-1218"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="387.98,-1214.65 379.07,-1220.37 389.61,-1221.46 387.98,-1214.65"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge139" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M938.25,-1159.69C865.15,-1155.1 729.22,-1143.77 616,-1118.43"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge138" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M938.36,-1158.41C927.31,-1155.2 916.69,-1149.93 909,-1141.43 837.79,-1062.77 947.43,-981.05 873,-905.43 818.4,-849.96 243.09,-766.26 179,-810.43"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge136" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M981.04,-1174.58C963.76,-1196.27 928.22,-1243.7 909,-1289.43 880.92,-1356.22 924.78,-1397.75 873,-1448.43 699.96,-1617.77 570,-1482.7 328.5,-1465.43"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge134" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M983.89,-1174.47C967.75,-1200.63 925.65,-1262.8 873,-1293.43 838.98,-1313.22 817.96,-1288.78 786.5,-1312.43"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge140" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M944.69,-1174.43C886.39,-1190.01 783.52,-1219.06 698,-1251.43 599.05,-1288.89 583.62,-1322.76 481.5,-1350.43"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M479.5,-1350.43C443.91,-1358.75 403.79,-1368.88 373.85,-1376.59"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="372.92,-1373.22 364.11,-1379.11 374.67,-1380 372.92,-1373.22"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge141" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M981.44,-1174.75C964.77,-1196.73 930.17,-1244.57 909,-1289.43 886.51,-1337.1 911.19,-1366.1 873,-1402.43 818.75,-1454.05 730.02,-1467.55 672.32,-1470.52"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="672.12,-1467.02 662.28,-1470.94 672.42,-1474.02 672.12,-1467.02"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge135" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M938.44,-1157.25C927.65,-1154.06 917.12,-1149.1 909,-1141.43 870.67,-1105.25 910.97,-1064.99 873,-1028.43 844.26,-1000.76 826.35,-1006.41 786.5,-1004.43"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge137" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M944.53,-1174.55C932.68,-1178.35 920.14,-1182.99 909,-1188.43 871.64,-1206.66 832.76,-1235.24 809.08,-1253.91"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="806.71,-1251.32 801.08,-1260.3 811.08,-1256.79 806.71,-1251.32"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge147" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M975.01,-1108.34C941.46,-1084.36 860.66,-1033.76 786.5,-1042.43"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge146" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M984.76,-1108.12C970.36,-1079.49 934.16,-1006.02 909,-942.43 890.39,-895.38 910.07,-868.87 873,-834.43 861.57,-823.81 343.28,-691.44 328.5,-696.43"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge144" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M938.92,-1130.09C879.75,-1141.71 780.68,-1163.1 698,-1190.43 676.8,-1197.44 346.83,-1335.69 328.5,-1348.43"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge142" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M938.85,-1124.91C927.78,-1128.11 917.03,-1133.25 909,-1141.43 860.36,-1190.96 922.49,-1244.74 873,-1293.43 844.94,-1321.03 817.96,-1288.78 786.5,-1312.43"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M784.5,-1312.43C752.61,-1336.4 729.25,-1311.62 698,-1336.43 671.83,-1357.21 685.45,-1378.62 662,-1402.43 658.96,-1405.52 655.47,-1408.35 651.81,-1410.92"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="649.67,-1408.13 643.07,-1416.42 653.4,-1414.06 649.67,-1408.13"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge148" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M947.99,-1108.37C897.54,-1094.86 816.94,-1075.47 786.5,-1080.43"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge149" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M938.83,-1124.37C927.63,-1127.58 916.83,-1132.86 909,-1141.43 841.3,-1215.56 942.06,-1291.56 873,-1364.43 818.25,-1422.2 765.2,-1359.78 698,-1402.43 675.78,-1416.53 682.58,-1433.03 662,-1449.43 660.27,-1450.81 658.44,-1452.12 656.53,-1453.36"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="654.78,-1450.33 647.88,-1458.37 658.29,-1456.39 654.78,-1450.33"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge143" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M979.04,-1108.43C958.89,-1088.88 916.16,-1050.16 873,-1028.43 837.37,-1010.49 826.35,-1006.41 786.5,-1004.43"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge145" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M938.92,-1129.02C928.57,-1132.02 918.1,-1136.04 909,-1141.43 883.92,-1156.29 829.98,-1219.51 802.83,-1252.38"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="799.87,-1250.47 796.23,-1260.41 805.28,-1254.91 799.87,-1250.47"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge155" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M479.5,-1154.43C416.92,-1130.2 390.47,-1180.19 328.5,-1154.43"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-1154.43C273.69,-1132.48 223.5,-1086.51 197.48,-1060.14"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="199.68,-1057.38 190.21,-1052.64 194.65,-1062.25 199.68,-1057.38"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge154" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M938.75,-1322.43C897.59,-1331.45 838.67,-1343.41 786.5,-1350.43"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M784.5,-1350.43C738.87,-1356.57 735.99,-1319.44 698,-1293.43 623.31,-1242.3 611.17,-1219.3 532,-1175.43 510.74,-1163.65 504.17,-1163.21 481.5,-1154.43"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M479.5,-1154.43C441.32,-1146.76 431.82,-1165.31 393,-1168.43 297.99,-1176.07 264.06,-1197.44 179,-1154.43"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge152" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M966.39,-1322.48C947.25,-1333.26 921.85,-1350.99 909,-1374.43 868.34,-1448.62 932.53,-1693.32 873,-1753.43 851.6,-1775.04 353.93,-1827.12 328.5,-1810.43"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-1810.43C216.77,-1729.37 187.86,-1550.05 180.97,-1487.48"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="184.46,-1487.12 179.96,-1477.52 177.49,-1487.83 184.46,-1487.12"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge150" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M784.5,-1350.43C744.96,-1355.75 733.65,-1356.51 698,-1374.43 679.89,-1383.53 678.87,-1391.19 662,-1402.43 657.42,-1405.48 652.46,-1408.53 647.55,-1411.41"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="645.8,-1408.38 638.86,-1416.38 649.28,-1414.46 645.8,-1408.38"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge156" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M784.5,-1350.43C710.28,-1360.41 690.42,-1342.03 616,-1350.43"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge157" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M969.3,-1322.48C950.88,-1333.72 924.96,-1352.1 909,-1374.43 880.55,-1414.22 912.84,-1450.06 873,-1478.43 809.16,-1523.89 712,-1503.23 657.26,-1485.76"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="658.14,-1482.37 647.55,-1482.56 655.94,-1489.02 658.14,-1482.37"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge151" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M972.91,-1298.37C912.16,-1257.87 715.19,-1126.56 642.91,-1078.37"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="644.61,-1075.29 634.34,-1072.66 640.72,-1081.12 644.61,-1075.29"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge153" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M938.87,-1300.74C905.23,-1294.49 861.98,-1286.46 830.16,-1280.54"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="830.73,-1277.09 820.26,-1278.7 829.45,-1283.97 830.73,-1277.09"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge158" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M312.55,-1220.21C298.87,-1207.87 277.82,-1187.9 262,-1168.43 233.29,-1133.1 205.72,-1087.5 190.69,-1061.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="193.74,-1059.62 185.75,-1052.66 187.65,-1063.08 193.74,-1059.62"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection_diffusion_2d_t~~UsesGraph_edge159" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M275.12,-1238.69C235.43,-1243.66 179.16,-1250.98 130,-1258.43 121.69,-1259.69 112.91,-1261.1 104.32,-1262.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="103.63,-1259.09 94.35,-1264.2 104.79,-1266 103.63,-1259.09"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_advection_diffusion_2d_tUsesGraph = svgPanZoom('#moduleself_advection_diffusion_2d_tUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_advection_diffusion_2d_t~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_advection_diffusion_2d_tUsedByGraph" width="371pt" height="74pt"
+ viewBox="0.00 0.00 371.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_advection_diffusion_2d_t~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>module~~self_advection_diffusion_2d_t~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 367,-70 367,4 -4,4"/>
+<!-- module~self_advection_diffusion_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsedByGraph_node1" class="node">
+<title>module~self_advection_diffusion_2d_t</title>
+<polygon fill="none" stroke="black" points="168,-45 0,-45 0,-21 168,-21 168,-45"/>
+<text text-anchor="middle" x="84" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">self_advection_diffusion_2d_t</text>
+</g>
+<!-- module~self_advection_diffusion_2d~2 -->
+<g id="module~~self_advection_diffusion_2d_t~~UsedByGraph_node2" class="node">
+<title>module~self_advection_diffusion_2d~2</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsedByGraph_node2"><a xlink:href=".././module/self_advection_diffusion_2d~2.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="363,-66 204,-66 204,-42 363,-42 363,-66"/>
+<text text-anchor="middle" x="283.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsedByGraph_edge1" class="edge">
+<title>module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M203.88,-45.64C195.45,-44.74 186.82,-43.83 178.24,-42.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="178.53,-39.43 168.21,-41.85 177.79,-46.39 178.53,-39.43"/>
+</g>
+<!-- module~self_advection_diffusion_2d -->
+<g id="module~~self_advection_diffusion_2d_t~~UsedByGraph_node3" class="node">
+<title>module~self_advection_diffusion_2d</title>
+<g id="a_module~~self_advection_diffusion_2d_t~~UsedByGraph_node3"><a xlink:href=".././module/self_advection_diffusion_2d.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="363,-24 204,-24 204,0 363,0 363,-24"/>
+<text text-anchor="middle" x="283.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_advection_diffusion_2d_t~~UsedByGraph_edge2" class="edge">
+<title>module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M203.88,-20.36C195.45,-21.26 186.82,-22.17 178.24,-23.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="177.79,-19.61 168.21,-24.15 178.53,-26.57 177.79,-19.61"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#type-advection_diffusion_2d_t">advection_diffusion_2d_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#proc-entropy_func_advection_diffusion_2d_t">entropy_func_advection_diffusion_2d_t</a>
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#proc-flux2d_advection_diffusion_2d_t">flux2d_advection_diffusion_2d_t</a>
+      <a class="list-group-item" href="../module/self_advection_diffusion_2d_t.html#proc-riemannflux2d_advection_diffusion_2d_t">riemannflux2d_advection_diffusion_2d_t</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-advection_diffusion_2d_t"></span><h3>type, public, extends(<a href='../type/dgmodel2d.html'>DGModel2D</a>) :: <a href='../type/advection_diffusion_2d_t.html'>advection_diffusion_2d_t</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-dsdt~2"></span>type(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux~2"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence~2"></span>type(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~2"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh~2"></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nu~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution~2"></span>type(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient~2"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source~2"></span>type(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-u~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>u</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-v"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>v</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol~2"></span>type(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalfree'>AdditionalFree</a></strong>  => AdditionalFree_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalinit'>AdditionalInit</a></strong>  => AdditionalInit_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionaloutput'>AdditionalOutput</a></strong>  => AdditionalOutput_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-boundaryflux~2'>BoundaryFlux</a></strong>  => BoundaryFlux_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-calculateentropy~2'>CalculateEntropy</a></strong>  => CalculateEntropy_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-calculatesolutiongradient~2'>CalculateSolutionGradient</a></strong>  => CalculateSolutionGradient_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-calculatetendency~2'>CalculateTendency</a></strong>  => CalculateTendency_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-euler_timeintegrator'>Euler_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-fluxmethod~2'>FluxMethod</a></strong>  => fluxmethod_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-forwardstep'>ForwardStep</a></strong>  => ForwardStep_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-free~2'>Free</a></strong>  => Free_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-getsimulationtime'>GetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-incrementiocounter'>IncrementIOCounter</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-init~2'>Init</a></strong>  => Init_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk2_timeintegrator'>LowStorageRK2_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk3_timeintegrator'>LowStorageRK3_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk4_timeintegrator'>LowStorageRK4_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pretendency'>PreTendency</a></strong>  => PreTendency_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-printtype'>PrintType</a></strong>  => PrintType_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-readmodel~2'>ReadModel</a></strong>  => Read_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportentropy'>ReportEntropy</a></strong>  => ReportEntropy_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-reportmetrics~2'>ReportMetrics</a></strong>  => ReportMetrics_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportusermetrics'>ReportUserMetrics</a></strong>  => ReportUserMetrics_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-setboundarycondition~2'>SetBoundaryCondition</a></strong>  => setboundarycondition_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-setgradientboundarycondition~2'>SetGradientBoundaryCondition</a></strong>  => setgradientboundarycondition_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-setmetadata~4'>SetMetadata</a></strong>  => SetMetadata_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setnumberofvariables'>SetNumberOfVariables</a></strong>  => SetNumberOfVariables_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setsimulationtime'>SetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/advection_diffusion_2d_t.html#boundprocedure-setsolution~5'>SetSolution</a></strong>  => SetSolutionFromChar_DGModel2D_t, SetSolutionFromEqn_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/advection_diffusion_2d_t.html#boundprocedure-settimeintegrator~5'>SetTimeIntegrator</a></strong>  => SetTimeIntegrator_withChar </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-sourcemethod~3'>SourceMethod</a></strong>  => sourcemethod_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-updategrk2~2'>UpdateGRK2</a></strong>  => UpdateGRK2_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-updategrk3~2'>UpdateGRK3</a></strong>  => UpdateGRK3_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-updategrk4~2'>UpdateGRK4</a></strong>  => UpdateGRK4_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d.html#boundprocedure-updatesolution~2'>UpdateSolution</a></strong>  => UpdateSolution_DGModel2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-writemodel~2'>WriteModel</a></strong>  => Write_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel2d_t.html#boundprocedure-writetecplot~2'>WriteTecplot</a></strong>  => WriteTecplot_DGModel2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/advection_diffusion_2d_t.html#boundprocedure-entropy_func~4'>entropy_func</a></strong>  => entropy_func_advection_diffusion_2d_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux1d'>flux1D</a></strong>  => flux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/advection_diffusion_2d_t.html#boundprocedure-flux2d~2'>flux2d</a></strong>  => flux2d_advection_diffusion_2d_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux3d'>flux3D</a></strong>  => flux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc1d_nonormalflow'>hbc1d_NoNormalFlow</a></strong>  => hbc1d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc1d_prescribed'>hbc1d_Prescribed</a></strong>  => hbc1d_Prescribed_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc1d_radiation'>hbc1d_Radiation</a></strong>  => hbc1d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc2d_nonormalflow'>hbc2d_NoNormalFlow</a></strong>  => hbc2d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc2d_prescribed'>hbc2d_Prescribed</a></strong>  => hbc2d_Prescribed_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc2d_radiation'>hbc2d_Radiation</a></strong>  => hbc2d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc3d_nonormalflow'>hbc3d_NoNormalFlow</a></strong>  => hbc3d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc3d_prescribed'>hbc3d_Prescribed</a></strong>  => hbc3d_Prescribed_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-hbc3d_radiation'>hbc3d_Radiation</a></strong>  => hbc3d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc1d_nonormalflow'>pbc1d_NoNormalFlow</a></strong>  => pbc1d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc1d_prescribed'>pbc1d_Prescribed</a></strong>  => pbc1d_Prescribed_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc1d_radiation'>pbc1d_Radiation</a></strong>  => pbc1d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc2d_nonormalflow'>pbc2d_NoNormalFlow</a></strong>  => pbc2d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc2d_prescribed'>pbc2d_Prescribed</a></strong>  => pbc2d_Prescribed_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc2d_radiation'>pbc2d_Radiation</a></strong>  => pbc2d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc3d_nonormalflow'>pbc3d_NoNormalFlow</a></strong>  => pbc3d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc3d_prescribed'>pbc3d_Prescribed</a></strong>  => pbc3d_Prescribed_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pbc3d_radiation'>pbc3d_Radiation</a></strong>  => pbc3d_Generic_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux1d'>riemannflux1d</a></strong>  => riemannflux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/advection_diffusion_2d_t.html#boundprocedure-riemannflux2d~3'>riemannflux2d</a></strong>  => riemannflux2d_advection_diffusion_2d_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux3d'>riemannflux3d</a></strong>  => riemannflux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source1d'>source1d</a></strong>  => source1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source2d'>source2d</a></strong>  => source2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source3d'>source3d</a></strong>  => source3d_Model </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+ 
+    <section>
+    <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-entropy_func_advection_diffusion_2d_t"></span><h3>public pure function <a href='../proc/entropy_func_advection_diffusion_2d_t.html'>entropy_func_advection_diffusion_2d_t</a>(this, s) result(e)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_2d_t.html'>advection_diffusion_2d_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%solution%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-flux2d_advection_diffusion_2d_t"></span><h3>public pure function <a href='../proc/flux2d_advection_diffusion_2d_t.html'>flux2d_advection_diffusion_2d_t</a>(this, s, dsdx) result(flux)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_2d_t.html'>advection_diffusion_2d_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%solution%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%solution%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%solution%nvar,1:2)</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-riemannflux2d_advection_diffusion_2d_t"></span><h3>public pure function <a href='../proc/riemannflux2d_advection_diffusion_2d_t.html'>riemannflux2d_advection_diffusion_2d_t</a>(this, sL, sR, dsdx, nhat) result(flux)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_2d_t.html'>advection_diffusion_2d_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+  </div>
+  </div>
+
+    </section>
+    <br>
+
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-03-05 21:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
