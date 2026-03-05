@@ -1,23 +1,32 @@
 steps:
-  - label: ":AMD MI210: Build & Test"
-    key: "build-mi210"
+  - label: ":AMD MI210: Build & Test (Coverage)"
+    key: "build-test-mi210"
     command: |
       source /opt/spack-environment/activate.sh
+      export WORKSPACE=/workspace
       mkdir -p /workspace/build
       cd /workspace/build
-      set -x
       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
-            -DCMAKE_BUILD_TYPE="debug" \
+            -DCMAKE_BUILD_TYPE="coverage" \
             -DSELF_ENABLE_GPU=ON \
+            -DSELF_GPU_BACKEND=HIP \
             -DSELF_ENABLE_TESTING=ON \
             -DCMAKE_HIP_ARCHITECTURES="gfx90a" \
+            -DGPU_TARGETS="gfx90a" \
             -DSELF_ENABLE_EXAMPLES=ON \
-            -DSELF_ENABLE_INTERFACE=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             /workspace/
-      set +x
       make -j
+      lcov --capture --initial \
+           --directory /workspace/build/src/ \
+           --output-file /workspace/initial.info
       ctest --test-dir /workspace/build --output-on-failure
+      lcov --capture \
+           --directory /workspace/build/src/ \
+           --output-file /workspace/ctest-capture.info
+      lcov --add-tracefile /workspace/initial.info \
+           --add-tracefile /workspace/ctest-capture.info \
+           --output-file /workspace/coverage.info
     env:
       slurm_partition: "main"
       slurm_gres: "gpu:mi210:2"
@@ -26,6 +35,21 @@ steps:
       slurm_ntasks: 2
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
-      WORKSPACE: "/workspace"
+    agents:
+      queue: "galapagos"
+
+  - label: ":codecov: Upload Coverage"
+    key: "upload-coverage"
+    depends_on: "build-test-mi210"
+    command: |
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      chmod +x codecov
+      ./codecov -t "$${CODECOV_TOKEN}" \
+                -f "$${BUILDKITE_BUILD_CHECKOUT_PATH}/coverage.info" \
+                -F buildkite-rocm-mi210
+    plugins:
+      - cluster-secrets#v1.0.1:
+          env:
+            CODECOV_TOKEN: CODECOV_TOKEN
     agents:
       queue: "galapagos"
