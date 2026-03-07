@@ -1,0 +1,26 @@
+spack:
+  specs:
+  - cmake@3.30.2
+  - feq-parse@2.2.2
+  - openmpi@5.0.2
+  - hdf5@1.14.3 +fortran +mpi
+
+  container:
+    # Select the format of the recipe e.g. docker,
+    # singularity or anything else that is currently supported
+    format: docker
+
+    # Sets the base images for the stages where Spack builds the
+    # software or where the software gets installed after being built..
+    images:
+      os: "ubuntu:22.04 "
+      spack: develop
+
+    # Labels for the image
+    labels:
+      app: "self"
+      mpi: "openmpi@5.0.2"
+      platform: "x86_64"
+      gpu: "none"
+      hdf5: "1.14.3"
+      feqparse: "2.2.2"
