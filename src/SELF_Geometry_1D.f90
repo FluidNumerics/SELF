@@ -32,13 +32,13 @@ module SELF_Geometry_1D
   use SELF_Scalar_1D
   use SELF_SupportRoutines
   use SELF_Mesh_1D
+  use SELF_Geometry
 
   implicit none
 
-  type,public :: Geometry1D
+  type,extends(SEMGeometry),public :: Geometry1D
     type(Scalar1D) :: x ! Physical Positions
     type(Scalar1D) :: dxds ! Conversion from computational to physical space
-    integer :: nElem
 
   contains
 
@@ -53,38 +53,38 @@ module SELF_Geometry_1D
 
 contains
 
-  subroutine Init_Geometry1D(myGeom,interp,nElem)
+  subroutine Init_Geometry1D(this,interp,nElem)
     implicit none
-    class(Geometry1D),intent(out) :: myGeom
+    class(Geometry1D),intent(out) :: this
     type(Lagrange),pointer,intent(in) :: interp
     integer,intent(in) :: nElem
 
-    myGeom%nElem = nElem
+    this%nElem = nElem
 
-    call myGeom%x%Init(interp=interp, &
-                       nVar=1, &
-                       nElem=nElem)
+    call this%x%Init(interp=interp, &
+                     nVar=1, &
+                     nElem=nElem)
 
-    call myGeom%dxds%Init(interp=interp, &
-                          nVar=1, &
-                          nElem=nElem)
+    call this%dxds%Init(interp=interp, &
+                        nVar=1, &
+                        nElem=nElem)
 
   endsubroutine Init_Geometry1D
 
-  subroutine Free_Geometry1D(myGeom)
+  subroutine Free_Geometry1D(this)
     implicit none
-    class(Geometry1D),intent(inout) :: myGeom
+    class(Geometry1D),intent(inout) :: this
 
-    call myGeom%x%Free()
-    call myGeom%dxds%Free()
+    call this%x%Free()
+    call this%dxds%Free()
 
   endsubroutine Free_Geometry1D
 
-  subroutine GenerateFromMesh_Geometry1D(myGeom,mesh)
+  subroutine GenerateFromMesh_Geometry1D(this,mesh)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
     implicit none
-    class(Geometry1D),intent(inout) :: myGeom
+    class(Geometry1D),intent(inout) :: this
     type(Mesh1D),intent(in) :: mesh
     ! Local
     integer :: iel,i,nid
@@ -92,8 +92,8 @@ contains
     type(Scalar1D) :: xMesh
 
     call meshToModel%Init(mesh%nGeo,mesh%quadrature, &
-                          myGeom%x%interp%N, &
-                          myGeom%x%interp%controlNodeType)
+                          this%x%interp%N, &
+                          this%x%interp%controlNodeType)
 
     call xMesh%Init(meshToModel, &
                     1,mesh%nElem)
@@ -108,11 +108,11 @@ contains
     enddo
 
     ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    call xMesh%GridInterp(myGeom%x%interior)
-    call myGeom%x%UpdateDevice()
-    call myGeom%x%BoundaryInterp()
+    call xMesh%GridInterp(this%x%interior)
+    call this%x%UpdateDevice()
+    call this%x%BoundaryInterp()
 
-    call myGeom%CalculateMetricTerms()
+    call this%CalculateMetricTerms()
 
     call xMesh%Free()
 
@@ -120,19 +120,19 @@ contains
 
   endsubroutine GenerateFromMesh_Geometry1D
 
-  subroutine CalculateMetricTerms_Geometry1D(myGeom)
+  subroutine CalculateMetricTerms_Geometry1D(this)
     implicit none
-    class(Geometry1D),intent(inout) :: myGeom
+    class(Geometry1D),intent(inout) :: this
 
-    call myGeom%x%Derivative(myGeom%dxds%interior)
-    call myGeom%dxds%UpdateDevice()
-    call myGeom%dxds%BoundaryInterp()
+    call this%x%Derivative(this%dxds%interior)
+    call this%dxds%UpdateDevice()
+    call this%dxds%BoundaryInterp()
 
   endsubroutine CalculateMetricTerms_Geometry1D
 
-  subroutine Write_Geometry1D(myGeom,fileName)
+  subroutine Write_Geometry1D(this,fileName)
     implicit none
-    class(Geometry1D),intent(in) :: myGeom
+    class(Geometry1D),intent(in) :: this
     character(*),optional,intent(in) :: fileName
     ! Local
     integer(HID_T) :: fileId
@@ -150,16 +150,16 @@ contains
     call CreateGroup_HDF5(fileId,'/quadrature')
 
     call WriteArray_HDF5(fileId,'/quadrature/xi', &
-                         myGeom%x%interp%controlPoints)
+                         this%x%interp%controlPoints)
 
     call WriteArray_HDF5(fileId,'/quadrature/weights', &
-                         myGeom%x%interp%qWeights)
+                         this%x%interp%qWeights)
 
     call WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                         myGeom%x%interp%dgMatrix)
+                         this%x%interp%dgMatrix)
 
     call WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                         myGeom%x%interp%dMatrix)
+                         this%x%interp%dMatrix)
 
     call CreateGroup_HDF5(fileId,'/mesh')
 
@@ -167,13 +167,13 @@ contains
 
     call CreateGroup_HDF5(fileId,'/mesh/boundary')
 
-    call WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom%x%interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/x',this%x%interior)
 
-    call WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom%dxds%interior)
+    call WriteArray_HDF5(fileId,'/mesh/interior/dxds',this%dxds%interior)
 
-    call WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom%x%boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/x',this%x%boundary)
 
-    call WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom%dxds%boundary)
+    call WriteArray_HDF5(fileId,'/mesh/boundary/dxds',this%dxds%boundary)
 
     call Close_HDF5(fileId)
 

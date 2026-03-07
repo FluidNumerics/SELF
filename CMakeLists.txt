@@ -1,28 +1,28 @@
-#  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
-# 
+#  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#
 #  Maintainers : support@fluidnumerics.com
 #  Official Repository : https://github.com/FluidNumerics/self/
-# 
+#
 #  Copyright © 2024 Fluid Numerics LLC
-# 
+#
 #  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-# 
+#
 #  1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-# 
+#
 #  2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
 #     the documentation and/or other materials provided with the distribution.
-# 
+#
 #  3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
 #     this software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 #  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 #  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 #  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 #  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 #  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-#  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+#
+#  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 cmake_minimum_required(VERSION 3.21)
 cmake_policy(VERSION 3.21...3.27)
@@ -43,6 +43,7 @@ set_property(CACHE SELF_GPU_BACKEND PROPERTY STRINGS AUTO CUDA HIP)
 
 option(SELF_REQUIRE_GPU_AWARE_MPI "Require GPU-aware MPI when building with GPU support. Set OFF to downgrade the check to a warning. (Default ON)"  ON)
 option(SELF_ENABLE_DOUBLE_PRECISION "Option to enable double precision for floating point arithmetic. (Default On)"  ON)
+option(SELF_ENABLE_INTERFACE "Option to enable Python interface. (Default Off)"  OFF)
 
 set(SELF_MPIEXEC_NUMPROCS "2" CACHE STRING "The number of MPI ranks to use to launch MPI tests. Only used when launching test programs via ctest.")
 set(SELF_MPIEXEC_OPTIONS "" CACHE STRING "Any additional options, such as binding options, to use for MPI tests.Only used when launching test programs via ctest. Defaults to nothing")
@@ -59,7 +60,7 @@ FortranCInterface_VERIFY()
 if(NOT FortranCInterface_VERIFIED_C)
 	message(FATAL_ERROR "Fortran compiler must support C Interface")
 endif(NOT FortranCInterface_VERIFIED_C)
-	
+
 if(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     MESSAGE(FATAL_ERROR "Fortran compiler does not support F90")
 endif(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
@@ -135,11 +136,6 @@ find_package(MPI COMPONENTS Fortran C REQUIRED)
 
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)
-
-# # JSON-Fortran
-# find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
-# find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
-
 
 # FEQ-Parse
 find_library(FEQPARSE_LIBRARIES NAMES feqparse REQUIRED)
@@ -257,19 +253,23 @@ endif()
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
-# link_directories(${CMAKE_BINARY_DIR}/src)
+
+if(SELF_ENABLE_INTERFACE)
+    # JSON-Fortran
+    find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
+    find_path(JSONFORTRAN_INCLUDE_DIRS json_module.mod)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/src/python)
+endif()
 
 if(SELF_ENABLE_TESTING)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/test)
-    if(SELF_ENABLE_EXAMPLES)
-        add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
-    endif()
-else()
-    if(SELF_ENABLE_EXAMPLES)
-        enable_testing()
-        add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
-    endif()
+endif()
+
+if(SELF_ENABLE_EXAMPLES)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
 endif()
 
 
+# Share / etc resources
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/share DESTINATION ${CMAKE_INSTALL_PREFIX})

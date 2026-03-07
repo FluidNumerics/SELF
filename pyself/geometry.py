@@ -2,7 +2,7 @@
 #
 
 import pyself.lagrange as lagrange
-
+import numpy as np
 
 # class semline:
 #     def __init__(self):
@@ -27,7 +27,7 @@ import pyself.lagrange as lagrange
 
 #         if 'controlgrid' in list(f.keys()):
 
-#             d = f['controlgrid/geometry/x/interior'] 
+#             d = f['controlgrid/geometry/x/interior']
 #             self.nElem = d.shape[0]
 #             nvar = d.shape[1]
 #             N = d.shape[2]
@@ -36,9 +36,9 @@ import pyself.lagrange as lagrange
 #         else:
 #             print(f"Error: /controlgrid group not found in {hdf5File}.")
 #             return 1
-        
+
 #         if 'targetgrid' in list(f.keys()):
-#             d = f['targetgrid/geometry/x/interior'] 
+#             d = f['targetgrid/geometry/x/interior']
 #             self.nElem = d.shape[0]
 #             nvar = d.shape[1]
 #             N = d.shape[2]
@@ -54,13 +54,27 @@ class semquad:
     def __init__(self):
 
         self.interp = lagrange.interp()
-        self.nElem = 0 # Number of elements
-        self.x = None # physical x-coordinates at quadrature points
-        self.y = None # physical y-coordinates at quadrature points
-        # self.dxds = None # Covariant basis vectors at quadrature points
-        # self.dsdx = None # Contravariant basis vectors at quadrature points
-        # self.J = None # Jacobian at quadrature points
-        self.daskChunkSize=1000 # number of elements per dask chunk
+        self.nElem = 0  # Number of elements
+        self.x = None  # physical x-coordinates at quadrature points
+        self.x_name = "x"
+        self.x_units = None
+        self.y = None  # physical y-coordinates at quadrature points
+        self.y_name = "y"
+        self.y_units = None
+
+        self.daskChunkSize = 1000  # number of elements per dask chunk
+
+    def set_coordinates(self, x: np.array, y: np.array):
+        self.x = da.from_array(x, chunks=(self.daskChunkSize, N, N))
+        self.y = da.from_array(y, chunks=(self.daskChunkSize, N, N))
+        self.nElem = x.shape[0]
+
+    def set_units(self, units):
+        self.x_units = units
+        self.y_units = units
+
+    def set_interpolant(self, interp: lagrange.interp):
+        self.interp = interp
 
     def load(self, hdf5File):
         """Loads in interpolant and geometry data from SELF model output"""
@@ -69,20 +83,19 @@ class semquad:
 
         self.interp.load(hdf5File)
 
-        f = h5py.File(hdf5File, 'r')
-        if 'controlgrid' in list(f.keys()):
+        f = h5py.File(hdf5File, "r")
+        if "controlgrid" in list(f.keys()):
 
-            d = f['controlgrid/geometry/x_dim1'] 
+            d = f["controlgrid/geometry/x_dim1"]
             self.nElem = d.shape[0]
             N = d.shape[2]
-            self.x = da.from_array(d, chunks=(self.daskChunkSize,N,N))
-            d = f['controlgrid/geometry/x_dim2'] 
-            self.y = da.from_array(d, chunks=(self.daskChunkSize,N,N))
+            self.x = da.from_array(d, chunks=(self.daskChunkSize, N, N))
+            d = f["controlgrid/geometry/x_dim2"]
+            self.y = da.from_array(d, chunks=(self.daskChunkSize, N, N))
             self.x_name = "x"
-            self.x_units = f['controlgrid/geometry/metadata/units/1']
+            self.x_units = f["controlgrid/geometry/metadata/units/1"]
             self.y_name = "y"
-            self.y_units = f['controlgrid/geometry/metadata/units/1']
-
+            self.y_units = f["controlgrid/geometry/metadata/units/1"]
 
         else:
             print(f"Error: /controlgrid group not found in {hdf5File}.")
@@ -95,14 +108,32 @@ class semhex:
     def __init__(self):
 
         self.interp = lagrange.interp()
-        self.nElem = 0 # Number of elements
-        self.x = None # physical x-coordinates at quadrature points
-        self.y = None # physical y-coordinates at quadrature points
-        self.z = None # physical z-coordinates at quadrature points
-        # self.dxds = None # Covariant basis vectors at quadrature points
-        # self.dsdx = None # Contravariant basis vectors at quadrature points
-        # self.J = None # Jacobian at quadrature points
-        self.daskChunkSize=1000 # number of elements per dask chunk
+        self.nElem = 0  # Number of elements
+        self.x = None  # physical x-coordinates at quadrature points
+        self.x_name = "x"
+        self.x_units = None
+        self.y = None  # physical y-coordinates at quadrature points
+        self.y_name = "y"
+        self.y_units = None
+        self.z = None  # physical z-coordinates at quadrature points
+        self.z_name = "z"
+        self.z_units = None
+
+        self.daskChunkSize = 1000  # number of elements per dask chunk
+
+    def set_coordinates(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.nElem = x.shape[0]
+
+    def set_units(self, units):
+        self.x_units = units
+        self.y_units = units
+        self.z_units = units
+
+    def set_interpolant(self, interp: lagrange.interp):
+        self.interp = interp
 
     def load(self, hdf5File):
         """Loads in interpolant and geometry data from SELF model output"""
@@ -111,24 +142,23 @@ class semhex:
 
         self.interp.load(hdf5File)
 
-        f = h5py.File(hdf5File, 'r')
-        if 'controlgrid' in list(f.keys()):
+        f = h5py.File(hdf5File, "r")
+        if "controlgrid" in list(f.keys()):
 
-            d = f['controlgrid/geometry/x_dim1'] 
+            d = f["controlgrid/geometry/x_dim1"]
             self.nElem = d.shape[0]
             N = d.shape[2]
-            self.x = da.from_array(d, chunks=(self.daskChunkSize,N,N,N))
-            d = f['controlgrid/geometry/x_dim2'] 
-            self.y = da.from_array(d, chunks=(self.daskChunkSize,N,N,N))
-            d = f['controlgrid/geometry/x_dim3'] 
-            self.z = da.from_array(d, chunks=(self.daskChunkSize,N,N,N))
+            self.x = da.from_array(d, chunks=(self.daskChunkSize, N, N, N))
+            d = f["controlgrid/geometry/x_dim2"]
+            self.y = da.from_array(d, chunks=(self.daskChunkSize, N, N, N))
+            d = f["controlgrid/geometry/x_dim3"]
+            self.z = da.from_array(d, chunks=(self.daskChunkSize, N, N, N))
             self.x_name = "x"
-            self.x_units = f['controlgrid/geometry/metadata/units/1']
+            self.x_units = f["controlgrid/geometry/metadata/units/1"]
             self.y_name = "y"
-            self.y_units = f['controlgrid/geometry/metadata/units/1']
+            self.y_units = f["controlgrid/geometry/metadata/units/1"]
             self.y_name = "z"
-            self.y_units = f['controlgrid/geometry/metadata/units/1']
-
+            self.y_units = f["controlgrid/geometry/metadata/units/1"]
 
         else:
             print(f"Error: /controlgrid group not found in {hdf5File}.")

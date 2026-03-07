@@ -31,6 +31,7 @@ module SELF_Model
   use SELF_HDF5
   use HDF5
   use FEQParse
+  use SELF_BoundaryConditions
 
 #include "SELF_Macros.h"
 
@@ -107,10 +108,13 @@ module SELF_Model
     logical :: prescribed_bcs_enabled = .true.
     logical :: tecplot_enabled = .true.
     integer :: nvar
+    integer :: ndim
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
 
   contains
+
+    procedure(SELF_FreeModel),deferred :: Free
 
     procedure :: IncrementIOCounter
 
@@ -151,28 +155,6 @@ module SELF_Model
     procedure :: source2d => source2d_Model
     procedure :: source3d => source3d_Model
 
-    ! Boundary condition functions (hyperbolic)
-    procedure :: hbc1d_Prescribed => hbc1d_Prescribed_Model
-    procedure :: hbc1d_Radiation => hbc1d_Generic_Model
-    procedure :: hbc1d_NoNormalFlow => hbc1d_Generic_Model
-    procedure :: hbc2d_Prescribed => hbc2d_Prescribed_Model
-    procedure :: hbc2d_Radiation => hbc2d_Generic_Model
-    procedure :: hbc2d_NoNormalFlow => hbc2d_Generic_Model
-    procedure :: hbc3d_Prescribed => hbc3d_Prescribed_Model
-    procedure :: hbc3d_Radiation => hbc3d_Generic_Model
-    procedure :: hbc3d_NoNormalFlow => hbc3d_Generic_Model
-
-    ! Boundary condition functions (parabolic)
-    procedure :: pbc1d_Prescribed => pbc1d_Prescribed_Model
-    procedure :: pbc1d_Radiation => pbc1d_Generic_Model
-    procedure :: pbc1d_NoNormalFlow => pbc1d_Generic_Model
-    procedure :: pbc2d_Prescribed => pbc2d_Prescribed_Model
-    procedure :: pbc2d_Radiation => pbc2d_Generic_Model
-    procedure :: pbc2d_NoNormalFlow => pbc2d_Generic_Model
-    procedure :: pbc3d_Prescribed => pbc3d_Prescribed_Model
-    procedure :: pbc3d_Radiation => pbc3d_Generic_Model
-    procedure :: pbc3d_NoNormalFlow => pbc3d_Generic_Model
-
     procedure :: ReportEntropy => ReportEntropy_Model
     procedure :: ReportMetrics => ReportMetrics_Model
     procedure :: ReportUserMetrics => ReportUserMetrics_Model
@@ -191,6 +173,14 @@ module SELF_Model
     procedure :: GetSimulationTime
 
   endtype Model
+
+  interface
+    subroutine SELF_FreeModel(this)
+      import Model
+      implicit none
+      class(Model),intent(inout) :: this
+    endsubroutine SELF_FreeModel
+  endinterface
 
   interface
     subroutine SELF_timeIntegrator(this,tn)
@@ -257,6 +247,10 @@ module SELF_Model
   endinterface
 
 contains
+
+! //////////////////////////////////////////// !
+!  Model Methods
+! ////////////////////////////////////////////// !
 
   subroutine IncrementIOCounter(this)
     implicit none
@@ -457,174 +451,6 @@ contains
     enddo
 
   endfunction source3d_Model
-
-  pure function hbc1d_Generic_Model(this,s,nhat) result(exts)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
-
-  endfunction hbc1d_Generic_Model
-
-  pure function hbc1d_Prescribed_Model(this,x,t) result(exts)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: x
-    real(prec),intent(in) :: t
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
-
-  endfunction hbc1d_Prescribed_Model
-
-  pure function hbc2d_Generic_Model(this,s,nhat) result(exts)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:2)
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
-
-  endfunction hbc2d_Generic_Model
-
-  pure function hbc2d_Prescribed_Model(this,x,t) result(exts)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: x(1:2)
-    real(prec),intent(in) :: t
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
-
-  endfunction hbc2d_Prescribed_Model
-
-  pure function hbc3d_Generic_Model(this,s,nhat) result(exts)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:3)
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
-
-  endfunction hbc3d_Generic_Model
-
-  pure function hbc3d_Prescribed_Model(this,x,t) result(exts)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: x(1:3)
-    real(prec),intent(in) :: t
-    real(prec) :: exts(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      exts(ivar) = 0.0_prec
-    enddo
-
-  endfunction hbc3d_Prescribed_Model
-
-  pure function pbc1d_Generic_Model(this,dsdx,nhat) result(extDsdx)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: dsdx(1:this%nvar)
-    real(prec),intent(in) :: nhat
-    real(prec) :: extDsdx(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      extDsdx(ivar) = dsdx(ivar)
-    enddo
-
-  endfunction pbc1d_Generic_Model
-
-  pure function pbc1d_Prescribed_Model(this,x,t) result(extDsdx)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: x
-    real(prec),intent(in) :: t
-    real(prec) :: extDsdx(1:this%nvar)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      extDsdx(ivar) = 0.0_prec
-    enddo
-
-  endfunction pbc1d_Prescribed_Model
-
-  pure function pbc2d_Generic_Model(this,dsdx,nhat) result(extDsdx)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
-    real(prec),intent(in) :: nhat(1:2)
-    real(prec) :: extDsdx(1:this%nvar,1:2)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:2) = dsdx(ivar,1:2)
-    enddo
-
-  endfunction pbc2d_Generic_Model
-
-  pure function pbc2d_Prescribed_Model(this,x,t) result(extDsdx)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: x(1:2)
-    real(prec),intent(in) :: t
-    real(prec) :: extDsdx(1:this%nvar,1:2)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:2) = 0.0_prec
-    enddo
-
-  endfunction pbc2d_Prescribed_Model
-
-  pure function pbc3d_Generic_Model(this,dsdx,nhat) result(extDsdx)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
-    real(prec),intent(in) :: nhat(1:3)
-    real(prec) :: extDsdx(1:this%nvar,1:3)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:3) = dsdx(ivar,1:3)
-    enddo
-
-  endfunction pbc3d_Generic_Model
-
-  pure function pbc3d_Prescribed_Model(this,x,t) result(extDsdx)
-    class(Model),intent(in) :: this
-    real(prec),intent(in) :: x(1:3)
-    real(prec),intent(in) :: t
-    real(prec) :: extDsdx(1:this%nvar,1:3)
-    ! Local
-    integer :: ivar
-
-    do ivar = 1,this%nvar
-      extDsdx(ivar,1:3) = 0.0_prec
-    enddo
-
-  endfunction pbc3d_Prescribed_Model
 
   subroutine SetTimeIntegrator_withChar(this,integrator)
     !! Sets the time integrator method, using a character input

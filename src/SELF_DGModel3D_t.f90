@@ -98,6 +98,7 @@ contains
 
     this%mesh => mesh
     this%geometry => geometry
+    this%ndim = 3
     call this%SetNumberOfVariables()
 
     call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
@@ -112,6 +113,8 @@ contains
     call this%solutionGradient%AssociateGeometry(geometry)
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%boundaryconditions%Init()
 
     call this%AdditionalInit()
 
@@ -147,6 +150,7 @@ contains
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
+    call this%boundaryconditions%Free()
     call this%AdditionalFree()
 
   endsubroutine Free_DGModel3D_t
@@ -440,50 +444,31 @@ contains
     class(DGModel3D_t),intent(inout) :: this
     ! local
     integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: nhat(1:3),x(1:3)
+    real(prec) :: nhat(1:3),x(1:3),s(1:this%nvar),dsdx(1:this%nvar,1:3)
+    type(SELF_BoundaryCondition),pointer :: bc
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
+    do iel = 1,this%mesh%nElem
+      do k = 1,6
 
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
+        if(e2 == 0) then
+          bc => this%boundaryconditions%GetBCForID(bcid)
 
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
+          do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1)
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+            x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
+            s = this%solution%boundary(i,j,k,iEl,1:this%nvar)
+            dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
 
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Prescribed(x,this%t)
-            enddo
+            this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
+              bc%bcFunction(s,dsdx,x,this%t,nhat,this%nvar,3)
           enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Radiation(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
         endif
-      endif
 
+      enddo
     enddo
 
   endsubroutine setboundarycondition_DGModel3D_t
@@ -496,55 +481,28 @@ contains
     class(DGModel3D_t),intent(inout) :: this
     ! local
     integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: dsdx(1:this%nvar,1:3)
-    real(prec) :: nhat(1:3),x(1:3)
+    real(prec) :: nhat(1:3),x(1:3),s(1:this%nvar),dsdx(1:this%nvar,1:3)
+    type(SELF_BoundaryCondition),pointer :: bc
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
+    do iel = 1,this%mesh%nElem
+      do k = 1,6
+        bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
+        e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
 
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
+        if(e2 == 0) then
+          bc => this%boundaryconditions%GetBCForID(bcid)
+          do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1)
+            ! Get the boundary normals on cell edges from the mesh geometry
+            nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
+            x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
+            s = this%solution%boundary(i,j,k,iEl,1:this%nvar)
+            dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
 
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Prescribed(x,this%t)
-            enddo
+            this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
+              bc%bcgFunction(s,dsdx,x,this%t,nhat,this%nvar,3)
           enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Radiation(dsdx,nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_NoNormalFlow(dsdx,nhat)
-            enddo
-          enddo
-
         endif
-      endif
-
+      enddo
     enddo
 
   endsubroutine setgradientboundarycondition_DGModel3D_t

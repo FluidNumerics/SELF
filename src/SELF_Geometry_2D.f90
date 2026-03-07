@@ -34,17 +34,17 @@ module SELF_Geometry_2D
   use SELF_Tensor_2D
   use SELF_SupportRoutines
   use SELF_Mesh_2D
+  use SELF_Geometry
 
   implicit none
 
-  type,public :: SEMQuad
+  type,extends(SEMGeometry),public :: SEMQuad
     type(Vector2D) :: x ! Physical positions
     type(Tensor2D) :: dxds ! Covariant basis vectors
     type(Tensor2D) :: dsdx ! Contavariant basis vectors
     type(Vector2D) :: nHat ! Normal Vectors pointing across coordinate lines
     type(Scalar2D) :: nScale ! Boundary scale
     type(Scalar2D) :: J ! Jacobian of the transformation
-    integer :: nElem
   contains
 
     procedure,public :: Init => Init_SEMQuad
@@ -58,58 +58,58 @@ module SELF_Geometry_2D
 
 contains
 
-  subroutine Init_SEMQuad(myGeom,interp,nElem)
+  subroutine Init_SEMQuad(this,interp,nElem)
     implicit none
-    class(SEMQuad),intent(out) :: myGeom
+    class(SEMQuad),intent(out) :: this
     type(Lagrange),pointer,intent(in) :: interp
     integer,intent(in) :: nElem
 
-    myGeom%nElem = nElem
+    this%nElem = nElem
 
-    call myGeom%x%Init(interp=interp, &
-                       nVar=1, &
-                       nElem=nElem)
+    call this%x%Init(interp=interp, &
+                     nVar=1, &
+                     nElem=nElem)
 
-    call myGeom%x%meta(1)%SetName("x")
+    call this%x%meta(1)%SetName("x")
 
-    call myGeom%dxds%Init(interp=interp, &
+    call this%dxds%Init(interp=interp, &
+                        nVar=1, &
+                        nElem=nElem)
+
+    call this%dsdx%Init(interp=interp, &
+                        nVar=1, &
+                        nElem=nElem)
+
+    call this%nHat%Init(interp=interp, &
+                        nVar=1, &
+                        nElem=nElem)
+
+    call this%nScale%Init(interp=interp, &
                           nVar=1, &
                           nElem=nElem)
 
-    call myGeom%dsdx%Init(interp=interp, &
-                          nVar=1, &
-                          nElem=nElem)
-
-    call myGeom%nHat%Init(interp=interp, &
-                          nVar=1, &
-                          nElem=nElem)
-
-    call myGeom%nScale%Init(interp=interp, &
-                            nVar=1, &
-                            nElem=nElem)
-
-    call myGeom%J%Init(interp=interp, &
-                       nVar=1, &
-                       nElem=nElem)
+    call this%J%Init(interp=interp, &
+                     nVar=1, &
+                     nElem=nElem)
 
   endsubroutine Init_SEMQuad
 
-  subroutine Free_SEMQuad(myGeom)
+  subroutine Free_SEMQuad(this)
     implicit none
-    class(SEMQuad),intent(inout) :: myGeom
+    class(SEMQuad),intent(inout) :: this
 
-    call myGeom%x%Free()
-    call myGeom%dxds%Free()
-    call myGeom%dsdx%Free()
-    call myGeom%nHat%Free()
-    call myGeom%nScale%Free()
-    call myGeom%J%Free()
+    call this%x%Free()
+    call this%dxds%Free()
+    call this%dsdx%Free()
+    call this%nHat%Free()
+    call this%nScale%Free()
+    call this%J%Free()
 
   endsubroutine Free_SEMQuad
 
-  subroutine GenerateFromMesh_SEMQuad(myGeom,mesh)
+  subroutine GenerateFromMesh_SEMQuad(this,mesh)
     implicit none
-    class(SEMQuad),intent(inout) :: myGeom
+    class(SEMQuad),intent(inout) :: this
     type(Mesh2D),intent(in) :: mesh
     ! Local
     integer :: iel
@@ -119,8 +119,8 @@ contains
 
     call meshToModel%Init(mesh%nGeo, &
                           mesh%quadrature, &
-                          myGeom%x%interp%N, &
-                          myGeom%x%interp%controlNodeType)
+                          this%x%interp%N, &
+                          this%x%interp%controlNodeType)
 
     call xMesh%Init(meshToModel,1,mesh%nElem)
 
@@ -133,20 +133,20 @@ contains
       enddo
     enddo
 
-    call xMesh%GridInterp(myGeom%x%interior)
-    call myGeom%x%UpdateDevice()
-    call myGeom%x%BoundaryInterp() ! Boundary interp will run on GPU if enabled, hence why we close in update host/device
-    call myGeom%x%UpdateHost()
-    call myGeom%CalculateMetricTerms()
+    call xMesh%GridInterp(this%x%interior)
+    call this%x%UpdateDevice()
+    call this%x%BoundaryInterp() ! Boundary interp will run on GPU if enabled, hence why we close in update host/device
+    call this%x%UpdateHost()
+    call this%CalculateMetricTerms()
 
     call xMesh%Free()
     call meshToModel%Free()
 
   endsubroutine GenerateFromMesh_SEMQuad
 
-  subroutine CalculateContravariantBasis_SEMQuad(myGeom)
+  subroutine CalculateContravariantBasis_SEMQuad(this)
     implicit none
-    class(SEMQuad),intent(inout) :: myGeom
+    class(SEMQuad),intent(inout) :: this
     ! Local
     integer :: iEl,i,j,k
     real(prec) :: fac
@@ -155,104 +155,104 @@ contains
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
-    do iEl = 1,myGeom%nElem
-      do j = 1,myGeom%dxds%interp%N+1
-        do i = 1,myGeom%dxds%interp%N+1
+    do iEl = 1,this%nElem
+      do j = 1,this%dxds%interp%N+1
+        do i = 1,this%dxds%interp%N+1
 
-          myGeom%dsdx%interior(i,j,iel,1,1,1) = myGeom%dxds%interior(i,j,iel,1,2,2)
-          myGeom%dsdx%interior(i,j,iel,1,2,1) = -myGeom%dxds%interior(i,j,iel,1,1,2)
-          myGeom%dsdx%interior(i,j,iel,1,1,2) = -myGeom%dxds%interior(i,j,iel,1,2,1)
-          myGeom%dsdx%interior(i,j,iel,1,2,2) = myGeom%dxds%interior(i,j,iel,1,1,1)
+          this%dsdx%interior(i,j,iel,1,1,1) = this%dxds%interior(i,j,iel,1,2,2)
+          this%dsdx%interior(i,j,iel,1,2,1) = -this%dxds%interior(i,j,iel,1,1,2)
+          this%dsdx%interior(i,j,iel,1,1,2) = -this%dxds%interior(i,j,iel,1,2,1)
+          this%dsdx%interior(i,j,iel,1,2,2) = this%dxds%interior(i,j,iel,1,1,1)
 
         enddo
       enddo
     enddo
 
     ! Interpolate the contravariant tensor to the boundaries
-    call myGeom%dsdx%BoundaryInterp() ! Tensor boundary interp is not offloaded
+    call this%dsdx%BoundaryInterp() ! Tensor boundary interp is not offloaded
 
     ! Now, modify the sign of dsdx so that
-    ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-    do iEl = 1,myGeom%nElem
+    ! this % dsdx % boundary is equal to the outward pointing normal vector
+    do iEl = 1,this%nElem
       do k = 1,4
-        do i = 1,myGeom%J%interp%N+1
+        do i = 1,this%J%interp%N+1
           if(k == selfSide2D_East .or. k == selfSide2D_North) then
-            fac = sign(1.0_prec,myGeom%J%boundary(i,k,iEl,1))
+            fac = sign(1.0_prec,this%J%boundary(i,k,iEl,1))
           else
-            fac = -sign(1.0_prec,myGeom%J%boundary(i,k,iEl,1))
+            fac = -sign(1.0_prec,this%J%boundary(i,k,iEl,1))
           endif
 
           if(k == 1) then ! South
 
-            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
-                       myGeom%dsdx%boundary(i,k,iEl,1,2,2)**2)
+            mag = sqrt(this%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
+                       this%dsdx%boundary(i,k,iEl,1,2,2)**2)
 
-            myGeom%nScale%boundary(i,k,iEl,1) = mag
+            this%nScale%boundary(i,k,iEl,1) = mag
 
-            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
+            this%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*this%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
 
           elseif(k == 2) then ! East
 
-            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
-                       myGeom%dsdx%boundary(i,k,iEl,1,2,1)**2)
+            mag = sqrt(this%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
+                       this%dsdx%boundary(i,k,iEl,1,2,1)**2)
 
-            myGeom%nScale%boundary(i,k,iEl,1) = mag
+            this%nScale%boundary(i,k,iEl,1) = mag
 
-            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
+            this%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*this%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
 
           elseif(k == 3) then ! North
 
-            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
-                       myGeom%dsdx%boundary(i,k,iEl,1,2,2)**2)
+            mag = sqrt(this%dsdx%boundary(i,k,iEl,1,1,2)**2+ &
+                       this%dsdx%boundary(i,k,iEl,1,2,2)**2)
 
-            myGeom%nScale%boundary(i,k,iEl,1) = mag
+            this%nScale%boundary(i,k,iEl,1) = mag
 
-            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
+            this%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*this%dsdx%boundary(i,k,iEl,1,1:2,2)/mag
 
           elseif(k == 4) then ! West
 
-            mag = sqrt(myGeom%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
-                       myGeom%dsdx%boundary(i,k,iEl,1,2,1)**2)
+            mag = sqrt(this%dsdx%boundary(i,k,iEl,1,1,1)**2+ &
+                       this%dsdx%boundary(i,k,iEl,1,2,1)**2)
 
-            myGeom%nScale%boundary(i,k,iEl,1) = mag
+            this%nScale%boundary(i,k,iEl,1) = mag
 
-            myGeom%nHat%boundary(i,k,iEl,1,1:2) = &
-              fac*myGeom%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
+            this%nHat%boundary(i,k,iEl,1,1:2) = &
+              fac*this%dsdx%boundary(i,k,iEl,1,1:2,1)/mag
 
           endif
 
           ! Set the directionality for dsdx on the boundaries
-          myGeom%dsdx%boundary(i,k,iEl,1,1:2,1:2) = &
-            myGeom%dsdx%boundary(i,k,iEl,1,1:2,1:2)*fac
+          this%dsdx%boundary(i,k,iEl,1,1:2,1:2) = &
+            this%dsdx%boundary(i,k,iEl,1,1:2,1:2)*fac
 
         enddo
       enddo
     enddo
 
-    call myGeom%dsdx%UpdateDevice()
-    call myGeom%nHat%UpdateDevice()
-    call myGeom%nScale%UpdateDevice()
+    call this%dsdx%UpdateDevice()
+    call this%nHat%UpdateDevice()
+    call this%nScale%UpdateDevice()
 
   endsubroutine CalculateContravariantBasis_SEMQuad
 
-  subroutine CalculateMetricTerms_SEMQuad(myGeom)
+  subroutine CalculateMetricTerms_SEMQuad(this)
     implicit none
-    class(SEMQuad),intent(inout) :: myGeom
+    class(SEMQuad),intent(inout) :: this
 
-    call myGeom%x%Gradient(myGeom%dxds%interior)
-    call myGeom%dxds%BoundaryInterp() ! Tensor boundary interp is not offloaded to GPU
-    call myGeom%dxds%UpdateDevice()
+    call this%x%Gradient(this%dxds%interior)
+    call this%dxds%BoundaryInterp() ! Tensor boundary interp is not offloaded to GPU
+    call this%dxds%UpdateDevice()
 
-    call myGeom%dxds%Determinant(myGeom%J%interior)
+    call this%dxds%Determinant(this%J%interior)
 
-    call myGeom%J%UpdateDevice()
-    call myGeom%J%BoundaryInterp()
-    call myGeom%J%UpdateHost()
+    call this%J%UpdateDevice()
+    call this%J%BoundaryInterp()
+    call this%J%UpdateHost()
 
-    call myGeom%CalculateContravariantBasis()
+    call this%CalculateContravariantBasis()
 
   endsubroutine CalculateMetricTerms_SEMQuad
 

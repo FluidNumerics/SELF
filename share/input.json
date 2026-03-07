@@ -1,0 +1,58 @@
+{
+  "version": "v0.0.0",
+  "model_name": "linear-shallow-water-2d",
+  "geometry": {
+    "mesh_file": "mesh/Circle/Circle_mesh.h5",
+    "control_degree": 7,
+    "control_quadrature": "gauss",
+    "target_degree": 16,
+    "target_quadrature": "uniform",
+    "uniform_boundary_condition":"no_normal_flow"
+  },
+  "time_options": {
+    "integrator": "rk3",
+    "dt": 0.0025,
+    "cfl_max": 0.0,
+    "start_time": 0.0,
+    "duration": 30.0,
+    "io_interval": 0.05,
+    "update_interval": 50
+  },
+  "units": {
+    "time": "s",
+    "length": "m",
+    "mass": "kg"
+  },
+  "linear-shallow-water-2d": {
+    "environment": {
+      "g": 1.0,
+      "H": 1.0,
+      "Cd": 0.25,
+      "f0": 10.0,
+      "beta": 0.0
+    },
+    "initial_conditions": {
+      "geostrophic_balance": false,
+      "static_state": true,
+      "file": "",
+      "u": "",
+      "v": "",
+      "eta": ""
+    },
+    "boundary_conditions": {
+      "time_dependent": false,
+      "dt": 0.0,
+      "file": "",
+      "from_initial_conditions": false,
+      "u": "",
+      "v": "",
+      "eta": ""
+    },
+    "impulse_source_term": {
+      "amplitude": [0.0],
+      "spatial_width": [0.0],
+      "xc": [0.0],
+      "yc": [0.0]
+    }
+  }
+}
