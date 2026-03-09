@@ -61,9 +61,7 @@ contains
     type(MappedVector2D) :: df
     integer :: iside
     integer :: e2
-    character(LEN=255) :: WORKSPACE
     integer :: iel,j,i
-    integer(HID_T) :: fileId
     integer :: bcids(1:4)
 
     ! Create an interpolant

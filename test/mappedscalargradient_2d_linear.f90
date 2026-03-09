@@ -61,7 +61,6 @@ contains
     type(MappedVector2D) :: df
     character(LEN=255) :: WORKSPACE
     integer :: iel,j,i
-    integer(HID_T) :: fileId
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

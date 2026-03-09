@@ -64,7 +64,7 @@ contains
     integer :: i
     integer :: j
     integer :: k
-    integer :: e2,s2,bcid
+    integer :: e2
     integer :: bcids(1:6)
 
     ! Create an interpolant

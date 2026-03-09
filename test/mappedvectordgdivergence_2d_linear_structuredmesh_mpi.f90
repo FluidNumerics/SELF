@@ -59,7 +59,6 @@ contains
     type(SEMQuad),target :: geometry
     type(MappedVector2D) :: f
     type(MappedScalar2D) :: df
-    character(LEN=255) :: WORKSPACE
     integer :: i,j,iel,e2
     real(prec) :: nhat(1:2),nmag,fx,fy,diff
     integer :: bcids(1:4)
