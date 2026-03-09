@@ -142,13 +142,13 @@ contains
   subroutine UpdateHost_Vector2D_t(this)
     implicit none
     class(Vector2D_t),intent(inout) :: this
-    if (.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateHost_Vector2D_t
 
   subroutine UpdateDevice_Vector2D_t(this)
     implicit none
     class(Vector2D_t),intent(inout) :: this
-    if (.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Vector2D_t
 
   subroutine SetEquation_Vector2D_t(this,idir,ivar,eqnChar)

@@ -95,7 +95,7 @@ contains
     ! Local
     integer :: iVar
 
-    if (.false.) this%N = int(time) ! suppress unused-dummy-argument warning
+    if(.false.) this%N = int(time) ! suppress unused-dummy-argument warning
     do ivar = 1,this%nvar
       this%interior(:,:,ivar) = this%eqn(ivar)%evaluate(this%geometry%x%interior)
     enddo

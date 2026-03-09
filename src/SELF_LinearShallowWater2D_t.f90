@@ -193,7 +193,7 @@ contains
     flux(2,2) = this%g*s(3)
     flux(3,1) = this%H*s(1)
     flux(3,2) = this%H*s(2)
-    if (.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
+    if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux2d_LinearShallowWater2D_t
 
@@ -217,7 +217,7 @@ contains
     flux(1) = 0.5_prec*(this%g*(sL(3)+sR(3))+c*(unL-unR))*nhat(1)
     flux(2) = 0.5_prec*(this%g*(sL(3)+sR(3))+c*(unL-unR))*nhat(2)
     flux(3) = 0.5_prec*(this%H*(unL+unR)+c*(sL(3)-sR(3)))
-    if (.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
+    if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearShallowWater2D_t
 

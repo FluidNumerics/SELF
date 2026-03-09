@@ -145,7 +145,7 @@ contains
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
 
-    if (.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine sourcemethod_LinearEuler3D_t
 
@@ -174,7 +174,7 @@ contains
     flux(5,1) = this%c*this%c*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
     flux(5,2) = this%c*this%c*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
     flux(5,3) = this%c*this%c*this%rho0*s(4) ! pressure, y flux : rho0*c^2*w
-    if (.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
+    if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux3D_LinearEuler3D_t
 
@@ -215,7 +215,7 @@ contains
     fR(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
 
     flux(1:5) = 0.5_prec*(fL(1:5)+fR(1:5))+c*(sL(1:5)-sR(1:5))
-    if (.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
+    if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux3D_LinearEuler3D_t
 

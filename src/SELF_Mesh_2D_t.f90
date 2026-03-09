@@ -193,7 +193,7 @@ contains
   subroutine UpdateDevice_Mesh2D_t(this)
     implicit none
     class(Mesh2D_t),intent(inout) :: this
-    if (.false.) this%nElem = this%nElem ! CPU stub; suppress unused-dummy-argument warning
+    if(.false.) this%nElem = this%nElem ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Mesh2D_t
 
   subroutine ResetBoundaryConditionType_Mesh2D_t(this,bcid)

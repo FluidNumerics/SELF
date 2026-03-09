@@ -119,13 +119,13 @@ contains
   subroutine UpdateHost_Scalar2D_t(this)
     implicit none
     class(Scalar2D_t),intent(inout) :: this
-    if (.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateHost_Scalar2D_t
 
   subroutine UpdateDevice_Scalar2D_t(this)
     implicit none
     class(Scalar2D_t),intent(inout) :: this
-    if (.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Scalar2D_t
 
   subroutine BoundaryInterp_Scalar2D_t(this)

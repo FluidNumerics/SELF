@@ -278,20 +278,20 @@ contains
   subroutine AdditionalInit_Model(this)
     implicit none
     class(Model),intent(inout) :: this
-    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
+    if(.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine AdditionalInit_Model
 
   subroutine AdditionalFree_Model(this)
     implicit none
     class(Model),intent(inout) :: this
-    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
+    if(.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine AdditionalFree_Model
 
   subroutine AdditionalOutput_Model(this,fileid)
     implicit none
     class(Model),intent(inout) :: this
     integer(HID_T),intent(in) :: fileid
-    if (.false.) this%nvar = int(fileid) ! Default implementation; suppress unused-dummy-argument warning
+    if(.false.) this%nvar = int(fileid) ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine AdditionalOutput_Model
 
   subroutine PrintType_Model(this)
@@ -299,7 +299,7 @@ contains
     class(Model),intent(in) :: this
 
     print*,__FILE__//" : Model : No model type"
-    if (.false.) write(*,*) this%nvar ! suppress unused-dummy-argument warning
+    if(.false.) write(*,*) this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine PrintType_Model
 
@@ -314,7 +314,7 @@ contains
     implicit none
     class(Model),intent(inout) :: this
 
-    if (.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine PreTendency_Model
 
@@ -324,7 +324,7 @@ contains
     real(prec) :: e
 
     e = 0.0_prec
-    if (.false.) e = e + s(1) ! suppress unused-dummy-argument warning
+    if(.false.) e = e+s(1) ! suppress unused-dummy-argument warning
 
   endfunction entropy_func_Model
 
@@ -337,9 +337,9 @@ contains
     real(prec) :: flux(1:this%nvar)
 
     flux = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      flux = sL + sR + dsdx; flux(1) = flux(1) + nhat
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux = sL+sR+dsdx; flux(1) = flux(1)+nhat
+    endif
 
   endfunction riemannflux1d_Model
 
@@ -352,9 +352,9 @@ contains
     real(prec) :: flux(1:this%nvar)
 
     flux = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      flux = sL + sR; flux(1) = flux(1) + dsdx(1,1) + nhat(1)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux = sL+sR; flux(1) = flux(1)+dsdx(1,1)+nhat(1)
+    endif
 
   endfunction riemannflux2d_Model
 
@@ -367,9 +367,9 @@ contains
     real(prec) :: flux(1:this%nvar)
 
     flux = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      flux = sL + sR; flux(1) = flux(1) + dsdx(1,1) + nhat(1)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux = sL+sR; flux(1) = flux(1)+dsdx(1,1)+nhat(1)
+    endif
 
   endfunction riemannflux3d_Model
 
@@ -380,7 +380,7 @@ contains
     real(prec) :: flux(1:this%nvar)
 
     flux = 0.0_prec
-    if (.false.) flux = s + dsdx ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) flux = s+dsdx ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction flux1d_Model
 
@@ -391,9 +391,9 @@ contains
     real(prec) :: flux(1:this%nvar,1:2)
 
     flux = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      flux(:,1) = s; flux(1,:) = flux(1,:) + dsdx(1,:)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux(:,1) = s; flux(1,:) = flux(1,:)+dsdx(1,:)
+    endif
 
   endfunction flux2d_Model
 
@@ -404,9 +404,9 @@ contains
     real(prec) :: flux(1:this%nvar,1:3)
 
     flux = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      flux(:,1) = s; flux(1,:) = flux(1,:) + dsdx(1,:)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      flux(:,1) = s; flux(1,:) = flux(1,:)+dsdx(1,:)
+    endif
 
   endfunction flux3d_Model
 
@@ -417,7 +417,7 @@ contains
     real(prec) :: source(1:this%nvar)
 
     source = 0.0_prec
-    if (.false.) source = s + dsdx ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) source = s+dsdx ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction source1d_Model
 
@@ -428,9 +428,9 @@ contains
     real(prec) :: source(1:this%nvar)
 
     source = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      source = s; source(1) = source(1) + dsdx(1,1)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      source = s; source(1) = source(1)+dsdx(1,1)
+    endif
 
   endfunction source2d_Model
 
@@ -441,9 +441,9 @@ contains
     real(prec) :: source(1:this%nvar)
 
     source = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      source = s; source(1) = source(1) + dsdx(1,1)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      source = s; source(1) = source(1)+dsdx(1,1)
+    endif
 
   endfunction source3d_Model
 
@@ -454,9 +454,9 @@ contains
     real(prec) :: exts(1:this%nvar)
 
     exts = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      exts = s; exts(1) = exts(1) + nhat
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      exts = s; exts(1) = exts(1)+nhat
+    endif
 
   endfunction hbc1d_Generic_Model
 
@@ -467,7 +467,7 @@ contains
     real(prec) :: exts(1:this%nvar)
 
     exts = 0.0_prec
-    if (.false.) exts(1) = exts(1) + x + t ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) exts(1) = exts(1)+x+t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction hbc1d_Prescribed_Model
 
@@ -478,9 +478,9 @@ contains
     real(prec) :: exts(1:this%nvar)
 
     exts = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      exts = s; exts(1) = exts(1) + nhat(1)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      exts = s; exts(1) = exts(1)+nhat(1)
+    endif
 
   endfunction hbc2d_Generic_Model
 
@@ -491,7 +491,7 @@ contains
     real(prec) :: exts(1:this%nvar)
 
     exts = 0.0_prec
-    if (.false.) exts(1) = exts(1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) exts(1) = exts(1)+x(1)+t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction hbc2d_Prescribed_Model
 
@@ -502,9 +502,9 @@ contains
     real(prec) :: exts(1:this%nvar)
 
     exts = 0.0_prec
-    if (.false.) then ! suppress unused-dummy-argument warnings for default implementation
-      exts = s; exts(1) = exts(1) + nhat(1)
-    end if
+    if(.false.) then ! suppress unused-dummy-argument warnings for default implementation
+      exts = s; exts(1) = exts(1)+nhat(1)
+    endif
 
   endfunction hbc3d_Generic_Model
 
@@ -515,7 +515,7 @@ contains
     real(prec) :: exts(1:this%nvar)
 
     exts = 0.0_prec
-    if (.false.) exts(1) = exts(1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) exts(1) = exts(1)+x(1)+t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction hbc3d_Prescribed_Model
 
@@ -526,7 +526,7 @@ contains
     real(prec) :: extDsdx(1:this%nvar)
 
     extDsdx = dsdx
-    if (.false.) extDsdx(1) = extDsdx(1) + nhat ! suppress unused-dummy-argument warning for default implementation
+    if(.false.) extDsdx(1) = extDsdx(1)+nhat ! suppress unused-dummy-argument warning for default implementation
 
   endfunction pbc1d_Generic_Model
 
@@ -537,7 +537,7 @@ contains
     real(prec) :: extDsdx(1:this%nvar)
 
     extDsdx = 0.0_prec
-    if (.false.) extDsdx(1) = extDsdx(1) + x + t ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) extDsdx(1) = extDsdx(1)+x+t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction pbc1d_Prescribed_Model
 
@@ -548,7 +548,7 @@ contains
     real(prec) :: extDsdx(1:this%nvar,1:2)
 
     extDsdx = dsdx
-    if (.false.) extDsdx(1,1) = extDsdx(1,1) + nhat(1) ! suppress unused-dummy-argument warning for default implementation
+    if(.false.) extDsdx(1,1) = extDsdx(1,1)+nhat(1) ! suppress unused-dummy-argument warning for default implementation
 
   endfunction pbc2d_Generic_Model
 
@@ -559,7 +559,7 @@ contains
     real(prec) :: extDsdx(1:this%nvar,1:2)
 
     extDsdx = 0.0_prec
-    if (.false.) extDsdx(1,1) = extDsdx(1,1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) extDsdx(1,1) = extDsdx(1,1)+x(1)+t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction pbc2d_Prescribed_Model
 
@@ -570,7 +570,7 @@ contains
     real(prec) :: extDsdx(1:this%nvar,1:3)
 
     extDsdx = dsdx
-    if (.false.) extDsdx(1,1) = extDsdx(1,1) + nhat(1) ! suppress unused-dummy-argument warning for default implementation
+    if(.false.) extDsdx(1,1) = extDsdx(1,1)+nhat(1) ! suppress unused-dummy-argument warning for default implementation
 
   endfunction pbc3d_Generic_Model
 
@@ -581,7 +581,7 @@ contains
     real(prec) :: extDsdx(1:this%nvar,1:3)
 
     extDsdx = 0.0_prec
-    if (.false.) extDsdx(1,1) = extDsdx(1,1) + x(1) + t ! suppress unused-dummy-argument warnings for default implementation
+    if(.false.) extDsdx(1,1) = extDsdx(1,1)+x(1)+t ! suppress unused-dummy-argument warnings for default implementation
 
   endfunction pbc3d_Prescribed_Model
 
@@ -695,7 +695,7 @@ contains
       !! report their own custom metrics after file io
     implicit none
     class(Model),intent(inout) :: this
-    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
+    if(.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine ReportMetrics_Model
 
   subroutine ReportUserMetrics_Model(this)
@@ -703,7 +703,7 @@ contains
     !! report their own custom metrics after file io
     implicit none
     class(Model),intent(inout) :: this
-    if (.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
+    if(.false.) this%nvar = this%nvar ! Default implementation; suppress unused-dummy-argument warning
   endsubroutine ReportUserMetrics_Model
 
   ! ////////////////////////////////////// !

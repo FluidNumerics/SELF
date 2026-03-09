@@ -148,7 +148,7 @@ contains
     flux(3,2) = s(4)/this%rho0 ! y-velocity, y flux; p/rho0
     flux(4,1) = this%c*this%c*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
     flux(4,2) = this%c*this%c*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
-    if (.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
+    if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux2d_LinearEuler2D_t
 
@@ -185,7 +185,7 @@ contains
     fR(4) = rho0*c*c*(u*nhat(1)+v*nhat(2)) ! pressure
 
     flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+c*(sL(1:4)-sR(1:4))
-    if (.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
+    if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearEuler2D_t
 
