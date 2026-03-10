@@ -54,7 +54,6 @@ contains
     type(Scalar1D) :: fTarget
     type(Lagrange),target :: interp
     type(Lagrange),target :: interpTarget
-    real(prec) :: imat
 
     ! Create an interpolant
     call interp%Init(N=controlDegree, &

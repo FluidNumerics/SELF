@@ -44,7 +44,6 @@ program LinearShallowWater2D_constant
   type(Mesh2D),target :: mesh
   integer :: bcids(1:4)
   type(SEMQuad),target :: geometry
-  character(LEN=255) :: WORKSPACE
 
   ! Set boundary conditions
   bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South

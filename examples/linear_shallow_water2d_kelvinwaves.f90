@@ -38,13 +38,11 @@ program linear_shallow_water2d_kelvinwaves
   real(prec),parameter :: f0 = 10.0_prec ! reference coriolis parameter (1/s)
   real(prec),parameter :: Cd = 0.25_prec ! Linear drag coefficient (1/s)
   real(prec),parameter :: iointerval = 0.05 ! Write files 20 times per characteristic time scale
-  real(prec) :: r
   real(prec) :: e0,ef ! Initial and final entropy
   type(LinearShallowWater2D) :: modelobj ! Shallow water model
   type(Lagrange),target :: interp ! Interpolant
   type(Mesh2D),target :: mesh ! Mesh class
   type(SEMQuad),target :: geometry ! Geometry class
-  integer :: i,j,iel
   real(prec),parameter :: g = 1.0_prec ! Acceleration due to gravity
   real(prec),parameter :: H = 1.0_prec ! Uniform resting depth
   character(LEN=255) :: WORKSPACE

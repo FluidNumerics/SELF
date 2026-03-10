@@ -120,13 +120,13 @@ contains
   subroutine UpdateHost_Tensor3D_t(this)
     implicit none
     class(Tensor3D_t),intent(inout) :: this
-
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateHost_Tensor3D_t
 
   subroutine UpdateDevice_Tensor3D_t(this)
     implicit none
     class(Tensor3D_t),intent(inout) :: this
-
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Tensor3D_t
 
   subroutine BoundaryInterp_Tensor3D_t(this)

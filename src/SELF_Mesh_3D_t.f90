@@ -185,9 +185,6 @@ contains
     integer,intent(in) :: nSides
     integer,intent(in) :: nNodes
     integer,intent(in) :: nBCs
-    ! Local
-    integer :: i,j,k,l
-
     this%nElem = nElem
     this%nGlobalElem = nElem
     this%nGeo = nGeo
@@ -271,9 +268,7 @@ contains
   subroutine UpdateDevice_Mesh3D_t(this)
     implicit none
     class(Mesh3D_t),intent(inout) :: this
-
-    return
-
+    if(.false.) this%nElem = this%nElem ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Mesh3D_t
 
   subroutine ResetBoundaryConditionType_Mesh3D_t(this,bcid)
@@ -343,6 +338,7 @@ contains
 
     eid = i+nxpertile*(j-1+nypertile*(k-1+nzpertile*( &
                                       ti-1+ntilex*(tj-1+ntiley*(tk-1)))))
+    if(.false.) eid = eid+ntilez ! suppress unused-dummy-argument warning
 
   endfunction elementid
 

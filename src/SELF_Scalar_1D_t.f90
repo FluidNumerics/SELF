@@ -118,13 +118,13 @@ contains
   subroutine UpdateHost_Scalar1D_t(this)
     implicit none
     class(Scalar1D_t),intent(inout) :: this
-
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateHost_Scalar1D_t
 
   subroutine UpdateDevice_Scalar1D_t(this)
     implicit none
     class(Scalar1D_t),intent(inout) :: this
-
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Scalar1D_t
 
   subroutine AverageSides_Scalar1D_t(this)

@@ -263,7 +263,7 @@ contains
     ! Local
     character(8) :: zoneID
     integer :: fUnit
-    integer :: iEl,i,j,iVar
+    integer :: iEl,i,j
     character(LEN=self_TecplotHeaderLength) :: tecHeader
     character(LEN=self_FormatLength) :: fmat
 

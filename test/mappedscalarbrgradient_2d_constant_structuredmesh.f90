@@ -63,7 +63,6 @@ contains
     integer :: iside
     integer :: i
     integer :: e2
-    character(LEN=255) :: WORKSPACE
     integer :: bcids(1:4)
 
     ! Create an interpolant

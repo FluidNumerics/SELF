@@ -63,7 +63,6 @@ contains
     integer :: e2
     character(LEN=255) :: WORKSPACE
     integer :: iel,j,i
-    integer(HID_T) :: fileId
 
     ! Create a uniform block mesh
     call get_environment_variable("WORKSPACE",WORKSPACE)

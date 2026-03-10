@@ -43,7 +43,6 @@ program linear_shallow_water2d_nonormalflow_model
   integer :: bcids(1:4) ! Boundary conditions for structured mesh
   type(Mesh2D),target :: mesh ! Mesh class
   type(SEMQuad),target :: geometry ! Geometry class
-  character(LEN=255) :: WORKSPACE ! Used for file I/O
 
   real(prec),parameter :: g = 1.0_prec ! Acceleration due to gravity
   real(prec),parameter :: H = 1.0_prec ! Uniform resting depth

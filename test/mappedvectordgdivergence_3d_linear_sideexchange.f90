@@ -60,7 +60,7 @@ contains
     type(MappedVector3D) :: f
     type(MappedScalar3D) :: df
     character(LEN=255) :: WORKSPACE
-    integer :: i,j,k,iel,e2,s2
+    integer :: i,j,k,iel,e2
     real(prec) :: nhat(1:3),nmag,fx,fy,fz
 
     ! Create an interpolant

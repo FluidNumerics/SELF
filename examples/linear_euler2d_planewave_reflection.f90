@@ -122,6 +122,7 @@ contains
     exts(2) = u*(shi-shr) ! u
     exts(3) = v*(shi+shr) ! v
     exts(4) = p*(shi+shr) ! pressure
+    if(.false.) exts(1) = exts(1)+t ! suppress unused-dummy-argument warning
 
   endfunction hbc2d_Prescribed_lineareuler2d_planewave
 
