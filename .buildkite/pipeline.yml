@@ -1,12 +1,22 @@
 steps:
+  # PR builds: coverage tests + release build/test (no push)
   - label: ":pipeline: AMD MI210 Coverage Tests"
+    if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/amd-mi210-debug-tests.yml
 
   - label: ":pipeline: NVIDIA V100 Coverage Tests"
+    if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/nvidia-v100-debug-tests.yml
 
   - label: ":pipeline: x86 CPU Coverage Tests"
+    if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/x86-cpu-debug-tests.yml
 
   - label: ":pipeline: Release Builds"
+    if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/release-builds.yml
+
+  # Main branch: release build, test, and publish only
+  - label: ":pipeline: Release & Publish"
+    if: build.branch == "main"
+    command: buildkite-agent pipeline upload .buildkite/release-and-publish.yml

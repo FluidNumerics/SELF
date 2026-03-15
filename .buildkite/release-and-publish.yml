@@ -2,7 +2,6 @@ steps:
   # ---- AMD MI210 (gfx90a) Release ----
   - label: ":docker: Build Release Image (x86-rocm643-gfx90a)"
     key: "docker-build-gfx90a"
-    depends_on: "test-mi210"
     command: |
       SELFISH_IMAGE="higherordermethods/selfish:latest-x86-rocm643-gfx90a"
       docker pull "$${SELFISH_IMAGE}"
@@ -11,6 +10,7 @@ steps:
         --build-arg SELFISH_IMAGE="$${SELFISH_IMAGE}" \
         --build-arg SELFISH_SHA="$${SELFISH_SHA}" \
         -t higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86-rocm643-gfx90a \
+        -t higherordermethods/self:latest-x86-rocm643-gfx90a \
         -f docker/x86_gfx90a/Dockerfile .
     env:
       slurm_nodelist: "oram"
@@ -34,10 +34,20 @@ steps:
     agents:
       queue: "galapagos"
 
+  - label: ":rocket: Push Release Image (x86-rocm643-gfx90a)"
+    key: "push-release-gfx90a"
+    depends_on: "test-release-gfx90a"
+    command: |
+      docker push higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86-rocm643-gfx90a
+      docker push higherordermethods/self:latest-x86-rocm643-gfx90a
+    env:
+      slurm_nodelist: "oram"
+    agents:
+      queue: "galapagos"
+
   # ---- NVIDIA V100 (sm70) Release ----
   - label: ":docker: Build Release Image (x86-cuda124-sm70)"
     key: "docker-build-sm70"
-    depends_on: "test-v100"
     command: |
       SELFISH_IMAGE="higherordermethods/selfish:latest-x86-cuda124-sm70"
       docker pull "$${SELFISH_IMAGE}"
@@ -46,6 +56,7 @@ steps:
         --build-arg SELFISH_IMAGE="$${SELFISH_IMAGE}" \
         --build-arg SELFISH_SHA="$${SELFISH_SHA}" \
         -t higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86-cuda124-sm70 \
+        -t higherordermethods/self:latest-x86-cuda124-sm70 \
         -f docker/x86_sm70/Dockerfile .
     env:
       slurm_nodelist: "oram"
@@ -69,10 +80,20 @@ steps:
     agents:
       queue: "galapagos"
 
+  - label: ":rocket: Push Release Image (x86-cuda124-sm70)"
+    key: "push-release-sm70"
+    depends_on: "test-release-sm70"
+    command: |
+      docker push higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86-cuda124-sm70
+      docker push higherordermethods/self:latest-x86-cuda124-sm70
+    env:
+      slurm_nodelist: "oram"
+    agents:
+      queue: "galapagos"
+
   # ---- x86 CPU-only Release ----
   - label: ":docker: Build Release Image (x86)"
     key: "docker-build-x86"
-    depends_on: "test-x86-cpu"
     command: |
       SELFISH_IMAGE="higherordermethods/selfish:latest-x86"
       docker pull "$${SELFISH_IMAGE}"
@@ -81,6 +102,7 @@ steps:
         --build-arg SELFISH_IMAGE="$${SELFISH_IMAGE}" \
         --build-arg SELFISH_SHA="$${SELFISH_SHA}" \
         -t higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86 \
+        -t higherordermethods/self:latest-x86 \
         -f docker/x86/Dockerfile .
     env:
       slurm_nodelist: "oram"
@@ -100,5 +122,16 @@ steps:
       slurm_ntasks: 2
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86"
+    agents:
+      queue: "galapagos"
+
+  - label: ":rocket: Push Release Image (x86)"
+    key: "push-release-x86"
+    depends_on: "test-release-x86"
+    command: |
+      docker push higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86
+      docker push higherordermethods/self:latest-x86
+    env:
+      slurm_nodelist: "oram"
     agents:
       queue: "galapagos"
