@@ -1,11 +1,10 @@
 steps:
-  - label: ":partyparrot: Build & Test AMD MI210 (Coverage)"
-    key: "build-test-mi210"
+  - label: ":cmake: Build AMD MI210 (Coverage)"
+    key: "build-mi210"
     command: |
       source /opt/spack-environment/activate.sh
       export WORKSPACE=/workspace
       mkdir -p /workspace/build
-      rocminfo
       cd /workspace/build
       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
             -DCMAKE_BUILD_TYPE="coverage" \
@@ -21,13 +20,22 @@ steps:
       lcov --capture --initial \
            --directory /workspace/build/src/ \
            --output-file /workspace/initial.info
+    env:
+      slurm_partition: "main"
+      slurm_time: "01:00:00"
+      slurm_nodes: 1
+      slurm_ntasks: 2
+      slurm_cpus_per_task: 8
+      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
+    agents:
+      queue: "galapagos"
+
+  - label: ":test_tube: Test AMD MI210 (Coverage)"
+    key: "test-mi210"
+    depends_on: "build-mi210"
+    command: |
+      source /opt/spack-environment/activate.sh
       ctest --test-dir /workspace/build --output-on-failure
-      lcov --capture \
-           --directory /workspace/build/src/ \
-           --output-file /workspace/ctest-capture.info
-      lcov --add-tracefile /workspace/initial.info \
-           --add-tracefile /workspace/ctest-capture.info \
-           --output-file /workspace/coverage.info
     env:
       slurm_partition: "main"
       slurm_gres: "gpu:mi210:2"
@@ -39,9 +47,30 @@ steps:
     agents:
       queue: "galapagos"
 
-  - label: ":codecov: Upload Coverage"
-    key: "upload-coverage"
-    depends_on: "build-test-mi210"
+  - label: ":coverage: Coverage AMD MI210"
+    key: "coverage-mi210"
+    depends_on: "test-mi210"
+    command: |
+      source /opt/spack-environment/activate.sh
+      lcov --capture \
+           --directory /workspace/build/src/ \
+           --output-file /workspace/ctest-capture.info
+      lcov --add-tracefile /workspace/initial.info \
+           --add-tracefile /workspace/ctest-capture.info \
+           --output-file /workspace/coverage.info
+    env:
+      slurm_partition: "main"
+      slurm_time: "01:00:00"
+      slurm_nodes: 1
+      slurm_ntasks: 2
+      slurm_cpus_per_task: 8
+      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
+    agents:
+      queue: "galapagos"
+
+  - label: ":codecov: Upload Coverage (MI210)"
+    key: "upload-coverage-mi210"
+    depends_on: "coverage-mi210"
     command: |
       curl -Os https://uploader.codecov.io/latest/linux/codecov
       chmod +x codecov

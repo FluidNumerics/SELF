@@ -1,6 +1,6 @@
 steps:
-  - label: ":partyparrot: Build & Test x86 CPU (Coverage)"
-    key: "build-test-x86-cpu"
+  - label: ":cmake: Build x86 CPU (Coverage)"
+    key: "build-x86-cpu"
     command: |
       source /opt/spack-environment/activate.sh
       export WORKSPACE=/workspace
@@ -17,7 +17,37 @@ steps:
       lcov --capture --initial \
            --directory /workspace/build/src/ \
            --output-file /workspace/initial.info
+    env:
+      slurm_partition: "main"
+      slurm_time: "01:00:00"
+      slurm_nodes: 1
+      slurm_ntasks: 2
+      slurm_cpus_per_task: 8
+      slurm_container_image: "docker://higherordermethods/selfish:latest-x86"
+    agents:
+      queue: "galapagos"
+
+  - label: ":test_tube: Test x86 CPU (Coverage)"
+    key: "test-x86-cpu"
+    depends_on: "build-x86-cpu"
+    command: |
+      source /opt/spack-environment/activate.sh
       ctest --test-dir /workspace/build --output-on-failure
+    env:
+      slurm_partition: "main"
+      slurm_time: "01:00:00"
+      slurm_nodes: 1
+      slurm_ntasks: 2
+      slurm_cpus_per_task: 8
+      slurm_container_image: "docker://higherordermethods/selfish:latest-x86"
+    agents:
+      queue: "galapagos"
+
+  - label: ":coverage: Coverage x86 CPU"
+    key: "coverage-x86-cpu"
+    depends_on: "test-x86-cpu"
+    command: |
+      source /opt/spack-environment/activate.sh
       lcov --capture \
            --directory /workspace/build/src/ \
            --output-file /workspace/ctest-capture.info
@@ -36,7 +66,7 @@ steps:
 
   - label: ":codecov: Upload Coverage (x86 CPU)"
     key: "upload-coverage-x86-cpu"
-    depends_on: "build-test-x86-cpu"
+    depends_on: "coverage-x86-cpu"
     command: |
       curl -Os https://uploader.codecov.io/latest/linux/codecov
       chmod +x codecov

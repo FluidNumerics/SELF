@@ -2,7 +2,7 @@ steps:
   # ---- AMD MI210 (gfx90a) Release ----
   - label: ":docker: Build Release Image (x86-rocm643-gfx90a)"
     key: "docker-build-gfx90a"
-    depends_on: "build-test-mi210"
+    depends_on: "test-mi210"
     command: |
       SELFISH_IMAGE="higherordermethods/selfish:latest-x86-rocm643-gfx90a"
       docker pull "$${SELFISH_IMAGE}"
@@ -50,7 +50,7 @@ steps:
   # ---- NVIDIA V100 (sm70) Release ----
   - label: ":docker: Build Release Image (x86-cuda124-sm70)"
     key: "docker-build-sm70"
-    depends_on: "build-test-v100"
+    depends_on: "test-v100"
     command: |
       SELFISH_IMAGE="higherordermethods/selfish:latest-x86-cuda124-sm70"
       docker pull "$${SELFISH_IMAGE}"
@@ -98,7 +98,7 @@ steps:
   # ---- x86 CPU-only Release ----
   - label: ":docker: Build Release Image (x86)"
     key: "docker-build-x86"
-    depends_on: "build-test-x86-cpu"
+    depends_on: "test-x86-cpu"
     command: |
       SELFISH_IMAGE="higherordermethods/selfish:latest-x86"
       docker pull "$${SELFISH_IMAGE}"
