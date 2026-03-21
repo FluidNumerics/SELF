@@ -38,6 +38,7 @@ steps:
       source /opt/spack-environment/activate.sh
       ctest --test-dir /workspace/build --output-on-failure
     env:
+      BUILDKITE_GIT_CLEAN_FLAGS: "-ffdq"
       slurm_partition: "main"
       slurm_gres: "gpu:mi210:2"
       slurm_time: "01:00:00"
@@ -60,6 +61,7 @@ steps:
            --add-tracefile /workspace/ctest-capture.info \
            --output-file /workspace/coverage.info
     env:
+      BUILDKITE_GIT_CLEAN_FLAGS: "-ffdq"
       slurm_partition: "main"
       slurm_time: "01:00:00"
       slurm_nodes: 1
@@ -72,6 +74,8 @@ steps:
   - label: ":codecov: Upload Coverage (MI210)"
     key: "upload-coverage-mi210"
     depends_on: "coverage-mi210"
+    env:
+      BUILDKITE_GIT_CLEAN_FLAGS: "-ffdq"
     command: |
       curl -Os https://uploader.codecov.io/latest/linux/codecov
       chmod +x codecov
