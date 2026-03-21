@@ -32,11 +32,12 @@ steps:
   - label: ":test_tube: Test NVIDIA V100 (Coverage)"
     key: "test-v100"
     depends_on: "build-v100"
+    plugins:
+      - thedyrt/skip-checkout#v0.1.1: ~
     command: |
       source /opt/spack-environment/activate.sh
       ctest --test-dir /workspace/build --output-on-failure
     env:
-      BUILDKITE_GIT_CLEAN_FLAGS: "-ffdq"
       slurm_partition: "main"
       slurm_gres: "gpu:v100:2"
       slurm_time: "01:00:00"
@@ -50,6 +51,8 @@ steps:
   - label: ":coverage: Coverage NVIDIA V100"
     key: "coverage-v100"
     depends_on: "test-v100"
+    plugins:
+      - thedyrt/skip-checkout#v0.1.1: ~
     command: |
       source /opt/spack-environment/activate.sh
       lcov --capture \
@@ -59,7 +62,6 @@ steps:
            --add-tracefile /workspace/ctest-capture.info \
            --output-file /workspace/coverage.info
     env:
-      BUILDKITE_GIT_CLEAN_FLAGS: "-ffdq"
       slurm_partition: "main"
       slurm_time: "01:00:00"
       slurm_nodes: 1
@@ -72,8 +74,8 @@ steps:
   - label: ":codecov: Upload Coverage (V100)"
     key: "upload-coverage-v100"
     depends_on: "coverage-v100"
-    env:
-      BUILDKITE_GIT_CLEAN_FLAGS: "-ffdq"
+    plugins:
+      - thedyrt/skip-checkout#v0.1.1: ~
     command: |
       curl -Os https://uploader.codecov.io/latest/linux/codecov
       chmod +x codecov
