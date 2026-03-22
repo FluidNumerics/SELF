@@ -3,7 +3,6 @@ steps:
     key: "build-mi210"
     command: |
       source /opt/spack-environment/activate.sh
-      export WORKSPACE=/workspace
       mkdir -p /workspace/build
       cd /workspace/build
       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
@@ -38,6 +37,7 @@ steps:
       - thedyrt/skip-checkout#v0.1.1: ~
     command: |
       source /opt/spack-environment/activate.sh
+      export WORKSPACE=/workspace
       ctest --test-dir /workspace/build --output-on-failure
     env:
       slurm_partition: "main"
