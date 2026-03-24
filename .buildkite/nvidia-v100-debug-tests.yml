@@ -2,7 +2,9 @@ steps:
   - label: ":cmake: Build NVIDIA V100 (Coverage)"
     key: "build-v100"
     command: |
+      _pre_spack_ldlp="${LD_LIBRARY_PATH}"
       source /opt/spack-environment/activate.sh
+      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${_pre_spack_ldlp}"
       mkdir -p /workspace/build
       cd /workspace/build
       FC=gfortran cmake -DCMAKE_INSTALL_PREFIX=/workspace/opt/self \
@@ -35,7 +37,9 @@ steps:
     plugins:
       - thedyrt/skip-checkout#v0.1.1: ~
     command: |
+      _pre_spack_ldlp="${LD_LIBRARY_PATH}"
       source /opt/spack-environment/activate.sh
+      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${_pre_spack_ldlp}"
       export WORKSPACE=/workspace
       ctest --test-dir /workspace/build --output-on-failure
     env:
@@ -55,7 +59,9 @@ steps:
     plugins:
       - thedyrt/skip-checkout#v0.1.1: ~
     command: |
+      _pre_spack_ldlp="${LD_LIBRARY_PATH}"
       source /opt/spack-environment/activate.sh
+      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${_pre_spack_ldlp}"
       lcov --capture \
            --directory /workspace/build/src/ \
            --output-file /workspace/ctest-capture.info
