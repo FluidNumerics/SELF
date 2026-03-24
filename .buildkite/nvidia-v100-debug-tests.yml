@@ -13,8 +13,9 @@ steps:
             -DCMAKE_CUDA_ARCHITECTURES="70" \
             -DSELF_ENABLE_EXAMPLES=ON \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
             /workspace/
-      make -j
+      make -j VERBOSE=1
       lcov --capture --initial \
            --directory /workspace/build/src/ \
            --output-file /workspace/initial.info
