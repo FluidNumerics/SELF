@@ -12,11 +12,12 @@ steps:
     if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/x86-cpu-debug-tests.yml
 
-  - label: ":pipeline: Release Builds"
-    if: build.branch != "main"
-    command: buildkite-agent pipeline upload .buildkite/release-builds.yml
+  # TODO: Re-enable release builds once container build strategy is decided
+  #       (e.g. Google Cloud Build). Discuss with team.
+  # - label: ":pipeline: Release Builds"
+  #   if: build.branch != "main"
+  #   command: buildkite-agent pipeline upload .buildkite/release-builds.yml
 
-  # Main branch: release build, test, and publish only
-  - label: ":pipeline: Release & Publish"
-    if: build.branch == "main"
-    command: buildkite-agent pipeline upload .buildkite/release-and-publish.yml
+  # - label: ":pipeline: Release & Publish"
+  #   if: build.branch == "main"
+  #   command: buildkite-agent pipeline upload .buildkite/release-and-publish.yml
