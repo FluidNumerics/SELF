@@ -1,6 +1,6 @@
 steps:
-  - label: ":cmake: Build NVIDIA V100 (Coverage)"
-    key: "build-v100"
+  - label: ":cmake: Build and Test NVIDIA V100 (Coverage)"
+    key: "build-and-test-v100"
     command: |
       source /opt/spack-environment/activate.sh
       mkdir -p /workspace/build
@@ -19,25 +19,21 @@ steps:
       lcov --capture --initial \
            --directory /workspace/build/src/ \
            --output-file /workspace/initial.info
-    env:
-      slurm_partition: "main"
-      slurm_time: "01:00:00"
-      slurm_nodes: 1
-      slurm_ntasks: 2
-      slurm_cpus_per_task: 8
-      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-cuda124-sm70"
-    agents:
-      queue: "galapagos"
-
-  - label: ":test_tube: Test NVIDIA V100 (Coverage)"
-    key: "test-v100"
-    depends_on: "build-v100"
-    plugins:
-      - thedyrt/skip-checkout#v0.1.1: ~
-    command: |
-      source /opt/spack-environment/activate.sh
       export WORKSPACE=/workspace
       ctest --test-dir /workspace/build --output-on-failure
+      lcov --capture \
+           --directory /workspace/build/src/ \
+           --output-file /workspace/ctest-capture.info
+      lcov --add-tracefile /workspace/initial.info \
+           --add-tracefile /workspace/ctest-capture.info \
+           --output-file /workspace/coverage.info
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      chmod +x codecov
+      ./codecov -t "$${CODECOV_TOKEN}" \
+                -f "$${BUILDKITE_BUILD_CHECKOUT_PATH}/coverage.info" \
+                -F buildkite-cuda-v100
+    secrets:
+      - CODECOV_TOKEN
     env:
       slurm_partition: "main"
       slurm_gres: "gpu:v100:2"
@@ -46,44 +42,5 @@ steps:
       slurm_ntasks: 2
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/selfish:latest-x86-cuda124-sm70"
-    agents:
-      queue: "galapagos"
-
-  - label: ":coverage: Coverage NVIDIA V100"
-    key: "coverage-v100"
-    depends_on: "test-v100"
-    plugins:
-      - thedyrt/skip-checkout#v0.1.1: ~
-    command: |
-      source /opt/spack-environment/activate.sh
-      lcov --capture \
-           --directory /workspace/build/src/ \
-           --output-file /workspace/ctest-capture.info
-      lcov --add-tracefile /workspace/initial.info \
-           --add-tracefile /workspace/ctest-capture.info \
-           --output-file /workspace/coverage.info
-    env:
-      slurm_partition: "main"
-      slurm_time: "01:00:00"
-      slurm_nodes: 1
-      slurm_ntasks: 2
-      slurm_cpus_per_task: 8
-      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-cuda124-sm70"
-    agents:
-      queue: "galapagos"
-
-  - label: ":codecov: Upload Coverage (V100)"
-    key: "upload-coverage-v100"
-    depends_on: "coverage-v100"
-    plugins:
-      - thedyrt/skip-checkout#v0.1.1: ~
-    command: |
-      curl -Os https://uploader.codecov.io/latest/linux/codecov
-      chmod +x codecov
-      ./codecov -t "$${CODECOV_TOKEN}" \
-                -f "$${BUILDKITE_BUILD_CHECKOUT_PATH}/coverage.info" \
-                -F buildkite-cuda-v100
-    secrets:
-      - CODECOV_TOKEN
     agents:
       queue: "galapagos"

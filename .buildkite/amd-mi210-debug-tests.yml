@@ -1,6 +1,6 @@
 steps:
-  - label: ":cmake: Build AMD MI210 (Coverage)"
-    key: "build-mi210"
+  - label: ":partyparrot: Build and Test AMD MI210 (Coverage)"
+    key: "build-and-test-mi210"
     command: |
       source /opt/spack-environment/activate.sh
       mkdir -p /workspace/build
@@ -20,26 +20,21 @@ steps:
       lcov --capture --initial \
            --directory /workspace/build/src/ \
            --output-file /workspace/initial.info
-    env:
-      slurm_partition: "main"
-      slurm_time: "01:00:00"
-      slurm_nodes: 1
-      slurm_ntasks: 2
-      slurm_cpus_per_task: 8
-      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
-      slurm_nodelist: "noether"
-    agents:
-      queue: "galapagos"
-
-  - label: ":test_tube: Test AMD MI210 (Coverage)"
-    key: "test-mi210"
-    depends_on: "build-mi210"
-    plugins:
-      - thedyrt/skip-checkout#v0.1.1: ~
-    command: |
-      source /opt/spack-environment/activate.sh
       export WORKSPACE=/workspace
       ctest --test-dir /workspace/build --output-on-failure
+      lcov --capture \
+           --directory /workspace/build/src/ \
+           --output-file /workspace/ctest-capture.info
+      lcov --add-tracefile /workspace/initial.info \
+           --add-tracefile /workspace/ctest-capture.info \
+           --output-file /workspace/coverage.info
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      chmod +x codecov
+      ./codecov -t "$${CODECOV_TOKEN}" \
+                -f "$${BUILDKITE_BUILD_CHECKOUT_PATH}/coverage.info" \
+                -F buildkite-rocm-mi210
+    secrets:
+      - CODECOV_TOKEN
     env:
       slurm_partition: "main"
       slurm_gres: "gpu:mi210:2"
@@ -48,45 +43,6 @@ steps:
       slurm_ntasks: 2
       slurm_cpus_per_task: 8
       slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
-    agents:
-      queue: "galapagos"
-
-  - label: ":coverage: Coverage AMD MI210"
-    key: "coverage-mi210"
-    depends_on: "test-mi210"
-    plugins:
-      - thedyrt/skip-checkout#v0.1.1: ~
-    command: |
-      source /opt/spack-environment/activate.sh
-      lcov --capture \
-           --directory /workspace/build/src/ \
-           --output-file /workspace/ctest-capture.info
-      lcov --add-tracefile /workspace/initial.info \
-           --add-tracefile /workspace/ctest-capture.info \
-           --output-file /workspace/coverage.info
-    env:
-      slurm_partition: "main"
-      slurm_time: "01:00:00"
-      slurm_nodes: 1
-      slurm_ntasks: 2
-      slurm_cpus_per_task: 8
-      slurm_container_image: "docker://higherordermethods/selfish:latest-x86-rocm643-gfx90a"
-    agents:
-      queue: "galapagos"
-
-  - label: ":codecov: Upload Coverage (MI210)"
-    key: "upload-coverage-mi210"
-    depends_on: "coverage-mi210"
-    plugins:
-      - thedyrt/skip-checkout#v0.1.1: ~
-    command: |
-      curl -Os https://uploader.codecov.io/latest/linux/codecov
-      chmod +x codecov
-      ./codecov -t "$${CODECOV_TOKEN}" \
-                -f "$${BUILDKITE_BUILD_CHECKOUT_PATH}/coverage.info" \
-                -F buildkite-rocm-mi210
-    secrets:
-      - CODECOV_TOKEN
-    agents:
-      queue: "galapagos"
       slurm_nodelist: "noether"
+    agents:
+      queue: "galapagos"
