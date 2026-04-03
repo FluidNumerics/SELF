@@ -73,6 +73,15 @@ static void check(const cudaError_t err, const char *const file, const int line)
 #define TE_3D_INDEX(i,j,k,iel,iVar,row,col,N,nEl,nVar) i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*(iVar + nVar*(row + 3*col)))))
 #define TEB_3D_INDEX(i,j,k,iel,iVar,row,col,N,nEl,nVar) i + (N+1)*(j + (N+1)*(k + 6*(iel + nEl*(iVar + nVar*(row + 3*col)))))
 
+// Two-point vector interior indexing.
+// Memory layout matches interior(n, i, j, iel, iVar, idir) in Fortran (column-major):
+//   n + (N+1)*(i + (N+1)*(j + (N+1)*(iel + nEl*(iVar + nVar*idir))))
+// where n is the two-point sum index and (i,j) are the nodal coordinates.
+#define TPV_2D_INDEX(n,i,j,iel,iVar,idir,N,nEl,nVar) n + (N+1)*(i + (N+1)*(j + (N+1)*(iel + nEl*(iVar + nVar*idir))))
+
+// Three-D analogue: interior(n, i, j, k, iel, iVar, idir)
+#define TPV_3D_INDEX(n,i,j,k,iel,iVar,idir,N,nEl,nVar) n + (N+1)*(i + (N+1)*(j + (N+1)*(k + (N+1)*(iel + nEl*(iVar + nVar*idir)))))
+
 
 // Boundary condition flags //
 //

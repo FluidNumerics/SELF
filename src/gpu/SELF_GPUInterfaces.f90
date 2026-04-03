@@ -197,4 +197,46 @@ module SELF_GPUInterfaces
     endsubroutine JacobianWeight_3D_gpu
   endinterface
 
+  ! TwoPointVector
+
+  interface
+    subroutine TwoPointVectorDivergence_2D_gpu(f,df,dmat,N,nVar,nEl) &
+      bind(c,name="TwoPointVectorDivergence_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,df,dmat
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine TwoPointVectorDivergence_2D_gpu
+  endinterface
+
+  interface
+    subroutine TwoPointVectorDivergence_3D_gpu(f,df,dmat,N,nVar,nEl) &
+      bind(c,name="TwoPointVectorDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,df,dmat
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine TwoPointVectorDivergence_3D_gpu
+  endinterface
+
+  interface
+    subroutine MappedTwoPointVectorDivergence_2D_gpu(f,df,dmat,dsdx,jacobian,N,nVar,nEl) &
+      bind(c,name="MappedTwoPointVectorDivergence_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,df,dmat,dsdx,jacobian
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine MappedTwoPointVectorDivergence_2D_gpu
+  endinterface
+
+  interface
+    subroutine MappedTwoPointVectorDivergence_3D_gpu(f,df,dmat,dsdx,jacobian,N,nVar,nEl) &
+      bind(c,name="MappedTwoPointVectorDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: f,df,dmat,dsdx,jacobian
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine MappedTwoPointVectorDivergence_3D_gpu
+  endinterface
+
 endmodule SELF_GPUInterfaces
