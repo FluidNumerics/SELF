@@ -78,7 +78,7 @@ and in 3-D
 F(0:N,0:N,0:N,0:N,1:nEl,1:nvar,1:3)
 ```
 
-The first dimension refers to the directional component (physical or computational) of the vector. The second dimension is a computational coordinate direction and variations in this dimensions are equivalent to looping over $n$ in the two-point vector representation shown above. The remaining array dimensions of size `0:N` are computational coordinate directions and are the usual `(i,j,k)` dimensions, in this order. This is followed by the dimension over the solution variables and then the elements. 
+The first dimension is a computational coordinate direction and variations in this dimension are equivalent to looping over $n$ in the two-point vector representation shown above. The next dimensions are `(i,j)` (2-D) or `(i,j,k)` (3-D) computational coordinate directions, followed by the elements, solution variables, and the directional component of the vector `(...,nEl,nvar,idir)`, respectively.
 
 
 ### Tensors
