@@ -135,6 +135,15 @@ add_fortran_tests (
     "linear_shallow_water_2d_constant.f90"
     "linear_shallow_water_2d_nonormalflow.f90"
     "linear_shallow_water_2d_radiation.f90"
+    "twopointvectordivergence_2d_constant.f90"
+    "twopointvectordivergence_2d_linear.f90"
+    "twopointvectordivergence_2d_rotational.f90"
+    "twopointvectordivergence_3d_constant.f90"
+    "twopointvectordivergence_3d_linear.f90"
+    "mappedtwopointvectordivergence_2d_constant.f90"
+    "mappedtwopointvectordivergence_2d_linear.f90"
+    "mappedtwopointvectordivergence_3d_constant.f90"
+    "mappedtwopointvectordivergence_3d_linear.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
