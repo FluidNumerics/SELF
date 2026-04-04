@@ -98,7 +98,28 @@ where $s$ is the solution and $u$ is a velocity field. A convex entropy function
 
 
 ## Split form equations
+Split-form equations rewrite the flux divergence so that the resulting discretization satisfies a discrete entropy conservation law. For a scalar conservation law $s_t + (u s)_x = 0$, we can use the product rule to write the equivalent split form:
 
+\begin{equation}
+s_t + \frac{1}{2}\left( (u s)_x + u s_x + s u_x \right) = 0
+\end{equation}
+
+Discretizing the split form with the SBP derivative matrix $D$ and a symmetric two-point flux $f^\#(s_i, s_n)$ leads to the split-form DGSEM:
+
+\begin{equation}
+\frac{ds_i}{dt} = -2 \sum_n D_{\text{split},n,i} \, f^\#(s_i, s_n) - \frac{1}{w_i} \left( f_{\text{Riemann}} - f_{\text{local}} \right)\bigg|_{\partial \Omega_e}
+\end{equation}
+
+where $D_\text{split} = D - \frac{1}{2}M^{-1}B$ is the skew-symmetric split-form derivative operator (see [Split-Form DGSEM](SplitFormDGSEM.md) for details). The skew-symmetry of $D_\text{split}$ ensures the volume integral contributes zero to the discrete entropy rate; all entropy change passes through the surface Riemann flux.
 
 ## Two-point flux
+A two-point flux $\mathbf{f}^\#(\mathbf{s}_L, \mathbf{s}_R)$ is a symmetric, consistent numerical flux that satisfies the Tadmor entropy conservation condition:
+
+\begin{equation}
+(\mathbf{w}_R - \mathbf{w}_L)^T \mathbf{f}^\# = \Psi_R - \Psi_L
+\end{equation}
+
+where $\mathbf{w} = \partial \eta / \partial \mathbf{s}$ are the entropy variables and $\Psi$ is the entropy flux potential. When used in the split-form volume integral, this condition guarantees that the discrete volume contribution to $d\eta/dt$ vanishes identically.
+
+For linear advection with $f = as$ and $\eta = s^2/2$, the arithmetic mean $f^\#(s_L, s_R) = a(s_L + s_R)/2$ satisfies this condition. For nonlinear systems (Euler, shallow water), deriving the entropy-conserving flux is more involved; see the references in [Split-Form DGSEM](SplitFormDGSEM.md).
 
