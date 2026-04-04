@@ -35,8 +35,9 @@ module SELF_ECAdvection2D_t
   !! EC two-point flux (arithmetic mean, entropy-conserving for eta = u^2/2):
   !!   F^EC(uL, uR) = (u_a * (uL+uR)/2,  v_a * (uL+uR)/2)
   !!
-  !! Surface Riemann flux (Godunov/upwind):
-  !!   F_Riemann = 0.5 * (a.n) * (uL+uR) - 0.5 * |a.n| * (uR-uL)
+  !! Surface Riemann flux (Local Lax-Friedrichs / Rusanov):
+  !!   F_Riemann = 0.5 * (a.n) * (uL+uR) - 0.5 * |a| * (uR-uL)
+  !! where |a| = sqrt(u^2 + v^2) is the maximum wave speed.
   !! This is dissipative (entropy-stable) and reduces to the central flux
   !! when uL = uR (no dissipation at no-normal-flow or mirror boundaries).
 
@@ -114,8 +115,8 @@ contains
 
   pure function hbc2d_NoNormalFlow_ECAdvection2D_t(this,s,nhat) result(exts)
     !! Mirror boundary condition: sets extBoundary = interior state.
-    !! With the upwind Riemann flux, this gives sR = sL at the boundary,
-    !! so the Riemann flux reduces to the central flux (a.n)*s — no upwind
+    !! With the LLF Riemann flux, this gives sR = sL at the boundary,
+    !! so the Riemann flux reduces to the central flux (a.n)*s — no
     !! dissipation.  Use this BC when testing entropy conservation.
     class(ECAdvection2D_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
