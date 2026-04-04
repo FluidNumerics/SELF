@@ -130,7 +130,7 @@ contains
     type(c_ptr),intent(inout) :: df
 
     call TwoPointVectorDivergence_3D_gpu(this%interior_gpu,df, &
-                                         this%interp%dMatrix_gpu, &
+                                         this%interp%dSplitMatrix_gpu, &
                                          this%interp%N,this%nVar,this%nElem)
 
   endsubroutine Divergence_TwoPointVector3D

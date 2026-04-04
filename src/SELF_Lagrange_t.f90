@@ -97,6 +97,27 @@ module SELF_Lagrange_t
       !! The derivative matrix for mapping function nodal values to a nodal values of the derivative estimate. The dgMatrix is based
       !! on a weak form of the derivative. It must be used with bMatrix to account for boundary contributions in the weak form.
 
+    real(prec),pointer,contiguous,dimension(:,:) :: dSplitMatrix
+      !! The split-form derivative matrix D_split = D - 0.5*M^{-1}*B, where B is the SBP boundary operator.
+      !!
+      !! D_split is skew-symmetric under the M inner product: M*D_split + D_split^T*M = 0. Unlike D, it is
+      !! NOT an SBP operator (the weighted symmetric part is zero, not the boundary term B). This property
+      !! makes D_split ideal for the EC-DGSEM split-form volume integral:
+      !!
+      !!   du/dt = -(2/J) sum_n D_split[n,i] * F_EC(u_i, u_n)  +  (1/J) M^{-1} B^T f_Riemann
+      !!
+      !! The skew-symmetry of the volume term guarantees it contributes zero to the entropy rate, so all
+      !! entropy change passes through the surface term. An entropy-dissipative Riemann solver then makes
+      !! the full scheme entropy-stable.
+      !!
+      !! Using D_split in the volume combined with plain f_Riemann on the surface is algebraically identical
+      !! to using D in the volume with the penalty (f_Riemann - f_local) on the surface (Trixi.jl convention).
+      !!
+      !! In SELF index convention (dSplitMatrix(ii,i) = D_split[i-1, ii-1]):
+      !!   dSplitMatrix(ii,i) = dMatrix(ii,i)
+      !!                       - 0.5*(bMatrix(i,2)*bMatrix(ii,2)
+      !!                              - bMatrix(i,1)*bMatrix(ii,1)) / qWeights(i)
+
     real(prec),pointer,contiguous,dimension(:,:) :: bMatrix
       !! The boundary interpolation matrix that is used to map a grid of nodal values at the control points to the element boundaries.
 
@@ -149,6 +170,7 @@ contains
              this%iMatrix(1:N+1,1:M+1), &
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
+             this%dSplitMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
@@ -192,6 +214,21 @@ contains
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
 
+    ! D_split = D - 0.5*M^{-1}*B  (skew-symmetric under the M inner product)
+    ! In SELF index convention: dSplitMatrix(ii,i) = dMatrix(ii,i)
+    !   - 0.5*(bMatrix(i,2)*bMatrix(ii,2) - bMatrix(i,1)*bMatrix(ii,1)) / qWeights(i)
+    block
+      integer :: i,ii
+      do i = 1,N+1
+        do ii = 1,N+1
+          this%dSplitMatrix(ii,i) = this%dMatrix(ii,i)- &
+                                    0.5_prec*(this%bMatrix(i,2)*this%bMatrix(ii,2)- &
+                                              this%bMatrix(i,1)*this%bMatrix(ii,1))/ &
+                                    this%qWeights(i)
+        enddo
+      enddo
+    endblock
+
   endsubroutine Init_Lagrange_t
 
   subroutine Free_Lagrange_t(this)
@@ -207,6 +244,7 @@ contains
     deallocate(this%iMatrix)
     deallocate(this%dMatrix)
     deallocate(this%dgMatrix)
+    deallocate(this%dSplitMatrix)
     deallocate(this%bMatrix)
 
   endsubroutine Free_Lagrange_t

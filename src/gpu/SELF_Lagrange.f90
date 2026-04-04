@@ -41,6 +41,7 @@ module SELF_Lagrange
     type(c_ptr) :: iMatrix_gpu
     type(c_ptr) :: dMatrix_gpu
     type(c_ptr) :: dgMatrix_gpu
+    type(c_ptr) :: dSplitMatrix_gpu
     type(c_ptr) :: bMatrix_gpu
 
   contains
@@ -90,6 +91,7 @@ contains
              this%iMatrix(1:N+1,1:M+1), &
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
+             this%dSplitMatrix(1:N+1,1:N+1), &
              this%bMatrix(1:N+1,1:2))
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
@@ -133,9 +135,22 @@ contains
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
 
+    block
+      integer :: i,ii
+      do i = 1,N+1
+        do ii = 1,N+1
+          this%dSplitMatrix(ii,i) = this%dMatrix(ii,i)- &
+                                    0.5_prec*(this%bMatrix(i,2)*this%bMatrix(ii,2)- &
+                                              this%bMatrix(i,1)*this%bMatrix(ii,1))/ &
+                                    this%qWeights(i)
+        enddo
+      enddo
+    endblock
+
     call gpuCheck(hipMalloc(this%iMatrix_gpu,sizeof(this%iMatrix)))
     call gpuCheck(hipMalloc(this%dMatrix_gpu,sizeof(this%dMatrix)))
     call gpuCheck(hipMalloc(this%dgMatrix_gpu,sizeof(this%dgMatrix)))
+    call gpuCheck(hipMalloc(this%dSplitMatrix_gpu,sizeof(this%dSplitMatrix)))
     call gpuCheck(hipMalloc(this%bMatrix_gpu,sizeof(this%bMatrix)))
     call gpuCheck(hipMalloc(this%qWeights_gpu,sizeof(this%qWeights)))
 
@@ -152,6 +167,11 @@ contains
     call gpuCheck(hipMemcpy(this%dgMatrix_gpu, &
                             c_loc(this%dgMatrix), &
                             sizeof(this%dgMatrix), &
+                            hipMemcpyHostToDevice))
+
+    call gpuCheck(hipMemcpy(this%dSplitMatrix_gpu, &
+                            c_loc(this%dSplitMatrix), &
+                            sizeof(this%dSplitMatrix), &
                             hipMemcpyHostToDevice))
 
     call gpuCheck(hipMemcpy(this%bMatrix_gpu, &
@@ -184,6 +204,7 @@ contains
     call gpuCheck(hipFree(this%iMatrix_gpu))
     call gpuCheck(hipFree(this%dMatrix_gpu))
     call gpuCheck(hipFree(this%dgMatrix_gpu))
+    call gpuCheck(hipFree(this%dSplitMatrix_gpu))
     call gpuCheck(hipFree(this%bMatrix_gpu))
     call gpuCheck(hipFree(this%qWeights_gpu))
 

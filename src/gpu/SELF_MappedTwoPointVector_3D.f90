@@ -57,7 +57,7 @@ contains
 
     call MappedTwoPointVectorDivergence_3D_gpu( &
       this%interior_gpu,df, &
-      this%interp%dMatrix_gpu, &
+      this%interp%dSplitMatrix_gpu, &
       this%geometry%dsdx%interior_gpu, &
       this%geometry%J%interior_gpu, &
       this%interp%N,this%nVar,this%nElem)

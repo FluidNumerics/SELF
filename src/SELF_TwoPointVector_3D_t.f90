@@ -155,9 +155,9 @@ contains
       dfLoc = 0.0_prec
       do nn = 1,this%N+1
         dfLoc = dfLoc+ &
-                this%interp%dMatrix(nn,i)*this%interior(nn,i,j,k,iEl,iVar,1)+ &
-                this%interp%dMatrix(nn,j)*this%interior(nn,i,j,k,iEl,iVar,2)+ &
-                this%interp%dMatrix(nn,k)*this%interior(nn,i,j,k,iEl,iVar,3)
+                this%interp%dSplitMatrix(nn,i)*this%interior(nn,i,j,k,iEl,iVar,1)+ &
+                this%interp%dSplitMatrix(nn,j)*this%interior(nn,i,j,k,iEl,iVar,2)+ &
+                this%interp%dSplitMatrix(nn,k)*this%interior(nn,i,j,k,iEl,iVar,3)
       enddo
       df(i,j,k,iEl,iVar) = 2.0_prec*dfLoc
 
