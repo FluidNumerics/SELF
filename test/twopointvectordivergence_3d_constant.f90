@@ -60,7 +60,7 @@ contains
     type(Lagrange),target :: interp
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -76,6 +76,23 @@ contains
     call f%Divergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term for each of three coordinate directions
+    block
+      integer :: i,j,k,iEl,iVar
+      do concurrent(i=1:controlDegree+1,j=1:controlDegree+1, &
+                    k=1:controlDegree+1,iEl=1:nelem,iVar=1:nvar)
+
+        df%interior(i,j,k,iEl,iVar) = df%interior(i,j,k,iEl,iVar)+ &
+                                      (interp%bMatrix(i,2)*(+1.0_prec)+ &
+                                       interp%bMatrix(i,1)*(-1.0_prec))/interp%qWeights(i)+ &
+                                      (interp%bMatrix(j,2)*(+1.0_prec)+ &
+                                       interp%bMatrix(j,1)*(-1.0_prec))/interp%qWeights(j)+ &
+                                      (interp%bMatrix(k,2)*(+1.0_prec)+ &
+                                       interp%bMatrix(k,1)*(-1.0_prec))/interp%qWeights(k)
+
+      enddo
+    endblock
 
     df%interior = abs(df%interior-0.0_prec)
 

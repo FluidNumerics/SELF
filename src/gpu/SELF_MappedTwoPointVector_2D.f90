@@ -48,19 +48,19 @@ contains
     !! GPU implementation of the physical-space split-form divergence for
     !! a 2-D two-point vector on a curvilinear mesh.
     !!
-    !! The fused kernel performs metric averaging (Winters et al.) and the
-    !! Jacobian weighting in a single pass over the degrees of freedom.
-    !! interior_gpu must already contain the physical-space two-point fluxes.
+    !! interior_gpu must already contain pre-projected SCALAR contravariant
+    !! two-point fluxes (see MappedDivergence_MappedTwoPointVector2D_t).
+    !! Applies the reference-element split-form sum then divides by J.
     implicit none
     class(MappedTwoPointVector2D),intent(inout) :: this
     type(c_ptr),intent(out) :: df
 
-    call MappedTwoPointVectorDivergence_2D_gpu( &
-      this%interior_gpu,df, &
-      this%interp%dSplitMatrix_gpu, &
-      this%geometry%dsdx%interior_gpu, &
-      this%geometry%J%interior_gpu, &
-      this%interp%N,this%nVar,this%nElem)
+    call TwoPointVectorDivergence_2D_gpu(this%interior_gpu,df, &
+                                         this%interp%dSplitMatrix_gpu, &
+                                         this%interp%N,this%nVar,this%nElem)
+
+    call JacobianWeight_2D_gpu(df,this%geometry%J%interior_gpu, &
+                               this%interp%N,this%nVar,this%nElem)
 
   endsubroutine MappedDivergence_MappedTwoPointVector2D
 

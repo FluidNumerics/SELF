@@ -75,7 +75,7 @@ contains
     integer :: i,j,nn,iel,ivar
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -89,20 +89,32 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    ! Physical two-point arithmetic-mean fluxes for V = (x, y).
-    ! d=1 (x-component): arithmetic mean of x-coordinates for the xi^1 pair (i,j)-(nn,j).
-    ! d=2 (y-component): arithmetic mean of y-coordinates for the xi^2 pair (i,j)-(i,nn).
-    ! On a Cartesian mesh the off-diagonal metric terms are zero, so each
-    ! component only contributes to the divergence through its own direction.
+    ! Contravariant two-point fluxes for V = (x, y), divergence = 2.
+    ! For V=(x,y), F_EC(sL,sR) = ((xL+xR)/2, (yL+yR)/2).
+    ! Each direction r: Fc^r = avg(Ja^r) . F_EC with correct pair.
     do ivar = 1,nvar
       do iel = 1,mesh%nelem
         do j = 1,controlDegree+1
           do i = 1,controlDegree+1
             do nn = 1,controlDegree+1
+              ! xi^1: pair (i,j)-(nn,j)
               f%interior(nn,i,j,iel,ivar,1) = &
+                0.5_prec*(geometry%dsdx%interior(i,j,iel,1,1,1)+ &
+                          geometry%dsdx%interior(nn,j,iel,1,1,1))* &
                 0.5_prec*(geometry%x%interior(i,j,iel,1,1)+ &
-                          geometry%x%interior(nn,j,iel,1,1))
+                          geometry%x%interior(nn,j,iel,1,1))+ &
+                0.5_prec*(geometry%dsdx%interior(i,j,iel,1,2,1)+ &
+                          geometry%dsdx%interior(nn,j,iel,1,2,1))* &
+                0.5_prec*(geometry%x%interior(i,j,iel,1,2)+ &
+                          geometry%x%interior(nn,j,iel,1,2))
+              ! xi^2: pair (i,j)-(i,nn)
               f%interior(nn,i,j,iel,ivar,2) = &
+                0.5_prec*(geometry%dsdx%interior(i,j,iel,1,1,2)+ &
+                          geometry%dsdx%interior(i,nn,iel,1,1,2))* &
+                0.5_prec*(geometry%x%interior(i,j,iel,1,1)+ &
+                          geometry%x%interior(i,nn,iel,1,1))+ &
+                0.5_prec*(geometry%dsdx%interior(i,j,iel,1,2,2)+ &
+                          geometry%dsdx%interior(i,nn,iel,1,2,2))* &
                 0.5_prec*(geometry%x%interior(i,j,iel,1,2)+ &
                           geometry%x%interior(i,nn,iel,1,2))
             enddo
@@ -118,6 +130,48 @@ contains
     call f%MappedDivergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term: (1/J)*M^{-1}*B^T * (F_phys . nhat * nScale)
+    ! For V=(x,y): F_phys.nhat = x*nhat_x + y*nhat_y at each face node.
+    block
+      integer :: ii,jj,iiEl,iiVar
+      real(prec) :: fbn_e,fbn_w,fbn_n,fbn_s,jac,xb,yb
+      do concurrent(ii=1:controlDegree+1,jj=1:controlDegree+1, &
+                    iiEl=1:mesh%nElem,iiVar=1:nvar)
+
+        jac = geometry%J%interior(ii,jj,iiEl,1)
+
+        ! East (side 2): boundary node j=jj at xi^1=+1
+        xb = geometry%x%boundary(jj,2,iiEl,1,1)
+        yb = geometry%x%boundary(jj,2,iiEl,1,2)
+        fbn_e = (xb*geometry%nHat%boundary(jj,2,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(jj,2,iiEl,1,2))* &
+                geometry%nScale%boundary(jj,2,iiEl,1)
+        ! West (side 4)
+        xb = geometry%x%boundary(jj,4,iiEl,1,1)
+        yb = geometry%x%boundary(jj,4,iiEl,1,2)
+        fbn_w = (xb*geometry%nHat%boundary(jj,4,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(jj,4,iiEl,1,2))* &
+                geometry%nScale%boundary(jj,4,iiEl,1)
+        ! North (side 3)
+        xb = geometry%x%boundary(ii,3,iiEl,1,1)
+        yb = geometry%x%boundary(ii,3,iiEl,1,2)
+        fbn_n = (xb*geometry%nHat%boundary(ii,3,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(ii,3,iiEl,1,2))* &
+                geometry%nScale%boundary(ii,3,iiEl,1)
+        ! South (side 1)
+        xb = geometry%x%boundary(ii,1,iiEl,1,1)
+        yb = geometry%x%boundary(ii,1,iiEl,1,2)
+        fbn_s = (xb*geometry%nHat%boundary(ii,1,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(ii,1,iiEl,1,2))* &
+                geometry%nScale%boundary(ii,1,iiEl,1)
+
+        df%interior(ii,jj,iiEl,iiVar) = df%interior(ii,jj,iiEl,iiVar)+ &
+                                        (interp%bMatrix(ii,2)*fbn_e+interp%bMatrix(ii,1)*fbn_w)/(interp%qWeights(ii)*jac)+ &
+                                        (interp%bMatrix(jj,2)*fbn_n+interp%bMatrix(jj,1)*fbn_s)/(interp%qWeights(jj)*jac)
+
+      enddo
+    endblock
 
     print*,"absmax (nabla.F) :",maxval(df%interior)
     df%interior = abs(df%interior-2.0_prec)

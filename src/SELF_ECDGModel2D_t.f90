@@ -109,29 +109,60 @@ contains
   endfunction twopointflux2d_ECDGModel2D_t
 
   subroutine TwoPointFluxMethod_ECDGModel2D_t(this)
-    !! Computes the physical-space EC two-point fluxes for all node pairs and
-    !! stores them in twoPointFlux%interior(n,i,j,iel,ivar,d).
+    !! Computes pre-projected SCALAR contravariant two-point fluxes for all
+    !! node pairs and stores them in twoPointFlux%interior(n,i,j,iel,ivar,r).
     !!
-    !! For each (n,i,j,iel), the flux is evaluated between nodes (i,j) and (n,j),
-    !! i.e. the partner index n varies in the first computational direction.
-    !! MappedDivergence applies the same flux for both the xi^1 and xi^2 sums
-    !! (with direction-specific metric averaging), so this single evaluation
-    !! serves both coordinate-direction contributions.
+    !! Following Trixi.jl for curved meshes, each computational direction r
+    !! uses the correct partner node AND the correct averaged metric Ja^r:
+    !!
+    !!   r=1: pair (i,j)-(nn,j), Ja^1_avg = 0.5*(Ja^1(i,j) + Ja^1(nn,j))
+    !!        interior(nn,i,j,...,1) = sum_d Ja^1_avg(d) * F_EC_d(sL, sR)
+    !!
+    !!   r=2: pair (i,j)-(i,nn), Ja^2_avg = 0.5*(Ja^2(i,j) + Ja^2(i,nn))
+    !!        interior(nn,i,j,...,2) = sum_d Ja^2_avg(d) * F_EC_d(sL, sR)
+    !!
+    !! The result is a SCALAR per (nn,i,j,iel,ivar,r) — no cross-contamination
+    !! between directions.
     implicit none
     class(ECDGModel2D_t),intent(inout) :: this
     ! Local
-    integer :: nn,i,j,iEl
+    integer :: nn,i,j,d,iEl,iVar
     real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
-    real(prec) :: F(1:this%nvar,1:2)
+    real(prec) :: Fphys(1:this%nvar,1:2)
+    real(prec) :: Fc
 
     do concurrent(nn=1:this%solution%N+1,i=1:this%solution%N+1, &
                   j=1:this%solution%N+1,iEl=1:this%mesh%nElem)
 
       sL = this%solution%interior(i,j,iEl,1:this%nvar)
+
+      ! xi^1: pair (i,j)-(nn,j), project onto avg(Ja^1)
       sR = this%solution%interior(nn,j,iEl,1:this%nvar)
-      F = this%twopointflux2d(sL,sR)
-      this%twoPointFlux%interior(nn,i,j,iEl,1:this%nvar,1) = F(1:this%nvar,1)
-      this%twoPointFlux%interior(nn,i,j,iEl,1:this%nvar,2) = F(1:this%nvar,2)
+      Fphys = this%twopointflux2d(sL,sR)
+      do iVar = 1,this%nvar
+        Fc = 0.0_prec
+        do d = 1,2
+          Fc = Fc+0.5_prec*( &
+               this%geometry%dsdx%interior(i,j,iEl,1,d,1)+ &
+               this%geometry%dsdx%interior(nn,j,iEl,1,d,1))* &
+               Fphys(iVar,d)
+        enddo
+        this%twoPointFlux%interior(nn,i,j,iEl,iVar,1) = Fc
+      enddo
+
+      ! xi^2: pair (i,j)-(i,nn), project onto avg(Ja^2)
+      sR = this%solution%interior(i,nn,iEl,1:this%nvar)
+      Fphys = this%twopointflux2d(sL,sR)
+      do iVar = 1,this%nvar
+        Fc = 0.0_prec
+        do d = 1,2
+          Fc = Fc+0.5_prec*( &
+               this%geometry%dsdx%interior(i,j,iEl,1,d,2)+ &
+               this%geometry%dsdx%interior(i,nn,iEl,1,d,2))* &
+               Fphys(iVar,d)
+        enddo
+        this%twoPointFlux%interior(nn,i,j,iEl,iVar,2) = Fc
+      enddo
 
     enddo
 

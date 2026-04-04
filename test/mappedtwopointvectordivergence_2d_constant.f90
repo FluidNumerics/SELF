@@ -68,7 +68,7 @@ contains
     character(LEN=255) :: WORKSPACE
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -82,8 +82,36 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    ! Constant physical-space two-point flux in each physical direction
-    f%interior = 1.0_prec
+    ! Set contravariant two-point fluxes for a constant physical flux F=(1,1).
+    ! For constant F, F_EC(sL,sR) = F for all pairs.
+    ! Contravariant: Fc^r(nn,i,j) = sum_d avg(Ja^r_d) * F_d
+    ! On a uniform Cartesian mesh, avg(Ja^r_d) = Ja^r_d (constant per element).
+    block
+      integer :: nn,i,j,d,iEl,iVar
+      real(prec) :: Fc
+      do concurrent(nn=1:controlDegree+1,i=1:controlDegree+1, &
+                    j=1:controlDegree+1,iEl=1:mesh%nElem,iVar=1:nvar)
+
+        ! xi^1: pair (i,j)-(nn,j)
+        Fc = 0.0_prec
+        do d = 1,2
+          Fc = Fc+0.5_prec*( &
+               geometry%dsdx%interior(i,j,iEl,1,d,1)+ &
+               geometry%dsdx%interior(nn,j,iEl,1,d,1))*1.0_prec
+        enddo
+        f%interior(nn,i,j,iEl,iVar,1) = Fc
+
+        ! xi^2: pair (i,j)-(i,nn)
+        Fc = 0.0_prec
+        do d = 1,2
+          Fc = Fc+0.5_prec*( &
+               geometry%dsdx%interior(i,j,iEl,1,d,2)+ &
+               geometry%dsdx%interior(i,nn,iEl,1,d,2))*1.0_prec
+        enddo
+        f%interior(nn,i,j,iEl,iVar,2) = Fc
+
+      enddo
+    endblock
     call f%UpdateDevice()
 
 #ifdef ENABLE_GPU
@@ -92,6 +120,32 @@ contains
     call f%MappedDivergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term for constant flux on the mapped element.
+    ! The boundary normal flux = F_phys . nhat * nScale at each face.
+    ! For F=(1,1): fbn = (nhat_x + nhat_y)*nScale at each face node.
+    block
+      integer :: i,j,iEl,iVar
+      real(prec) :: fbn_east,fbn_west,fbn_north,fbn_south,jac
+      do concurrent(i=1:controlDegree+1,j=1:controlDegree+1, &
+                    iEl=1:mesh%nElem,iVar=1:nvar)
+
+        jac = geometry%J%interior(i,j,iEl,1)
+        fbn_east = geometry%nScale%boundary(j,2,iEl,1)* &
+                   (geometry%nHat%boundary(j,2,iEl,1,1)+geometry%nHat%boundary(j,2,iEl,1,2))
+        fbn_west = geometry%nScale%boundary(j,4,iEl,1)* &
+                   (geometry%nHat%boundary(j,4,iEl,1,1)+geometry%nHat%boundary(j,4,iEl,1,2))
+        fbn_north = geometry%nScale%boundary(i,3,iEl,1)* &
+                    (geometry%nHat%boundary(i,3,iEl,1,1)+geometry%nHat%boundary(i,3,iEl,1,2))
+        fbn_south = geometry%nScale%boundary(i,1,iEl,1)* &
+                    (geometry%nHat%boundary(i,1,iEl,1,1)+geometry%nHat%boundary(i,1,iEl,1,2))
+
+        df%interior(i,j,iEl,iVar) = df%interior(i,j,iEl,iVar)+ &
+                                    (interp%bMatrix(i,2)*fbn_east+interp%bMatrix(i,1)*fbn_west)/(interp%qWeights(i)*jac)+ &
+                                    (interp%bMatrix(j,2)*fbn_north+interp%bMatrix(j,1)*fbn_south)/(interp%qWeights(j)*jac)
+
+      enddo
+    endblock
 
     df%interior = abs(df%interior-0.0_prec)
 

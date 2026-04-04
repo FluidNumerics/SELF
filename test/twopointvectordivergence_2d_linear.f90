@@ -71,7 +71,7 @@ contains
     integer :: i,j,nn,iel,ivar
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -103,6 +103,24 @@ contains
     call f%Divergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term. For V = (xi1, xi2), the physical flux at each face is:
+    !   east:  f_xi1 at xi^1=+1 = cp(N+1), fbn = +cp(N+1)
+    !   west:  f_xi1 at xi^1=-1 = cp(1),   fbn = -cp(1)
+    !   north: f_xi2 at xi^2=+1 = cp(N+1), fbn = +cp(N+1)
+    !   south: f_xi2 at xi^2=-1 = cp(1),   fbn = -cp(1)
+    do concurrent(i=1:controlDegree+1,j=1:controlDegree+1, &
+                  iEl=1:nelem,iVar=1:nvar)
+
+      df%interior(i,j,iEl,iVar) = df%interior(i,j,iEl,iVar)+ &
+                                  (interp%bMatrix(i,2)*(+interp%controlPoints(controlDegree+1))+ &
+                                   interp%bMatrix(i,1)*(-interp%controlPoints(1)))/ &
+                                  interp%qWeights(i)+ &
+                                  (interp%bMatrix(j,2)*(+interp%controlPoints(controlDegree+1))+ &
+                                   interp%bMatrix(j,1)*(-interp%controlPoints(1)))/ &
+                                  interp%qWeights(j)
+
+    enddo
 
     print*,"absmax (nabla.F) :",maxval(df%interior)
     df%interior = abs(df%interior-2.0_prec)

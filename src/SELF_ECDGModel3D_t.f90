@@ -89,25 +89,64 @@ contains
   endfunction twopointflux3d_ECDGModel3D_t
 
   subroutine TwoPointFluxMethod_ECDGModel3D_t(this)
-    !! Fills twoPointFlux%interior(n,i,j,k,iel,ivar,d) with the physical-space
-    !! EC two-point fluxes between nodes (i,j,k) and (n,j,k).
+    !! Computes pre-projected SCALAR contravariant two-point fluxes for all
+    !! node pairs, following Trixi.jl for curved meshes. Each direction r
+    !! uses the correct partner AND the correct averaged metric Ja^r.
     implicit none
     class(ECDGModel3D_t),intent(inout) :: this
     ! Local
-    integer :: nn,i,j,k,iEl
+    integer :: nn,i,j,k,d,iEl,iVar
     real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
-    real(prec) :: F(1:this%nvar,1:3)
+    real(prec) :: Fphys(1:this%nvar,1:3)
+    real(prec) :: Fc
 
     do concurrent(nn=1:this%solution%N+1,i=1:this%solution%N+1, &
                   j=1:this%solution%N+1,k=1:this%solution%N+1, &
                   iEl=1:this%mesh%nElem)
 
       sL = this%solution%interior(i,j,k,iEl,1:this%nvar)
+
+      ! xi^1: pair (i,j,k)-(nn,j,k), project onto avg(Ja^1)
       sR = this%solution%interior(nn,j,k,iEl,1:this%nvar)
-      F = this%twopointflux3d(sL,sR)
-      this%twoPointFlux%interior(nn,i,j,k,iEl,1:this%nvar,1) = F(1:this%nvar,1)
-      this%twoPointFlux%interior(nn,i,j,k,iEl,1:this%nvar,2) = F(1:this%nvar,2)
-      this%twoPointFlux%interior(nn,i,j,k,iEl,1:this%nvar,3) = F(1:this%nvar,3)
+      Fphys = this%twopointflux3d(sL,sR)
+      do iVar = 1,this%nvar
+        Fc = 0.0_prec
+        do d = 1,3
+          Fc = Fc+0.5_prec*( &
+               this%geometry%dsdx%interior(i,j,k,iEl,1,d,1)+ &
+               this%geometry%dsdx%interior(nn,j,k,iEl,1,d,1))* &
+               Fphys(iVar,d)
+        enddo
+        this%twoPointFlux%interior(nn,i,j,k,iEl,iVar,1) = Fc
+      enddo
+
+      ! xi^2: pair (i,j,k)-(i,nn,k), project onto avg(Ja^2)
+      sR = this%solution%interior(i,nn,k,iEl,1:this%nvar)
+      Fphys = this%twopointflux3d(sL,sR)
+      do iVar = 1,this%nvar
+        Fc = 0.0_prec
+        do d = 1,3
+          Fc = Fc+0.5_prec*( &
+               this%geometry%dsdx%interior(i,j,k,iEl,1,d,2)+ &
+               this%geometry%dsdx%interior(i,nn,k,iEl,1,d,2))* &
+               Fphys(iVar,d)
+        enddo
+        this%twoPointFlux%interior(nn,i,j,k,iEl,iVar,2) = Fc
+      enddo
+
+      ! xi^3: pair (i,j,k)-(i,j,nn), project onto avg(Ja^3)
+      sR = this%solution%interior(i,j,nn,iEl,1:this%nvar)
+      Fphys = this%twopointflux3d(sL,sR)
+      do iVar = 1,this%nvar
+        Fc = 0.0_prec
+        do d = 1,3
+          Fc = Fc+0.5_prec*( &
+               this%geometry%dsdx%interior(i,j,k,iEl,1,d,3)+ &
+               this%geometry%dsdx%interior(i,j,nn,iEl,1,d,3))* &
+               Fphys(iVar,d)
+        enddo
+        this%twoPointFlux%interior(nn,i,j,k,iEl,iVar,3) = Fc
+      enddo
 
     enddo
 

@@ -41,10 +41,9 @@ contains
     !!   V = x * e_x + y * e_y + z * e_z
     !! on a uniform Cartesian block mesh, for which the exact divergence is 3.
     !!
-    !! Physical two-point arithmetic-mean fluxes are computed from the mesh
-    !! node coordinates. On a Cartesian mesh the off-diagonal metric terms
-    !! vanish, so MappedDivergence with averaged metrics (Winters et al.)
-    !! reduces to the standard spectral-element divergence scaled by 1/J.
+    !! Contravariant two-point fluxes are set using arithmetic means of mesh
+    !! node coordinates projected onto the averaged metric terms (Winters et al.).
+    !! Each direction r: Fc^r = sum_d avg(Ja^r_d) * F_EC_d with correct pair.
     use SELF_Constants
     use SELF_Lagrange
     use SELF_Mesh_3D
@@ -71,7 +70,7 @@ contains
     integer :: i,j,k,nn,iel,ivar
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -85,23 +84,55 @@ contains
     call df%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    ! Physical two-point arithmetic-mean fluxes for V = (x, y, z).
-    ! idir=1 (x): arithmetic mean of x-coordinates for the xi^1 pair (i,j,k)-(nn,j,k)
-    ! idir=2 (y): arithmetic mean of y-coordinates for the xi^2 pair (i,j,k)-(i,nn,k)
-    ! idir=3 (z): arithmetic mean of z-coordinates for the xi^3 pair (i,j,k)-(i,j,nn)
+    ! Contravariant two-point fluxes for V = (x, y, z), divergence = 3.
+    ! For V=(x,y,z), F_EC_d(sL,sR) = avg(x_d) for each physical direction d.
+    ! Each direction r: Fc^r = sum_d avg(Ja^r_d) * F_EC_d with correct pair.
     do ivar = 1,nvar
       do iel = 1,mesh%nelem
         do k = 1,controlDegree+1
           do j = 1,controlDegree+1
             do i = 1,controlDegree+1
               do nn = 1,controlDegree+1
+                ! xi^1: pair (i,j,k)-(nn,j,k)
                 f%interior(nn,i,j,k,iel,ivar,1) = &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,1,1)+ &
+                            geometry%dsdx%interior(nn,j,k,iel,1,1,1))* &
                   0.5_prec*(geometry%x%interior(i,j,k,iel,1,1)+ &
-                            geometry%x%interior(nn,j,k,iel,1,1))
-                f%interior(nn,i,j,k,iel,ivar,2) = &
+                            geometry%x%interior(nn,j,k,iel,1,1))+ &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,2,1)+ &
+                            geometry%dsdx%interior(nn,j,k,iel,1,2,1))* &
                   0.5_prec*(geometry%x%interior(i,j,k,iel,1,2)+ &
-                            geometry%x%interior(i,nn,k,iel,1,2))
+                            geometry%x%interior(nn,j,k,iel,1,2))+ &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,3,1)+ &
+                            geometry%dsdx%interior(nn,j,k,iel,1,3,1))* &
+                  0.5_prec*(geometry%x%interior(i,j,k,iel,1,3)+ &
+                            geometry%x%interior(nn,j,k,iel,1,3))
+                ! xi^2: pair (i,j,k)-(i,nn,k)
+                f%interior(nn,i,j,k,iel,ivar,2) = &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,1,2)+ &
+                            geometry%dsdx%interior(i,nn,k,iel,1,1,2))* &
+                  0.5_prec*(geometry%x%interior(i,j,k,iel,1,1)+ &
+                            geometry%x%interior(i,nn,k,iel,1,1))+ &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,2,2)+ &
+                            geometry%dsdx%interior(i,nn,k,iel,1,2,2))* &
+                  0.5_prec*(geometry%x%interior(i,j,k,iel,1,2)+ &
+                            geometry%x%interior(i,nn,k,iel,1,2))+ &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,3,2)+ &
+                            geometry%dsdx%interior(i,nn,k,iel,1,3,2))* &
+                  0.5_prec*(geometry%x%interior(i,j,k,iel,1,3)+ &
+                            geometry%x%interior(i,nn,k,iel,1,3))
+                ! xi^3: pair (i,j,k)-(i,j,nn)
                 f%interior(nn,i,j,k,iel,ivar,3) = &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,1,3)+ &
+                            geometry%dsdx%interior(i,j,nn,iel,1,1,3))* &
+                  0.5_prec*(geometry%x%interior(i,j,k,iel,1,1)+ &
+                            geometry%x%interior(i,j,nn,iel,1,1))+ &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,2,3)+ &
+                            geometry%dsdx%interior(i,j,nn,iel,1,2,3))* &
+                  0.5_prec*(geometry%x%interior(i,j,k,iel,1,2)+ &
+                            geometry%x%interior(i,j,nn,iel,1,2))+ &
+                  0.5_prec*(geometry%dsdx%interior(i,j,k,iel,1,3,3)+ &
+                            geometry%dsdx%interior(i,j,nn,iel,1,3,3))* &
                   0.5_prec*(geometry%x%interior(i,j,k,iel,1,3)+ &
                             geometry%x%interior(i,j,nn,iel,1,3))
               enddo
@@ -118,6 +149,74 @@ contains
     call f%MappedDivergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term: (1/J)*M^{-1}*B^T * (F_phys . nhat * nScale)
+    ! For V=(x,y,z): F_phys.nhat = x*nhat_x + y*nhat_y + z*nhat_z at each face node.
+    ! 3D sides: 1=Bottom, 2=South, 3=East, 4=North, 5=West, 6=Top
+    block
+      integer :: ii,jj,kk,iiEl,iiVar
+      real(prec) :: fbn_e,fbn_w,fbn_n,fbn_s,fbn_t,fbn_b,jac,xb,yb,zb
+      do concurrent(ii=1:controlDegree+1,jj=1:controlDegree+1, &
+                    kk=1:controlDegree+1,iiEl=1:mesh%nElem,iiVar=1:nvar)
+
+        jac = geometry%J%interior(ii,jj,kk,iiEl,1)
+
+        ! East (side 3): boundary node (jj,kk) at xi^1=+1
+        xb = geometry%x%boundary(jj,kk,3,iiEl,1,1)
+        yb = geometry%x%boundary(jj,kk,3,iiEl,1,2)
+        zb = geometry%x%boundary(jj,kk,3,iiEl,1,3)
+        fbn_e = (xb*geometry%nHat%boundary(jj,kk,3,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(jj,kk,3,iiEl,1,2)+ &
+                 zb*geometry%nHat%boundary(jj,kk,3,iiEl,1,3))* &
+                geometry%nScale%boundary(jj,kk,3,iiEl,1)
+        ! West (side 5): boundary node (jj,kk) at xi^1=-1
+        xb = geometry%x%boundary(jj,kk,5,iiEl,1,1)
+        yb = geometry%x%boundary(jj,kk,5,iiEl,1,2)
+        zb = geometry%x%boundary(jj,kk,5,iiEl,1,3)
+        fbn_w = (xb*geometry%nHat%boundary(jj,kk,5,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(jj,kk,5,iiEl,1,2)+ &
+                 zb*geometry%nHat%boundary(jj,kk,5,iiEl,1,3))* &
+                geometry%nScale%boundary(jj,kk,5,iiEl,1)
+        ! North (side 4): boundary node (ii,kk) at xi^2=+1
+        xb = geometry%x%boundary(ii,kk,4,iiEl,1,1)
+        yb = geometry%x%boundary(ii,kk,4,iiEl,1,2)
+        zb = geometry%x%boundary(ii,kk,4,iiEl,1,3)
+        fbn_n = (xb*geometry%nHat%boundary(ii,kk,4,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(ii,kk,4,iiEl,1,2)+ &
+                 zb*geometry%nHat%boundary(ii,kk,4,iiEl,1,3))* &
+                geometry%nScale%boundary(ii,kk,4,iiEl,1)
+        ! South (side 2): boundary node (ii,kk) at xi^2=-1
+        xb = geometry%x%boundary(ii,kk,2,iiEl,1,1)
+        yb = geometry%x%boundary(ii,kk,2,iiEl,1,2)
+        zb = geometry%x%boundary(ii,kk,2,iiEl,1,3)
+        fbn_s = (xb*geometry%nHat%boundary(ii,kk,2,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(ii,kk,2,iiEl,1,2)+ &
+                 zb*geometry%nHat%boundary(ii,kk,2,iiEl,1,3))* &
+                geometry%nScale%boundary(ii,kk,2,iiEl,1)
+        ! Top (side 6): boundary node (ii,jj) at xi^3=+1
+        xb = geometry%x%boundary(ii,jj,6,iiEl,1,1)
+        yb = geometry%x%boundary(ii,jj,6,iiEl,1,2)
+        zb = geometry%x%boundary(ii,jj,6,iiEl,1,3)
+        fbn_t = (xb*geometry%nHat%boundary(ii,jj,6,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(ii,jj,6,iiEl,1,2)+ &
+                 zb*geometry%nHat%boundary(ii,jj,6,iiEl,1,3))* &
+                geometry%nScale%boundary(ii,jj,6,iiEl,1)
+        ! Bottom (side 1): boundary node (ii,jj) at xi^3=-1
+        xb = geometry%x%boundary(ii,jj,1,iiEl,1,1)
+        yb = geometry%x%boundary(ii,jj,1,iiEl,1,2)
+        zb = geometry%x%boundary(ii,jj,1,iiEl,1,3)
+        fbn_b = (xb*geometry%nHat%boundary(ii,jj,1,iiEl,1,1)+ &
+                 yb*geometry%nHat%boundary(ii,jj,1,iiEl,1,2)+ &
+                 zb*geometry%nHat%boundary(ii,jj,1,iiEl,1,3))* &
+                geometry%nScale%boundary(ii,jj,1,iiEl,1)
+
+        df%interior(ii,jj,kk,iiEl,iiVar) = df%interior(ii,jj,kk,iiEl,iiVar)+ &
+                                           (interp%bMatrix(ii,2)*fbn_e+interp%bMatrix(ii,1)*fbn_w)/(interp%qWeights(ii)*jac)+ &
+                                           (interp%bMatrix(jj,2)*fbn_n+interp%bMatrix(jj,1)*fbn_s)/(interp%qWeights(jj)*jac)+ &
+                                           (interp%bMatrix(kk,2)*fbn_t+interp%bMatrix(kk,1)*fbn_b)/(interp%qWeights(kk)*jac)
+
+      enddo
+    endblock
 
     print*,"absmax (nabla.F) :",maxval(df%interior)
     df%interior = abs(df%interior-3.0_prec)

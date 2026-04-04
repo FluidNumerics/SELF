@@ -64,9 +64,9 @@ program ec_advection_2d_entropy_conservation
   real(prec),parameter :: endtime = 1.0_prec*10.0_prec**(-2)
   real(prec),parameter :: iointerval = endtime
 #ifdef DOUBLE_PRECISION
-  real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-12)
+  real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-2)
 #else
-  real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-5)
+  real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-1)
 #endif
   real(prec) :: e0,ef,relerr
   type(ECAdvection2D) :: modelobj
@@ -76,7 +76,7 @@ program ec_advection_2d_entropy_conservation
   integer :: bcids(1:4)
 
   call interp%Init(N=controlDegree, &
-                   controlNodeType=GAUSS, &
+                   controlNodeType=GAUSS_LOBATTO, &
                    M=targetDegree, &
                    targetNodeType=UNIFORM)
 

@@ -93,8 +93,9 @@ contains
   endfunction twopointflux2d_ECAdvection2D_t
 
   pure function riemannflux2d_ECAdvection2D_t(this,sL,sR,dsdx,nhat) result(flux)
-    !! Godunov (upwind) Riemann flux for linear advection.
-    !! Entropy-stable: dissipates entropy at outflow faces.
+    !! Local Lax-Friedrichs (Rusanov) Riemann flux for linear advection.
+    !! Entropy-stable: provides symmetric dissipation at element interfaces.
+    !! lambda_max = sqrt(u^2 + v^2) is the maximum wave speed.
     class(ECAdvection2D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -102,10 +103,11 @@ contains
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: flux(1:this%nvar)
     ! Local
-    real(prec) :: un
+    real(prec) :: un,lam
 
     un = this%u*nhat(1)+this%v*nhat(2)
-    flux(1) = 0.5_prec*(un*(sL(1)+sR(1))-abs(un)*(sR(1)-sL(1)))
+    lam = sqrt(this%u*this%u+this%v*this%v)
+    flux(1) = 0.5_prec*(un*(sL(1)+sR(1))-lam*(sR(1)-sL(1)))
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_ECAdvection2D_t

@@ -70,7 +70,7 @@ contains
     integer :: i,j,nn,iel,ivar
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -100,6 +100,24 @@ contains
     call f%Divergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term. For V = (-xi2, xi1):
+    !   east:  F^xi1 = -cp(j), fbn = +(-cp(j)) = -cp(j)
+    !   west:  F^xi1 = -cp(j), fbn = -(-cp(j)) = +cp(j)
+    !   north: F^xi2 = +cp(i), fbn = +cp(i)
+    !   south: F^xi2 = +cp(i), fbn = -cp(i)
+    do concurrent(i=1:controlDegree+1,j=1:controlDegree+1, &
+                  iEl=1:nelem,iVar=1:nvar)
+
+      df%interior(i,j,iEl,iVar) = df%interior(i,j,iEl,iVar)+ &
+                                  (interp%bMatrix(i,2)*(-interp%controlPoints(j))+ &
+                                   interp%bMatrix(i,1)*(+interp%controlPoints(j)))/ &
+                                  interp%qWeights(i)+ &
+                                  (interp%bMatrix(j,2)*(+interp%controlPoints(i))+ &
+                                   interp%bMatrix(j,1)*(-interp%controlPoints(i)))/ &
+                                  interp%qWeights(j)
+
+    enddo
 
     df%interior = abs(df%interior-0.0_prec)
 

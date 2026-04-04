@@ -68,6 +68,11 @@ contains
   subroutine Init_TwoPointVector2D_t(this,interp,nVar,nElem)
     !! Allocate the interior array for a 2-D two-point vector field.
     !! The interior array has rank 6 with layout (n,i,j,nEl,nVar,idir).
+    !!
+    !! Requires Gauss-Lobatto quadrature nodes (controlNodeType=GAUSS_LOBATTO).
+    !! With GLL nodes D_split = (D-D^T)/2 is exactly skew-symmetric, which is
+    !! the standard operator used in the entropy-conserving split-form DGSEM
+    !! (Gassner, Winters, Kopriva 2016).
     implicit none
     class(TwoPointVector2D_t),intent(out) :: this
     type(Lagrange),target,intent(in) :: interp
@@ -75,6 +80,11 @@ contains
     integer,intent(in) :: nElem
     ! Local
     integer :: i
+
+    if(interp%controlNodeType /= GAUSS_LOBATTO) then
+      print*,__FILE__//" : TwoPointVector2D requires Gauss-Lobatto quadrature nodes."
+      stop 1
+    endif
 
     this%interp => interp
     this%nVar = nVar

@@ -96,65 +96,25 @@ contains
 
   subroutine MappedDivergence_MappedTwoPointVector3D_t(this,df)
     !! Computes the physical-space divergence of a 3-D split-form vector field
-    !! on a curvilinear mesh following Winters, Kopriva, Gassner, Hindenlang.
+    !! on a curvilinear mesh.
     !!
-    !! interior(n,i,j,k,iEl,iVar,d) must contain the physical-space two-point
-    !! flux f^d between the node pair in each coordinate direction.
-    !! Metric terms are averaged between the two nodes of each pair to satisfy
-    !! the discrete metric identities required for entropy conservation.
+    !! Convention (following Trixi.jl for curved meshes):
+    !! interior(n,i,j,k,iEl,iVar,r) holds the pre-projected SCALAR contravariant
+    !! two-point flux for the r-th computational direction.
+    !! MappedDivergence applies the reference-element split-form sum and
+    !! divides by J.
     implicit none
     class(MappedTwoPointVector3D_t),intent(in) :: this
     real(prec),intent(out) :: &
       df(1:this%N+1,1:this%N+1,1:this%N+1,1:this%nElem,1:this%nVar)
     ! Local
-    integer :: i,j,k,nn,d,iEl,iVar
-    real(prec) :: dfLoc,Fc1,Fc2,Fc3
+    integer :: i,j,k,iEl,iVar
+
+    call this%Divergence(df)
 
     do concurrent(i=1:this%N+1,j=1:this%N+1,k=1:this%N+1, &
                   iEl=1:this%nElem,iVar=1:this%nVar)
-
-      dfLoc = 0.0_prec
-      do nn = 1,this%N+1
-
-        ! Contravariant two-point flux in the xi^1 direction.
-        ! Metric terms are averaged between nodes (i,j,k) and (nn,j,k).
-        Fc1 = 0.0_prec
-        do d = 1,3
-          Fc1 = Fc1+0.5_prec*( &
-                this%geometry%dsdx%interior(i,j,k,iEl,1,d,1)+ &
-                this%geometry%dsdx%interior(nn,j,k,iEl,1,d,1))* &
-                this%interior(nn,i,j,k,iEl,iVar,d)
-        enddo
-
-        ! Contravariant two-point flux in the xi^2 direction.
-        ! Metric terms are averaged between nodes (i,j,k) and (i,nn,k).
-        Fc2 = 0.0_prec
-        do d = 1,3
-          Fc2 = Fc2+0.5_prec*( &
-                this%geometry%dsdx%interior(i,j,k,iEl,1,d,2)+ &
-                this%geometry%dsdx%interior(i,nn,k,iEl,1,d,2))* &
-                this%interior(nn,i,j,k,iEl,iVar,d)
-        enddo
-
-        ! Contravariant two-point flux in the xi^3 direction.
-        ! Metric terms are averaged between nodes (i,j,k) and (i,j,nn).
-        Fc3 = 0.0_prec
-        do d = 1,3
-          Fc3 = Fc3+0.5_prec*( &
-                this%geometry%dsdx%interior(i,j,k,iEl,1,d,3)+ &
-                this%geometry%dsdx%interior(i,j,nn,iEl,1,d,3))* &
-                this%interior(nn,i,j,k,iEl,iVar,d)
-        enddo
-
-        dfLoc = dfLoc+ &
-                this%interp%dMatrix(nn,i)*Fc1+ &
-                this%interp%dMatrix(nn,j)*Fc2+ &
-                this%interp%dMatrix(nn,k)*Fc3
-
-      enddo
-
-      df(i,j,k,iEl,iVar) = 2.0_prec*dfLoc/this%geometry%J%interior(i,j,k,iEl,1)
-
+      df(i,j,k,iEl,iVar) = df(i,j,k,iEl,iVar)/this%geometry%J%interior(i,j,k,iEl,1)
     enddo
 
   endsubroutine MappedDivergence_MappedTwoPointVector3D_t

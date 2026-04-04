@@ -37,12 +37,13 @@ program test
 contains
 
   integer function twopointvectordivergence_2d_constant() result(r)
-    !! Verifies that the split-form divergence of a constant two-point vector
-    !! field is identically zero.
+    !! Verifies that the split-form DG divergence of a constant two-point
+    !! vector field is identically zero.
     !!
-    !! Setting interior(nn,i,j,iel,ivar,idir) = 1 for all indices gives a
-    !! constant contravariant flux; each column of the derivative matrix sums
-    !! to zero, so the split-form sum must also vanish.
+    !! The Divergence method uses dSplitMatrix which has non-zero boundary
+    !! column sums. The surface term (M^{-1} B^T f_boundary) cancels these
+    !! exactly, so the full split-form divergence (volume + surface) of a
+    !! constant field is zero.
     use SELF_Constants
     use SELF_Lagrange
     use SELF_Scalar_2D
@@ -62,15 +63,17 @@ contains
     type(TwoPointVector2D) :: f
     type(Scalar2D) :: df
     type(Lagrange),target :: interp
+    integer :: i,j,iEl,iVar
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
     call f%Init(interp,nvar,nelem)
     call df%Init(interp,nvar,nelem)
 
+    ! Constant two-point flux
     f%interior = 1.0_prec
     call f%UpdateDevice()
 
@@ -80,6 +83,25 @@ contains
     call f%Divergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add weak-form surface term: M^{-1} B^T f_bn on the reference element (J=1).
+    ! The boundary normal flux fbn includes the outward normal sign:
+    !   east  (xi^1=+1): fbn = +f = +1
+    !   west  (xi^1=-1): fbn = -f = -1
+    !   north (xi^2=+1): fbn = +f = +1
+    !   south (xi^2=-1): fbn = -f = -1
+    do concurrent(i=1:controlDegree+1,j=1:controlDegree+1, &
+                  iEl=1:nelem,iVar=1:nvar)
+
+      df%interior(i,j,iEl,iVar) = df%interior(i,j,iEl,iVar)+ &
+                                  (interp%bMatrix(i,2)*(+1.0_prec)+ & ! east (+n)
+                                   interp%bMatrix(i,1)*(-1.0_prec))/ & ! west (-n)
+                                  interp%qWeights(i)+ &
+                                  (interp%bMatrix(j,2)*(+1.0_prec)+ & ! north (+n)
+                                   interp%bMatrix(j,1)*(-1.0_prec))/ & ! south (-n)
+                                  interp%qWeights(j)
+
+    enddo
 
     df%interior = abs(df%interior-0.0_prec)
 

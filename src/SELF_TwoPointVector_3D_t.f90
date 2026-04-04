@@ -69,6 +69,8 @@ contains
   subroutine Init_TwoPointVector3D_t(this,interp,nVar,nElem)
     !! Allocate the interior array for a 3-D two-point vector field.
     !! The interior array has rank 7 with layout (n,i,j,k,nEl,nVar,idir).
+    !!
+    !! Requires Gauss-Lobatto quadrature nodes (controlNodeType=GAUSS_LOBATTO).
     implicit none
     class(TwoPointVector3D_t),intent(out) :: this
     type(Lagrange),target,intent(in) :: interp
@@ -76,6 +78,11 @@ contains
     integer,intent(in) :: nElem
     ! Local
     integer :: i
+
+    if(interp%controlNodeType /= GAUSS_LOBATTO) then
+      print*,__FILE__//" : TwoPointVector3D requires Gauss-Lobatto quadrature nodes."
+      stop 1
+    endif
 
     this%interp => interp
     this%nVar = nVar

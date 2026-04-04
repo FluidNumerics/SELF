@@ -62,7 +62,7 @@ contains
     integer :: i,j,k,nn,iel,ivar
 
     call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
+                     controlNodeType=GAUSS_LOBATTO, &
                      M=targetDegree, &
                      targetNodeType=UNIFORM)
 
@@ -97,6 +97,24 @@ contains
     call f%Divergence(df%interior)
 #endif
     call df%UpdateHost()
+
+    ! Add surface term for V = (xi1, xi2, xi3)
+    block
+      integer :: i,j,k,iEl,iVar
+      integer :: Np1
+      Np1 = controlDegree+1
+      do concurrent(i=1:Np1,j=1:Np1,k=1:Np1,iEl=1:nelem,iVar=1:nvar)
+
+        df%interior(i,j,k,iEl,iVar) = df%interior(i,j,k,iEl,iVar)+ &
+                                      (interp%bMatrix(i,2)*(+interp%controlPoints(Np1))+ &
+                                       interp%bMatrix(i,1)*(-interp%controlPoints(1)))/interp%qWeights(i)+ &
+                                      (interp%bMatrix(j,2)*(+interp%controlPoints(Np1))+ &
+                                       interp%bMatrix(j,1)*(-interp%controlPoints(1)))/interp%qWeights(j)+ &
+                                      (interp%bMatrix(k,2)*(+interp%controlPoints(Np1))+ &
+                                       interp%bMatrix(k,1)*(-interp%controlPoints(1)))/interp%qWeights(k)
+
+      enddo
+    endblock
 
     print*,"absmax (nabla.F) :",maxval(df%interior)
     df%interior = abs(df%interior-3.0_prec)
