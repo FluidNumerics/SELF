@@ -64,12 +64,7 @@ contains
     call this%SourceMethod()
     call this%BoundaryFlux()
 
-    ! SourceMethod already downloaded solution%interior to host
     call this%TwoPointFluxMethod()
-    call gpuCheck(hipMemcpy(this%twoPointFlux%interior_gpu, &
-                            c_loc(this%twoPointFlux%interior), &
-                            sizeof(this%twoPointFlux%interior), &
-                            hipMemcpyHostToDevice))
 
     call this%twoPointFlux%MappedDivergence(this%fluxDivergence%interior_gpu)
 

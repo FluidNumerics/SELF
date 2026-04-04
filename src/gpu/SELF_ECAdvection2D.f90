@@ -27,10 +27,114 @@
 module SELF_ECAdvection2D
 
   use SELF_ECAdvection2D_t
+  use SELF_GPU
+  use SELF_GPUInterfaces
+  use iso_c_binding
 
   implicit none
 
   type,extends(ECAdvection2D_t),public :: ECAdvection2D
+
+  contains
+
+    procedure :: SetBoundaryCondition => SetBoundaryCondition_ECAdvection2D
+    procedure :: BoundaryFlux => BoundaryFlux_ECAdvection2D
+    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ECAdvection2D
+    procedure :: SourceMethod => SourceMethod_ECAdvection2D
+
   endtype ECAdvection2D
+
+  interface
+    subroutine setboundarycondition_ecadvection2d_gpu(extboundary,boundary,sideinfo,N,nel,nvar) &
+      bind(c,name="setboundarycondition_ecadvection2d_gpu")
+      use iso_c_binding
+      type(c_ptr),value :: extboundary,boundary,sideinfo
+      integer(c_int),value :: N,nel,nvar
+    endsubroutine setboundarycondition_ecadvection2d_gpu
+  endinterface
+
+  interface
+    subroutine boundaryflux_ecadvection2d_gpu(fb,fextb,nhat,nscale,flux,u,v,N,nel,nvar) &
+      bind(c,name="boundaryflux_ecadvection2d_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: fb,fextb,nhat,nscale,flux
+      real(c_prec),value :: u,v
+      integer(c_int),value :: N,nel,nvar
+    endsubroutine boundaryflux_ecadvection2d_gpu
+  endinterface
+
+  interface
+    subroutine twopointfluxmethod_ecadvection2d_gpu(f,s,dsdx,u,v,N,nvar,nel) &
+      bind(c,name="twopointfluxmethod_ecadvection2d_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: f,s,dsdx
+      real(c_prec),value :: u,v
+      integer(c_int),value :: N,nvar,nel
+    endsubroutine twopointfluxmethod_ecadvection2d_gpu
+  endinterface
+
+contains
+
+  subroutine SetBoundaryCondition_ECAdvection2D(this)
+    !! Mirror BC on GPU: extBoundary = boundary at all domain faces.
+    implicit none
+    class(ECAdvection2D),intent(inout) :: this
+
+    call setboundarycondition_ecadvection2d_gpu( &
+      this%solution%extboundary_gpu, &
+      this%solution%boundary_gpu, &
+      this%mesh%sideinfo_gpu, &
+      this%solution%interp%N, &
+      this%solution%nelem, &
+      this%solution%nvar)
+
+  endsubroutine SetBoundaryCondition_ECAdvection2D
+
+  subroutine BoundaryFlux_ECAdvection2D(this)
+    !! LLF Riemann flux on GPU — fully device-resident.
+    implicit none
+    class(ECAdvection2D),intent(inout) :: this
+
+    call boundaryflux_ecadvection2d_gpu( &
+      this%solution%boundary_gpu, &
+      this%solution%extboundary_gpu, &
+      this%geometry%nhat%boundary_gpu, &
+      this%geometry%nscale%boundary_gpu, &
+      this%flux%boundarynormal_gpu, &
+      this%u,this%v, &
+      this%solution%interp%N, &
+      this%solution%nelem, &
+      this%solution%nvar)
+
+  endsubroutine BoundaryFlux_ECAdvection2D
+
+  subroutine TwoPointFluxMethod_ECAdvection2D(this)
+    !! Contravariant EC two-point flux on GPU — fully device-resident.
+    implicit none
+    class(ECAdvection2D),intent(inout) :: this
+
+    call twopointfluxmethod_ecadvection2d_gpu( &
+      this%twoPointFlux%interior_gpu, &
+      this%solution%interior_gpu, &
+      this%geometry%dsdx%interior_gpu, &
+      this%u,this%v, &
+      this%solution%interp%N, &
+      this%solution%nvar, &
+      this%solution%nelem)
+
+  endsubroutine TwoPointFluxMethod_ECAdvection2D
+
+  subroutine SourceMethod_ECAdvection2D(this)
+    !! No source term — zero the device array without touching the host.
+    implicit none
+    class(ECAdvection2D),intent(inout) :: this
+
+    call gpuCheck(hipMemset(this%source%interior_gpu, &
+                            0, &
+                            sizeof(this%source%interior)))
+
+  endsubroutine SourceMethod_ECAdvection2D
 
 endmodule SELF_ECAdvection2D

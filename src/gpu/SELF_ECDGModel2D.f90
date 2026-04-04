@@ -70,12 +70,11 @@ contains
     call this%SourceMethod()
     call this%BoundaryFlux() ! CPU, uploads flux%boundaryNormal_gpu
 
-    ! Two-point flux: SourceMethod already downloaded solution%interior to host;
+    ! Two-point flux: concrete GPU models (e.g. ECAdvection2D) override
+    ! TwoPointFluxMethod to run entirely on device.  Models that compute
+    ! on the host should call twoPointFlux%UpdateDevice() at the end of
+    ! their TwoPointFluxMethod override.
     call this%TwoPointFluxMethod()
-    call gpuCheck(hipMemcpy(this%twoPointFlux%interior_gpu, &
-                            c_loc(this%twoPointFlux%interior), &
-                            sizeof(this%twoPointFlux%interior), &
-                            hipMemcpyHostToDevice))
 
     ! EC volume divergence (uses MappedTwoPointVectorDivergence_2D_gpu)
     call this%twoPointFlux%MappedDivergence(this%fluxDivergence%interior_gpu)
