@@ -239,4 +239,24 @@ module SELF_GPUInterfaces
     endsubroutine MappedTwoPointVectorDivergence_3D_gpu
   endinterface
 
+  interface
+    subroutine ECDGSurfaceContribution_2D_gpu(fbn,jacobian,bmatrix,qweights,df,N,nvar,nel) &
+      bind(c,name="ECDGSurfaceContribution_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: fbn,jacobian,bmatrix,qweights,df
+      integer(c_int),value :: N,nvar,nel
+    endsubroutine ECDGSurfaceContribution_2D_gpu
+  endinterface
+
+  interface
+    subroutine ECDGSurfaceContribution_3D_gpu(fbn,jacobian,bmatrix,qweights,df,N,nvar,nel) &
+      bind(c,name="ECDGSurfaceContribution_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: fbn,jacobian,bmatrix,qweights,df
+      integer(c_int),value :: N,nvar,nel
+    endsubroutine ECDGSurfaceContribution_3D_gpu
+  endinterface
+
 endmodule SELF_GPUInterfaces

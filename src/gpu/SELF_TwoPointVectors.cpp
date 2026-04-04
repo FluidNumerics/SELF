@@ -306,3 +306,105 @@ extern "C"
     }
   }
 }
+
+// ============================================================
+// ECDGSurfaceContribution_2D / _3D
+//
+// Adds the weak-form DG surface contribution divided by the element Jacobian
+// to the flux divergence array.  This is the surface term in the EC-DGSEM
+// tendency:
+//
+//   df += (1/J) * M^{-1} * B^T * f_bn
+//
+// where f_bn = flux%boundaryNormal (Riemann fluxes scaled by nScale).
+// The layout of f_bn is SCB_2D_INDEX / SCB_3D_INDEX (scalar boundary).
+// The Jacobian array has layout SC_2D_INDEX / SC_3D_INDEX (scalar interior).
+// ============================================================
+
+__global__ void __launch_bounds__(256) ECDGSurfaceContribution_2D_gpukernel(
+    real *fbn, real *jacobian, real *bMatrix, real *qWeights, real *df, int N, int nq)
+{
+  uint32_t iq  = threadIdx.x;
+  if (iq < nq) {
+    uint32_t i   = iq % (N+1);
+    uint32_t j   = iq / (N+1);
+    uint32_t iel = blockIdx.x;
+    uint32_t nel = gridDim.x;
+    uint32_t ivar = blockIdx.y;
+
+    real J = jacobian[iq + nq*iel];
+
+    df[iq + nq*(iel + nel*ivar)] +=
+      (bMatrix[i+(N+1)]*fbn[SCB_2D_INDEX(j,1,iel,ivar,N,nel)] + // east
+       bMatrix[i]       *fbn[SCB_2D_INDEX(j,3,iel,ivar,N,nel)]) // west
+      / (qWeights[i]*J)
+      +
+      (bMatrix[j+(N+1)]*fbn[SCB_2D_INDEX(i,2,iel,ivar,N,nel)] + // north
+       bMatrix[j]       *fbn[SCB_2D_INDEX(i,0,iel,ivar,N,nel)]) // south
+      / (qWeights[j]*J);
+  }
+}
+
+extern "C"
+{
+  void ECDGSurfaceContribution_2D_gpu(
+      real *fbn, real *jacobian, real *bMatrix, real *qWeights, real *df,
+      int N, int nvar, int nel)
+  {
+    int nq = (N+1)*(N+1);
+    if (N <= 7) {
+      ECDGSurfaceContribution_2D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(
+        fbn, jacobian, bMatrix, qWeights, df, N, nq);
+    } else {
+      ECDGSurfaceContribution_2D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), 0, 0>>>(
+        fbn, jacobian, bMatrix, qWeights, df, N, nq);
+    }
+  }
+}
+
+__global__ void __launch_bounds__(512) ECDGSurfaceContribution_3D_gpukernel(
+    real *fbn, real *jacobian, real *bMatrix, real *qWeights, real *df, int N, int nq)
+{
+  uint32_t iq   = threadIdx.x;
+  if (iq < nq) {
+    uint32_t i    = iq % (N+1);
+    uint32_t j    = (iq/(N+1)) % (N+1);
+    uint32_t k    = iq/(N+1)/(N+1);
+    uint32_t iel  = blockIdx.x;
+    uint32_t nel  = gridDim.x;
+    uint32_t ivar = blockIdx.y;
+
+    real J = jacobian[iq + nq*iel];
+
+    df[iq + nq*(iel + nel*ivar)] +=
+      (fbn[SCB_3D_INDEX(i,j,5,iel,ivar,N,nel)]*bMatrix[k+(N+1)] + // top
+       fbn[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])         // bottom
+      / (qWeights[k]*J)
+      +
+      (fbn[SCB_3D_INDEX(j,k,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] + // east
+       fbn[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])         // west
+      / (qWeights[i]*J)
+      +
+      (fbn[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] + // north
+       fbn[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])         // south
+      / (qWeights[j]*J);
+  }
+}
+
+extern "C"
+{
+  void ECDGSurfaceContribution_3D_gpu(
+      real *fbn, real *jacobian, real *bMatrix, real *qWeights, real *df,
+      int N, int nvar, int nel)
+  {
+    int nq = (N+1)*(N+1)*(N+1);
+    if (N < 4) {
+      ECDGSurfaceContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(
+        fbn, jacobian, bMatrix, qWeights, df, N, nq);
+    } else if (N >= 4 && N < 8) {
+      ECDGSurfaceContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(
+        fbn, jacobian, bMatrix, qWeights, df, N, nq);
+    }
+  }
+}
+}
