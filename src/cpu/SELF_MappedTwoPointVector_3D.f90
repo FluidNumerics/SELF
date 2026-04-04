@@ -31,7 +31,6 @@ module SELF_MappedTwoPointVector_3D
   implicit none
 
   type,extends(MappedTwoPointVector3D_t),public :: MappedTwoPointVector3D
-    character(3) :: backend = "cpu"
   endtype MappedTwoPointVector3D
 
 endmodule SELF_MappedTwoPointVector_3D
