@@ -127,13 +127,14 @@ contains
   endsubroutine TwoPointFluxMethod_ECAdvection2D
 
   subroutine SourceMethod_ECAdvection2D(this)
-    !! No source term — zero the device array without touching the host.
+    !! No source term — upload the zero-initialised host array to device.
     implicit none
     class(ECAdvection2D),intent(inout) :: this
 
-    call gpuCheck(hipMemset(this%source%interior_gpu, &
-                            0, &
-                            sizeof(this%source%interior)))
+    call gpuCheck(hipMemcpy(this%source%interior_gpu, &
+                            c_loc(this%source%interior), &
+                            sizeof(this%source%interior), &
+                            hipMemcpyHostToDevice))
 
   endsubroutine SourceMethod_ECAdvection2D
 
