@@ -171,7 +171,10 @@ contains
           do i = 1,this%solution%interp%N+1
             jac = abs(this%geometry%J%interior(i,j,k,iel,1))
             s = this%solution%interior(i,j,k,iel,1:this%nvar)
-            e = e+this%entropy_func(s)*jac
+            e = e+this%entropy_func(s)*jac* &
+                this%solution%interp%qWeights(i)* &
+                this%solution%interp%qWeights(j)* &
+                this%solution%interp%qWeights(k)
           enddo
         enddo
       enddo
