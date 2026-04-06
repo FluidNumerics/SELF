@@ -146,6 +146,8 @@ add_fortran_tests (
     "mappedtwopointvectordivergence_3d_linear.f90"
     "ec_advection_2d_rk3.f90"
     "ec_advection_2d_entropy_conservation.f90"
+    "ec_advection_3d_rk3.f90"
+    "ec_advection_3d_entropy_conservation.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
