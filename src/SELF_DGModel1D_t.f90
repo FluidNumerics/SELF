@@ -307,7 +307,7 @@ contains
       do i = 1,this%solution%interp%N+1
         J = this%geometry%dxds%interior(i,iel,1)
         s(1:this%solution%nvar) = this%solution%interior(i,iel,1:this%solution%nvar)
-        e = e+this%entropy_func(s)*J
+        e = e+this%entropy_func(s)*J*this%solution%interp%qWeights(i)
       enddo
     enddo
 
