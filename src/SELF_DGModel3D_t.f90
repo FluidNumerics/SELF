@@ -36,6 +36,7 @@ module SELF_DGModel3D_t
   use HDF5
   use FEQParse
   use SELF_Model
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -49,12 +50,15 @@ module SELF_DGModel3D_t
     type(MappedScalar3D)   :: workSol
     type(Mesh3D),pointer   :: mesh
     type(SEMHex),pointer  :: geometry
+    type(BoundaryConditionList) :: hyperbolicBCs
+    type(BoundaryConditionList) :: parabolicBCs
 
   contains
 
     procedure :: Init => Init_DGModel3D_t
     procedure :: SetMetadata => SetMetadata_DGModel3D_t
     procedure :: Free => Free_DGModel3D_t
+    procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel3D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel3D_t
     procedure :: BoundaryFlux => BoundaryFlux_DGModel3D_t
@@ -109,7 +113,12 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
+    call this%hyperbolicBCs%Init()
+    call this%parabolicBCs%Init()
+
     call this%AdditionalInit()
+
+    call this%MapBoundaryConditions()
 
     call this%SetMetadata()
 
@@ -143,6 +152,8 @@ contains
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
+    call this%hyperbolicBCs%Free()
+    call this%parabolicBCs%Free()
     call this%AdditionalFree()
 
   endsubroutine Free_DGModel3D_t
@@ -431,119 +442,113 @@ contains
 
   endsubroutine sourcemethod_DGModel3D_t
 
-  subroutine setboundarycondition_DGModel3D_t(this)
-    !! Boundary conditions for the solution are set to
-    !! 0 for the external state to provide radiation type
-    !! boundary conditions.
+  subroutine MapBoundaryConditions_DGModel3D_t(this)
+    !! Scan the mesh sideInfo and populate the elements/sides
+    !! arrays for each registered boundary condition.
     implicit none
     class(DGModel3D_t),intent(inout) :: this
-    ! local
-    integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: nhat(1:3),x(1:3)
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    integer :: iEl,k,e2,bcid
+    integer :: count,n
+    integer,allocatable :: elems(:),sds(:)
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
+    ! Map hyperbolic BCs
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      count = 0
+      do iEl = 1,this%mesh%nElem
+        do k = 1,6
+          e2 = this%mesh%sideInfo(3,k,iEl)
+          bcid = this%mesh%sideInfo(5,k,iEl)
+          if(e2 == 0 .and. bcid == bc%bcid) count = count+1
+        enddo
+      enddo
 
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Prescribed(x,this%t)
-            enddo
+      if(count > 0) then
+        allocate(elems(count),sds(count))
+        n = 0
+        do iEl = 1,this%mesh%nElem
+          do k = 1,6
+            e2 = this%mesh%sideInfo(3,k,iEl)
+            bcid = this%mesh%sideInfo(5,k,iEl)
+            if(e2 == 0 .and. bcid == bc%bcid) then
+              n = n+1
+              elems(n) = iEl
+              sds(n) = k
+            endif
           enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Radiation(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        endif
+        enddo
+        call this%hyperbolicBCs%PopulateBoundaries(bc%bcid,count,elems,sds)
+        deallocate(elems,sds)
       endif
+      bc => bc%next
+    enddo
 
+    ! Map parabolic BCs
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      count = 0
+      do iEl = 1,this%mesh%nElem
+        do k = 1,6
+          e2 = this%mesh%sideInfo(3,k,iEl)
+          bcid = this%mesh%sideInfo(5,k,iEl)
+          if(e2 == 0 .and. bcid == bc%bcid) count = count+1
+        enddo
+      enddo
+
+      if(count > 0) then
+        allocate(elems(count),sds(count))
+        n = 0
+        do iEl = 1,this%mesh%nElem
+          do k = 1,6
+            e2 = this%mesh%sideInfo(3,k,iEl)
+            bcid = this%mesh%sideInfo(5,k,iEl)
+            if(e2 == 0 .and. bcid == bc%bcid) then
+              n = n+1
+              elems(n) = iEl
+              sds(n) = k
+            endif
+          enddo
+        enddo
+        call this%parabolicBCs%PopulateBoundaries(bc%bcid,count,elems,sds)
+        deallocate(elems,sds)
+      endif
+      bc => bc%next
+    enddo
+
+  endsubroutine MapBoundaryConditions_DGModel3D_t
+
+  subroutine setboundarycondition_DGModel3D_t(this)
+    !! Apply registered boundary conditions for the solution.
+    implicit none
+    class(DGModel3D_t),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    procedure(SELF_bcMethod),pointer :: apply_bc
+
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      apply_bc => bc%bcMethod
+      call apply_bc(bc,this)
+      bc => bc%next
     enddo
 
   endsubroutine setboundarycondition_DGModel3D_t
 
   subroutine setgradientboundarycondition_DGModel3D_t(this)
-    !! Boundary conditions for the solution are set to
-    !! 0 for the external state to provide radiation type
-    !! boundary conditions.
+    !! Apply registered boundary conditions for the solution gradient.
     implicit none
     class(DGModel3D_t),intent(inout) :: this
-    ! local
-    integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: dsdx(1:this%nvar,1:3)
-    real(prec) :: nhat(1:3),x(1:3)
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    procedure(SELF_bcMethod),pointer :: apply_bc
 
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
-
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Prescribed(x,this%t)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Radiation(dsdx,nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_NoNormalFlow(dsdx,nhat)
-            enddo
-          enddo
-
-        endif
-      endif
-
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      apply_bc => bc%bcMethod
+      call apply_bc(bc,this)
+      bc => bc%next
     enddo
 
   endsubroutine setgradientboundarycondition_DGModel3D_t

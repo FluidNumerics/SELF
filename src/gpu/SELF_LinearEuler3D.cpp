@@ -122,55 +122,45 @@ extern "C"
   }
 
 }
-__global__ void setboundarycondition_LinearEuler3D_gpukernel(real *extBoundary, real *boundary, int *sideInfo, real *nhat,  int N, int nel){
-
+// Radiation BC kernel for 3D Linear Euler
+// Sets extBoundary = 0 on pre-filtered boundary faces
+__global__ void hbc3d_radiation_lineareuler3d_kernel(
+    real *extBoundary,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel)
+{
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
-  uint32_t ndof = (N+1)*(N+1)*6*nel;
+  uint32_t dofs_per_face = (N+1)*(N+1);
+  uint32_t total_dofs = nBoundaries * dofs_per_face;
 
-  if(idof < ndof){
-    uint32_t i = idof % (N+1);
-    uint32_t j = (idof/(N+1)) % (N+1);
-    uint32_t s1 = (idof/(N+1)/(N+1)) % 6;
-    uint32_t e1 = idof/(N+1)/(N+1)/6;
-    uint32_t e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-    uint32_t bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
-    if( e2 == 0){
-      // if( bcid == SELF_BC_NONORMALFLOW ){
+  if(idof < total_dofs){
+    uint32_t i  = idof % (N+1);
+    uint32_t j  = (idof / (N+1)) % (N+1);
+    uint32_t n  = idof / dofs_per_face;
+    uint32_t e1 = elements[n] - 1;
+    uint32_t s1 = sides[n] - 1;
 
-      //   real u = boundary[SCB_3D_INDEX(i,s1,e1,1,N,nel)];
-      //   real v = boundary[SCB_3D_INDEX(i,s1,e1,2,N,nel)];
-      //   real nx = nhat[VEB_3D_INDEX(i,s1,e1,0,0,N,nel,1)];
-      //   real ny = nhat[VEB_3D_INDEX(i,s1,e1,0,1,N,nel,1)];
-      //   extBoundary[SCB_3D_INDEX(i,s1,e1,0,N,nel)] = boundary[SCB_3D_INDEX(i,s1,e1,0,N,nel)]; // density
-      //   extBoundary[SCB_3D_INDEX(i,s1,e1,1,N,nel)] = (ny*ny-nx*nx)*u-2.0*nx*ny*v; // u
-      //   extBoundary[SCB_3D_INDEX(i,s1,e1,2,N,nel)] = (nx*nx-ny*ny)*v-2.0*nx*ny*u; //v
-      //   extBoundary[SCB_3D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_3D_INDEX(i,s1,e1,3,N,nel)]; // pressure
-
-      // } else 
-      if ( bcid == SELF_BC_RADIATION ){
-
-        extBoundary[SCB_3D_INDEX(i,j,s1,e1,0,N,nel)] = 0.0;
-        extBoundary[SCB_3D_INDEX(i,j,s1,e1,1,N,nel)] = 0.0;
-        extBoundary[SCB_3D_INDEX(i,j,s1,e1,2,N,nel)] = 0.0;
-        extBoundary[SCB_3D_INDEX(i,j,s1,e1,3,N,nel)] = 0.0;
-        extBoundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)] = 0.0;
-
-      }
-    
-    }
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,0,N,nel)] = 0.0;
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,1,N,nel)] = 0.0;
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,2,N,nel)] = 0.0;
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,3,N,nel)] = 0.0;
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)] = 0.0;
   }
 }
 
-extern "C" 
+extern "C"
 {
-  void setboundarycondition_LinearEuler3D_gpu(real *extBoundary, real *boundary, int *sideInfo, real *nhat,  int N, int nel){
+  void hbc3d_radiation_lineareuler3d_gpu(
+      real *extBoundary,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel)
+  {
     int threads_per_block = 256;
-    int ndof = (N+1)*(N+1)*6*nel;
-    int nblocks_x = ndof/threads_per_block +1;
-
-    dim3 nblocks(nblocks_x,1,1);
-    dim3 nthreads(threads_per_block,1,1);
-
-	setboundarycondition_LinearEuler3D_gpukernel<<<nblocks,nthreads, 0, 0>>>(extBoundary,boundary,sideInfo,nhat,N,nel);
+    int dofs_per_face = (N+1)*(N+1);
+    int total_dofs = nBoundaries * dofs_per_face;
+    int nblocks_x = total_dofs/threads_per_block + 1;
+    hbc3d_radiation_lineareuler3d_kernel<<<dim3(nblocks_x,1,1),
+      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary,
+        elements, sides, nBoundaries, N, nel);
   }
 }

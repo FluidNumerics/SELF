@@ -36,6 +36,7 @@ module lineareuler2d_planewave_prop_model
 !! See section 5.4.3 of D. A. Kopriva, "Implementing Spectral Methods for Partial Differential Equations" (2009)
 
   use self_lineareuler2d
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -50,11 +51,27 @@ module lineareuler2d_planewave_prop_model
   contains
 
     procedure :: setInitialCondition
-    procedure :: hbc2d_Prescribed => hbc2d_Prescribed_lineareuler2d_planewave ! override for the hyperbolic boundary conditions
+    procedure :: AdditionalInit => AdditionalInit_lineareuler2d_planewave
 
   endtype lineareuler2d_planewave
 
 contains
+
+  subroutine AdditionalInit_lineareuler2d_planewave(this)
+    implicit none
+    class(lineareuler2d_planewave),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    ! Register the parent class NoNormalFlow BC first
+    call AdditionalInit_LinearEuler2D_t(this)
+
+    ! Register the prescribed BC
+    bcfunc => hbc2d_Prescribed_lineareuler2d_planewave
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_PRESCRIBED,"prescribed",bcfunc)
+
+  endsubroutine AdditionalInit_lineareuler2d_planewave
 
   subroutine setInitialCondition(this)
     implicit none
@@ -87,29 +104,39 @@ contains
 
   endsubroutine setInitialCondition
 
-  pure function hbc2d_Prescribed_lineareuler2d_planewave(this,x,t) result(exts)
-    class(lineareuler2d_planewave),intent(in) :: this
-    real(prec),intent(in) :: x(1:2)
-    real(prec),intent(in) :: t
-    real(prec) :: exts(1:this%nvar)
+  subroutine hbc2d_Prescribed_lineareuler2d_planewave(bc,mymodel)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
     ! Local
+    integer :: n,i,iEl,j
+    real(prec) :: x(1:2)
     real(prec) :: p,rho,u,v,phase,shape
 
-    p = this%p
-    rho = this%p/this%c/this%c
-    u = this%p*this%wx/this%c
-    v = this%p*this%wy/this%c
+    select type(m => mymodel)
+    class is(lineareuler2d_planewave)
+      p = m%p
+      rho = m%p/m%c/m%c
+      u = m%p*m%wx/m%c
+      v = m%p*m%wy/m%c
 
-    phase = this%wx*(x(1)-this%x0)+this%wy*(x(2)-this%y0)-this%c*this%t
-    shape = exp(-phase*phase/(this%L*this%L))
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        j = bc%sides(n)
+        do i = 1,m%solution%interp%N+1
+          x = m%geometry%x%boundary(i,j,iEl,1,1:2)
 
-    exts(1) = rho*shape ! density
-    exts(2) = u*shape ! u
-    exts(3) = v*shape ! v
-    exts(4) = p*shape ! pressure
-    if(.false.) exts(1) = exts(1)+t ! suppress unused-dummy-argument warning
+          phase = m%wx*(x(1)-m%x0)+m%wy*(x(2)-m%y0)-m%c*m%t
+          shape = exp(-phase*phase/(m%L*m%L))
 
-  endfunction hbc2d_Prescribed_lineareuler2d_planewave
+          m%solution%extBoundary(i,j,iEl,1) = rho*shape ! density
+          m%solution%extBoundary(i,j,iEl,2) = u*shape ! u
+          m%solution%extBoundary(i,j,iEl,3) = v*shape ! v
+          m%solution%extBoundary(i,j,iEl,4) = p*shape ! pressure
+        enddo
+      enddo
+    endselect
+
+  endsubroutine hbc2d_Prescribed_lineareuler2d_planewave
 
 endmodule lineareuler2d_planewave_prop_model
 

@@ -5,35 +5,40 @@
 // Mirror boundary condition: extBoundary = boundary at domain faces
 // ============================================================
 
-__global__ void setboundarycondition_ecadvection2d_gpukernel(
-    real *extBoundary, real *boundary, int *sideInfo, int N, int nel, int nvar)
+// Mirror BC kernel for 2D EC Advection
+// Sets extBoundary = boundary on pre-filtered boundary faces
+__global__ void hbc2d_mirror_ecadvection2d_kernel(
+    real *extBoundary, real *boundary,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel, int nvar)
 {
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
-  uint32_t ndof = (N+1)*4*nel;
+  uint32_t total_dofs = nBoundaries * (N+1);
 
-  if (idof < ndof) {
+  if (idof < total_dofs) {
     uint32_t i  = idof % (N+1);
-    uint32_t s1 = (idof/(N+1)) % 4;
-    uint32_t e1 = idof/(N+1)/4;
-    uint32_t e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-    if (e2 == 0) {
-      uint32_t ivar = blockIdx.y;
-      extBoundary[SCB_2D_INDEX(i,s1,e1,ivar,N,nel)] =
-        boundary[SCB_2D_INDEX(i,s1,e1,ivar,N,nel)];
-    }
+    uint32_t n  = idof / (N+1);
+    uint32_t e1 = elements[n] - 1;
+    uint32_t s1 = sides[n] - 1;
+    uint32_t ivar = blockIdx.y;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,ivar,N,nel)] =
+      boundary[SCB_2D_INDEX(i,s1,e1,ivar,N,nel)];
   }
 }
 
 extern "C"
 {
-  void setboundarycondition_ecadvection2d_gpu(
-      real *extBoundary, real *boundary, int *sideInfo, int N, int nel, int nvar)
+  void hbc2d_mirror_ecadvection2d_gpu(
+      real *extBoundary, real *boundary,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel, int nvar)
   {
-    int ndof = (N+1)*4*nel;
+    int total_dofs = nBoundaries * (N+1);
     int threads_per_block = 256;
-    int nblocks_x = ndof/threads_per_block + 1;
-    setboundarycondition_ecadvection2d_gpukernel<<<dim3(nblocks_x,nvar,1),
-      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary, boundary, sideInfo, N, nel, nvar);
+    int nblocks_x = total_dofs/threads_per_block + 1;
+    hbc2d_mirror_ecadvection2d_kernel<<<dim3(nblocks_x,nvar,1),
+      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary, boundary,
+        elements, sides, nBoundaries, N, nel, nvar);
   }
 }
 

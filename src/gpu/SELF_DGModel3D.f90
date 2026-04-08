@@ -29,6 +29,9 @@ module SELF_DGModel3D
   use SELF_DGModel3D_t
   use SELF_GPU
   use SELF_GPUInterfaces
+  use SELF_BoundaryConditions
+  use SELF_Geometry_3D
+  use SELF_Mesh_3D
 
   implicit none
 
@@ -36,14 +39,15 @@ module SELF_DGModel3D
 
   contains
 
+    procedure :: Init => Init_DGModel3D
+    procedure :: Free => Free_DGModel3D
+
     procedure :: UpdateSolution => UpdateSolution_DGModel3D
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel3D
     procedure :: BoundaryFlux => BoundaryFlux_DGModel3D
     procedure :: FluxMethod => fluxmethod_DGModel3D
     procedure :: SourceMethod => sourcemethod_DGModel3D
-    procedure :: SetBoundaryCondition => setboundarycondition_DGModel3D
-    procedure :: SetGradientBoundaryCondition => setgradientboundarycondition_DGModel3D
 
     procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D
     procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D
@@ -293,148 +297,77 @@ contains
 
   endsubroutine sourcemethod_DGModel3D
 
-  subroutine setboundarycondition_DGModel3D(this)
-    !! Boundary conditions for the solution are set to
-    !! 0 for the external state to provide radiation type
-    !! boundary conditions.
+  subroutine Init_DGModel3D(this,mesh,geometry)
+    !! Initialize the 3D DG model, then upload BC element/side arrays to GPU.
     implicit none
-    class(DGModel3D),intent(inout) :: this
-    ! local
-    integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: nhat(1:3),x(1:3)
+    class(DGModel3D),intent(out) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    ! Local
+    type(BoundaryCondition),pointer :: bc
 
-    call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
-                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
-                            hipMemcpyDeviceToHost))
+    call Init_DGModel3D_t(this,mesh,geometry)
 
-    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
-                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
-                            hipMemcpyDeviceToHost))
-
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
-
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Prescribed(x,this%t)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_Radiation(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                this%hbc3d_NoNormalFlow(this%solution%boundary(i,j,k,iEl,1:this%nvar),nhat)
-            enddo
-          enddo
-
-        endif
+    ! Upload hyperbolic BC element/side arrays to device
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
       endif
-
+      bc => bc%next
     enddo
 
-    call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
-                            c_loc(this%solution%extBoundary), &
-                            sizeof(this%solution%extBoundary), &
-                            hipMemcpyHostToDevice))
-
-  endsubroutine setboundarycondition_DGModel3D
-
-  subroutine setgradientboundarycondition_DGModel3D(this)
-    !! Boundary conditions for the solution are set to
-    !! 0 for the external state to provide radiation type
-    !! boundary conditions.
-    implicit none
-    class(DGModel3D),intent(inout) :: this
-    ! local
-    integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: dsdx(1:this%nvar,1:3)
-    real(prec) :: nhat(1:3),x(1:3)
-
-    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
-                            this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
-                            hipMemcpyDeviceToHost))
-
-    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%extboundary), &
-                            this%solutiongradient%extboundary_gpu,sizeof(this%solutiongradient%extboundary), &
-                            hipMemcpyDeviceToHost))
-
-    do concurrent(k=1:6,iel=1:this%mesh%nElem)
-
-      bcid = this%mesh%sideInfo(5,k,iEl) ! Boundary Condition ID
-      e2 = this%mesh%sideInfo(3,k,iEl) ! Neighboring Element ID
-
-      if(e2 == 0) then
-        if(bcid == SELF_BC_PRESCRIBED) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              x = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Prescribed(x,this%t)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_RADIATION) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_Radiation(dsdx,nhat)
-            enddo
-          enddo
-
-        elseif(bcid == SELF_BC_NONORMALFLOW) then
-
-          do j = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-            do i = 1,this%solutiongradient%interp%N+1 ! Loop over quadrature points
-              nhat = this%geometry%nhat%boundary(i,j,k,iEl,1,1:3)
-
-              dsdx = this%solutiongradient%boundary(i,j,k,iEl,1:this%nvar,1:3)
-
-              this%solutiongradient%extBoundary(i,j,k,iEl,1:this%nvar,1:3) = &
-                this%pbc3d_NoNormalFlow(dsdx,nhat)
-            enddo
-          enddo
-
-        endif
+    ! Upload parabolic BC element/side arrays to device
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
       endif
-
+      bc => bc%next
     enddo
 
-    call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
-                            c_loc(this%solutiongradient%extBoundary), &
-                            sizeof(this%solutiongradient%extBoundary), &
-                            hipMemcpyHostToDevice))
+  endsubroutine Init_DGModel3D
 
-  endsubroutine setgradientboundarycondition_DGModel3D
+  subroutine Free_DGModel3D(this)
+    !! Free the 3D DG model, including GPU BC arrays.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    ! Free hyperbolic BC device arrays
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    ! Free parabolic BC device arrays
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    call Free_DGModel3D_t(this)
+
+  endsubroutine Free_DGModel3D
 
   subroutine CalculateTendency_DGModel3D(this)
     implicit none

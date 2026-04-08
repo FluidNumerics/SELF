@@ -15,7 +15,7 @@
 ! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
 !    this software without specific prior written permission.
 !
-! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 ! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 ! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 ! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
@@ -27,12 +27,14 @@
 module self_LinearShallowWater2D
 
   use self_LinearShallowWater2D_t
+  use SELF_GPU
+  use SELF_BoundaryConditions
 
   implicit none
 
   type,extends(LinearShallowWater2D_t) :: LinearShallowWater2D
   contains
-    procedure :: setboundarycondition => setboundarycondition_LinearShallowWater2D
+    procedure :: AdditionalInit => AdditionalInit_LinearShallowWater2D
     procedure :: boundaryflux => boundaryflux_LinearShallowWater2D
     procedure :: fluxmethod => fluxmethod_LinearShallowWater2D
     procedure :: sourcemethod => sourcemethod_LinearShallowWater2D
@@ -40,12 +42,23 @@ module self_LinearShallowWater2D
   endtype LinearShallowWater2D
 
   interface
-    subroutine setboundarycondition_LinearShallowWater2D_gpu(extboundary,boundary,sideinfo,nhat,N,nel,nvar) &
-      bind(c,name="setboundarycondition_LinearShallowWater2D_gpu")
+    subroutine hbc2d_nonormalflow_linearshallowwater2d_gpu(extboundary,boundary,nhat, &
+                                                           elements,sides,nBoundaries,N,nel) &
+      bind(c,name="hbc2d_nonormalflow_linearshallowwater2d_gpu")
       use iso_c_binding
-      type(c_ptr),value :: extboundary,boundary,sideinfo,nhat
-      integer(c_int),value :: N,nel,nvar
-    endsubroutine setboundarycondition_LinearShallowWater2D_gpu
+      type(c_ptr),value :: extboundary,boundary,nhat,elements,sides
+      integer(c_int),value :: nBoundaries,N,nel
+    endsubroutine hbc2d_nonormalflow_linearshallowwater2d_gpu
+  endinterface
+
+  interface
+    subroutine hbc2d_radiation_linearshallowwater2d_gpu(extboundary, &
+                                                        elements,sides,nBoundaries,N,nel) &
+      bind(c,name="hbc2d_radiation_linearshallowwater2d_gpu")
+      use iso_c_binding
+      type(c_ptr),value :: extboundary,elements,sides
+      integer(c_int),value :: nBoundaries,N,nel
+    endsubroutine hbc2d_radiation_linearshallowwater2d_gpu
   endinterface
 
   interface
@@ -83,6 +96,60 @@ module self_LinearShallowWater2D
 
 contains
 
+  subroutine AdditionalInit_LinearShallowWater2D(this)
+    implicit none
+    class(LinearShallowWater2D),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    ! Call parent _t AdditionalInit (registers CPU BCs + initializes fCori)
+    call AdditionalInit_LinearShallowWater2D_t(this)
+
+    ! Re-register with GPU-accelerated versions
+    bcfunc => hbc2d_NoNormalFlow_LinearShallowWater2D_GPU_wrapper
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+    bcfunc => hbc2d_Radiation_LinearShallowWater2D_GPU_wrapper
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_RADIATION,"radiation",bcfunc)
+
+  endsubroutine AdditionalInit_LinearShallowWater2D
+
+  subroutine hbc2d_NoNormalFlow_LinearShallowWater2D_GPU_wrapper(bc,mymodel)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    select type(m => mymodel)
+    class is(LinearShallowWater2D)
+      if(bc%nBoundaries > 0) then
+        call hbc2d_nonormalflow_linearshallowwater2d_gpu( &
+          m%solution%extBoundary_gpu, &
+          m%solution%boundary_gpu, &
+          m%geometry%nhat%boundary_gpu, &
+          bc%elements_gpu,bc%sides_gpu, &
+          bc%nBoundaries,m%solution%interp%N,m%solution%nElem)
+      endif
+    endselect
+
+  endsubroutine hbc2d_NoNormalFlow_LinearShallowWater2D_GPU_wrapper
+
+  subroutine hbc2d_Radiation_LinearShallowWater2D_GPU_wrapper(bc,mymodel)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    select type(m => mymodel)
+    class is(LinearShallowWater2D)
+      if(bc%nBoundaries > 0) then
+        call hbc2d_radiation_linearshallowwater2d_gpu( &
+          m%solution%extBoundary_gpu, &
+          bc%elements_gpu,bc%sides_gpu, &
+          bc%nBoundaries,m%solution%interp%N,m%solution%nElem)
+      endif
+    endselect
+
+  endsubroutine hbc2d_Radiation_LinearShallowWater2D_GPU_wrapper
+
   subroutine boundaryflux_LinearShallowWater2D(this)
     implicit none
     class(LinearShallowWater2D),intent(inout) :: this
@@ -92,58 +159,12 @@ contains
                                                this%geometry%nhat%boundary_gpu, &
                                                this%geometry%nscale%boundary_gpu, &
                                                this%flux%boundaryNormal_gpu, &
-                                               this%g, &
-                                               this%H, &
+                                               this%g,this%H, &
                                                this%solution%interp%N, &
                                                this%solution%nelem, &
                                                this%solution%nvar)
 
   endsubroutine boundaryflux_LinearShallowWater2D
-
-  subroutine setboundarycondition_LinearShallowWater2D(this)
-    implicit none
-    class(LinearShallowWater2D),intent(inout) :: this
-    integer :: i,iel,j,e2,bcid
-    real(prec) :: x(1:2)
-
-    if(this%prescribed_bcs_enabled) then
-      call gpuCheck(hipMemcpy(c_loc(this%solution%extBoundary), &
-                              this%solution%extBoundary_gpu, &
-                              sizeof(this%solution%extBoundary), &
-                              hipMemcpyDeviceToHost))
-      do iel = 1,this%solution%nelem
-        do j = 1,4
-          bcid = this%mesh%sideinfo(5,j,iel)
-          e2 = this%mesh%sideinfo(3,j,iel)
-
-          if(e2 == 0) then
-            if(bcid == SELF_BC_PRESCRIBED) then
-              do i = 1,this%solution%interp%N+1
-                x = this%geometry%x%boundary(i,j,iel,1,1:2)
-                this%solution%extBoundary(i,j,iel,1:this%nvar) = &
-                  this%hbc2d_Prescribed(x,this%t)
-              enddo
-            endif
-          endif
-        enddo
-      enddo
-
-      call gpucheck(hipMemcpy(this%solution%extBoundary_gpu, &
-                              c_loc(this%solution%extBoundary), &
-                              sizeof(this%solution%extBoundary), &
-                              hipMemcpyHostToDevice))
-
-    endif
-
-    call setboundarycondition_LinearShallowWater2D_gpu(this%solution%extboundary_gpu, &
-                                                       this%solution%boundary_gpu, &
-                                                       this%mesh%sideInfo_gpu, &
-                                                       this%geometry%nhat%boundary_gpu, &
-                                                       this%solution%interp%N, &
-                                                       this%solution%nelem, &
-                                                       this%solution%nvar)
-
-  endsubroutine setboundarycondition_LinearShallowWater2D
 
   subroutine fluxmethod_LinearShallowWater2D(this)
     implicit none
@@ -151,8 +172,7 @@ contains
 
     call fluxmethod_LinearShallowWater2D_gpu(this%solution%interior_gpu, &
                                              this%flux%interior_gpu, &
-                                             this%g, &
-                                             this%H, &
+                                             this%g,this%H, &
                                              this%solution%interp%N, &
                                              this%solution%nelem, &
                                              this%solution%nvar)

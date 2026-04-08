@@ -39,6 +39,7 @@ module burgers1d_shock_model
 !! where $s = \frac{u_l + u_r}{2}$ is the shock speed.
 
   use self_Burgers1D
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -49,42 +50,73 @@ module burgers1d_shock_model
 
   contains
 
-    procedure :: hbc1d_Prescribed => hbc1d_Prescribed_burgers1d_shock ! override for the hyperbolic boundary conditions
-    procedure :: pbc1d_Prescribed => pbc1d_Prescribed_burgers1d_shock ! override for the parabolic boundary conditions
+    procedure :: AdditionalInit => AdditionalInit_burgers1d_shock
 
   endtype burgers1d_shock
 
 contains
 
-  pure function hbc1d_Prescribed_burgers1d_shock(this,x,t) result(exts)
-    class(burgers1d_shock),intent(in) :: this
-    real(prec),intent(in) :: x
-    real(prec),intent(in) :: t
-    real(prec) :: exts(1:this%nvar)
+  subroutine AdditionalInit_burgers1d_shock(this)
+    implicit none
+    class(burgers1d_shock),intent(inout) :: this
     ! Local
-    real(prec) :: jump,s
+    procedure(SELF_bcMethod),pointer :: bcfunc
 
-    jump = this%ul-this%ur
-    s = 0.5_prec*(this%ul+this%ur)
-    exts(1) = s-0.5_prec*tanh((x-s*t-this%x0)*jump/(4.0_prec*this%nu))
+    bcfunc => hbc1d_Prescribed_burgers1d_shock
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_PRESCRIBED,"prescribed",bcfunc)
 
-  endfunction hbc1d_Prescribed_burgers1d_shock
+    bcfunc => pbc1d_Prescribed_burgers1d_shock
+    call this%parabolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_PRESCRIBED,"prescribed",bcfunc)
 
-  pure function pbc1d_Prescribed_burgers1d_shock(this,x,t) result(extDsdx)
-    class(burgers1d_shock),intent(in) :: this
-    real(prec),intent(in) :: x
-    real(prec),intent(in) :: t
-    real(prec) :: extDsdx(1:this%nvar)
+  endsubroutine AdditionalInit_burgers1d_shock
+
+  subroutine hbc1d_Prescribed_burgers1d_shock(bc,mymodel)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
     ! Local
-    real(prec) :: jump,s,r,drdx
+    integer :: n,iEl,s
+    real(prec) :: x,jump,spd
 
-    jump = this%ul-this%ur
-    s = 0.5_prec*(this%ul+this%ur)
-    r = (x-s*t-this%x0)*jump/(4.0_prec*this%nu)
-    drdx = jump/(4.0_prec*this%nu)
-    extDsdx(1) = -0.5_prec*drdx*(sech(r))**2
+    select type(m => mymodel)
+    class is(burgers1d_shock)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        s = bc%sides(n)
+        x = m%geometry%x%boundary(s,iEl,1)
+        jump = m%ul-m%ur
+        spd = 0.5_prec*(m%ul+m%ur)
+        m%solution%extBoundary(s,iEl,1) = &
+          spd-0.5_prec*tanh((x-spd*m%t-m%x0)*jump/(4.0_prec*m%nu))
+      enddo
+    endselect
 
-  endfunction pbc1d_Prescribed_burgers1d_shock
+  endsubroutine hbc1d_Prescribed_burgers1d_shock
+
+  subroutine pbc1d_Prescribed_burgers1d_shock(bc,mymodel)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,iEl,s
+    real(prec) :: x,jump,spd,r,drdx
+
+    select type(m => mymodel)
+    class is(burgers1d_shock)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        s = bc%sides(n)
+        x = m%geometry%x%boundary(s,iEl,1)
+        jump = m%ul-m%ur
+        spd = 0.5_prec*(m%ul+m%ur)
+        r = (x-spd*m%t-m%x0)*jump/(4.0_prec*m%nu)
+        drdx = jump/(4.0_prec*m%nu)
+        m%solutionGradient%extBoundary(s,iEl,1) = &
+          -0.5_prec*drdx*(sech(r))**2
+      enddo
+    endselect
+
+  endsubroutine pbc1d_Prescribed_burgers1d_shock
 
   pure real(prec) function sech(x) result(fx)
     real(prec),intent(in) :: x

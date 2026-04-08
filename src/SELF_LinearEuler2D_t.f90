@@ -57,6 +57,7 @@ module self_LinearEuler2D_t
   use self_model
   use self_dgmodel2d
   use self_mesh
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -69,8 +70,8 @@ module self_LinearEuler2D_t
   contains
     procedure :: SetNumberOfVariables => SetNumberOfVariables_LinearEuler2D_t
     procedure :: SetMetadata => SetMetadata_LinearEuler2D_t
+    procedure :: AdditionalInit => AdditionalInit_LinearEuler2D_t
     procedure :: entropy_func => entropy_func_LinearEuler2D_t
-    procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_LinearEuler2D_t
     procedure :: flux2d => flux2d_LinearEuler2D_t
     procedure :: riemannflux2d => riemannflux2d_LinearEuler2D_t
     !procedure :: source2d => source2d_LinearEuler2D_t
@@ -121,18 +122,47 @@ contains
 
   endfunction entropy_func_LinearEuler2D_t
 
-  pure function hbc2d_NoNormalFlow_LinearEuler2D_t(this,s,nhat) result(exts)
-    class(LinearEuler2D_t),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:2)
-    real(prec) :: exts(1:this%nvar)
+  subroutine AdditionalInit_LinearEuler2D_t(this)
+    implicit none
+    class(LinearEuler2D_t),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
 
-    exts(1) = s(1) ! density
-    exts(2) = (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
-    exts(3) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
-    exts(4) = s(4) ! p
+    bcfunc => hbc2d_NoNormalFlow_LinearEuler2D
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
-  endfunction hbc2d_NoNormalFlow_LinearEuler2D_t
+  endsubroutine AdditionalInit_LinearEuler2D_t
+
+  subroutine hbc2d_NoNormalFlow_LinearEuler2D(bc,mymodel)
+    !! No-normal-flow boundary condition for 2D linear Euler equations.
+    !! Reflects the velocity vector about the boundary normal while
+    !! preserving density and pressure.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,iEl,j
+    real(prec) :: nhat(1:2),s(1:4)
+
+    select type(m => mymodel)
+    class is(LinearEuler2D_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        j = bc%sides(n)
+        do i = 1,m%solution%interp%N+1
+          nhat = m%geometry%nhat%boundary(i,j,iEl,1,1:2)
+          s = m%solution%boundary(i,j,iEl,1:4)
+          m%solution%extBoundary(i,j,iEl,1) = s(1) ! density
+          m%solution%extBoundary(i,j,iEl,2) = &
+            (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
+          m%solution%extBoundary(i,j,iEl,3) = &
+            (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
+          m%solution%extBoundary(i,j,iEl,4) = s(4) ! p
+        enddo
+      enddo
+    endselect
+
+  endsubroutine hbc2d_NoNormalFlow_LinearEuler2D
 
   pure function flux2d_LinearEuler2D_t(this,s,dsdx) result(flux)
     class(LinearEuler2D_t),intent(in) :: this

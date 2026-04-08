@@ -31,7 +31,7 @@ program ec_advection_2d_entropy_conservation
   !! Setup:
   !!   - Advection velocity: (u, 0) — purely horizontal
   !!   - Mesh: uniform structured, all boundaries set to SELF_BC_NONORMALFLOW
-  !!   - BC override: hbc2d_NoNormalFlow returns sR = sL (mirror)
+  !!   - BC: ECAdvection2D_t registers a no-normal-flow BC that mirrors sR = sL
   !!
   !! With a purely horizontal advection velocity:
   !!   - North/South faces have un = v*ny = 0 (no normal flux at all)
@@ -81,7 +81,7 @@ program ec_advection_2d_entropy_conservation
                    targetNodeType=UNIFORM)
 
   ! Uniform 5x5 structured mesh on [0,1]x[0,1] with no-normal-flow on all sides.
-  ! ECAdvection2D_t overrides hbc2d_NoNormalFlow to mirror the interior state,
+  ! ECAdvection2D_t registers a no-normal-flow BC that mirrors the interior state,
   ! so sR = sL at every domain face — no upwind dissipation.
   bcids(1:4) = [SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW, &
                 SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW]

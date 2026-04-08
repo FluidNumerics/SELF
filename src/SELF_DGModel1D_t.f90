@@ -34,6 +34,7 @@ module SELF_DGModel1D_t
   use HDF5
   use FEQParse
   use SELF_Model
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -47,12 +48,15 @@ module SELF_DGModel1D_t
     type(MappedScalar1D) :: workSol
     type(Mesh1D),pointer :: mesh
     type(Geometry1D),pointer :: geometry
+    type(BoundaryConditionList) :: hyperbolicBCs
+    type(BoundaryConditionList) :: parabolicBCs
 
   contains
 
     procedure :: Init => Init_DGModel1D_t
     procedure :: SetMetadata => SetMetadata_DGModel1D_t
     procedure :: Free => Free_DGModel1D_t
+    procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel1D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel1D_t
     procedure :: BoundaryFlux => BoundaryFlux_DGModel1D_t
@@ -106,7 +110,12 @@ contains
     call this%flux%AssociateGeometry(geometry)
     call this%fluxDivergence%AssociateGeometry(geometry)
 
+    call this%hyperbolicBCs%Init()
+    call this%parabolicBCs%Init()
+
     call this%AdditionalInit()
+
+    call this%MapBoundaryConditions()
 
     call this%SetMetadata()
 
@@ -145,6 +154,8 @@ contains
     call this%flux%Free()
     call this%source%Free()
     call this%fluxDivergence%Free()
+    call this%hyperbolicBCs%Free()
+    call this%parabolicBCs%Free()
     call this%AdditionalFree()
 
   endsubroutine Free_DGModel1D_t
@@ -315,127 +326,125 @@ contains
 
   endsubroutine CalculateEntropy_DGModel1D_t
 
-  subroutine setboundarycondition_DGModel1D_t(this)
-    ! Here, we use the pre-tendency method to calculate the
-    ! derivative of the solution using a bassi-rebay method
-    ! We then do a boundary interpolation and side exchange
-    ! on the gradient field
+  subroutine MapBoundaryConditions_DGModel1D_t(this)
+    !! Scan the mesh boundary condition IDs and populate the elements/sides
+    !! arrays for each registered boundary condition.
     implicit none
     class(DGModel1D_t),intent(inout) :: this
-    ! local
-    integer :: N,nelem
-    real(prec) :: x
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    integer :: nelem,count,n
+    integer :: elems(2),sds(2)
 
-    nelem = this%geometry%nelem ! number of elements in the mesh
-    N = this%solution%interp%N ! polynomial degree
+    nelem = this%mesh%nElem
 
-    ! left-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
+    ! Map hyperbolic BCs
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      count = 0
+      if(this%mesh%bcid(1) == bc%bcid) count = count+1
+      if(this%mesh%bcid(2) == bc%bcid) count = count+1
 
-      x = this%geometry%x%boundary(1,1,1)
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_Prescribed(x,this%t)
+      if(count > 0) then
+        n = 0
+        if(this%mesh%bcid(1) == bc%bcid) then
+          n = n+1
+          elems(n) = 1
+          sds(n) = 1
+        endif
+        if(this%mesh%bcid(2) == bc%bcid) then
+          n = n+1
+          elems(n) = nelem
+          sds(n) = 2
+        endif
+        call this%hyperbolicBCs%PopulateBoundaries(bc%bcid,count, &
+                                                   elems(1:count),sds(1:count))
+      endif
+      bc => bc%next
+    enddo
 
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
+    ! Map parabolic BCs
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      count = 0
+      if(this%mesh%bcid(1) == bc%bcid) count = count+1
+      if(this%mesh%bcid(2) == bc%bcid) count = count+1
 
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_Radiation(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
+      if(count > 0) then
+        n = 0
+        if(this%mesh%bcid(1) == bc%bcid) then
+          n = n+1
+          elems(n) = 1
+          sds(n) = 1
+        endif
+        if(this%mesh%bcid(2) == bc%bcid) then
+          n = n+1
+          elems(n) = nelem
+          sds(n) = 2
+        endif
+        call this%parabolicBCs%PopulateBoundaries(bc%bcid,count, &
+                                                  elems(1:count),sds(1:count))
+      endif
+      bc => bc%next
+    enddo
 
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
+  endsubroutine MapBoundaryConditions_DGModel1D_t
 
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_NoNormalFlow(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
+  subroutine setboundarycondition_DGModel1D_t(this)
+    !! Apply boundary conditions for the solution.
+    !! Periodic boundaries are set as the default; registered
+    !! boundary conditions overwrite specific endpoints.
+    implicit none
+    class(DGModel1D_t),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    procedure(SELF_bcMethod),pointer :: apply_bc
+    integer :: nelem
 
-    else ! Periodic
+    nelem = this%mesh%nElem
 
-      this%solution%extBoundary(1,1,1:this%nvar) = this%solution%boundary(2,nelem,1:this%nvar)
+    ! Default: periodic boundary conditions
+    this%solution%extBoundary(1,1,1:this%nvar) = &
+      this%solution%boundary(2,nelem,1:this%nvar)
+    this%solution%extBoundary(2,nelem,1:this%nvar) = &
+      this%solution%boundary(1,1,1:this%nvar)
 
-    endif
-
-    ! right-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(2,nelem,1)
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_Radiation(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_NoNormalFlow(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = this%solution%boundary(1,1,1:this%nvar)
-
-    endif
+    ! Apply registered boundary conditions
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      apply_bc => bc%bcMethod
+      call apply_bc(bc,this)
+      bc => bc%next
+    enddo
 
   endsubroutine setboundarycondition_DGModel1D_t
 
   subroutine setgradientboundarycondition_DGModel1D_t(this)
-    ! Here, we set the boundary conditions for the
-    ! solution and the solution gradient at the left
-    ! and right most boundaries.
-    !
-    ! Here, we use periodic boundary conditions
+    !! Apply boundary conditions for the solution gradient.
+    !! Periodic boundaries are set as the default; registered
+    !! boundary conditions overwrite specific endpoints.
     implicit none
     class(DGModel1D_t),intent(inout) :: this
-    ! local
-    real(prec) :: x
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+    procedure(SELF_bcMethod),pointer :: apply_bc
     integer :: nelem
 
-    nelem = this%geometry%nelem ! number of elements in the mesh
+    nelem = this%mesh%nElem
 
-    ! left-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
+    ! Default: periodic boundary conditions
+    this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
+      this%solutionGradient%boundary(2,nelem,1:this%nvar)
+    this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
+      this%solutionGradient%boundary(1,1,1:this%nvar)
 
-      x = this%geometry%x%boundary(1,1,1)
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_Radiation(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = this%solutionGradient%boundary(2,nelem,1:this%nvar)
-
-    endif
-
-    ! right-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(2,nelem,1)
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_Radiation(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = this%solutionGradient%boundary(1,1,1:this%nvar)
-
-    endif
+    ! Apply registered boundary conditions
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      apply_bc => bc%bcMethod
+      call apply_bc(bc,this)
+      bc => bc%next
+    enddo
 
   endsubroutine setgradientboundarycondition_DGModel1D_t
 

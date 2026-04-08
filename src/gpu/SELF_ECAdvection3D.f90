@@ -29,6 +29,7 @@ module SELF_ECAdvection3D
   use SELF_ECAdvection3D_t
   use SELF_GPU
   use SELF_GPUInterfaces
+  use SELF_BoundaryConditions
   use iso_c_binding
 
   implicit none
@@ -37,7 +38,7 @@ module SELF_ECAdvection3D
 
   contains
 
-    procedure :: SetBoundaryCondition => SetBoundaryCondition_ECAdvection3D
+    procedure :: AdditionalInit => AdditionalInit_ECAdvection3D
     procedure :: BoundaryFlux => BoundaryFlux_ECAdvection3D
     procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ECAdvection3D
     procedure :: SourceMethod => SourceMethod_ECAdvection3D
@@ -45,12 +46,13 @@ module SELF_ECAdvection3D
   endtype ECAdvection3D
 
   interface
-    subroutine setboundarycondition_ecadvection3d_gpu(extboundary,boundary,sideinfo,N,nel,nvar) &
-      bind(c,name="setboundarycondition_ecadvection3d_gpu")
+    subroutine hbc3d_mirror_ecadvection3d_gpu(extboundary,boundary, &
+                                              elements,sides,nBoundaries,N,nel,nvar) &
+      bind(c,name="hbc3d_mirror_ecadvection3d_gpu")
       use iso_c_binding
-      type(c_ptr),value :: extboundary,boundary,sideinfo
-      integer(c_int),value :: N,nel,nvar
-    endsubroutine setboundarycondition_ecadvection3d_gpu
+      type(c_ptr),value :: extboundary,boundary,elements,sides
+      integer(c_int),value :: nBoundaries,N,nel,nvar
+    endsubroutine hbc3d_mirror_ecadvection3d_gpu
   endinterface
 
   interface
@@ -77,20 +79,40 @@ module SELF_ECAdvection3D
 
 contains
 
-  subroutine SetBoundaryCondition_ECAdvection3D(this)
-    !! Mirror BC on GPU: extBoundary = boundary at all domain faces.
+  subroutine AdditionalInit_ECAdvection3D(this)
     implicit none
     class(ECAdvection3D),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
 
-    call setboundarycondition_ecadvection3d_gpu( &
-      this%solution%extboundary_gpu, &
-      this%solution%boundary_gpu, &
-      this%mesh%sideinfo_gpu, &
-      this%solution%interp%N, &
-      this%solution%nelem, &
-      this%solution%nvar)
+    ! Call parent _t AdditionalInit (registers CPU mirror BC)
+    call AdditionalInit_ECAdvection3D_t(this)
 
-  endsubroutine SetBoundaryCondition_ECAdvection3D
+    ! Re-register with GPU-accelerated version
+    bcfunc => hbc3d_Mirror_ECAdvection3D_GPU_wrapper
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+  endsubroutine AdditionalInit_ECAdvection3D
+
+  subroutine hbc3d_Mirror_ECAdvection3D_GPU_wrapper(bc,mymodel)
+    !! GPU-accelerated mirror BC for 3D EC Advection.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    select type(m => mymodel)
+    class is(ECAdvection3D)
+      if(bc%nBoundaries > 0) then
+        call hbc3d_mirror_ecadvection3d_gpu( &
+          m%solution%extBoundary_gpu, &
+          m%solution%boundary_gpu, &
+          bc%elements_gpu,bc%sides_gpu, &
+          bc%nBoundaries,m%solution%interp%N, &
+          m%solution%nElem,m%solution%nvar)
+      endif
+    endselect
+
+  endsubroutine hbc3d_Mirror_ECAdvection3D_GPU_wrapper
 
   subroutine BoundaryFlux_ECAdvection3D(this)
     !! LLF Riemann flux on GPU — fully device-resident.

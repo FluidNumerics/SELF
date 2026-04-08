@@ -43,6 +43,7 @@ module SELF_ECAdvection2D_t
 
   use SELF_ECDGModel2D_t
   use SELF_mesh
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -56,11 +57,7 @@ module SELF_ECAdvection2D_t
     procedure :: entropy_func => entropy_func_ECAdvection2D_t
     procedure :: twopointflux2d => twopointflux2d_ECAdvection2D_t
     procedure :: riemannflux2d => riemannflux2d_ECAdvection2D_t
-
-    ! Mirror BC: sets extBoundary = interior boundary state so that
-    ! sR = sL at all domain faces.  Used to eliminate boundary dissipation
-    ! when testing entropy conservation.
-    procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_ECAdvection2D_t
+    procedure :: AdditionalInit => AdditionalInit_ECAdvection2D_t
 
   endtype ECAdvection2D_t
 
@@ -113,19 +110,40 @@ contains
 
   endfunction riemannflux2d_ECAdvection2D_t
 
-  pure function hbc2d_NoNormalFlow_ECAdvection2D_t(this,s,nhat) result(exts)
+  subroutine AdditionalInit_ECAdvection2D_t(this)
+    implicit none
+    class(ECAdvection2D_t),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    bcfunc => hbc2d_NoNormalFlow_ECAdvection2D
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+  endsubroutine AdditionalInit_ECAdvection2D_t
+
+  subroutine hbc2d_NoNormalFlow_ECAdvection2D(bc,mymodel)
     !! Mirror boundary condition: sets extBoundary = interior state.
     !! With the LLF Riemann flux, this gives sR = sL at the boundary,
     !! so the Riemann flux reduces to the central flux (a.n)*s — no
     !! dissipation.  Use this BC when testing entropy conservation.
-    class(ECAdvection2D_t),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:2)
-    real(prec) :: exts(1:this%nvar)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,iEl,j
 
-    exts = s
-    if(.false.) exts(1) = exts(1)+nhat(1) ! suppress unused-dummy-argument warning
+    select type(m => mymodel)
+    class is(ECAdvection2D_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        j = bc%sides(n)
+        do i = 1,m%solution%interp%N+1
+          m%solution%extBoundary(i,j,iEl,1:m%nvar) = &
+            m%solution%boundary(i,j,iEl,1:m%nvar)
+        enddo
+      enddo
+    endselect
 
-  endfunction hbc2d_NoNormalFlow_ECAdvection2D_t
+  endsubroutine hbc2d_NoNormalFlow_ECAdvection2D
 
 endmodule SELF_ECAdvection2D_t

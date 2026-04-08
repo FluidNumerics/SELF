@@ -31,7 +31,7 @@ program ec_advection_3d_entropy_conservation
   !! Setup:
   !!   - Advection velocity: (u, 0, 0) — purely x-directed
   !!   - Mesh: uniform structured 3x3x3, all boundaries SELF_BC_NONORMALFLOW
-  !!   - BC override: hbc3d_NoNormalFlow returns sR = sL (mirror)
+  !!   - BC: ECAdvection3D_t registers a no-normal-flow BC that mirrors sR = sL
   !!
   !! With purely x-directed advection:
   !!   - South/North (y-faces) and Bottom/Top (z-faces) have un = 0

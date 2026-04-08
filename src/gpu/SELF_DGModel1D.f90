@@ -37,12 +37,16 @@ module SELF_DGModel1D
   use SELF_DGModel1D_t
   use SELF_GPU
   use SELF_GPUInterfaces
+  use SELF_BoundaryConditions
 
   implicit none
 
   type,extends(DGModel1D_t) :: DGModel1D
 
   contains
+
+    procedure :: Init => Init_DGModel1D
+    procedure :: Free => Free_DGModel1D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel1D
 
@@ -172,68 +176,90 @@ contains
 
   endsubroutine CalculateEntropy_DGModel1D
 
-  subroutine setboundarycondition_DGModel1D(this)
-    ! Here, we use the pre-tendency method to calculate the
-    ! derivative of the solution using a bassi-rebay method
-    ! We then do a boundary interpolation and side exchange
-    ! on the gradient field
+  subroutine Init_DGModel1D(this,mesh,geometry)
+    !! Initialize the 1D DG model, then upload BC element/side arrays to GPU.
+    implicit none
+    class(DGModel1D),intent(out) :: this
+    type(Mesh1D),intent(in),target :: mesh
+    type(Geometry1D),intent(in),target :: geometry
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    call Init_DGModel1D_t(this,mesh,geometry)
+
+    ! Upload hyperbolic BC element/side arrays to device
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+    ! Upload parabolic BC element/side arrays to device
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+  endsubroutine Init_DGModel1D
+
+  subroutine Free_DGModel1D(this)
+    !! Free the 1D DG model, including GPU BC arrays.
     implicit none
     class(DGModel1D),intent(inout) :: this
-    ! local
-    integer :: N,nelem
-    real(prec) :: x
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    ! Free hyperbolic BC device arrays
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    ! Free parabolic BC device arrays
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    call Free_DGModel1D_t(this)
+
+  endsubroutine Free_DGModel1D
+
+  subroutine setboundarycondition_DGModel1D(this)
+    !! Apply boundary conditions for the solution on GPU.
+    !! Syncs boundary data from device, applies host-side BC dispatch
+    !! (periodic defaults + registered BCs), then syncs back to device.
+    implicit none
+    class(DGModel1D),intent(inout) :: this
 
     call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
                             this%solution%boundary_gpu,sizeof(this%solution%boundary), &
                             hipMemcpyDeviceToHost))
 
-    nelem = this%geometry%nelem ! number of elements in the mesh
-    N = this%solution%interp%N ! polynomial degree
-    ! left-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(1,1,1)
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_Radiation(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solution%extBoundary(1,1,1:this%nvar) = &
-        this%hbc1d_NoNormalFlow(this%solution%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solution%extBoundary(1,1,1:this%nvar) = this%solution%boundary(2,nelem,1:this%nvar)
-
-    endif
-
-    ! right-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(2,nelem,1)
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_Radiation(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = &
-        this%hbc1d_NoNormalFlow(this%solution%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solution%extBoundary(2,nelem,1:this%nvar) = this%solution%boundary(1,1,1:this%nvar)
-
-    endif
+    call setboundarycondition_DGModel1D_t(this)
 
     call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
                             c_loc(this%solution%extBoundary), &
@@ -243,68 +269,17 @@ contains
   endsubroutine setboundarycondition_DGModel1D
 
   subroutine setgradientboundarycondition_DGModel1D(this)
-    ! Here, we set the boundary conditions for the
-    ! solution and the solution gradient at the left
-    ! and right most boundaries.
-    !
-    ! Here, we use periodic boundary conditions
+    !! Apply gradient boundary conditions on GPU.
+    !! Syncs gradient boundary data from device, applies host-side BC dispatch
+    !! (periodic defaults + registered BCs), then syncs back to device.
     implicit none
     class(DGModel1D),intent(inout) :: this
-    ! local
-    integer :: nelem
-    real(prec) :: x
 
     call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%boundary), &
                             this%solutiongradient%boundary_gpu,sizeof(this%solutiongradient%boundary), &
                             hipMemcpyDeviceToHost))
 
-    nelem = this%geometry%nelem ! number of elements in the mesh
-
-    ! left-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(1,1,1)
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_Radiation(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = &
-        this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(1,1,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solutionGradient%extBoundary(1,1,1:this%nvar) = this%solutionGradient%boundary(2,nelem,1:this%nvar)
-
-    endif
-
-    ! right-most boundary
-    if(this%mesh%bcid(1) == SELF_BC_PRESCRIBED) then
-
-      x = this%geometry%x%boundary(2,nelem,1)
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_Prescribed(x,this%t)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_RADIATION) then
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_Radiation(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    elseif(this%mesh%bcid(1) == SELF_BC_NONORMALFLOW) then
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = &
-        this%pbc1d_NoNormalFlow(this%solutionGradient%boundary(2,nelem,1:this%nvar),-1.0_prec)
-
-    else ! Periodic
-
-      this%solutionGradient%extBoundary(2,nelem,1:this%nvar) = this%solutionGradient%boundary(1,1,1:this%nvar)
-
-    endif
+    call setgradientboundarycondition_DGModel1D_t(this)
 
     call gpuCheck(hipMemcpy(this%solutiongradient%extBoundary_gpu, &
                             c_loc(this%solutiongradient%extBoundary), &

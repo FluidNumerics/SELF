@@ -41,6 +41,7 @@ module SELF_ECAdvection3D_t
 
   use SELF_ECDGModel3D_t
   use SELF_mesh
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -55,7 +56,7 @@ module SELF_ECAdvection3D_t
     procedure :: entropy_func => entropy_func_ECAdvection3D_t
     procedure :: twopointflux3d => twopointflux3d_ECAdvection3D_t
     procedure :: riemannflux3d => riemannflux3d_ECAdvection3D_t
-    procedure :: hbc3d_NoNormalFlow => hbc3d_NoNormalFlow_ECAdvection3D_t
+    procedure :: AdditionalInit => AdditionalInit_ECAdvection3D_t
 
   endtype ECAdvection3D_t
 
@@ -108,16 +109,39 @@ contains
 
   endfunction riemannflux3d_ECAdvection3D_t
 
-  pure function hbc3d_NoNormalFlow_ECAdvection3D_t(this,s,nhat) result(exts)
+  subroutine AdditionalInit_ECAdvection3D_t(this)
+    implicit none
+    class(ECAdvection3D_t),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    bcfunc => hbc3d_NoNormalFlow_ECAdvection3D
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+  endsubroutine AdditionalInit_ECAdvection3D_t
+
+  subroutine hbc3d_NoNormalFlow_ECAdvection3D(bc,mymodel)
     !! Mirror boundary condition: sets extBoundary = interior state.
-    class(ECAdvection3D_t),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:3)
-    real(prec) :: exts(1:this%nvar)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,j,iEl,k
 
-    exts = s
-    if(.false.) exts(1) = exts(1)+nhat(1) ! suppress unused-dummy-argument warning
+    select type(m => mymodel)
+    class is(ECAdvection3D_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        k = bc%sides(n)
+        do j = 1,m%solution%interp%N+1
+          do i = 1,m%solution%interp%N+1
+            m%solution%extBoundary(i,j,k,iEl,1:m%nvar) = &
+              m%solution%boundary(i,j,k,iEl,1:m%nvar)
+          enddo
+        enddo
+      enddo
+    endselect
 
-  endfunction hbc3d_NoNormalFlow_ECAdvection3D_t
+  endsubroutine hbc3d_NoNormalFlow_ECAdvection3D
 
 endmodule SELF_ECAdvection3D_t
