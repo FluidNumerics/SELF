@@ -27,9 +27,12 @@
 module SELF_ECAdvection3D
 
   use SELF_ECAdvection3D_t
+  use SELF_ECDGModel3D_t
   use SELF_GPU
   use SELF_GPUInterfaces
   use SELF_BoundaryConditions
+  use SELF_Mesh_3D
+  use SELF_Geometry_3D
   use iso_c_binding
 
   implicit none
@@ -38,6 +41,8 @@ module SELF_ECAdvection3D
 
   contains
 
+    procedure :: Init => Init_ECAdvection3D
+    procedure :: Free => Free_ECAdvection3D
     procedure :: AdditionalInit => AdditionalInit_ECAdvection3D
     procedure :: BoundaryFlux => BoundaryFlux_ECAdvection3D
     procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ECAdvection3D
@@ -78,6 +83,53 @@ module SELF_ECAdvection3D
   endinterface
 
 contains
+
+  subroutine Init_ECAdvection3D(this,mesh,geometry)
+    !! Initialize EC Advection 3D, then upload BC element/side arrays to GPU.
+    implicit none
+    class(ECAdvection3D),intent(out) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    call Init_ECDGModel3D_t(this,mesh,geometry)
+
+    ! Upload hyperbolic BC element/side arrays to device
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+  endsubroutine Init_ECAdvection3D
+
+  subroutine Free_ECAdvection3D(this)
+    !! Free EC Advection 3D, including GPU BC arrays.
+    implicit none
+    class(ECAdvection3D),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    call Free_ECDGModel3D_t(this)
+
+  endsubroutine Free_ECAdvection3D
 
   subroutine AdditionalInit_ECAdvection3D(this)
     implicit none
