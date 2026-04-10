@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_LinearShallowWater2D_t.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_LinearShallowWater2D_t.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.2% of total for source files.">175 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_LinearShallowWater2D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_LinearShallowWater2D_t.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_linearshallowwater2d_t.html">self_LinearShallowWater2D_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_linearshallowwater2d_t.f90.html#src">SELF_LinearShallowWater2D_t.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_linearshallowwater2d_tf90EfferentGraph" width="641pt" height="222pt"
+ viewBox="0.00 0.00 641.00 221.88" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph" class="graph" transform="scale(0.24 0.24) rotate(0) translate(4 926.08)">
+<title>sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-926.08 2683,-926.08 2683,4 -4,4"/>
+<!-- sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_linearshallowwater2d_t.f90</title>
+<polygon fill="none" stroke="black" points="2679,-203.69 2485,-203.69 2485,-179.69 2679,-179.69 2679,-203.69"/>
+<text text-anchor="middle" x="2582" y="-189.29" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_LinearShallowWater2D_t.f90</text>
+</g>
+<!-- sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_model.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_model.f90.html" xlink:title="SELF_Model.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="795.5,-263.69 699.5,-263.69 699.5,-239.69 795.5,-239.69 795.5,-263.69"/>
+<text text-anchor="middle" x="747.5" y="-249.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2217,-171.69C2051.43,-133.14 2004.3,-179.9 1834.5,-171.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-171.69C1778.59,-170.3 1766.72,-155.38 1713,-150.69 1636.84,-144.05 1617.31,-146.14 1541,-150.69 1246.1,-168.28 1173.46,-187.93 881,-229.69 856.27,-233.22 829.03,-237.65 805.71,-241.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="804.91,-238.2 795.64,-243.33 806.09,-245.1 804.91,-238.2"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_dgmodel2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_dgmodel2d.f90.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2449,-223.69 2322,-223.69 2322,-199.69 2449,-199.69 2449,-223.69"/>
+<text text-anchor="middle" x="2385.5" y="-209.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2484.89,-201.58C2476.25,-202.46 2467.6,-203.35 2459.2,-204.22"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2458.7,-200.75 2449.11,-205.25 2459.42,-207.71 2458.7,-200.75"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1194,-69.69 1103,-69.69 1103,-45.69 1194,-45.69 1194,-69.69"/>
+<text text-anchor="middle" x="1148.5" y="-55.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2484.75,-189.47C2395.02,-186.84 2267.91,-181.51 2219,-171.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2217,-171.69C2145.34,-154.39 2178.93,-76.59 2114,-41.69 2004.18,17.34 1959.18,-17.69 1834.5,-17.69 1834.5,-17.69 1834.5,-17.69 1445,-17.69 1360.34,-17.69 1263.25,-34.02 1204.16,-45.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1203.41,-42.39 1194.3,-47.81 1204.8,-49.25 1203.41,-42.39"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_boundaryconditions.f90.html" xlink:title="SELF_BoundaryConditions.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1713,-183.69 1541,-183.69 1541,-159.69 1713,-159.69 1713,-183.69"/>
+<text text-anchor="middle" x="1627" y="-169.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-171.69C1796.83,-169.97 1757.63,-169.6 1723.17,-169.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1723.09,-166.29 1713.11,-169.86 1723.14,-173.29 1723.09,-166.29"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-301.69 152,-301.69 152,-277.69 303,-277.69 303,-301.69"/>
+<text text-anchor="middle" x="227.5" y="-287.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M727.62,-239.66C694.67,-219.66 623.83,-181.04 557.5,-173.69"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-457.69 499.5,-457.69 499.5,-433.69 613.5,-433.69 613.5,-457.69"/>
+<text text-anchor="middle" x="556.5" y="-443.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M732.86,-263.94C713.03,-282.19 675.8,-318.2 650,-353.69 630.35,-380.72 638.42,-396.88 614,-419.69 610.39,-423.06 606.27,-426.06 601.94,-428.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="599.94,-425.81 592.83,-433.66 603.29,-431.96 599.94,-425.81"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-416.69 181,-416.69 181,-392.69 274,-392.69 274,-416.69"/>
+<text text-anchor="middle" x="227.5" y="-402.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M699.22,-262.28C683.35,-266.4 665.69,-271.61 650,-277.69 534.35,-322.53 525.76,-413.98 402,-405.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-405.69C361.49,-401.69 317.85,-401.5 284.22,-402.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="284.03,-398.78 274.13,-402.54 284.22,-405.77 284.03,-398.78"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_dgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_dgmodel2d_t.f90.html" xlink:title="SELF_DGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2286,-285.69 2150,-285.69 2150,-261.69 2286,-261.69 2286,-285.69"/>
+<text text-anchor="middle" x="2218" y="-271.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M2352.2,-223.79C2326.11,-233.57 2289.21,-247.39 2260.86,-258.01"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="2259.36,-254.84 2251.22,-261.62 2261.81,-261.39 2259.36,-254.84"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-379.69 0,-379.69 0,-355.69 116,-355.69 116,-379.69"/>
+<text text-anchor="middle" x="58" y="-365.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1102.82,-54.91C1028.94,-50.88 876.73,-45.01 748.5,-55.69"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-109.69 881,-109.69 881,-85.69 1067,-85.69 1067,-109.69"/>
+<text text-anchor="middle" x="974" y="-95.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1102.63,-68.1C1082.54,-72.76 1058.54,-78.32 1036.79,-83.36"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1035.93,-79.97 1026.98,-85.64 1037.51,-86.79 1035.93,-79.97"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1589.15,-159.66C1536.45,-142.5 1436.47,-110.16 1351,-83.69 1281.42,-62.15 1266.07,-47.25 1194,-36.69 1153.98,-30.83 1143.36,-34.12 1103,-36.69 987.63,-44.04 959.96,-57.55 845,-69.69 781.24,-76.43 617.16,-70.22 557.5,-93.69"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1577.89,-183.77C1481.28,-207.91 1256.7,-263.41 1067,-305.69 1020.82,-315.99 692.96,-371.88 650,-391.69 631.59,-400.18 631.32,-409.16 614,-419.69 608.49,-423.04 602.48,-426.24 596.49,-429.18"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="594.74,-426.14 587.19,-433.57 597.73,-432.47 594.74,-426.14"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-239.69C1440.83,-210.85 967.45,-237 805.8,-247.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="805.35,-244.18 795.6,-248.33 805.82,-251.16 805.35,-244.18"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2149.76,-265.67C2073.47,-257.04 1945.25,-243.98 1834.5,-239.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-239.69C1776.36,-235.56 1766.48,-215.26 1713,-197.69 1701.89,-194.04 1689.9,-190.27 1678.54,-186.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1679.34,-183.36 1668.75,-183.79 1677.29,-190.06 1679.34,-183.36"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2190.53,-261.58C2030.19,-190.03 1175.09,165.54 557.5,-93.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-93.69C529.49,-102.51 522.57,-104.6 499,-118.69 481.6,-129.09 480.61,-136.66 463,-146.69 437.69,-161.12 428.62,-158.86 402,-170.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-170.69C340.98,-196.94 281.01,-244.32 250.02,-270.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="247.37,-268.36 242.07,-277.53 251.93,-273.66 247.37,-268.36"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2207.24,-286C2167.05,-335.23 2008.16,-515.27 1834.5,-515.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-515.69C1727.22,-536.18 1458.01,-489.82 1351,-482.69 1083.26,-464.85 1012,-494.42 748.5,-443.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-443.69C706.37,-435.6 660.46,-435.87 623.94,-438.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="623.62,-434.79 613.9,-439.01 624.13,-441.77 623.62,-434.79"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-239.69C1739.3,-234.18 1719.31,-268.26 1628,-287.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1626,-287.69C1343,-347.92 1264.27,-285.44 975,-291.69"/>
+</g>
+<!-- sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_mesh_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_mesh_2d.f90.html" xlink:title="SELF_Mesh_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1502,-373.69 1390,-373.69 1390,-349.69 1502,-349.69 1502,-373.69"/>
+<text text-anchor="middle" x="1446" y="-359.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1626,-287.69C1571.58,-299.27 1512.74,-326.79 1477.92,-344.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1475.99,-341.88 1468.76,-349.62 1479.24,-348.07 1475.99,-341.88"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_mappedvector_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_mappedvector_2d.f90.html" xlink:title="SELF_MappedVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2114,-567.69 1954,-567.69 1954,-543.69 2114,-543.69 2114,-567.69"/>
+<text text-anchor="middle" x="2034" y="-553.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2215.7,-285.87C2210.72,-326.56 2189.15,-459.25 2114,-529.69 2110.21,-533.24 2105.93,-536.31 2101.37,-538.96"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2099.64,-535.91 2092.3,-543.55 2102.81,-542.15 2099.64,-535.91"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_mappedscalar_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_mappedscalar_2d.f90.html" xlink:title="SELF_MappedScalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2114,-319.69 1954,-319.69 1954,-295.69 2114,-295.69 2114,-319.69"/>
+<text text-anchor="middle" x="2034" y="-305.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2152.58,-285.73C2138.54,-288.35 2123.57,-291.15 2109.18,-293.83"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2108.52,-290.4 2099.34,-295.67 2109.81,-297.28 2108.52,-290.4"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_geometry_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_geometry_2d.f90.html" xlink:title="SELF_Geometry_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1695.5,-567.69 1558.5,-567.69 1558.5,-543.69 1695.5,-543.69 1695.5,-567.69"/>
+<text text-anchor="middle" x="1627" y="-553.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.5,-515.69C1778.19,-515.82 1717.25,-529.56 1676.14,-540.89"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1675.06,-537.56 1666.39,-543.64 1676.96,-544.3 1675.06,-537.56"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M187.72,-301.8C176.07,-305.81 163.37,-310.58 152,-315.69 129.59,-325.78 105.4,-339.4 87.3,-350.17"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="85.2,-347.35 78.44,-355.51 88.81,-353.35 85.2,-347.35"/>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M523.74,-433.67C493.1,-422.97 445.14,-408.58 402,-405.69"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M180.73,-394.58C163,-390.67 142.38,-386.11 123.21,-381.88"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="123.86,-378.44 113.34,-379.7 122.35,-385.27 123.86,-378.44"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-145.69 650,-145.69 650,-121.69 845,-121.69 845,-145.69"/>
+<text text-anchor="middle" x="747.5" y="-131.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M897.93,-109.73C877.24,-113.05 854.66,-116.67 833.45,-120.07"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="832.82,-116.63 823.5,-121.67 833.92,-123.54 832.82,-116.63"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_mesh_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_mesh_2d_t.f90.html" xlink:title="SELF_Mesh_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1351,-149.69 1230,-149.69 1230,-125.69 1351,-125.69 1351,-149.69"/>
+<text text-anchor="middle" x="1290.5" y="-135.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1407.61,-349.59C1400.17,-345.96 1392.85,-341.39 1387,-335.69 1334.87,-285 1307.44,-200.09 1296.81,-159.97"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1300.17,-158.96 1294.31,-150.13 1293.38,-160.68 1300.17,-158.96"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_mappedvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_mappedvector_2d_t.f90.html" xlink:title="SELF_MappedVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1918,-567.69 1749,-567.69 1749,-543.69 1918,-543.69 1918,-567.69"/>
+<text text-anchor="middle" x="1833.5" y="-553.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1953.98,-555.69C1945.51,-555.69 1936.83,-555.69 1928.21,-555.69"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1928.13,-552.19 1918.13,-555.69 1928.13,-559.19 1928.13,-552.19"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M649.8,-130.82C620.16,-130.58 587.47,-130.95 557.5,-132.69"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M555.5,-132.69C487.39,-136.66 469.72,-124.43 402,-132.69"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M555.5,-132.69C520.42,-134.74 434.11,-156.42 402,-170.69"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-799.69 499,-799.69 499,-775.69 614,-775.69 614,-799.69"/>
+<text text-anchor="middle" x="556.5" y="-785.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M728.21,-145.97C705.51,-162.33 667.64,-193.58 650,-230.69 584.2,-369.13 641.65,-422.92 614,-573.69 600.95,-644.86 576.53,-727.11 564.53,-765.64"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="561.15,-764.71 561.49,-775.3 567.83,-766.81 561.15,-764.71"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_mappedscalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_mappedscalar_2d_t.f90.html" xlink:title="SELF_MappedScalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1918,-412.69 1749,-412.69 1749,-388.69 1918,-388.69 1918,-412.69"/>
+<text text-anchor="middle" x="1833.5" y="-398.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M2007.05,-319.85C1971.88,-336.33 1908.97,-365.8 1869.61,-384.24"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1867.71,-381.27 1860.14,-388.68 1870.68,-387.61 1867.71,-381.27"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1595.36,-567.79C1578.06,-575.65 1556.81,-587.15 1541,-601.69 1519.5,-621.47 1524.65,-635.07 1505,-656.69 1423.25,-746.67 1413.07,-827.69 1291.5,-827.69 1291.5,-827.69 1291.5,-827.69 973,-827.69 788.33,-827.69 742,-835.61 557.5,-827.69"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1609.3,-543.67C1567.41,-513.89 1453.85,-435.44 1351,-384.69 1223.78,-321.93 890.36,-174.32 748.5,-173.69"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1562.38,-543.67C1554.52,-540.14 1547.11,-535.58 1541,-529.69 1505.79,-495.74 1529.93,-467.78 1505,-425.69 1495.22,-409.18 1480.73,-393.19 1468.67,-381.32"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1470.82,-378.53 1461.18,-374.15 1465.99,-383.59 1470.82,-378.53"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="792,-571.69 703,-571.69 703,-547.69 792,-547.69 792,-571.69"/>
+<text text-anchor="middle" x="747.5" y="-557.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1445,-515.69C1211.27,-448.8 916.05,-513.8 799.32,-545.03"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="798.31,-541.68 789.57,-547.67 800.14,-548.44 798.31,-541.68"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1576.04,-567.75C1527.64,-579.5 1452.21,-597.98 1387,-614.69 1145.56,-676.56 1090.21,-714.04 845,-758.69 770.04,-772.34 682.83,-780 624.29,-783.98"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="623.81,-780.5 614.06,-784.65 624.27,-787.49 623.81,-780.5"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_vector_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_vector_2d.f90.html" xlink:title="SELF_Vector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1505,-647.69 1387,-647.69 1387,-623.69 1505,-623.69 1505,-647.69"/>
+<text text-anchor="middle" x="1446" y="-633.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1598.81,-567.84C1567.88,-581.67 1517.24,-604.3 1483.04,-619.59"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1481.56,-616.41 1473.86,-623.69 1484.41,-622.81 1481.56,-616.41"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_scalar_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_scalar_2d.f90.html" xlink:title="SELF_Scalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1349.5,-417.69 1231.5,-417.69 1231.5,-393.69 1349.5,-393.69 1349.5,-417.69"/>
+<text text-anchor="middle" x="1290.5" y="-403.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1563.83,-543.68C1529.19,-536.52 1485.42,-526.69 1447,-515.69"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1445,-515.69C1388.48,-499.52 1335.84,-452.04 1309.36,-425.04"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1311.76,-422.49 1302.31,-417.7 1306.71,-427.33 1311.76,-422.49"/>
+</g>
+<!-- sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_tensor_2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_tensor_2d.f90.html" xlink:title="SELF_Tensor_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1505,-567.69 1387,-567.69 1387,-543.69 1505,-543.69 1505,-567.69"/>
+<text text-anchor="middle" x="1446" y="-553.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1558.33,-555.69C1544.23,-555.69 1529.36,-555.69 1515.23,-555.69"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1515.11,-552.19 1505.11,-555.69 1515.11,-559.19 1515.11,-552.19"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1268.24,-125.54C1244.56,-112.01 1206.12,-90.05 1179.42,-74.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1180.92,-71.62 1170.5,-69.7 1177.45,-77.7 1180.92,-71.62"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-137.69C931.04,-142.71 919.23,-143.68 881,-161.69 863.15,-170.11 863.01,-179.62 845,-187.69 764.01,-223.98 734.85,-204.67 650,-230.69 580.96,-251.87 566.06,-263.89 499,-290.69 455.85,-307.94 447.77,-321.7 402,-329.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-329.69C305.11,-341.41 195.16,-353.37 126.33,-360.67"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="125.64,-357.22 116.07,-361.75 126.38,-364.18 125.64,-357.22"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-137.69C1070.96,-133.32 1051.12,-128.58 975,-137.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-137.69C872.66,-149.7 849.55,-174.14 748.5,-173.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-173.69C662.5,-173.32 640.99,-182.94 557.5,-173.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-173.69C487.68,-166.18 464.35,-142.97 402,-170.69"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1272.09,-149.9C1244.53,-169.63 1189.87,-210.51 1149.5,-251.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-251.69C1119.95,-279.79 1014.3,-293.6 975,-291.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-291.69C827,-284.6 787.27,-303.45 650,-353.69 605.71,-369.9 604.17,-398.88 557.5,-405.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-405.69C487.66,-412.89 469.86,-412.75 402,-405.69"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1229.85,-139.19C1204.99,-139.43 1175.83,-139.2 1149.5,-137.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-137.69C1124.77,-136.39 1070.59,-123.21 1028.97,-112.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1029.78,-108.92 1019.22,-109.76 1028,-115.69 1029.78,-108.92"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-251.69C1101.76,-297.09 1117.9,-326.99 1103,-389.69 1078.98,-490.78 1134.28,-541.51 1067,-620.69 1008.81,-689.17 748.59,-749.35 624.17,-774.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="623.11,-771.44 614.01,-776.86 624.51,-778.3 623.11,-771.44"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M728.01,-571.95C656.6,-619.31 402.62,-787.69 402,-787.69"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M400,-787.69C323.94,-792.64 303.12,-803.23 228.5,-787.69"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M726.27,-547.49C692.6,-527.18 624.92,-486.36 586.28,-463.05"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="587.95,-459.97 577.58,-457.81 584.34,-465.97 587.95,-459.97"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M702.94,-568.11C663.62,-573.77 604.84,-577.36 557.5,-559.69"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M717.81,-571.76C696.05,-582.35 667.06,-599.81 650,-623.69 613.16,-675.27 654.71,-713.1 614,-761.69 611.27,-764.95 608.04,-767.82 604.54,-770.35"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="602.63,-767.41 595.95,-775.64 606.3,-773.37 602.63,-767.41"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M498.64,-787.69C469.71,-787.69 433.98,-787.69 402,-787.69"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-458.69 339,-458.69 339,-434.69 463,-434.69 463,-458.69"/>
+<text text-anchor="middle" x="401" y="-444.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M550.04,-775.56C527.43,-725.33 441,-533.32 411.74,-468.34"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="414.85,-466.72 407.56,-459.04 408.47,-469.6 414.85,-466.72"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node27" class="node">
+<title>sourcefile~self_vector_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node27"><a xlink:href=".././sourcefile/self_vector_2d_t.f90.html" xlink:title="SELF_Vector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-611.69 910.5,-611.69 910.5,-587.69 1037.5,-587.69 1037.5,-611.69"/>
+<text text-anchor="middle" x="974" y="-597.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_vector_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_vector_2d_t.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1386.9,-631.24C1301.32,-624.69 1141.46,-612.44 1048.05,-605.29"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1048.07,-601.78 1037.83,-604.51 1047.54,-608.76 1048.07,-601.78"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-903.69C658.89,-880.86 647.95,-831.69 557.5,-827.69"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1769.89,-543.63C1762.18,-540.11 1754.94,-535.56 1749,-529.69 1712.11,-493.24 1750.91,-454.09 1713,-418.69 1655.4,-364.92 1609.32,-414.95 1541,-375.69 1535.69,-372.64 1390.24,-222.89 1387,-217.69 1361.79,-177.25 1385.25,-149.82 1351,-116.69 1331.05,-97.39 1316.54,-109.67 1291.5,-97.69"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1787.68,-543.6C1774.99,-539.67 1761.28,-534.95 1749,-529.69 1642.87,-484.22 1525.64,-412.18 1473.97,-379.21"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1475.7,-376.16 1465.39,-373.71 1471.92,-382.05 1475.7,-376.16"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1748.73,-555.69C1734.53,-555.69 1719.84,-555.69 1705.8,-555.69"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1705.71,-552.19 1695.71,-555.69 1705.71,-559.19 1705.71,-552.19"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1832.3,-568.02C1830.76,-617.02 1817.94,-799.3 1713,-879.69 1618.77,-951.88 1565.7,-903.69 1447,-903.69 1447,-903.69 1447,-903.69 1147.5,-903.69 970.17,-903.69 921.05,-944.62 748.5,-903.69"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-903.69C703.73,-892.55 684.98,-906.71 650,-879.69 623.55,-859.27 638.42,-836.5 614,-813.69 610.39,-810.32 606.27,-807.33 601.94,-804.68"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="603.29,-801.43 592.83,-799.73 599.94,-807.58 603.29,-801.43"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1626,-615.69C1589.44,-618.86 1548.78,-623.32 1515.47,-627.23"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1514.89,-623.78 1505.37,-628.43 1515.72,-630.73 1514.89,-623.78"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1804.74,-567.69C1766.03,-583.52 1693.25,-610.04 1628,-615.69"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1626,-615.69C1570.33,-620.51 1509.43,-592.31 1474.95,-572.92"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1476.36,-569.7 1465.95,-567.72 1472.86,-575.76 1476.36,-569.7"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1823.52,-388.4C1805.1,-363.91 1760.77,-308.38 1713,-273.69 1644.62,-224.05 1604.77,-248.13 1541,-192.69 1518.95,-173.52 1528,-155.7 1505,-137.69 1447.89,-92.98 1419.98,-106.1 1351,-83.69 1281.73,-61.19 1266.03,-47.53 1194,-36.69 1170.52,-33.16 911.23,-33.42 881,-35.69 821.61,-40.15 807.83,-50.49 748.5,-55.69"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M746.5,-55.69C636.02,-58.62 604.63,-47.21 499,-79.69 452.04,-94.13 450.77,-126.75 402,-132.69"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M400,-132.69C251.31,-147.83 119.25,-293.34 74.86,-347.51"/>
+<polygon fill="#003fff" stroke="#003fff" points="72.05,-345.41 68.49,-355.38 77.5,-349.8 72.05,-345.41"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1771.73,-388.65C1731.1,-380.7 1676.41,-370.23 1628,-361.69"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1626,-361.69C1580.46,-353.66 1576.56,-331.25 1541,-301.69 1450.35,-226.36 1452.06,-177.35 1351,-116.69 1327.2,-102.41 1316.65,-109.45 1291.5,-97.69"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1289.5,-97.69C1252.68,-81.8 1154.55,-84.15 1077.61,-89.03"/>
+<polygon fill="#003fff" stroke="#003fff" points="1077.13,-85.56 1067.38,-89.71 1077.59,-92.54 1077.13,-85.56"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1626,-361.69C1588.76,-355.57 1546.57,-355.26 1512.51,-356.62"/>
+<polygon fill="#003fff" stroke="#003fff" points="1512.04,-353.14 1502.21,-357.09 1512.36,-360.13 1512.04,-353.14"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1816.45,-412.86C1780.69,-439.96 1694.27,-505.46 1652.04,-537.47"/>
+<polygon fill="#003fff" stroke="#003fff" points="1649.83,-534.76 1643.97,-543.59 1654.06,-540.34 1649.83,-534.76"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1819.51,-412.82C1801.19,-430.61 1767.9,-465.62 1749,-501.69 1721.58,-554.04 1742.62,-578.56 1713,-629.69 1633.78,-766.45 1605.04,-865.69 1447,-865.69 1447,-865.69 1447,-865.69 973,-865.69 837.78,-865.69 682,-825.3 605.28,-802.65"/>
+<polygon fill="#003fff" stroke="#003fff" points="606.02,-799.22 595.43,-799.71 604.01,-805.92 606.02,-799.22"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1626,-361.69C1572.14,-352.84 1559.05,-375.1 1505,-382.69 1456.57,-389.5 1401.71,-395.37 1359.73,-399.47"/>
+<polygon fill="#003fff" stroke="#003fff" points="1359.23,-396.01 1349.62,-400.45 1359.91,-402.97 1359.23,-396.01"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1802.57,-412.73C1733.61,-440.45 1563.53,-508.84 1486.3,-539.89"/>
+<polygon fill="#003fff" stroke="#003fff" points="1484.88,-536.69 1476.91,-543.67 1487.49,-543.18 1484.88,-536.69"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1231.46,-407.24C1206.21,-407.3 1176.33,-406.55 1149.5,-403.69"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1147.5,-403.69C1111.14,-399.82 1102.89,-393.69 1067,-386.69 925.85,-359.17 891.78,-341.94 748.5,-329.69"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M746.5,-329.69C594.57,-310.71 553.37,-306.64 402,-329.69"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node26" class="node">
+<title>sourcefile~self_scalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node26"><a xlink:href=".././sourcefile/self_scalar_2d_t.f90.html" xlink:title="SELF_Scalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-419.69 910.5,-419.69 910.5,-395.69 1037.5,-395.69 1037.5,-419.69"/>
+<text text-anchor="middle" x="974" y="-405.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d_t.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1147.5,-403.69C1114.98,-400.23 1078.83,-400.45 1048.06,-401.84"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1047.66,-398.36 1037.84,-402.35 1048.01,-405.35 1047.66,-398.36"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node28" class="node">
+<title>sourcefile~self_tensor_2d_t.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node28"><a xlink:href=".././sourcefile/self_tensor_2d_t.f90.html" xlink:title="SELF_Tensor_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-567.69 910.5,-567.69 910.5,-543.69 1037.5,-543.69 1037.5,-567.69"/>
+<text text-anchor="middle" x="974" y="-553.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_tensor_2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_tensor_2d_t.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1386.9,-555.69C1301.32,-555.69 1141.46,-555.69 1048.05,-555.69"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1047.83,-552.19 1037.83,-555.69 1047.83,-559.19 1047.83,-552.19"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M399.62,-458.72C396.98,-522.65 376.74,-818.56 228.5,-787.69"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M226.5,-787.69C142.28,-770.16 79.5,-474.83 63.18,-390.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="66.57,-389.28 61.26,-380.11 59.69,-390.59 66.57,-389.28"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M386.83,-434.63C357.22,-407.53 285.22,-341.62 249.42,-308.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="251.69,-306.18 241.95,-302.01 246.97,-311.34 251.69,-306.18"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M350.85,-434.66C330.01,-429.55 305.6,-423.58 284.1,-418.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="284.67,-414.85 274.12,-415.87 283,-421.64 284.67,-414.85"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node29" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_node29"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-458.69 165.5,-458.69 165.5,-434.69 289.5,-434.69 289.5,-458.69"/>
+<text text-anchor="middle" x="227.5" y="-444.29" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M338.57,-446.69C325.98,-446.69 312.63,-446.69 299.73,-446.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="299.5,-443.19 289.5,-446.69 299.5,-450.19 299.5,-443.19"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M950.57,-395.67C911.09,-375.48 825.99,-336.32 748.5,-329.69"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M746.5,-405.69C698.06,-408.01 644.05,-420.47 606.22,-430.87"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="605.16,-427.53 596.48,-433.6 607.05,-434.27 605.16,-427.53"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M910.06,-405.23C865.04,-403.93 803.01,-403.09 748.5,-405.69"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M746.5,-405.69C662.6,-409.7 640.62,-393.55 557.5,-405.69"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M961.43,-419.76C932.6,-449.73 858.87,-525.75 845,-533.69 831.91,-541.19 816.58,-546.6 802.05,-550.46"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="801.02,-547.11 792.15,-552.9 802.69,-553.91 801.02,-547.11"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M942.34,-419.75C862.77,-451.09 655.45,-533.08 650,-538.69 586.36,-604.25 565.82,-717.47 559.79,-765.31"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="556.28,-765.17 558.6,-775.5 563.23,-765.98 556.28,-765.17"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge79" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M961.25,-611.85C939.78,-633.54 892.08,-679.38 845,-708.69 786.31,-745.24 626.59,-830.44 557.5,-827.69"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge82" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M910.24,-589.11C900.08,-585.97 889.96,-581.92 881,-576.69 860.91,-564.96 861.29,-555.3 845,-538.69 802.85,-495.73 807.6,-455.07 748.5,-443.69"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge83" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M910.27,-605.15C826.31,-609.95 674.43,-609.72 557.5,-559.69"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge80" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M910.46,-588.55C876.51,-582.5 834.96,-575.1 802.44,-569.3"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="802.68,-565.79 792.22,-567.48 801.45,-572.68 802.68,-565.79"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge81" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M910.44,-606.17C854.17,-612.73 776.23,-623.87 748.5,-637.69"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge84" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M910.17,-563.62C899.67,-567.04 889.46,-571.87 881,-578.69 852.84,-601.41 871.12,-626.67 845,-651.69 776.6,-717.22 718.76,-672.54 650,-737.69 624.32,-762.03 640.76,-785.55 614,-808.69 593.96,-826.02 583.98,-828.43 557.5,-827.69"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M555.5,-827.69C485.06,-824.89 472.35,-783.11 402,-787.69"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge87" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M959.06,-543.56C936.58,-524.61 890.25,-488.06 845,-467.69 804.7,-449.55 791.9,-452.05 748.5,-443.69"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge88" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M910.34,-545.69C889.6,-542.83 866.36,-540.11 845,-538.69 758.52,-532.98 736.13,-529.04 650,-538.69 608.11,-543.39 597,-574.43 557.5,-559.69"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M555.5,-559.69C488.97,-531.23 520.97,-469.01 463,-425.69 440.14,-408.61 430.38,-408.64 402,-405.69"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge85" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M910.46,-556.81C876.51,-557.41 834.96,-558.15 802.44,-558.73"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="802.16,-555.24 792.22,-558.91 802.28,-562.24 802.16,-555.24"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge86" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M918.06,-567.77C905.74,-570.93 892.83,-574.62 881,-578.69 820.06,-599.7 806.2,-608.94 748.5,-637.69"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M746.5,-637.69C706.94,-657.41 682.8,-632.07 650,-661.69 614.94,-693.35 645.94,-726.89 614,-761.69 610.96,-765 607.42,-767.93 603.61,-770.5"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="601.81,-767.5 594.96,-775.58 605.35,-773.53 601.81,-767.5"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~EfferentGraph_edge89" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M176.12,-434.59C167.92,-432.03 159.62,-429.06 152,-425.69 127.47,-414.85 101.76,-398.37 83.61,-385.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="85.53,-382.81 75.34,-379.89 81.48,-388.53 85.53,-382.81"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_linearshallowwater2d_tf90EfferentGraph = svgPanZoom('#sourcefileself_linearshallowwater2d_tf90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefileself_linearshallowwater2d_tf90AfferentGraph" width="423pt" height="74pt"
+ viewBox="0.00 0.00 423.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 419,-70 419,4 -4,4"/>
+<!-- sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_node1" class="node">
+<title>sourcefile~self_linearshallowwater2d_t.f90</title>
+<polygon fill="none" stroke="black" points="194,-45 0,-45 0,-21 194,-21 194,-45"/>
+<text text-anchor="middle" x="97" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_LinearShallowWater2D_t.f90</text>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_node2" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/self_linearshallowwater2d.f90.html" xlink:title="SELF_LinearShallowWater2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="415,-66 230,-66 230,-42 415,-42 415,-66"/>
+<text text-anchor="middle" x="322.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_edge1" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M229.95,-45.4C221.46,-44.6 212.81,-43.79 204.2,-42.98"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="204.41,-39.48 194.12,-42.03 203.75,-46.45 204.41,-39.48"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_node3" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90~2</title>
+<g id="a_sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/self_linearshallowwater2d.f90~2.html" xlink:title="SELF_LinearShallowWater2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="415,-24 230,-24 230,0 415,0 415,-24"/>
+<text text-anchor="middle" x="322.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_linearshallowwater2d_t.f90~~AfferentGraph_edge2" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M229.95,-20.6C221.46,-21.4 212.81,-22.21 204.2,-23.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="203.75,-19.55 194.12,-23.97 204.41,-26.52 203.75,-19.55"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_linearshallowwater2d_t.html">self_LinearShallowWater2D_t</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_linearshallowwater2d_t.f90.html#src">SELF_LinearShallowWater2D_t.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">self_LinearShallowWater2D_t</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a><span class="w">  </span><span class="k">use </span><span class="n">self_model</span>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">self_dgmodel2d</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="w">  </span><span class="k">use </span><span class="n">self_mesh</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_BoundaryConditions</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">  </span><span class="k">implicit none</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a>
+<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">dgmodel2d</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">LinearShallowWater2D_t</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">H</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"> </span><span class="c">! uniform resting depth</span>
+<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"> </span><span class="c">! acceleration due to gravity</span>
+<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Cd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"> </span><span class="c">! Linear drag coefficient (1/s)</span>
+<a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">MappedScalar2D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fCori</span><span class="w"> </span><span class="c">! The coriolis parameter</span>
+<a id="ln-40" name="ln-40" href="#ln-40"></a>
+<a id="ln-41" name="ln-41" href="#ln-41"></a><span class="w">  </span><span class="k">contains</span>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalInit</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalInit_LinearShallowWater2D_t</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalFree</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalFree_LinearShallowWater2D_t</span>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetNumberOfVariables</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetNumberOfVariables_LinearShallowWater2D_t</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetMetadata</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetMetadata_LinearShallowWater2D_t</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy_func</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">entropy_func_LinearShallowWater2D_t</span>
+<a id="ln-47" name="ln-47" href="#ln-47"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux2d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">flux2d_LinearShallowWater2D_t</span>
+<a id="ln-48" name="ln-48" href="#ln-48"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">riemannflux2d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">riemannflux2d_LinearShallowWater2D_t</span>
+<a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sourcemethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sourcemethod_LinearShallowWater2D_t</span>
+<a id="ln-50" name="ln-50" href="#ln-50"></a><span class="w">    </span><span class="c">! Custom methods</span>
+<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetCoriolis</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetCoriolis_fplane_LinearShallowWater2D_t</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-52" name="ln-52" href="#ln-52"></a><span class="w">      </span><span class="n">SetCoriolis_betaplane_LinearShallowWater2D_t</span>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetCoriolis_fplane_LinearShallowWater2D_t</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetCoriolis_betaplane_LinearShallowWater2D_t</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">DiagnoseGeostrophicVelocity</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">DiagnoseGeostrophicVelocity_LinearShallowWater2D_t</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="w">  </span><span class="k">endtype </span><span class="n">LinearShallowWater2D_t</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="k">contains</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="k">  subroutine </span><span class="n">AdditionalInit_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-63" name="ln-63" href="#ln-63"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-64" name="ln-64" href="#ln-64"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-66" name="ln-66" href="#ln-66"></a><span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">SELF_bcMethod</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcfunc</span>
+<a id="ln-67" name="ln-67" href="#ln-67"></a>
+<a id="ln-68" name="ln-68" href="#ln-68"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-69" name="ln-69" href="#ln-69"></a><span class="w">                         </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-70" name="ln-70" href="#ln-70"></a>
+<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="w">    </span><span class="n">bcfunc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">hbc2d_NoNormalFlow_LinearShallowWater2D</span>
+<a id="ln-72" name="ln-72" href="#ln-72"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">RegisterBoundaryCondition</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-73" name="ln-73" href="#ln-73"></a><span class="w">      </span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">,</span><span class="s2">&quot;no_normal_flow&quot;</span><span class="p">,</span><span class="n">bcfunc</span><span class="p">)</span>
+<a id="ln-74" name="ln-74" href="#ln-74"></a>
+<a id="ln-75" name="ln-75" href="#ln-75"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">AdditionalInit_LinearShallowWater2D_t</span>
+<a id="ln-76" name="ln-76" href="#ln-76"></a>
+<a id="ln-77" name="ln-77" href="#ln-77"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">AdditionalFree_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-78" name="ln-78" href="#ln-78"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-79" name="ln-79" href="#ln-79"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-80" name="ln-80" href="#ln-80"></a>
+<a id="ln-81" name="ln-81" href="#ln-81"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">Free</span><span class="p">()</span>
+<a id="ln-82" name="ln-82" href="#ln-82"></a>
+<a id="ln-83" name="ln-83" href="#ln-83"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">AdditionalFree_LinearShallowWater2D_t</span>
+<a id="ln-84" name="ln-84" href="#ln-84"></a>
+<a id="ln-85" name="ln-85" href="#ln-85"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">SetNumberOfVariables_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-86" name="ln-86" href="#ln-86"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-87" name="ln-87" href="#ln-87"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-88" name="ln-88" href="#ln-88"></a>
+<a id="ln-89" name="ln-89" href="#ln-89"></a><span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span>
+<a id="ln-90" name="ln-90" href="#ln-90"></a>
+<a id="ln-91" name="ln-91" href="#ln-91"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetNumberOfVariables_LinearShallowWater2D_t</span>
+<a id="ln-92" name="ln-92" href="#ln-92"></a>
+<a id="ln-93" name="ln-93" href="#ln-93"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">SetCoriolis_fplane_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">f0</span><span class="p">)</span>
+<a id="ln-94" name="ln-94" href="#ln-94"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-95" name="ln-95" href="#ln-95"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-96" name="ln-96" href="#ln-96"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f0</span>
+<a id="ln-97" name="ln-97" href="#ln-97"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-98" name="ln-98" href="#ln-98"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-99" name="ln-99" href="#ln-99"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span>
+<a id="ln-100" name="ln-100" href="#ln-100"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">j</span>
+<a id="ln-101" name="ln-101" href="#ln-101"></a>
+<a id="ln-102" name="ln-102" href="#ln-102"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-103" name="ln-103" href="#ln-103"></a><span class="w">                  </span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-104" name="ln-104" href="#ln-104"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f0</span>
+<a id="ln-105" name="ln-105" href="#ln-105"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-106" name="ln-106" href="#ln-106"></a><span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span>
+<a id="ln-107" name="ln-107" href="#ln-107"></a>
+<a id="ln-108" name="ln-108" href="#ln-108"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetCoriolis_fplane_LinearShallowWater2D_t</span>
+<a id="ln-109" name="ln-109" href="#ln-109"></a>
+<a id="ln-110" name="ln-110" href="#ln-110"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">SetCoriolis_betaplane_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">f0</span><span class="p">,</span><span class="n">beta</span><span class="p">)</span>
+<a id="ln-111" name="ln-111" href="#ln-111"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-112" name="ln-112" href="#ln-112"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-113" name="ln-113" href="#ln-113"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f0</span>
+<a id="ln-114" name="ln-114" href="#ln-114"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">beta</span>
+<a id="ln-115" name="ln-115" href="#ln-115"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-116" name="ln-116" href="#ln-116"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-117" name="ln-117" href="#ln-117"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span>
+<a id="ln-118" name="ln-118" href="#ln-118"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">j</span>
+<a id="ln-119" name="ln-119" href="#ln-119"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">y</span>
+<a id="ln-120" name="ln-120" href="#ln-120"></a>
+<a id="ln-121" name="ln-121" href="#ln-121"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-122" name="ln-122" href="#ln-122"></a><span class="w">                  </span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-123" name="ln-123" href="#ln-123"></a><span class="w">      </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-124" name="ln-124" href="#ln-124"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f0</span><span class="o">+</span><span class="n">beta</span><span class="o">*</span><span class="n">y</span>
+<a id="ln-125" name="ln-125" href="#ln-125"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-126" name="ln-126" href="#ln-126"></a><span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span>
+<a id="ln-127" name="ln-127" href="#ln-127"></a>
+<a id="ln-128" name="ln-128" href="#ln-128"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetCoriolis_betaplane_LinearShallowWater2D_t</span>
+<a id="ln-129" name="ln-129" href="#ln-129"></a>
+<a id="ln-130" name="ln-130" href="#ln-130"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">DiagnoseGeostrophicVelocity_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-131" name="ln-131" href="#ln-131"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-132" name="ln-132" href="#ln-132"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-133" name="ln-133" href="#ln-133"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-134" name="ln-134" href="#ln-134"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-135" name="ln-135" href="#ln-135"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span>
+<a id="ln-136" name="ln-136" href="#ln-136"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">j</span>
+<a id="ln-137" name="ln-137" href="#ln-137"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dpdx</span><span class="p">,</span><span class="n">dpdy</span><span class="p">,</span><span class="n">f</span>
+<a id="ln-138" name="ln-138" href="#ln-138"></a>
+<a id="ln-139" name="ln-139" href="#ln-139"></a><span class="w">    </span><span class="c">! We assume here that the velocity field is identically zero</span>
+<a id="ln-140" name="ln-140" href="#ln-140"></a><span class="w">    </span><span class="c">! everywhere and the only field that is set is the free surface height</span>
+<a id="ln-141" name="ln-141" href="#ln-141"></a><span class="w">    </span><span class="c">! with a non-zero coriolis parameter.</span>
+<a id="ln-142" name="ln-142" href="#ln-142"></a><span class="w">    </span><span class="c">! In this case, we have that the tendency calculation will give</span>
+<a id="ln-143" name="ln-143" href="#ln-143"></a><span class="w">    </span><span class="c">! the gradient in the free surface, consistent with the DG approximation</span>
+<a id="ln-144" name="ln-144" href="#ln-144"></a><span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(:,:,:,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"> </span><span class="c">! Set u=0</span>
+<a id="ln-145" name="ln-145" href="#ln-145"></a><span class="w">    </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(:,:,:,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span><span class="w"> </span><span class="c">! Set v=0</span>
+<a id="ln-146" name="ln-146" href="#ln-146"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span>
+<a id="ln-147" name="ln-147" href="#ln-147"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateTendency</span><span class="p">()</span>
+<a id="ln-148" name="ln-148" href="#ln-148"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">dSdt</span><span class="p">%</span><span class="n">UpdateHost</span><span class="p">()</span>
+<a id="ln-149" name="ln-149" href="#ln-149"></a>
+<a id="ln-150" name="ln-150" href="#ln-150"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-151" name="ln-151" href="#ln-151"></a><span class="w">                  </span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-152" name="ln-152" href="#ln-152"></a>
+<a id="ln-153" name="ln-153" href="#ln-153"></a><span class="w">      </span><span class="n">dpdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">dSdt</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-154" name="ln-154" href="#ln-154"></a><span class="w">      </span><span class="n">dpdy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">dSdt</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-155" name="ln-155" href="#ln-155"></a><span class="w">      </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-156" name="ln-156" href="#ln-156"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">dpdy</span><span class="o">/</span><span class="n">f</span><span class="w"> </span><span class="c">! u</span>
+<a id="ln-157" name="ln-157" href="#ln-157"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dpdx</span><span class="o">/</span><span class="n">f</span><span class="w"> </span><span class="c">! v</span>
+<a id="ln-158" name="ln-158" href="#ln-158"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-159" name="ln-159" href="#ln-159"></a>
+<a id="ln-160" name="ln-160" href="#ln-160"></a><span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">UpdateDevice</span><span class="p">()</span>
+<a id="ln-161" name="ln-161" href="#ln-161"></a>
+<a id="ln-162" name="ln-162" href="#ln-162"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">DiagnoseGeostrophicVelocity_LinearShallowWater2D_t</span>
+<a id="ln-163" name="ln-163" href="#ln-163"></a>
+<a id="ln-164" name="ln-164" href="#ln-164"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">SetMetadata_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-165" name="ln-165" href="#ln-165"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-166" name="ln-166" href="#ln-166"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-167" name="ln-167" href="#ln-167"></a>
+<a id="ln-168" name="ln-168" href="#ln-168"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SetName</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;u&quot;</span><span class="p">)</span>
+<a id="ln-169" name="ln-169" href="#ln-169"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SetUnits</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;m/s&quot;</span><span class="p">)</span>
+<a id="ln-170" name="ln-170" href="#ln-170"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SetName</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;v&quot;</span><span class="p">)</span>
+<a id="ln-171" name="ln-171" href="#ln-171"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SetUnits</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;m/s&quot;</span><span class="p">)</span>
+<a id="ln-172" name="ln-172" href="#ln-172"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SetName</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="s2">&quot;eta&quot;</span><span class="p">)</span>
+<a id="ln-173" name="ln-173" href="#ln-173"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SetUnits</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+<a id="ln-174" name="ln-174" href="#ln-174"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">SetName</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;f&quot;</span><span class="p">)</span>
+<a id="ln-175" name="ln-175" href="#ln-175"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">SetUnits</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;1/s&quot;</span><span class="p">)</span>
+<a id="ln-176" name="ln-176" href="#ln-176"></a>
+<a id="ln-177" name="ln-177" href="#ln-177"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">SetMetadata_LinearShallowWater2D_t</span>
+<a id="ln-178" name="ln-178" href="#ln-178"></a>
+<a id="ln-179" name="ln-179" href="#ln-179"></a><span class="w">  </span><span class="k">pure function </span><span class="n">entropy_func_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<a id="ln-180" name="ln-180" href="#ln-180"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-181" name="ln-181" href="#ln-181"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-182" name="ln-182" href="#ln-182"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">e</span>
+<a id="ln-183" name="ln-183" href="#ln-183"></a>
+<a id="ln-184" name="ln-184" href="#ln-184"></a><span class="w">    </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">H</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-185" name="ln-185" href="#ln-185"></a><span class="w">                  </span><span class="n">this</span><span class="p">%</span><span class="n">H</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-186" name="ln-186" href="#ln-186"></a><span class="w">                  </span><span class="n">this</span><span class="p">%</span><span class="n">g</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<a id="ln-187" name="ln-187" href="#ln-187"></a>
+<a id="ln-188" name="ln-188" href="#ln-188"></a><span class="w">  </span><span class="k">endfunction </span><span class="n">entropy_func_LinearShallowWater2D_t</span>
+<a id="ln-189" name="ln-189" href="#ln-189"></a>
+<a id="ln-190" name="ln-190" href="#ln-190"></a><span class="w">  </span><span class="k">pure function </span><span class="n">flux2d_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">dsdx</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
+<a id="ln-191" name="ln-191" href="#ln-191"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-192" name="ln-192" href="#ln-192"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-193" name="ln-193" href="#ln-193"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dsdx</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-194" name="ln-194" href="#ln-194"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-195" name="ln-195" href="#ln-195"></a>
+<a id="ln-196" name="ln-196" href="#ln-196"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">g</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<a id="ln-197" name="ln-197" href="#ln-197"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span>
+<a id="ln-198" name="ln-198" href="#ln-198"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span>
+<a id="ln-199" name="ln-199" href="#ln-199"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">g</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<a id="ln-200" name="ln-200" href="#ln-200"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">H</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-201" name="ln-201" href="#ln-201"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">H</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-202" name="ln-202" href="#ln-202"></a><span class="w">    </span><span class="k">if</span><span class="p">(.</span><span class="n">false</span><span class="p">.)</span><span class="w"> </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">dsdx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="c">! suppress unused-dummy-argument warning</span>
+<a id="ln-203" name="ln-203" href="#ln-203"></a>
+<a id="ln-204" name="ln-204" href="#ln-204"></a><span class="w">  </span><span class="k">endfunction </span><span class="n">flux2d_LinearShallowWater2D_t</span>
+<a id="ln-205" name="ln-205" href="#ln-205"></a>
+<a id="ln-206" name="ln-206" href="#ln-206"></a><span class="w">  </span><span class="k">pure function </span><span class="n">riemannflux2d_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">sL</span><span class="p">,</span><span class="n">sR</span><span class="p">,</span><span class="n">dsdx</span><span class="p">,</span><span class="n">nhat</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
+<a id="ln-207" name="ln-207" href="#ln-207"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-208" name="ln-208" href="#ln-208"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sL</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nVar</span><span class="p">)</span>
+<a id="ln-209" name="ln-209" href="#ln-209"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sR</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nVar</span><span class="p">)</span>
+<a id="ln-210" name="ln-210" href="#ln-210"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dsdx</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nVar</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-211" name="ln-211" href="#ln-211"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-212" name="ln-212" href="#ln-212"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nVar</span><span class="p">)</span>
+<a id="ln-213" name="ln-213" href="#ln-213"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-214" name="ln-214" href="#ln-214"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">c</span>
+<a id="ln-215" name="ln-215" href="#ln-215"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">unL</span>
+<a id="ln-216" name="ln-216" href="#ln-216"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">unR</span>
+<a id="ln-217" name="ln-217" href="#ln-217"></a>
+<a id="ln-218" name="ln-218" href="#ln-218"></a><span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">sqrt</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">g</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">H</span><span class="p">)</span>
+<a id="ln-219" name="ln-219" href="#ln-219"></a>
+<a id="ln-220" name="ln-220" href="#ln-220"></a><span class="w">    </span><span class="n">unL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sL</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">sL</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-221" name="ln-221" href="#ln-221"></a><span class="w">    </span><span class="n">unR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sR</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">sR</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-222" name="ln-222" href="#ln-222"></a>
+<a id="ln-223" name="ln-223" href="#ln-223"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">g</span><span class="o">*</span><span class="p">(</span><span class="n">sL</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="n">sR</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">unL</span><span class="o">-</span><span class="n">unR</span><span class="p">))</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-224" name="ln-224" href="#ln-224"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">g</span><span class="o">*</span><span class="p">(</span><span class="n">sL</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="n">sR</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">unL</span><span class="o">-</span><span class="n">unR</span><span class="p">))</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-225" name="ln-225" href="#ln-225"></a><span class="w">    </span><span class="n">flux</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5_prec</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">H</span><span class="o">*</span><span class="p">(</span><span class="n">unL</span><span class="o">+</span><span class="n">unR</span><span class="p">)</span><span class="o">+</span><span class="n">c</span><span class="o">*</span><span class="p">(</span><span class="n">sL</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="n">sR</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<a id="ln-226" name="ln-226" href="#ln-226"></a><span class="w">    </span><span class="k">if</span><span class="p">(.</span><span class="n">false</span><span class="p">.)</span><span class="w"> </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flux</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">dsdx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="c">! suppress unused-dummy-argument warning</span>
+<a id="ln-227" name="ln-227" href="#ln-227"></a>
+<a id="ln-228" name="ln-228" href="#ln-228"></a><span class="w">  </span><span class="k">endfunction </span><span class="n">riemannflux2d_LinearShallowWater2D_t</span>
+<a id="ln-229" name="ln-229" href="#ln-229"></a>
+<a id="ln-230" name="ln-230" href="#ln-230"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">hbc2d_NoNormalFlow_LinearShallowWater2D</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span><span class="n">mymodel</span><span class="p">)</span>
+<a id="ln-231" name="ln-231" href="#ln-231"></a><span class="w">    </span><span class="c">!! No-normal-flow boundary condition for 2D linear shallow water equations.</span>
+<a id="ln-232" name="ln-232" href="#ln-232"></a><span class="w">    </span><span class="c">!! Reflects the velocity vector about the boundary normal while</span>
+<a id="ln-233" name="ln-233" href="#ln-233"></a><span class="w">    </span><span class="c">!! preserving the free surface elevation.</span>
+<a id="ln-234" name="ln-234" href="#ln-234"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-235" name="ln-235" href="#ln-235"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mymodel</span>
+<a id="ln-236" name="ln-236" href="#ln-236"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-237" name="ln-237" href="#ln-237"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">j</span>
+<a id="ln-238" name="ln-238" href="#ln-238"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">),</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">)</span>
+<a id="ln-239" name="ln-239" href="#ln-239"></a>
+<a id="ln-240" name="ln-240" href="#ln-240"></a><span class="w">    </span><span class="k">select type</span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mymodel</span><span class="p">)</span>
+<a id="ln-241" name="ln-241" href="#ln-241"></a><span class="w">    </span><span class="k">class is</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">)</span>
+<a id="ln-242" name="ln-242" href="#ln-242"></a><span class="w">      </span><span class="k">do </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span>
+<a id="ln-243" name="ln-243" href="#ln-243"></a><span class="w">        </span><span class="n">iEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a id="ln-244" name="ln-244" href="#ln-244"></a><span class="w">        </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a id="ln-245" name="ln-245" href="#ln-245"></a><span class="w">        </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-246" name="ln-246" href="#ln-246"></a><span class="w">          </span><span class="n">nhat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">nhat</span><span class="p">%</span><span class="n">boundary</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>
+<a id="ln-247" name="ln-247" href="#ln-247"></a><span class="w">          </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">)</span>
+<a id="ln-248" name="ln-248" href="#ln-248"></a><span class="w">          </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-249" name="ln-249" href="#ln-249"></a><span class="w">            </span><span class="p">(</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mf">2.0_prec</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="c">! u</span>
+<a id="ln-250" name="ln-250" href="#ln-250"></a><span class="w">          </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-251" name="ln-251" href="#ln-251"></a><span class="w">            </span><span class="p">(</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mf">2.0_prec</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nhat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="c">! v</span>
+<a id="ln-252" name="ln-252" href="#ln-252"></a><span class="w">          </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="c">! eta</span>
+<a id="ln-253" name="ln-253" href="#ln-253"></a><span class="w">        </span><span class="k">enddo</span>
+<a id="ln-254" name="ln-254" href="#ln-254"></a><span class="k">      enddo</span>
+<a id="ln-255" name="ln-255" href="#ln-255"></a><span class="k">    endselect</span>
+<a id="ln-256" name="ln-256" href="#ln-256"></a>
+<a id="ln-257" name="ln-257" href="#ln-257"></a><span class="k">  endsubroutine </span><span class="n">hbc2d_NoNormalFlow_LinearShallowWater2D</span>
+<a id="ln-258" name="ln-258" href="#ln-258"></a>
+<a id="ln-259" name="ln-259" href="#ln-259"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">sourcemethod_LinearShallowWater2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-260" name="ln-260" href="#ln-260"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-261" name="ln-261" href="#ln-261"></a><span class="k">    class</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-262" name="ln-262" href="#ln-262"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-263" name="ln-263" href="#ln-263"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-264" name="ln-264" href="#ln-264"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span>
+<a id="ln-265" name="ln-265" href="#ln-265"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">j</span>
+<a id="ln-266" name="ln-266" href="#ln-266"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-267" name="ln-267" href="#ln-267"></a>
+<a id="ln-268" name="ln-268" href="#ln-268"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-269" name="ln-269" href="#ln-269"></a><span class="w">                  </span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-270" name="ln-270" href="#ln-270"></a>
+<a id="ln-271" name="ln-271" href="#ln-271"></a><span class="w">      </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-272" name="ln-272" href="#ln-272"></a>
+<a id="ln-273" name="ln-273" href="#ln-273"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">Cd</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="c">! du/dt = f*v - Cd*u</span>
+<a id="ln-274" name="ln-274" href="#ln-274"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">fCori</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">Cd</span><span class="o">*</span><span class="n">s</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="c">! dv/dt = -f*u - Cd*v</span>
+<a id="ln-275" name="ln-275" href="#ln-275"></a>
+<a id="ln-276" name="ln-276" href="#ln-276"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-277" name="ln-277" href="#ln-277"></a>
+<a id="ln-278" name="ln-278" href="#ln-278"></a><span class="k">  endsubroutine </span><span class="n">sourcemethod_LinearShallowWater2D_t</span>
+<a id="ln-279" name="ln-279" href="#ln-279"></a>
+<a id="ln-280" name="ln-280" href="#ln-280"></a><span class="k">endmodule </span><span class="n">self_LinearShallowWater2D_t</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-04-10 19:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

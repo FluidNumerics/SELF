@@ -1,0 +1,204 @@
+/*
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+*/
+
+#include "SELF_GPU_Macros.h"
+
+__global__ void boundaryflux_LinearShallowWater2D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, real g, real H, int ndof){
+    uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+
+    if( idof < ndof){
+
+        real nx = nhat[idof];
+        real ny = nhat[idof+ndof];
+        real nm = nmag[idof];
+
+        real fl[3];
+        fl[0] = fb[idof];           // uL
+        fl[1] = fb[idof + ndof];    // vL
+        fl[2] = fb[idof + 2*ndof];  // etaL
+
+        real fr[3];
+        fr[0] = extfb[idof];           // uR
+        fr[1] = extfb[idof + ndof];    // vR
+        fr[2] = extfb[idof + 2*ndof];  // etaR
+        
+        real unL = fl[0] * nx + fl[1] * ny;
+        real unR = fr[0] * nx + fr[1] * ny;
+
+        real c = sqrt(g * H);
+
+        flux[idof]          = 0.5 * (g * (fl[2] + fr[2]) + c * (unL - unR)) * nx * nm;
+        flux[idof + ndof]   = 0.5 * (g * (fl[2] + fr[2]) + c * (unL - unR)) * ny * nm;
+        flux[idof + 2*ndof] = 0.5 * (H * (unL + unR) + c * (fl[2] - fr[2])) * nm;
+    }
+}
+
+extern "C"
+{
+    void boundaryflux_LinearShallowWater2D_gpu(real *fb, real *extfb, real *nhat, real *nmag, real *flux, real g, real H, int N, int nel, int nvar){
+        int threads_per_block = 256;
+        uint32_t ndof = (N+1)*4*nel;
+        int nblocks_x = ndof/threads_per_block + 1;
+
+        dim3 nblocks(nblocks_x, nvar, 1);
+        dim3 nthreads(threads_per_block, 1, 1);
+
+        boundaryflux_LinearShallowWater2D_kernel<<<nblocks,nthreads>>>(fb,extfb,nhat,nmag,flux,g,H,ndof);
+    }
+}
+
+__global__ void fluxmethod_LinearShallowWater2D_gpukernel(real *solution, real *flux, real g, real H, int ndof, int nvar){
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if( idof < ndof ){
+    real u = solution[idof];
+    real v = solution[idof + ndof];
+    real eta = solution[idof + 2*ndof];
+
+    flux[idof + ndof*(0 + nvar*0)] = g*eta; // x-component of u
+    flux[idof + ndof*(0 + nvar*1)] = 0.0;   // y-component of u
+    flux[idof + ndof*(1 + nvar*0)] = 0.0;   // x-component of v
+    flux[idof + ndof*(1 + nvar*1)] = g*eta; // y-component of v
+    flux[idof + ndof*(2 + nvar*0)] = H*u;   // x-component of eta
+    flux[idof + ndof*(2 + nvar*1)] = H*v;   // y-component of eta
+
+  }
+
+}
+extern "C"
+{
+  void fluxmethod_LinearShallowWater2D_gpu(real *solution, real *flux, real g, real H, int N, int nel, int nvar){
+    int ndof = (N+1)*(N+1)*nel;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block +1;
+    fluxmethod_LinearShallowWater2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,flux,g,H,ndof,nvar);
+  }
+}
+
+// No-normal-flow BC kernel for 2D Linear Shallow Water
+__global__ void hbc2d_nonormalflow_linearshallowwater2d_kernel(
+    real *extBoundary, real *boundary, real *nhat,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel)
+{
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t total_dofs = nBoundaries * (N+1);
+
+  if(idof < total_dofs){
+    uint32_t i  = idof % (N+1);
+    uint32_t n  = idof / (N+1);
+    uint32_t e1 = elements[n] - 1;
+    uint32_t s1 = sides[n] - 1;
+
+    real u   = boundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)];
+    real v   = boundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)];
+    real eta = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)];
+    real nx  = nhat[VEB_2D_INDEX(i,s1,e1,0,0,N,nel,1)];
+    real ny  = nhat[VEB_2D_INDEX(i,s1,e1,0,1,N,nel,1)];
+
+    extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = (ny*ny - nx*nx)*u - 2.0*nx*ny*v;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = (nx*nx - ny*ny)*v - 2.0*nx*ny*u;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = eta;
+  }
+}
+
+extern "C"
+{
+  void hbc2d_nonormalflow_linearshallowwater2d_gpu(
+      real *extBoundary, real *boundary, real *nhat,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel)
+  {
+    int threads_per_block = 256;
+    int total_dofs = nBoundaries * (N+1);
+    int nblocks_x = total_dofs/threads_per_block + 1;
+    hbc2d_nonormalflow_linearshallowwater2d_kernel<<<dim3(nblocks_x,1,1),
+      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary, boundary, nhat,
+        elements, sides, nBoundaries, N, nel);
+  }
+}
+
+// Radiation BC kernel for 2D Linear Shallow Water
+__global__ void hbc2d_radiation_linearshallowwater2d_kernel(
+    real *extBoundary,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel)
+{
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t total_dofs = nBoundaries * (N+1);
+
+  if(idof < total_dofs){
+    uint32_t i  = idof % (N+1);
+    uint32_t n  = idof / (N+1);
+    uint32_t e1 = elements[n] - 1;
+    uint32_t s1 = sides[n] - 1;
+
+    extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = 0.0;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = 0.0;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = 0.0;
+  }
+}
+
+extern "C"
+{
+  void hbc2d_radiation_linearshallowwater2d_gpu(
+      real *extBoundary,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel)
+  {
+    int threads_per_block = 256;
+    int total_dofs = nBoundaries * (N+1);
+    int nblocks_x = total_dofs/threads_per_block + 1;
+    hbc2d_radiation_linearshallowwater2d_kernel<<<dim3(nblocks_x,1,1),
+      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary,
+        elements, sides, nBoundaries, N, nel);
+  }
+}
+
+__global__ void sourcemethod_LinearShallowWater2D_gpukernel(real *solution, real *source, real *fCori, real Cd, int ndof){
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if( idof < ndof ){
+    real u = solution[idof];
+    real v = solution[idof + ndof];
+
+    source[idof] = fCori[idof]*v - Cd*u; // du/dt = fv - Cd*u
+    source[idof+ndof] = -fCori[idof]*u - Cd*v;   // dv/dt  = -fu - Cd*v
+
+  }
+
+}
+extern "C"
+{
+  void sourcemethod_LinearShallowWater2D_gpu(real *solution, real *source, real *fCori, real Cd, int N, int nel, int nvar){
+    int ndof = (N+1)*(N+1)*nel;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block +1;
+    sourcemethod_LinearShallowWater2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,source,fCori,Cd,ndof);
+  }
+}

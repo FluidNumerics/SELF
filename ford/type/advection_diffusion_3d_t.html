@@ -1,0 +1,2548 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>advection_diffusion_3d_t &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>advection_diffusion_3d_t
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.9% of total for derived types.</p>Including implementation: 796 statements,  1.4% of total for derived types.">11 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_advection_diffusion_3d_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_advection_diffusion_3d_t.f90.html'>SELF_advection_diffusion_3d_t.f90</a></li>
+     <li><a href='../module/self_advection_diffusion_3d_t.html'>self_advection_diffusion_3d_t</a></li>
+     <li class="active">advection_diffusion_3d_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-dsdt~2">dSdt</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-flux~2">flux</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-fluxdivergence~2">fluxDivergence</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-geometry~2">geometry</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-hyperbolicbcs~2">hyperbolicBCs</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-mesh~2">mesh</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-nu~4">nu</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-parabolicbcs~2">parabolicBCs</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-solution~2">solution</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-solutiongradient~2">solutionGradient</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-source~2">source</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-timeintegrator">timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-u~4">u</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-v~3">v</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-w~2">w</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-worksol~2">workSol</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-additionalfree">AdditionalFree</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-additionalinit~6">AdditionalInit</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-boundaryflux~2">BoundaryFlux</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-calculateentropy~2">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-calculatesolutiongradient~2">CalculateSolutionGradient</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-calculatetendency~2">CalculateTendency</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-fluxmethod~2">FluxMethod</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-free~3">Free</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-init~3">Init</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-mapboundaryconditions~2">MapBoundaryConditions</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-pretendency">PreTendency</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-readmodel~2">ReadModel</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-reportmetrics~2">ReportMetrics</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setboundarycondition~2">SetBoundaryCondition</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setgradientboundarycondition~2">SetGradientBoundaryCondition</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setmetadata~2">SetMetadata</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setnumberofvariables">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setsolution~14">SetSolution</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-settimeintegrator~15">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-sourcemethod~2">SourceMethod</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updategrk2~2">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updategrk3~2">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updategrk4~2">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updatesolution~2">UpdateSolution</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-writemodel~2">WriteModel</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-writetecplot~2">WriteTecplot</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-entropy_func~9">entropy_func</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-flux2d">flux2D</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-flux3d">flux3d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-riemannflux1d">riemannflux1d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-riemannflux2d">riemannflux2d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-riemannflux3d~3">riemannflux3d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-source3d">source3d</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#src">advection_diffusion_3d_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/dgmodel3d.html'>DGModel3D</a>) :: advection_diffusion_3d_t</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~advection_diffusion_3d_t~~InheritsGraph Pages: 1 -->
+<svg id="typeadvection_diffusion_3d_tInheritsGraph" width="641pt" height="78pt"
+ viewBox="0.00 0.00 641.00 77.51" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph" class="graph" transform="scale(0.28 0.28) rotate(0) translate(4 274)">
+<title>type~~advection_diffusion_3d_t~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-274 2295,-274 2295,4 -4,4"/>
+<!-- type~advection_diffusion_3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node1" class="node">
+<title>type~advection_diffusion_3d_t</title>
+<polygon fill="none" stroke="black" points="2291,-135 2147,-135 2147,-111 2291,-111 2291,-135"/>
+<text text-anchor="middle" x="2219" y="-120.6" font-family="Helvetica,sans-Serif" font-size="10.50">advection_diffusion_3d_t</text>
+</g>
+<!-- type~dgmodel3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node2" class="node">
+<title>type~dgmodel3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node2"><a xlink:href=".././type/dgmodel3d.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2110,-135 2034,-135 2034,-111 2110,-111 2110,-135"/>
+<text text-anchor="middle" x="2072" y="-120.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge1" class="edge">
+<title>type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M2146.77,-123C2137.81,-123 2128.83,-123 2120.36,-123"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2120.33,-119.5 2110.33,-123 2120.33,-126.5 2120.33,-119.5"/>
+</g>
+<!-- type~dgmodel3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node3" class="node">
+<title>type~dgmodel3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node3"><a xlink:href=".././type/dgmodel3d_t.html" xlink:title="DGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1997,-135 1912,-135 1912,-111 1997,-111 1997,-135"/>
+<text text-anchor="middle" x="1954.5" y="-120.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge2" class="edge">
+<title>type~dgmodel3d&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M2033.82,-123C2025.29,-123 2016.07,-123 2007.06,-123"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2007.02,-119.5 1997.02,-123 2007.02,-126.5 2007.02,-119.5"/>
+</g>
+<!-- type~semhex -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node4" class="node">
+<title>type~semhex</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node4"><a xlink:href=".././type/semhex.html" xlink:title="SEMHex">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1125,-148 1070,-148 1070,-124 1125,-124 1125,-148"/>
+<text text-anchor="middle" x="1097.5" y="-133.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMHex</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~semhex -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge6" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1911.97,-123.63C1765.47,-125.86 1274.12,-133.33 1135.3,-135.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1135.13,-131.94 1125.19,-135.59 1135.24,-138.94 1135.13,-131.94"/>
+<text text-anchor="middle" x="1454.5" y="-133.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mesh3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node5" class="node">
+<title>type~mesh3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node5"><a xlink:href=".././type/mesh3d.html" xlink:title="Mesh3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1610,-66 1555,-66 1555,-42 1610,-42 1610,-66"/>
+<text text-anchor="middle" x="1582.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mesh3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge5" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mesh3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1939.93,-110.95C1928.53,-101.59 1911.35,-89.19 1894,-83 1799.71,-49.38 1679.65,-49.2 1620.23,-51.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1620.03,-48.19 1610.2,-52.16 1620.36,-55.19 1620.03,-48.19"/>
+<text text-anchor="middle" x="1780.5" y="-85.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~mappedscalar3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node6" class="node">
+<title>type~mappedscalar3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node6"><a xlink:href=".././type/mappedscalar3d.html" xlink:title="MappedScalar3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1634.5,-188 1530.5,-188 1530.5,-164 1634.5,-164 1634.5,-188"/>
+<text text-anchor="middle" x="1582.5" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mappedscalar3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge3" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mappedscalar3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1931.56,-135.14C1920.61,-140.63 1906.95,-146.63 1894,-150 1809.58,-171.99 1708.3,-176.59 1644.9,-176.99"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1644.67,-173.49 1634.68,-177.02 1644.69,-180.49 1644.67,-173.49"/>
+<text text-anchor="middle" x="1780.5" y="-178.4" font-family="Helvetica,sans-Serif" font-size="9.50">solution, source, fluxDivergence, dSdt, workSol</text>
+</g>
+<!-- type~mappedvector3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node7" class="node">
+<title>type~mappedvector3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node7"><a xlink:href=".././type/mappedvector3d.html" xlink:title="MappedVector3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1634.5,-108 1530.5,-108 1530.5,-84 1634.5,-84 1634.5,-108"/>
+<text text-anchor="middle" x="1582.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mappedvector3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge4" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mappedvector3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1911.99,-114.61C1905.98,-113.6 1899.84,-112.69 1894,-112 1807.93,-101.87 1707.68,-98.15 1644.9,-96.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1644.84,-93.29 1634.77,-96.58 1644.7,-100.29 1644.84,-93.29"/>
+<text text-anchor="middle" x="1780.5" y="-114.4" font-family="Helvetica,sans-Serif" font-size="9.50">solutionGradient, flux</text>
+</g>
+<!-- type~boundaryconditionlist -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node8" class="node">
+<title>type~boundaryconditionlist</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node8"><a xlink:href=".././type/boundaryconditionlist.html" xlink:title="BoundaryConditionList">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1649,-237 1516,-237 1516,-213 1649,-213 1649,-237"/>
+<text text-anchor="middle" x="1582.5" y="-222.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryConditionList</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~boundaryconditionlist -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge7" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~boundaryconditionlist</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1946.44,-135.19C1936.77,-150.63 1917.86,-176.69 1894,-189 1820.75,-226.79 1725.13,-232.41 1659.46,-230.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1659.3,-227.22 1649.19,-230.4 1659.07,-234.22 1659.3,-227.22"/>
+<text text-anchor="middle" x="1780.5" y="-232.4" font-family="Helvetica,sans-Serif" font-size="9.50">hyperbolicBCs, parabolicBCs</text>
+</g>
+<!-- type~model -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node9" class="node">
+<title>type~model</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node9"><a xlink:href=".././type/model.html" xlink:title="Model">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1609.5,-24 1555.5,-24 1555.5,0 1609.5,0 1609.5,-24"/>
+<text text-anchor="middle" x="1582.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Model</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~model -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge8" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~model</title>
+<path fill="none" stroke="#ff0000" d="M1947.84,-110.77C1939.05,-93.31 1920.33,-61.71 1894,-47 1805.54,2.41 1680.87,-1.65 1619.92,-7.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1619.24,-4.01 1609.65,-8.51 1619.96,-10.97 1619.24,-4.01"/>
+</g>
+<!-- type~vector3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node10" class="node">
+<title>type~vector3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node10"><a xlink:href=".././type/vector3d.html" xlink:title="Vector3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="941,-110 880,-110 880,-86 941,-86 941,-110"/>
+<text text-anchor="middle" x="910.5" y="-95.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Vector3D</text>
+</a>
+</g>
+</g>
+<!-- type~semhex&#45;&gt;type~vector3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge9" class="edge">
+<title>type~semhex&#45;&gt;type~vector3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1069.95,-127.78C1062.86,-125.74 1055.17,-123.66 1048,-122 1015.68,-114.52 978.58,-108.13 951.22,-103.83"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="951.66,-100.36 941.24,-102.29 950.59,-107.28 951.66,-100.36"/>
+<text text-anchor="middle" x="1022" y="-124.4" font-family="Helvetica,sans-Serif" font-size="9.50">x, nHat</text>
+</g>
+<!-- type~tensor3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node11" class="node">
+<title>type~tensor3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node11"><a xlink:href=".././type/tensor3d.html" xlink:title="Tensor3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="941.5,-152 879.5,-152 879.5,-128 941.5,-128 941.5,-152"/>
+<text text-anchor="middle" x="910.5" y="-137.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- type~semhex&#45;&gt;type~tensor3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge10" class="edge">
+<title>type~semhex&#45;&gt;type~tensor3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1069.62,-136.08C1049.38,-136.19 1020.95,-136.43 996,-137 981.62,-137.33 965.86,-137.84 951.89,-138.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="951.47,-134.87 941.61,-138.74 951.73,-141.86 951.47,-134.87"/>
+<text text-anchor="middle" x="1022" y="-139.4" font-family="Helvetica,sans-Serif" font-size="9.50">dxds, dsdx</text>
+</g>
+<!-- type~scalar3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node14" class="node">
+<title>type~scalar3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node14"><a xlink:href=".././type/scalar3d.html" xlink:title="Scalar3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="941,-194 880,-194 880,-170 941,-170 941,-194"/>
+<text text-anchor="middle" x="910.5" y="-179.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- type~semhex&#45;&gt;type~scalar3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge11" class="edge">
+<title>type~semhex&#45;&gt;type~scalar3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1069.99,-142.59C1038.89,-150.32 987.03,-163.22 951.14,-172.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="949.88,-168.85 941.02,-174.66 951.56,-175.64 949.88,-168.85"/>
+<text text-anchor="middle" x="1022" y="-162.4" font-family="Helvetica,sans-Serif" font-size="9.50">nScale, J</text>
+</g>
+<!-- type~mesh3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node13" class="node">
+<title>type~mesh3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node13"><a xlink:href=".././type/mesh3d_t.html" xlink:title="Mesh3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1368.5,-62 1304.5,-62 1304.5,-38 1368.5,-38 1368.5,-62"/>
+<text text-anchor="middle" x="1336.5" y="-47.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d&#45;&gt;type~mesh3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge12" class="edge">
+<title>type~mesh3d&#45;&gt;type~mesh3d_t</title>
+<path fill="none" stroke="#ffff00" d="M1554.92,-53.56C1512.49,-52.87 1429.1,-51.5 1378.83,-50.68"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1378.69,-47.17 1368.64,-50.51 1378.58,-54.17 1378.69,-47.17"/>
+</g>
+<!-- type~mappedscalar3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node12" class="node">
+<title>type~mappedscalar3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node12"><a xlink:href=".././type/mappedscalar3d_t.html" xlink:title="MappedScalar3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1393,-188 1280,-188 1280,-164 1393,-164 1393,-188"/>
+<text text-anchor="middle" x="1336.5" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar3d&#45;&gt;type~mappedscalar3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge13" class="edge">
+<title>type~mappedscalar3d&#45;&gt;type~mappedscalar3d_t</title>
+<path fill="none" stroke="#00ff00" d="M1530.35,-176C1493.45,-176 1443.33,-176 1403.43,-176"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1403.26,-172.5 1393.26,-176 1403.26,-179.5 1403.26,-172.5"/>
+</g>
+<!-- type~mappedvector3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node15" class="node">
+<title>type~mappedvector3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node15"><a xlink:href=".././type/mappedvector3d_t.html" xlink:title="MappedVector3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1393,-108 1280,-108 1280,-84 1393,-84 1393,-108"/>
+<text text-anchor="middle" x="1336.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector3d&#45;&gt;type~mappedvector3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge14" class="edge">
+<title>type~mappedvector3d&#45;&gt;type~mappedvector3d_t</title>
+<path fill="none" stroke="#00ffff" d="M1530.35,-96C1493.45,-96 1443.33,-96 1403.43,-96"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1403.26,-92.5 1393.26,-96 1403.26,-99.5 1403.26,-92.5"/>
+</g>
+<!-- type~boundarycondition -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node16" class="node">
+<title>type~boundarycondition</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node16"><a xlink:href=".././type/boundarycondition.html" xlink:title="BoundaryCondition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1262,-242 1147,-242 1147,-218 1262,-218 1262,-242"/>
+<text text-anchor="middle" x="1204.5" y="-227.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryCondition</text>
+</a>
+</g>
+</g>
+<!-- type~boundaryconditionlist&#45;&gt;type~boundarycondition -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge15" class="edge">
+<title>type~boundaryconditionlist&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1515.58,-225.88C1447.26,-226.79 1341.06,-228.2 1272.39,-229.11"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1272.08,-225.61 1262.13,-229.25 1272.17,-232.61 1272.08,-225.61"/>
+<text text-anchor="middle" x="1454.5" y="-229.4" font-family="Helvetica,sans-Serif" font-size="9.50">current, head, tail</text>
+</g>
+<!-- type~vector3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node20" class="node">
+<title>type~vector3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node20"><a xlink:href=".././type/vector3d_t.html" xlink:title="Vector3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="769,-110 699,-110 699,-86 769,-86 769,-110"/>
+<text text-anchor="middle" x="734" y="-95.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Vector3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~vector3d&#45;&gt;type~vector3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge16" class="edge">
+<title>type~vector3d&#45;&gt;type~vector3d_t</title>
+<path fill="none" stroke="#ff0000" d="M879.9,-98C852.38,-98 811.01,-98 779.51,-98"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="779.24,-94.5 769.24,-98 779.24,-101.5 779.24,-94.5"/>
+</g>
+<!-- type~tensor3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node21" class="node">
+<title>type~tensor3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node21"><a xlink:href=".././type/tensor3d_t.html" xlink:title="Tensor3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="769.5,-152 698.5,-152 698.5,-128 769.5,-128 769.5,-152"/>
+<text text-anchor="middle" x="734" y="-137.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~tensor3d&#45;&gt;type~tensor3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge17" class="edge">
+<title>type~tensor3d&#45;&gt;type~tensor3d_t</title>
+<path fill="none" stroke="#ffda00" d="M879.1,-140C851.64,-140 810.88,-140 779.71,-140"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="779.53,-136.5 769.53,-140 779.53,-143.5 779.53,-136.5"/>
+</g>
+<!-- type~mappedscalar3d_t&#45;&gt;type~semhex -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge18" class="edge">
+<title>type~mappedscalar3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1279.65,-168.46C1242.04,-163.12 1191.4,-155.44 1147,-147 1143.1,-146.26 1139.04,-145.43 1135,-144.57"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="1135.63,-141.12 1125.11,-142.39 1134.13,-147.96 1135.63,-141.12"/>
+<text text-anchor="middle" x="1204.5" y="-167.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedscalar3d_t&#45;&gt;type~scalar3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge19" class="edge">
+<title>type~mappedscalar3d_t&#45;&gt;type~scalar3d</title>
+<path fill="none" stroke="#48ff00" d="M1279.72,-178.47C1273.74,-178.67 1267.75,-178.86 1262,-179 1149.34,-181.78 1016.26,-182.11 951.26,-182.08"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="951.05,-178.58 941.05,-182.07 951.04,-185.58 951.05,-178.58"/>
+</g>
+<!-- type~semmesh -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node18" class="node">
+<title>type~semmesh</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node18"><a xlink:href=".././type/semmesh.html" xlink:title="SEMMesh">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1129,-42 1066,-42 1066,-18 1129,-18 1129,-42"/>
+<text text-anchor="middle" x="1097.5" y="-27.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMMesh</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d_t&#45;&gt;type~semmesh -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge20" class="edge">
+<title>type~mesh3d_t&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#00ff91" d="M1304.03,-47.34C1261.65,-43.77 1186.18,-37.4 1139.44,-33.45"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1139.61,-29.96 1129.35,-32.6 1139.02,-36.93 1139.61,-29.96"/>
+</g>
+<!-- type~scalar3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node17" class="node">
+<title>type~scalar3d_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node17"><a xlink:href=".././type/scalar3d_t.html" xlink:title="Scalar3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="769,-194 699,-194 699,-170 769,-170 769,-194"/>
+<text text-anchor="middle" x="734" y="-179.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~scalar3d&#45;&gt;type~scalar3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge21" class="edge">
+<title>type~scalar3d&#45;&gt;type~scalar3d_t</title>
+<path fill="none" stroke="#0091ff" d="M879.9,-182C852.38,-182 811.01,-182 779.51,-182"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="779.24,-178.5 769.24,-182 779.24,-185.5 779.24,-178.5"/>
+</g>
+<!-- type~mappedvector3d_t&#45;&gt;type~semhex -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge22" class="edge">
+<title>type~mappedvector3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1279.68,-95.31C1241.65,-96.15 1190.5,-99.86 1147,-112 1140.59,-113.79 1134.01,-116.43 1127.84,-119.31"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1125.96,-116.34 1118.59,-123.94 1129.1,-122.59 1125.96,-116.34"/>
+<text text-anchor="middle" x="1204.5" y="-114.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedvector3d_t&#45;&gt;type~vector3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge23" class="edge">
+<title>type~mappedvector3d_t&#45;&gt;type~vector3d</title>
+<path fill="none" stroke="#4800ff" d="M1279.73,-92.65C1273.75,-92.38 1267.75,-92.16 1262,-92 1149.34,-88.94 1016.25,-93.45 951.25,-96.17"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="950.89,-92.69 941.05,-96.61 951.19,-99.68 950.89,-92.69"/>
+</g>
+<!-- type~boundarycondition&#45;&gt;type~boundarycondition -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge25" class="edge">
+<title>type~boundarycondition&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1222.03,-242.01C1228.15,-250.97 1222.3,-260 1204.5,-260 1193.65,-260 1187.24,-256.65 1185.28,-252"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1188.75,-252.46 1186.97,-242.01 1181.85,-251.29 1188.75,-252.46"/>
+<text text-anchor="middle" x="1204.5" y="-262.4" font-family="Helvetica,sans-Serif" font-size="9.50">next, prev</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node19" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-224 0,-224 0,-200 54,-200 54,-224"/>
+<text text-anchor="middle" x="27" y="-209.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~boundarycondition&#45;&gt;c_ptr -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge24" class="edge">
+<title>type~boundarycondition&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1147,-230.95C1111.42,-231.46 1064.52,-232 1023,-232 1023,-232 1023,-232 183.5,-232 142.29,-232 95.44,-225.01 64.04,-219.29"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="64.48,-215.81 54.01,-217.41 63.19,-222.69 64.48,-215.81"/>
+<text text-anchor="middle" x="583" y="-234.4" font-family="Helvetica,sans-Serif" font-size="9.50">elements_gpu, sides_gpu</text>
+</g>
+<!-- type~self_dataobj -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node22" class="node">
+<title>type~self_dataobj</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node22"><a xlink:href=".././type/self_dataobj.html" xlink:title="SELF_DataObj">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="504,-159 417,-159 417,-135 504,-135 504,-159"/>
+<text text-anchor="middle" x="460.5" y="-144.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataObj</text>
+</a>
+</g>
+</g>
+<!-- type~scalar3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge26" class="edge">
+<title>type~scalar3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#ff0000" d="M698.75,-172.48C658.41,-161.42 595.42,-144.72 584,-145"/>
+</g>
+<!-- type~domaindecomposition -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node23" class="node">
+<title>type~domaindecomposition</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node23"><a xlink:href=".././type/domaindecomposition.html" xlink:title="DomainDecomposition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="978,-42 843,-42 843,-18 978,-18 978,-42"/>
+<text text-anchor="middle" x="910.5" y="-27.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- type~semmesh&#45;&gt;type~domaindecomposition -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge27" class="edge">
+<title>type~semmesh&#45;&gt;type~domaindecomposition</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1065.95,-30C1044.84,-30 1015.76,-30 988.52,-30"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="988.19,-26.5 978.19,-30 988.19,-33.5 988.19,-26.5"/>
+<text text-anchor="middle" x="1022" y="-32.4" font-family="Helvetica,sans-Serif" font-size="9.50">decomp</text>
+</g>
+<!-- type~vector3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge28" class="edge">
+<title>type~vector3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#0066ff" d="M698.98,-107.81C687.24,-111.26 674.02,-115.22 662,-119 627.14,-129.96 620.53,-144.1 584,-145"/>
+<path fill="none" stroke="#0066ff" d="M582,-145C559.8,-145.55 535.3,-145.99 514.22,-146.31"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="514.11,-142.81 504.17,-146.46 514.22,-149.81 514.11,-142.81"/>
+</g>
+<!-- type~tensor3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge29" class="edge">
+<title>type~tensor3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#cc00ff" d="M698.38,-141.33C668.19,-142.46 623.2,-144.03 584,-145"/>
+</g>
+<!-- type~lagrange -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node24" class="node">
+<title>type~lagrange</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node24"><a xlink:href=".././type/lagrange.html" xlink:title="Lagrange">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="337,-119 273,-119 273,-95 337,-95 337,-119"/>
+<text text-anchor="middle" x="305" y="-104.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~lagrange -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge30" class="edge">
+<title>type~self_dataobj&#45;&gt;type~lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M416.74,-135.86C394.99,-130.19 368.68,-123.33 347.16,-117.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="347.89,-114.3 337.33,-115.17 346.13,-121.07 347.89,-114.3"/>
+<text text-anchor="middle" x="384.5" y="-132.4" font-family="Helvetica,sans-Serif" font-size="9.50">interp</text>
+</g>
+<!-- type~metadata -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node25" class="node">
+<title>type~metadata</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node25"><a xlink:href=".././type/metadata.html" xlink:title="Metadata">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="336.5,-203 273.5,-203 273.5,-179 336.5,-179 336.5,-203"/>
+<text text-anchor="middle" x="305" y="-188.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Metadata</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~metadata -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge31" class="edge">
+<title>type~self_dataobj&#45;&gt;type~metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M417.56,-159.02C395.39,-165.38 368.3,-173.14 346.37,-179.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="345.34,-176.08 336.69,-182.2 347.27,-182.81 345.34,-176.08"/>
+<text text-anchor="middle" x="384.5" y="-173.4" font-family="Helvetica,sans-Serif" font-size="9.50">meta</text>
+</g>
+<!-- EquationParser -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node26" class="node">
+<title>EquationParser</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="352,-161 258,-161 258,-137 352,-137 352,-161"/>
+<text text-anchor="middle" x="305" y="-146.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EquationParser</text>
+</g>
+<!-- type~self_dataobj&#45;&gt;EquationParser -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge32" class="edge">
+<title>type~self_dataobj&#45;&gt;EquationParser</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M416.74,-147.56C399.83,-147.78 380.16,-148.03 362.13,-148.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="361.97,-144.77 352.02,-148.4 362.07,-151.77 361.97,-144.77"/>
+<text text-anchor="middle" x="384.5" y="-150.4" font-family="Helvetica,sans-Serif" font-size="9.50">eqn</text>
+</g>
+<!-- type~domaindecomposition_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node27" class="node">
+<title>type~domaindecomposition_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node27"><a xlink:href=".././type/domaindecomposition_t.html" xlink:title="DomainDecomposition_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="806,-42 662,-42 662,-18 806,-18 806,-42"/>
+<text text-anchor="middle" x="734" y="-27.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- type~domaindecomposition&#45;&gt;type~domaindecomposition_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge33" class="edge">
+<title>type~domaindecomposition&#45;&gt;type~domaindecomposition_t</title>
+<path fill="none" stroke="#00ffff" d="M842.53,-30C833.97,-30 825.12,-30 816.36,-30"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="816.13,-26.5 806.13,-30 816.13,-33.5 816.13,-26.5"/>
+</g>
+<!-- type~lagrange_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_node28" class="node">
+<title>type~lagrange_t</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritsGraph_node28"><a xlink:href=".././type/lagrange_t.html" xlink:title="Lagrange_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="221,-183 148,-183 148,-159 221,-159 221,-183"/>
+<text text-anchor="middle" x="184.5" y="-168.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- type~lagrange&#45;&gt;type~lagrange_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge34" class="edge">
+<title>type~lagrange&#45;&gt;type~lagrange_t</title>
+<path fill="none" stroke="#ff0000" d="M276.04,-119.19C270.03,-121.97 263.76,-124.99 258,-128 242.93,-135.88 226.61,-145.46 213.27,-153.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="211.26,-150.71 204.57,-158.93 214.92,-156.68 211.26,-150.71"/>
+</g>
+<!-- type~lagrange_t&#45;&gt;c_ptr -->
+<g id="type~~advection_diffusion_3d_t~~InheritsGraph_edge35" class="edge">
+<title>type~lagrange_t&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M147.83,-180.41C122.76,-187.01 89.36,-195.82 64.18,-202.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="63.07,-199.13 54.29,-205.07 64.85,-205.9 63.07,-199.13"/>
+<text text-anchor="middle" x="101" y="-201.4" font-family="Helvetica,sans-Serif" font-size="9.50">blas_handle</text>
+</g>
+</g>
+</svg>
+</div><script>var pantypeadvection_diffusion_3d_tInheritsGraph = svgPanZoom('#typeadvection_diffusion_3d_tInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~advection_diffusion_3d_t~~InheritedByGraph Pages: 1 -->
+<svg id="typeadvection_diffusion_3d_tInheritedByGraph" width="323pt" height="74pt"
+ viewBox="0.00 0.00 323.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~advection_diffusion_3d_t~~InheritedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>type~~advection_diffusion_3d_t~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 319,-70 319,4 -4,4"/>
+<!-- type~advection_diffusion_3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritedByGraph_node1" class="node">
+<title>type~advection_diffusion_3d_t</title>
+<polygon fill="none" stroke="black" points="144,-45 0,-45 0,-21 144,-21 144,-45"/>
+<text text-anchor="middle" x="72" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">advection_diffusion_3d_t</text>
+</g>
+<!-- type~advection_diffusion_3d -->
+<g id="type~~advection_diffusion_3d_t~~InheritedByGraph_node2" class="node">
+<title>type~advection_diffusion_3d</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritedByGraph_node2"><a xlink:href=".././type/advection_diffusion_3d.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="315,-66 180,-66 180,-42 315,-42 315,-66"/>
+<text text-anchor="middle" x="247.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritedByGraph_edge1" class="edge">
+<title>type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#ff0000" d="M179.92,-45.94C171.47,-44.92 162.75,-43.86 154.11,-42.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="154.36,-39.32 144.01,-41.6 153.52,-46.27 154.36,-39.32"/>
+</g>
+<!-- type~advection_diffusion_3d~2 -->
+<g id="type~~advection_diffusion_3d_t~~InheritedByGraph_node3" class="node">
+<title>type~advection_diffusion_3d~2</title>
+<g id="a_type~~advection_diffusion_3d_t~~InheritedByGraph_node3"><a xlink:href=".././type/advection_diffusion_3d~2.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="315,-24 180,-24 180,0 315,0 315,-24"/>
+<text text-anchor="middle" x="247.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~advection_diffusion_3d_t~~InheritedByGraph_edge2" class="edge">
+<title>type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#ff0000" d="M179.92,-20.06C171.47,-21.08 162.75,-22.14 154.11,-23.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="153.52,-19.73 144.01,-24.4 154.36,-26.68 153.52,-19.73"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-dsdt~2">dSdt</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-flux~2">flux</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-fluxdivergence~2">fluxDivergence</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-geometry~2">geometry</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-hyperbolicbcs~2">hyperbolicBCs</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-mesh~2">mesh</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-nu~4">nu</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-parabolicbcs~2">parabolicBCs</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-solution~2">solution</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-solutiongradient~2">solutionGradient</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-source~2">source</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-timeintegrator">timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-u~4">u</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-v~3">v</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-w~2">w</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#variable-worksol~2">workSol</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-additionalfree">AdditionalFree</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-additionalinit~6">AdditionalInit</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-boundaryflux~2">BoundaryFlux</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-calculateentropy~2">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-calculatesolutiongradient~2">CalculateSolutionGradient</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-calculatetendency~2">CalculateTendency</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-fluxmethod~2">FluxMethod</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-free~3">Free</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-init~3">Init</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-mapboundaryconditions~2">MapBoundaryConditions</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-pretendency">PreTendency</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-readmodel~2">ReadModel</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-reportmetrics~2">ReportMetrics</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setboundarycondition~2">SetBoundaryCondition</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setgradientboundarycondition~2">SetGradientBoundaryCondition</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setmetadata~2">SetMetadata</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setnumberofvariables">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-setsolution~14">SetSolution</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-settimeintegrator~15">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-sourcemethod~2">SourceMethod</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updategrk2~2">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updategrk3~2">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updategrk4~2">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-updatesolution~2">UpdateSolution</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-writemodel~2">WriteModel</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-writetecplot~2">WriteTecplot</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-entropy_func~9">entropy_func</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-flux2d">flux2D</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-flux3d">flux3d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-riemannflux1d">riemannflux1d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-riemannflux2d">riemannflux2d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-riemannflux3d~3">riemannflux3d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#boundprocedure-source3d">source3d</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/advection_diffusion_3d_t.html#src">advection_diffusion_3d_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-dsdt~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux~2"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~2"></span>type(<a href='../type/semhex.html'>SEMHex</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs~2"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh~2"></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nu~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs~2"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient~2"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-u~4"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>u</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-v~3"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>v</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-w~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>w</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalfree"></span><h3>procedure, public :: <strong>AdditionalFree</strong>  => <a href='../proc/additionalfree_model.html'>AdditionalFree_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalfree_model.html'>AdditionalFree_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalinit~6"></span><h3>procedure, public :: <strong>AdditionalInit</strong>  => <a href='../proc/additionalinit_advection_diffusion_3d_t.html'>AdditionalInit_advection_diffusion_3d_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalinit_advection_diffusion_3d_t.html'>AdditionalInit_advection_diffusion_3d_t</a>(this)</h3>
+<p>Register boundary conditions for the advection-diffusion model.
+Hyperbolic: mirror (no-normal-flow) wall condition on the solution.
+Parabolic: no-stress condition that zeros the normal gradient at
+the boundary, giving zero diffusive flux through walls.  This is
+stable with the Bassi-Rebay (BR1) method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_3d_t.html'>advection_diffusion_3d_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionaloutput"></span><h3>procedure, public :: <strong>AdditionalOutput</strong>  => <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>(this, fileid)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=HID_T),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileid</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-boundaryflux~2"></span><h3>procedure, public :: <strong>BoundaryFlux</strong>  => <a href='../proc/boundaryflux_dgmodel3d_t.html'>BoundaryFlux_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/boundaryflux_dgmodel3d_t.html'>BoundaryFlux_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculateentropy~2"></span><h3>procedure, public :: <strong>CalculateEntropy</strong>  => <a href='../proc/calculateentropy_dgmodel3d_t.html'>CalculateEntropy_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculateentropy_dgmodel3d_t.html'>CalculateEntropy_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatesolutiongradient~2"></span><h3>procedure, public :: <strong>CalculateSolutionGradient</strong>  => <a href='../proc/calculatesolutiongradient_dgmodel3d_t.html'>CalculateSolutionGradient_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculatesolutiongradient_dgmodel3d_t.html'>CalculateSolutionGradient_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatetendency~2"></span><h3>procedure, public :: <strong>CalculateTendency</strong>  => <a href='../proc/calculatetendency_dgmodel3d_t.html'>CalculateTendency_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculatetendency_dgmodel3d_t.html'>CalculateTendency_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-euler_timeintegrator"></span><h3>procedure, public :: <strong>Euler_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/euler_timeintegrator.html'>Euler_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-fluxmethod~2"></span><h3>procedure, public :: <strong>FluxMethod</strong>  => <a href='../proc/fluxmethod_dgmodel3d_t.html'>fluxmethod_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/fluxmethod_dgmodel3d_t.html'>fluxmethod_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-forwardstep"></span><h3>procedure, public :: <strong>ForwardStep</strong>  => <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>(this, tn, dt, ioInterval)</h3>
+<p>Forward steps the model using the associated tendency procedure and time integrator</p><a href="../proc/forwardstep_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ioInterval</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~3"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_dgmodel3d_t.html'>Free_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_dgmodel3d_t.html'>Free_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-getsimulationtime"></span><h3>procedure, public :: <strong>GetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/getsimulationtime.html'>GetSimulationTime</a>(this, t)</h3>
+<p>Returns the current simulation time stored in the model % t attribute</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-incrementiocounter"></span><h3>procedure, public :: <strong>IncrementIOCounter</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/incrementiocounter.html'>IncrementIOCounter</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~3"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_dgmodel3d_t.html'>Init_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_dgmodel3d_t.html'>Init_DGModel3D_t</a>(this, mesh, geometry)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semhex.html'>SEMHex</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk2_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK2_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk2_timeintegrator.html'>LowStorageRK2_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk3_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK3_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk3_timeintegrator.html'>LowStorageRK3_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk4_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK4_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk4_timeintegrator.html'>LowStorageRK4_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-mapboundaryconditions~2"></span><h3>procedure, public :: <strong>MapBoundaryConditions</strong>  => <a href='../proc/mapboundaryconditions_dgmodel3d_t.html'>MapBoundaryConditions_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/mapboundaryconditions_dgmodel3d_t.html'>MapBoundaryConditions_DGModel3D_t</a>(this)</h3>
+<p>Scan the mesh sideInfo and populate the elements/sides
+arrays for each registered boundary condition.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-pretendency"></span><h3>procedure, public :: <strong>PreTendency</strong>  => <a href='../proc/pretendency_model.html'>PreTendency_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/pretendency_model.html'>PreTendency_Model</a>(this)</h3>
+<p>PreTendency is a template routine that is used to house any additional calculations
+that you want to execute at the beginning of the tendency calculation routine.
+This default PreTendency simply returns back to the caller without executing any instructions</p><a href="../proc/pretendency_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-printtype"></span><h3>procedure, public :: <strong>PrintType</strong>  => <a href='../proc/printtype_model.html'>PrintType_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/printtype_model.html'>PrintType_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-readmodel~2"></span><h3>procedure, public :: <strong>ReadModel</strong>  => <a href='../proc/read_dgmodel3d_t.html'>Read_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/read_dgmodel3d_t.html'>Read_DGModel3D_t</a>(this, fileName)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportentropy"></span><h3>procedure, public :: <strong>ReportEntropy</strong>  => <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportmetrics~2"></span><h3>procedure, public :: <strong>ReportMetrics</strong>  => <a href='../proc/reportmetrics_dgmodel3d_t.html'>ReportMetrics_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportmetrics_dgmodel3d_t.html'>ReportMetrics_DGModel3D_t</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportusermetrics"></span><h3>procedure, public :: <strong>ReportUserMetrics</strong>  => <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>(this)</h3>
+<p>Method that can be overridden by users to
+report their own custom metrics after file io</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setboundarycondition~2"></span><h3>procedure, public :: <strong>SetBoundaryCondition</strong>  => <a href='../proc/setboundarycondition_dgmodel3d_t.html'>setboundarycondition_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setboundarycondition_dgmodel3d_t.html'>setboundarycondition_DGModel3D_t</a>(this)</h3>
+<p>Apply registered boundary conditions for the solution.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setgradientboundarycondition~2"></span><h3>procedure, public :: <strong>SetGradientBoundaryCondition</strong>  => <a href='../proc/setgradientboundarycondition_dgmodel3d_t.html'>setgradientboundarycondition_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setgradientboundarycondition_dgmodel3d_t.html'>setgradientboundarycondition_DGModel3D_t</a>(this)</h3>
+<p>Apply registered boundary conditions for the solution gradient.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setmetadata~2"></span><h3>procedure, public :: <strong>SetMetadata</strong>  => <a href='../proc/setmetadata_dgmodel3d_t.html'>SetMetadata_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setmetadata_dgmodel3d_t.html'>SetMetadata_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setnumberofvariables"></span><h3>procedure, public :: <strong>SetNumberOfVariables</strong>  => <a href='../proc/setnumberofvariables_model.html'>SetNumberOfVariables_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setnumberofvariables_model.html'>SetNumberOfVariables_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsimulationtime"></span><h3>procedure, public :: <strong>SetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setsimulationtime.html'>SetSimulationTime</a>(this, t)</h3>
+<p>Sets the model % t attribute with the provided simulation time</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsolution~14"></span><h3>generic, public :: <strong>SetSolution</strong>  => <a href='../type/dgmodel3d_t.html#boundprocedure-setsolutionfromchar_dgmodel3d_t'>SetSolutionFromChar_DGModel3D_t</a>, <a href='../type/dgmodel3d_t.html#boundprocedure-setsolutionfromeqn_dgmodel3d_t'>SetSolutionFromEqn_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setsolutionfromchar_dgmodel3d_t.html'>SetSolutionFromChar_DGModel3D_t</a>(this, eqnChar)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqnChar</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setsolutionfromeqn_dgmodel3d_t.html'>SetSolutionFromEqn_DGModel3D_t</a>(this, eqn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-settimeintegrator~15"></span><h3>generic, public :: <strong>SetTimeIntegrator</strong>  => <a href='../type/model.html#boundprocedure-settimeintegrator_withchar'>SetTimeIntegrator_withChar</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/settimeintegrator_withchar.html'>SetTimeIntegrator_withChar</a>(this, integrator)</h3>
+<p>Sets the time integrator method, using a character input</p><a href="../proc/settimeintegrator_withchar.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>integrator</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-sourcemethod~2"></span><h3>procedure, public :: <strong>SourceMethod</strong>  => <a href='../proc/sourcemethod_dgmodel3d_t.html'>sourcemethod_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/sourcemethod_dgmodel3d_t.html'>sourcemethod_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk2~2"></span><h3>procedure, public :: <strong>UpdateGRK2</strong>  => <a href='../proc/updategrk2_dgmodel3d_t.html'>UpdateGRK2_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk2_dgmodel3d_t.html'>UpdateGRK2_DGModel3D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk3~2"></span><h3>procedure, public :: <strong>UpdateGRK3</strong>  => <a href='../proc/updategrk3_dgmodel3d_t.html'>UpdateGRK3_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk3_dgmodel3d_t.html'>UpdateGRK3_DGModel3D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk4~2"></span><h3>procedure, public :: <strong>UpdateGRK4</strong>  => <a href='../proc/updategrk4_dgmodel3d_t.html'>UpdateGRK4_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk4_dgmodel3d_t.html'>UpdateGRK4_DGModel3D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatesolution~2"></span><h3>procedure, public :: <strong>UpdateSolution</strong>  => <a href='../proc/updatesolution_dgmodel3d_t.html'>UpdateSolution_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatesolution_dgmodel3d_t.html'>UpdateSolution_DGModel3D_t</a>(this, dt)</h3>
+<p>Computes a solution update as , where dt is either provided through the interface
+or taken as the Model's stored time step size (model % dt)</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writemodel~2"></span><h3>procedure, public :: <strong>WriteModel</strong>  => <a href='../proc/write_dgmodel3d_t.html'>Write_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/write_dgmodel3d_t.html'>Write_DGModel3D_t</a>(this, fileName)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writetecplot~2"></span><h3>procedure, public :: <strong>WriteTecplot</strong>  => <a href='../proc/writetecplot_dgmodel3d_t.html'>WriteTecplot_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/writetecplot_dgmodel3d_t.html'>WriteTecplot_DGModel3D_t</a>(this, filename)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-entropy_func~9"></span><h3>procedure, public :: <strong>entropy_func</strong>  => <a href='../proc/entropy_func_advection_diffusion_3d_t.html'>entropy_func_advection_diffusion_3d_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/entropy_func_advection_diffusion_3d_t.html'>entropy_func_advection_diffusion_3d_t</a>(this, s) result(e)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_3d_t.html'>advection_diffusion_3d_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%solution%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux1d"></span><h3>procedure, public :: <strong>flux1D</strong>  => <a href='../proc/flux1d_model.html'>flux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux1d_model.html'>flux1d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux2d"></span><h3>procedure, public :: <strong>flux2D</strong>  => <a href='../proc/flux2d_model.html'>flux2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux2d_model.html'>flux2d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:2)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux3d"></span><h3>procedure, public :: <strong>flux3d</strong>  => <a href='../proc/flux3d_advection_diffusion_3d_t.html'>flux3d_advection_diffusion_3d_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux3d_advection_diffusion_3d_t.html'>flux3d_advection_diffusion_3d_t</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_3d_t.html'>advection_diffusion_3d_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%solution%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%solution%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%solution%nvar,1:3)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux1d"></span><h3>procedure, public :: <strong>riemannflux1d</strong>  => <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux2d"></span><h3>procedure, public :: <strong>riemannflux2d</strong>  => <a href='../proc/riemannflux2d_model.html'>riemannflux2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux2d_model.html'>riemannflux2d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux3d~3"></span><h3>procedure, public :: <strong>riemannflux3d</strong>  => <a href='../proc/riemannflux3d_advection_diffusion_3d_t.html'>riemannflux3d_advection_diffusion_3d_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux3d_advection_diffusion_3d_t.html'>riemannflux3d_advection_diffusion_3d_t</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/advection_diffusion_3d_t.html'>advection_diffusion_3d_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source1d"></span><h3>procedure, public :: <strong>source1d</strong>  => <a href='../proc/source1d_model.html'>source1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source1d_model.html'>source1d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source2d"></span><h3>procedure, public :: <strong>source2d</strong>  => <a href='../proc/source2d_model.html'>source2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source2d_model.html'>source2d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source3d"></span><h3>procedure, public :: <strong>source3d</strong>  => <a href='../proc/source3d_model.html'>source3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source3d_model.html'>source3d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">dgmodel3d</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">advection_diffusion_3d_t</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nu</span><span class="w"> </span><span class="c">! diffusion coefficient</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="c">! constant x-component of velocity</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="c">! constant y-component of velocity</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="c">! constant z-component of velocity</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalInit</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalInit_advection_diffusion_3d_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">riemannflux3d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">riemannflux3d_advection_diffusion_3d_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux3d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">flux3d_advection_diffusion_3d_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy_func</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">entropy_func_advection_diffusion_3d_t</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">advection_diffusion_3d_t</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-04-10 19:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

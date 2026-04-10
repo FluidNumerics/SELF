@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_BoundaryConditions &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_BoundaryConditions 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.0% of total for modules and submodules.">141 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_BoundaryConditions.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_boundaryconditions.f90.html'>SELF_BoundaryConditions.f90</a></li>
+     <li class="active">SELF_BoundaryConditions</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#variable-self_bcname_length">SELF_BCNAME_LENGTH</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
+  <div id="inters-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#interface-self_bcmethod">SELF_bcMethod</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#type-boundarycondition">BoundaryCondition</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#type-boundaryconditionlist">BoundaryConditionList</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-getbcforid">GetBCForID</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-free_bclist">Free_BCList</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-init_bclist">Init_BCList</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-movenext">MoveNext</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-populateboundaries">PopulateBoundaries</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-registerbcmethod">RegisterbcMethod</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-rewind">rewind</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_metadata.html'>SELF_Metadata</a></li>
+    <li><a href='../module/self_supportroutines.html'>SELF_SupportRoutines</a></li>
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_boundaryconditions~~UsesGraph Pages: 1 -->
+<svg id="moduleself_boundaryconditionsUsesGraph" width="641pt" height="202pt"
+ viewBox="0.00 0.00 641.00 202.50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_boundaryconditions~~UsesGraph" class="graph" transform="scale(0.89 0.89) rotate(0) translate(4 222.82)">
+<title>module~~self_boundaryconditions~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-222.82 714,-222.82 714,4 -4,4"/>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node1" class="node">
+<title>module~self_boundaryconditions</title>
+<polygon fill="none" stroke="black" points="710,-78.82 559,-78.82 559,-54.82 710,-54.82 710,-78.82"/>
+<text text-anchor="middle" x="634.5" y="-64.42" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_BoundaryConditions</text>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node2" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node2"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="523,-158.82 429,-158.82 429,-134.82 523,-134.82 523,-158.82"/>
+<text text-anchor="middle" x="476" y="-144.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_metadata -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge1" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M609.73,-78.97C583.03,-92.62 539.54,-114.85 509.66,-130.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="507.79,-127.15 500.48,-134.82 510.98,-133.38 507.79,-127.15"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node3" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node3"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-58.82 262,-58.82 262,-34.82 393,-34.82 393,-58.82"/>
+<text text-anchor="middle" x="327.5" y="-44.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge2" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M475,-6.82C455.01,-4.53 406.77,-19.2 371.08,-31.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="369.68,-28.19 361.38,-34.77 371.97,-34.8 369.68,-28.19"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node4" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node4"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-36.82 5,-36.82 5,-12.82 89,-12.82 89,-36.82"/>
+<text text-anchor="middle" x="47" y="-22.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;iso_c_binding -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge3" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M612.11,-54.61C582.77,-38.82 527.88,-12.65 477,-6.82"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M475,-6.82C340.08,8.63 179.81,-7.22 99.41,-17.5"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="98.54,-14.09 89.07,-18.85 99.44,-21.03 98.54,-14.09"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node5" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-218.82 151,-218.82 151,-194.82 205,-194.82 205,-218.82"/>
+<text text-anchor="middle" x="178" y="-204.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge4" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M430.45,-158.84C418.34,-161.94 405.2,-165.15 393,-167.82 330.8,-181.44 257.71,-194.03 215.05,-201.05"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="214.45,-197.6 205.14,-202.67 215.58,-204.51 214.45,-197.6"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node6" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node6"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-158.82 291,-158.82 291,-134.82 364,-134.82 364,-158.82"/>
+<text text-anchor="middle" x="327.5" y="-144.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge5" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M428.65,-146.82C411.43,-146.82 391.91,-146.82 374.71,-146.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="374.34,-143.32 364.34,-146.82 374.34,-150.32 374.34,-143.32"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node7" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node7"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-96.82 0,-96.82 0,-72.82 94,-72.82 94,-96.82"/>
+<text text-anchor="middle" x="47" y="-82.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge6" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M262,-49.72C223.49,-52.12 173.72,-56.38 130,-63.82 120,-65.52 109.44,-67.83 99.34,-70.3"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="98.27,-66.96 89.43,-72.8 99.98,-73.74 98.27,-66.96"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node8" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node8"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-96.82 130,-96.82 130,-72.82 226,-72.82 226,-96.82"/>
+<text text-anchor="middle" x="178" y="-82.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge7" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M279.83,-58.84C265.77,-62.47 250.19,-66.48 235.56,-70.25"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="234.43,-66.93 225.62,-72.81 236.18,-73.71 234.43,-66.93"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge8" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M296.65,-158.96C273.02,-168.58 239.93,-182.04 214.86,-192.23"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="213.29,-189.1 205.34,-196.11 215.93,-195.58 213.29,-189.1"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge9" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M290.96,-153.8C250.73,-160.18 183.78,-166.1 130,-147.82 104.81,-139.26 81.31,-119.51 65.98,-104.38"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="68.24,-101.68 58.75,-96.98 63.23,-106.58 68.24,-101.68"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge11" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M297.71,-134.72C274.66,-125.03 242.15,-111.36 216.97,-100.78"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="218.29,-97.54 207.72,-96.89 215.58,-103.99 218.29,-97.54"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_boundaryconditions~~UsesGraph_node9" class="node">
+<title>mpi</title>
+<g id="a_module~~self_boundaryconditions~~UsesGraph_node9"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-138.82 151,-138.82 151,-114.82 205,-114.82 205,-138.82"/>
+<text text-anchor="middle" x="178" y="-124.42" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge10" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M290.79,-141.98C267.87,-138.87 238.2,-134.85 215.19,-131.73"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="215.51,-128.24 205.13,-130.36 214.57,-135.18 215.51,-128.24"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge13" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M150.89,-72.68C131.4,-63.61 104.54,-51.12 83.16,-41.17"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="84.61,-37.99 74.07,-36.95 81.66,-44.34 84.61,-37.99"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_boundaryconditions~~UsesGraph_edge12" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M129.7,-84.82C121.42,-84.82 112.73,-84.82 104.23,-84.82"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="104.01,-81.32 94.01,-84.82 104.01,-88.32 104.01,-81.32"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_boundaryconditionsUsesGraph = svgPanZoom('#moduleself_boundaryconditionsUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_boundaryconditions~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_boundaryconditionsUsedByGraph" width="641pt" height="754pt"
+ viewBox="0.00 0.00 641.00 753.69" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_boundaryconditions~~UsedByGraph" class="graph" transform="scale(0.73 0.73) rotate(0) translate(4 1026)">
+<title>module~~self_boundaryconditions~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1026 872,-1026 872,4 -4,4"/>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node1" class="node">
+<title>module~self_boundaryconditions</title>
+<polygon fill="none" stroke="black" points="151,-624 0,-624 0,-600 151,-600 151,-624"/>
+<text text-anchor="middle" x="75.5" y="-609.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_BoundaryConditions</text>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node2" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node2"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="303,-770 187,-770 187,-746 303,-746 303,-770"/>
+<text text-anchor="middle" x="245" y="-755.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge1" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M230.01,-745.8C200.75,-720.3 132.92,-661.17 98.05,-630.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="100.17,-627.99 90.34,-624.06 95.57,-633.27 100.17,-627.99"/>
+</g>
+<!-- module~self_linearshallowwater2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node3" class="node">
+<title>module~self_linearshallowwater2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node3"><a xlink:href=".././module/self_linearshallowwater2d_t.html" xlink:title="self_LinearShallowWater2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="672.5,-977 505.5,-977 505.5,-953 672.5,-953 672.5,-977"/>
+<text text-anchor="middle" x="589" y="-962.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge2" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M505.05,-963.09C473.68,-962.87 437.68,-963.22 405,-965"/>
+</g>
+<!-- module~self_dgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node24" class="node">
+<title>module~self_dgmodel2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node24"><a xlink:href=".././module/self_dgmodel2d~2.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="457.5,-854 350.5,-854 350.5,-830 457.5,-830 457.5,-854"/>
+<text text-anchor="middle" x="404" y="-839.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge47" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M570.78,-952.87C547.75,-936.7 505.57,-907.3 469,-883 457.21,-875.16 444.05,-866.69 432.75,-859.49"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="434.47,-856.44 424.15,-854.03 430.72,-862.35 434.47,-856.44"/>
+</g>
+<!-- module~self_lineareuler2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node4" class="node">
+<title>module~self_lineareuler2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node4"><a xlink:href=".././module/self_lineareuler2d_t.html" xlink:title="self_LinearEuler2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="650,-896 528,-896 528,-872 650,-872 650,-896"/>
+<text text-anchor="middle" x="589" y="-881.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge4" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M546.08,-896.01C532.76,-900.26 518.09,-905.39 505,-911 458.57,-930.89 455.44,-962.25 405,-965"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M403,-965C333.33,-968.8 308.31,-996.4 246,-965"/>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge49" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M535.56,-871.96C514.31,-867.09 489.6,-861.42 467.43,-856.33"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="467.98,-852.86 457.45,-854.04 466.41,-859.69 467.98,-852.86"/>
+</g>
+<!-- module~self_advection_diffusion_3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node5" class="node">
+<title>module~self_advection_diffusion_3d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node5"><a xlink:href=".././module/self_advection_diffusion_3d_t.html" xlink:title="self_advection_diffusion_3d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="673,-319 505,-319 505,-295 673,-295 673,-319"/>
+<text text-anchor="middle" x="589" y="-304.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge5" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M549.94,-319.09C513.26,-329.83 455.98,-344.25 405,-347"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M403,-347C333.32,-350.76 304.99,-309.73 246,-347"/>
+</g>
+<!-- module~self_dgmodel3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node29" class="node">
+<title>module~self_dgmodel3d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node29"><a xlink:href=".././module/self_dgmodel3d~2.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="457.5,-420 350.5,-420 350.5,-396 457.5,-396 457.5,-420"/>
+<text text-anchor="middle" x="404" y="-405.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge55" class="edge">
+<title>module~self_advection_diffusion_3d_t&#45;&gt;module~self_dgmodel3d~2</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M565.93,-319.18C533.41,-337.13 472.53,-370.73 435.68,-391.06"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="433.93,-388.03 426.87,-395.93 437.31,-394.16 433.93,-388.03"/>
+</g>
+<!-- module~self_dgmodel1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node6" class="node">
+<title>module~self_dgmodel1d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node6"><a xlink:href=".././module/self_dgmodel1d_t.html" xlink:title="SELF_DGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="303,-319 187,-319 187,-295 303,-295 303,-319"/>
+<text text-anchor="middle" x="245" y="-304.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge3" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M206.65,-319.04C199.46,-322.66 192.47,-327.24 187,-333 114.61,-409.17 87.69,-538.51 79.53,-589.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="76.05,-589.55 78.03,-599.96 82.98,-590.59 76.05,-589.55"/>
+</g>
+<!-- module~self_lineareuler3d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node7" class="node">
+<title>module~self_lineareuler3d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node7"><a xlink:href=".././module/self_lineareuler3d.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="845,-360 732,-360 732,-336 845,-336 845,-360"/>
+<text text-anchor="middle" x="788.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge6" class="edge">
+<title>module~self_lineareuler3d&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M731.71,-345.88C657.18,-343.51 521.04,-340.75 405,-347"/>
+</g>
+<!-- module~self_lineareuler3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node35" class="node">
+<title>module~self_lineareuler3d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node35"><a xlink:href=".././module/self_lineareuler3d_t.html" xlink:title="self_LinearEuler3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="650,-399 528,-399 528,-375 650,-375 650,-399"/>
+<text text-anchor="middle" x="589" y="-384.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge60" class="edge">
+<title>module~self_lineareuler3d&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M731.96,-358.97C709.7,-363.36 683.79,-368.48 660.24,-373.13"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="659.44,-369.72 650.31,-375.09 660.8,-376.59 659.44,-369.72"/>
+</g>
+<!-- module~self_dgmodel1d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node8" class="node">
+<title>module~self_dgmodel1d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node8"><a xlink:href=".././module/self_dgmodel1d.html" xlink:title="SELF_DGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="457.5,-319 350.5,-319 350.5,-295 457.5,-295 457.5,-319"/>
+<text text-anchor="middle" x="404" y="-304.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge7" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M350.38,-318.71C308.34,-328.35 255.01,-341.31 246,-347"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M244,-347C150.59,-406.01 99.99,-538.08 83.05,-590.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="79.7,-589.23 80.03,-599.82 86.37,-591.33 79.7,-589.23"/>
+</g>
+<!-- module~self_dgmodel1d&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge28" class="edge">
+<title>module~self_dgmodel1d&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M350.28,-307C338.45,-307 325.74,-307 313.41,-307"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="313.16,-303.5 303.16,-307 313.16,-310.5 313.16,-303.5"/>
+</g>
+<!-- module~self_dgmodel2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node9" class="node">
+<title>module~self_dgmodel2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node9"><a xlink:href=".././module/self_dgmodel2d.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="457.5,-916 350.5,-916 350.5,-892 457.5,-892 457.5,-916"/>
+<text text-anchor="middle" x="404" y="-901.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge8" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M382.88,-916.07C346.45,-937.22 271,-977.6 246,-965"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M244,-965C116.02,-900.5 85.19,-702.03 78.33,-634.65"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="81.78,-633.96 77.37,-624.32 74.81,-634.61 81.78,-633.96"/>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge20" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M380.92,-891.91C368.08,-884.39 351.93,-874.07 339,-863 308.46,-836.86 278.63,-800.77 261.3,-778.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="263.95,-776.13 255.09,-770.32 258.39,-780.39 263.95,-776.13"/>
+</g>
+<!-- module~self_dgmodel3d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node10" class="node">
+<title>module~self_dgmodel3d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node10"><a xlink:href=".././module/self_dgmodel3d.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="457.5,-605 350.5,-605 350.5,-581 457.5,-581 457.5,-605"/>
+<text text-anchor="middle" x="404" y="-590.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge9" class="edge">
+<title>module~self_dgmodel3d&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M367.74,-605.02C329.05,-617.66 269.36,-635.43 246,-633"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M244,-633C216.99,-630.2 187.59,-626.67 161.06,-623.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="161.41,-619.83 151.05,-622.04 160.53,-626.77 161.41,-619.83"/>
+</g>
+<!-- module~self_dgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node13" class="node">
+<title>module~self_dgmodel3d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node13"><a xlink:href=".././module/self_dgmodel3d_t.html" xlink:title="SELF_DGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="303,-583 187,-583 187,-559 303,-559 303,-583"/>
+<text text-anchor="middle" x="245" y="-568.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge32" class="edge">
+<title>module~self_dgmodel3d&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M350.28,-585.61C338.45,-583.96 325.74,-582.17 313.41,-580.45"/>
+<polygon fill="#001dff" stroke="#001dff" points="313.55,-576.93 303.16,-579.01 312.58,-583.86 313.55,-576.93"/>
+</g>
+<!-- module~self_ecadvection3d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node11" class="node">
+<title>module~self_ecadvection3d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node11"><a xlink:href=".././module/self_ecadvection3d.html" xlink:title="SELF_ECAdvection3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="851,-602 726,-602 726,-578 851,-578 851,-602"/>
+<text text-anchor="middle" x="788.5" y="-587.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge10" class="edge">
+<title>module~self_ecadvection3d&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M588,-595C504.93,-595.37 487.96,-628.75 405,-633"/>
+</g>
+<!-- module~self_ecadvection3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node14" class="node">
+<title>module~self_ecadvection3d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node14"><a xlink:href=".././module/self_ecadvection3d_t.html" xlink:title="SELF_ECAdvection3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="656,-567 522,-567 522,-543 656,-543 656,-567"/>
+<text text-anchor="middle" x="589" y="-552.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d&#45;&gt;module~self_ecadvection3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge35" class="edge">
+<title>module~self_ecadvection3d&#45;&gt;module~self_ecadvection3d_t</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M725.82,-579.07C706.94,-575.72 685.95,-572 666.22,-568.51"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="666.8,-565.06 656.34,-566.76 665.58,-571.95 666.8,-565.06"/>
+</g>
+<!-- module~self_ecdgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node23" class="node">
+<title>module~self_ecdgmodel3d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node23"><a xlink:href=".././module/self_ecdgmodel3d_t.html" xlink:title="SELF_ECDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="469,-563 339,-563 339,-539 469,-539 469,-563"/>
+<text text-anchor="middle" x="404" y="-548.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge43" class="edge">
+<title>module~self_ecadvection3d&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M725.69,-592.23C686.76,-593.47 635.45,-594.8 590,-595"/>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M588,-595C562.48,-595.11 499.98,-578.71 455.13,-565.9"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="455.85,-562.47 445.28,-563.07 453.92,-569.2 455.85,-562.47"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node12" class="node">
+<title>module~self_advection_diffusion_2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node12"><a xlink:href=".././module/self_advection_diffusion_2d_t.html" xlink:title="self_advection_diffusion_2d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="673,-811 505,-811 505,-787 673,-787 673,-811"/>
+<text text-anchor="middle" x="589" y="-796.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge11" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M533,-786.91C523.55,-784.31 513.91,-781.33 505,-778 427.56,-749.02 410.57,-735.41 339,-694 296.21,-669.25 295.17,-638.11 246,-633"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge48" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M536.54,-811.09C514.62,-816.24 488.89,-822.29 466.02,-827.66"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="465.01,-824.3 456.08,-830 466.61,-831.12 465.01,-824.3"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge12" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M194.65,-583.08C176.16,-587.61 154.96,-592.79 135.67,-597.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="134.67,-594.16 125.79,-599.94 136.33,-600.96 134.67,-594.16"/>
+</g>
+<!-- module~self_ecadvection3d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge13" class="edge">
+<title>module~self_ecadvection3d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M536.91,-567.13C526,-570.77 514.81,-575.35 505,-581 486.19,-591.84 487.89,-603.3 469,-614 443.18,-628.62 434.63,-631.48 405,-633"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M403,-633C333.31,-636.57 315.4,-640.21 246,-633"/>
+</g>
+<!-- module~self_ecadvection3d_t&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge42" class="edge">
+<title>module~self_ecadvection3d_t&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M521.93,-553.56C508.09,-553.25 493.41,-552.93 479.29,-552.62"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="479.21,-549.12 469.13,-552.4 479.05,-556.12 479.21,-549.12"/>
+</g>
+<!-- module~self_ecadvection2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node15" class="node">
+<title>module~self_ecadvection2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node15"><a xlink:href=".././module/self_ecadvection2d_t.html" xlink:title="SELF_ECAdvection2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="656,-685 522,-685 522,-661 656,-661 656,-685"/>
+<text text-anchor="middle" x="589" y="-670.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge14" class="edge">
+<title>module~self_ecadvection2d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M545.23,-660.91C500.07,-648.64 431.79,-631.63 405,-633"/>
+</g>
+<!-- module~self_ecdgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node25" class="node">
+<title>module~self_ecdgmodel2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node25"><a xlink:href=".././module/self_ecdgmodel2d_t.html" xlink:title="SELF_ECDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="469,-685 339,-685 339,-661 469,-661 469,-685"/>
+<text text-anchor="middle" x="404" y="-670.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d_t&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge50" class="edge">
+<title>module~self_ecadvection2d_t&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M521.93,-673C508.09,-673 493.41,-673 479.29,-673"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="479.13,-669.5 469.13,-673 479.13,-676.5 479.13,-669.5"/>
+</g>
+<!-- module~self_linearshallowwater2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node16" class="node">
+<title>module~self_linearshallowwater2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node16"><a xlink:href=".././module/self_linearshallowwater2d~2.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="867.5,-1022 709.5,-1022 709.5,-998 867.5,-998 867.5,-1022"/>
+<text text-anchor="middle" x="788.5" y="-1007.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d~2&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge15" class="edge">
+<title>module~self_linearshallowwater2d~2&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M709.26,-1005.93C652.39,-1002.34 573.67,-996.09 505,-986 460.07,-979.4 450.36,-962.86 405,-965"/>
+</g>
+<!-- module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge22" class="edge">
+<title>module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M734.83,-998C709.6,-992.25 679.2,-985.32 652.78,-979.3"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="653.39,-975.85 642.86,-977.04 651.84,-982.68 653.39,-975.85"/>
+</g>
+<!-- module~self_ecadvection2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node17" class="node">
+<title>module~self_ecadvection2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node17"><a xlink:href=".././module/self_ecadvection2d~2.html" xlink:title="SELF_ECAdvection2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="851,-644 726,-644 726,-620 851,-620 851,-644"/>
+<text text-anchor="middle" x="788.5" y="-629.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d~2&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge16" class="edge">
+<title>module~self_ecadvection2d~2&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M725.63,-630.69C686.67,-630.26 635.36,-630.44 590,-633"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M588,-633C506.8,-637.58 486.23,-628.84 405,-633"/>
+</g>
+<!-- module~self_ecadvection2d~2&#45;&gt;module~self_ecadvection2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge37" class="edge">
+<title>module~self_ecadvection2d~2&#45;&gt;module~self_ecadvection2d_t</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M729.58,-644.02C707.07,-648.7 681.13,-654.08 657.76,-658.93"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="657,-655.52 647.92,-660.98 658.42,-662.37 657,-655.52"/>
+</g>
+<!-- module~self_ecadvection2d~2&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge52" class="edge">
+<title>module~self_ecadvection2d~2&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M588,-633C541.4,-635.63 489.54,-647.88 452.96,-658.14"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="451.72,-654.85 443.07,-660.97 453.64,-661.58 451.72,-654.85"/>
+</g>
+<!-- module~self_lineareuler2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node18" class="node">
+<title>module~self_lineareuler2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node18"><a xlink:href=".././module/self_lineareuler2d.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="845,-938 732,-938 732,-914 845,-914 845,-938"/>
+<text text-anchor="middle" x="788.5" y="-923.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge17" class="edge">
+<title>module~self_lineareuler2d&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M731.79,-927.2C674.64,-928.97 583.28,-933.34 505,-944 460,-950.13 450.35,-962.53 405,-965"/>
+</g>
+<!-- module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge24" class="edge">
+<title>module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M731.96,-914.19C708.49,-909.2 680.98,-903.35 656.44,-898.13"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="657,-894.67 646.49,-896.01 655.55,-901.52 657,-894.67"/>
+</g>
+<!-- module~self_lineareuler2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node19" class="node">
+<title>module~self_lineareuler2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node19"><a xlink:href=".././module/self_lineareuler2d~2.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="845,-896 732,-896 732,-872 845,-872 845,-896"/>
+<text text-anchor="middle" x="788.5" y="-881.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge23" class="edge">
+<title>module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M731.96,-884C709.8,-884 684.02,-884 660.55,-884"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="660.31,-880.5 650.31,-884 660.31,-887.5 660.31,-880.5"/>
+</g>
+<!-- module~self_advection_diffusion_3d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node20" class="node">
+<title>module~self_advection_diffusion_3d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node20"><a xlink:href=".././module/self_advection_diffusion_3d.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-318 709,-318 709,-294 868,-294 868,-318"/>
+<text text-anchor="middle" x="788.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge25" class="edge">
+<title>module~self_advection_diffusion_3d&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#f0ff00" stroke-dasharray="5,2" d="M708.88,-306.4C700.45,-306.44 691.82,-306.48 683.24,-306.53"/>
+<polygon fill="#f0ff00" stroke="#f0ff00" points="683.2,-303.03 673.21,-306.58 683.23,-310.03 683.2,-303.03"/>
+</g>
+<!-- module~self_advection_diffusion_3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node21" class="node">
+<title>module~self_advection_diffusion_3d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node21"><a xlink:href=".././module/self_advection_diffusion_3d~2.html" xlink:title="self_advection_diffusion_3d">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-276 709,-276 709,-252 868,-252 868,-276"/>
+<text text-anchor="middle" x="788.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge26" class="edge">
+<title>module~self_advection_diffusion_3d~2&#45;&gt;module~self_advection_diffusion_3d_t</title>
+<path fill="none" stroke="#f0ff00" stroke-dasharray="5,2" d="M732.22,-276.04C708.35,-281.23 680.25,-287.35 655.35,-292.77"/>
+<polygon fill="#f0ff00" stroke="#f0ff00" points="654.29,-289.42 645.26,-294.97 655.78,-296.26 654.29,-289.42"/>
+</g>
+<!-- module~self_dgmodel1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node22" class="node">
+<title>module~self_dgmodel1d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node22"><a xlink:href=".././module/self_dgmodel1d~2.html" xlink:title="SELF_DGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="457.5,-193 350.5,-193 350.5,-169 457.5,-169 457.5,-193"/>
+<text text-anchor="middle" x="404" y="-178.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge27" class="edge">
+<title>module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M387.95,-193.08C360.47,-215.13 302.02,-262.04 269.34,-288.27"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="266.85,-285.78 261.24,-294.77 271.23,-291.24 266.85,-285.78"/>
+</g>
+<!-- module~self_ecdgmodel3d_t&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge31" class="edge">
+<title>module~self_ecdgmodel3d_t&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M338.69,-559.19C330.38,-560.25 321.85,-561.34 313.5,-562.4"/>
+<polygon fill="#001dff" stroke="#001dff" points="312.89,-558.95 303.41,-563.69 313.77,-565.89 312.89,-558.95"/>
+</g>
+<!-- module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge18" class="edge">
+<title>module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M380.51,-829.96C353.46,-815.49 307.9,-791.12 277.4,-774.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="278.92,-771.64 268.45,-770.01 275.62,-777.82 278.92,-771.64"/>
+</g>
+<!-- module~self_ecdgmodel2d_t&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge19" class="edge">
+<title>module~self_ecdgmodel2d_t&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M380.51,-685.18C353.38,-699.86 307.64,-724.63 277.14,-741.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="275.33,-738.14 268.2,-745.98 278.66,-744.3 275.33,-738.14"/>
+</g>
+<!-- module~self_linearshallowwater2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node26" class="node">
+<title>module~self_linearshallowwater2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node26"><a xlink:href=".././module/self_linearshallowwater2d.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="867.5,-980 709.5,-980 709.5,-956 867.5,-956 867.5,-980"/>
+<text text-anchor="middle" x="788.5" y="-965.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge21" class="edge">
+<title>module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M709.44,-966.81C700.67,-966.68 691.67,-966.54 682.73,-966.41"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="682.74,-962.91 672.68,-966.26 682.63,-969.91 682.74,-962.91"/>
+</g>
+<!-- module~self_advection_diffusion_2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node27" class="node">
+<title>module~self_advection_diffusion_2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node27"><a xlink:href=".././module/self_advection_diffusion_2d.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-770 709,-770 709,-746 868,-746 868,-770"/>
+<text text-anchor="middle" x="788.5" y="-755.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge29" class="edge">
+<title>module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#0078ff" stroke-dasharray="5,2" d="M729.58,-770.02C707.07,-774.7 681.13,-780.08 657.76,-784.93"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="657,-781.52 647.92,-786.98 658.42,-788.37 657,-781.52"/>
+</g>
+<!-- module~self_advection_diffusion_2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node28" class="node">
+<title>module~self_advection_diffusion_2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node28"><a xlink:href=".././module/self_advection_diffusion_2d~2.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-728 709,-728 709,-704 868,-704 868,-728"/>
+<text text-anchor="middle" x="788.5" y="-713.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge30" class="edge">
+<title>module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#0078ff" stroke-dasharray="5,2" d="M727.23,-728.14C720.84,-730.58 714.63,-733.5 709,-737 688.4,-749.8 693.69,-765.35 673,-778 669.99,-779.84 666.83,-781.52 663.57,-783.05"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="662.02,-779.9 654.15,-786.99 664.73,-786.36 662.02,-779.9"/>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge33" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M391.2,-420.25C364.26,-448.22 298.05,-516.97 265.17,-551.1"/>
+<polygon fill="#001dff" stroke="#001dff" points="262.35,-548.98 257.94,-558.61 267.4,-553.83 262.35,-548.98"/>
+</g>
+<!-- module~self_ecadvection3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node30" class="node">
+<title>module~self_ecadvection3d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node30"><a xlink:href=".././module/self_ecadvection3d~2.html" xlink:title="SELF_ECAdvection3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="851,-560 726,-560 726,-536 851,-536 851,-560"/>
+<text text-anchor="middle" x="788.5" y="-545.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection3d~2&#45;&gt;module~self_ecadvection3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge34" class="edge">
+<title>module~self_ecadvection3d~2&#45;&gt;module~self_ecadvection3d_t</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M725.82,-550.19C707.03,-550.85 686.14,-551.59 666.49,-552.29"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="666.21,-548.8 656.34,-552.65 666.46,-555.79 666.21,-548.8"/>
+</g>
+<!-- module~self_ecadvection2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node31" class="node">
+<title>module~self_ecadvection2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node31"><a xlink:href=".././module/self_ecadvection2d.html" xlink:title="SELF_ECAdvection2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="851,-686 726,-686 726,-662 851,-662 851,-686"/>
+<text text-anchor="middle" x="788.5" y="-671.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d&#45;&gt;module~self_ecadvection2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge36" class="edge">
+<title>module~self_ecadvection2d&#45;&gt;module~self_ecadvection2d_t</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M725.82,-673.69C707.03,-673.59 686.14,-673.49 666.49,-673.39"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="666.36,-669.89 656.34,-673.34 666.33,-676.89 666.36,-669.89"/>
+</g>
+<!-- module~self_ecdgmodel3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node32" class="node">
+<title>module~self_ecdgmodel3d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node32"><a xlink:href=".././module/self_ecdgmodel3d~2.html" xlink:title="SELF_ECDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="649.5,-483 528.5,-483 528.5,-459 649.5,-459 649.5,-483"/>
+<text text-anchor="middle" x="589" y="-468.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d~2&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge44" class="edge">
+<title>module~self_ecdgmodel3d~2&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M531.04,-483.11C522.19,-485.65 513.25,-488.61 505,-492 478.17,-503.04 449.89,-520.32 430.28,-533.33"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="428.25,-530.48 421.91,-538.97 432.16,-536.28 428.25,-530.48"/>
+</g>
+<!-- module~self_ecdgmodel3d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node33" class="node">
+<title>module~self_ecdgmodel3d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node33"><a xlink:href=".././module/self_ecdgmodel3d.html" xlink:title="SELF_ECDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="649.5,-525 528.5,-525 528.5,-501 649.5,-501 649.5,-525"/>
+<text text-anchor="middle" x="589" y="-510.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge45" class="edge">
+<title>module~self_ecdgmodel3d&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M530.1,-525.02C511.9,-528.8 491.65,-533.01 472.83,-536.92"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="471.92,-533.53 462.84,-538.99 473.34,-540.38 471.92,-533.53"/>
+</g>
+<!-- module~self_nulldgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node34" class="node">
+<title>module~self_nulldgmodel2d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node34"><a xlink:href=".././module/self_nulldgmodel2d_t.html" xlink:title="self_NullDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="654,-854 524,-854 524,-830 654,-830 654,-854"/>
+<text text-anchor="middle" x="589" y="-839.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge46" class="edge">
+<title>module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d~2</title>
+<path fill="none" stroke="#00ff4e" stroke-dasharray="5,2" d="M524,-842C505.82,-842 486.04,-842 467.93,-842"/>
+<polygon fill="#00ff4e" stroke="#00ff4e" points="467.77,-838.5 457.77,-842 467.77,-845.5 467.77,-838.5"/>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge54" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d~2</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M527.83,-393.91C508.49,-396.12 487.02,-398.59 467.52,-400.83"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="467.06,-397.36 457.52,-401.97 467.86,-404.31 467.06,-397.36"/>
+</g>
+<!-- module~self_nulldgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node36" class="node">
+<title>module~self_nulldgmodel3d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node36"><a xlink:href=".././module/self_nulldgmodel3d_t.html" xlink:title="self_NullDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="654,-441 524,-441 524,-417 654,-417 654,-441"/>
+<text text-anchor="middle" x="589" y="-426.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge56" class="edge">
+<title>module~self_nulldgmodel3d_t&#45;&gt;module~self_dgmodel3d~2</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M524,-421.66C505.82,-419.57 486.04,-417.3 467.93,-415.22"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="468.1,-411.72 457.77,-414.06 467.31,-418.67 468.1,-411.72"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node37" class="node">
+<title>module~self_advection_diffusion_1d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node37"><a xlink:href=".././module/self_advection_diffusion_1d_t.html" xlink:title="self_advection_diffusion_1d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="673,-193 505,-193 505,-169 673,-169 673,-193"/>
+<text text-anchor="middle" x="589" y="-178.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge38" class="edge">
+<title>module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#9cff00" stroke-dasharray="5,2" d="M504.8,-181C492.39,-181 479.77,-181 467.86,-181"/>
+<polygon fill="#9cff00" stroke="#9cff00" points="467.61,-177.5 457.61,-181 467.61,-184.5 467.61,-177.5"/>
+</g>
+<!-- module~self_nulldgmodel1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node38" class="node">
+<title>module~self_nulldgmodel1d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node38"><a xlink:href=".././module/self_nulldgmodel1d_t.html" xlink:title="self_NullDGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="654,-150 524,-150 524,-126 654,-126 654,-150"/>
+<text text-anchor="middle" x="589" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge39" class="edge">
+<title>module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#9cff00" stroke-dasharray="5,2" d="M536.54,-150.09C514.62,-155.24 488.89,-161.29 466.02,-166.66"/>
+<polygon fill="#9cff00" stroke="#9cff00" points="465.01,-163.3 456.08,-169 466.61,-170.12 465.01,-163.3"/>
+</g>
+<!-- module~self_advection_diffusion_1d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node39" class="node">
+<title>module~self_advection_diffusion_1d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node39"><a xlink:href=".././module/self_advection_diffusion_1d.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-234 709,-234 709,-210 868,-210 868,-234"/>
+<text text-anchor="middle" x="788.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge40" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#9cff00" stroke-dasharray="5,2" d="M708.96,-219.31C652.11,-216.67 573.54,-211.58 505,-202 492.25,-200.22 478.68,-197.76 465.8,-195.15"/>
+<polygon fill="#9cff00" stroke="#9cff00" points="466.14,-191.64 455.64,-193.03 464.71,-198.5 466.14,-191.64"/>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge64" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M729.58,-209.98C707.07,-205.3 681.13,-199.92 657.76,-195.07"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="658.42,-191.63 647.92,-193.02 657,-198.48 658.42,-191.63"/>
+</g>
+<!-- module~self_burgers1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node40" class="node">
+<title>module~self_burgers1d_t</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node40"><a xlink:href=".././module/self_burgers1d_t.html" xlink:title="self_Burgers1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="640.5,-66 537.5,-66 537.5,-42 640.5,-42 640.5,-66"/>
+<text text-anchor="middle" x="589" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge41" class="edge">
+<title>module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#9cff00" stroke-dasharray="5,2" d="M570.45,-66.18C538.07,-88.65 468.78,-136.74 430.95,-162.99"/>
+<polygon fill="#9cff00" stroke="#9cff00" points="428.71,-160.28 422.49,-168.86 432.7,-166.03 428.71,-160.28"/>
+</g>
+<!-- module~self_ecdgmodel2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node41" class="node">
+<title>module~self_ecdgmodel2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node41"><a xlink:href=".././module/self_ecdgmodel2d.html" xlink:title="SELF_ECDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="649.5,-769 528.5,-769 528.5,-745 649.5,-745 649.5,-769"/>
+<text text-anchor="middle" x="589" y="-754.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge51" class="edge">
+<title>module~self_ecdgmodel2d&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M528.38,-746.19C520.24,-743.51 512.21,-740.16 505,-736 485.13,-724.53 488.03,-711.81 469,-699 463.65,-695.4 457.72,-692.16 451.69,-689.29"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="452.76,-685.94 442.2,-685.1 449.93,-692.34 452.76,-685.94"/>
+</g>
+<!-- module~self_ecdgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node42" class="node">
+<title>module~self_ecdgmodel2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node42"><a xlink:href=".././module/self_ecdgmodel2d~2.html" xlink:title="SELF_ECDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="649.5,-727 528.5,-727 528.5,-703 649.5,-703 649.5,-727"/>
+<text text-anchor="middle" x="589" y="-712.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d~2&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge53" class="edge">
+<title>module~self_ecdgmodel2d~2&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M535.56,-702.96C514.31,-698.09 489.6,-692.42 467.43,-687.33"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="467.98,-683.86 457.45,-685.04 466.41,-690.69 467.98,-683.86"/>
+</g>
+<!-- module~self_nulldgmodel2d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node43" class="node">
+<title>module~self_nulldgmodel2d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node43"><a xlink:href=".././module/self_nulldgmodel2d.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="849,-854 728,-854 728,-830 849,-830 849,-854"/>
+<text text-anchor="middle" x="788.5" y="-839.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge57" class="edge">
+<title>module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M727.98,-842C707.97,-842 685.39,-842 664.38,-842"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="664.22,-838.5 654.22,-842 664.22,-845.5 664.22,-838.5"/>
+</g>
+<!-- module~self_lineareuler3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node44" class="node">
+<title>module~self_lineareuler3d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node44"><a xlink:href=".././module/self_lineareuler3d~2.html" xlink:title="self_LinearEuler3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="845,-402 732,-402 732,-378 845,-378 845,-402"/>
+<text text-anchor="middle" x="788.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge59" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M731.96,-389.16C709.8,-388.82 684.02,-388.43 660.55,-388.07"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="660.36,-384.57 650.31,-387.92 660.26,-391.57 660.36,-384.57"/>
+</g>
+<!-- module~self_nulldgmodel2d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node45" class="node">
+<title>module~self_nulldgmodel2d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node45"><a xlink:href=".././module/self_nulldgmodel2d~2.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="849,-812 728,-812 728,-788 849,-788 849,-812"/>
+<text text-anchor="middle" x="788.5" y="-797.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge58" class="edge">
+<title>module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M730.9,-812.04C707.66,-816.98 680.58,-822.74 656.41,-827.88"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="655.66,-824.46 646.6,-829.96 657.11,-831.31 655.66,-824.46"/>
+</g>
+<!-- module~self_nulldgmodel3d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node46" class="node">
+<title>module~self_nulldgmodel3d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node46"><a xlink:href=".././module/self_nulldgmodel3d~2.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="849,-486 728,-486 728,-462 849,-462 849,-486"/>
+<text text-anchor="middle" x="788.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge62" class="edge">
+<title>module~self_nulldgmodel3d~2&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M734.83,-462C709.6,-456.25 679.2,-449.32 652.78,-443.3"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="653.39,-439.85 642.86,-441.04 651.84,-446.68 653.39,-439.85"/>
+</g>
+<!-- module~self_advection_diffusion_1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node47" class="node">
+<title>module~self_advection_diffusion_1d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node47"><a xlink:href=".././module/self_advection_diffusion_1d~2.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-192 709,-192 709,-168 868,-168 868,-192"/>
+<text text-anchor="middle" x="788.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge63" class="edge">
+<title>module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M708.88,-180.4C700.45,-180.44 691.82,-180.48 683.24,-180.53"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="683.2,-177.03 673.21,-180.58 683.23,-184.03 683.2,-177.03"/>
+</g>
+<!-- module~self_nulldgmodel1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node48" class="node">
+<title>module~self_nulldgmodel1d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node48"><a xlink:href=".././module/self_nulldgmodel1d~2.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="849,-150 728,-150 728,-126 849,-126 849,-150"/>
+<text text-anchor="middle" x="788.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge65" class="edge">
+<title>module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M727.98,-138C707.97,-138 685.39,-138 664.38,-138"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="664.22,-134.5 654.22,-138 664.22,-141.5 664.22,-134.5"/>
+</g>
+<!-- module~self_nulldgmodel1d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node49" class="node">
+<title>module~self_nulldgmodel1d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node49"><a xlink:href=".././module/self_nulldgmodel1d.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="849,-108 728,-108 728,-84 849,-84 849,-108"/>
+<text text-anchor="middle" x="788.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge66" class="edge">
+<title>module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M730.9,-108.04C707.66,-112.98 680.58,-118.74 656.41,-123.88"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="655.66,-120.46 646.6,-125.96 657.11,-127.31 655.66,-120.46"/>
+</g>
+<!-- module~self_nulldgmodel3d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node50" class="node">
+<title>module~self_nulldgmodel3d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node50"><a xlink:href=".././module/self_nulldgmodel3d.html" xlink:title="self_NullDGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="849,-444 728,-444 728,-420 849,-420 849,-444"/>
+<text text-anchor="middle" x="788.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge61" class="edge">
+<title>module~self_nulldgmodel3d&#45;&gt;module~self_nulldgmodel3d_t</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M727.98,-431.1C707.97,-430.79 685.39,-430.45 664.38,-430.13"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="664.27,-426.63 654.22,-429.98 664.16,-433.63 664.27,-426.63"/>
+</g>
+<!-- module~self_burgers1d~2 -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node51" class="node">
+<title>module~self_burgers1d~2</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node51"><a xlink:href=".././module/self_burgers1d~2.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="835.5,-66 741.5,-66 741.5,-42 835.5,-42 835.5,-66"/>
+<text text-anchor="middle" x="788.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge67" class="edge">
+<title>module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#5c00ff" stroke-dasharray="5,2" d="M741.2,-54C714.17,-54 679.76,-54 650.59,-54"/>
+<polygon fill="#5c00ff" stroke="#5c00ff" points="650.52,-50.5 640.52,-54 650.52,-57.5 650.52,-50.5"/>
+</g>
+<!-- module~self_burgers1d -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_node52" class="node">
+<title>module~self_burgers1d</title>
+<g id="a_module~~self_boundaryconditions~~UsedByGraph_node52"><a xlink:href=".././module/self_burgers1d.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="835.5,-24 741.5,-24 741.5,0 835.5,0 835.5,-24"/>
+<text text-anchor="middle" x="788.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_boundaryconditions~~UsedByGraph_edge68" class="edge">
+<title>module~self_burgers1d&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#5c00ff" stroke-dasharray="5,2" d="M741.2,-21.85C714.17,-27.59 679.76,-34.91 650.59,-41.11"/>
+<polygon fill="#5c00ff" stroke="#5c00ff" points="649.57,-37.75 640.52,-43.26 651.03,-44.6 649.57,-37.75"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_boundaryconditionsUsedByGraph = svgPanZoom('#moduleself_boundaryconditionsUsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#variable-self_bcname_length">SELF_BCNAME_LENGTH</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
+  <div id="inters-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#interface-self_bcmethod">SELF_bcMethod</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#type-boundarycondition">BoundaryCondition</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#type-boundaryconditionlist">BoundaryConditionList</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-getbcforid">GetBCForID</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-free_bclist">Free_BCList</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-init_bclist">Init_BCList</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-movenext">MoveNext</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-populateboundaries">PopulateBoundaries</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-registerbcmethod">RegisterbcMethod</a>
+      <a class="list-group-item" href="../module/self_boundaryconditions.html#proc-rewind">rewind</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    <section>
+    <h2>Variables</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-self_bcname_length"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>SELF_BCNAME_LENGTH</strong></td><td> =</td><td>32</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    <section>
+   <h2>Interfaces</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-self_bcmethod"></span><h3>interface   </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public subroutine SELF_bcMethod(this, mymodel)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(Model),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mymodel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+    </li>
+  </ul>
+</div>
+
+    </section>
+  <br>
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-boundarycondition"></span><h3>type, public :: <a href='../type/boundarycondition.html'>BoundaryCondition</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-bcmethod"></span>procedure(<a href='../interface/self_bcmethod.html'>SELF_bcMethod</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>bcMethod</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bcid~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>bcid</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bcname"></span>character,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>bcname</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elements"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>elements</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elements_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>elements_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nboundaries"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nBoundaries</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-next"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>next</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prev"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>prev</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sides"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>sides</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sides_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>sides_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+  </div>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-boundaryconditionlist"></span><h3>type, public :: <a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-current"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>current</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-head"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>head</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nbc"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nbc</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tail"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>tail</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-free~23'>Free</a></strong>  => Free_BCList </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-getbcforid'>GetBCForID</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-init~23'>Init</a></strong>  => Init_BCList </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-movenext'>MoveNext</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-populateboundaries'>PopulateBoundaries</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-registerboundarycondition'>RegisterBoundaryCondition</a></strong>  => RegisterbcMethod </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-registerbcmethod'>RegisterbcMethod</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/boundaryconditionlist.html#boundprocedure-rewind'>rewind</a></strong>  </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+ 
+    <section>
+    <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-getbcforid"></span><h3>public function <a href='../proc/getbcforid.html'>GetBCForID</a>(list, bcid) result(node)</h3></div>
+  <div class="panel-body">
+       
+<p>Returns the node associated with the given bcid.
+If the bcid is not found, a null pointer is returned.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcid</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),pointer</small></h4>  
+
+  </div>
+  </div>
+
+    </section>
+    <br>
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_bclist"></span><h3>public subroutine <a href='../proc/free_bclist.html'>Free_BCList</a>(list)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_bclist"></span><h3>public subroutine <a href='../proc/init_bclist.html'>Init_BCList</a>(list)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-movenext"></span><h3>public subroutine <a href='../proc/movenext.html'>MoveNext</a>(list)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-populateboundaries"></span><h3>public subroutine <a href='../proc/populateboundaries.html'>PopulateBoundaries</a>(list, bcid, nBoundaries, elements, sides)</h3></div>
+  <div class="panel-body">
+       
+<p>Populate the elements and sides arrays for a registered boundary condition.
+Called after scanning the mesh to determine which faces belong to each bcid.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcid</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nBoundaries</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>elements</strong>(1:nBoundaries)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sides</strong>(1:nBoundaries)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-registerbcmethod"></span><h3>public subroutine <a href='../proc/registerbcmethod.html'>RegisterbcMethod</a>(list, bcid, bcname, bcfunc)</h3></div>
+  <div class="panel-body">
+       
+<p>Register a boundary condition function with the given bcid and bcname.
+If the bcid is already registered, the function pointer is updated.
+The elements and sides arrays are not allocated here; call
+PopulateBoundaries after scanning the mesh.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcid</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcname</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>procedure(<a href='../interface/self_bcmethod.html'>SELF_bcMethod</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>pointer</td><td>::</td>
+  <td><strong>bcfunc</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-rewind"></span><h3>public subroutine <a href='../proc/rewind.html'>rewind</a>(list)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>list</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-04-10 19:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

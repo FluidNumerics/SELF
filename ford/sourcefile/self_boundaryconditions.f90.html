@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_BoundaryConditions.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_BoundaryConditions.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.0% of total for source files.">141 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_BoundaryConditions.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_BoundaryConditions.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html">SELF_BoundaryConditions</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_boundaryconditions.f90.html#src">SELF_BoundaryConditions.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_boundaryconditions.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_boundaryconditionsf90EfferentGraph" width="641pt" height="71pt"
+ viewBox="0.00 0.00 641.00 70.90" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph" class="graph" transform="scale(0.96 0.96) rotate(0) translate(4 70)">
+<title>sourcefile~~self_boundaryconditions.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 665,-70 665,4 -4,4"/>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<polygon fill="none" stroke="black" points="661,-45 489,-45 489,-21 661,-21 661,-45"/>
+<text text-anchor="middle" x="575" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_BoundaryConditions.f90</text>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-66 152,-66 152,-42 303,-42 303,-66"/>
+<text text-anchor="middle" x="227.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M488.6,-38.19C435.19,-41.44 366.66,-45.6 313.36,-48.84"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.02,-45.36 303.25,-49.46 313.44,-52.34 313.02,-45.36"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="453,-25 339,-25 339,-1 453,-1 453,-25"/>
+<text text-anchor="middle" x="396" y="-10.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M488.87,-23.38C480.31,-22.41 471.7,-21.44 463.38,-20.5"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="463.71,-17.02 453.38,-19.37 462.92,-23.97 463.71,-17.02"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-45 0,-45 0,-21 116,-21 116,-45"/>
+<text text-anchor="middle" x="58" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M151.57,-44.61C143.15,-43.55 134.6,-42.48 126.29,-41.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="126.64,-37.95 116.28,-40.18 125.76,-44.9 126.64,-37.95"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-24 181,-24 181,0 274,0 274,-24"/>
+<text text-anchor="middle" x="227.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M338.63,-12.66C321.04,-12.56 301.66,-12.44 284.13,-12.33"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="284.07,-8.83 274.05,-12.27 284.02,-15.83 284.07,-8.83"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M180.73,-17.74C163.89,-19.85 144.46,-22.29 126.13,-24.58"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="125.57,-21.13 116.09,-25.84 126.45,-28.07 125.57,-21.13"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_boundaryconditionsf90EfferentGraph = svgPanZoom('#sourcefileself_boundaryconditionsf90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_boundaryconditions.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefileself_boundaryconditionsf90AfferentGraph" width="641pt" height="667pt"
+ viewBox="0.00 0.00 641.00 667.49" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph" class="graph" transform="scale(0.65 0.65) rotate(0) translate(4 1029)">
+<title>sourcefile~~self_boundaryconditions.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1029 988,-1029 988,4 -4,4"/>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node1" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<polygon fill="none" stroke="black" points="172,-624 0,-624 0,-600 172,-600 172,-624"/>
+<text text-anchor="middle" x="86" y="-609.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_BoundaryConditions.f90</text>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node2" class="node">
+<title>sourcefile~self_dgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/self_dgmodel2d_t.f90.html" xlink:title="SELF_DGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="344,-771 208,-771 208,-747 344,-747 344,-771"/>
+<text text-anchor="middle" x="276" y="-756.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge1" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M259.62,-746.97C226.84,-721.34 149.94,-661.21 110.8,-630.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="112.63,-627.6 102.6,-624.2 108.32,-633.11 112.63,-627.6"/>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node3" class="node">
+<title>sourcefile~self_lineareuler3d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/self_lineareuler3d.f90~2.html" xlink:title="SELF_LinearEuler3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="961,-395 821,-395 821,-371 961,-371 961,-395"/>
+<text text-anchor="middle" x="891" y="-380.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge5" class="edge">
+<title>sourcefile~self_lineareuler3d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M840.18,-395.05C816.63,-400.15 788.03,-405.48 762,-408 675.74,-416.35 653.17,-417.25 567,-408 562.9,-407.56 280.51,-342.85 277,-345"/>
+</g>
+<!-- sourcefile~self_lineareuler3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node35" class="node">
+<title>sourcefile~self_lineareuler3d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node35"><a xlink:href=".././sourcefile/self_lineareuler3d_t.f90.html" xlink:title="SELF_LinearEuler3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="739,-479 590,-479 590,-455 739,-455 739,-479"/>
+<text text-anchor="middle" x="664.5" y="-464.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90~2&#45;&gt;sourcefile~self_lineareuler3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge64" class="edge">
+<title>sourcefile~self_lineareuler3d.f90~2&#45;&gt;sourcefile~self_lineareuler3d_t.f90</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M820.55,-394.28C812.69,-396.87 805,-400.07 798,-404 778,-415.24 781.78,-429.38 762,-441 754.85,-445.2 747,-448.74 738.98,-451.72"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="737.82,-448.41 729.49,-454.96 740.09,-455.03 737.82,-448.41"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node4" class="node">
+<title>sourcefile~self_linearshallowwater2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/self_linearshallowwater2d_t.f90.html" xlink:title="SELF_LinearShallowWater2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="761.5,-941 567.5,-941 567.5,-917 761.5,-917 761.5,-941"/>
+<text text-anchor="middle" x="664.5" y="-926.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge2" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M567.27,-940.19C532.43,-943.75 492.74,-947.21 456.5,-949"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node19" class="node">
+<title>sourcefile~self_dgmodel2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node19"><a xlink:href=".././sourcefile/self_dgmodel2d.f90.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="519,-853 392,-853 392,-829 519,-829 519,-853"/>
+<text text-anchor="middle" x="455.5" y="-838.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge39" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M586.45,-916.99C579.65,-914.53 573.06,-911.57 567,-908 546.1,-895.69 551.11,-880.55 531,-867 525.28,-863.14 518.92,-859.8 512.4,-856.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="513.37,-853.52 502.79,-853 510.73,-860.01 513.37,-853.52"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node5" class="node">
+<title>sourcefile~self_advection_diffusion_2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/self_advection_diffusion_2d_t.f90.html" xlink:title="SELF_advection_diffusion_2d_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="762,-899 567,-899 567,-875 762,-875 762,-899"/>
+<text text-anchor="middle" x="664.5" y="-884.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_2d_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge3" class="edge">
+<title>sourcefile~self_advection_diffusion_2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M601.91,-899.04C590.24,-901.71 578.19,-904.72 567,-908 516.73,-922.72 508.82,-946.42 456.5,-949"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M454.5,-949C375.71,-952.89 348.22,-982.93 277,-949"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge40" class="edge">
+<title>sourcefile~self_advection_diffusion_2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M609.38,-874.97C582.17,-868.93 549,-861.55 520.52,-855.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="521.18,-851.79 510.66,-853.04 519.66,-858.62 521.18,-851.79"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node6" class="node">
+<title>sourcefile~self_dgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/self_dgmodel3d_t.f90.html" xlink:title="SELF_DGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="344,-562 208,-562 208,-538 344,-538 344,-562"/>
+<text text-anchor="middle" x="276" y="-547.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge4" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M238.31,-562.1C208.28,-572 165.65,-586.06 133.29,-596.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="132,-593.47 123.6,-599.93 134.2,-600.12 132,-593.47"/>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node7" class="node">
+<title>sourcefile~self_dgmodel1d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/self_dgmodel1d.f90~2.html" xlink:title="SELF_DGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="519,-277 392,-277 392,-253 519,-253 519,-277"/>
+<text text-anchor="middle" x="455.5" y="-262.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge6" class="edge">
+<title>sourcefile~self_dgmodel1d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M416.57,-277.03C404.72,-281.11 391.69,-285.93 380,-291 332.58,-311.57 321.07,-317.99 277,-345"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M275,-345C176.87,-405.15 116.15,-537.81 95.22,-590.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="91.84,-589.19 91.46,-599.77 98.36,-591.73 91.84,-589.19"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node12" class="node">
+<title>sourcefile~self_dgmodel1d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node12"><a xlink:href=".././sourcefile/self_dgmodel1d_t.f90.html" xlink:title="SELF_DGModel1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="344,-277 208,-277 208,-253 344,-253 344,-277"/>
+<text text-anchor="middle" x="276" y="-262.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90~2&#45;&gt;sourcefile~self_dgmodel1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge31" class="edge">
+<title>sourcefile~self_dgmodel1d.f90~2&#45;&gt;sourcefile~self_dgmodel1d_t.f90</title>
+<path fill="none" stroke="#0078ff" stroke-dasharray="5,2" d="M391.92,-265C379.71,-265 366.78,-265 354.16,-265"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="354.14,-261.5 344.14,-265 354.14,-268.5 354.14,-261.5"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node8" class="node">
+<title>sourcefile~self_dgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/self_dgmodel2d.f90~2.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="519,-900 392,-900 392,-876 519,-876 519,-900"/>
+<text text-anchor="middle" x="455.5" y="-885.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge7" class="edge">
+<title>sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M432.06,-900.05C390.96,-921.41 305.24,-962.45 277,-949"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M275,-949C147.5,-888.26 102.5,-699.04 90.59,-634.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="94.01,-633.4 88.84,-624.15 87.12,-634.61 94.01,-633.4"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge19" class="edge">
+<title>sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M409.27,-875.87C399.23,-872.2 388.93,-867.61 380,-862 344.11,-839.47 311.07,-802.29 292.53,-779.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="295.1,-776.92 286.15,-771.25 289.61,-781.27 295.1,-776.92"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node9" class="node">
+<title>sourcefile~self_dgmodel3d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/self_dgmodel3d.f90~2.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="519,-594 392,-594 392,-570 519,-570 519,-594"/>
+<text text-anchor="middle" x="455.5" y="-579.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge8" class="edge">
+<title>sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M433.1,-594.08C400.21,-611.28 334.93,-640.02 277,-633"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M275,-633C244.83,-629.34 211.9,-625.59 182.16,-622.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="182.53,-618.8 172.2,-621.18 181.76,-625.76 182.53,-618.8"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge27" class="edge">
+<title>sourcefile~self_dgmodel3d.f90~2&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M391.92,-570.72C379.63,-568.5 366.61,-566.16 353.92,-563.87"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="354.29,-560.38 343.83,-562.05 353.05,-567.27 354.29,-560.38"/>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node10" class="node">
+<title>sourcefile~self_ecadvection3d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/self_ecadvection3d.f90~2.html" xlink:title="SELF_ECAdvection3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="963.5,-318 818.5,-318 818.5,-294 963.5,-294 963.5,-318"/>
+<text text-anchor="middle" x="891" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge9" class="edge">
+<title>sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M818.43,-303.86C774.32,-303 716.6,-302.67 665.5,-305"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M663.5,-305C571.6,-309.18 547.36,-290.59 456.5,-305"/>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node11" class="node">
+<title>sourcefile~self_ecadvection3d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node11"><a xlink:href=".././sourcefile/self_ecadvection3d_t.f90.html" xlink:title="SELF_ECAdvection3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="741.5,-277 587.5,-277 587.5,-253 741.5,-253 741.5,-277"/>
+<text text-anchor="middle" x="664.5" y="-262.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_ecadvection3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge29" class="edge">
+<title>sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_ecadvection3d_t.f90</title>
+<path fill="none" stroke="#00d1ff" stroke-dasharray="5,2" d="M824.16,-293.98C798.23,-289.24 768.29,-283.77 741.46,-278.87"/>
+<polygon fill="#00d1ff" stroke="#00d1ff" points="741.81,-275.38 731.34,-277.02 740.55,-282.26 741.81,-275.38"/>
+</g>
+<!-- sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node29" class="node">
+<title>sourcefile~self_ecdgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node29"><a xlink:href=".././sourcefile/self_ecdgmodel3d_t.f90.html" xlink:title="SELF_ECDGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="531,-357 380,-357 380,-333 531,-333 531,-357"/>
+<text text-anchor="middle" x="455.5" y="-342.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge55" class="edge">
+<title>sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M663.5,-305C610.3,-307.42 550.7,-320.01 509.17,-330.43"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="508.1,-327.09 499.28,-332.96 509.83,-333.87 508.1,-327.09"/>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge10" class="edge">
+<title>sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M606.57,-277.07C565.09,-285.6 507.47,-296.91 456.5,-305"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M454.5,-305C374.63,-317.67 345.95,-302.74 277,-345"/>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge53" class="edge">
+<title>sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M603.95,-277.06C591.4,-280.69 578.49,-285.28 567,-291 548.86,-300.04 548.8,-309.31 531,-319 523.9,-322.86 516.11,-326.33 508.34,-329.37"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="507.06,-326.11 498.9,-332.87 509.49,-332.68 507.06,-326.11"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge11" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M259.74,-277.02C244.95,-289.3 222.65,-309.57 208,-331 148.07,-418.64 107.96,-540.73 93.26,-590.05"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="89.81,-589.36 90.36,-599.94 96.53,-591.33 89.81,-589.36"/>
+</g>
+<!-- sourcefile~self_lineareuler2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node13" class="node">
+<title>sourcefile~self_lineareuler2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node13"><a xlink:href=".././sourcefile/self_lineareuler2d_t.f90.html" xlink:title="SELF_LinearEuler2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="739,-807 590,-807 590,-783 739,-783 739,-807"/>
+<text text-anchor="middle" x="664.5" y="-792.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge12" class="edge">
+<title>sourcefile~self_lineareuler2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M589.69,-786.42C549.5,-780.35 499.37,-770.46 456.5,-755"/>
+</g>
+<!-- sourcefile~self_lineareuler2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge41" class="edge">
+<title>sourcefile~self_lineareuler2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M609.38,-807.03C582.17,-813.07 549,-820.45 520.52,-826.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="519.66,-823.38 510.66,-828.96 521.18,-830.21 519.66,-823.38"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node14" class="node">
+<title>sourcefile~self_advection_diffusion_3d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node14"><a xlink:href=".././sourcefile/self_advection_diffusion_3d_t.f90.html" xlink:title="SELF_advection_diffusion_3d_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="762,-563 567,-563 567,-539 762,-539 762,-563"/>
+<text text-anchor="middle" x="664.5" y="-548.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_3d_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge13" class="edge">
+<title>sourcefile~self_advection_diffusion_3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M589.73,-563.02C581.86,-565.48 574.13,-568.44 567,-572 548.1,-581.42 549.04,-592.02 531,-603 500.51,-621.56 492.03,-629.58 456.5,-633"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M454.5,-633C375.98,-640.57 355.32,-642.49 277,-633"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node23" class="node">
+<title>sourcefile~self_dgmodel3d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node23"><a xlink:href=".././sourcefile/self_dgmodel3d.f90.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="519,-541 392,-541 392,-517 519,-517 519,-541"/>
+<text text-anchor="middle" x="455.5" y="-526.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge43" class="edge">
+<title>sourcefile~self_advection_diffusion_3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M566.97,-540.74C554.29,-539.39 541.47,-538.03 529.27,-536.73"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="529.51,-533.24 519.19,-535.66 528.77,-540.2 529.51,-533.24"/>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node15" class="node">
+<title>sourcefile~self_ecadvection2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node15"><a xlink:href=".././sourcefile/self_ecadvection2d_t.f90.html" xlink:title="SELF_ECAdvection2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="741.5,-605 587.5,-605 587.5,-581 741.5,-581 741.5,-605"/>
+<text text-anchor="middle" x="664.5" y="-590.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge14" class="edge">
+<title>sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614.95,-605.09C573.24,-614.82 511.33,-627.71 456.5,-633"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node28" class="node">
+<title>sourcefile~self_ecdgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node28"><a xlink:href=".././sourcefile/self_ecdgmodel2d_t.f90.html" xlink:title="SELF_ECDGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="531,-685 380,-685 380,-661 531,-661 531,-685"/>
+<text text-anchor="middle" x="455.5" y="-670.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge49" class="edge">
+<title>sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#2700ff" stroke-dasharray="5,2" d="M603.95,-605.06C591.4,-608.69 578.49,-613.28 567,-619 548.86,-628.04 548.8,-637.31 531,-647 523.9,-650.86 516.11,-654.33 508.34,-657.37"/>
+<polygon fill="#2700ff" stroke="#2700ff" points="507.06,-654.11 498.9,-660.87 509.49,-660.68 507.06,-654.11"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node16" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node16"><a xlink:href=".././sourcefile/self_linearshallowwater2d.f90~2.html" xlink:title="SELF_LinearShallowWater2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="983.5,-1025 798.5,-1025 798.5,-1001 983.5,-1001 983.5,-1025"/>
+<text text-anchor="middle" x="891" y="-1010.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge15" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M828.8,-1000.95C727.17,-981.45 527.73,-945.49 456.5,-949"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge22" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M818.15,-1000.91C811.13,-998.47 804.29,-995.53 798,-992 778,-980.76 781.78,-966.62 762,-955 754.85,-950.8 747,-947.26 738.98,-944.28"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="740.09,-940.97 729.49,-941.04 737.82,-947.59 740.09,-940.97"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node17" class="node">
+<title>sourcefile~self_ecadvection2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node17"><a xlink:href=".././sourcefile/self_ecadvection2d.f90~2.html" xlink:title="SELF_ECAdvection2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="963.5,-689 818.5,-689 818.5,-665 963.5,-665 963.5,-689"/>
+<text text-anchor="middle" x="891" y="-674.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge16" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M837.98,-664.99C782.54,-652.51 698.33,-634.58 665.5,-633"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M663.5,-633C571.61,-628.56 548.08,-624.17 456.5,-633"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge37" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecadvection2d_t.f90</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M818.15,-664.91C811.13,-662.47 804.29,-659.53 798,-656 778,-644.76 781.78,-630.62 762,-619 754.85,-614.8 747,-611.26 738.98,-608.28"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="740.09,-604.97 729.49,-605.04 737.82,-611.59 740.09,-604.97"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge50" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#2700ff" stroke-dasharray="5,2" d="M663.5,-633C606.81,-630.26 542.84,-645.52 501.22,-657.97"/>
+<polygon fill="#2700ff" stroke="#2700ff" points="500.19,-654.63 491.66,-660.9 502.24,-661.32 500.19,-654.63"/>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node18" class="node">
+<title>sourcefile~self_lineareuler2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node18"><a xlink:href=".././sourcefile/self_lineareuler2d.f90~2.html" xlink:title="SELF_LinearEuler2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="961,-731 821,-731 821,-707 961,-707 961,-731"/>
+<text text-anchor="middle" x="891" y="-716.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge17" class="edge">
+<title>sourcefile~self_lineareuler2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M824.89,-731.02C720.94,-749.11 522.48,-778.8 456.5,-755"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M454.5,-755C364.34,-722.84 372.03,-644.52 277,-633"/>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90~2&#45;&gt;sourcefile~self_lineareuler2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge33" class="edge">
+<title>sourcefile~self_lineareuler2d.f90~2&#45;&gt;sourcefile~self_lineareuler2d_t.f90</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M820.99,-731.12C813.05,-733.57 805.22,-736.5 798,-740 779.51,-748.96 780.31,-759.68 762,-769 753.62,-773.26 744.47,-776.89 735.24,-779.95"/>
+<polygon fill="#001dff" stroke="#001dff" points="734.14,-776.63 725.63,-782.94 736.22,-783.31 734.14,-776.63"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge18" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M428.31,-828.9C397.55,-814.69 346.38,-791.05 312.18,-775.25"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.56,-772.03 303.01,-771.02 310.62,-778.39 313.56,-772.03"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node20" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node20"><a xlink:href=".././sourcefile/self_linearshallowwater2d.f90.html" xlink:title="SELF_LinearShallowWater2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="983.5,-983 798.5,-983 798.5,-959 983.5,-959 983.5,-983"/>
+<text text-anchor="middle" x="891" y="-968.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge21" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M825.67,-958.96C798.9,-953.96 767.65,-948.11 739.89,-942.92"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="740.32,-939.44 729.84,-941.04 739.03,-946.32 740.32,-939.44"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node21" class="node">
+<title>sourcefile~self_advection_diffusion_2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node21"><a xlink:href=".././sourcefile/self_advection_diffusion_2d.f90~2.html" xlink:title="SELF_advection_diffusion_2d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="984,-941 798,-941 798,-917 984,-917 984,-941"/>
+<text text-anchor="middle" x="891" y="-926.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_2d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge24" class="edge">
+<title>sourcefile~self_advection_diffusion_2d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90</title>
+<path fill="none" stroke="#f0ff00" stroke-dasharray="5,2" d="M825.67,-916.96C798.9,-911.96 767.65,-906.11 739.89,-900.92"/>
+<polygon fill="#f0ff00" stroke="#f0ff00" points="740.32,-897.44 729.84,-899.04 739.03,-904.32 740.32,-897.44"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node22" class="node">
+<title>sourcefile~self_advection_diffusion_2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node22"><a xlink:href=".././sourcefile/self_advection_diffusion_2d.f90.html" xlink:title="SELF_advection_diffusion_2d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="984,-899 798,-899 798,-875 984,-875 984,-899"/>
+<text text-anchor="middle" x="891" y="-884.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_2d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge23" class="edge">
+<title>sourcefile~self_advection_diffusion_2d.f90&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90</title>
+<path fill="none" stroke="#f0ff00" stroke-dasharray="5,2" d="M797.72,-887C789.38,-887 780.88,-887 772.43,-887"/>
+<polygon fill="#f0ff00" stroke="#f0ff00" points="772.16,-883.5 762.16,-887 772.16,-890.5 772.16,-883.5"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge26" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M391.92,-536.4C379.71,-537.85 366.78,-539.38 354.16,-540.87"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="353.66,-537.41 344.14,-542.06 354.48,-544.36 353.66,-537.41"/>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node24" class="node">
+<title>sourcefile~self_ecadvection3d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node24"><a xlink:href=".././sourcefile/self_ecadvection3d.f90.html" xlink:title="SELF_ECAdvection3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="963.5,-276 818.5,-276 818.5,-252 963.5,-252 963.5,-276"/>
+<text text-anchor="middle" x="891" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90&#45;&gt;sourcefile~self_ecadvection3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge28" class="edge">
+<title>sourcefile~self_ecadvection3d.f90&#45;&gt;sourcefile~self_ecadvection3d_t.f90</title>
+<path fill="none" stroke="#00d1ff" stroke-dasharray="5,2" d="M818.35,-264.32C797.1,-264.41 773.6,-264.52 751.53,-264.62"/>
+<polygon fill="#00d1ff" stroke="#00d1ff" points="751.49,-261.12 741.5,-264.66 751.52,-268.12 751.49,-261.12"/>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node25" class="node">
+<title>sourcefile~self_dgmodel1d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node25"><a xlink:href=".././sourcefile/self_dgmodel1d.f90.html" xlink:title="SELF_DGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="519,-150 392,-150 392,-126 519,-126 519,-150"/>
+<text text-anchor="middle" x="455.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_dgmodel1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge30" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_dgmodel1d_t.f90</title>
+<path fill="none" stroke="#0078ff" stroke-dasharray="5,2" d="M437.48,-150.18C406.07,-172.65 338.86,-220.74 302.17,-246.99"/>
+<polygon fill="#0078ff" stroke="#0078ff" points="300.06,-244.19 293.97,-252.86 304.14,-249.89 300.06,-244.19"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node26" class="node">
+<title>sourcefile~self_advection_diffusion_3d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node26"><a xlink:href=".././sourcefile/self_advection_diffusion_3d.f90.html" xlink:title="SELF_advection_diffusion_3d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="984,-605 798,-605 798,-581 984,-581 984,-605"/>
+<text text-anchor="middle" x="891" y="-590.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_3d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge34" class="edge">
+<title>sourcefile~self_advection_diffusion_3d.f90&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M825.67,-580.96C798.9,-575.96 767.65,-570.11 739.89,-564.92"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="740.32,-561.44 729.84,-563.04 739.03,-568.32 740.32,-561.44"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node27" class="node">
+<title>sourcefile~self_ecadvection2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node27"><a xlink:href=".././sourcefile/self_ecadvection2d.f90.html" xlink:title="SELF_ECAdvection2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="963.5,-647 818.5,-647 818.5,-623 963.5,-623 963.5,-647"/>
+<text text-anchor="middle" x="891" y="-632.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90&#45;&gt;sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge36" class="edge">
+<title>sourcefile~self_ecadvection2d.f90&#45;&gt;sourcefile~self_ecadvection2d_t.f90</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M825.67,-622.96C798.9,-617.96 767.65,-612.11 739.89,-606.92"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="740.32,-603.44 729.84,-605.04 739.03,-610.32 740.32,-603.44"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge20" class="edge">
+<title>sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M429.45,-685.14C398.52,-700.12 345.8,-725.67 311.18,-742.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="309.4,-739.41 301.93,-746.92 312.45,-745.71 309.4,-739.41"/>
+</g>
+<!-- sourcefile~self_ecdgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge25" class="edge">
+<title>sourcefile~self_ecdgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M443.93,-357.21C414.33,-391.39 330.44,-488.28 294.12,-530.23"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="291.42,-528 287.52,-537.85 296.71,-532.59 291.42,-528"/>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node30" class="node">
+<title>sourcefile~self_lineareuler2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node30"><a xlink:href=".././sourcefile/self_lineareuler2d.f90.html" xlink:title="SELF_LinearEuler2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="961,-773 821,-773 821,-749 961,-749 961,-773"/>
+<text text-anchor="middle" x="891" y="-758.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90&#45;&gt;sourcefile~self_lineareuler2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge32" class="edge">
+<title>sourcefile~self_lineareuler2d.f90&#45;&gt;sourcefile~self_lineareuler2d_t.f90</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M820.81,-771.48C798.15,-774.91 772.73,-778.76 749.13,-782.34"/>
+<polygon fill="#001dff" stroke="#001dff" points="748.5,-778.89 739.13,-783.85 749.54,-785.81 748.5,-778.89"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node31" class="node">
+<title>sourcefile~self_advection_diffusion_3d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node31"><a xlink:href=".././sourcefile/self_advection_diffusion_3d.f90~2.html" xlink:title="SELF_advection_diffusion_3d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="984,-563 798,-563 798,-539 984,-539 984,-563"/>
+<text text-anchor="middle" x="891" y="-548.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_3d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_3d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge35" class="edge">
+<title>sourcefile~self_advection_diffusion_3d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_3d_t.f90</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M797.72,-551C789.38,-551 780.88,-551 772.43,-551"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="772.16,-547.5 762.16,-551 772.16,-554.5 772.16,-547.5"/>
+</g>
+<!-- sourcefile~self_burgers1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node32" class="node">
+<title>sourcefile~self_burgers1d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node32"><a xlink:href=".././sourcefile/self_burgers1d_t.f90.html" xlink:title="SELF_Burgers1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="729.5,-192 599.5,-192 599.5,-168 729.5,-168 729.5,-192"/>
+<text text-anchor="middle" x="664.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Burgers1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_burgers1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge46" class="edge">
+<title>sourcefile~self_burgers1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M604.18,-167.96C579.71,-163 551.19,-157.21 525.77,-152.05"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="526.32,-148.6 515.83,-150.04 524.93,-155.46 526.32,-148.6"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node33" class="node">
+<title>sourcefile~self_advection_diffusion_1d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node33"><a xlink:href=".././sourcefile/self_advection_diffusion_1d_t.f90.html" xlink:title="SELF_advection_diffusion_1d_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="762,-150 567,-150 567,-126 762,-126 762,-150"/>
+<text text-anchor="middle" x="664.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_1d_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge45" class="edge">
+<title>sourcefile~self_advection_diffusion_1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M566.97,-138C554.29,-138 541.47,-138 529.27,-138"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="529.19,-134.5 519.19,-138 529.19,-141.5 529.19,-134.5"/>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node34" class="node">
+<title>sourcefile~self_nulldgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node34"><a xlink:href=".././sourcefile/self_nulldgmodel3d_t.f90.html" xlink:title="SELF_NullDGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="743,-521 586,-521 586,-497 743,-497 743,-521"/>
+<text text-anchor="middle" x="664.5" y="-506.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge44" class="edge">
+<title>sourcefile~self_nulldgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M585.83,-516.5C567.25,-518.3 547.48,-520.21 529.13,-521.98"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="528.72,-518.51 519.1,-522.95 529.39,-525.47 528.72,-518.51"/>
+</g>
+<!-- sourcefile~self_lineareuler3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge42" class="edge">
+<title>sourcefile~self_lineareuler3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#27ff00" stroke-dasharray="5,2" d="M601.91,-479.04C590.24,-481.71 578.19,-484.72 567,-488 542.76,-495.1 516.2,-504.88 495.2,-513.12"/>
+<polygon fill="#27ff00" stroke="#27ff00" points="493.67,-509.95 485.67,-516.89 496.25,-516.46 493.67,-509.95"/>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node36" class="node">
+<title>sourcefile~self_ecdgmodel3d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node36"><a xlink:href=".././sourcefile/self_ecdgmodel3d.f90~2.html" xlink:title="SELF_ECDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="735.5,-399 593.5,-399 593.5,-375 735.5,-375 735.5,-399"/>
+<text text-anchor="middle" x="664.5" y="-384.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90~2&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge56" class="edge">
+<title>sourcefile~self_ecdgmodel3d.f90~2&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M604.18,-374.96C579.71,-370 551.19,-364.21 525.77,-359.05"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="526.32,-355.6 515.83,-357.04 524.93,-362.46 526.32,-355.6"/>
+</g>
+<!-- sourcefile~self_nulldgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node37" class="node">
+<title>sourcefile~self_nulldgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node37"><a xlink:href=".././sourcefile/self_nulldgmodel2d_t.f90.html" xlink:title="SELF_NullDGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="743,-853 586,-853 586,-829 743,-829 743,-853"/>
+<text text-anchor="middle" x="664.5" y="-838.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge38" class="edge">
+<title>sourcefile~self_nulldgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M585.83,-841C567.25,-841 547.48,-841 529.13,-841"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="529.1,-837.5 519.1,-841 529.1,-844.5 529.1,-837.5"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node38" class="node">
+<title>sourcefile~self_advection_diffusion_1d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node38"><a xlink:href=".././sourcefile/self_advection_diffusion_1d.f90~2.html" xlink:title="SELF_advection_diffusion_1d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="984,-108 798,-108 798,-84 984,-84 984,-108"/>
+<text text-anchor="middle" x="891" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_1d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90~2&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge47" class="edge">
+<title>sourcefile~self_advection_diffusion_1d.f90~2&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M797.82,-98.98C733.05,-101.81 644.49,-107.16 567,-117 552.52,-118.84 537.07,-121.4 522.46,-124.09"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="521.68,-120.68 512.5,-125.97 522.98,-127.56 521.68,-120.68"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge60" class="edge">
+<title>sourcefile~self_advection_diffusion_1d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90</title>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M825.67,-108.04C798.9,-113.04 767.65,-118.89 739.89,-124.08"/>
+<polygon fill="#ff8b00" stroke="#ff8b00" points="739.03,-120.68 729.84,-125.96 740.32,-127.56 739.03,-120.68"/>
+</g>
+<!-- sourcefile~self_nulldgmodel1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node39" class="node">
+<title>sourcefile~self_nulldgmodel1d_t.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node39"><a xlink:href=".././sourcefile/self_nulldgmodel1d_t.f90.html" xlink:title="SELF_NullDGModel1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="743,-66 586,-66 586,-42 743,-42 743,-66"/>
+<text text-anchor="middle" x="664.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge48" class="edge">
+<title>sourcefile~self_nulldgmodel1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#00ffc4" stroke-dasharray="5,2" d="M617.79,-66.01C601.55,-70.73 583.27,-76.56 567,-83 539.1,-94.04 508.67,-109.45 486.82,-121.16"/>
+<polygon fill="#00ffc4" stroke="#00ffc4" points="485.14,-118.08 478.01,-125.92 488.47,-124.24 485.14,-118.08"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node40" class="node">
+<title>sourcefile~self_ecdgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node40"><a xlink:href=".././sourcefile/self_ecdgmodel2d.f90~2.html" xlink:title="SELF_ECDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="735.5,-727 593.5,-727 593.5,-703 735.5,-703 735.5,-727"/>
+<text text-anchor="middle" x="664.5" y="-712.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge51" class="edge">
+<title>sourcefile~self_ecdgmodel2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#2700ff" stroke-dasharray="5,2" d="M604.18,-702.96C579.71,-698 551.19,-692.21 525.77,-687.05"/>
+<polygon fill="#2700ff" stroke="#2700ff" points="526.32,-683.6 515.83,-685.04 524.93,-690.46 526.32,-683.6"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node41" class="node">
+<title>sourcefile~self_ecdgmodel2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node41"><a xlink:href=".././sourcefile/self_ecdgmodel2d.f90.html" xlink:title="SELF_ECDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="735.5,-685 593.5,-685 593.5,-661 735.5,-661 735.5,-685"/>
+<text text-anchor="middle" x="664.5" y="-670.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge52" class="edge">
+<title>sourcefile~self_ecdgmodel2d.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#2700ff" stroke-dasharray="5,2" d="M593.42,-673C576.65,-673 558.58,-673 541.23,-673"/>
+<polygon fill="#2700ff" stroke="#2700ff" points="541.11,-669.5 531.11,-673 541.11,-676.5 541.11,-669.5"/>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node42" class="node">
+<title>sourcefile~self_ecdgmodel3d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node42"><a xlink:href=".././sourcefile/self_ecdgmodel3d.f90.html" xlink:title="SELF_ECDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="735.5,-357 593.5,-357 593.5,-333 735.5,-333 735.5,-357"/>
+<text text-anchor="middle" x="664.5" y="-342.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge54" class="edge">
+<title>sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90</title>
+<path fill="none" stroke="#9c00ff" stroke-dasharray="5,2" d="M593.42,-345C576.65,-345 558.58,-345 541.23,-345"/>
+<polygon fill="#9c00ff" stroke="#9c00ff" points="541.11,-341.5 531.11,-345 541.11,-348.5 541.11,-341.5"/>
+</g>
+<!-- sourcefile~self_burgers1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node43" class="node">
+<title>sourcefile~self_burgers1d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node43"><a xlink:href=".././sourcefile/self_burgers1d.f90.html" xlink:title="SELF_Burgers1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="951.5,-234 830.5,-234 830.5,-210 951.5,-210 951.5,-234"/>
+<text text-anchor="middle" x="891" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Burgers1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_burgers1d.f90&#45;&gt;sourcefile~self_burgers1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge57" class="edge">
+<title>sourcefile~self_burgers1d.f90&#45;&gt;sourcefile~self_burgers1d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M830.43,-210.86C802.53,-205.64 769.03,-199.37 739.52,-193.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="740.16,-190.41 729.69,-192.01 738.87,-197.29 740.16,-190.41"/>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node44" class="node">
+<title>sourcefile~self_nulldgmodel3d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node44"><a xlink:href=".././sourcefile/self_nulldgmodel3d.f90~2.html" xlink:title="SELF_NullDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="965,-521 817,-521 817,-497 965,-497 965,-521"/>
+<text text-anchor="middle" x="891" y="-506.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90~2&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge62" class="edge">
+<title>sourcefile~self_nulldgmodel3d.f90~2&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M816.8,-509C796.57,-509 774.4,-509 753.42,-509"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="753.24,-505.5 743.24,-509 753.24,-512.5 753.24,-505.5"/>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node45" class="node">
+<title>sourcefile~self_nulldgmodel3d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node45"><a xlink:href=".././sourcefile/self_nulldgmodel3d.f90.html" xlink:title="SELF_NullDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="965,-479 817,-479 817,-455 965,-455 965,-479"/>
+<text text-anchor="middle" x="891" y="-464.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel3d.f90&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge61" class="edge">
+<title>sourcefile~self_nulldgmodel3d.f90&#45;&gt;sourcefile~self_nulldgmodel3d_t.f90</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M825.67,-479.04C798.9,-484.04 767.65,-489.89 739.89,-495.08"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="739.03,-491.68 729.84,-496.96 740.32,-498.56 739.03,-491.68"/>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node46" class="node">
+<title>sourcefile~self_lineareuler3d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node46"><a xlink:href=".././sourcefile/self_lineareuler3d.f90.html" xlink:title="SELF_LinearEuler3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="961,-437 821,-437 821,-413 961,-413 961,-437"/>
+<text text-anchor="middle" x="891" y="-422.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler3d.f90&#45;&gt;sourcefile~self_lineareuler3d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge63" class="edge">
+<title>sourcefile~self_lineareuler3d.f90&#45;&gt;sourcefile~self_lineareuler3d_t.f90</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M825.67,-437.04C798.9,-442.04 767.65,-447.89 739.89,-453.08"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="739.03,-449.68 729.84,-454.96 740.32,-456.56 739.03,-449.68"/>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node47" class="node">
+<title>sourcefile~self_nulldgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node47"><a xlink:href=".././sourcefile/self_nulldgmodel2d.f90~2.html" xlink:title="SELF_NullDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="965,-857 817,-857 817,-833 965,-833 965,-857"/>
+<text text-anchor="middle" x="891" y="-842.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90~2&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge66" class="edge">
+<title>sourcefile~self_nulldgmodel2d.f90~2&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M816.8,-843.7C796.57,-843.34 774.4,-842.94 753.42,-842.57"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="753.3,-839.06 743.24,-842.39 753.17,-846.06 753.3,-839.06"/>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node48" class="node">
+<title>sourcefile~self_nulldgmodel1d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node48"><a xlink:href=".././sourcefile/self_nulldgmodel1d.f90.html" xlink:title="SELF_NullDGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="965,-66 817,-66 817,-42 965,-42 965,-66"/>
+<text text-anchor="middle" x="891" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge67" class="edge">
+<title>sourcefile~self_nulldgmodel1d.f90&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M816.8,-54C796.57,-54 774.4,-54 753.42,-54"/>
+<polygon fill="#002eff" stroke="#002eff" points="753.24,-50.5 743.24,-54 753.24,-57.5 753.24,-50.5"/>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node49" class="node">
+<title>sourcefile~self_nulldgmodel1d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node49"><a xlink:href=".././sourcefile/self_nulldgmodel1d.f90~2.html" xlink:title="SELF_NullDGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="965,-24 817,-24 817,0 965,0 965,-24"/>
+<text text-anchor="middle" x="891" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90~2&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge68" class="edge">
+<title>sourcefile~self_nulldgmodel1d.f90~2&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M825.67,-24.04C798.9,-29.04 767.65,-34.89 739.89,-40.08"/>
+<polygon fill="#002eff" stroke="#002eff" points="739.03,-36.68 729.84,-41.96 740.32,-43.56 739.03,-36.68"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node50" class="node">
+<title>sourcefile~self_advection_diffusion_1d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node50"><a xlink:href=".././sourcefile/self_advection_diffusion_1d.f90.html" xlink:title="SELF_advection_diffusion_1d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="984,-150 798,-150 798,-126 984,-126 984,-150"/>
+<text text-anchor="middle" x="891" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_1d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge59" class="edge">
+<title>sourcefile~self_advection_diffusion_1d.f90&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90</title>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M797.72,-138C789.38,-138 780.88,-138 772.43,-138"/>
+<polygon fill="#ff8b00" stroke="#ff8b00" points="772.16,-134.5 762.16,-138 772.16,-141.5 772.16,-134.5"/>
+</g>
+<!-- sourcefile~self_burgers1d.f90~2 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node51" class="node">
+<title>sourcefile~self_burgers1d.f90~2</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node51"><a xlink:href=".././sourcefile/self_burgers1d.f90~2.html" xlink:title="SELF_Burgers1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="951.5,-192 830.5,-192 830.5,-168 951.5,-168 951.5,-192"/>
+<text text-anchor="middle" x="891" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Burgers1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_burgers1d.f90~2&#45;&gt;sourcefile~self_burgers1d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge58" class="edge">
+<title>sourcefile~self_burgers1d.f90~2&#45;&gt;sourcefile~self_burgers1d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M830.43,-180C802.66,-180 769.32,-180 739.91,-180"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="739.69,-176.5 729.69,-180 739.69,-183.5 739.69,-176.5"/>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node52" class="node">
+<title>sourcefile~self_nulldgmodel2d.f90</title>
+<g id="a_sourcefile~~self_boundaryconditions.f90~~AfferentGraph_node52"><a xlink:href=".././sourcefile/self_nulldgmodel2d.f90.html" xlink:title="SELF_NullDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="965,-815 817,-815 817,-791 965,-791 965,-815"/>
+<text text-anchor="middle" x="891" y="-800.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90 -->
+<g id="sourcefile~~self_boundaryconditions.f90~~AfferentGraph_edge65" class="edge">
+<title>sourcefile~self_nulldgmodel2d.f90&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M818.97,-815.02C795.92,-818.92 770.19,-823.28 746.48,-827.29"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="745.73,-823.87 736.46,-828.99 746.9,-830.77 745.73,-823.87"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_boundaryconditionsf90AfferentGraph = svgPanZoom('#sourcefileself_boundaryconditionsf90AfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_boundaryconditions.html">SELF_BoundaryConditions</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_boundaryconditions.f90.html#src">SELF_BoundaryConditions.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_BoundaryConditions</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_SupportRoutines</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Metadata</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="nb">  </span><span class="k">implicit none</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="k">  </span><span class="kt">integer</span><span class="p">,</span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SELF_BCNAME_LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">  </span><span class="k">type </span><span class="n">BoundaryCondition</span>
+<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">SELF_bcMethod</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcid</span>
+<a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="n">SELF_BCNAME_LENGTH</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcname</span>
+<a id="ln-40" name="ln-40" href="#ln-40"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nBoundaries</span><span class="w"> </span><span class="c">! Number of boundaries this BC applies to</span>
+<a id="ln-41" name="ln-41" href="#ln-41"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elements</span><span class="p">(:)</span><span class="w"> </span><span class="c">! List of elements this BC applies to</span>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sides</span><span class="p">(:)</span><span class="w"> </span><span class="c">! List of local sides this BC applies to</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elements_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span><span class="w"> </span><span class="c">! Device pointer for elements</span>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sides_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span><span class="w"> </span><span class="c">! Device pointer for sides</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-47" name="ln-47" href="#ln-47"></a><span class="w">  </span><span class="k">endtype </span><span class="n">BoundaryCondition</span>
+<a id="ln-48" name="ln-48" href="#ln-48"></a>
+<a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">  </span><span class="k">type </span><span class="n">BoundaryConditionList</span>
+<a id="ln-50" name="ln-50" href="#ln-50"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-52" name="ln-52" href="#ln-52"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">tail</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nbc</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">  </span><span class="k">contains</span>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_BCList</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_BCList</span>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MoveNext</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="k">rewind</span>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">GetBCForID</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a><span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RegisterBoundaryCondition</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">RegisterbcMethod</span>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RegisterbcMethod</span>
+<a id="ln-63" name="ln-63" href="#ln-63"></a><span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">PopulateBoundaries</span>
+<a id="ln-64" name="ln-64" href="#ln-64"></a>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">  </span><span class="k">endtype </span><span class="n">BoundaryConditionList</span>
+<a id="ln-66" name="ln-66" href="#ln-66"></a>
+<a id="ln-67" name="ln-67" href="#ln-67"></a><span class="w">  </span><span class="k">interface</span>
+<a id="ln-68" name="ln-68" href="#ln-68"></a><span class="k">    subroutine </span><span class="n">SELF_bcMethod</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mymodel</span><span class="p">)</span>
+<a id="ln-69" name="ln-69" href="#ln-69"></a><span class="w">      </span><span class="k">use </span><span class="n">SELF_Constants</span><span class="p">,</span><span class="k">only</span><span class="p">:</span><span class="n">prec</span>
+<a id="ln-70" name="ln-70" href="#ln-70"></a><span class="w">      </span><span class="k">use </span><span class="n">SELF_Model</span><span class="p">,</span><span class="k">only</span><span class="p">:</span><span class="n">Model</span>
+<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="w">      </span><span class="k">import </span><span class="n">BoundaryCondition</span>
+<a id="ln-72" name="ln-72" href="#ln-72"></a><span class="w">      </span><span class="k">implicit none</span>
+<a id="ln-73" name="ln-73" href="#ln-73"></a><span class="k">      class</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-74" name="ln-74" href="#ln-74"></a><span class="w">      </span><span class="k">class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mymodel</span>
+<a id="ln-75" name="ln-75" href="#ln-75"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">SELF_bcMethod</span>
+<a id="ln-76" name="ln-76" href="#ln-76"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-77" name="ln-77" href="#ln-77"></a>
+<a id="ln-78" name="ln-78" href="#ln-78"></a><span class="k">contains</span>
+<a id="ln-79" name="ln-79" href="#ln-79"></a>
+<a id="ln-80" name="ln-80" href="#ln-80"></a><span class="c">! //////////////////////////////////////////// !</span>
+<a id="ln-81" name="ln-81" href="#ln-81"></a><span class="c">!  Boundary Condition Methods</span>
+<a id="ln-82" name="ln-82" href="#ln-82"></a><span class="c">! ////////////////////////////////////////////// !</span>
+<a id="ln-83" name="ln-83" href="#ln-83"></a>
+<a id="ln-84" name="ln-84" href="#ln-84"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">Init_BCList</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<a id="ln-85" name="ln-85" href="#ln-85"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-86" name="ln-86" href="#ln-86"></a><span class="w">    </span><span class="n">list</span><span class="p">%</span><span class="n">head</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-87" name="ln-87" href="#ln-87"></a><span class="w">    </span><span class="n">list</span><span class="p">%</span><span class="n">tail</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-88" name="ln-88" href="#ln-88"></a><span class="w">    </span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-89" name="ln-89" href="#ln-89"></a><span class="w">    </span><span class="n">list</span><span class="p">%</span><span class="n">nbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<a id="ln-90" name="ln-90" href="#ln-90"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">Init_BCList</span>
+<a id="ln-91" name="ln-91" href="#ln-91"></a>
+<a id="ln-92" name="ln-92" href="#ln-92"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">Free_BCList</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<a id="ln-93" name="ln-93" href="#ln-93"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-94" name="ln-94" href="#ln-94"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">node</span><span class="p">,</span><span class="n">next_node</span>
+<a id="ln-95" name="ln-95" href="#ln-95"></a>
+<a id="ln-96" name="ln-96" href="#ln-96"></a><span class="w">    </span><span class="n">node</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-97" name="ln-97" href="#ln-97"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+<a id="ln-98" name="ln-98" href="#ln-98"></a><span class="w">      </span><span class="n">next_node</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">node</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-99" name="ln-99" href="#ln-99"></a><span class="w">      </span><span class="k">nullify</span><span class="p">(</span><span class="n">node</span><span class="p">%</span><span class="n">bcMethod</span><span class="p">)</span>
+<a id="ln-100" name="ln-100" href="#ln-100"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">node</span><span class="p">%</span><span class="n">elements</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">node</span><span class="p">%</span><span class="n">elements</span><span class="p">)</span>
+<a id="ln-101" name="ln-101" href="#ln-101"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">node</span><span class="p">%</span><span class="n">sides</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">node</span><span class="p">%</span><span class="n">sides</span><span class="p">)</span>
+<a id="ln-102" name="ln-102" href="#ln-102"></a><span class="w">      </span><span class="k">deallocate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+<a id="ln-103" name="ln-103" href="#ln-103"></a><span class="w">      </span><span class="n">node</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">next_node</span>
+<a id="ln-104" name="ln-104" href="#ln-104"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-105" name="ln-105" href="#ln-105"></a>
+<a id="ln-106" name="ln-106" href="#ln-106"></a><span class="k">    call </span><span class="n">Init_BCList</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<a id="ln-107" name="ln-107" href="#ln-107"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">Free_BCList</span>
+<a id="ln-108" name="ln-108" href="#ln-108"></a>
+<a id="ln-109" name="ln-109" href="#ln-109"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">MoveNext</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<a id="ln-110" name="ln-110" href="#ln-110"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-111" name="ln-111" href="#ln-111"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="p">%</span><span class="n">next</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-112" name="ln-112" href="#ln-112"></a><span class="k">      </span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-113" name="ln-113" href="#ln-113"></a><span class="w">    </span><span class="k">else</span>
+<a id="ln-114" name="ln-114" href="#ln-114"></a><span class="k">      nullify</span><span class="p">(</span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="p">)</span>
+<a id="ln-115" name="ln-115" href="#ln-115"></a><span class="w">    </span><span class="k">endif</span>
+<a id="ln-116" name="ln-116" href="#ln-116"></a><span class="k">  endsubroutine </span><span class="n">MoveNext</span>
+<a id="ln-117" name="ln-117" href="#ln-117"></a>
+<a id="ln-118" name="ln-118" href="#ln-118"></a><span class="w">  </span><span class="k">subroutine rewind</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<a id="ln-119" name="ln-119" href="#ln-119"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-120" name="ln-120" href="#ln-120"></a><span class="w">    </span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-121" name="ln-121" href="#ln-121"></a><span class="w">  </span><span class="k">endsubroutine rewind</span>
+<a id="ln-122" name="ln-122" href="#ln-122"></a>
+<a id="ln-123" name="ln-123" href="#ln-123"></a><span class="k">  function </span><span class="n">GetBCForID</span><span class="p">(</span><span class="n">list</span><span class="p">,</span><span class="n">bcid</span><span class="p">)</span><span class="w"> </span><span class="k">result</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+<a id="ln-124" name="ln-124" href="#ln-124"></a><span class="w">    </span><span class="c">!! Returns the node associated with the given bcid.</span>
+<a id="ln-125" name="ln-125" href="#ln-125"></a><span class="w">    </span><span class="c">!! If the bcid is not found, a null pointer is returned.</span>
+<a id="ln-126" name="ln-126" href="#ln-126"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-127" name="ln-127" href="#ln-127"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcid</span>
+<a id="ln-128" name="ln-128" href="#ln-128"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">node</span>
+<a id="ln-129" name="ln-129" href="#ln-129"></a>
+<a id="ln-130" name="ln-130" href="#ln-130"></a><span class="w">    </span><span class="n">node</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-131" name="ln-131" href="#ln-131"></a>
+<a id="ln-132" name="ln-132" href="#ln-132"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+<a id="ln-133" name="ln-133" href="#ln-133"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">node</span><span class="p">%</span><span class="n">bcid</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">bcid</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-134" name="ln-134" href="#ln-134"></a><span class="k">        return</span>
+<a id="ln-135" name="ln-135" href="#ln-135"></a><span class="k">      endif</span>
+<a id="ln-136" name="ln-136" href="#ln-136"></a><span class="k">      </span><span class="n">node</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">node</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-137" name="ln-137" href="#ln-137"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-138" name="ln-138" href="#ln-138"></a><span class="w">    </span><span class="c">! If we reach this point, the bcid was not found</span>
+<a id="ln-139" name="ln-139" href="#ln-139"></a><span class="w">    </span><span class="n">node</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<a id="ln-140" name="ln-140" href="#ln-140"></a>
+<a id="ln-141" name="ln-141" href="#ln-141"></a><span class="w">  </span><span class="k">endfunction </span><span class="n">GetBCForID</span>
+<a id="ln-142" name="ln-142" href="#ln-142"></a>
+<a id="ln-143" name="ln-143" href="#ln-143"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">RegisterbcMethod</span><span class="p">(</span><span class="n">list</span><span class="p">,</span><span class="n">bcid</span><span class="p">,</span><span class="n">bcname</span><span class="p">,</span><span class="n">bcfunc</span><span class="p">)</span>
+<a id="ln-144" name="ln-144" href="#ln-144"></a><span class="w">    </span><span class="c">!! Register a boundary condition function with the given bcid and bcname.</span>
+<a id="ln-145" name="ln-145" href="#ln-145"></a><span class="w">    </span><span class="c">!! If the bcid is already registered, the function pointer is updated.</span>
+<a id="ln-146" name="ln-146" href="#ln-146"></a><span class="w">    </span><span class="c">!! The elements and sides arrays are not allocated here; call</span>
+<a id="ln-147" name="ln-147" href="#ln-147"></a><span class="w">    </span><span class="c">!! PopulateBoundaries after scanning the mesh.</span>
+<a id="ln-148" name="ln-148" href="#ln-148"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-149" name="ln-149" href="#ln-149"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcid</span>
+<a id="ln-150" name="ln-150" href="#ln-150"></a><span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcname</span>
+<a id="ln-151" name="ln-151" href="#ln-151"></a><span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">SELF_bcMethod</span><span class="p">),</span><span class="k">pointer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcfunc</span>
+<a id="ln-152" name="ln-152" href="#ln-152"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-153" name="ln-153" href="#ln-153"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-154" name="ln-154" href="#ln-154"></a>
+<a id="ln-155" name="ln-155" href="#ln-155"></a><span class="w">    </span><span class="c">! Check if bcid is registered</span>
+<a id="ln-156" name="ln-156" href="#ln-156"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">GetBCForID</span><span class="p">(</span><span class="n">bcid</span><span class="p">)</span>
+<a id="ln-157" name="ln-157" href="#ln-157"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-158" name="ln-158" href="#ln-158"></a><span class="k">      print</span><span class="o">*</span><span class="p">,</span><span class="s2">&quot;Boundary condition with ID &quot;</span><span class="p">,</span><span class="n">bcid</span><span class="p">,</span><span class="s2">&quot; is already registered.&quot;</span>
+<a id="ln-159" name="ln-159" href="#ln-159"></a><span class="w">      </span><span class="k">print</span><span class="o">*</span><span class="p">,</span><span class="s2">&quot;Assigning new function to existing BC&quot;</span>
+<a id="ln-160" name="ln-160" href="#ln-160"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">bcMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bcfunc</span>
+<a id="ln-161" name="ln-161" href="#ln-161"></a><span class="w">    </span><span class="k">else</span>
+<a id="ln-162" name="ln-162" href="#ln-162"></a><span class="k">      allocate</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
+<a id="ln-163" name="ln-163" href="#ln-163"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">bcid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bcid</span>
+<a id="ln-164" name="ln-164" href="#ln-164"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">bcname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">trim</span><span class="p">(</span><span class="n">bcname</span><span class="p">)</span>
+<a id="ln-165" name="ln-165" href="#ln-165"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">bcMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bcfunc</span>
+<a id="ln-166" name="ln-166" href="#ln-166"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<a id="ln-167" name="ln-167" href="#ln-167"></a><span class="w">      </span><span class="k">nullify</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">next</span><span class="p">)</span>
+<a id="ln-168" name="ln-168" href="#ln-168"></a><span class="w">      </span><span class="k">nullify</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">prev</span><span class="p">)</span>
+<a id="ln-169" name="ln-169" href="#ln-169"></a>
+<a id="ln-170" name="ln-170" href="#ln-170"></a><span class="w">      </span><span class="c">! Insert at the tail</span>
+<a id="ln-171" name="ln-171" href="#ln-171"></a><span class="w">      </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="nb">associated</span><span class="p">(</span><span class="n">list</span><span class="p">%</span><span class="n">head</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-172" name="ln-172" href="#ln-172"></a><span class="w">        </span><span class="c">! First entry</span>
+<a id="ln-173" name="ln-173" href="#ln-173"></a><span class="w">        </span><span class="n">list</span><span class="p">%</span><span class="n">head</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-174" name="ln-174" href="#ln-174"></a><span class="w">        </span><span class="n">list</span><span class="p">%</span><span class="n">tail</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-175" name="ln-175" href="#ln-175"></a><span class="w">      </span><span class="k">else</span>
+<a id="ln-176" name="ln-176" href="#ln-176"></a><span class="w">        </span><span class="c">! Append to tail</span>
+<a id="ln-177" name="ln-177" href="#ln-177"></a><span class="w">        </span><span class="n">bc</span><span class="p">%</span><span class="n">prev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">tail</span>
+<a id="ln-178" name="ln-178" href="#ln-178"></a><span class="w">        </span><span class="n">list</span><span class="p">%</span><span class="n">tail</span><span class="p">%</span><span class="n">next</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-179" name="ln-179" href="#ln-179"></a><span class="w">        </span><span class="n">list</span><span class="p">%</span><span class="n">tail</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-180" name="ln-180" href="#ln-180"></a><span class="w">      </span><span class="k">endif</span>
+<a id="ln-181" name="ln-181" href="#ln-181"></a>
+<a id="ln-182" name="ln-182" href="#ln-182"></a><span class="k">      </span><span class="n">list</span><span class="p">%</span><span class="n">nbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">nbc</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-183" name="ln-183" href="#ln-183"></a><span class="w">      </span><span class="n">list</span><span class="p">%</span><span class="n">current</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-184" name="ln-184" href="#ln-184"></a>
+<a id="ln-185" name="ln-185" href="#ln-185"></a><span class="w">    </span><span class="k">endif</span>
+<a id="ln-186" name="ln-186" href="#ln-186"></a>
+<a id="ln-187" name="ln-187" href="#ln-187"></a><span class="k">  endsubroutine </span><span class="n">RegisterbcMethod</span>
+<a id="ln-188" name="ln-188" href="#ln-188"></a>
+<a id="ln-189" name="ln-189" href="#ln-189"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">PopulateBoundaries</span><span class="p">(</span><span class="n">list</span><span class="p">,</span><span class="n">bcid</span><span class="p">,</span><span class="n">nBoundaries</span><span class="p">,</span><span class="n">elements</span><span class="p">,</span><span class="n">sides</span><span class="p">)</span>
+<a id="ln-190" name="ln-190" href="#ln-190"></a><span class="w">    </span><span class="c">!! Populate the elements and sides arrays for a registered boundary condition.</span>
+<a id="ln-191" name="ln-191" href="#ln-191"></a><span class="w">    </span><span class="c">!! Called after scanning the mesh to determine which faces belong to each bcid.</span>
+<a id="ln-192" name="ln-192" href="#ln-192"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryConditionList</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">list</span>
+<a id="ln-193" name="ln-193" href="#ln-193"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcid</span>
+<a id="ln-194" name="ln-194" href="#ln-194"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nBoundaries</span>
+<a id="ln-195" name="ln-195" href="#ln-195"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elements</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nBoundaries</span><span class="p">)</span>
+<a id="ln-196" name="ln-196" href="#ln-196"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sides</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nBoundaries</span><span class="p">)</span>
+<a id="ln-197" name="ln-197" href="#ln-197"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-198" name="ln-198" href="#ln-198"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-199" name="ln-199" href="#ln-199"></a>
+<a id="ln-200" name="ln-200" href="#ln-200"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">list</span><span class="p">%</span><span class="n">GetBCForID</span><span class="p">(</span><span class="n">bcid</span><span class="p">)</span>
+<a id="ln-201" name="ln-201" href="#ln-201"></a><span class="w">    </span><span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-202" name="ln-202" href="#ln-202"></a><span class="k">      return</span>
+<a id="ln-203" name="ln-203" href="#ln-203"></a><span class="k">    endif</span>
+<a id="ln-204" name="ln-204" href="#ln-204"></a>
+<a id="ln-205" name="ln-205" href="#ln-205"></a><span class="k">    </span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nBoundaries</span>
+<a id="ln-206" name="ln-206" href="#ln-206"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">)</span>
+<a id="ln-207" name="ln-207" href="#ln-207"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">))</span><span class="w"> </span><span class="k">deallocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">)</span>
+<a id="ln-208" name="ln-208" href="#ln-208"></a><span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nBoundaries</span><span class="p">))</span>
+<a id="ln-209" name="ln-209" href="#ln-209"></a><span class="w">    </span><span class="k">allocate</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nBoundaries</span><span class="p">))</span>
+<a id="ln-210" name="ln-210" href="#ln-210"></a><span class="w">    </span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">elements</span>
+<a id="ln-211" name="ln-211" href="#ln-211"></a><span class="w">    </span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sides</span>
+<a id="ln-212" name="ln-212" href="#ln-212"></a>
+<a id="ln-213" name="ln-213" href="#ln-213"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">PopulateBoundaries</span>
+<a id="ln-214" name="ln-214" href="#ln-214"></a>
+<a id="ln-215" name="ln-215" href="#ln-215"></a><span class="k">endmodule </span><span class="n">SELF_BoundaryConditions</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-04-10 19:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
