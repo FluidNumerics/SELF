@@ -24,93 +24,93 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ec_advection_3d_entropy_conservation
-  !! Tests that the 3-D EC-DG advection model conserves entropy when
-  !! boundary dissipation is absent.
-  !!
-  !! Setup:
-  !!   - Advection velocity: (u, 0, 0) — purely x-directed
-  !!   - Mesh: uniform structured 3x3x3, all boundaries SELF_BC_NONORMALFLOW
-  !!   - BC: ECAdvection3D_t registers a no-normal-flow BC that mirrors sR = sL
-  !!
-  !! With purely x-directed advection:
-  !!   - South/North (y-faces) and Bottom/Top (z-faces) have un = 0
-  !!   - East/West (x-faces) have sR = sL, so LLF flux = central flux
-  !! Total entropy change is zero to tolerance.
+program advection_diffusion_2d_nostress
+!! Test for the no-normal-flow (mirror) + no-stress (gradient reflection)
+!! boundary conditions on the 2D advection-diffusion model.
+!!
+!! A Gaussian pulse centered in the domain diffuses outward with
+!! insulating (zero-flux) walls.  The entropy (L2 norm) must decay
+!! monotonically, verifying stability of the BR1 no-stress BC.
 
-  use SELF_Constants
-  use SELF_Lagrange
-  use SELF_Mesh_3D
-  use SELF_Geometry_3D
-  use SELF_ECAdvection3D
+  use self_data
+  use self_advection_diffusion_2d
 
   implicit none
-
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
   integer,parameter :: controlDegree = 7
   integer,parameter :: targetDegree = 16
-  real(prec),parameter :: u = 0.5_prec
-  real(prec),parameter :: v = 0.0_prec
-  real(prec),parameter :: w = 0.0_prec
-  real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4)
-  real(prec),parameter :: endtime = 1.0_prec*10.0_prec**(-2)
-  real(prec),parameter :: iointerval = endtime
-#ifdef DOUBLE_PRECISION
-  real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-2)
-#else
-  real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-1)
-#endif
-  real(prec) :: e0,ef,relerr
-  type(ECAdvection3D) :: modelobj
+  real(prec),parameter :: nu = 0.005_prec ! diffusivity
+  real(prec),parameter :: dt = 1.0_prec*10.0_prec**(-4) ! time-step size
+  real(prec),parameter :: endtime = 0.2_prec
+  real(prec),parameter :: iointerval = 0.1_prec
+  real(prec) :: e0,ef ! Initial and final entropy
+  type(advection_diffusion_2d) :: modelobj
   type(Lagrange),target :: interp
-  type(Mesh3D),target :: mesh
-  type(SEMHex),target :: geometry
-  integer :: bcids(1:6)
+  type(Mesh2D),target :: mesh
+  type(SEMQuad),target :: geometry
+  character(LEN=255) :: WORKSPACE
 
+  ! Create a uniform block mesh
+  call get_environment_variable("WORKSPACE",WORKSPACE)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5")
+
+  ! Tag all physical boundaries as no-normal-flow walls.
+  ! This activates both the hyperbolic mirror BC and the
+  ! parabolic no-stress BC registered by the model.
+  call mesh%ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
+
+  ! Create an interpolant
   call interp%Init(N=controlDegree, &
-                   controlNodeType=GAUSS_LOBATTO, &
+                   controlNodeType=GAUSS, &
                    M=targetDegree, &
                    targetNodeType=UNIFORM)
 
-  bcids(1:6) = [SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW, &
-                SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW, &
-                SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW]
-  call mesh%StructuredMesh(3,3,3,1,1,1, &
-                           1.0_prec/3.0_prec,1.0_prec/3.0_prec,1.0_prec/3.0_prec, &
-                           bcids)
-
+  ! Generate geometry (metric terms) from the mesh elements
   call geometry%Init(interp,mesh%nElem)
   call geometry%GenerateFromMesh(mesh)
 
+  ! Initialize the model
   call modelobj%Init(mesh,geometry)
-  modelobj%u = u
-  modelobj%v = v
-  modelobj%w = w
+  modelobj%gradient_enabled = .true.
 
-  call modelobj%solution%SetEquation(1, &
-                                     'f = exp( -( (x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2 )/0.01 )')
+  ! Pure diffusion: zero advection velocity
+  modelobj%u = 0.0_prec
+  modelobj%v = 0.0_prec
+  ! Set the diffusivity
+  modelobj%nu = nu
+
+  ! Set the initial condition: Gaussian pulse centered in the domain
+  call modelobj%solution%SetEquation(1,'f = exp( -( (x-0.5)^2 + (y-0.5)^2 )/0.005 )')
   call modelobj%solution%SetInteriorFromEquation(geometry,0.0_prec)
+
+  print*,"min, max (interior)", &
+    minval(modelobj%solution%interior), &
+    maxval(modelobj%solution%interior)
 
   call modelobj%CalculateEntropy()
   call modelobj%ReportEntropy()
   e0 = modelobj%entropy
 
+  ! Set the model's time integration method
   call modelobj%SetTimeIntegrator(integrator)
+
+  ! Forward step the model
   call modelobj%ForwardStep(endtime,dt,iointerval)
 
+  print*,"min, max (interior)", &
+    minval(modelobj%solution%interior), &
+    maxval(modelobj%solution%interior)
   ef = modelobj%entropy
 
-  relerr = abs(ef-e0)/abs(e0)
-  print*,"e0, ef, relative change in entropy: ",e0,ef,relerr
-
-  if(relerr > tolerance) then
-    print*,"Error: EC-DG 3D entropy not conserved to tolerance! relerr =",relerr
+  if(ef > e0) then
+    print*,"Error: Final entropy greater than initial entropy! ",e0,ef
     stop 1
   endif
 
+  ! Clean up
   call modelobj%free()
   call mesh%free()
   call geometry%free()
   call interp%free()
 
-endprogram ec_advection_3d_entropy_conservation
+endprogram advection_diffusion_2d_nostress

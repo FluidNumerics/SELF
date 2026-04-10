@@ -33,30 +33,10 @@ module self_advection_diffusion_2d
   type,extends(advection_diffusion_2d_t) :: advection_diffusion_2d
 
   contains
-    procedure :: setboundarycondition => setboundarycondition_advection_diffusion_2d
-    procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_2d
     procedure :: boundaryflux => boundaryflux_advection_diffusion_2d
     procedure :: fluxmethod => fluxmethod_advection_diffusion_2d
 
   endtype advection_diffusion_2d
-
-  interface
-    subroutine setboundarycondition_advection_diffusion_2d_gpu(extboundary,boundary,sideinfo,N,nel,nvar) &
-      bind(c,name="setboundarycondition_advection_diffusion_2d_gpu")
-      use iso_c_binding
-      type(c_ptr),value :: extboundary,boundary,sideinfo
-      integer(c_int),value :: N,nel,nvar
-    endsubroutine setboundarycondition_advection_diffusion_2d_gpu
-  endinterface
-
-  interface
-    subroutine setgradientboundarycondition_advection_diffusion_2d_gpu(extboundary,boundary,sideinfo,N,nel,nvar) &
-      bind(c,name="setgradientboundarycondition_advection_diffusion_2d_gpu")
-      use iso_c_binding
-      type(c_ptr),value :: extboundary,boundary,sideinfo
-      integer(c_int),value :: N,nel,nvar
-    endsubroutine setgradientboundarycondition_advection_diffusion_2d_gpu
-  endinterface
 
   interface
     subroutine fluxmethod_advection_diffusion_2d_gpu(solution,solutiongradient,flux,u,v,nu,N,nel,nvar) &
@@ -81,29 +61,6 @@ module self_advection_diffusion_2d
   endinterface
 
 contains
-
-  subroutine setboundarycondition_advection_diffusion_2d(this)
-    !! Boundary conditions are set to periodic boundary conditions
-    implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
-
-    call setboundarycondition_advection_diffusion_2d_gpu(this%solution%extboundary_gpu, &
-                                                         this%solution%boundary_gpu,this%mesh%sideInfo_gpu,this%solution%interp%N, &
-                                                         this%solution%nelem,this%solution%nvar)
-
-  endsubroutine setboundarycondition_advection_diffusion_2d
-
-  subroutine setgradientboundarycondition_advection_diffusion_2d(this)
-    !! Gradient boundary conditions are set to periodic boundary conditions
-    implicit none
-    class(advection_diffusion_2d),intent(inout) :: this
-
-    call setgradientboundarycondition_advection_diffusion_2d_gpu( &
-      this%solutiongradient%extboundary_gpu, &
-      this%solutiongradient%boundary_gpu,this%mesh%sideInfo_gpu, &
-      this%solution%interp%N,this%solution%nelem,this%solution%nvar)
-
-  endsubroutine setgradientboundarycondition_advection_diffusion_2d
 
   subroutine fluxmethod_advection_diffusion_2d(this)
     implicit none

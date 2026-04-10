@@ -60,7 +60,7 @@ program ec_advection_2d_rk3
                    targetNodeType=UNIFORM)
 
   ! Structured mesh with no-normal-flow BCs on all sides.
-  ! ECAdvection2D_t overrides hbc2d_NoNormalFlow to mirror (sR=sL),
+  ! ECAdvection2D_t registers a no-normal-flow BC that mirrors (sR=sL),
   ! so the upwind Riemann flux has zero dissipation at domain faces.
   bcids(1:4) = [SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW, &
                 SELF_BC_NONORMALFLOW,SELF_BC_NONORMALFLOW]

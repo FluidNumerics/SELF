@@ -35,21 +35,10 @@ module self_advection_diffusion_1d
   type,extends(advection_diffusion_1d_t) :: advection_diffusion_1d
 
   contains
-    procedure :: setboundarycondition => setboundarycondition_advection_diffusion_1d
-    procedure :: setgradientboundarycondition => setgradientboundarycondition_advection_diffusion_1d
     procedure :: boundaryflux => boundaryflux_advection_diffusion_1d
     procedure :: fluxmethod => fluxmethod_advection_diffusion_1d
 
   endtype advection_diffusion_1d
-
-  interface
-    subroutine setboundarycondition_advection_diffusion_1d_gpu(extboundary,boundary,nel,nvar) &
-      bind(c,name="setboundarycondition_advection_diffusion_1d_gpu")
-      use iso_c_binding
-      type(c_ptr),value :: extboundary,boundary
-      integer(c_int),value :: nel,nvar
-    endsubroutine setboundarycondition_advection_diffusion_1d_gpu
-  endinterface
 
   interface
     subroutine fluxmethod_advection_diffusion_1d_gpu(solution,solutiongradient,flux,u,nu,ndof) &
@@ -74,26 +63,6 @@ module self_advection_diffusion_1d
   endinterface
 
 contains
-
-  subroutine setboundarycondition_advection_diffusion_1d(this)
-    !! Boundary conditions are set to periodic boundary conditions
-    implicit none
-    class(advection_diffusion_1d),intent(inout) :: this
-
-    call setboundarycondition_advection_diffusion_1d_gpu(this%solution%extboundary_gpu, &
-                                                         this%solution%boundary_gpu,this%solution%nelem,this%solution%nvar)
-
-  endsubroutine setboundarycondition_advection_diffusion_1d
-
-  subroutine setgradientboundarycondition_advection_diffusion_1d(this)
-    !! Gradient boundary conditions are set to periodic boundary conditions
-    implicit none
-    class(advection_diffusion_1d),intent(inout) :: this
-
-    call setboundarycondition_advection_diffusion_1d_gpu(this%solutiongradient%extboundary_gpu, &
-                                                         this%solutiongradient%boundary_gpu,this%solution%nelem,this%solution%nvar)
-
-  endsubroutine setgradientboundarycondition_advection_diffusion_1d
 
   subroutine fluxmethod_advection_diffusion_1d(this)
     implicit none

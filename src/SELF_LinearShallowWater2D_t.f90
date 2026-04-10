@@ -28,6 +28,7 @@ module self_LinearShallowWater2D_t
   use self_model
   use self_dgmodel2d
   use self_mesh
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -45,7 +46,6 @@ module self_LinearShallowWater2D_t
     procedure :: entropy_func => entropy_func_LinearShallowWater2D_t
     procedure :: flux2d => flux2d_LinearShallowWater2D_t
     procedure :: riemannflux2d => riemannflux2d_LinearShallowWater2D_t
-    procedure :: hbc2d_NoNormalFlow => hbc2d_NoNormalFlow_LinearShallowWater2D_t
     procedure :: sourcemethod => sourcemethod_LinearShallowWater2D_t
     ! Custom methods
     generic,public :: SetCoriolis => SetCoriolis_fplane_LinearShallowWater2D_t, &
@@ -62,9 +62,15 @@ contains
   subroutine AdditionalInit_LinearShallowWater2D_t(this)
     implicit none
     class(LinearShallowWater2D_t),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
 
     call this%fCori%Init(this%geometry%x%interp, &
                          1,this%mesh%nElem)
+
+    bcfunc => hbc2d_NoNormalFlow_LinearShallowWater2D
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
   endsubroutine AdditionalInit_LinearShallowWater2D_t
 
@@ -221,17 +227,34 @@ contains
 
   endfunction riemannflux2d_LinearShallowWater2D_t
 
-  pure function hbc2d_NoNormalFlow_LinearShallowWater2D_t(this,s,nhat) result(exts)
-    class(LinearShallowWater2D_t),intent(in) :: this
-    real(prec),intent(in) :: s(1:this%nvar)
-    real(prec),intent(in) :: nhat(1:2)
-    real(prec) :: exts(1:this%nvar)
+  subroutine hbc2d_NoNormalFlow_LinearShallowWater2D(bc,mymodel)
+    !! No-normal-flow boundary condition for 2D linear shallow water equations.
+    !! Reflects the velocity vector about the boundary normal while
+    !! preserving the free surface elevation.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,iEl,j
+    real(prec) :: nhat(1:2),s(1:3)
 
-    exts(1) = (nhat(2)**2-nhat(1)**2)*s(1)-2.0_prec*nhat(1)*nhat(2)*s(2) ! u
-    exts(2) = (nhat(1)**2-nhat(2)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(1) ! v
-    exts(3) = s(3) ! eta
+    select type(m => mymodel)
+    class is(LinearShallowWater2D_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        j = bc%sides(n)
+        do i = 1,m%solution%interp%N+1
+          nhat = m%geometry%nhat%boundary(i,j,iEl,1,1:2)
+          s = m%solution%boundary(i,j,iEl,1:3)
+          m%solution%extBoundary(i,j,iEl,1) = &
+            (nhat(2)**2-nhat(1)**2)*s(1)-2.0_prec*nhat(1)*nhat(2)*s(2) ! u
+          m%solution%extBoundary(i,j,iEl,2) = &
+            (nhat(1)**2-nhat(2)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(1) ! v
+          m%solution%extBoundary(i,j,iEl,3) = s(3) ! eta
+        enddo
+      enddo
+    endselect
 
-  endfunction hbc2d_NoNormalFlow_LinearShallowWater2D_t
+  endsubroutine hbc2d_NoNormalFlow_LinearShallowWater2D
 
   subroutine sourcemethod_LinearShallowWater2D_t(this)
     implicit none

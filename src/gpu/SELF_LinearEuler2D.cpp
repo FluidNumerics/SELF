@@ -110,52 +110,89 @@ extern "C"
   }
 
 }
-__global__ void setboundarycondition_LinearEuler2D_gpukernel(real *extBoundary, real *boundary, int *sideInfo, real *nhat,  int N, int nel, int nvar){
-
+// ============================================================
+// No-normal-flow BC kernel for 2D Linear Euler
+// Operates on pre-filtered boundary faces via elements/sides arrays
+// ============================================================
+__global__ void hbc2d_nonormalflow_lineareuler2d_kernel(
+    real *extBoundary, real *boundary, real *nhat,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel)
+{
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
-  uint32_t ndof = (N+1)*4*nel;
+  uint32_t total_dofs = nBoundaries * (N+1);
 
-  if(idof < ndof){
-    uint32_t i = idof % (N+1);
-    uint32_t s1 = (idof/(N+1)) % 4;
-    uint32_t e1 = idof/(N+1)/4;
-    uint32_t e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-    uint32_t bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
-    if( e2 == 0){
-      if( bcid == SELF_BC_NONORMALFLOW ){
+  if(idof < total_dofs){
+    uint32_t i  = idof % (N+1);
+    uint32_t n  = idof / (N+1);
+    uint32_t e1 = elements[n] - 1; // Fortran 1-based to C 0-based
+    uint32_t s1 = sides[n] - 1;
 
-        real u = boundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)];
-        real v = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)];
-        real nx = nhat[VEB_2D_INDEX(i,s1,e1,0,0,N,nel,1)];
-        real ny = nhat[VEB_2D_INDEX(i,s1,e1,0,1,N,nel,1)];
-        extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)]; // density
-        extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = (ny*ny-nx*nx)*u-2.0*nx*ny*v; // u
-        extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = (nx*nx-ny*ny)*v-2.0*nx*ny*u; //v
-        extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // pressure
+    real u  = boundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)];
+    real v  = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)];
+    real nx = nhat[VEB_2D_INDEX(i,s1,e1,0,0,N,nel,1)];
+    real ny = nhat[VEB_2D_INDEX(i,s1,e1,0,1,N,nel,1)];
 
-      } else if ( bcid == SELF_BC_RADIATION ){
-
-        extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = 0.0;
-        extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = 0.0;
-        extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = 0.0;
-        extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = 0.0;
-
-      }
-    
-    }
+    extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)]; // density
+    extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = (ny*ny-nx*nx)*u - 2.0*nx*ny*v; // u
+    extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = (nx*nx-ny*ny)*v - 2.0*nx*ny*u; // v
+    extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // pressure
   }
 }
 
-extern "C" 
+extern "C"
 {
-  void setboundarycondition_LinearEuler2D_gpu(real *extBoundary, real *boundary, int *sideInfo, real *nhat,  int N, int nel, int nvar){
+  void hbc2d_nonormalflow_lineareuler2d_gpu(
+      real *extBoundary, real *boundary, real *nhat,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel)
+  {
     int threads_per_block = 256;
-    int ndof = (N+1)*4*nel;
-    int nblocks_x = ndof/threads_per_block +1;
+    int total_dofs = nBoundaries * (N+1);
+    int nblocks_x = total_dofs/threads_per_block + 1;
+    hbc2d_nonormalflow_lineareuler2d_kernel<<<dim3(nblocks_x,1,1),
+      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary, boundary, nhat,
+        elements, sides, nBoundaries, N, nel);
+  }
+}
 
-    dim3 nblocks(nblocks_x,1,1);
-    dim3 nthreads(threads_per_block,1,1);
+// ============================================================
+// Radiation BC kernel for 2D Linear Euler
+// Sets extBoundary = 0 on pre-filtered boundary faces
+// ============================================================
+__global__ void hbc2d_radiation_lineareuler2d_kernel(
+    real *extBoundary,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel)
+{
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t total_dofs = nBoundaries * (N+1);
 
-	setboundarycondition_LinearEuler2D_gpukernel<<<nblocks,nthreads, 0, 0>>>(extBoundary,boundary,sideInfo,nhat,N,nel,nvar);
+  if(idof < total_dofs){
+    uint32_t i  = idof % (N+1);
+    uint32_t n  = idof / (N+1);
+    uint32_t e1 = elements[n] - 1;
+    uint32_t s1 = sides[n] - 1;
+
+    extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = 0.0;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = 0.0;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = 0.0;
+    extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = 0.0;
+  }
+}
+
+extern "C"
+{
+  void hbc2d_radiation_lineareuler2d_gpu(
+      real *extBoundary,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel)
+  {
+    int threads_per_block = 256;
+    int total_dofs = nBoundaries * (N+1);
+    int nblocks_x = total_dofs/threads_per_block + 1;
+    hbc2d_radiation_lineareuler2d_kernel<<<dim3(nblocks_x,1,1),
+      dim3(threads_per_block,1,1), 0, 0>>>(extBoundary,
+        elements, sides, nBoundaries, N, nel);
   }
 }

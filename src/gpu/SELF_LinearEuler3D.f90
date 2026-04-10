@@ -15,7 +15,7 @@
 ! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
 !    this software without specific prior written permission.
 !
-! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 ! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 ! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 ! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
@@ -27,24 +27,27 @@
 module self_LinearEuler3D
 
   use self_LinearEuler3D_t
+  use SELF_GPU
+  use SELF_BoundaryConditions
 
   implicit none
 
   type,extends(LinearEuler3D_t) :: LinearEuler3D
   contains
-    procedure :: setboundarycondition => setboundarycondition_LinearEuler3D
+    procedure :: AdditionalInit => AdditionalInit_LinearEuler3D
     procedure :: boundaryflux => boundaryflux_LinearEuler3D
     procedure :: fluxmethod => fluxmethod_LinearEuler3D
 
   endtype LinearEuler3D
 
   interface
-    subroutine setboundarycondition_LinearEuler3D_gpu(extboundary,boundary,sideinfo,nhat,N,nel) &
-      bind(c,name="setboundarycondition_LinearEuler3D_gpu")
+    subroutine hbc3d_radiation_lineareuler3d_gpu(extboundary, &
+                                                 elements,sides,nBoundaries,N,nel) &
+      bind(c,name="hbc3d_radiation_lineareuler3d_gpu")
       use iso_c_binding
-      type(c_ptr),value :: extboundary,boundary,sideinfo,nhat
-      integer(c_int),value :: N,nel
-    endsubroutine setboundarycondition_LinearEuler3D_gpu
+      type(c_ptr),value :: extboundary,elements,sides
+      integer(c_int),value :: nBoundaries,N,nel
+    endsubroutine hbc3d_radiation_lineareuler3d_gpu
   endinterface
 
   interface
@@ -71,6 +74,34 @@ module self_LinearEuler3D
 
 contains
 
+  subroutine AdditionalInit_LinearEuler3D(this)
+    implicit none
+    class(LinearEuler3D),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    bcfunc => hbc3d_Radiation_LinearEuler3D_GPU_wrapper
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_RADIATION,"radiation",bcfunc)
+
+  endsubroutine AdditionalInit_LinearEuler3D
+
+  subroutine hbc3d_Radiation_LinearEuler3D_GPU_wrapper(bc,mymodel)
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    select type(m => mymodel)
+    class is(LinearEuler3D)
+      if(bc%nBoundaries > 0) then
+        call hbc3d_radiation_lineareuler3d_gpu( &
+          m%solution%extBoundary_gpu, &
+          bc%elements_gpu,bc%sides_gpu, &
+          bc%nBoundaries,m%solution%interp%N,m%solution%nElem)
+      endif
+    endselect
+
+  endsubroutine hbc3d_Radiation_LinearEuler3D_GPU_wrapper
+
   subroutine boundaryflux_LinearEuler3D(this)
     implicit none
     class(LinearEuler3D),intent(inout) :: this
@@ -95,57 +126,5 @@ contains
                                       this%solution%nvar)
 
   endsubroutine fluxmethod_LinearEuler3D
-
-  subroutine setboundarycondition_LinearEuler3D(this)
-    !! Boundary conditions are set to periodic boundary conditions
-    implicit none
-    class(LinearEuler3D),intent(inout) :: this
-    ! local
-    integer :: i,iEl,j,k,e2,bcid
-    real(prec) :: x(1:3)
-
-    if(this%prescribed_bcs_enabled) then
-      call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
-                              this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
-                              hipMemcpyDeviceToHost))
-
-      ! Prescribed boundaries are still done on the CPU
-      do iEl = 1,this%solution%nElem ! Loop over all elements
-        do k = 1,6 ! Loop over all sides
-
-          bcid = this%mesh%sideInfo(5,j,iEl) ! Boundary Condition ID
-          e2 = this%mesh%sideInfo(3,j,iEl) ! Neighboring Element ID
-
-          if(e2 == 0) then
-            if(bcid == SELF_BC_PRESCRIBED) then
-
-              do j = 1,this%solution%interp%N+1 ! Loop over quadrature points
-                do i = 1,this%solution%interp%N+1 ! Loop over quadrature points
-                  x = this%geometry%x%boundary(i,j,k,iEl,1,1:3)
-
-                  this%solution%extBoundary(i,j,k,iEl,1:this%nvar) = &
-                    this%hbc3D_Prescribed(x,this%t)
-                enddo
-              enddo
-
-            endif
-          endif
-
-        enddo
-      enddo
-
-      call gpuCheck(hipMemcpy(this%solution%extBoundary_gpu, &
-                              c_loc(this%solution%extBoundary), &
-                              sizeof(this%solution%extBoundary), &
-                              hipMemcpyHostToDevice))
-    endif
-    call setboundarycondition_LinearEuler3D_gpu(this%solution%extboundary_gpu, &
-                                                this%solution%boundary_gpu, &
-                                                this%mesh%sideInfo_gpu, &
-                                                this%geometry%nhat%boundary_gpu, &
-                                                this%solution%interp%N, &
-                                                this%solution%nelem)
-
-  endsubroutine setboundarycondition_LinearEuler3D
 
 endmodule self_LinearEuler3D
