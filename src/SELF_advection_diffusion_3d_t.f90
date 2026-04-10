@@ -29,6 +29,7 @@ module self_advection_diffusion_3d_t
   use self_model
   use self_dgmodel3d
   use self_mesh
+  use SELF_BoundaryConditions
 
   implicit none
 
@@ -40,6 +41,7 @@ module self_advection_diffusion_3d_t
 
   contains
 
+    procedure :: AdditionalInit => AdditionalInit_advection_diffusion_3d_t
     procedure :: riemannflux3d => riemannflux3d_advection_diffusion_3d_t
     procedure :: flux3d => flux3d_advection_diffusion_3d_t
     procedure :: entropy_func => entropy_func_advection_diffusion_3d_t
@@ -47,6 +49,90 @@ module self_advection_diffusion_3d_t
   endtype advection_diffusion_3d_t
 
 contains
+
+  subroutine AdditionalInit_advection_diffusion_3d_t(this)
+    !! Register boundary conditions for the advection-diffusion model.
+    !! Hyperbolic: mirror (no-normal-flow) wall condition on the solution.
+    !! Parabolic: no-stress condition that zeros the normal gradient at
+    !! the boundary, giving zero diffusive flux through walls.  This is
+    !! stable with the Bassi-Rebay (BR1) method.
+    implicit none
+    class(advection_diffusion_3d_t),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    bcfunc => hbc3d_NoNormalFlow_advection_diffusion_3d_t
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+    bcfunc => pbc3d_NoStress_advection_diffusion_3d_t
+    call this%parabolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+  endsubroutine AdditionalInit_advection_diffusion_3d_t
+
+  subroutine hbc3d_NoNormalFlow_advection_diffusion_3d_t(bc,mymodel)
+    !! Mirror boundary condition on the solution: sets the exterior
+    !! state equal to the interior state.  With LLF this zeroes the
+    !! upwind dissipation at the wall.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,j,iEl,s
+
+    select type(m => mymodel)
+    class is(advection_diffusion_3d_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        s = bc%sides(n)
+        do j = 1,m%solution%interp%N+1
+          do i = 1,m%solution%interp%N+1
+            m%solution%extBoundary(i,j,s,iEl,1:m%nvar) = &
+              m%solution%boundary(i,j,s,iEl,1:m%nvar)
+          enddo
+        enddo
+      enddo
+    endselect
+
+  endsubroutine hbc3d_NoNormalFlow_advection_diffusion_3d_t
+
+  subroutine pbc3d_NoStress_advection_diffusion_3d_t(bc,mymodel)
+    !! No-stress boundary condition for the BR1 diffusive flux.
+    !! Reflects the interior gradient so that the normal component
+    !! of the averaged gradient vanishes at the boundary:
+    !!   sigma_ext = sigma_int - 2 (sigma_int . nhat) nhat
+    !! This gives zero diffusive flux through the wall and is
+    !! unconditionally stable for Bassi-Rebay.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,j,iEl,s,ivar,idir
+    real(prec) :: nhat(1:3),sigma_n
+
+    select type(m => mymodel)
+    class is(advection_diffusion_3d_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        s = bc%sides(n)
+        do j = 1,m%solution%interp%N+1
+          do i = 1,m%solution%interp%N+1
+            nhat(1:3) = m%geometry%nHat%boundary(i,j,s,iEl,1,1:3)
+            do ivar = 1,m%nvar
+              sigma_n = m%solutionGradient%boundary(i,j,s,iEl,ivar,1)*nhat(1)+ &
+                        m%solutionGradient%boundary(i,j,s,iEl,ivar,2)*nhat(2)+ &
+                        m%solutionGradient%boundary(i,j,s,iEl,ivar,3)*nhat(3)
+              do idir = 1,3
+                m%solutionGradient%extBoundary(i,j,s,iEl,ivar,idir) = &
+                  m%solutionGradient%boundary(i,j,s,iEl,ivar,idir)- &
+                  2.0_prec*sigma_n*nhat(idir)
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    endselect
+
+  endsubroutine pbc3d_NoStress_advection_diffusion_3d_t
 
   pure function entropy_func_advection_diffusion_3d_t(this,s) result(e)
     class(advection_diffusion_3d_t),intent(in) :: this
