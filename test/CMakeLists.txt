@@ -150,6 +150,8 @@ add_fortran_tests (
     "ec_advection_2d_entropy_conservation.f90"
     "ec_advection_3d_rk3.f90"
     "ec_advection_3d_entropy_conservation.f90"
+    "ec_euler3d_motionless.f90"
+    "ec_euler3d_hydrostaticbalance.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
