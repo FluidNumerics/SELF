@@ -26,22 +26,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - variant: x86
-            context: docker/x86
-            selfish_image: higherordermethods/selfish:latest-x86
-            tag_suffix: x86
-          - variant: x86-cuda124-sm70
-            context: docker/x86_sm70
-            selfish_image: higherordermethods/selfish:latest-x86-cuda124-sm70
-            tag_suffix: x86-cuda124-sm70
           - variant: x86-cuda130-sm100
             context: docker/x86_sm100
             selfish_image: higherordermethods/selfish:latest-x86-cuda130-sm100
             tag_suffix: x86-cuda130-sm100
-          - variant: x86-rocm643-gfx90a
-            context: docker/x86_gfx90a
-            selfish_image: higherordermethods/selfish:latest-x86-rocm643-gfx90a
-            tag_suffix: x86-rocm643-gfx90a
 
     steps:
       - name: Checkout repository
