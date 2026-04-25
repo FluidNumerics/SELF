@@ -1,0 +1,86 @@
+name: docker-publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker/**'
+      - 'src/**'
+      - 'test/**'
+      - 'examples/**'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - '.github/workflows/docker-publish.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY_IMAGE: higherordermethods/self
+
+jobs:
+  build-push:
+    name: ${{ matrix.variant }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: x86
+            context: docker/x86
+            selfish_image: higherordermethods/selfish:latest-x86
+            tag_suffix: x86
+          - variant: x86-cuda124-sm70
+            context: docker/x86_sm70
+            selfish_image: higherordermethods/selfish:latest-x86-cuda124-sm70
+            tag_suffix: x86-cuda124-sm70
+          - variant: x86-cuda130-sm100
+            context: docker/x86_sm100
+            selfish_image: higherordermethods/selfish:latest-x86-cuda130-sm100
+            tag_suffix: x86-cuda130-sm100
+          - variant: x86-rocm643-gfx90a
+            context: docker/x86_gfx90a
+            selfish_image: higherordermethods/selfish:latest-x86-rocm643-gfx90a
+            tag_suffix: x86-rocm643-gfx90a
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stage build context
+        run: |
+          # The Dockerfiles COPY . /opt/self/src, so the build context must
+          # be the repo root. Move the variant's Dockerfile there for the
+          # duration of the build.
+          cp ${{ matrix.context }}/Dockerfile ./Dockerfile.build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Resolve selfish base image digest
+        id: selfish
+        run: |
+          docker pull ${{ matrix.selfish_image }}
+          SHA=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ matrix.selfish_image }} | awk -F@ '{print $2}')
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.build
+          push: true
+          tags: |
+            ${{ env.REGISTRY_IMAGE }}:latest-${{ matrix.tag_suffix }}
+            ${{ env.REGISTRY_IMAGE }}:${{ github.sha }}-${{ matrix.tag_suffix }}
+          build-args: |
+            SELFISH_IMAGE=${{ matrix.selfish_image }}
+            SELFISH_SHA=${{ steps.selfish.outputs.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache-${{ matrix.tag_suffix }}
+          cache-to: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache-${{ matrix.tag_suffix }},mode=max
