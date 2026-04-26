@@ -39,13 +39,13 @@ module SELF_ECAdvection3D_t
   !!   F_Riemann = 0.5 * (a.n) * (uL+uR) - 0.5 * |a| * (uR-uL)
   !! where |a| = sqrt(u^2 + v^2 + w^2) is the maximum wave speed.
 
-  use SELF_ECDGModel3D_t
+  use SELF_ECDGModel3D
   use SELF_mesh
   use SELF_BoundaryConditions
 
   implicit none
 
-  type,extends(ECDGModel3D_t) :: ECAdvection3D_t
+  type,extends(ECDGModel3D) :: ECAdvection3D_t
 
     real(prec) :: u ! x-component of advection velocity
     real(prec) :: v ! y-component of advection velocity

@@ -38,10 +38,15 @@ steps:
     key: "push-release-gfx90a"
     depends_on: "test-release-gfx90a"
     command: |
+      echo "$${DOCKERHUB_TOKEN}" | docker login -u "$${DOCKERHUB_USERNAME}" --password-stdin
       docker push higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86-rocm643-gfx90a
       docker push higherordermethods/self:latest-x86-rocm643-gfx90a
+      docker logout
+    secrets:
+      - DOCKERHUB_USERNAME
+      - DOCKERHUB_TOKEN
     env:
-      slurm_nodelist: "oram"
+      slurm_nodelist: "noether"
     agents:
       queue: "galapagos"
 
@@ -84,8 +89,13 @@ steps:
     key: "push-release-sm70"
     depends_on: "test-release-sm70"
     command: |
+      echo "$${DOCKERHUB_TOKEN}" | docker login -u "$${DOCKERHUB_USERNAME}" --password-stdin
       docker push higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86-cuda124-sm70
       docker push higherordermethods/self:latest-x86-cuda124-sm70
+      docker logout
+    secrets:
+      - DOCKERHUB_USERNAME
+      - DOCKERHUB_TOKEN
     env:
       slurm_nodelist: "oram"
     agents:
@@ -129,8 +139,13 @@ steps:
     key: "push-release-x86"
     depends_on: "test-release-x86"
     command: |
+      echo "$${DOCKERHUB_TOKEN}" | docker login -u "$${DOCKERHUB_USERNAME}" --password-stdin
       docker push higherordermethods/self:$${BUILDKITE_BUILD_NUMBER}-x86
       docker push higherordermethods/self:latest-x86
+      docker logout
+    secrets:
+      - DOCKERHUB_USERNAME
+      - DOCKERHUB_TOKEN
     env:
       slurm_nodelist: "oram"
     agents:

@@ -50,13 +50,13 @@ module SELF_ECEuler3D_t
   !!
   !! Surface Riemann flux: Local Lax-Friedrichs (Rusanov)
 
-  use SELF_ECDGModel3D_t
+  use SELF_ECDGModel3D
   use SELF_mesh
   use SELF_BoundaryConditions
 
   implicit none
 
-  type,extends(ECDGModel3D_t) :: ECEuler3D_t
+  type,extends(ECDGModel3D) :: ECEuler3D_t
 
     real(prec) :: p0 = 100000.0_prec ! Reference pressure [Pa]
     real(prec) :: Rd = 287.0_prec ! Gas constant for dry air [J/(kg*K)]

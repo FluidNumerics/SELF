@@ -42,12 +42,12 @@ module SELF_ECDGModel2D_t
   !! and f_Riemann is a standard Riemann solver flux at element faces (computed
   !! by BoundaryFlux via riemannflux2d).
 
-  use SELF_DGModel2D_t
+  use SELF_DGModel2D
   use SELF_MappedTwoPointVector_2D
 
   implicit none
 
-  type,extends(DGModel2D_t) :: ECDGModel2D_t
+  type,extends(DGModel2D) :: ECDGModel2D_t
 
     type(MappedTwoPointVector2D) :: twoPointFlux
 
