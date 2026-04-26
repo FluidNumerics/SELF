@@ -41,13 +41,13 @@ module SELF_ECAdvection2D_t
   !! This is dissipative (entropy-stable) and reduces to the central flux
   !! when uL = uR (no dissipation at no-normal-flow or mirror boundaries).
 
-  use SELF_ECDGModel2D_t
+  use SELF_ECDGModel2D
   use SELF_mesh
   use SELF_BoundaryConditions
 
   implicit none
 
-  type,extends(ECDGModel2D_t) :: ECAdvection2D_t
+  type,extends(ECDGModel2D) :: ECAdvection2D_t
 
     real(prec) :: u ! x-component of advection velocity
     real(prec) :: v ! y-component of advection velocity

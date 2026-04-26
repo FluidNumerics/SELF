@@ -28,12 +28,12 @@ module SELF_ECDGModel3D_t
   !! Entropy-conserving DGSEM base class for 3-D conservation laws.
   !! See SELF_ECDGModel2D_t for design documentation.
 
-  use SELF_DGModel3D_t
+  use SELF_DGModel3D
   use SELF_MappedTwoPointVector_3D
 
   implicit none
 
-  type,extends(DGModel3D_t) :: ECDGModel3D_t
+  type,extends(DGModel3D) :: ECDGModel3D_t
 
     type(MappedTwoPointVector3D) :: twoPointFlux
 
