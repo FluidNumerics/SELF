@@ -2,12 +2,20 @@
 #include <math.h>
 
 // ============================================================
-// Mirror boundary condition: extBoundary = boundary at domain faces
+// Prescribed-zero boundary state for the tracer.
+//
+// "No-normal-flow" only has physical meaning when velocity is a
+// prognostic variable that can be reflected at the wall. For a
+// passive tracer with externally-prescribed velocity the correct
+// external state is identically zero on the boundary, which combined
+// with the LLF (= upwind for linear advection) Riemann flux gives
+// zero injection on inflow faces and upwind sL on outflow faces.
+//
 // 3D: 6 sides, boundary arrays indexed (i,j,side,iel,ivar)
 // ============================================================
 
-// Mirror BC kernel for 3D EC Advection
-// Sets extBoundary = boundary on pre-filtered boundary faces
+// BC kernel for 3D EC Advection: sets extBoundary = 0 on filtered faces.
+// (boundary arg is unused; kept for ABI compatibility with the wrapper.)
 __global__ void hbc3d_mirror_ecadvection3d_kernel(
     real *extBoundary, real *boundary,
     int *elements, int *sides,
@@ -24,8 +32,8 @@ __global__ void hbc3d_mirror_ecadvection3d_kernel(
     uint32_t e1 = elements[n] - 1;
     uint32_t s1 = sides[n] - 1;
     uint32_t ivar = blockIdx.y;
-    extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nel)] =
-      boundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nel)];
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nel)] = (real)0;
+    (void)boundary;
   }
 }
 
@@ -49,12 +57,16 @@ extern "C"
 // ============================================================
 // LLF boundary flux for 3-D linear advection
 //   flux = 0.5*(un*(sL+sR) - lambda*(sR-sL)) * nScale
-//   un = u*nx + v*ny + w*nz,  lambda = sqrt(u^2+v^2+w^2)
+//   un = u*nx + v*ny + w*nz,  lambda = |un|
+//
+// Per-face lambda matches upwind (Godunov) for linear advection: at
+// tangential faces (u.n=0) lam=0 so flux=0, avoiding spurious dissipation
+// on element interfaces whose normal is perpendicular to the velocity.
 // ============================================================
 
 __global__ void boundaryflux_ecadvection3d_gpukernel(
     real *fb, real *fextb, real *nhat, real *nscale, real *flux,
-    real u, real v, real w, real lam, int N, int nel, int nvar)
+    real u, real v, real w, int N, int nel, int nvar)
 {
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
   uint32_t ndof = (N+1)*(N+1)*6*nel;
@@ -70,6 +82,7 @@ __global__ void boundaryflux_ecadvection3d_gpukernel(
     real ny   = nhat[VEB_3D_INDEX(i,j,s1,iel,0,1,N,nel,1)];
     real nz   = nhat[VEB_3D_INDEX(i,j,s1,iel,0,2,N,nel,1)];
     real un   = u*nx + v*ny + w*nz;
+    real lam  = fabs(un);
     real nmag = nscale[SCB_3D_INDEX(i,j,s1,iel,0,N,nel)];
 
     real sL = fb[idof + ivar*ndof];
@@ -85,12 +98,11 @@ extern "C"
       real *fb, real *fextb, real *nhat, real *nscale, real *flux,
       real u, real v, real w, int N, int nel, int nvar)
   {
-    real lam = sqrt(u*u + v*v + w*w);
     int ndof = (N+1)*(N+1)*6*nel;
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block + 1;
     boundaryflux_ecadvection3d_gpukernel<<<dim3(nblocks_x,nvar,1),
-      dim3(threads_per_block,1,1), 0, 0>>>(fb, fextb, nhat, nscale, flux, u, v, w, lam, N, nel, nvar);
+      dim3(threads_per_block,1,1), 0, 0>>>(fb, fextb, nhat, nscale, flux, u, v, w, N, nel, nvar);
   }
 }
 

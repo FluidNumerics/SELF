@@ -92,7 +92,10 @@ contains
 
   pure function riemannflux3d_ECAdvection3D_t(this,sL,sR,dsdx,nhat) result(flux)
     !! Local Lax-Friedrichs (Rusanov) Riemann flux for linear advection.
-    !! lambda_max = sqrt(u^2 + v^2 + w^2).
+    !! Uses the per-face spectral radius lambda = |u.n|, matching upwind
+    !! (Godunov) for linear advection: tangential faces (u.n=0) contribute
+    !! zero flux, avoiding spurious dissipation across element interfaces
+    !! whose face normal is perpendicular to the velocity.
     class(ECAdvection3D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -103,7 +106,7 @@ contains
     real(prec) :: un,lam
 
     un = this%u*nhat(1)+this%v*nhat(2)+this%w*nhat(3)
-    lam = sqrt(this%u*this%u+this%v*this%v+this%w*this%w)
+    lam = abs(un)
     flux(1) = 0.5_prec*(un*(sL(1)+sR(1))-lam*(sR(1)-sL(1)))
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
@@ -122,7 +125,15 @@ contains
   endsubroutine AdditionalInit_ECAdvection3D_t
 
   subroutine hbc3d_NoNormalFlow_ECAdvection3D(bc,mymodel)
-    !! Mirror boundary condition: sets extBoundary = interior state.
+    !! Prescribed-zero boundary state for the tracer.
+    !!
+    !! "No-normal-flow" only has physical meaning when the velocity field
+    !! is a prognostic variable that can be reflected at the wall. For a
+    !! passive tracer with externally-prescribed velocity the appropriate
+    !! external state is identically zero everywhere on the boundary,
+    !! which combined with the LLF (= upwind for linear advection) Riemann
+    !! flux gives correct inflow (zero injection) and outflow (upwind sL)
+    !! behaviour.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
     ! Local
@@ -135,8 +146,7 @@ contains
         k = bc%sides(n)
         do j = 1,m%solution%interp%N+1
           do i = 1,m%solution%interp%N+1
-            m%solution%extBoundary(i,j,k,iEl,1:m%nvar) = &
-              m%solution%boundary(i,j,k,iEl,1:m%nvar)
+            m%solution%extBoundary(i,j,k,iEl,1:m%nvar) = 0.0_prec
           enddo
         enddo
       enddo
