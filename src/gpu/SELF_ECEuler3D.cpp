@@ -37,6 +37,31 @@ __device__ real eos_pressure(real rho, real theta, real p0, real Rd, real gamma)
   return p0 * pow(rho * Rd * theta / p0, gamma);
 }
 
+/*
+ * Logarithmic mean used by the Souza et al. (2023, JAMES)
+ * entropy-conservative two-point flux for compressible Euler with
+ * potential temperature:
+ *
+ *   <a>_log = (a - b) / (ln(a) - ln(b))   for a != b
+ *   <a>_log = (a + b) / 2                 for a == b
+ *
+ * Implemented with a Taylor series in u = ((a-b)/(a+b))^2 near a == b
+ * to avoid 0/0.
+ */
+__device__ inline real log_mean_dev(real a, real b)
+{
+  real zeta = a / b;
+  real f = (zeta - (real)1.0) / (zeta + (real)1.0);
+  real u = f * f;
+  real F_F;
+  if (u < (real)1.0e-2) {
+    F_F = (real)1.0 + u/(real)3.0 + u*u/(real)5.0 + u*u*u/(real)7.0;
+  } else {
+    F_F = log(zeta) / ((real)2.0 * f);
+  }
+  return (a + b) / ((real)2.0 * F_F);
+}
+
 // ============================================================
 // No-normal-flow boundary condition for EC Euler 3D
 //
@@ -118,6 +143,7 @@ extern "C"
 
 __global__ void boundaryflux_eceuler3d_kernel(
     real *fb, real *fextb, real *nhat, real *nscale, real *flux,
+    real *p_hyd_b, real *p_hyd_extb,
     real p0, real Rd, real gamma, int N, int nel)
 {
   uint32_t idof = threadIdx.x + blockIdx.x * blockDim.x;
@@ -129,6 +155,13 @@ __global__ void boundaryflux_eceuler3d_kernel(
     real ny   = nhat[idof + ndof];
     real nz   = nhat[idof + 2 * ndof];
     real nmag = nscale[idof];
+    // Hydrostatic pressure on each side of the face (well-balanced split).
+    // Reading both interior and exterior buffers lets us support jump
+    // discontinuities in the hydrostatic profile across element edges
+    // (e.g., for stretched or non-conforming meshes); for a smooth
+    // profile both values agree by construction.
+    real p_hyd_L = p_hyd_b[idof];
+    real p_hyd_R = p_hyd_extb[idof];
 
     // Left state (interior)
     real rhoL   = fb[idof];
@@ -163,18 +196,19 @@ __global__ void boundaryflux_eceuler3d_kernel(
     // Maximum wave speed
     real lam = max(fabs(unL) + cL, fabs(unR) + cR);
 
-    // Normal fluxes
+    // Normal fluxes with WB pressure split: each side subtracts its
+    // own p_hyd so that conservation holds even with discontinuities.
     real fL0 = rhoL * unL;
     real fR0 = rhoR * unR;
 
-    real fL1 = rhouL * unL + pL * nx;
-    real fR1 = rhouR * unR + pR * nx;
+    real fL1 = rhouL * unL + (pL - p_hyd_L) * nx;
+    real fR1 = rhouR * unR + (pR - p_hyd_R) * nx;
 
-    real fL2 = rhovL * unL + pL * ny;
-    real fR2 = rhovR * unR + pR * ny;
+    real fL2 = rhovL * unL + (pL - p_hyd_L) * ny;
+    real fR2 = rhovR * unR + (pR - p_hyd_R) * ny;
 
-    real fL3 = rhowL * unL + pL * nz;
-    real fR3 = rhowR * unR + pR * nz;
+    real fL3 = rhowL * unL + (pL - p_hyd_L) * nz;
+    real fR3 = rhowR * unR + (pR - p_hyd_R) * nz;
 
     real fL4 = rthetaL * unL;
     real fR4 = rthetaR * unR;
@@ -192,6 +226,7 @@ extern "C"
 {
   void boundaryflux_eceuler3d_gpu(
       real *fb, real *fextb, real *nhat, real *nscale, real *flux,
+      real *p_hyd_b, real *p_hyd_extb,
       real p0, real Rd, real gamma, int N, int nel)
   {
     int ndof = (N + 1) * (N + 1) * 6 * nel;
@@ -199,30 +234,39 @@ extern "C"
     int nblocks_x = ndof / threads_per_block + 1;
     boundaryflux_eceuler3d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
-        fb, fextb, nhat, nscale, flux, p0, Rd, gamma, N, nel);
+        fb, fextb, nhat, nscale, flux, p_hyd_b, p_hyd_extb, p0, Rd, gamma, N, nel);
   }
 }
 
 // ============================================================
-// Kennedy-Gruber two-point flux for EC Euler 3D on curvilinear mesh
+// Souza et al. (2023, JAMES) entropy-conservative two-point flux for
+// EC Euler 3D with potential temperature on curvilinear mesh, with
+// well-balanced hydrostatic pressure split.
 //
-// For each computational direction r and node pair, computes:
+// Physical flux:
+//   f_d(rho)     = <rho>_log * <v_d>
+//   f_d(rho*v_i) = <rho>_log * <v_i> * <v_d> + (<p> - <p_hyd>) * delta_{id}
+//   f_d(rho*th)  = <rho*theta>_log * <v_d>
+//
+// where <a>_log is the logarithmic mean, <a> the arithmetic mean.
+// The hydrostatic pressure subtraction makes the volume tendency for
+// (rho*u, rho*v, rho*w) vanish exactly in the hydrostatic state.
+//
+// For each computational direction r and node pair, the contravariant
+// flux is the parent's split-form projection:
+//
 //   Fc^r = avg(Ja^r_d) * Fphys_d  (summed over physical dirs d=1,2,3)
 //
-// Physical flux (Kennedy-Gruber split form):
-//   f_d(rho)    = {{rho}} * {{v_d}}
-//   f_d(rho*vi) = {{rho}} * {{vi}} * {{v_d}} + {{p}} * delta_{id}
-//   f_d(rho*th) = {{rho}} * {{theta}} * {{v_d}}
-//
 // Memory layout:
-//   s:    SC_3D_INDEX(i,j,k,iel,ivar,N,nel)
-//   dsdx: stored as dsdx[iq + nq*(iel + nel*(d + 3*r))] for Ja^r_d
-//   f:    TPV_3D_INDEX(nn,i,j,k,iel,ivar,idir,N,nel,nvar)
+//   s:     SC_3D_INDEX(i,j,k,iel,ivar,N,nel)
+//   dsdx:  dsdx[iq + nq*(iel + nel*(d + 3*r))] for Ja^r_d
+//   p_hyd: p_hyd[iq + nq*iel]   (Scalar3D nVar=1, interior buffer)
+//   f:     TPV_3D_INDEX(nn,i,j,k,iel,ivar,idir,N,nel,nvar)
 // ============================================================
 
 template <int blockSize>
 __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
-    real *f, real *s, real *dsdx,
+    real *f, real *s, real *dsdx, real *p_hyd,
     real p0, real Rd, real gamma,
     int nq, int N, int nvar)
 {
@@ -246,12 +290,13 @@ __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
     real w_ijk     = rhow_ijk / rho_ijk;
     real theta_ijk = rtheta_ijk / rho_ijk;
     real p_ijk     = eos_pressure(rho_ijk, theta_ijk, p0, Rd, gamma);
+    real ph_ijk    = p_hyd[iq + nq * iel];
 
     int nq4 = nq * (N + 1); // stride between idir slices in TPV layout
 
     for (int nn = 0; nn < N + 1; nn++) {
 
-      // === xi^1: pair (i,j,k)-(nn,j,k) ===
+      // ============== xi^1: pair (i,j,k)-(nn,j,k) ==============
       uint32_t iq1 = nn + (N + 1) * (jj + (N + 1) * kk);
       real rho1   = s[iq1 + nq * (iel + nel * 0)];
       real rhou1  = s[iq1 + nq * (iel + nel * 1)];
@@ -263,51 +308,49 @@ __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
       real w1     = rhow1 / rho1;
       real theta1 = rtheta1 / rho1;
       real p1     = eos_pressure(rho1, theta1, p0, Rd, gamma);
+      real ph1    = p_hyd[iq1 + nq * iel];
 
-      real rho_a = 0.5 * (rho_ijk + rho1);
-      real u_a   = 0.5 * (u_ijk + u1);
-      real v_a   = 0.5 * (v_ijk + v1);
-      real w_a   = 0.5 * (w_ijk + w1);
-      real th_a  = 0.5 * (theta_ijk + theta1);
-      real p_a   = 0.5 * (p_ijk + p1);
+      real rho_log = log_mean_dev(rho_ijk, rho1);
+      real rth_log = log_mean_dev(rtheta_ijk, rtheta1);
+      real u_a     = (real)0.5 * (u_ijk + u1);
+      real v_a     = (real)0.5 * (v_ijk + v1);
+      real w_a     = (real)0.5 * (w_ijk + w1);
+      real p_a     = (real)0.5 * (p_ijk + p1) - (real)0.5 * (ph_ijk + ph1);
 
-      // Physical flux dotted with averaged Ja^1
-      // dsdx layout: dsdx[iq + nq*(iel + nel*(d + 3*r))]
-      // For r=0 (xi^1): Ja^1_d at d=0,1,2
       for (int ivar = 0; ivar < 5; ivar++) {
         real Fphys_x, Fphys_y, Fphys_z;
         if (ivar == 0) {
-          Fphys_x = rho_a * u_a;
-          Fphys_y = rho_a * v_a;
-          Fphys_z = rho_a * w_a;
+          Fphys_x = rho_log * u_a;
+          Fphys_y = rho_log * v_a;
+          Fphys_z = rho_log * w_a;
         } else if (ivar == 1) {
-          Fphys_x = rho_a * u_a * u_a + p_a;
-          Fphys_y = rho_a * u_a * v_a;
-          Fphys_z = rho_a * u_a * w_a;
+          Fphys_x = rho_log * u_a * u_a + p_a;
+          Fphys_y = rho_log * u_a * v_a;
+          Fphys_z = rho_log * u_a * w_a;
         } else if (ivar == 2) {
-          Fphys_x = rho_a * v_a * u_a;
-          Fphys_y = rho_a * v_a * v_a + p_a;
-          Fphys_z = rho_a * v_a * w_a;
+          Fphys_x = rho_log * v_a * u_a;
+          Fphys_y = rho_log * v_a * v_a + p_a;
+          Fphys_z = rho_log * v_a * w_a;
         } else if (ivar == 3) {
-          Fphys_x = rho_a * w_a * u_a;
-          Fphys_y = rho_a * w_a * v_a;
-          Fphys_z = rho_a * w_a * w_a + p_a;
+          Fphys_x = rho_log * w_a * u_a;
+          Fphys_y = rho_log * w_a * v_a;
+          Fphys_z = rho_log * w_a * w_a + p_a;
         } else {
-          Fphys_x = rho_a * th_a * u_a;
-          Fphys_y = rho_a * th_a * v_a;
-          Fphys_z = rho_a * th_a * w_a;
+          Fphys_x = rth_log * u_a;
+          Fphys_y = rth_log * v_a;
+          Fphys_z = rth_log * w_a;
         }
-        real Ja1_x = 0.5 * (dsdx[iq + nq * (iel + nel * (0 + 3 * 0))] +
-                             dsdx[iq1 + nq * (iel + nel * (0 + 3 * 0))]);
-        real Ja1_y = 0.5 * (dsdx[iq + nq * (iel + nel * (1 + 3 * 0))] +
-                             dsdx[iq1 + nq * (iel + nel * (1 + 3 * 0))]);
-        real Ja1_z = 0.5 * (dsdx[iq + nq * (iel + nel * (2 + 3 * 0))] +
-                             dsdx[iq1 + nq * (iel + nel * (2 + 3 * 0))]);
+        real Ja1_x = (real)0.5 * (dsdx[iq + nq * (iel + nel * (0 + 3 * 0))] +
+                                   dsdx[iq1 + nq * (iel + nel * (0 + 3 * 0))]);
+        real Ja1_y = (real)0.5 * (dsdx[iq + nq * (iel + nel * (1 + 3 * 0))] +
+                                   dsdx[iq1 + nq * (iel + nel * (1 + 3 * 0))]);
+        real Ja1_z = (real)0.5 * (dsdx[iq + nq * (iel + nel * (2 + 3 * 0))] +
+                                   dsdx[iq1 + nq * (iel + nel * (2 + 3 * 0))]);
         f[nn + (N + 1) * iq + nq4 * (iel + nel * (ivar + nvar * 0))] =
             Ja1_x * Fphys_x + Ja1_y * Fphys_y + Ja1_z * Fphys_z;
       }
 
-      // === xi^2: pair (i,j,k)-(i,nn,k) ===
+      // ============== xi^2: pair (i,j,k)-(i,nn,k) ==============
       uint32_t iq2 = ii + (N + 1) * (nn + (N + 1) * kk);
       real rho2   = s[iq2 + nq * (iel + nel * 0)];
       real rhou2  = s[iq2 + nq * (iel + nel * 1)];
@@ -319,48 +362,49 @@ __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
       real w2     = rhow2 / rho2;
       real theta2 = rtheta2 / rho2;
       real p2     = eos_pressure(rho2, theta2, p0, Rd, gamma);
+      real ph2    = p_hyd[iq2 + nq * iel];
 
-      rho_a = 0.5 * (rho_ijk + rho2);
-      u_a   = 0.5 * (u_ijk + u2);
-      v_a   = 0.5 * (v_ijk + v2);
-      w_a   = 0.5 * (w_ijk + w2);
-      th_a  = 0.5 * (theta_ijk + theta2);
-      p_a   = 0.5 * (p_ijk + p2);
+      rho_log = log_mean_dev(rho_ijk, rho2);
+      rth_log = log_mean_dev(rtheta_ijk, rtheta2);
+      u_a     = (real)0.5 * (u_ijk + u2);
+      v_a     = (real)0.5 * (v_ijk + v2);
+      w_a     = (real)0.5 * (w_ijk + w2);
+      p_a     = (real)0.5 * (p_ijk + p2) - (real)0.5 * (ph_ijk + ph2);
 
       for (int ivar = 0; ivar < 5; ivar++) {
         real Fphys_x, Fphys_y, Fphys_z;
         if (ivar == 0) {
-          Fphys_x = rho_a * u_a;
-          Fphys_y = rho_a * v_a;
-          Fphys_z = rho_a * w_a;
+          Fphys_x = rho_log * u_a;
+          Fphys_y = rho_log * v_a;
+          Fphys_z = rho_log * w_a;
         } else if (ivar == 1) {
-          Fphys_x = rho_a * u_a * u_a + p_a;
-          Fphys_y = rho_a * u_a * v_a;
-          Fphys_z = rho_a * u_a * w_a;
+          Fphys_x = rho_log * u_a * u_a + p_a;
+          Fphys_y = rho_log * u_a * v_a;
+          Fphys_z = rho_log * u_a * w_a;
         } else if (ivar == 2) {
-          Fphys_x = rho_a * v_a * u_a;
-          Fphys_y = rho_a * v_a * v_a + p_a;
-          Fphys_z = rho_a * v_a * w_a;
+          Fphys_x = rho_log * v_a * u_a;
+          Fphys_y = rho_log * v_a * v_a + p_a;
+          Fphys_z = rho_log * v_a * w_a;
         } else if (ivar == 3) {
-          Fphys_x = rho_a * w_a * u_a;
-          Fphys_y = rho_a * w_a * v_a;
-          Fphys_z = rho_a * w_a * w_a + p_a;
+          Fphys_x = rho_log * w_a * u_a;
+          Fphys_y = rho_log * w_a * v_a;
+          Fphys_z = rho_log * w_a * w_a + p_a;
         } else {
-          Fphys_x = rho_a * th_a * u_a;
-          Fphys_y = rho_a * th_a * v_a;
-          Fphys_z = rho_a * th_a * w_a;
+          Fphys_x = rth_log * u_a;
+          Fphys_y = rth_log * v_a;
+          Fphys_z = rth_log * w_a;
         }
-        real Ja2_x = 0.5 * (dsdx[iq + nq * (iel + nel * (0 + 3 * 1))] +
-                             dsdx[iq2 + nq * (iel + nel * (0 + 3 * 1))]);
-        real Ja2_y = 0.5 * (dsdx[iq + nq * (iel + nel * (1 + 3 * 1))] +
-                             dsdx[iq2 + nq * (iel + nel * (1 + 3 * 1))]);
-        real Ja2_z = 0.5 * (dsdx[iq + nq * (iel + nel * (2 + 3 * 1))] +
-                             dsdx[iq2 + nq * (iel + nel * (2 + 3 * 1))]);
+        real Ja2_x = (real)0.5 * (dsdx[iq + nq * (iel + nel * (0 + 3 * 1))] +
+                                   dsdx[iq2 + nq * (iel + nel * (0 + 3 * 1))]);
+        real Ja2_y = (real)0.5 * (dsdx[iq + nq * (iel + nel * (1 + 3 * 1))] +
+                                   dsdx[iq2 + nq * (iel + nel * (1 + 3 * 1))]);
+        real Ja2_z = (real)0.5 * (dsdx[iq + nq * (iel + nel * (2 + 3 * 1))] +
+                                   dsdx[iq2 + nq * (iel + nel * (2 + 3 * 1))]);
         f[nn + (N + 1) * iq + nq4 * (iel + nel * (ivar + nvar * 1))] =
             Ja2_x * Fphys_x + Ja2_y * Fphys_y + Ja2_z * Fphys_z;
       }
 
-      // === xi^3: pair (i,j,k)-(i,j,nn) ===
+      // ============== xi^3: pair (i,j,k)-(i,j,nn) ==============
       uint32_t iq3 = ii + (N + 1) * (jj + (N + 1) * nn);
       real rho3   = s[iq3 + nq * (iel + nel * 0)];
       real rhou3  = s[iq3 + nq * (iel + nel * 1)];
@@ -372,43 +416,44 @@ __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
       real w3     = rhow3 / rho3;
       real theta3 = rtheta3 / rho3;
       real p3     = eos_pressure(rho3, theta3, p0, Rd, gamma);
+      real ph3    = p_hyd[iq3 + nq * iel];
 
-      rho_a = 0.5 * (rho_ijk + rho3);
-      u_a   = 0.5 * (u_ijk + u3);
-      v_a   = 0.5 * (v_ijk + v3);
-      w_a   = 0.5 * (w_ijk + w3);
-      th_a  = 0.5 * (theta_ijk + theta3);
-      p_a   = 0.5 * (p_ijk + p3);
+      rho_log = log_mean_dev(rho_ijk, rho3);
+      rth_log = log_mean_dev(rtheta_ijk, rtheta3);
+      u_a     = (real)0.5 * (u_ijk + u3);
+      v_a     = (real)0.5 * (v_ijk + v3);
+      w_a     = (real)0.5 * (w_ijk + w3);
+      p_a     = (real)0.5 * (p_ijk + p3) - (real)0.5 * (ph_ijk + ph3);
 
       for (int ivar = 0; ivar < 5; ivar++) {
         real Fphys_x, Fphys_y, Fphys_z;
         if (ivar == 0) {
-          Fphys_x = rho_a * u_a;
-          Fphys_y = rho_a * v_a;
-          Fphys_z = rho_a * w_a;
+          Fphys_x = rho_log * u_a;
+          Fphys_y = rho_log * v_a;
+          Fphys_z = rho_log * w_a;
         } else if (ivar == 1) {
-          Fphys_x = rho_a * u_a * u_a + p_a;
-          Fphys_y = rho_a * u_a * v_a;
-          Fphys_z = rho_a * u_a * w_a;
+          Fphys_x = rho_log * u_a * u_a + p_a;
+          Fphys_y = rho_log * u_a * v_a;
+          Fphys_z = rho_log * u_a * w_a;
         } else if (ivar == 2) {
-          Fphys_x = rho_a * v_a * u_a;
-          Fphys_y = rho_a * v_a * v_a + p_a;
-          Fphys_z = rho_a * v_a * w_a;
+          Fphys_x = rho_log * v_a * u_a;
+          Fphys_y = rho_log * v_a * v_a + p_a;
+          Fphys_z = rho_log * v_a * w_a;
         } else if (ivar == 3) {
-          Fphys_x = rho_a * w_a * u_a;
-          Fphys_y = rho_a * w_a * v_a;
-          Fphys_z = rho_a * w_a * w_a + p_a;
+          Fphys_x = rho_log * w_a * u_a;
+          Fphys_y = rho_log * w_a * v_a;
+          Fphys_z = rho_log * w_a * w_a + p_a;
         } else {
-          Fphys_x = rho_a * th_a * u_a;
-          Fphys_y = rho_a * th_a * v_a;
-          Fphys_z = rho_a * th_a * w_a;
+          Fphys_x = rth_log * u_a;
+          Fphys_y = rth_log * v_a;
+          Fphys_z = rth_log * w_a;
         }
-        real Ja3_x = 0.5 * (dsdx[iq + nq * (iel + nel * (0 + 3 * 2))] +
-                             dsdx[iq3 + nq * (iel + nel * (0 + 3 * 2))]);
-        real Ja3_y = 0.5 * (dsdx[iq + nq * (iel + nel * (1 + 3 * 2))] +
-                             dsdx[iq3 + nq * (iel + nel * (1 + 3 * 2))]);
-        real Ja3_z = 0.5 * (dsdx[iq + nq * (iel + nel * (2 + 3 * 2))] +
-                             dsdx[iq3 + nq * (iel + nel * (2 + 3 * 2))]);
+        real Ja3_x = (real)0.5 * (dsdx[iq + nq * (iel + nel * (0 + 3 * 2))] +
+                                   dsdx[iq3 + nq * (iel + nel * (0 + 3 * 2))]);
+        real Ja3_y = (real)0.5 * (dsdx[iq + nq * (iel + nel * (1 + 3 * 2))] +
+                                   dsdx[iq3 + nq * (iel + nel * (1 + 3 * 2))]);
+        real Ja3_z = (real)0.5 * (dsdx[iq + nq * (iel + nel * (2 + 3 * 2))] +
+                                   dsdx[iq3 + nq * (iel + nel * (2 + 3 * 2))]);
         f[nn + (N + 1) * iq + nq4 * (iel + nel * (ivar + nvar * 2))] =
             Ja3_x * Fphys_x + Ja3_y * Fphys_y + Ja3_z * Fphys_z;
       }
@@ -419,28 +464,31 @@ __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
 extern "C"
 {
   void twopointfluxmethod_eceuler3d_gpu(
-      real *f, real *s, real *dsdx,
+      real *f, real *s, real *dsdx, real *p_hyd,
       real p0, real Rd, real gamma,
       int N, int nvar, int nel)
   {
     int nq = (N + 1) * (N + 1) * (N + 1);
     if (N < 4) {
       twopointfluxmethod_eceuler3d_kernel<64><<<dim3(nel, 1, 1),
-          dim3(64, 1, 1), 0, 0>>>(f, s, dsdx, p0, Rd, gamma, nq, N, nvar);
+          dim3(64, 1, 1), 0, 0>>>(f, s, dsdx, p_hyd, p0, Rd, gamma, nq, N, nvar);
     } else if (N >= 4 && N < 8) {
       twopointfluxmethod_eceuler3d_kernel<512><<<dim3(nel, 1, 1),
-          dim3(512, 1, 1), 0, 0>>>(f, s, dsdx, p0, Rd, gamma, nq, N, nvar);
+          dim3(512, 1, 1), 0, 0>>>(f, s, dsdx, p_hyd, p0, Rd, gamma, nq, N, nvar);
     }
   }
 }
 
 // ============================================================
-// Gravitational source term: S = [0, 0, 0, -rho*g, 0]
-// Fully device-resident — reads solution, writes source on GPU.
+// Gravitational source term with the well-balanced split:
+//   S = [0, 0, 0, -(rho - rho_hyd)*g, 0]
+// In the hydrostatic state rho == rho_hyd, so the source vanishes
+// exactly (matching the WB volume + boundary fluxes).
+// Fully device-resident — reads solution and rho_hyd, writes source.
 // ============================================================
 
 __global__ void sourcemethod_eceuler3d_kernel(
-    real *source, real *solution, real g, int ndof)
+    real *source, real *solution, real *rho_hyd, real g, int ndof)
 {
   uint32_t idof = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -448,7 +496,7 @@ __global__ void sourcemethod_eceuler3d_kernel(
     source[idof]              = 0.0; // rho
     source[idof + ndof]       = 0.0; // rhou
     source[idof + 2 * ndof]   = 0.0; // rhov
-    source[idof + 3 * ndof]   = -solution[idof] * g; // rhow = -rho*g
+    source[idof + 3 * ndof]   = -(solution[idof] - rho_hyd[idof]) * g; // rhow
     source[idof + 4 * ndof]   = 0.0; // rhotheta
   }
 }
@@ -456,12 +504,146 @@ __global__ void sourcemethod_eceuler3d_kernel(
 extern "C"
 {
   void sourcemethod_eceuler3d_gpu(
-      real *source, real *solution, real g, int N, int nel)
+      real *source, real *solution, real *rho_hyd, real g, int N, int nel)
   {
     int ndof = (N + 1) * (N + 1) * (N + 1) * nel;
     int threads_per_block = 256;
     int nblocks_x = ndof / threads_per_block + 1;
     sourcemethod_eceuler3d_kernel<<<dim3(nblocks_x, 1, 1),
-        dim3(threads_per_block, 1, 1), 0, 0>>>(source, solution, g, ndof);
+        dim3(threads_per_block, 1, 1), 0, 0>>>(source, solution, rho_hyd, g, ndof);
+  }
+}
+
+// ============================================================
+// Diffusive flux for ECEuler3D — constant-coefficient Laplacian
+// (Bassi-Rebay 1) with separate momentum (nu) and thermal (kappa)
+// diffusivities.
+//
+// Interior fill:
+//   F_d(rho)       = 0
+//   F_d(rho*v_i)   = -nu    * d(rho*v_i)/dx_d   for i = 1,2,3
+//   F_d(rho*theta) = -kappa * d(rho*theta)/dx_d
+//
+// solutionGradient layout (Vector3D):
+//   dsdx[(idof + ndof_node*ivar) + ndof_per_dir*d]
+// where ndof_node = (N+1)^3 * nel  and  ndof_per_dir = ndof_node*nvar.
+//
+// diffFlux is also a Vector3D with the same layout. Using the
+// MappedDGDivergence pipeline downstream gives the BR1 weak-form
+// diffusive divergence in a single MappedDGDivergence call.
+// ============================================================
+
+__global__ void diffusiveflux_eceuler3d_kernel(
+    real *diffFlux, real *grad, real nu, real kappa,
+    uint32_t ndof_node, uint32_t nvar)
+{
+  uint32_t i = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t ndof_total = ndof_node * nvar * 3;
+  if (i < ndof_total) {
+    // Decode (node, ivar, d). Layout: outer d, middle ivar, inner node.
+    uint32_t node = i % ndof_node;
+    uint32_t var  = (i / ndof_node) % nvar;
+    // Choose coefficient by variable index: 0 -> rho (no diffusion);
+    // 1,2,3 -> momentum (nu); 4 -> rho*theta (kappa).
+    real coeff;
+    if (var == 0) coeff = (real)0;
+    else if (var == 4) coeff = kappa;
+    else coeff = nu;
+    diffFlux[i] = -coeff * grad[i];
+    (void)node;
+  }
+}
+
+extern "C"
+{
+  void diffusiveflux_eceuler3d_gpu(
+      real *diffFlux, real *grad, real nu, real kappa,
+      int N, int nvar, int nel)
+  {
+    uint32_t ndof_node = (N+1) * (N+1) * (N+1) * (uint32_t)nel;
+    uint32_t ndof_total = ndof_node * (uint32_t)nvar * 3;
+    uint32_t nthreads = 256;
+    uint32_t nblocks  = (ndof_total + nthreads - 1) / nthreads;
+    diffusiveflux_eceuler3d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
+        diffFlux, grad, nu, kappa, ndof_node, (uint32_t)nvar);
+  }
+}
+
+// ============================================================
+// Boundary BR1 central flux for the parabolic terms:
+//   f_R^diff(iVar) = -coeff(iVar) * (avg_grad(iVar,d) . n_d) * nmag
+//
+// avgGrad layout (Vector3D, boundary side, with the 3 components
+// stored as separate "vars" of the 3*nvar ordering used internally):
+//   avgGrad[idof_face + ndof_face*(var + nvar*d)]
+// where idof_face = (i + (N+1)*j + (N+1)^2*side + 6*(N+1)^2*iel).
+// nhat layout (Vector3D, nVar=1, boundary):
+//   nhat[idof_face]                  : x-comp
+//   nhat[idof_face + ndof_face]      : y-comp
+//   nhat[idof_face + 2*ndof_face]    : z-comp
+// nscale layout (Scalar3D, nVar=1):  nscale[idof_face]
+// fluxN layout (Scalar3D, boundary): fluxN[idof_face + ndof_face*var]
+// ============================================================
+
+__global__ void diffusiveboundaryflux_eceuler3d_kernel(
+    real *fluxN, real *avgGrad, real *uBnd, real *uExt,
+    real *nhat, real *nscale,
+    real nu, real kappa, real tau_nu, real tau_kappa,
+    uint32_t ndof_face, uint32_t nvar)
+{
+  // SIPG-stabilised BR1 boundary flux:
+  //   fluxN = -coeff*(avgGrad . n)*nmag + tau*(uL - uR)*nmag
+  // tau_nu, tau_kappa precomputed on host:
+  //   tau = eta_penalty * coeff * (N+1)^2 / length_scale.
+  // Solution buffer layout (Scalar3D, boundary):
+  //   uBnd[idof + ndof_face*var]   = solution%boundary(... ,var)
+  //   uExt[idof + ndof_face*var]   = solution%extBoundary(... ,var)
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  if (idof < ndof_face) {
+    real nx   = nhat[idof];
+    real ny   = nhat[idof + ndof_face];
+    real nz   = nhat[idof + 2*ndof_face];
+    real nmag = nscale[idof];
+
+    for (uint32_t var = 0; var < nvar; var++) {
+      real coeff, tau;
+      if (var == 0) {
+        coeff = (real)0;
+        tau   = (real)0;
+      } else if (var == 4) {
+        coeff = kappa;
+        tau   = tau_kappa;
+      } else {
+        coeff = nu;
+        tau   = tau_nu;
+      }
+
+      // avgGrad components for this variable: stride between d-slabs
+      // is ndof_face*nvar.
+      real gx = avgGrad[idof + ndof_face*(var + nvar*0)];
+      real gy = avgGrad[idof + ndof_face*(var + nvar*1)];
+      real gz = avgGrad[idof + ndof_face*(var + nvar*2)];
+      real gn = gx*nx + gy*ny + gz*nz;
+      real uL = uBnd[idof + ndof_face*var];
+      real uR = uExt[idof + ndof_face*var];
+      fluxN[idof + ndof_face*var] = (-coeff*gn + tau*(uL - uR)) * nmag;
+    }
+  }
+}
+
+extern "C"
+{
+  void diffusiveboundaryflux_eceuler3d_gpu(
+      real *fluxN, real *avgGrad, real *uBnd, real *uExt,
+      real *nhat, real *nscale,
+      real nu, real kappa, real tau_nu, real tau_kappa,
+      int N, int nvar, int nel)
+  {
+    uint32_t ndof_face = (N+1) * (N+1) * 6 * (uint32_t)nel;
+    uint32_t nthreads = 256;
+    uint32_t nblocks  = (ndof_face + nthreads - 1) / nthreads;
+    diffusiveboundaryflux_eceuler3d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
+        fluxN, avgGrad, uBnd, uExt, nhat, nscale,
+        nu, kappa, tau_nu, tau_kappa, ndof_face, (uint32_t)nvar);
   }
 }

@@ -129,6 +129,16 @@ __global__ void CalculateDSDt_Model(real *fluxDivergence, real *source, real *dS
 
 }
 
+// Accumulate one field into another (a += b) on the device. Used to
+// fold the parabolic-divergence buffer into the total fluxDivergence
+// before the dSdt computation.
+__global__ void AccumulateField_Model(real *a, real *b, uint32_t ndof){
+  size_t i = threadIdx.x + blockIdx.x*blockDim.x;
+  if (i < ndof) {
+    a[i] += b[i];
+  }
+}
+
 extern "C"
 {
   void UpdateSolution_gpu(real *solution, real *dSdt, real dt, int ndof)
@@ -156,6 +166,16 @@ extern "C"
     uint32_t nthreads = 256;
     uint32_t nblocks_x = ndof/nthreads + 1;
     CalculateDSDt_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(fluxDivergence, source, dSdt, ndof);
+  }
+}
+
+extern "C"
+{
+  void AccumulateField_gpu(real *a, real *b, int ndof)
+  {
+    uint32_t nthreads = 256;
+    uint32_t nblocks_x = ndof/nthreads + 1;
+    AccumulateField_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(a, b, ndof);
   }
 }
 
