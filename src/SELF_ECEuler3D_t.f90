@@ -89,18 +89,6 @@ module SELF_ECEuler3D_t
     real(prec) :: eta_penalty = 4.0_prec
     real(prec) :: length_scale = 0.0_prec
 
-    !! Hydrostatic background state used by the well-balanced split.
-    !! Populated by SetHydrostaticBalance; zero otherwise (no correction).
-    !! Stored as MappedScalar3D so we get host+device buffers,
-    !! BoundaryInterp, UpdateDevice, AND SideExchange — letting us
-    !! populate the boundary buffer (interior side) and the extBoundary
-    !! buffer (exterior side, from the neighbor element) so the LLF
-    !! flux kernel can subtract each side's own p_hyd. This supports
-    !! jump discontinuities in the hydrostatic field across element
-    !! interfaces (e.g., for stretched or non-conforming meshes).
-    type(MappedScalar3D) :: hydrostatic_pressure
-    type(MappedScalar3D) :: hydrostatic_density
-
     !! Diffusive-flux scratch buffer. Holds the constant-coefficient
     !! Laplacian flux F_diff(i,j,k,iel,iVar,d) = -coeff_iVar * d(s_iVar)/dx_d
     !! with coeff_iVar = 0 for rho, nu for rhou/rhov/rhow, and kappa for
@@ -139,10 +127,15 @@ module SELF_ECEuler3D_t
 contains
 
   subroutine SetNumberOfVariables_ECEuler3D_t(this)
+    !! Six conserved variables: (rho, rho*u, rho*v, rho*w, rho*theta, Phi),
+    !! where Phi = g*z is the geopotential. Phi has zero flux (volume and
+    !! surface) so its tendency is identically zero; it is carried in the
+    !! state vector solely so that the Souza et al. (2023) non-conservative
+    !! gravity flux differencing in SourceMethod can read it node-locally.
     implicit none
     class(ECEuler3D_t),intent(inout) :: this
 
-    this%nvar = 5
+    this%nvar = 6
 
   endsubroutine SetNumberOfVariables_ECEuler3D_t
 
@@ -164,6 +157,9 @@ contains
 
     call this%solution%SetName(5,"rhotheta")
     call this%solution%SetUnits(5,"kg K/m^3")
+
+    call this%solution%SetName(6,"phi")
+    call this%solution%SetUnits(6,"m^2/s^2")
 
   endsubroutine SetMetadata_ECEuler3D_t
 
@@ -222,10 +218,11 @@ contains
     !!   f_d(rho)     = <rho>_log * <v_d>
     !!   f_d(rho*v_i) = <rho>_log * <v_i> * <v_d> + <p> * delta_{id}
     !!   f_d(rho*th)  = <rho*theta>_log * <v_d>
+    !!   f_d(Phi)     = 0  (geopotential is carried, not advected)
     !!
     !! <a>_log is the logarithmic mean (see log_mean), <a> the arithmetic
-    !! mean. The pressure here is the *total* pressure; the well-balanced
-    !! split (subtracting p_hyd) is applied in TwoPointFluxMethod.
+    !! mean. Pressure here is the *total* pressure; gravity is handled by
+    !! the Souza non-conservative term in SourceMethod, not by a flux split.
     class(ECEuler3D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -270,6 +267,7 @@ contains
     flux(3,1) = rho_log*v_avg*u_avg
     flux(4,1) = rho_log*w_avg*u_avg
     flux(5,1) = rth_log*u_avg
+    flux(6,1) = 0.0_prec
 
     ! y-direction flux (d=2)
     flux(1,2) = rho_log*v_avg
@@ -277,6 +275,7 @@ contains
     flux(3,2) = rho_log*v_avg*v_avg+p_avg
     flux(4,2) = rho_log*w_avg*v_avg
     flux(5,2) = rth_log*v_avg
+    flux(6,2) = 0.0_prec
 
     ! z-direction flux (d=3)
     flux(1,3) = rho_log*w_avg
@@ -284,32 +283,26 @@ contains
     flux(3,3) = rho_log*v_avg*w_avg
     flux(4,3) = rho_log*w_avg*w_avg+p_avg
     flux(5,3) = rth_log*w_avg
+    flux(6,3) = 0.0_prec
 
   endfunction twopointflux3d_ECEuler3D_t
 
   subroutine TwoPointFluxMethod_ECEuler3D_t(this)
-    !! Compute pre-projected scalar contravariant two-point fluxes for the
-    !! Souza et al. (2023) EC flux, with the well-balanced hydrostatic
-    !! pressure subtraction applied inline.
-    !!
-    !! For each node pair (a, b) along reference direction r, the
-    !! contravariant flux is the parent's split-form projection:
+    !! Pre-projected scalar contravariant two-point Souza et al. (2023) EC
+    !! flux. For each node pair (a, b) along reference direction r:
     !!
     !!   Fc^r_v_i = sum_d 0.5*(Ja^r_d(a) + Ja^r_d(b)) * f_d(v_i, sL=s(a), sR=s(b))
     !!
-    !! and the pressure component of f_d(v_i) is replaced by
-    !! (<p> - <p_hyd>) so that, in the hydrostatic state, the only
-    !! surviving term in the rho*w equation is the source -(rho - rho_hyd)*g,
-    !! which vanishes exactly. The components rho*u, rho*v are unaffected
-    !! by this offset because p_hyd has no horizontal gradient (the offset
-    !! cancels under the discrete divergence).
+    !! Gravity is NOT split into the pressure flux here; it is handled by
+    !! the Souza non-conservative gravity flux differencing in SourceMethod
+    !! (which uses the geopotential carried as state variable index 6).
     implicit none
     class(ECEuler3D_t),intent(inout) :: this
     ! Local
     integer :: nn,i,j,k,d,iEl,iVar
     real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
     real(prec) :: Fphys(1:this%nvar,1:3)
-    real(prec) :: Fc,p_hyd_avg
+    real(prec) :: Fc
 
     do concurrent(nn=1:this%solution%N+1,i=1:this%solution%N+1, &
                   j=1:this%solution%N+1,k=1:this%solution%N+1, &
@@ -320,11 +313,6 @@ contains
       ! ------------- xi^1: pair (i,j,k)-(nn,j,k) -------------
       sR = this%solution%interior(nn,j,k,iEl,1:this%nvar)
       Fphys = this%twopointflux3d(sL,sR)
-      p_hyd_avg = 0.5_prec*(this%hydrostatic_pressure%interior(i,j,k,iEl,1)+ &
-                            this%hydrostatic_pressure%interior(nn,j,k,iEl,1))
-      Fphys(2,1) = Fphys(2,1)-p_hyd_avg
-      Fphys(3,2) = Fphys(3,2)-p_hyd_avg
-      Fphys(4,3) = Fphys(4,3)-p_hyd_avg
       do iVar = 1,this%nvar
         Fc = 0.0_prec
         do d = 1,3
@@ -339,11 +327,6 @@ contains
       ! ------------- xi^2: pair (i,j,k)-(i,nn,k) -------------
       sR = this%solution%interior(i,nn,k,iEl,1:this%nvar)
       Fphys = this%twopointflux3d(sL,sR)
-      p_hyd_avg = 0.5_prec*(this%hydrostatic_pressure%interior(i,j,k,iEl,1)+ &
-                            this%hydrostatic_pressure%interior(i,nn,k,iEl,1))
-      Fphys(2,1) = Fphys(2,1)-p_hyd_avg
-      Fphys(3,2) = Fphys(3,2)-p_hyd_avg
-      Fphys(4,3) = Fphys(4,3)-p_hyd_avg
       do iVar = 1,this%nvar
         Fc = 0.0_prec
         do d = 1,3
@@ -358,11 +341,6 @@ contains
       ! ------------- xi^3: pair (i,j,k)-(i,j,nn) -------------
       sR = this%solution%interior(i,j,nn,iEl,1:this%nvar)
       Fphys = this%twopointflux3d(sL,sR)
-      p_hyd_avg = 0.5_prec*(this%hydrostatic_pressure%interior(i,j,k,iEl,1)+ &
-                            this%hydrostatic_pressure%interior(i,j,nn,iEl,1))
-      Fphys(2,1) = Fphys(2,1)-p_hyd_avg
-      Fphys(3,2) = Fphys(3,2)-p_hyd_avg
-      Fphys(4,3) = Fphys(4,3)-p_hyd_avg
       do iVar = 1,this%nvar
         Fc = 0.0_prec
         do d = 1,3
@@ -439,36 +417,34 @@ contains
     ! LLF flux
     flux(1:5) = 0.5_prec*(fL(1:5)+fR(1:5))- &
                 0.5_prec*lam*(sR(1:5)-sL(1:5))
+    ! Geopotential is carried in the state vector but has no flux.
+    flux(6) = 0.0_prec
 
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux3d_ECEuler3D_t
 
   subroutine BoundaryFlux_ECEuler3D_t(this)
-    !! Local Lax-Friedrichs (Rusanov) Riemann flux at element boundaries
-    !! and physical walls, with the well-balanced hydrostatic pressure
-    !! split applied inline.
+    !! LMARS (Low-Mach Approximate Riemann Solver, Chen et al. 2013)
+    !! interface flux. No hydrostatic pressure split: gravity is folded
+    !! into SourceMethod via the Souza non-conservative form using the
+    !! geopotential carried in the state vector (variable index 6).
     !!
-    !! At every face point we subtract p_hyd (read from the boundary
-    !! buffer of hydrostatic_pressure, populated by SetHydrostaticBalance
-    !! via BoundaryInterp) from both pL and pR before forming the
-    !! pressure-flux contribution to (rho*u, rho*v, rho*w). At element
-    !! interfaces in z, both sides see the same z and therefore the same
-    !! p_hyd value (the hydrostatic profile is single-valued in z), and
-    !! at no-normal-flow walls the mirror BC gives p_hyd_R = p_hyd_L.
+    !!   un* = 0.5*(unL + unR) - (pR - pL) / (2 * rho_bar * c_bar)
+    !!   p*  = 0.5*(pL + pR)   - 0.5 * rho_bar * c_bar * (unR - unL)
     !!
-    !! In the hydrostatic state (p == p_hyd everywhere) this flux is
-    !! exactly zero, complementing the WB volume term so the discrete
-    !! tendency vanishes to machine precision.
+    !! Upwind on sign of un* selects which side supplies the conserved
+    !! state for the advective part. Pressure adds to normal momentum.
+    !! Geopotential (var 6) has zero flux.
     implicit none
     class(ECEuler3D_t),intent(inout) :: this
     ! Local
     integer :: i,j,k,iel
-    real(prec) :: nhat(1:3),nmag,p_hyd_L,p_hyd_R
+    real(prec) :: nhat(1:3),nmag
     real(prec) :: rhoL,uL,vL,wL,thetaL,pL,unL,cL
     real(prec) :: rhoR,uR,vR,wR,thetaR,pR,unR,cR
-    real(prec) :: fL(1:5),fR(1:5),lam,gamma
-    real(prec) :: sL(1:5),sR(1:5)
+    real(prec) :: rho_bar,c_bar,rc,un_star,p_star,gamma
+    real(prec) :: sL(1:5),sR(1:5),s_up(1:5)
 
     gamma = this%cp/this%cv
 
@@ -479,13 +455,7 @@ contains
       nmag = this%geometry%nScale%boundary(i,j,k,iEl,1)
       sL = this%solution%boundary(i,j,k,iel,1:5)
       sR = this%solution%extBoundary(i,j,k,iel,1:5)
-      ! WB pressure shift on each side: extBoundary holds the neighbor's
-      ! p_hyd at internal interfaces (with proper flip handling) and the
-      ! mirror value at walls.
-      p_hyd_L = this%hydrostatic_pressure%boundary(i,j,k,iel,1)
-      p_hyd_R = this%hydrostatic_pressure%extBoundary(i,j,k,iel,1)
 
-      ! Left primitives
       rhoL = sL(1)
       uL = sL(2)/rhoL
       vL = sL(3)/rhoL
@@ -495,7 +465,6 @@ contains
       unL = uL*nhat(1)+vL*nhat(2)+wL*nhat(3)
       cL = sqrt(gamma*pL/rhoL)
 
-      ! Right primitives
       rhoR = sR(1)
       uR = sR(2)/rhoR
       vR = sR(3)/rhoR
@@ -505,53 +474,104 @@ contains
       unR = uR*nhat(1)+vR*nhat(2)+wR*nhat(3)
       cR = sqrt(gamma*pR/rhoR)
 
-      ! Normal physical flux on each side, with p replaced by p - p_hyd
-      ! (each side uses its own p_hyd) in the momentum equations.
-      fL(1) = rhoL*unL
-      fL(2) = sL(2)*unL+(pL-p_hyd_L)*nhat(1)
-      fL(3) = sL(3)*unL+(pL-p_hyd_L)*nhat(2)
-      fL(4) = sL(4)*unL+(pL-p_hyd_L)*nhat(3)
-      fL(5) = sL(5)*unL
+      rho_bar = 0.5_prec*(rhoL+rhoR)
+      c_bar = 0.5_prec*(cL+cR)
+      rc = rho_bar*c_bar
 
-      fR(1) = rhoR*unR
-      fR(2) = sR(2)*unR+(pR-p_hyd_R)*nhat(1)
-      fR(3) = sR(3)*unR+(pR-p_hyd_R)*nhat(2)
-      fR(4) = sR(4)*unR+(pR-p_hyd_R)*nhat(3)
-      fR(5) = sR(5)*unR
+      un_star = 0.5_prec*(unL+unR)-(pR-pL)/(2.0_prec*rc)
+      p_star = 0.5_prec*(pL+pR)-0.5_prec*rc*(unR-unL)
 
-      lam = max(abs(unL)+cL,abs(unR)+cR)
+      ! Upwind on un_star (advective part of LMARS)
+      if(un_star >= 0.0_prec) then
+        s_up = sL
+      else
+        s_up = sR
+      endif
 
-      this%flux%boundaryNormal(i,j,k,iEl,1:5) = &
-        (0.5_prec*(fL+fR)-0.5_prec*lam*(sR-sL))*nmag
+      this%flux%boundaryNormal(i,j,k,iEl,1) = (s_up(1)*un_star)*nmag
+      this%flux%boundaryNormal(i,j,k,iEl,2) = (s_up(2)*un_star+p_star*nhat(1))*nmag
+      this%flux%boundaryNormal(i,j,k,iEl,3) = (s_up(3)*un_star+p_star*nhat(2))*nmag
+      this%flux%boundaryNormal(i,j,k,iEl,4) = (s_up(4)*un_star+p_star*nhat(3))*nmag
+      this%flux%boundaryNormal(i,j,k,iEl,5) = (s_up(5)*un_star)*nmag
+      this%flux%boundaryNormal(i,j,k,iEl,6) = 0.0_prec
 
     enddo
 
   endsubroutine BoundaryFlux_ECEuler3D_t
 
   subroutine SourceMethod_ECEuler3D_t(this)
-    !! Gravitational source term, well-balanced split:
-    !!   S = [0, 0, 0, -(rho - rho_hyd)*g, 0]
+    !! Souza et al. (2023) non-conservative gravity flux differencing.
     !!
-    !! In the hydrostatic state rho == rho_hyd so S(rho*w) = 0 exactly,
-    !! and combined with the pressure-flux subtraction in
-    !! TwoPointFluxMethod the discrete tendency for rho*w vanishes to
-    !! machine precision. Reduces to -rho*g when hydrostatic_density = 0
-    !! (i.e. SetHydrostaticBalance was never called).
+    !! The rho*w equation carries the body force -rho * partial_z Phi where
+    !! Phi = g*z is the geopotential, which we keep as state variable index
+    !! 6 (no flux, no source of its own — its tendency is identically zero).
+    !! On a curvilinear mesh, the SBP-EC strong-form flux differencing for
+    !! the non-conservative product rho * partial_z Phi reads:
+    !!
+    !!   [rho * d_z Phi]_i = (1/J_i) sum_r sum_j D_split^r[i_r, j]
+    !!                       * 0.5*(Ja^r_z(i) + Ja^r_z(j))
+    !!                       * <rho>_log(s_i, s_j) * (Phi_j - Phi_i)
+    !!
+    !! and we set source(rho*w) = - that result. The other variables
+    !! (rho, rho*u, rho*v, rho*theta, Phi) all have zero source.
+    !!
+    !! Why this form replaces the WB hydrostatic split: gravity now lives
+    !! on the same node-pair carrier as the EC volume flux (every node
+    !! pair, including those that span an element interface), so the
+    !! gravity / pressure-flux topology mismatch that produced
+    !! z-element-aligned banding is gone. Well-balancing is recovered
+    !! automatically: in the hydrostatic state the EC volume flux gives
+    !! d_z p_hyd and the source gives -rho_hyd*g, which cancel pointwise.
     implicit none
     class(ECEuler3D_t),intent(inout) :: this
     ! Local
-    integer :: i,j,k,iEl
+    integer :: i,j,k,iEl,nn
+    real(prec) :: rho_ijk,phi_ijk,rho_p,phi_p
+    real(prec) :: rho_log,Ja_avg,acc,jac
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   k=1:this%solution%N+1,iEl=1:this%mesh%nElem)
 
+      rho_ijk = this%solution%interior(i,j,k,iEl,1)
+      phi_ijk = this%solution%interior(i,j,k,iEl,6)
+      acc = 0.0_prec
+
+      do nn = 1,this%solution%N+1
+        ! xi^1 partner (nn, j, k)
+        rho_p = this%solution%interior(nn,j,k,iEl,1)
+        phi_p = this%solution%interior(nn,j,k,iEl,6)
+        rho_log = log_mean(rho_ijk,rho_p)
+        Ja_avg = 0.5_prec*(this%geometry%dsdx%interior(i,j,k,iEl,1,3,1)+ &
+                           this%geometry%dsdx%interior(nn,j,k,iEl,1,3,1))
+        acc = acc+this%solution%interp%dSplitMatrix(nn,i)* &
+              Ja_avg*rho_log*(phi_p-phi_ijk)
+
+        ! xi^2 partner (i, nn, k)
+        rho_p = this%solution%interior(i,nn,k,iEl,1)
+        phi_p = this%solution%interior(i,nn,k,iEl,6)
+        rho_log = log_mean(rho_ijk,rho_p)
+        Ja_avg = 0.5_prec*(this%geometry%dsdx%interior(i,j,k,iEl,1,3,2)+ &
+                           this%geometry%dsdx%interior(i,nn,k,iEl,1,3,2))
+        acc = acc+this%solution%interp%dSplitMatrix(nn,j)* &
+              Ja_avg*rho_log*(phi_p-phi_ijk)
+
+        ! xi^3 partner (i, j, nn)
+        rho_p = this%solution%interior(i,j,nn,iEl,1)
+        phi_p = this%solution%interior(i,j,nn,iEl,6)
+        rho_log = log_mean(rho_ijk,rho_p)
+        Ja_avg = 0.5_prec*(this%geometry%dsdx%interior(i,j,k,iEl,1,3,3)+ &
+                           this%geometry%dsdx%interior(i,j,nn,iEl,1,3,3))
+        acc = acc+this%solution%interp%dSplitMatrix(nn,k)* &
+              Ja_avg*rho_log*(phi_p-phi_ijk)
+      enddo
+
+      jac = this%geometry%J%interior(i,j,k,iEl,1)
       this%source%interior(i,j,k,iEl,1) = 0.0_prec
       this%source%interior(i,j,k,iEl,2) = 0.0_prec
       this%source%interior(i,j,k,iEl,3) = 0.0_prec
-      this%source%interior(i,j,k,iEl,4) = &
-        -(this%solution%interior(i,j,k,iEl,1)- &
-          this%hydrostatic_density%interior(i,j,k,iEl,1))*this%g
+      this%source%interior(i,j,k,iEl,4) = -acc/jac
       this%source%interior(i,j,k,iEl,5) = 0.0_prec
+      this%source%interior(i,j,k,iEl,6) = 0.0_prec
 
     enddo
 
@@ -605,13 +625,6 @@ contains
     ! A GPU-aware mirror BC for the gradient can be added later for
     ! tests where the wall behaviour matters.
 
-    ! Hydrostatic background state for the well-balanced split. Default
-    ! is zero (no correction); SetHydrostaticBalance overwrites it.
-    ! Allocated as a 1-variable Scalar3D so we automatically get host
-    ! and device buffers, plus BoundaryInterp and UpdateDevice.
-    call this%hydrostatic_pressure%Init(this%solution%interp,1,this%mesh%nElem)
-    call this%hydrostatic_density%Init(this%solution%interp,1,this%mesh%nElem)
-
     ! Diffusive-flux scratch buffers. Always allocated (memory cost is
     ! modest); only used when nu>0 or kappa>0 (and gradient_enabled is
     ! therefore .true.).
@@ -625,8 +638,6 @@ contains
     implicit none
     class(ECEuler3D_t),intent(inout) :: this
 
-    call this%hydrostatic_pressure%Free()
-    call this%hydrostatic_density%Free()
     call this%diffFlux%Free()
     call this%diffDiv%Free()
 
@@ -688,6 +699,8 @@ contains
         -this%nu*this%solutionGradient%interior(i,j,k,iel,4,d)
       this%diffFlux%interior(i,j,k,iel,5,d) = &
         -this%kappa*this%solutionGradient%interior(i,j,k,iel,5,d)
+      ! Geopotential carries no diffusion.
+      this%diffFlux%interior(i,j,k,iel,6,d) = 0.0_prec
     enddo
 
   endsubroutine DiffusiveFluxMethod_ECEuler3D_t
@@ -753,6 +766,9 @@ contains
       uL = this%solution%boundary(i,j,k,iel,5)
       uR = this%solution%extBoundary(i,j,k,iel,5)
       this%diffFlux%boundaryNormal(i,j,k,iel,5) = (-coeff*gradn+tau*(uL-uR))*nmag
+
+      ! Geopotential — no diffusion, no penalty.
+      this%diffFlux%boundaryNormal(i,j,k,iel,6) = 0.0_prec
     enddo
 
   endsubroutine DiffusiveBoundaryFlux_ECEuler3D_t
@@ -897,6 +913,11 @@ contains
             m%solution%extBoundary(i,j,k,iEl,5) = &
               m%solution%boundary(i,j,k,iEl,5)
 
+            ! Mirror geopotential — Phi only depends on z, so the
+            ! mirror across a no-normal-flow wall is the same value.
+            m%solution%extBoundary(i,j,k,iEl,6) = &
+              m%solution%boundary(i,j,k,iEl,6)
+
           enddo
         enddo
       enddo
@@ -905,39 +926,29 @@ contains
   endsubroutine hbc3d_NoNormalFlow_ECEuler3D
 
   subroutine SetHydrostaticBalance_ECEuler3D_t(this,theta0)
-    !! Sets the solution to a hydrostatically balanced atmosphere with
-    !! uniform potential temperature theta0 and zero velocity, AND stores
-    !! the same hydrostatic profile for the well-balanced flux/source
-    !! split.
+    !! Initialise a hydrostatically balanced atmosphere with uniform
+    !! potential temperature theta0, zero velocity, and the geopotential
+    !! Phi = g*z carried as state variable index 6.
     !!
-    !! The Exner function is:
-    !!   pi(z) = 1 - g*z / (cp*theta0)
+    !! Exner function: pi(z) = 1 - g*z / (cp*theta0)
+    !! rho(z)         = p0/(Rd*theta0) * pi(z)^(cv/Rd)
+    !! rho*theta(z)   = p0/Rd * pi(z)^(cv/Rd)
     !!
-    !! From which:
-    !!   rho(z)       = p0/(Rd*theta0) * pi(z)^(cv/Rd)
-    !!   rho*theta(z) = p0/Rd * pi(z)^(cv/Rd)
-    !!   p(z)         = p0 * pi(z)^(cp/Rd)
-    !!   rho*u = rho*v = rho*w = 0
-    !!
-    !! We populate the hydrostatic_pressure and hydrostatic_density on
-    !! both interior and boundary buffers analytically from z (rather
-    !! than via BoundaryInterp), and mirror boundary -> extBoundary so
-    !! that walls and element interfaces all see a sensible p_hyd on
-    !! both sides. SideExchange then overwrites extBoundary at internal
-    !! interfaces with the neighbor's boundary value (which equals our
-    !! own at the shared GLL z-coordinate, but supports jump
-    !! discontinuities for non-conforming or stretched meshes).
+    !! Boundary and extBoundary buffers of the solution are populated
+    !! analytically from per-face z so that face values are bit-exact
+    !! with what BoundaryInterp would produce (and extBoundary at walls
+    !! mirrors). SideExchange will overwrite extBoundary at interior
+    !! element interfaces with the neighbour's value — for a smooth
+    !! profile this is a no-op.
     implicit none
     class(ECEuler3D_t),intent(inout) :: this
     real(prec),intent(in) :: theta0
     ! Local
     integer :: i,j,k,iEl
     integer :: side
-    real(prec) :: z,exner,rho,p_hyd,gamma
+    real(prec) :: z,exner,rho
 
     print*,__FILE__," : Setting hydrostatic balance with theta0 = ",theta0
-
-    gamma = this%cp/this%cv
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   k=1:this%solution%N+1,iEl=1:this%mesh%nElem)
@@ -945,49 +956,44 @@ contains
       z = this%geometry%x%interior(i,j,k,iEl,1,3)
       exner = 1.0_prec-this%g*z/(this%cp*theta0)
       rho = this%p0/(this%Rd*theta0)*exner**(this%cv/this%Rd)
-      p_hyd = this%p0*(rho*this%Rd*theta0/this%p0)**gamma
 
       this%solution%interior(i,j,k,iEl,1) = rho
       this%solution%interior(i,j,k,iEl,2) = 0.0_prec
       this%solution%interior(i,j,k,iEl,3) = 0.0_prec
       this%solution%interior(i,j,k,iEl,4) = 0.0_prec
       this%solution%interior(i,j,k,iEl,5) = rho*theta0
-
-      this%hydrostatic_density%interior(i,j,k,iEl,1) = rho
-      this%hydrostatic_pressure%interior(i,j,k,iEl,1) = p_hyd
+      this%solution%interior(i,j,k,iEl,6) = this%g*z
 
     enddo
 
     ! Populate boundary + extBoundary buffers analytically from the
-    ! per-face z-coordinates. Same formula as the interior loop so the
-    ! values at the shared GLL nodes are bitwise identical to what
-    ! BoundaryInterp would have produced, plus we get extBoundary set
-    ! correctly at walls (mirror = boundary).
+    ! per-face z-coordinates. Geopotential at the boundary mirrors
+    ! by construction (Phi = g*z is single-valued in z).
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   side=1:6,iEl=1:this%mesh%nElem)
 
       z = this%geometry%x%boundary(i,j,side,iEl,1,3)
       exner = 1.0_prec-this%g*z/(this%cp*theta0)
       rho = this%p0/(this%Rd*theta0)*exner**(this%cv/this%Rd)
-      p_hyd = this%p0*(rho*this%Rd*theta0/this%p0)**gamma
 
-      this%hydrostatic_density%boundary(i,j,side,iEl,1) = rho
-      this%hydrostatic_density%extBoundary(i,j,side,iEl,1) = rho
-      this%hydrostatic_pressure%boundary(i,j,side,iEl,1) = p_hyd
-      this%hydrostatic_pressure%extBoundary(i,j,side,iEl,1) = p_hyd
+      this%solution%boundary(i,j,side,iEl,1) = rho
+      this%solution%boundary(i,j,side,iEl,2) = 0.0_prec
+      this%solution%boundary(i,j,side,iEl,3) = 0.0_prec
+      this%solution%boundary(i,j,side,iEl,4) = 0.0_prec
+      this%solution%boundary(i,j,side,iEl,5) = rho*theta0
+      this%solution%boundary(i,j,side,iEl,6) = this%g*z
+
+      this%solution%extBoundary(i,j,side,iEl,1) = rho
+      this%solution%extBoundary(i,j,side,iEl,2) = 0.0_prec
+      this%solution%extBoundary(i,j,side,iEl,3) = 0.0_prec
+      this%solution%extBoundary(i,j,side,iEl,4) = 0.0_prec
+      this%solution%extBoundary(i,j,side,iEl,5) = rho*theta0
+      this%solution%extBoundary(i,j,side,iEl,6) = this%g*z
 
     enddo
 
     call this%ReportMetrics()
     call this%solution%UpdateDevice()
-    call this%hydrostatic_pressure%UpdateDevice()
-    call this%hydrostatic_density%UpdateDevice()
-    ! SideExchange overwrites extBoundary at internal interfaces with
-    ! the neighbor's boundary. For a smooth hydrostatic profile on a
-    ! conforming mesh this is a no-op (same value); for non-conforming
-    ! or stretched grids it captures jump discontinuities.
-    call this%hydrostatic_pressure%SideExchange(this%mesh)
-    call this%hydrostatic_density%SideExchange(this%mesh)
 
   endsubroutine SetHydrostaticBalance_ECEuler3D_t
 

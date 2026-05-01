@@ -66,25 +66,24 @@ module SELF_ECEuler3D
 
   interface
     subroutine boundaryflux_eceuler3d_gpu(fb,fextb,nhat,nscale,flux, &
-                                          p_hyd_b,p_hyd_extb, &
                                           p0,Rd,gamma,N,nel) &
       bind(c,name="boundaryflux_eceuler3d_gpu")
       use iso_c_binding
       use SELF_Constants
-      type(c_ptr),value :: fb,fextb,nhat,nscale,flux,p_hyd_b,p_hyd_extb
+      type(c_ptr),value :: fb,fextb,nhat,nscale,flux
       real(c_prec),value :: p0,Rd,gamma
       integer(c_int),value :: N,nel
     endsubroutine boundaryflux_eceuler3d_gpu
   endinterface
 
   interface
-    subroutine twopointfluxmethod_eceuler3d_gpu(f,s,dsdx,p_hyd, &
+    subroutine twopointfluxmethod_eceuler3d_gpu(f,s,dsdx, &
                                                 p0,Rd,gamma, &
                                                 N,nvar,nel) &
       bind(c,name="twopointfluxmethod_eceuler3d_gpu")
       use iso_c_binding
       use SELF_Constants
-      type(c_ptr),value :: f,s,dsdx,p_hyd
+      type(c_ptr),value :: f,s,dsdx
       real(c_prec),value :: p0,Rd,gamma
       integer(c_int),value :: N,nvar,nel
     endsubroutine twopointfluxmethod_eceuler3d_gpu
@@ -117,14 +116,13 @@ module SELF_ECEuler3D
   endinterface
 
   interface
-    subroutine sourcemethod_eceuler3d_gpu(source,solution,rho_hyd, &
-                                          g,N,nel) &
+    subroutine sourcemethod_eceuler3d_gpu(source,solution,dsdx,J,dSplit, &
+                                          N,nvar,nel) &
       bind(c,name="sourcemethod_eceuler3d_gpu")
       use iso_c_binding
       use SELF_Constants
-      type(c_ptr),value :: source,solution,rho_hyd
-      real(c_prec),value :: g
-      integer(c_int),value :: N,nel
+      type(c_ptr),value :: source,solution,dsdx,J,dSplit
+      integer(c_int),value :: N,nvar,nel
     endsubroutine sourcemethod_eceuler3d_gpu
   endinterface
 
@@ -213,8 +211,9 @@ contains
   endsubroutine hbc3d_NoNormalFlow_ECEuler3D_GPU_wrapper
 
   subroutine BoundaryFlux_ECEuler3D(this)
-    !! LLF Riemann flux on GPU with well-balanced hydrostatic pressure
-    !! split. Fully device-resident.
+    !! LMARS interface flux on GPU. No hydrostatic pressure split:
+    !! gravity is handled by the Souza non-conservative source term
+    !! using the geopotential carried as state variable index 6.
     implicit none
     class(ECEuler3D),intent(inout) :: this
 
@@ -224,8 +223,6 @@ contains
       this%geometry%nhat%boundary_gpu, &
       this%geometry%nscale%boundary_gpu, &
       this%flux%boundarynormal_gpu, &
-      this%hydrostatic_pressure%boundary_gpu, &
-      this%hydrostatic_pressure%extboundary_gpu, &
       this%p0,this%Rd,this%cp/this%cv, &
       this%solution%interp%N, &
       this%solution%nelem)
@@ -233,8 +230,8 @@ contains
   endsubroutine BoundaryFlux_ECEuler3D
 
   subroutine TwoPointFluxMethod_ECEuler3D(this)
-    !! Souza et al. (2023) entropy-conservative two-point flux on GPU
-    !! with well-balanced hydrostatic pressure split. Fully device-resident.
+    !! Souza et al. (2023) entropy-conservative two-point flux on GPU.
+    !! Fully device-resident.
     implicit none
     class(ECEuler3D),intent(inout) :: this
 
@@ -242,7 +239,6 @@ contains
       this%twoPointFlux%interior_gpu, &
       this%solution%interior_gpu, &
       this%geometry%dsdx%interior_gpu, &
-      this%hydrostatic_pressure%interior_gpu, &
       this%p0,this%Rd,this%cp/this%cv, &
       this%solution%interp%N, &
       this%solution%nvar, &
@@ -251,18 +247,21 @@ contains
   endsubroutine TwoPointFluxMethod_ECEuler3D
 
   subroutine SourceMethod_ECEuler3D(this)
-    !! Gravitational source term on GPU with the well-balanced split:
-    !!   S(rho*w) = -(rho - rho_hyd)*g
-    !! Fully device-resident.
+    !! Souza et al. (2023) non-conservative gravity flux differencing on
+    !! GPU. The geopotential lives at solution(:,:,:,:,6); the source for
+    !! rho*w is computed via the SBP-EC two-point form using log-mean
+    !! density and the contravariant metric. Fully device-resident.
     implicit none
     class(ECEuler3D),intent(inout) :: this
 
     call sourcemethod_eceuler3d_gpu( &
       this%source%interior_gpu, &
       this%solution%interior_gpu, &
-      this%hydrostatic_density%interior_gpu, &
-      this%g, &
+      this%geometry%dsdx%interior_gpu, &
+      this%geometry%J%interior_gpu, &
+      this%solution%interp%dSplitMatrix_gpu, &
       this%solution%interp%N, &
+      this%solution%nvar, &
       this%solution%nelem)
 
   endsubroutine SourceMethod_ECEuler3D
