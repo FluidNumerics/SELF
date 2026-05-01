@@ -65,6 +65,17 @@ module SELF_ECEuler3D
   endinterface
 
   interface
+    subroutine pbc3d_nostress_eceuler3d_gpu(extgrad,grad, &
+                                            nhat,elements,sides, &
+                                            nBoundaries,N,nel,nvar) &
+      bind(c,name="pbc3d_nostress_eceuler3d_gpu")
+      use iso_c_binding
+      type(c_ptr),value :: extgrad,grad,nhat,elements,sides
+      integer(c_int),value :: nBoundaries,N,nel,nvar
+    endsubroutine pbc3d_nostress_eceuler3d_gpu
+  endinterface
+
+  interface
     subroutine boundaryflux_eceuler3d_gpu(fb,fextb,nhat,nscale,flux, &
                                           p0,Rd,gamma,N,nel) &
       bind(c,name="boundaryflux_eceuler3d_gpu")
@@ -152,6 +163,21 @@ contains
       bc => bc%next
     enddo
 
+    ! Upload parabolic BC element/side arrays to device. Required for the
+    ! GPU parabolic BC kernels (e.g. pbc3d_NoStress_ECEuler3D_GPU_wrapper).
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
   endsubroutine Init_ECEuler3D
 
   subroutine Free_ECEuler3D(this)
@@ -161,6 +187,15 @@ contains
     type(BoundaryCondition),pointer :: bc
 
     bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    bc => this%parabolicBCs%head
     do while(associated(bc))
       if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
       if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
@@ -182,9 +217,15 @@ contains
     ! Call parent _t AdditionalInit (registers CPU BC)
     call AdditionalInit_ECEuler3D_t(this)
 
-    ! Re-register with GPU-accelerated version
+    ! Re-register with GPU-accelerated versions for both lists.
+    ! hyperbolicBCs and parabolicBCs are independent linked lists, so
+    ! the same SELF_BC_NONORMALFLOW tag applies in both contexts.
     bcfunc => hbc3d_NoNormalFlow_ECEuler3D_GPU_wrapper
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
+
+    bcfunc => pbc3d_NoStress_ECEuler3D_GPU_wrapper
+    call this%parabolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
   endsubroutine AdditionalInit_ECEuler3D
@@ -209,6 +250,29 @@ contains
     endselect
 
   endsubroutine hbc3d_NoNormalFlow_ECEuler3D_GPU_wrapper
+
+  subroutine pbc3d_NoStress_ECEuler3D_GPU_wrapper(bc,mymodel)
+    !! GPU-accelerated parabolic no-stress / no-heat-flux BC for 3D EC Euler.
+    !! Reflects the normal component of the solution gradient at every wall
+    !! node so that BR1 averaging gives avgGrad . n = 0 (zero diffusive flux
+    !! through the wall) for every variable.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+
+    select type(m => mymodel)
+    class is(ECEuler3D)
+      if(bc%nBoundaries > 0) then
+        call pbc3d_nostress_eceuler3d_gpu( &
+          m%solutionGradient%extBoundary_gpu, &
+          m%solutionGradient%boundary_gpu, &
+          m%geometry%nhat%boundary_gpu, &
+          bc%elements_gpu,bc%sides_gpu, &
+          bc%nBoundaries,m%solution%interp%N, &
+          m%solution%nElem,m%solution%nvar)
+      endif
+    endselect
+
+  endsubroutine pbc3d_NoStress_ECEuler3D_GPU_wrapper
 
   subroutine BoundaryFlux_ECEuler3D(this)
     !! LMARS interface flux on GPU. No hydrostatic pressure split:

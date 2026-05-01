@@ -136,6 +136,64 @@ extern "C"
 }
 
 // ============================================================
+// Parabolic no-stress / no-heat-flux BC.
+// Reflects the normal component of the solution gradient at every
+// wall node so BR1 averaging gives avgGrad . n = 0 (zero diffusive
+// normal flux for every variable).
+//   grad_ext = grad_int - 2*(grad_int . n)*n
+// ============================================================
+
+__global__ void pbc3d_nostress_eceuler3d_kernel(
+    real *extGrad, real *grad, real *nhat,
+    int *elements, int *sides,
+    int nBoundaries, int N, int nel, int nvar)
+{
+  uint32_t idof = threadIdx.x + blockIdx.x * blockDim.x;
+  uint32_t dofs_per_face = (N + 1) * (N + 1);
+  uint32_t total_dofs = nBoundaries * dofs_per_face;
+
+  if (idof < total_dofs) {
+    uint32_t i  = idof % (N + 1);
+    uint32_t j  = (idof / (N + 1)) % (N + 1);
+    uint32_t n  = idof / dofs_per_face;
+    uint32_t e1 = elements[n] - 1;
+    uint32_t s1 = sides[n] - 1;
+
+    real nx = nhat[VEB_3D_INDEX(i, j, s1, e1, 0, 0, N, nel, 1)];
+    real ny = nhat[VEB_3D_INDEX(i, j, s1, e1, 0, 1, N, nel, 1)];
+    real nz = nhat[VEB_3D_INDEX(i, j, s1, e1, 0, 2, N, nel, 1)];
+
+    for (int iVar = 0; iVar < nvar; iVar++) {
+      real gx = grad[VEB_3D_INDEX(i, j, s1, e1, iVar, 0, N, nel, nvar)];
+      real gy = grad[VEB_3D_INDEX(i, j, s1, e1, iVar, 1, N, nel, nvar)];
+      real gz = grad[VEB_3D_INDEX(i, j, s1, e1, iVar, 2, N, nel, nvar)];
+      real gn = gx * nx + gy * ny + gz * nz;
+      extGrad[VEB_3D_INDEX(i, j, s1, e1, iVar, 0, N, nel, nvar)] = gx - (real)2.0 * gn * nx;
+      extGrad[VEB_3D_INDEX(i, j, s1, e1, iVar, 1, N, nel, nvar)] = gy - (real)2.0 * gn * ny;
+      extGrad[VEB_3D_INDEX(i, j, s1, e1, iVar, 2, N, nel, nvar)] = gz - (real)2.0 * gn * nz;
+    }
+  }
+}
+
+extern "C"
+{
+  void pbc3d_nostress_eceuler3d_gpu(
+      real *extGrad, real *grad, real *nhat,
+      int *elements, int *sides,
+      int nBoundaries, int N, int nel, int nvar)
+  {
+    int dofs_per_face = (N + 1) * (N + 1);
+    int total_dofs = nBoundaries * dofs_per_face;
+    int threads_per_block = 256;
+    int nblocks_x = total_dofs / threads_per_block + 1;
+    pbc3d_nostress_eceuler3d_kernel<<<dim3(nblocks_x, 1, 1),
+        dim3(threads_per_block, 1, 1), 0, 0>>>(
+        extGrad, grad, nhat,
+        elements, sides, nBoundaries, N, nel, nvar);
+  }
+}
+
+// ============================================================
 // LLF (Rusanov) boundary flux for EC Euler 3D
 //
 // F* = 0.5*(fL + fR) - 0.5*lambda_max*(sR - sL)

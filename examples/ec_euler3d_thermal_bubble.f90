@@ -103,6 +103,13 @@ program ec_euler3d_thermal_bubble
   call modelobj%Init(mesh,geometry)
   modelobj%tecplot_enabled = .false.
 
+  ! Constant-coefficient Laplacian (BR1 + SIPG) diffusion. Exercises the
+  ! parabolic pipeline so it stays covered by regression. nu = kappa = 13
+  ! sets cell Reynolds number Re_cell = U*(dx/N^2)/nu = O(1) at the peak
+  ! plume velocity U ~ 5 m/s on the production setup; on the 4x4x6 unit
+  ! test grid (dx = 250 m) Re_cell is ~0.5 — comfortably viscous.
+  call modelobj%SetDiffusion(nu=13.0_prec,kappa=13.0_prec)
+
   ! Set up hydrostatically balanced background
   call modelobj%SetHydrostaticBalance(theta0)
 

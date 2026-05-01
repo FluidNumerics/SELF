@@ -578,14 +578,23 @@ contains
   endsubroutine SourceMethod_ECEuler3D_t
 
   subroutine pbc3d_NoStress_ECEuler3D(bc,mymodel)
-    !! Parabolic boundary condition for the constant-coefficient
-    !! Laplacian diffusion. Mirrors the solution gradient to the
-    !! exterior side so the BR1 average gives the unmodified interior
-    !! gradient at walls (no-stress / zero-flux on the diffusive flux).
+    !! Parabolic boundary condition: zero diffusive flux normal to the wall
+    !! (no-stress for momentum, no-heat-flux for rho*theta).
+    !!
+    !! Reflects the normal component of the interior solution gradient:
+    !!
+    !!   grad_ext = grad_int - 2 * (grad_int . n) * n
+    !!
+    !! After AverageSides() this gives avgGrad . n = 0 at every wall node,
+    !! so the BR1 diffusive boundary flux f^diff = -coeff*(avgGrad.n)*nmag
+    !! vanishes identically on no-normal-flow walls. Mirroring the gradient
+    !! directly (grad_ext = grad_int) gives a non-zero flux through the
+    !! wall and is NOT a no-stress condition.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
     ! Local
-    integer :: n,i,j,iEl,k,iVar,d
+    integer :: n,i,j,iEl,k,iVar
+    real(prec) :: nhat(1:3),gn,g(1:3)
 
     select type(m => mymodel)
     class is(ECEuler3D_t)
@@ -594,11 +603,13 @@ contains
         k = bc%sides(n)
         do j = 1,m%solution%interp%N+1
           do i = 1,m%solution%interp%N+1
+            nhat = m%geometry%nHat%boundary(i,j,k,iEl,1,1:3)
             do iVar = 1,m%nvar
-              do d = 1,3
-                m%solutionGradient%extBoundary(i,j,k,iEl,iVar,d) = &
-                  m%solutionGradient%boundary(i,j,k,iEl,iVar,d)
-              enddo
+              g(1:3) = m%solutionGradient%boundary(i,j,k,iEl,iVar,1:3)
+              gn = g(1)*nhat(1)+g(2)*nhat(2)+g(3)*nhat(3)
+              m%solutionGradient%extBoundary(i,j,k,iEl,iVar,1) = g(1)-2.0_prec*gn*nhat(1)
+              m%solutionGradient%extBoundary(i,j,k,iEl,iVar,2) = g(2)-2.0_prec*gn*nhat(2)
+              m%solutionGradient%extBoundary(i,j,k,iEl,iVar,3) = g(3)-2.0_prec*gn*nhat(3)
             enddo
           enddo
         enddo
@@ -617,13 +628,13 @@ contains
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
-    ! Note: no parabolic BC handler is registered here. With the default
-    ! solutionGradient%extBoundary == 0 at domain boundaries, AverageSides
-    ! produces avgBoundary == 0.5*interior_grad at walls (a mild
-    ! over-dissipation). For the thermal-bubble benchmark the bubble is
-    ! far from walls during the integration so this has negligible effect.
-    ! A GPU-aware mirror BC for the gradient can be added later for
-    ! tests where the wall behaviour matters.
+    ! Parabolic BC for the same wall tag: zero diffusive normal flux
+    ! (no-stress / no-heat-flux). hyperbolicBCs and parabolicBCs are
+    ! independent linked lists, so registering the same tag here does
+    ! not clobber the hyperbolic registration above.
+    bcfunc => pbc3d_NoStress_ECEuler3D
+    call this%parabolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
     ! Diffusive-flux scratch buffers. Always allocated (memory cost is
     ! modest); only used when nu>0 or kappa>0 (and gradient_enabled is
