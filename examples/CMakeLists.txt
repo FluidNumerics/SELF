@@ -70,4 +70,5 @@ add_fortran_tests (
   "linear_shallow_water2d_kelvinwaves.f90"
   "linear_euler3d_spherical_soundwave_radiation.f90"
   "ec_euler3d_thermal_bubble.f90"
+  "ec_euler2d_thermal_bubble.f90"
     )
