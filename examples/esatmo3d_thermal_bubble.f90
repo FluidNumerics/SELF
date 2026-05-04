@@ -24,17 +24,16 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ec_euler2d_thermal_bubble
+program esatmo3d_thermal_bubble
   !! Rising warm bubble benchmark for the EC-DG compressible Euler model
-  !! with potential temperature formulation in 2-D.
+  !! with potential temperature formulation.
   !!
   !! A pressure-balanced warm bubble (cos^2 profile) is placed in a
   !! hydrostatically balanced atmosphere with uniform theta0 = 300 K.
-  !! The density deficit drives buoyant rising motion. Gravity acts in
-  !! the +y direction (y is the vertical coordinate).
+  !! The density deficit drives buoyant rising motion.
   !!
-  !! Domain: [0, 1000m] x [0, 1500m]
-  !! Bubble center: (500, 350) m
+  !! Domain: [0, 1000m] x [0, 1000m] x [0, 1500m]
+  !! Bubble center: (500, 500, 350) m
   !! Bubble radius: 250 m
   !! Perturbation: dtheta = 2.0 K
   !!
@@ -42,9 +41,9 @@ program ec_euler2d_thermal_bubble
 
   use SELF_Constants
   use SELF_Lagrange
-  use SELF_Mesh_2D
-  use SELF_Geometry_2D
-  use SELF_ECEuler2D
+  use SELF_Mesh_3D
+  use SELF_Geometry_3D
+  use SELF_ESAtmo3D
 
   implicit none
 
@@ -53,13 +52,16 @@ program ec_euler2d_thermal_bubble
   real(prec),parameter :: dtheta = 2.0_prec ! Bubble perturbation [K]
   real(prec),parameter :: bubble_r0 = 250.0_prec ! Bubble radius [m]
   real(prec),parameter :: bubble_x0 = 500.0_prec ! Bubble center x [m]
-  real(prec),parameter :: bubble_y0 = 350.0_prec ! Bubble center y [m]
+  real(prec),parameter :: bubble_y0 = 500.0_prec ! Bubble center y [m]
+  real(prec),parameter :: bubble_z0 = 350.0_prec ! Bubble center z [m]
 
   ! Grid parameters
   integer,parameter :: nxPerTile = 4 ! Elements in x per tile
-  integer,parameter :: nyPerTile = 6 ! Elements in y per tile
+  integer,parameter :: nyPerTile = 4 ! Elements in y per tile
+  integer,parameter :: nzPerTile = 6 ! Elements in z per tile
   real(prec),parameter :: dx = 250.0_prec ! Element size x [m]
   real(prec),parameter :: dy = 250.0_prec ! Element size y [m]
+  real(prec),parameter :: dz = 250.0_prec ! Element size z [m]
 
   ! Time integration parameters
   character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
@@ -69,11 +71,11 @@ program ec_euler2d_thermal_bubble
   real(prec),parameter :: endtime = 1.0_prec*10.0_prec**(-1)
   real(prec),parameter :: iointerval = endtime
 
-  type(ECEuler2D) :: modelobj
+  type(ESAtmo3D) :: modelobj
   type(Lagrange),target :: interp
-  type(Mesh2D),target :: mesh
-  type(SEMQuad),target :: geometry
-  integer :: bcids(1:4)
+  type(Mesh3D),target :: mesh
+  type(SEMHex),target :: geometry
+  integer :: bcids(1:6)
   real(prec) :: e0,ef
 
   ! Create interpolant (Gauss-Lobatto for EC split form)
@@ -83,13 +85,15 @@ program ec_euler2d_thermal_bubble
                    targetNodeType=UNIFORM)
 
   ! Create structured mesh
-  ! Domain: [0, 1000] x [0, 1500]
-  ! Side ordering: 1=South, 2=East, 3=North, 4=West
-  bcids(1:4) = [SELF_BC_NONORMALFLOW, & ! South
+  ! Domain: [0, 1000] x [0, 1000] x [0, 1500]
+  bcids(1:6) = [SELF_BC_NONORMALFLOW, & ! Bottom
+                SELF_BC_NONORMALFLOW, & ! South
                 SELF_BC_NONORMALFLOW, & ! East
                 SELF_BC_NONORMALFLOW, & ! North
-                SELF_BC_NONORMALFLOW] ! West
-  call mesh%StructuredMesh(nxPerTile,nyPerTile,1,1,dx,dy,bcids)
+                SELF_BC_NONORMALFLOW, & ! West
+                SELF_BC_NONORMALFLOW] ! Top
+  call mesh%StructuredMesh(nxPerTile,nyPerTile,nzPerTile, &
+                           1,1,1,dx,dy,dz,bcids)
 
   ! Generate geometry
   call geometry%Init(interp,mesh%nElem)
@@ -102,8 +106,8 @@ program ec_euler2d_thermal_bubble
   ! Constant-coefficient Laplacian (BR1 + SIPG) diffusion. Exercises the
   ! parabolic pipeline so it stays covered by regression. nu = kappa = 13
   ! sets cell Reynolds number Re_cell = U*(dx/N^2)/nu = O(1) at the peak
-  ! plume velocity U ~ 5 m/s on the production setup; on the unit-test
-  ! grid (dx = 250 m) Re_cell is ~0.5 — comfortably viscous.
+  ! plume velocity U ~ 5 m/s on the production setup; on the 4x4x6 unit
+  ! test grid (dx = 250 m) Re_cell is ~0.5 — comfortably viscous.
   call modelobj%SetDiffusion(nu=13.0_prec,kappa=13.0_prec)
 
   ! Set up hydrostatically balanced background
@@ -111,7 +115,7 @@ program ec_euler2d_thermal_bubble
 
   ! Add warm bubble perturbation (pressure-balanced)
   call modelobj%AddThermalBubble(dtheta,bubble_r0, &
-                                 bubble_x0,bubble_y0)
+                                 bubble_x0,bubble_y0,bubble_z0)
 
   ! Write initial condition
   call modelobj%WriteModel()
@@ -142,4 +146,4 @@ program ec_euler2d_thermal_bubble
   call geometry%free()
   call interp%free()
 
-endprogram ec_euler2d_thermal_bubble
+endprogram esatmo3d_thermal_bubble

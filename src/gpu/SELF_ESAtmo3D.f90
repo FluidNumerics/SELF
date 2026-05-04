@@ -24,9 +24,9 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_ECEuler3D
+module SELF_ESAtmo3D
 
-  use SELF_ECEuler3D_t
+  use SELF_ESAtmo3D_t
   use SELF_ECDGModel3D_t
   use SELF_GPU
   use SELF_GPUInterfaces
@@ -37,111 +37,111 @@ module SELF_ECEuler3D
 
   implicit none
 
-  type,extends(ECEuler3D_t),public :: ECEuler3D
+  type,extends(ESAtmo3D_t),public :: ESAtmo3D
 
   contains
 
-    procedure :: Init => Init_ECEuler3D
-    procedure :: Free => Free_ECEuler3D
-    procedure :: AdditionalInit => AdditionalInit_ECEuler3D
-    procedure :: BoundaryFlux => BoundaryFlux_ECEuler3D
-    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ECEuler3D
-    procedure :: SourceMethod => SourceMethod_ECEuler3D
-    procedure :: DiffusiveFluxMethod => DiffusiveFluxMethod_ECEuler3D
-    procedure :: DiffusiveBoundaryFlux => DiffusiveBoundaryFlux_ECEuler3D
-    procedure :: CalculateTendency => CalculateTendency_ECEuler3D
+    procedure :: Init => Init_ESAtmo3D
+    procedure :: Free => Free_ESAtmo3D
+    procedure :: AdditionalInit => AdditionalInit_ESAtmo3D
+    procedure :: BoundaryFlux => BoundaryFlux_ESAtmo3D
+    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ESAtmo3D
+    procedure :: SourceMethod => SourceMethod_ESAtmo3D
+    procedure :: DiffusiveFluxMethod => DiffusiveFluxMethod_ESAtmo3D
+    procedure :: DiffusiveBoundaryFlux => DiffusiveBoundaryFlux_ESAtmo3D
+    procedure :: CalculateTendency => CalculateTendency_ESAtmo3D
 
-  endtype ECEuler3D
+  endtype ESAtmo3D
 
   interface
-    subroutine hbc3d_nonormalflow_eceuler3d_gpu(extboundary,boundary, &
-                                                nhat,elements,sides, &
-                                                nBoundaries,N,nel,nvar) &
-      bind(c,name="hbc3d_nonormalflow_eceuler3d_gpu")
+    subroutine hbc3d_nonormalflow_esatmo3d_gpu(extboundary,boundary, &
+                                               nhat,elements,sides, &
+                                               nBoundaries,N,nel,nvar) &
+      bind(c,name="hbc3d_nonormalflow_esatmo3d_gpu")
       use iso_c_binding
       type(c_ptr),value :: extboundary,boundary,nhat,elements,sides
       integer(c_int),value :: nBoundaries,N,nel,nvar
-    endsubroutine hbc3d_nonormalflow_eceuler3d_gpu
+    endsubroutine hbc3d_nonormalflow_esatmo3d_gpu
   endinterface
 
   interface
-    subroutine pbc3d_nostress_eceuler3d_gpu(extgrad,grad, &
-                                            nhat,elements,sides, &
-                                            nBoundaries,N,nel,nvar) &
-      bind(c,name="pbc3d_nostress_eceuler3d_gpu")
+    subroutine pbc3d_nostress_esatmo3d_gpu(extgrad,grad, &
+                                           nhat,elements,sides, &
+                                           nBoundaries,N,nel,nvar) &
+      bind(c,name="pbc3d_nostress_esatmo3d_gpu")
       use iso_c_binding
       type(c_ptr),value :: extgrad,grad,nhat,elements,sides
       integer(c_int),value :: nBoundaries,N,nel,nvar
-    endsubroutine pbc3d_nostress_eceuler3d_gpu
+    endsubroutine pbc3d_nostress_esatmo3d_gpu
   endinterface
 
   interface
-    subroutine boundaryflux_eceuler3d_gpu(fb,fextb,nhat,nscale,flux, &
-                                          p0,Rd,gamma,N,nel) &
-      bind(c,name="boundaryflux_eceuler3d_gpu")
+    subroutine boundaryflux_esatmo3d_gpu(fb,fextb,nhat,nscale,flux, &
+                                         p0,Rd,gamma,N,nel) &
+      bind(c,name="boundaryflux_esatmo3d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fb,fextb,nhat,nscale,flux
       real(c_prec),value :: p0,Rd,gamma
       integer(c_int),value :: N,nel
-    endsubroutine boundaryflux_eceuler3d_gpu
+    endsubroutine boundaryflux_esatmo3d_gpu
   endinterface
 
   interface
-    subroutine twopointfluxmethod_eceuler3d_gpu(f,s,dsdx, &
-                                                p0,Rd,gamma, &
-                                                N,nvar,nel) &
-      bind(c,name="twopointfluxmethod_eceuler3d_gpu")
+    subroutine twopointfluxmethod_esatmo3d_gpu(f,s,dsdx, &
+                                               p0,Rd,gamma, &
+                                               N,nvar,nel) &
+      bind(c,name="twopointfluxmethod_esatmo3d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: f,s,dsdx
       real(c_prec),value :: p0,Rd,gamma
       integer(c_int),value :: N,nvar,nel
-    endsubroutine twopointfluxmethod_eceuler3d_gpu
+    endsubroutine twopointfluxmethod_esatmo3d_gpu
   endinterface
 
   interface
-    subroutine diffusiveflux_eceuler3d_gpu(diffFlux,grad,nu,kappa, &
-                                           N,nvar,nel) &
-      bind(c,name="diffusiveflux_eceuler3d_gpu")
+    subroutine diffusiveflux_esatmo3d_gpu(diffFlux,grad,nu,kappa, &
+                                          N,nvar,nel) &
+      bind(c,name="diffusiveflux_esatmo3d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: diffFlux,grad
       real(c_prec),value :: nu,kappa
       integer(c_int),value :: N,nvar,nel
-    endsubroutine diffusiveflux_eceuler3d_gpu
+    endsubroutine diffusiveflux_esatmo3d_gpu
   endinterface
 
   interface
-    subroutine diffusiveboundaryflux_eceuler3d_gpu(fluxN,avgGrad,uBnd,uExt, &
-                                                   nhat,nscale, &
-                                                   nu,kappa,tau_nu,tau_kappa, &
-                                                   N,nvar,nel) &
-      bind(c,name="diffusiveboundaryflux_eceuler3d_gpu")
+    subroutine diffusiveboundaryflux_esatmo3d_gpu(fluxN,avgGrad,uBnd,uExt, &
+                                                  nhat,nscale, &
+                                                  nu,kappa,tau_nu,tau_kappa, &
+                                                  N,nvar,nel) &
+      bind(c,name="diffusiveboundaryflux_esatmo3d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fluxN,avgGrad,uBnd,uExt,nhat,nscale
       real(c_prec),value :: nu,kappa,tau_nu,tau_kappa
       integer(c_int),value :: N,nvar,nel
-    endsubroutine diffusiveboundaryflux_eceuler3d_gpu
+    endsubroutine diffusiveboundaryflux_esatmo3d_gpu
   endinterface
 
   interface
-    subroutine sourcemethod_eceuler3d_gpu(source,solution,dsdx,J,dSplit, &
-                                          N,nvar,nel) &
-      bind(c,name="sourcemethod_eceuler3d_gpu")
+    subroutine sourcemethod_esatmo3d_gpu(source,solution,dsdx,J,dSplit, &
+                                         N,nvar,nel) &
+      bind(c,name="sourcemethod_esatmo3d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: source,solution,dsdx,J,dSplit
       integer(c_int),value :: N,nvar,nel
-    endsubroutine sourcemethod_eceuler3d_gpu
+    endsubroutine sourcemethod_esatmo3d_gpu
   endinterface
 
 contains
 
-  subroutine Init_ECEuler3D(this,mesh,geometry)
+  subroutine Init_ESAtmo3D(this,mesh,geometry)
     implicit none
-    class(ECEuler3D),intent(out) :: this
+    class(ESAtmo3D),intent(out) :: this
     type(Mesh3D),intent(in),target :: mesh
     type(SEMHex),intent(in),target :: geometry
     ! Local
@@ -164,7 +164,7 @@ contains
     enddo
 
     ! Upload parabolic BC element/side arrays to device. Required for the
-    ! GPU parabolic BC kernels (e.g. pbc3d_NoStress_ECEuler3D_GPU_wrapper).
+    ! GPU parabolic BC kernels (e.g. pbc3d_NoStress_ESAtmo3D_GPU_wrapper).
     bc => this%parabolicBCs%head
     do while(associated(bc))
       if(bc%nBoundaries > 0) then
@@ -178,11 +178,11 @@ contains
       bc => bc%next
     enddo
 
-  endsubroutine Init_ECEuler3D
+  endsubroutine Init_ESAtmo3D
 
-  subroutine Free_ECEuler3D(this)
+  subroutine Free_ESAtmo3D(this)
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
     ! Local
     type(BoundaryCondition),pointer :: bc
 
@@ -206,40 +206,40 @@ contains
 
     call Free_ECDGModel3D_t(this)
 
-  endsubroutine Free_ECEuler3D
+  endsubroutine Free_ESAtmo3D
 
-  subroutine AdditionalInit_ECEuler3D(this)
+  subroutine AdditionalInit_ESAtmo3D(this)
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
     ! Local
     procedure(SELF_bcMethod),pointer :: bcfunc
 
     ! Call parent _t AdditionalInit (registers CPU BC)
-    call AdditionalInit_ECEuler3D_t(this)
+    call AdditionalInit_ESAtmo3D_t(this)
 
     ! Re-register with GPU-accelerated versions for both lists.
     ! hyperbolicBCs and parabolicBCs are independent linked lists, so
     ! the same SELF_BC_NONORMALFLOW tag applies in both contexts.
-    bcfunc => hbc3d_NoNormalFlow_ECEuler3D_GPU_wrapper
+    bcfunc => hbc3d_NoNormalFlow_ESAtmo3D_GPU_wrapper
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
-    bcfunc => pbc3d_NoStress_ECEuler3D_GPU_wrapper
+    bcfunc => pbc3d_NoStress_ESAtmo3D_GPU_wrapper
     call this%parabolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
-  endsubroutine AdditionalInit_ECEuler3D
+  endsubroutine AdditionalInit_ESAtmo3D
 
-  subroutine hbc3d_NoNormalFlow_ECEuler3D_GPU_wrapper(bc,mymodel)
-    !! GPU-accelerated no-normal-flow BC for 3D EC Euler.
+  subroutine hbc3d_NoNormalFlow_ESAtmo3D_GPU_wrapper(bc,mymodel)
+    !! GPU-accelerated no-normal-flow BC for 3D Entropy-Stable Atmosphere.
     !! Reflects normal momentum, mirrors density and rho*theta.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
 
     select type(m => mymodel)
-    class is(ECEuler3D)
+    class is(ESAtmo3D)
       if(bc%nBoundaries > 0) then
-        call hbc3d_nonormalflow_eceuler3d_gpu( &
+        call hbc3d_nonormalflow_esatmo3d_gpu( &
           m%solution%extBoundary_gpu, &
           m%solution%boundary_gpu, &
           m%geometry%nhat%boundary_gpu, &
@@ -249,10 +249,10 @@ contains
       endif
     endselect
 
-  endsubroutine hbc3d_NoNormalFlow_ECEuler3D_GPU_wrapper
+  endsubroutine hbc3d_NoNormalFlow_ESAtmo3D_GPU_wrapper
 
-  subroutine pbc3d_NoStress_ECEuler3D_GPU_wrapper(bc,mymodel)
-    !! GPU-accelerated parabolic no-stress / no-heat-flux BC for 3D EC Euler.
+  subroutine pbc3d_NoStress_ESAtmo3D_GPU_wrapper(bc,mymodel)
+    !! GPU-accelerated parabolic no-stress / no-heat-flux BC for 3D Entropy-Stable Atmosphere.
     !! Reflects the normal component of the solution gradient at every wall
     !! node so that BR1 averaging gives avgGrad . n = 0 (zero diffusive flux
     !! through the wall) for every variable.
@@ -260,9 +260,9 @@ contains
     class(Model),intent(inout) :: mymodel
 
     select type(m => mymodel)
-    class is(ECEuler3D)
+    class is(ESAtmo3D)
       if(bc%nBoundaries > 0) then
-        call pbc3d_nostress_eceuler3d_gpu( &
+        call pbc3d_nostress_esatmo3d_gpu( &
           m%solutionGradient%extBoundary_gpu, &
           m%solutionGradient%boundary_gpu, &
           m%geometry%nhat%boundary_gpu, &
@@ -272,16 +272,16 @@ contains
       endif
     endselect
 
-  endsubroutine pbc3d_NoStress_ECEuler3D_GPU_wrapper
+  endsubroutine pbc3d_NoStress_ESAtmo3D_GPU_wrapper
 
-  subroutine BoundaryFlux_ECEuler3D(this)
+  subroutine BoundaryFlux_ESAtmo3D(this)
     !! LMARS interface flux on GPU. No hydrostatic pressure split:
     !! gravity is handled by the Souza non-conservative source term
     !! using the geopotential carried as state variable index 6.
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
 
-    call boundaryflux_eceuler3d_gpu( &
+    call boundaryflux_esatmo3d_gpu( &
       this%solution%boundary_gpu, &
       this%solution%extboundary_gpu, &
       this%geometry%nhat%boundary_gpu, &
@@ -291,15 +291,15 @@ contains
       this%solution%interp%N, &
       this%solution%nelem)
 
-  endsubroutine BoundaryFlux_ECEuler3D
+  endsubroutine BoundaryFlux_ESAtmo3D
 
-  subroutine TwoPointFluxMethod_ECEuler3D(this)
+  subroutine TwoPointFluxMethod_ESAtmo3D(this)
     !! Souza et al. (2023) entropy-conservative two-point flux on GPU.
     !! Fully device-resident.
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
 
-    call twopointfluxmethod_eceuler3d_gpu( &
+    call twopointfluxmethod_esatmo3d_gpu( &
       this%twoPointFlux%interior_gpu, &
       this%solution%interior_gpu, &
       this%geometry%dsdx%interior_gpu, &
@@ -308,17 +308,17 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine TwoPointFluxMethod_ECEuler3D
+  endsubroutine TwoPointFluxMethod_ESAtmo3D
 
-  subroutine SourceMethod_ECEuler3D(this)
+  subroutine SourceMethod_ESAtmo3D(this)
     !! Souza et al. (2023) non-conservative gravity flux differencing on
     !! GPU. The geopotential lives at solution(:,:,:,:,6); the source for
     !! rho*w is computed via the SBP-EC two-point form using log-mean
     !! density and the contravariant metric. Fully device-resident.
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
 
-    call sourcemethod_eceuler3d_gpu( &
+    call sourcemethod_esatmo3d_gpu( &
       this%source%interior_gpu, &
       this%solution%interior_gpu, &
       this%geometry%dsdx%interior_gpu, &
@@ -328,16 +328,16 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine SourceMethod_ECEuler3D
+  endsubroutine SourceMethod_ESAtmo3D
 
-  subroutine DiffusiveFluxMethod_ECEuler3D(this)
+  subroutine DiffusiveFluxMethod_ESAtmo3D(this)
     !! GPU-resident fill of diffFlux%interior with the constant-coefficient
     !! Laplacian flux F_d(iVar) = -coeff(iVar) * d(s_iVar)/dx_d, where
     !! coeff is 0 for rho, nu for momentum, kappa for rho*theta.
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
 
-    call diffusiveflux_eceuler3d_gpu( &
+    call diffusiveflux_esatmo3d_gpu( &
       this%diffFlux%interior_gpu, &
       this%solutionGradient%interior_gpu, &
       this%nu,this%kappa, &
@@ -345,15 +345,15 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine DiffusiveFluxMethod_ECEuler3D
+  endsubroutine DiffusiveFluxMethod_ESAtmo3D
 
-  subroutine DiffusiveBoundaryFlux_ECEuler3D(this)
+  subroutine DiffusiveBoundaryFlux_ESAtmo3D(this)
     !! GPU-resident fill of diffFlux%boundaryNormal with the SIPG-stabilised
     !! BR1 diffusive flux:
     !!   f = -coeff*(avg_grad . n)*nmag + tau*(uL - uR)*nmag
     !! tau = eta_penalty*coeff*(N+1)^2/length_scale, computed on the host.
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
     ! Local
     real(prec) :: np2,tau_nu,tau_kappa
 
@@ -361,7 +361,7 @@ contains
     tau_nu = this%eta_penalty*this%nu*np2/this%length_scale
     tau_kappa = this%eta_penalty*this%kappa*np2/this%length_scale
 
-    call diffusiveboundaryflux_eceuler3d_gpu( &
+    call diffusiveboundaryflux_esatmo3d_gpu( &
       this%diffFlux%boundarynormal_gpu, &
       this%solutionGradient%avgBoundary_gpu, &
       this%solution%boundary_gpu, &
@@ -373,16 +373,16 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine DiffusiveBoundaryFlux_ECEuler3D
+  endsubroutine DiffusiveBoundaryFlux_ESAtmo3D
 
-  subroutine CalculateTendency_ECEuler3D(this)
-    !! GPU-resident tendency for ECEuler3D. The inviscid pipeline is
+  subroutine CalculateTendency_ESAtmo3D(this)
+    !! GPU-resident tendency for ESAtmo3D. The inviscid pipeline is
     !! identical to ECDGModel3D's GPU CalculateTendency; if either nu
     !! or kappa is positive, the constant-coefficient Laplacian
     !! divergence (BR1 weak-form) is then accumulated into
     !! fluxDivergence before forming dSdt.
     implicit none
-    class(ECEuler3D),intent(inout) :: this
+    class(ESAtmo3D),intent(inout) :: this
     ! Local
     integer :: ndof,ndof_diff
 
@@ -437,6 +437,6 @@ contains
                            this%source%interior_gpu, &
                            this%dSdt%interior_gpu,ndof)
 
-  endsubroutine CalculateTendency_ECEuler3D
+  endsubroutine CalculateTendency_ESAtmo3D
 
-endmodule SELF_ECEuler3D
+endmodule SELF_ESAtmo3D

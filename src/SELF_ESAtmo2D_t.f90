@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_ECEuler2D_t
+module SELF_ESAtmo2D_t
   !! Entropy-conserving compressible Euler equations in 2-D with potential
   !! temperature formulation (FastEddy / atmospheric LES equation set).
   !!
@@ -57,7 +57,7 @@ module SELF_ECEuler2D_t
 
   implicit none
 
-  type,extends(ECDGModel2D) :: ECEuler2D_t
+  type,extends(ECDGModel2D) :: ESAtmo2D_t
 
     real(prec) :: p0 = 100000.0_prec ! Reference pressure [Pa]
     real(prec) :: Rd = 287.0_prec ! Gas constant for dry air [J/(kg*K)]
@@ -90,30 +90,30 @@ module SELF_ECEuler2D_t
 
   contains
 
-    procedure :: SetNumberOfVariables => SetNumberOfVariables_ECEuler2D_t
-    procedure :: SetMetadata => SetMetadata_ECEuler2D_t
-    procedure :: entropy_func => entropy_func_ECEuler2D_t
-    procedure :: twopointflux2d => twopointflux2d_ECEuler2D_t
-    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ECEuler2D_t
-    procedure :: riemannflux2d => riemannflux2d_ECEuler2D_t
-    procedure :: BoundaryFlux => BoundaryFlux_ECEuler2D_t
-    procedure :: SourceMethod => SourceMethod_ECEuler2D_t
-    procedure :: AdditionalInit => AdditionalInit_ECEuler2D_t
-    procedure :: AdditionalFree => AdditionalFree_ECEuler2D_t
-    procedure :: SetHydrostaticBalance => SetHydrostaticBalance_ECEuler2D_t
-    procedure :: AddThermalBubble => AddThermalBubble_ECEuler2D_t
+    procedure :: SetNumberOfVariables => SetNumberOfVariables_ESAtmo2D_t
+    procedure :: SetMetadata => SetMetadata_ESAtmo2D_t
+    procedure :: entropy_func => entropy_func_ESAtmo2D_t
+    procedure :: twopointflux2d => twopointflux2d_ESAtmo2D_t
+    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ESAtmo2D_t
+    procedure :: riemannflux2d => riemannflux2d_ESAtmo2D_t
+    procedure :: BoundaryFlux => BoundaryFlux_ESAtmo2D_t
+    procedure :: SourceMethod => SourceMethod_ESAtmo2D_t
+    procedure :: AdditionalInit => AdditionalInit_ESAtmo2D_t
+    procedure :: AdditionalFree => AdditionalFree_ESAtmo2D_t
+    procedure :: SetHydrostaticBalance => SetHydrostaticBalance_ESAtmo2D_t
+    procedure :: AddThermalBubble => AddThermalBubble_ESAtmo2D_t
 
     !! Constant-coefficient Laplacian / Bassi-Rebay diffusion hooks
-    procedure :: SetDiffusion => SetDiffusion_ECEuler2D_t
-    procedure :: DiffusiveFluxMethod => DiffusiveFluxMethod_ECEuler2D_t
-    procedure :: DiffusiveBoundaryFlux => DiffusiveBoundaryFlux_ECEuler2D_t
-    procedure :: CalculateTendency => CalculateTendency_ECEuler2D_t
+    procedure :: SetDiffusion => SetDiffusion_ESAtmo2D_t
+    procedure :: DiffusiveFluxMethod => DiffusiveFluxMethod_ESAtmo2D_t
+    procedure :: DiffusiveBoundaryFlux => DiffusiveBoundaryFlux_ESAtmo2D_t
+    procedure :: CalculateTendency => CalculateTendency_ESAtmo2D_t
 
-  endtype ECEuler2D_t
+  endtype ESAtmo2D_t
 
 contains
 
-  subroutine SetNumberOfVariables_ECEuler2D_t(this)
+  subroutine SetNumberOfVariables_ESAtmo2D_t(this)
     !! Five conserved variables: (rho, rho*u, rho*v, rho*theta, Phi),
     !! where Phi = g*y is the geopotential. Phi has zero flux (volume
     !! and surface) so its tendency is identically zero; it is carried
@@ -121,15 +121,15 @@ contains
     !! non-conservative gravity flux differencing in SourceMethod can
     !! read it node-locally.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
 
     this%nvar = 5
 
-  endsubroutine SetNumberOfVariables_ECEuler2D_t
+  endsubroutine SetNumberOfVariables_ESAtmo2D_t
 
-  subroutine SetMetadata_ECEuler2D_t(this)
+  subroutine SetMetadata_ESAtmo2D_t(this)
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
 
     call this%solution%SetName(1,"rho")
     call this%solution%SetUnits(1,"kg/m^2")
@@ -146,15 +146,15 @@ contains
     call this%solution%SetName(5,"phi")
     call this%solution%SetUnits(5,"m^2/s^2")
 
-  endsubroutine SetMetadata_ECEuler2D_t
+  endsubroutine SetMetadata_ESAtmo2D_t
 
-  pure function entropy_func_ECEuler2D_t(this,s) result(e)
+  pure function entropy_func_ESAtmo2D_t(this,s) result(e)
     !! Mathematical entropy: total energy density (kinetic + internal).
     !!
     !!   e = 0.5*(rhou^2 + rhov^2)/rho + p/(gamma - 1)
     !!
     !! where p = p0 * (rho * Rd * theta / p0)^gamma and gamma = cp/cv.
-    class(ECEuler2D_t),intent(in) :: this
+    class(ESAtmo2D_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec) :: e
     ! Local
@@ -168,7 +168,7 @@ contains
     e = 0.5_prec*(s(2)*s(2)+s(3)*s(3))/rho+ &
         p/(gamma-1.0_prec)
 
-  endfunction entropy_func_ECEuler2D_t
+  endfunction entropy_func_ESAtmo2D_t
 
   pure function log_mean(a,b) result(am)
     !! Numerically stable logarithmic mean (Ismail-Roe 2009 / Ranocha 2018).
@@ -195,7 +195,7 @@ contains
     am = (a+b)/(2.0_prec*F_F)
   endfunction log_mean
 
-  pure function twopointflux2d_ECEuler2D_t(this,sL,sR) result(flux)
+  pure function twopointflux2d_ESAtmo2D_t(this,sL,sR) result(flux)
     !! Souza et al. (2023, JAMES) entropy-conservative two-point flux for
     !! 2-D compressible Euler in (rho, rho*v, rho*theta) variables with
     !! p = p0*(rho*Rd*theta/p0)^gamma.
@@ -207,7 +207,7 @@ contains
     !!
     !! Pressure here is the *total* pressure; gravity is handled by the
     !! Souza non-conservative term in SourceMethod, not by a flux split.
-    class(ECEuler2D_t),intent(in) :: this
+    class(ESAtmo2D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
     real(prec) :: flux(1:this%nvar,1:2)
@@ -256,9 +256,9 @@ contains
     flux(4,2) = rth_log*v_avg
     flux(5,2) = 0.0_prec
 
-  endfunction twopointflux2d_ECEuler2D_t
+  endfunction twopointflux2d_ESAtmo2D_t
 
-  subroutine TwoPointFluxMethod_ECEuler2D_t(this)
+  subroutine TwoPointFluxMethod_ESAtmo2D_t(this)
     !! Pre-projected scalar contravariant two-point Souza et al. (2023) EC
     !! flux. For each node pair (a, b) along reference direction r:
     !!
@@ -268,7 +268,7 @@ contains
     !! the Souza non-conservative gravity flux differencing in SourceMethod
     !! (which uses the geopotential carried as state variable index 5).
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     integer :: nn,i,j,d,iEl,iVar
     real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
@@ -310,9 +310,9 @@ contains
 
     enddo
 
-  endsubroutine TwoPointFluxMethod_ECEuler2D_t
+  endsubroutine TwoPointFluxMethod_ESAtmo2D_t
 
-  pure function riemannflux2d_ECEuler2D_t(this,sL,sR,dsdx,nhat) result(flux)
+  pure function riemannflux2d_ESAtmo2D_t(this,sL,sR,dsdx,nhat) result(flux)
     !! Local Lax-Friedrichs (Rusanov) Riemann flux. Provided as a fallback;
     !! the model overrides BoundaryFlux directly with the LMARS solver.
     !!
@@ -320,7 +320,7 @@ contains
     !!
     !! where lambda_max = max(|vL.n| + cL, |vR.n| + cR)
     !! and c = sqrt(gamma * p / rho) is the sound speed.
-    class(ECEuler2D_t),intent(in) :: this
+    class(ESAtmo2D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
@@ -375,9 +375,9 @@ contains
 
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
-  endfunction riemannflux2d_ECEuler2D_t
+  endfunction riemannflux2d_ESAtmo2D_t
 
-  subroutine BoundaryFlux_ECEuler2D_t(this)
+  subroutine BoundaryFlux_ESAtmo2D_t(this)
     !! LMARS (Low-Mach Approximate Riemann Solver, Chen et al. 2013)
     !! interface flux. No hydrostatic pressure split: gravity is folded
     !! into SourceMethod via the Souza non-conservative form using the
@@ -390,7 +390,7 @@ contains
     !! state for the advective part. Pressure adds to normal momentum.
     !! Geopotential (var 5) has zero flux.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     integer :: i,k,iel
     real(prec) :: nhat(1:2),nmag
@@ -446,9 +446,9 @@ contains
 
     enddo
 
-  endsubroutine BoundaryFlux_ECEuler2D_t
+  endsubroutine BoundaryFlux_ESAtmo2D_t
 
-  subroutine SourceMethod_ECEuler2D_t(this)
+  subroutine SourceMethod_ESAtmo2D_t(this)
     !! Souza et al. (2023) non-conservative gravity flux differencing.
     !!
     !! The rho*v equation carries the body force -rho * partial_y Phi where
@@ -464,7 +464,7 @@ contains
     !! and we set source(rho*v) = - that result. The other variables
     !! (rho, rho*u, rho*theta, Phi) all have zero source.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     integer :: i,j,iEl,nn
     real(prec) :: rho_ijk,phi_ijk,rho_p,phi_p
@@ -506,9 +506,9 @@ contains
 
     enddo
 
-  endsubroutine SourceMethod_ECEuler2D_t
+  endsubroutine SourceMethod_ESAtmo2D_t
 
-  subroutine pbc2d_NoStress_ECEuler2D(bc,mymodel)
+  subroutine pbc2d_NoStress_ESAtmo2D(bc,mymodel)
     !! Parabolic boundary condition: zero diffusive flux normal to the wall
     !! (no-stress for momentum, no-heat-flux for rho*theta).
     !!
@@ -526,7 +526,7 @@ contains
     real(prec) :: nhat(1:2),gn,g(1:2)
 
     select type(m => mymodel)
-    class is(ECEuler2D_t)
+    class is(ESAtmo2D_t)
       do n = 1,bc%nBoundaries
         iEl = bc%elements(n)
         k = bc%sides(n)
@@ -542,15 +542,15 @@ contains
       enddo
     endselect
 
-  endsubroutine pbc2d_NoStress_ECEuler2D
+  endsubroutine pbc2d_NoStress_ESAtmo2D
 
-  subroutine AdditionalInit_ECEuler2D_t(this)
+  subroutine AdditionalInit_ESAtmo2D_t(this)
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     procedure(SELF_bcMethod),pointer :: bcfunc
 
-    bcfunc => hbc2d_NoNormalFlow_ECEuler2D
+    bcfunc => hbc2d_NoNormalFlow_ESAtmo2D
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
@@ -558,7 +558,7 @@ contains
     ! (no-stress / no-heat-flux). hyperbolicBCs and parabolicBCs are
     ! independent linked lists, so registering the same tag here does
     ! not clobber the hyperbolic registration above.
-    bcfunc => pbc2d_NoStress_ECEuler2D
+    bcfunc => pbc2d_NoStress_ESAtmo2D
     call this%parabolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
@@ -569,18 +569,18 @@ contains
     call this%diffFlux%AssociateGeometry(this%geometry)
     call this%diffDiv%Init(this%solution%interp,this%nvar,this%mesh%nElem)
 
-  endsubroutine AdditionalInit_ECEuler2D_t
+  endsubroutine AdditionalInit_ESAtmo2D_t
 
-  subroutine AdditionalFree_ECEuler2D_t(this)
+  subroutine AdditionalFree_ESAtmo2D_t(this)
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
 
     call this%diffFlux%Free()
     call this%diffDiv%Free()
 
-  endsubroutine AdditionalFree_ECEuler2D_t
+  endsubroutine AdditionalFree_ESAtmo2D_t
 
-  subroutine SetDiffusion_ECEuler2D_t(this,nu,kappa,eta_penalty)
+  subroutine SetDiffusion_ESAtmo2D_t(this,nu,kappa,eta_penalty)
     !! Set the constant-coefficient Laplacian diffusion coefficients
     !! (kinematic momentum diffusivity and thermal diffusivity, both
     !! in m^2/s) and the dimensionless SIPG jump penalty. Setting nu
@@ -592,7 +592,7 @@ contains
     !! is 4*<J> so the characteristic edge length is 2*<J>^(1/2).
     !! The smallest length over the mesh is conservative.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     real(prec),intent(in) :: nu
     real(prec),intent(in) :: kappa
     real(prec),intent(in),optional :: eta_penalty
@@ -609,9 +609,9 @@ contains
     jmin = minval(this%geometry%J%interior)
     this%length_scale = 2.0_prec*sqrt(jmin)
 
-  endsubroutine SetDiffusion_ECEuler2D_t
+  endsubroutine SetDiffusion_ESAtmo2D_t
 
-  subroutine DiffusiveFluxMethod_ECEuler2D_t(this)
+  subroutine DiffusiveFluxMethod_ESAtmo2D_t(this)
     !! Fill diffFlux%interior with the constant-coefficient Laplacian
     !! flux at every interior node:
     !!
@@ -622,7 +622,7 @@ contains
     !!
     !! solutionGradient%interior(i,j,iel,iVar,d) holds d(s_iVar)/dx_d.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     integer :: i,j,iel,d
 
@@ -639,9 +639,9 @@ contains
       this%diffFlux%interior(i,j,iel,5,d) = 0.0_prec
     enddo
 
-  endsubroutine DiffusiveFluxMethod_ECEuler2D_t
+  endsubroutine DiffusiveFluxMethod_ESAtmo2D_t
 
-  subroutine DiffusiveBoundaryFlux_ECEuler2D_t(this)
+  subroutine DiffusiveBoundaryFlux_ESAtmo2D_t(this)
     !! Fill diffFlux%boundaryNormal with the SIPG-stabilised BR1 flux:
     !!
     !!   f_R^diff(iVar) = -coeff(iVar) * (avg_grad . n) * nmag
@@ -651,7 +651,7 @@ contains
     !! avg_grad is solutionGradient%avgBoundary (populated by
     !! AverageSides()); uL, uR are solution%boundary, %extBoundary.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     integer :: i,k,iel
     real(prec) :: nhat(1:2),nmag,gradn,coeff,tau,np2
@@ -696,10 +696,10 @@ contains
       this%diffFlux%boundaryNormal(i,k,iel,5) = 0.0_prec
     enddo
 
-  endsubroutine DiffusiveBoundaryFlux_ECEuler2D_t
+  endsubroutine DiffusiveBoundaryFlux_ESAtmo2D_t
 
-  subroutine CalculateTendency_ECEuler2D_t(this)
-    !! ECEuler2D tendency = EC inviscid pipeline (parent) + optional
+  subroutine CalculateTendency_ESAtmo2D_t(this)
+    !! ESAtmo2D tendency = EC inviscid pipeline (parent) + optional
     !! constant-coefficient Laplacian diffusion (BR1 weak-form DG).
     !!
     !! When nu>0 or kappa>0 the parent's CalculateTendency already
@@ -708,7 +708,7 @@ contains
     !! compute its DG divergence, and accumulate into fluxDivergence
     !! before forming dSdt.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     ! Local
     integer :: i,j,iEl,iVar
     real(prec) :: bMi1,bMi2,bMj1,bMj2,qwi,qwj,jac
@@ -774,9 +774,9 @@ contains
         this%fluxDivergence%interior(i,j,iEl,iVar)
     enddo
 
-  endsubroutine CalculateTendency_ECEuler2D_t
+  endsubroutine CalculateTendency_ESAtmo2D_t
 
-  subroutine hbc2d_NoNormalFlow_ECEuler2D(bc,mymodel)
+  subroutine hbc2d_NoNormalFlow_ESAtmo2D(bc,mymodel)
     !! No-normal-flow (wall) boundary condition.
     !!
     !! The normal component of momentum is negated while tangential
@@ -795,7 +795,7 @@ contains
     real(prec) :: nhat(1:2),rhovn
 
     select type(m => mymodel)
-    class is(ECEuler2D_t)
+    class is(ESAtmo2D_t)
       do n = 1,bc%nBoundaries
         iEl = bc%elements(n)
         k = bc%sides(n)
@@ -830,9 +830,9 @@ contains
       enddo
     endselect
 
-  endsubroutine hbc2d_NoNormalFlow_ECEuler2D
+  endsubroutine hbc2d_NoNormalFlow_ESAtmo2D
 
-  subroutine SetHydrostaticBalance_ECEuler2D_t(this,theta0)
+  subroutine SetHydrostaticBalance_ESAtmo2D_t(this,theta0)
     !! Initialise a hydrostatically balanced atmosphere with uniform
     !! potential temperature theta0, zero velocity, and the geopotential
     !! Phi = g*y carried as state variable index 5.
@@ -848,7 +848,7 @@ contains
     !! element interfaces with the neighbour's value — for a smooth
     !! profile this is a no-op.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     real(prec),intent(in) :: theta0
     ! Local
     integer :: i,j,iEl
@@ -898,9 +898,9 @@ contains
     call this%ReportMetrics()
     call this%solution%UpdateDevice()
 
-  endsubroutine SetHydrostaticBalance_ECEuler2D_t
+  endsubroutine SetHydrostaticBalance_ESAtmo2D_t
 
-  subroutine AddThermalBubble_ECEuler2D_t(this,dtheta,r0,x0,y0)
+  subroutine AddThermalBubble_ESAtmo2D_t(this,dtheta,r0,x0,y0)
     !! Adds a pressure-balanced warm bubble perturbation.
     !!
     !! The potential temperature perturbation has a cos^2 profile:
@@ -920,7 +920,7 @@ contains
     !! The buoyancy force arises from the density deficit in the
     !! gravitational source term -rho*g.
     implicit none
-    class(ECEuler2D_t),intent(inout) :: this
+    class(ESAtmo2D_t),intent(inout) :: this
     real(prec),intent(in) :: dtheta ! Perturbation amplitude [K]
     real(prec),intent(in) :: r0 ! Bubble radius [m]
     real(prec),intent(in) :: x0,y0 ! Bubble center [m]
@@ -956,6 +956,6 @@ contains
     call this%ReportMetrics()
     call this%solution%UpdateDevice()
 
-  endsubroutine AddThermalBubble_ECEuler2D_t
+  endsubroutine AddThermalBubble_ESAtmo2D_t
 
-endmodule SELF_ECEuler2D_t
+endmodule SELF_ESAtmo2D_t

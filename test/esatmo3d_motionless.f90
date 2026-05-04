@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ec_euler3d_motionless
+program esatmo3d_motionless
   !! Tests that the EC-DG Euler 3-D model maintains a motionless fluid
   !! in a closed domain (no gravity).
   !!
@@ -41,7 +41,7 @@ program ec_euler3d_motionless
   use SELF_Lagrange
   use SELF_Mesh_3D
   use SELF_Geometry_3D
-  use SELF_ECEuler3D
+  use SELF_ESAtmo3D
 
   implicit none
 
@@ -58,7 +58,7 @@ program ec_euler3d_motionless
 #else
   real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(-4)
 #endif
-  type(ECEuler3D) :: modelobj
+  type(ESAtmo3D) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh3D),target :: mesh
   type(SEMHex),target :: geometry
@@ -147,4 +147,4 @@ program ec_euler3d_motionless
   call geometry%free()
   call interp%free()
 
-endprogram ec_euler3d_motionless
+endprogram esatmo3d_motionless

@@ -63,13 +63,13 @@ __device__ inline real log_mean_dev_2d(real a, real b)
 }
 
 // ============================================================
-// No-normal-flow boundary condition for EC Euler 2D
+// No-normal-flow boundary condition for Entropy-Stable Atmosphere 2D
 //
 // Mirrors density (var 0), rho*theta (var 3), and Phi (var 4).
 // Reflects momentum: (rho*v)_ext = (rho*v)_int - 2*((rho*v).n)*n
 // ============================================================
 
-__global__ void hbc2d_nonormalflow_eceuler2d_kernel(
+__global__ void hbc2d_nonormalflow_esatmo2d_kernel(
     real *extBoundary, real *boundary, real *nhat,
     int *elements, int *sides,
     int nBoundaries, int N, int nel, int nvar)
@@ -116,7 +116,7 @@ __global__ void hbc2d_nonormalflow_eceuler2d_kernel(
 
 extern "C"
 {
-  void hbc2d_nonormalflow_eceuler2d_gpu(
+  void hbc2d_nonormalflow_esatmo2d_gpu(
       real *extBoundary, real *boundary, real *nhat,
       int *elements, int *sides,
       int nBoundaries, int N, int nel, int nvar)
@@ -125,7 +125,7 @@ extern "C"
     int total_dofs = nBoundaries * dofs_per_face;
     int threads_per_block = 256;
     int nblocks_x = total_dofs / threads_per_block + 1;
-    hbc2d_nonormalflow_eceuler2d_kernel<<<dim3(nblocks_x, 1, 1),
+    hbc2d_nonormalflow_esatmo2d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
         extBoundary, boundary, nhat,
         elements, sides, nBoundaries, N, nel, nvar);
@@ -139,7 +139,7 @@ extern "C"
 //   grad_ext = grad_int - 2*(grad_int . n)*n
 // ============================================================
 
-__global__ void pbc2d_nostress_eceuler2d_kernel(
+__global__ void pbc2d_nostress_esatmo2d_kernel(
     real *extGrad, real *grad, real *nhat,
     int *elements, int *sides,
     int nBoundaries, int N, int nel, int nvar)
@@ -169,7 +169,7 @@ __global__ void pbc2d_nostress_eceuler2d_kernel(
 
 extern "C"
 {
-  void pbc2d_nostress_eceuler2d_gpu(
+  void pbc2d_nostress_esatmo2d_gpu(
       real *extGrad, real *grad, real *nhat,
       int *elements, int *sides,
       int nBoundaries, int N, int nel, int nvar)
@@ -178,7 +178,7 @@ extern "C"
     int total_dofs = nBoundaries * dofs_per_face;
     int threads_per_block = 256;
     int nblocks_x = total_dofs / threads_per_block + 1;
-    pbc2d_nostress_eceuler2d_kernel<<<dim3(nblocks_x, 1, 1),
+    pbc2d_nostress_esatmo2d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
         extGrad, grad, nhat,
         elements, sides, nBoundaries, N, nel, nvar);
@@ -186,7 +186,7 @@ extern "C"
 }
 
 // ============================================================
-// LMARS boundary flux for EC Euler 2D
+// LMARS boundary flux for Entropy-Stable Atmosphere 2D
 //
 // Variables: [rho, rhou, rhov, rhotheta, Phi]
 // Geopotential (var 4) carries no flux. Gravity is folded into
@@ -194,7 +194,7 @@ extern "C"
 // hydrostatic pressure split is applied here.
 // ============================================================
 
-__global__ void boundaryflux_eceuler2d_kernel(
+__global__ void boundaryflux_esatmo2d_kernel(
     real *fb, real *fextb, real *nhat, real *nscale, real *flux,
     real p0, real Rd, real gamma, int N, int nel)
 {
@@ -258,14 +258,14 @@ __global__ void boundaryflux_eceuler2d_kernel(
 
 extern "C"
 {
-  void boundaryflux_eceuler2d_gpu(
+  void boundaryflux_esatmo2d_gpu(
       real *fb, real *fextb, real *nhat, real *nscale, real *flux,
       real p0, real Rd, real gamma, int N, int nel)
   {
     int ndof = (N + 1) * 4 * nel;
     int threads_per_block = 256;
     int nblocks_x = ndof / threads_per_block + 1;
-    boundaryflux_eceuler2d_kernel<<<dim3(nblocks_x, 1, 1),
+    boundaryflux_esatmo2d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
         fb, fextb, nhat, nscale, flux, p0, Rd, gamma, N, nel);
   }
@@ -273,7 +273,7 @@ extern "C"
 
 // ============================================================
 // Souza et al. (2023, JAMES) entropy-conservative two-point flux for
-// EC Euler 2D with potential temperature on curvilinear mesh.
+// Entropy-Stable Atmosphere 2D with potential temperature on curvilinear mesh.
 //
 // Physical flux:
 //   f_d(rho)     = <rho>_log * <v_d>
@@ -292,7 +292,7 @@ extern "C"
 // ============================================================
 
 template <int blockSize, int matSize>
-__global__ void __launch_bounds__(matSize) twopointfluxmethod_eceuler2d_kernel(
+__global__ void __launch_bounds__(matSize) twopointfluxmethod_esatmo2d_kernel(
     real *f, real *s, real *dsdx,
     real p0, real Rd, real gamma,
     int nq, int N, int nvar)
@@ -410,17 +410,17 @@ __global__ void __launch_bounds__(matSize) twopointfluxmethod_eceuler2d_kernel(
 
 extern "C"
 {
-  void twopointfluxmethod_eceuler2d_gpu(
+  void twopointfluxmethod_esatmo2d_gpu(
       real *f, real *s, real *dsdx,
       real p0, real Rd, real gamma,
       int N, int nvar, int nel)
   {
     int nq = (N + 1) * (N + 1);
     if (N < 7) {
-      twopointfluxmethod_eceuler2d_kernel<64, 64><<<dim3(nel, 1, 1),
+      twopointfluxmethod_esatmo2d_kernel<64, 64><<<dim3(nel, 1, 1),
           dim3(64, 1, 1), 0, 0>>>(f, s, dsdx, p0, Rd, gamma, nq, N, nvar);
     } else {
-      twopointfluxmethod_eceuler2d_kernel<256, 256><<<dim3(nel, 1, 1),
+      twopointfluxmethod_esatmo2d_kernel<256, 256><<<dim3(nel, 1, 1),
           dim3(256, 1, 1), 0, 0>>>(f, s, dsdx, p0, Rd, gamma, nq, N, nvar);
     }
   }
@@ -439,7 +439,7 @@ extern "C"
 // 0-indexed) since y is the vertical coordinate.
 // ============================================================
 template <int blockSize, int matSize>
-__global__ void __launch_bounds__(matSize) sourcemethod_eceuler2d_kernel(
+__global__ void __launch_bounds__(matSize) sourcemethod_esatmo2d_kernel(
     real *source, real *solution, real *dsdx, real *J, real *dSplit,
     int nq, int N, int nvar)
 {
@@ -491,23 +491,23 @@ __global__ void __launch_bounds__(matSize) sourcemethod_eceuler2d_kernel(
 
 extern "C"
 {
-  void sourcemethod_eceuler2d_gpu(
+  void sourcemethod_esatmo2d_gpu(
       real *source, real *solution, real *dsdx, real *J, real *dSplit,
       int N, int nvar, int nel)
   {
     int nq = (N + 1) * (N + 1);
     if (N < 7) {
-      sourcemethod_eceuler2d_kernel<64, 64><<<dim3(nel, 1, 1), dim3(64, 1, 1), 0, 0>>>(
+      sourcemethod_esatmo2d_kernel<64, 64><<<dim3(nel, 1, 1), dim3(64, 1, 1), 0, 0>>>(
           source, solution, dsdx, J, dSplit, nq, N, nvar);
     } else {
-      sourcemethod_eceuler2d_kernel<256, 256><<<dim3(nel, 1, 1), dim3(256, 1, 1), 0, 0>>>(
+      sourcemethod_esatmo2d_kernel<256, 256><<<dim3(nel, 1, 1), dim3(256, 1, 1), 0, 0>>>(
           source, solution, dsdx, J, dSplit, nq, N, nvar);
     }
   }
 }
 
 // ============================================================
-// Diffusive flux for ECEuler2D — constant-coefficient Laplacian
+// Diffusive flux for ESAtmo2D — constant-coefficient Laplacian
 // (Bassi-Rebay 1) with separate momentum (nu) and thermal (kappa)
 // diffusivities.
 //
@@ -520,7 +520,7 @@ extern "C"
 // Variable indexing (0-indexed): 0=rho, 1=rhou, 2=rhov, 3=rhotheta, 4=Phi
 // ============================================================
 
-__global__ void diffusiveflux_eceuler2d_kernel(
+__global__ void diffusiveflux_esatmo2d_kernel(
     real *diffFlux, real *grad, real nu, real kappa,
     uint32_t ndof_node, uint32_t nvar)
 {
@@ -538,7 +538,7 @@ __global__ void diffusiveflux_eceuler2d_kernel(
 
 extern "C"
 {
-  void diffusiveflux_eceuler2d_gpu(
+  void diffusiveflux_esatmo2d_gpu(
       real *diffFlux, real *grad, real nu, real kappa,
       int N, int nvar, int nel)
   {
@@ -546,7 +546,7 @@ extern "C"
     uint32_t ndof_total = ndof_node * (uint32_t)nvar * 2;
     uint32_t nthreads = 256;
     uint32_t nblocks  = (ndof_total + nthreads - 1) / nthreads;
-    diffusiveflux_eceuler2d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
+    diffusiveflux_esatmo2d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
         diffFlux, grad, nu, kappa, ndof_node, (uint32_t)nvar);
   }
 }
@@ -557,7 +557,7 @@ extern "C"
 // tau_nu, tau_kappa precomputed on host.
 // ============================================================
 
-__global__ void diffusiveboundaryflux_eceuler2d_kernel(
+__global__ void diffusiveboundaryflux_esatmo2d_kernel(
     real *fluxN, real *avgGrad, real *uBnd, real *uExt,
     real *nhat, real *nscale,
     real nu, real kappa, real tau_nu, real tau_kappa,
@@ -596,7 +596,7 @@ __global__ void diffusiveboundaryflux_eceuler2d_kernel(
 
 extern "C"
 {
-  void diffusiveboundaryflux_eceuler2d_gpu(
+  void diffusiveboundaryflux_esatmo2d_gpu(
       real *fluxN, real *avgGrad, real *uBnd, real *uExt,
       real *nhat, real *nscale,
       real nu, real kappa, real tau_nu, real tau_kappa,
@@ -605,7 +605,7 @@ extern "C"
     uint32_t ndof_face = (N+1) * 4 * (uint32_t)nel;
     uint32_t nthreads = 256;
     uint32_t nblocks  = (ndof_face + nthreads - 1) / nthreads;
-    diffusiveboundaryflux_eceuler2d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
+    diffusiveboundaryflux_esatmo2d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
         fluxN, avgGrad, uBnd, uExt, nhat, nscale,
         nu, kappa, tau_nu, tau_kappa, ndof_face, (uint32_t)nvar);
   }

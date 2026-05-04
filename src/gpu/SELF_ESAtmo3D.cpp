@@ -63,13 +63,13 @@ __device__ inline real log_mean_dev(real a, real b)
 }
 
 // ============================================================
-// No-normal-flow boundary condition for EC Euler 3D
+// No-normal-flow boundary condition for Entropy-Stable Atmosphere 3D
 //
 // Mirrors density (var 0) and rho*theta (var 4).
 // Reflects momentum: (rho*v)_ext = (rho*v)_int - 2*((rho*v).n)*n
 // ============================================================
 
-__global__ void hbc3d_nonormalflow_eceuler3d_kernel(
+__global__ void hbc3d_nonormalflow_esatmo3d_kernel(
     real *extBoundary, real *boundary, real *nhat,
     int *elements, int *sides,
     int nBoundaries, int N, int nel, int nvar)
@@ -119,7 +119,7 @@ __global__ void hbc3d_nonormalflow_eceuler3d_kernel(
 
 extern "C"
 {
-  void hbc3d_nonormalflow_eceuler3d_gpu(
+  void hbc3d_nonormalflow_esatmo3d_gpu(
       real *extBoundary, real *boundary, real *nhat,
       int *elements, int *sides,
       int nBoundaries, int N, int nel, int nvar)
@@ -128,7 +128,7 @@ extern "C"
     int total_dofs = nBoundaries * dofs_per_face;
     int threads_per_block = 256;
     int nblocks_x = total_dofs / threads_per_block + 1;
-    hbc3d_nonormalflow_eceuler3d_kernel<<<dim3(nblocks_x, 1, 1),
+    hbc3d_nonormalflow_esatmo3d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
         extBoundary, boundary, nhat,
         elements, sides, nBoundaries, N, nel, nvar);
@@ -143,7 +143,7 @@ extern "C"
 //   grad_ext = grad_int - 2*(grad_int . n)*n
 // ============================================================
 
-__global__ void pbc3d_nostress_eceuler3d_kernel(
+__global__ void pbc3d_nostress_esatmo3d_kernel(
     real *extGrad, real *grad, real *nhat,
     int *elements, int *sides,
     int nBoundaries, int N, int nel, int nvar)
@@ -177,7 +177,7 @@ __global__ void pbc3d_nostress_eceuler3d_kernel(
 
 extern "C"
 {
-  void pbc3d_nostress_eceuler3d_gpu(
+  void pbc3d_nostress_esatmo3d_gpu(
       real *extGrad, real *grad, real *nhat,
       int *elements, int *sides,
       int nBoundaries, int N, int nel, int nvar)
@@ -186,7 +186,7 @@ extern "C"
     int total_dofs = nBoundaries * dofs_per_face;
     int threads_per_block = 256;
     int nblocks_x = total_dofs / threads_per_block + 1;
-    pbc3d_nostress_eceuler3d_kernel<<<dim3(nblocks_x, 1, 1),
+    pbc3d_nostress_esatmo3d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
         extGrad, grad, nhat,
         elements, sides, nBoundaries, N, nel, nvar);
@@ -194,7 +194,7 @@ extern "C"
 }
 
 // ============================================================
-// LLF (Rusanov) boundary flux for EC Euler 3D
+// LLF (Rusanov) boundary flux for Entropy-Stable Atmosphere 3D
 //
 // F* = 0.5*(fL + fR) - 0.5*lambda_max*(sR - sL)
 // lambda_max = max(|unL|+cL, |unR|+cR)
@@ -203,7 +203,7 @@ extern "C"
 // Variables: [rho, rhou, rhov, rhow, rhotheta]
 // ============================================================
 
-__global__ void boundaryflux_eceuler3d_kernel(
+__global__ void boundaryflux_esatmo3d_kernel(
     real *fb, real *fextb, real *nhat, real *nscale, real *flux,
     real p0, real Rd, real gamma, int N, int nel)
 {
@@ -283,14 +283,14 @@ __global__ void boundaryflux_eceuler3d_kernel(
 
 extern "C"
 {
-  void boundaryflux_eceuler3d_gpu(
+  void boundaryflux_esatmo3d_gpu(
       real *fb, real *fextb, real *nhat, real *nscale, real *flux,
       real p0, real Rd, real gamma, int N, int nel)
   {
     int ndof = (N + 1) * (N + 1) * 6 * nel;
     int threads_per_block = 256;
     int nblocks_x = ndof / threads_per_block + 1;
-    boundaryflux_eceuler3d_kernel<<<dim3(nblocks_x, 1, 1),
+    boundaryflux_esatmo3d_kernel<<<dim3(nblocks_x, 1, 1),
         dim3(threads_per_block, 1, 1), 0, 0>>>(
         fb, fextb, nhat, nscale, flux, p0, Rd, gamma, N, nel);
   }
@@ -298,7 +298,7 @@ extern "C"
 
 // ============================================================
 // Souza et al. (2023, JAMES) entropy-conservative two-point flux for
-// EC Euler 3D with potential temperature on curvilinear mesh, with
+// Entropy-Stable Atmosphere 3D with potential temperature on curvilinear mesh, with
 // well-balanced hydrostatic pressure split.
 //
 // Physical flux:
@@ -325,7 +325,7 @@ extern "C"
 // ============================================================
 
 template <int blockSize>
-__global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
+__global__ void __launch_bounds__(512) twopointfluxmethod_esatmo3d_kernel(
     real *f, real *s, real *dsdx,
     real p0, real Rd, real gamma,
     int nq, int N, int nvar)
@@ -523,17 +523,17 @@ __global__ void __launch_bounds__(512) twopointfluxmethod_eceuler3d_kernel(
 
 extern "C"
 {
-  void twopointfluxmethod_eceuler3d_gpu(
+  void twopointfluxmethod_esatmo3d_gpu(
       real *f, real *s, real *dsdx,
       real p0, real Rd, real gamma,
       int N, int nvar, int nel)
   {
     int nq = (N + 1) * (N + 1) * (N + 1);
     if (N < 4) {
-      twopointfluxmethod_eceuler3d_kernel<64><<<dim3(nel, 1, 1),
+      twopointfluxmethod_esatmo3d_kernel<64><<<dim3(nel, 1, 1),
           dim3(64, 1, 1), 0, 0>>>(f, s, dsdx, p0, Rd, gamma, nq, N, nvar);
     } else if (N >= 4 && N < 8) {
-      twopointfluxmethod_eceuler3d_kernel<512><<<dim3(nel, 1, 1),
+      twopointfluxmethod_esatmo3d_kernel<512><<<dim3(nel, 1, 1),
           dim3(512, 1, 1), 0, 0>>>(f, s, dsdx, p0, Rd, gamma, nq, N, nvar);
     }
   }
@@ -548,7 +548,7 @@ extern "C"
 // using the geopotential Phi carried as state variable index 5
 // (0-indexed). All other source components are set to zero.
 template <int blockSize>
-__global__ void __launch_bounds__(512) sourcemethod_eceuler3d_kernel(
+__global__ void __launch_bounds__(512) sourcemethod_esatmo3d_kernel(
     real *source, real *solution, real *dsdx, real *J, real *dSplit,
     int nq, int N, int nvar)
 {
@@ -611,23 +611,23 @@ __global__ void __launch_bounds__(512) sourcemethod_eceuler3d_kernel(
 
 extern "C"
 {
-  void sourcemethod_eceuler3d_gpu(
+  void sourcemethod_esatmo3d_gpu(
       real *source, real *solution, real *dsdx, real *J, real *dSplit,
       int N, int nvar, int nel)
   {
     int nq = (N + 1) * (N + 1) * (N + 1);
     if (N < 4) {
-      sourcemethod_eceuler3d_kernel<64><<<dim3(nel, 1, 1), dim3(64, 1, 1), 0, 0>>>(
+      sourcemethod_esatmo3d_kernel<64><<<dim3(nel, 1, 1), dim3(64, 1, 1), 0, 0>>>(
           source, solution, dsdx, J, dSplit, nq, N, nvar);
     } else {
-      sourcemethod_eceuler3d_kernel<512><<<dim3(nel, 1, 1), dim3(512, 1, 1), 0, 0>>>(
+      sourcemethod_esatmo3d_kernel<512><<<dim3(nel, 1, 1), dim3(512, 1, 1), 0, 0>>>(
           source, solution, dsdx, J, dSplit, nq, N, nvar);
     }
   }
 }
 
 // ============================================================
-// Diffusive flux for ECEuler3D — constant-coefficient Laplacian
+// Diffusive flux for ESAtmo3D — constant-coefficient Laplacian
 // (Bassi-Rebay 1) with separate momentum (nu) and thermal (kappa)
 // diffusivities.
 //
@@ -645,7 +645,7 @@ extern "C"
 // diffusive divergence in a single MappedDGDivergence call.
 // ============================================================
 
-__global__ void diffusiveflux_eceuler3d_kernel(
+__global__ void diffusiveflux_esatmo3d_kernel(
     real *diffFlux, real *grad, real nu, real kappa,
     uint32_t ndof_node, uint32_t nvar)
 {
@@ -668,7 +668,7 @@ __global__ void diffusiveflux_eceuler3d_kernel(
 
 extern "C"
 {
-  void diffusiveflux_eceuler3d_gpu(
+  void diffusiveflux_esatmo3d_gpu(
       real *diffFlux, real *grad, real nu, real kappa,
       int N, int nvar, int nel)
   {
@@ -676,7 +676,7 @@ extern "C"
     uint32_t ndof_total = ndof_node * (uint32_t)nvar * 3;
     uint32_t nthreads = 256;
     uint32_t nblocks  = (ndof_total + nthreads - 1) / nthreads;
-    diffusiveflux_eceuler3d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
+    diffusiveflux_esatmo3d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
         diffFlux, grad, nu, kappa, ndof_node, (uint32_t)nvar);
   }
 }
@@ -697,7 +697,7 @@ extern "C"
 // fluxN layout (Scalar3D, boundary): fluxN[idof_face + ndof_face*var]
 // ============================================================
 
-__global__ void diffusiveboundaryflux_eceuler3d_kernel(
+__global__ void diffusiveboundaryflux_esatmo3d_kernel(
     real *fluxN, real *avgGrad, real *uBnd, real *uExt,
     real *nhat, real *nscale,
     real nu, real kappa, real tau_nu, real tau_kappa,
@@ -745,7 +745,7 @@ __global__ void diffusiveboundaryflux_eceuler3d_kernel(
 
 extern "C"
 {
-  void diffusiveboundaryflux_eceuler3d_gpu(
+  void diffusiveboundaryflux_esatmo3d_gpu(
       real *fluxN, real *avgGrad, real *uBnd, real *uExt,
       real *nhat, real *nscale,
       real nu, real kappa, real tau_nu, real tau_kappa,
@@ -754,7 +754,7 @@ extern "C"
     uint32_t ndof_face = (N+1) * (N+1) * 6 * (uint32_t)nel;
     uint32_t nthreads = 256;
     uint32_t nblocks  = (ndof_face + nthreads - 1) / nthreads;
-    diffusiveboundaryflux_eceuler3d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
+    diffusiveboundaryflux_esatmo3d_kernel<<<dim3(nblocks,1,1), dim3(nthreads,1,1), 0, 0>>>(
         fluxN, avgGrad, uBnd, uExt, nhat, nscale,
         nu, kappa, tau_nu, tau_kappa, ndof_face, (uint32_t)nvar);
   }

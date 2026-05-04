@@ -24,9 +24,9 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_ECEuler2D
+module SELF_ESAtmo2D
 
-  use SELF_ECEuler2D_t
+  use SELF_ESAtmo2D_t
   use SELF_ECDGModel2D_t
   use SELF_GPU
   use SELF_GPUInterfaces
@@ -37,111 +37,111 @@ module SELF_ECEuler2D
 
   implicit none
 
-  type,extends(ECEuler2D_t),public :: ECEuler2D
+  type,extends(ESAtmo2D_t),public :: ESAtmo2D
 
   contains
 
-    procedure :: Init => Init_ECEuler2D
-    procedure :: Free => Free_ECEuler2D
-    procedure :: AdditionalInit => AdditionalInit_ECEuler2D
-    procedure :: BoundaryFlux => BoundaryFlux_ECEuler2D
-    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ECEuler2D
-    procedure :: SourceMethod => SourceMethod_ECEuler2D
-    procedure :: DiffusiveFluxMethod => DiffusiveFluxMethod_ECEuler2D
-    procedure :: DiffusiveBoundaryFlux => DiffusiveBoundaryFlux_ECEuler2D
-    procedure :: CalculateTendency => CalculateTendency_ECEuler2D
+    procedure :: Init => Init_ESAtmo2D
+    procedure :: Free => Free_ESAtmo2D
+    procedure :: AdditionalInit => AdditionalInit_ESAtmo2D
+    procedure :: BoundaryFlux => BoundaryFlux_ESAtmo2D
+    procedure :: TwoPointFluxMethod => TwoPointFluxMethod_ESAtmo2D
+    procedure :: SourceMethod => SourceMethod_ESAtmo2D
+    procedure :: DiffusiveFluxMethod => DiffusiveFluxMethod_ESAtmo2D
+    procedure :: DiffusiveBoundaryFlux => DiffusiveBoundaryFlux_ESAtmo2D
+    procedure :: CalculateTendency => CalculateTendency_ESAtmo2D
 
-  endtype ECEuler2D
+  endtype ESAtmo2D
 
   interface
-    subroutine hbc2d_nonormalflow_eceuler2d_gpu(extboundary,boundary, &
-                                                nhat,elements,sides, &
-                                                nBoundaries,N,nel,nvar) &
-      bind(c,name="hbc2d_nonormalflow_eceuler2d_gpu")
+    subroutine hbc2d_nonormalflow_esatmo2d_gpu(extboundary,boundary, &
+                                               nhat,elements,sides, &
+                                               nBoundaries,N,nel,nvar) &
+      bind(c,name="hbc2d_nonormalflow_esatmo2d_gpu")
       use iso_c_binding
       type(c_ptr),value :: extboundary,boundary,nhat,elements,sides
       integer(c_int),value :: nBoundaries,N,nel,nvar
-    endsubroutine hbc2d_nonormalflow_eceuler2d_gpu
+    endsubroutine hbc2d_nonormalflow_esatmo2d_gpu
   endinterface
 
   interface
-    subroutine pbc2d_nostress_eceuler2d_gpu(extgrad,grad, &
-                                            nhat,elements,sides, &
-                                            nBoundaries,N,nel,nvar) &
-      bind(c,name="pbc2d_nostress_eceuler2d_gpu")
+    subroutine pbc2d_nostress_esatmo2d_gpu(extgrad,grad, &
+                                           nhat,elements,sides, &
+                                           nBoundaries,N,nel,nvar) &
+      bind(c,name="pbc2d_nostress_esatmo2d_gpu")
       use iso_c_binding
       type(c_ptr),value :: extgrad,grad,nhat,elements,sides
       integer(c_int),value :: nBoundaries,N,nel,nvar
-    endsubroutine pbc2d_nostress_eceuler2d_gpu
+    endsubroutine pbc2d_nostress_esatmo2d_gpu
   endinterface
 
   interface
-    subroutine boundaryflux_eceuler2d_gpu(fb,fextb,nhat,nscale,flux, &
-                                          p0,Rd,gamma,N,nel) &
-      bind(c,name="boundaryflux_eceuler2d_gpu")
+    subroutine boundaryflux_esatmo2d_gpu(fb,fextb,nhat,nscale,flux, &
+                                         p0,Rd,gamma,N,nel) &
+      bind(c,name="boundaryflux_esatmo2d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fb,fextb,nhat,nscale,flux
       real(c_prec),value :: p0,Rd,gamma
       integer(c_int),value :: N,nel
-    endsubroutine boundaryflux_eceuler2d_gpu
+    endsubroutine boundaryflux_esatmo2d_gpu
   endinterface
 
   interface
-    subroutine twopointfluxmethod_eceuler2d_gpu(f,s,dsdx, &
-                                                p0,Rd,gamma, &
-                                                N,nvar,nel) &
-      bind(c,name="twopointfluxmethod_eceuler2d_gpu")
+    subroutine twopointfluxmethod_esatmo2d_gpu(f,s,dsdx, &
+                                               p0,Rd,gamma, &
+                                               N,nvar,nel) &
+      bind(c,name="twopointfluxmethod_esatmo2d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: f,s,dsdx
       real(c_prec),value :: p0,Rd,gamma
       integer(c_int),value :: N,nvar,nel
-    endsubroutine twopointfluxmethod_eceuler2d_gpu
+    endsubroutine twopointfluxmethod_esatmo2d_gpu
   endinterface
 
   interface
-    subroutine diffusiveflux_eceuler2d_gpu(diffFlux,grad,nu,kappa, &
-                                           N,nvar,nel) &
-      bind(c,name="diffusiveflux_eceuler2d_gpu")
+    subroutine diffusiveflux_esatmo2d_gpu(diffFlux,grad,nu,kappa, &
+                                          N,nvar,nel) &
+      bind(c,name="diffusiveflux_esatmo2d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: diffFlux,grad
       real(c_prec),value :: nu,kappa
       integer(c_int),value :: N,nvar,nel
-    endsubroutine diffusiveflux_eceuler2d_gpu
+    endsubroutine diffusiveflux_esatmo2d_gpu
   endinterface
 
   interface
-    subroutine diffusiveboundaryflux_eceuler2d_gpu(fluxN,avgGrad,uBnd,uExt, &
-                                                   nhat,nscale, &
-                                                   nu,kappa,tau_nu,tau_kappa, &
-                                                   N,nvar,nel) &
-      bind(c,name="diffusiveboundaryflux_eceuler2d_gpu")
+    subroutine diffusiveboundaryflux_esatmo2d_gpu(fluxN,avgGrad,uBnd,uExt, &
+                                                  nhat,nscale, &
+                                                  nu,kappa,tau_nu,tau_kappa, &
+                                                  N,nvar,nel) &
+      bind(c,name="diffusiveboundaryflux_esatmo2d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fluxN,avgGrad,uBnd,uExt,nhat,nscale
       real(c_prec),value :: nu,kappa,tau_nu,tau_kappa
       integer(c_int),value :: N,nvar,nel
-    endsubroutine diffusiveboundaryflux_eceuler2d_gpu
+    endsubroutine diffusiveboundaryflux_esatmo2d_gpu
   endinterface
 
   interface
-    subroutine sourcemethod_eceuler2d_gpu(source,solution,dsdx,J,dSplit, &
-                                          N,nvar,nel) &
-      bind(c,name="sourcemethod_eceuler2d_gpu")
+    subroutine sourcemethod_esatmo2d_gpu(source,solution,dsdx,J,dSplit, &
+                                         N,nvar,nel) &
+      bind(c,name="sourcemethod_esatmo2d_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: source,solution,dsdx,J,dSplit
       integer(c_int),value :: N,nvar,nel
-    endsubroutine sourcemethod_eceuler2d_gpu
+    endsubroutine sourcemethod_esatmo2d_gpu
   endinterface
 
 contains
 
-  subroutine Init_ECEuler2D(this,mesh,geometry)
+  subroutine Init_ESAtmo2D(this,mesh,geometry)
     implicit none
-    class(ECEuler2D),intent(out) :: this
+    class(ESAtmo2D),intent(out) :: this
     type(Mesh2D),intent(in),target :: mesh
     type(SEMQuad),intent(in),target :: geometry
     ! Local
@@ -164,7 +164,7 @@ contains
     enddo
 
     ! Upload parabolic BC element/side arrays to device. Required for the
-    ! GPU parabolic BC kernels (e.g. pbc2d_NoStress_ECEuler2D_GPU_wrapper).
+    ! GPU parabolic BC kernels (e.g. pbc2d_NoStress_ESAtmo2D_GPU_wrapper).
     bc => this%parabolicBCs%head
     do while(associated(bc))
       if(bc%nBoundaries > 0) then
@@ -178,11 +178,11 @@ contains
       bc => bc%next
     enddo
 
-  endsubroutine Init_ECEuler2D
+  endsubroutine Init_ESAtmo2D
 
-  subroutine Free_ECEuler2D(this)
+  subroutine Free_ESAtmo2D(this)
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
     ! Local
     type(BoundaryCondition),pointer :: bc
 
@@ -206,38 +206,38 @@ contains
 
     call Free_ECDGModel2D_t(this)
 
-  endsubroutine Free_ECEuler2D
+  endsubroutine Free_ESAtmo2D
 
-  subroutine AdditionalInit_ECEuler2D(this)
+  subroutine AdditionalInit_ESAtmo2D(this)
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
     ! Local
     procedure(SELF_bcMethod),pointer :: bcfunc
 
     ! Call parent _t AdditionalInit (registers CPU BC, allocates diff buffers)
-    call AdditionalInit_ECEuler2D_t(this)
+    call AdditionalInit_ESAtmo2D_t(this)
 
     ! Re-register with GPU-accelerated versions for both lists.
-    bcfunc => hbc2d_NoNormalFlow_ECEuler2D_GPU_wrapper
+    bcfunc => hbc2d_NoNormalFlow_ESAtmo2D_GPU_wrapper
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
-    bcfunc => pbc2d_NoStress_ECEuler2D_GPU_wrapper
+    bcfunc => pbc2d_NoStress_ESAtmo2D_GPU_wrapper
     call this%parabolicBCs%RegisterBoundaryCondition( &
       SELF_BC_NONORMALFLOW,"no_normal_flow",bcfunc)
 
-  endsubroutine AdditionalInit_ECEuler2D
+  endsubroutine AdditionalInit_ESAtmo2D
 
-  subroutine hbc2d_NoNormalFlow_ECEuler2D_GPU_wrapper(bc,mymodel)
-    !! GPU-accelerated no-normal-flow BC for 2D EC Euler.
+  subroutine hbc2d_NoNormalFlow_ESAtmo2D_GPU_wrapper(bc,mymodel)
+    !! GPU-accelerated no-normal-flow BC for 2D Entropy-Stable Atmosphere.
     !! Reflects normal momentum, mirrors density, rho*theta, and Phi.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
 
     select type(m => mymodel)
-    class is(ECEuler2D)
+    class is(ESAtmo2D)
       if(bc%nBoundaries > 0) then
-        call hbc2d_nonormalflow_eceuler2d_gpu( &
+        call hbc2d_nonormalflow_esatmo2d_gpu( &
           m%solution%extBoundary_gpu, &
           m%solution%boundary_gpu, &
           m%geometry%nhat%boundary_gpu, &
@@ -247,17 +247,17 @@ contains
       endif
     endselect
 
-  endsubroutine hbc2d_NoNormalFlow_ECEuler2D_GPU_wrapper
+  endsubroutine hbc2d_NoNormalFlow_ESAtmo2D_GPU_wrapper
 
-  subroutine pbc2d_NoStress_ECEuler2D_GPU_wrapper(bc,mymodel)
-    !! GPU-accelerated parabolic no-stress / no-heat-flux BC for 2D EC Euler.
+  subroutine pbc2d_NoStress_ESAtmo2D_GPU_wrapper(bc,mymodel)
+    !! GPU-accelerated parabolic no-stress / no-heat-flux BC for 2D Entropy-Stable Atmosphere.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
 
     select type(m => mymodel)
-    class is(ECEuler2D)
+    class is(ESAtmo2D)
       if(bc%nBoundaries > 0) then
-        call pbc2d_nostress_eceuler2d_gpu( &
+        call pbc2d_nostress_esatmo2d_gpu( &
           m%solutionGradient%extBoundary_gpu, &
           m%solutionGradient%boundary_gpu, &
           m%geometry%nhat%boundary_gpu, &
@@ -267,14 +267,14 @@ contains
       endif
     endselect
 
-  endsubroutine pbc2d_NoStress_ECEuler2D_GPU_wrapper
+  endsubroutine pbc2d_NoStress_ESAtmo2D_GPU_wrapper
 
-  subroutine BoundaryFlux_ECEuler2D(this)
+  subroutine BoundaryFlux_ESAtmo2D(this)
     !! LMARS interface flux on GPU.
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
 
-    call boundaryflux_eceuler2d_gpu( &
+    call boundaryflux_esatmo2d_gpu( &
       this%solution%boundary_gpu, &
       this%solution%extboundary_gpu, &
       this%geometry%nhat%boundary_gpu, &
@@ -284,14 +284,14 @@ contains
       this%solution%interp%N, &
       this%solution%nelem)
 
-  endsubroutine BoundaryFlux_ECEuler2D
+  endsubroutine BoundaryFlux_ESAtmo2D
 
-  subroutine TwoPointFluxMethod_ECEuler2D(this)
+  subroutine TwoPointFluxMethod_ESAtmo2D(this)
     !! Souza et al. (2023) entropy-conservative two-point flux on GPU.
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
 
-    call twopointfluxmethod_eceuler2d_gpu( &
+    call twopointfluxmethod_esatmo2d_gpu( &
       this%twoPointFlux%interior_gpu, &
       this%solution%interior_gpu, &
       this%geometry%dsdx%interior_gpu, &
@@ -300,17 +300,17 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine TwoPointFluxMethod_ECEuler2D
+  endsubroutine TwoPointFluxMethod_ESAtmo2D
 
-  subroutine SourceMethod_ECEuler2D(this)
+  subroutine SourceMethod_ESAtmo2D(this)
     !! Souza et al. (2023) non-conservative gravity flux differencing on
     !! GPU. The geopotential lives at solution(:,:,:,5); the source for
     !! rho*v is computed via the SBP-EC two-point form using log-mean
     !! density and the contravariant metric.
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
 
-    call sourcemethod_eceuler2d_gpu( &
+    call sourcemethod_esatmo2d_gpu( &
       this%source%interior_gpu, &
       this%solution%interior_gpu, &
       this%geometry%dsdx%interior_gpu, &
@@ -320,15 +320,15 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine SourceMethod_ECEuler2D
+  endsubroutine SourceMethod_ESAtmo2D
 
-  subroutine DiffusiveFluxMethod_ECEuler2D(this)
+  subroutine DiffusiveFluxMethod_ESAtmo2D(this)
     !! GPU-resident fill of diffFlux%interior with the constant-coefficient
     !! Laplacian flux F_d(iVar) = -coeff(iVar) * d(s_iVar)/dx_d.
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
 
-    call diffusiveflux_eceuler2d_gpu( &
+    call diffusiveflux_esatmo2d_gpu( &
       this%diffFlux%interior_gpu, &
       this%solutionGradient%interior_gpu, &
       this%nu,this%kappa, &
@@ -336,14 +336,14 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine DiffusiveFluxMethod_ECEuler2D
+  endsubroutine DiffusiveFluxMethod_ESAtmo2D
 
-  subroutine DiffusiveBoundaryFlux_ECEuler2D(this)
+  subroutine DiffusiveBoundaryFlux_ESAtmo2D(this)
     !! GPU-resident fill of diffFlux%boundaryNormal with the SIPG-stabilised
     !! BR1 diffusive flux:
     !!   f = -coeff*(avg_grad . n)*nmag + tau*(uL - uR)*nmag
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
     ! Local
     real(prec) :: np2,tau_nu,tau_kappa
 
@@ -351,7 +351,7 @@ contains
     tau_nu = this%eta_penalty*this%nu*np2/this%length_scale
     tau_kappa = this%eta_penalty*this%kappa*np2/this%length_scale
 
-    call diffusiveboundaryflux_eceuler2d_gpu( &
+    call diffusiveboundaryflux_esatmo2d_gpu( &
       this%diffFlux%boundarynormal_gpu, &
       this%solutionGradient%avgBoundary_gpu, &
       this%solution%boundary_gpu, &
@@ -363,12 +363,12 @@ contains
       this%solution%nvar, &
       this%solution%nelem)
 
-  endsubroutine DiffusiveBoundaryFlux_ECEuler2D
+  endsubroutine DiffusiveBoundaryFlux_ESAtmo2D
 
-  subroutine CalculateTendency_ECEuler2D(this)
-    !! GPU-resident tendency for ECEuler2D.
+  subroutine CalculateTendency_ESAtmo2D(this)
+    !! GPU-resident tendency for ESAtmo2D.
     implicit none
-    class(ECEuler2D),intent(inout) :: this
+    class(ESAtmo2D),intent(inout) :: this
     ! Local
     integer :: ndof,ndof_diff
 
@@ -421,6 +421,6 @@ contains
                            this%source%interior_gpu, &
                            this%dSdt%interior_gpu,ndof)
 
-  endsubroutine CalculateTendency_ECEuler2D
+  endsubroutine CalculateTendency_ESAtmo2D
 
-endmodule SELF_ECEuler2D
+endmodule SELF_ESAtmo2D

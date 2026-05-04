@@ -24,13 +24,13 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_ECEuler3D
+module SELF_ESAtmo3D
 
-  use SELF_ECEuler3D_t
+  use SELF_ESAtmo3D_t
 
   implicit none
 
-  type,extends(ECEuler3D_t),public :: ECEuler3D
-  endtype ECEuler3D
+  type,extends(ESAtmo3D_t),public :: ESAtmo3D
+  endtype ESAtmo3D
 
-endmodule SELF_ECEuler3D
+endmodule SELF_ESAtmo3D

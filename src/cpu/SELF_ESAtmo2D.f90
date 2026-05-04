@@ -24,13 +24,13 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-module SELF_ECEuler2D
+module SELF_ESAtmo2D
 
-  use SELF_ECEuler2D_t
+  use SELF_ESAtmo2D_t
 
   implicit none
 
-  type,extends(ECEuler2D_t),public :: ECEuler2D
-  endtype ECEuler2D
+  type,extends(ESAtmo2D_t),public :: ESAtmo2D
+  endtype ESAtmo2D
 
-endmodule SELF_ECEuler2D
+endmodule SELF_ESAtmo2D
