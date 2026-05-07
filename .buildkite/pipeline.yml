@@ -12,12 +12,9 @@ steps:
     if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/x86-cpu-debug-tests.yml
 
-  # TODO: Re-enable release builds once container build strategy is decided
-  #       (e.g. Google Cloud Build). Discuss with team.
-  # - label: ":pipeline: Release Builds"
-  #   if: build.branch != "main"
-  #   command: buildkite-agent pipeline upload .buildkite/release-builds.yml
-
-  # - label: ":pipeline: Release & Publish"
-  #   if: build.branch == "main"
-  #   command: buildkite-agent pipeline upload .buildkite/release-and-publish.yml
+  # Main-branch publish: build → on-hardware ctest → push to higherordermethods/self
+  # on Docker Hub. Covers MI210 (gfx90a), V100 (sm70), and x86 CPU. B200/B300
+  # (sm100) is published from GitHub Actions because we have no Blackwell agent.
+  - label: ":pipeline: Release & Publish"
+    if: build.branch == "main"
+    command: buildkite-agent pipeline upload .buildkite/release-and-publish.yml

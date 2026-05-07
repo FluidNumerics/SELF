@@ -24,7 +24,7 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program ec_euler3d_hydrostaticbalance
+program esatmo3d_hydrostaticbalance
   !! Tests that the EC-DG Euler 3-D model maintains a hydrostatically
   !! balanced atmosphere with uniform potential temperature.
   !!
@@ -48,7 +48,7 @@ program ec_euler3d_hydrostaticbalance
   use SELF_Lagrange
   use SELF_Mesh_3D
   use SELF_Geometry_3D
-  use SELF_ECEuler3D
+  use SELF_ESAtmo3D
 
   implicit none
 
@@ -64,7 +64,7 @@ program ec_euler3d_hydrostaticbalance
 #else
   real(prec),parameter :: tolerance = 1.0_prec*10.0_prec**(0)
 #endif
-  type(ECEuler3D) :: modelobj
+  type(ESAtmo3D) :: modelobj
   type(Lagrange),target :: interp
   type(Mesh3D),target :: mesh
   type(SEMHex),target :: geometry
@@ -162,4 +162,4 @@ program ec_euler3d_hydrostaticbalance
   call geometry%free()
   call interp%free()
 
-endprogram ec_euler3d_hydrostaticbalance
+endprogram esatmo3d_hydrostaticbalance

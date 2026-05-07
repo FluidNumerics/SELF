@@ -112,6 +112,15 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    subroutine AccumulateField_gpu(a,b,ndof) bind(c,name="AccumulateField_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: a,b
+      integer(c_int),value :: ndof
+    endsubroutine AccumulateField_gpu
+  endinterface
+
+  interface
     subroutine GradientNormal_1D_gpu(fbn,fbavg,ndof) bind(c,name="GradientNormal_1d_gpu")
       use iso_c_binding
       type(c_ptr),value :: fbn,fbavg
