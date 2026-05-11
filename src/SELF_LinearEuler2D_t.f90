@@ -29,16 +29,21 @@ module self_LinearEuler2D_t
 !! equations in 2-D. The Linear Euler Equations, here, are the Euler equations
 !! linearized about a motionless background state.
 !!
-!! The conserved variables are
-
+!! The solution variables are
+!!
 !! \begin{equation}
 !! \vec{s} = \begin{pmatrix}
 !!     \rho \\
 !!      u \\
 !!      v \\
-!!      p
+!!      p \\
+!!      c
 !!  \end{pmatrix}
 !! \end{equation}
+!!
+!! The sound speed \(c\) is carried as a solution variable so that it
+!! can vary in space. Its flux and source are identically zero, so the
+!! sound speed is held fixed in time at each spatial location.
 !!
 !! The conservative flux is
 !!
@@ -47,7 +52,8 @@ module self_LinearEuler2D_t
 !!     \rho_0 u \hat{x} + \rho_0 v \hat{y} \\
 !!      \frac{p}{\rho_0} \hat{x} \\
 !!      \frac{p}{\rho_0} \hat{y} \\
-!!      c^2 \rho_0 ( u \hat{x} + v \hat{y} )
+!!      c^2 \rho_0 ( u \hat{x} + v \hat{y} ) \\
+!!      \vec{0}
 !!  \end{pmatrix}
 !! \end{equation}
 !!
@@ -64,7 +70,6 @@ module self_LinearEuler2D_t
   type,extends(dgmodel2d) :: LinearEuler2D_t
     ! Add any additional attributes here that are specific to your model
     real(prec) :: rho0 = 1.0_prec ! Reference density
-    real(prec) :: c = 1.0_prec ! Sound speed
     real(prec) :: g = 0.0_prec ! gravitational acceleration (y-direction only)
 
   contains
@@ -85,7 +90,7 @@ contains
     implicit none
     class(LinearEuler2D_t),intent(inout) :: this
 
-    this%nvar = 4
+    this%nvar = 5
 
   endsubroutine SetNumberOfVariables_LinearEuler2D_t
 
@@ -105,6 +110,9 @@ contains
     call this%solution%SetName(4,"P") ! Pressure
     call this%solution%SetUnits(4,"kg⋅m⁻¹⋅s⁻²")
 
+    call this%solution%SetName(5,"c") ! Sound speed
+    call this%solution%SetUnits(5,"m⋅s⁻¹")
+
   endsubroutine SetMetadata_LinearEuler2D_t
 
   pure function entropy_func_LinearEuler2D_t(this,s) result(e)
@@ -113,12 +121,14 @@ contains
     !!
     !! \begin{equation}
     !!   e = \frac{1}{2} \left( \rho_0*( u^2 + v^2 ) + \frac{P^2}{\rho_0 c^2} \right)
+    !!
+    !! where the sound speed c is taken from s(5).
     class(LinearEuler2D_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec) :: e
 
     e = 0.5_prec*this%rho0*(s(2)*s(2)+s(3)*(3))+ &
-        0.5_prec*(s(4)*s(4)/(this%rho0*this%c*this%c))
+        0.5_prec*(s(4)*s(4)/(this%rho0*s(5)*s(5)))
 
   endfunction entropy_func_LinearEuler2D_t
 
@@ -137,12 +147,12 @@ contains
   subroutine hbc2d_NoNormalFlow_LinearEuler2D(bc,mymodel)
     !! No-normal-flow boundary condition for 2D linear Euler equations.
     !! Reflects the velocity vector about the boundary normal while
-    !! preserving density and pressure.
+    !! preserving density, pressure, and sound speed.
     class(BoundaryCondition),intent(in) :: bc
     class(Model),intent(inout) :: mymodel
     ! Local
     integer :: n,i,iEl,j
-    real(prec) :: nhat(1:2),s(1:4)
+    real(prec) :: nhat(1:2),s(1:5)
 
     select type(m => mymodel)
     class is(LinearEuler2D_t)
@@ -151,13 +161,14 @@ contains
         j = bc%sides(n)
         do i = 1,m%solution%interp%N+1
           nhat = m%geometry%nhat%boundary(i,j,iEl,1,1:2)
-          s = m%solution%boundary(i,j,iEl,1:4)
+          s = m%solution%boundary(i,j,iEl,1:5)
           m%solution%extBoundary(i,j,iEl,1) = s(1) ! density
           m%solution%extBoundary(i,j,iEl,2) = &
             (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
           m%solution%extBoundary(i,j,iEl,3) = &
             (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
           m%solution%extBoundary(i,j,iEl,4) = s(4) ! p
+          m%solution%extBoundary(i,j,iEl,5) = s(5) ! c
         enddo
       enddo
     endselect
@@ -176,15 +187,19 @@ contains
     flux(2,2) = 0.0_prec ! x-velocity, y flux; 0
     flux(3,1) = 0.0_prec ! y-velocity, x flux; 0
     flux(3,2) = s(4)/this%rho0 ! y-velocity, y flux; p/rho0
-    flux(4,1) = this%c*this%c*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
-    flux(4,2) = this%c*this%c*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
+    flux(4,1) = s(5)*s(5)*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
+    flux(4,2) = s(5)*s(5)*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
+    flux(5,1) = 0.0_prec ! sound speed, x flux; 0 (c is held fixed in time)
+    flux(5,2) = 0.0_prec ! sound speed, y flux; 0 (c is held fixed in time)
     if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux2d_LinearEuler2D_t
 
   pure function riemannflux2d_LinearEuler2D_t(this,sL,sR,dsdx,nhat) result(flux)
-    !! Uses a local lax-friedrich's upwind flux
-    !! The max eigenvalue is taken as the sound speed
+    !! Uses a local lax-friedrich's upwind flux for variables 1..4.
+    !! The max eigenvalue is taken as the larger of the left and right
+    !! sound speeds. The sound speed variable (index 5) has identically
+    !! zero flux so that c is held fixed in time at each location.
     class(LinearEuler2D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -192,19 +207,22 @@ contains
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: flux(1:this%nvar)
     ! Local
-    real(prec) :: fL(1:this%nvar)
-    real(prec) :: fR(1:this%nvar)
-    real(prec) :: u,v,p,c,rho0
+    real(prec) :: fL(1:4)
+    real(prec) :: fR(1:4)
+    real(prec) :: u,v,p,cL,cR,cmax,rho0
+
+    rho0 = this%rho0
+    cL = sL(5)
+    cR = sR(5)
+    cmax = max(cL,cR)
 
     u = sL(2)
     v = sL(3)
     p = sL(4)
-    rho0 = this%rho0
-    c = this%c
     fL(1) = rho0*(u*nhat(1)+v*nhat(2)) ! density
     fL(2) = p*nhat(1)/rho0 ! u
     fL(3) = p*nhat(2)/rho0 ! v
-    fL(4) = rho0*c*c*(u*nhat(1)+v*nhat(2)) ! pressure
+    fL(4) = rho0*cL*cL*(u*nhat(1)+v*nhat(2)) ! pressure
 
     u = sR(2)
     v = sR(3)
@@ -212,14 +230,15 @@ contains
     fR(1) = rho0*(u*nhat(1)+v*nhat(2)) ! density
     fR(2) = p*nhat(1)/rho0 ! u
     fR(3) = p*nhat(2)/rho0 ! v
-    fR(4) = rho0*c*c*(u*nhat(1)+v*nhat(2)) ! pressure
+    fR(4) = rho0*cR*cR*(u*nhat(1)+v*nhat(2)) ! pressure
 
-    flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+c*(sL(1:4)-sR(1:4))
+    flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+cmax*(sL(1:4)-sR(1:4))
+    flux(5) = 0.0_prec ! sound speed flux is identically zero
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearEuler2D_t
 
-  subroutine SphericalSoundWave_LinearEuler2D_t(this,rhoprime,Lr,x0,y0)
+  subroutine SphericalSoundWave_LinearEuler2D_t(this,rhoprime,Lr,x0,y0,c)
     !! This subroutine sets the initial condition for a weak blast wave
     !! problem. The initial condition is given by
     !!
@@ -232,9 +251,11 @@ contains
     !! \end{aligned}
     !! \end{equation}
     !!
+    !! The sound speed `c` (passed as an argument since it is no longer a
+    !! scalar model attribute) is set uniformly across the domain.
     implicit none
     class(LinearEuler2D_t),intent(inout) :: this
-    real(prec),intent(in) ::  rhoprime,Lr,x0,y0
+    real(prec),intent(in) ::  rhoprime,Lr,x0,y0,c
     ! Local
     integer :: i,j,iEl
     real(prec) :: x,y,rho,r
@@ -244,6 +265,7 @@ contains
     print*,__FILE__," : Lr = ",Lr
     print*,__FILE__," : x0 = ",x0
     print*,__FILE__," : y0 = ",y0
+    print*,__FILE__," : c = ",c
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   iel=1:this%mesh%nElem)
@@ -256,7 +278,8 @@ contains
       this%solution%interior(i,j,iEl,1) = rho
       this%solution%interior(i,j,iEl,2) = 0.0_prec
       this%solution%interior(i,j,iEl,3) = 0.0_prec
-      this%solution%interior(i,j,iEl,4) = rho*this%c*this%c
+      this%solution%interior(i,j,iEl,4) = rho*c*c
+      this%solution%interior(i,j,iEl,5) = c
 
     enddo
 
