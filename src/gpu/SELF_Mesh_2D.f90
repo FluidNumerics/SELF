@@ -72,6 +72,15 @@ contains
 
     allocate(this%BCNames(1:nBCs))
 
+    ! Default material table: a single "default" material covers all
+    ! elements. Readers that carry material information overwrite
+    ! these allocations with the per-file table.
+    this%nMaterials = 1
+    allocate(this%elemMaterial(1:nElem))
+    allocate(this%materialNames(1:1))
+    this%elemMaterial = 1
+    this%materialNames(1) = "default"
+
     ! Create lookup tables to assist with connectivity generation
     this%CGNSCornerMap(1:2,1) = (/1,1/)
     this%CGNSCornerMap(1:2,2) = (/nGeo+1,1/)
@@ -108,6 +117,9 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
+    if(allocated(this%materialNames)) deallocate(this%materialNames)
+    this%nMaterials = 0
     call this%decomp%Free()
 
     call gpuCheck(hipFree(this%sideInfo_gpu))
