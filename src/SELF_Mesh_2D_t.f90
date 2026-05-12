@@ -829,6 +829,11 @@ contains
     ! At least one BC slot must exist so that Init allocates BCNames/BCType
     nBCsLocal = max(nBCsLocal,1)
 
+    ! Set up the domain decomposition arrays (elemToRank, offsetElem,
+    ! request/stat slots) using the file's element count. This is
+    ! required for SideExchange even in the serial single-rank case.
+    call this%decomp%GenerateDecomposition(nElemFile,4*nElemFile)
+
     ! ---- 4. Allocate SELF Mesh2D_t and populate ----
     call this%Init(nGeo,nElemFile,4*nElemFile,nElemFile*(nGeo+1)**2,nBCsLocal)
     this%nUniqueSides = 0 ! filled below after pair matching
@@ -1034,9 +1039,9 @@ contains
       u(i) = 0.5_prec*(xi(i-1)+1.0_prec)
     enddo
 
-    ! Edge curves. HOHQMesh stores them from corner k to corner k+1
-    ! (modular). Sides 3 (North) and 4 (West) therefore run opposite
-    ! to SELF's (ξ, η) directions and need to be reversed.
+    ! Edge curves. HOHQMesh's `edgeMap(2,4)` is `(1,2 ; 2,3 ; 4,3 ; 1,4)`,
+    ! so its sides 1/2/3/4 already run in SELF's (+ξ, +η, +ξ, +η)
+    ! directions. No reversal is needed.
     do i = 1,nGeo+1
       if(flag(1) == 1) then
         gS(1:2,i) = edgeCurve(1:2,i,1)
@@ -1053,14 +1058,14 @@ contains
       endif
 
       if(flag(3) == 1) then
-        gN(1:2,i) = edgeCurve(1:2,nGeo+2-i,3) ! reverse: CN3->CN4 to +ξ
+        gN(1:2,i) = edgeCurve(1:2,i,3)
       else
         t = u(i)
         gN(1:2,i) = (1.0_prec-t)*P(1:2,4)+t*P(1:2,3)
       endif
 
       if(flag(4) == 1) then
-        gW(1:2,i) = edgeCurve(1:2,nGeo+2-i,4) ! reverse: CN4->CN1 to +η
+        gW(1:2,i) = edgeCurve(1:2,i,4)
       else
         t = u(i)
         gW(1:2,i) = (1.0_prec-t)*P(1:2,1)+t*P(1:2,4)
