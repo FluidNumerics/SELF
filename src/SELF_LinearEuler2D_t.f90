@@ -196,10 +196,31 @@ contains
   endfunction flux2d_LinearEuler2D_t
 
   pure function riemannflux2d_LinearEuler2D_t(this,sL,sR,dsdx,nhat) result(flux)
-    !! Uses a local lax-friedrich's upwind flux for variables 1..4.
-    !! The max eigenvalue is taken as the larger of the left and right
-    !! sound speeds. The sound speed variable (index 5) has identically
-    !! zero flux so that c is held fixed in time at each location.
+    !! Characteristic-decomposition (impedance-matched) interface flux for
+    !! linear acoustics with possibly discontinuous sound speed.
+    !!
+    !! The normal-flux Jacobian has eigenstructure
+    !!   +c : right-going acoustic mode, W_+ = rho0*c*u_n + p
+    !!   -c : left-going  acoustic mode, W_- = -rho0*c*u_n + p
+    !!    0 : entropy density mode      , W_0 = rho' - p/c^2
+    !!    0 : tangential vorticity mode , u_t
+    !! Upwinding each mode by its characteristic direction at the face,
+    !!   W_+|* = W_+|_L   (transmitted from left,  at speed +c_L)
+    !!   W_-|* = W_-|_R   (transmitted from right, at speed -c_R)
+    !! yields the impedance-matched interface state
+    !!   u_n* = (Z_L u_n,L + Z_R u_n,R + (p_L - p_R)) / (Z_L + Z_R)
+    !!   p*   = (Z_R p_L + Z_L p_R + Z_L Z_R (u_n,L - u_n,R)) / (Z_L + Z_R)
+    !! with Z = rho0*c. This is exact upwind / Godunov for the linearised
+    !! acoustic system and reduces correctly to Fresnel reflection /
+    !! transmission across an impedance jump (c_L .ne. c_R). LLF with
+    !! cmax = max(c_L, c_R) over-dissipates tangential and entropy modes
+    !! and at high polynomial order fails to stably handle the
+    !! impedance mismatch (aliasing instability at material interfaces).
+    !!
+    !! The pressure flux uses an averaged c^2; this is a pragmatic
+    !! treatment of the non-conservative product rho0*c^2*div(v) at a
+    !! face where c jumps. A fully path-conservative (Castro-Pares)
+    !! treatment would use each side's own c^2 in its surface integral.
     class(LinearEuler2D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -207,33 +228,28 @@ contains
     real(prec),intent(in) :: nhat(1:2)
     real(prec) :: flux(1:this%nvar)
     ! Local
-    real(prec) :: fL(1:4)
-    real(prec) :: fR(1:4)
-    real(prec) :: u,v,p,cL,cR,cmax,rho0
+    real(prec) :: rho0,cL,cR,ZL,ZR,unL,unR,pL,pR,un_star,p_star,c2_avg
 
     rho0 = this%rho0
     cL = sL(5)
     cR = sR(5)
-    cmax = max(cL,cR)
+    ZL = rho0*cL
+    ZR = rho0*cR
 
-    u = sL(2)
-    v = sL(3)
-    p = sL(4)
-    fL(1) = rho0*(u*nhat(1)+v*nhat(2)) ! density
-    fL(2) = p*nhat(1)/rho0 ! u
-    fL(3) = p*nhat(2)/rho0 ! v
-    fL(4) = rho0*cL*cL*(u*nhat(1)+v*nhat(2)) ! pressure
+    unL = sL(2)*nhat(1)+sL(3)*nhat(2)
+    unR = sR(2)*nhat(1)+sR(3)*nhat(2)
+    pL = sL(4)
+    pR = sR(4)
 
-    u = sR(2)
-    v = sR(3)
-    p = sR(4)
-    fR(1) = rho0*(u*nhat(1)+v*nhat(2)) ! density
-    fR(2) = p*nhat(1)/rho0 ! u
-    fR(3) = p*nhat(2)/rho0 ! v
-    fR(4) = rho0*cR*cR*(u*nhat(1)+v*nhat(2)) ! pressure
+    un_star = (ZL*unL+ZR*unR+(pL-pR))/(ZL+ZR)
+    p_star = (ZR*pL+ZL*pR+ZL*ZR*(unL-unR))/(ZL+ZR)
+    c2_avg = 0.5_prec*(cL*cL+cR*cR)
 
-    flux(1:4) = 0.5_prec*(fL(1:4)+fR(1:4))+cmax*(sL(1:4)-sR(1:4))
-    flux(5) = 0.0_prec ! sound speed flux is identically zero
+    flux(1) = rho0*un_star
+    flux(2) = p_star*nhat(1)/rho0
+    flux(3) = p_star*nhat(2)/rho0
+    flux(4) = rho0*c2_avg*un_star
+    flux(5) = 0.0_prec
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearEuler2D_t

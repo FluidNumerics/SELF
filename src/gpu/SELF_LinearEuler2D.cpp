@@ -30,42 +30,38 @@
 
 
 __global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, real rho0, int ndof){
+  // Characteristic-decomposition (impedance-matched) interface flux for
+  // linear acoustics with possibly discontinuous sound speed. See the
+  // CPU-side Fortran subroutine riemannflux2d_LinearEuler2D_t for the
+  // derivation. This replaces LLF, which over-dissipates the tangential
+  // and entropy modes and fails to stably handle the impedance mismatch
+  // at high polynomial order (aliasing instability).
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
+    real nx  = nhat[idof];
+    real ny  = nhat[idof+ndof];
+    real nm  = nmag[idof];
 
-    real nx = nhat[idof];
-    real ny = nhat[idof+ndof];
+    real cL  = fb[idof + 4*ndof];
+    real cR  = extfb[idof + 4*ndof];
+    real ZL  = rho0*cL;
+    real ZR  = rho0*cR;
 
-    // Left state
-    real cL = fb[idof + 4*ndof];
-    real un = fb[idof + ndof]*nx + fb[idof + 2*ndof]*ny;
-    real p = fb[idof + 3*ndof];
+    real unL = fb[idof +     ndof]*nx + fb[idof + 2*ndof]*ny;
+    real unR = extfb[idof +  ndof]*nx + extfb[idof + 2*ndof]*ny;
+    real pL  = fb[idof + 3*ndof];
+    real pR  = extfb[idof + 3*ndof];
 
-    real fl[4];
-    fl[0] = rho0*un; // density flux
-    fl[1] = p*nx/rho0; // x-momentum flux
-    fl[2] = p*ny/rho0; // y-momentum flux
-    fl[3] = rho0*cL*cL*un; // pressure flux
+    real un_star = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR);
+    real p_star  = (ZR*pL  + ZL*pR  + ZL*ZR*(unL - unR)) / (ZL + ZR);
+    real c2_avg  = 0.5*(cL*cL + cR*cR);
 
-    // Right state
-    real cR = extfb[idof + 4*ndof];
-    un = extfb[idof + ndof]*nx + extfb[idof + 2*ndof]*ny;
-    p = extfb[idof + 3*ndof];
-
-    real fr[4];
-    fr[0] = rho0*un; // density flux
-    fr[1] = p*nx/rho0; // x-momentum flux
-    fr[2] = p*ny/rho0; // y-momentum flux
-    fr[3] = rho0*cR*cR*un; // pressure flux
-
-    real cmax = (cL > cR) ? cL : cR;
-    real nm = nmag[idof];
-    flux[idof] = (0.5*(fl[0]+fr[0])+cmax*(fb[idof]-extfb[idof]))*nm; // density
-    flux[idof+ndof] = (0.5*(fl[1]+fr[1])+cmax*(fb[idof+ndof]-extfb[idof+ndof]))*nm; // u
-    flux[idof+2*ndof] = (0.5*(fl[2]+fr[2])+cmax*(fb[idof+2*ndof]-extfb[idof+2*ndof]))*nm; // v
-    flux[idof+3*ndof] = (0.5*(fl[3]+fr[3])+cmax*(fb[idof+3*ndof]-extfb[idof+3*ndof]))*nm; // p
-    flux[idof+4*ndof] = 0.0; // sound speed flux is identically zero
+    flux[idof]          = (rho0*un_star) * nm;          // density
+    flux[idof + ndof]   = (p_star*nx/rho0) * nm;        // u
+    flux[idof + 2*ndof] = (p_star*ny/rho0) * nm;        // v
+    flux[idof + 3*ndof] = (rho0*c2_avg*un_star) * nm;   // pressure
+    flux[idof + 4*ndof] = 0.0;                          // sound speed
   }
 }
 
