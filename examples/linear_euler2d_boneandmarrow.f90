@@ -35,7 +35,6 @@ module lineareuler2d_boneandmarrow_model
 !! them), and radiates out through the outer boundary.
 
   use self_lineareuler2d
-  use SELF_BoundaryConditions
 
   implicit none
 
@@ -52,53 +51,16 @@ module lineareuler2d_boneandmarrow_model
 
   contains
 
+    ! AdditionalInit is inherited from `lineareuler2d`, which registers both
+    ! the no-normal-flow and radiation BCs using the correct CPU/GPU wrappers
+    ! for the current build. The radiation wrapper zeros (rho', u, v, p) and
+    ! preserves c on the same host/device buffer the rest of the pipeline
+    ! reads from, which is what this disk-shaped scatterer test requires.
     procedure :: setInitialCondition
-    procedure :: AdditionalInit => AdditionalInit_lineareuler2d_boneandmarrow
 
   endtype lineareuler2d_boneandmarrow
 
 contains
-
-  subroutine AdditionalInit_lineareuler2d_boneandmarrow(this)
-    !! Registers the radiation BC for the CPU path. The base class
-    !! `_t` only wires up no_normal_flow; we want all four sides of
-    !! this disk-shaped domain to behave as transparent outflow.
-    implicit none
-    class(lineareuler2d_boneandmarrow),intent(inout) :: this
-    procedure(SELF_bcMethod),pointer :: bcfunc
-
-    call AdditionalInit_LinearEuler2D_t(this)
-
-    bcfunc => hbc2d_Radiation_lineareuler2d_boneandmarrow
-    call this%hyperbolicBCs%RegisterBoundaryCondition( &
-      SELF_BC_RADIATION,"radiation",bcfunc)
-
-  endsubroutine AdditionalInit_lineareuler2d_boneandmarrow
-
-  subroutine hbc2d_Radiation_lineareuler2d_boneandmarrow(bc,mymodel)
-    !! Radiation (zero-state) BC for the four prognostic variables.
-    !! The sound speed (variable 5) is copied through from the
-    !! interior so that the face Riemann flux sees a consistent c.
-    class(BoundaryCondition),intent(in) :: bc
-    class(Model),intent(inout) :: mymodel
-    integer :: n,i,iEl,j
-
-    select type(m => mymodel)
-    class is(lineareuler2d_boneandmarrow)
-      do n = 1,bc%nBoundaries
-        iEl = bc%elements(n)
-        j = bc%sides(n)
-        do i = 1,m%solution%interp%N+1
-          m%solution%extBoundary(i,j,iEl,1) = 0.0_prec ! rho
-          m%solution%extBoundary(i,j,iEl,2) = 0.0_prec ! u
-          m%solution%extBoundary(i,j,iEl,3) = 0.0_prec ! v
-          m%solution%extBoundary(i,j,iEl,4) = 0.0_prec ! p
-          m%solution%extBoundary(i,j,iEl,5) = m%solution%boundary(i,j,iEl,5) ! c
-        enddo
-      enddo
-    endselect
-
-  endsubroutine hbc2d_Radiation_lineareuler2d_boneandmarrow
 
   subroutine setInitialCondition(this)
     !! Material-aware initial condition: stamp `c` from the per-
