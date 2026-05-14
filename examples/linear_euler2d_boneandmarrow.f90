@@ -47,7 +47,7 @@ module lineareuler2d_boneandmarrow_model
     real(prec) :: c_marrow = 0.92_prec
     real(prec) :: bump_x0 = 10.0_prec ! Pulse center, well into the muscle annulus
     real(prec) :: bump_y0 = 0.0_prec
-    real(prec) :: bump_L = 0.6_prec   ! Halfwidth (e-folding length) of the bump
+    real(prec) :: bump_L = 0.6_prec ! Halfwidth (e-folding length) of the bump
     real(prec) :: bump_amp = 1.0e-3_prec ! Density-perturbation amplitude
 
   contains

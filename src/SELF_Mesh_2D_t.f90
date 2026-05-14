@@ -861,8 +861,8 @@ contains
     ! Place corner nodes and run transfinite interpolation per element
     do e = 1,nElemFile
       call build_nodeCoords_for_element(this,e,nGeo,cornerIDs=ismCorners(:,e), &
-                                         flag=ismFlag(:,e),edgeCurve=edgeCurve(:,:,:,e), &
-                                         nodeXY=nodeXY)
+                                        flag=ismFlag(:,e),edgeCurve=edgeCurve(:,:,:,e), &
+                                        nodeXY=nodeXY)
       ! Synthesize globalNodeIDs: stamp the four corners with their file
       ! IDs and leave interior IDs as 0 (interior nodes are private to
       ! the element under our high-order tensor product layout).
