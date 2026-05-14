@@ -47,6 +47,7 @@ module lineareuler2d_planewave_prop_model
     real(prec) :: x0 = 0.0_prec ! x component of the wave center position
     real(prec) :: y0 = 0.0_prec ! y component of the wave center position
     real(prec) :: L = 1.0_prec ! Halfwidth of the plane wave
+    real(prec) :: c = 1.0_prec ! Reference sound speed (parameter for the analytical solution)
 
   contains
 
@@ -97,6 +98,7 @@ contains
       this%solution%interior(i,j,iel,2) = u*shape ! u
       this%solution%interior(i,j,iel,3) = v*shape ! v
       this%solution%interior(i,j,iel,4) = p*shape ! pressure
+      this%solution%interior(i,j,iel,5) = this%c ! sound speed (uniform background)
 
     enddo
 
@@ -132,6 +134,7 @@ contains
           m%solution%extBoundary(i,j,iEl,2) = u*shape ! u
           m%solution%extBoundary(i,j,iEl,3) = v*shape ! v
           m%solution%extBoundary(i,j,iEl,4) = p*shape ! pressure
+          m%solution%extBoundary(i,j,iEl,5) = m%c ! sound speed
         enddo
       enddo
     endselect

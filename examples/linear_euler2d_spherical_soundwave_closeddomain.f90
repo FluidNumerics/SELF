@@ -73,10 +73,10 @@ program LinearEuler_Example
   modelobj%prescribed_bcs_enabled = .false. ! Disables prescribed boundary condition block for gpu accelerated implementations
   modelobj%tecplot_enabled = .false. ! Disables tecplot output
   modelobj%rho0 = rho0 ! optional, set the reference density
-  modelobj%c = c ! optional set the reference sound wave speed
 
-  ! Set the initial condition
-  call modelobj%SphericalSoundWave(rhoprime,Lr,x0,y0)
+  ! Set the initial condition. The sound speed `c` is now carried as a
+  ! solution variable, so it is passed in here and written into solution(...,5).
+  call modelobj%SphericalSoundWave(rhoprime,Lr,x0,y0,c)
 
   call modelobj%WriteModel()
   call modelobj%IncrementIOCounter()

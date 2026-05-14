@@ -28,6 +28,7 @@ module SELF_Mesh_2D_t
 
   use SELF_Constants
   use SELF_Lagrange
+  use SELF_Quadrature
   use SELF_SupportRoutines
   use SELF_HDF5
   use SELF_Mesh
@@ -95,6 +96,9 @@ module SELF_Mesh_2D_t
   ! Mesh format is set up similar to the HOPr format
   ! See https://hopr-project.org/externals/MeshFormat.pdf
 
+  ! Length of a material-name string stored in the mesh
+  integer,parameter :: SELF_MESH_MATNAME_LENGTH = 64
+
   type,extends(SEMMesh) :: Mesh2D_t
     integer,pointer,dimension(:,:,:) :: sideInfo
     real(prec),pointer,dimension(:,:,:,:) :: nodeCoords
@@ -104,6 +108,14 @@ module SELF_Mesh_2D_t
     integer,pointer,dimension(:,:) :: CGNSSideMap
     integer,pointer,dimension(:,:) :: BCType
     character(LEN=255),allocatable :: BCNames(:)
+    ! Material tracking: every element has an integer material id
+    ! indexing into materialNames. Single-material readers (HOPr,
+    ! structured, ISM, ISM-v2) leave nMaterials = 1 with the name
+    ! "default". The ISM-MM reader populates the table with the
+    ! material strings from the .mesh file.
+    integer :: nMaterials = 0
+    integer,allocatable :: elemMaterial(:)
+    character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: materialNames(:)
 
   contains
     procedure,public :: Init => Init_Mesh2D_t
@@ -115,6 +127,7 @@ module SELF_Mesh_2D_t
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D_t
 
     procedure,public :: Read_HOPr => Read_HOPr_Mesh2D_t
+    procedure,public :: Read_HOHQMesh => Read_HOHQMesh_Mesh2D_t
 
     procedure,public :: Write_Mesh => Write_Mesh2D_t
 
@@ -152,6 +165,15 @@ contains
 
     allocate(this%BCNames(1:nBCs))
 
+    ! Default material table: a single "default" material covers all
+    ! elements. Readers that carry material information overwrite
+    ! these allocations with the per-file table.
+    this%nMaterials = 1
+    allocate(this%elemMaterial(1:nElem))
+    allocate(this%materialNames(1:1))
+    this%elemMaterial = 1
+    this%materialNames(1) = "default"
+
     ! Create lookup tables to assist with connectivity generation
     this%CGNSCornerMap(1:2,1) = (/1,1/)
     this%CGNSCornerMap(1:2,2) = (/nGeo+1,1/)
@@ -186,6 +208,9 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
+    if(allocated(this%materialNames)) deallocate(this%materialNames)
+    this%nMaterials = 0
     call this%decomp%Free()
 
   endsubroutine Free_Mesh2D_t
@@ -621,6 +646,445 @@ contains
     call this%UpdateDevice()
 
   endsubroutine Read_HOPr_Mesh2D_t
+
+  subroutine Read_HOHQMesh_Mesh2D_t(this,meshFile)
+    !! Reader for HOHQMesh text mesh files in the ISM and ISM-MM
+    !! formats. The format is auto-detected from the first line:
+    !!   * Line equal to "ISM-MM" (trimmed) => ISM-MM with per-element
+    !!     material name strings and a 4-int count line that includes
+    !!     an unused nEdges field (the ISM-MM writer in HOHQMesh does
+    !!     NOT emit an edge block).
+    !!   * Anything else is treated as plain ISM: the first line is
+    !!     itself the count line "nNodes nElems polyOrder" and there
+    !!     are no per-element material names.
+    !!
+    !! See HOHQMesh `WriteISMMeshFile` in `Source/IO/MeshOutputMethods.f90`
+    !! for the canonical writer. Curve sample points are written at
+    !! Chebyshev-Gauss-Lobatto nodes, so the resulting mesh has
+    !! `quadrature = CHEBYSHEV_GAUSS_LOBATTO`.
+    !!
+    !! Element-side connectivity (sideInfo(3:4,...)) is not present in
+    !! either of these formats, so neighbors are reconstructed here by
+    !! matching pairs of corner-node IDs across elements. Boundary
+    !! names from the .mesh file are collected into this%BCNames, and
+    !! sideInfo(5,...) carries the corresponding 1-based index (or 0
+    !! for interior faces). Material names (ISM-MM) populate
+    !! this%materialNames and this%elemMaterial.
+    implicit none
+    class(Mesh2D_t),intent(out) :: this
+    character(*),intent(in) :: meshFile
+    ! Local
+    integer :: iUnit
+    integer :: ios
+    integer :: nNodesFile,nEdgesFile,nElemFile,polyOrder
+    integer :: nGeo,nLocal
+    integer :: i,j,k,e,iSide
+    integer :: cornerIDs(1:4)
+    integer :: bCurveFlag(1:4)
+    integer :: cN1,cN2
+    integer :: ePair,sPair
+    integer :: bcIdx
+    integer :: matIdx
+    integer :: nBCsLocal
+    integer :: nMatsLocal
+    integer :: nCornerPairs
+    integer :: hashKey,bucket,probe
+    integer :: hashSize
+    integer,allocatable :: hashHead(:)
+    integer,allocatable :: hashNext(:)
+    integer,allocatable :: pairN1(:),pairN2(:)
+    integer,allocatable :: pairElem(:),pairSide(:)
+    integer,allocatable :: ismCorners(:,:) ! 4 x nElem
+    integer,allocatable :: ismBCid(:,:) ! 4 x nElem
+    integer,allocatable :: ismFlag(:,:) ! 4 x nElem
+    integer,allocatable :: ismMat(:) ! nElem
+    real(prec),allocatable :: nodeXY(:,:) ! 2 x nNodesFile
+    real(prec),allocatable :: edgeCurve(:,:,:,:) ! 2, nGeo+1, 4, nElem
+    real(prec) :: xyz(1:3)
+    character(LEN=255) :: header
+    character(LEN=SELF_MESH_MATNAME_LENGTH) :: matName
+    character(LEN=255) :: bdyNames(1:4)
+    character(LEN=255),allocatable :: BCNamesLocal(:)
+    character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: matNamesLocal(:)
+    logical :: isISM_MM
+
+    call this%decomp%init()
+
+    open(newunit=iUnit,file=trim(meshFile),status='old',action='read', &
+         form='formatted',iostat=ios)
+    if(ios /= 0) then
+      print*,__FILE__//' : Failed to open '//trim(meshFile)
+      stop 1
+    endif
+
+    print*,__FILE__//' : Reading HOHQMesh mesh from '//trim(meshFile)
+
+    ! ---- 1. Detect format from the first line ----
+    read(iUnit,'(A)') header
+    if(trim(adjustl(header)) == "ISM-MM") then
+      isISM_MM = .true.
+      read(iUnit,*) nNodesFile,nEdgesFile,nElemFile,polyOrder
+    else
+      isISM_MM = .false.
+      ! The header line we just read IS the count line for plain ISM.
+      read(header,*) nNodesFile,nElemFile,polyOrder
+      nEdgesFile = 0
+    endif
+
+    nGeo = polyOrder
+    print*,__FILE__//' : Format = ',merge("ISM-MM","ISM   ",isISM_MM)
+    print*,__FILE__//' : nNodes = ',nNodesFile,' nElem = ',nElemFile, &
+      ' polyOrder = ',polyOrder
+
+    ! ---- 2. Read all node coordinates (drop the z component for 2D) ----
+    allocate(nodeXY(1:2,1:nNodesFile))
+    do i = 1,nNodesFile
+      read(iUnit,*) xyz(1:3)
+      nodeXY(1:2,i) = xyz(1:2)
+    enddo
+
+    ! Neither ISM nor ISM-MM writes an edge block, even though ISM-MM's
+    ! count line declares nEdges. The HOHQMesh writer only emits edges
+    ! for the ISM-V2 variant.
+
+    ! ---- 3. Per-element block ----
+    allocate(ismCorners(1:4,1:nElemFile))
+    allocate(ismFlag(1:4,1:nElemFile))
+    allocate(ismBCid(1:4,1:nElemFile))
+    allocate(ismMat(1:nElemFile))
+    allocate(edgeCurve(1:2,1:nGeo+1,1:4,1:nElemFile))
+    edgeCurve = 0.0_prec
+
+    ! Boundary-name table built incrementally
+    nBCsLocal = 0
+    allocate(BCNamesLocal(1:16))
+    BCNamesLocal = ""
+
+    ! Material-name table built incrementally
+    nMatsLocal = 0
+    allocate(matNamesLocal(1:8))
+    matNamesLocal = ""
+
+    do e = 1,nElemFile
+
+      if(isISM_MM) then
+        read(iUnit,*) cornerIDs(1:4),matName
+        ! lookup/insert material name
+        matIdx = 0
+        do k = 1,nMatsLocal
+          if(trim(matNamesLocal(k)) == trim(matName)) then
+            matIdx = k; exit
+          endif
+        enddo
+        if(matIdx == 0) then
+          nMatsLocal = nMatsLocal+1
+          if(nMatsLocal > size(matNamesLocal)) call grow_string_table(matNamesLocal)
+          matNamesLocal(nMatsLocal) = matName
+          matIdx = nMatsLocal
+        endif
+        ismMat(e) = matIdx
+      else
+        read(iUnit,*) cornerIDs(1:4)
+        ismMat(e) = 1
+      endif
+      ismCorners(1:4,e) = cornerIDs
+
+      read(iUnit,*) bCurveFlag(1:4)
+      ismFlag(1:4,e) = bCurveFlag
+
+      do k = 1,4
+        if(bCurveFlag(k) == 1) then
+          do j = 1,nGeo+1
+            read(iUnit,*) xyz(1:3)
+            edgeCurve(1:2,j,k,e) = xyz(1:2)
+          enddo
+        endif
+      enddo
+
+      read(iUnit,*) bdyNames(1:4)
+      do k = 1,4
+        if(trim(adjustl(bdyNames(k))) == "---") then
+          ismBCid(k,e) = 0
+        else
+          ! lookup/insert bdy name
+          bcIdx = 0
+          do i = 1,nBCsLocal
+            if(trim(BCNamesLocal(i)) == trim(adjustl(bdyNames(k)))) then
+              bcIdx = i; exit
+            endif
+          enddo
+          if(bcIdx == 0) then
+            nBCsLocal = nBCsLocal+1
+            if(nBCsLocal > size(BCNamesLocal)) call grow_bc_table(BCNamesLocal)
+            BCNamesLocal(nBCsLocal) = trim(adjustl(bdyNames(k)))
+            bcIdx = nBCsLocal
+          endif
+          ismBCid(k,e) = bcIdx
+        endif
+      enddo
+    enddo
+
+    close(iUnit)
+
+    ! At least one BC slot must exist so that Init allocates BCNames/BCType
+    nBCsLocal = max(nBCsLocal,1)
+
+    ! Set up the domain decomposition arrays (elemToRank, offsetElem,
+    ! request/stat slots) using the file's element count. This is
+    ! required for SideExchange even in the serial single-rank case.
+    call this%decomp%GenerateDecomposition(nElemFile,4*nElemFile)
+
+    ! ---- 4. Allocate SELF Mesh2D_t and populate ----
+    call this%Init(nGeo,nElemFile,4*nElemFile,nElemFile*(nGeo+1)**2,nBCsLocal)
+    this%nUniqueSides = 0 ! filled below after pair matching
+    this%quadrature = CHEBYSHEV_GAUSS_LOBATTO ! HOHQMesh curve samples are at CGL points
+    this%BCType = 0
+    do i = 1,nBCsLocal
+      if(BCNamesLocal(i) /= "") then
+        this%BCNames(i) = BCNamesLocal(i)
+      else
+        this%BCNames(i) = "unused"
+      endif
+    enddo
+
+    ! Replace the default single-material table with the parsed one
+    deallocate(this%materialNames)
+    this%nMaterials = max(nMatsLocal,1)
+    allocate(this%materialNames(1:this%nMaterials))
+    if(nMatsLocal == 0) then
+      this%materialNames(1) = "default"
+    else
+      this%materialNames(1:nMatsLocal) = matNamesLocal(1:nMatsLocal)
+    endif
+    this%elemMaterial = ismMat
+
+    ! Place corner nodes and run transfinite interpolation per element
+    do e = 1,nElemFile
+      call build_nodeCoords_for_element(this,e,nGeo,cornerIDs=ismCorners(:,e), &
+                                        flag=ismFlag(:,e),edgeCurve=edgeCurve(:,:,:,e), &
+                                        nodeXY=nodeXY)
+      ! Synthesize globalNodeIDs: stamp the four corners with their file
+      ! IDs and leave interior IDs as 0 (interior nodes are private to
+      ! the element under our high-order tensor product layout).
+      this%globalNodeIDs(:,:,e) = 0
+      this%globalNodeIDs(1,1,e) = ismCorners(1,e)
+      this%globalNodeIDs(nGeo+1,1,e) = ismCorners(2,e)
+      this%globalNodeIDs(nGeo+1,nGeo+1,e) = ismCorners(3,e)
+      this%globalNodeIDs(1,nGeo+1,e) = ismCorners(4,e)
+
+      ! Pack elemInfo with simple placeholders; SELF's 2D path does not
+      ! depend on the HOPR-style offset fields when the mesh comes from
+      ! a non-HOPR reader.
+      this%elemInfo(1,e) = 0
+      this%elemInfo(2,e) = ismMat(e) ! Zone = material id
+      this%elemInfo(3,e) = 4*(e-1)
+      this%elemInfo(4,e) = 4*e
+      this%elemInfo(5,e) = (nGeo+1)**2*(e-1)
+      this%elemInfo(6,e) = (nGeo+1)**2*e
+    enddo
+
+    ! ---- 5. Build sideInfo via corner-pair matching ----
+    nCornerPairs = 4*nElemFile
+    allocate(pairN1(1:nCornerPairs),pairN2(1:nCornerPairs))
+    allocate(pairElem(1:nCornerPairs),pairSide(1:nCornerPairs))
+    do e = 1,nElemFile
+      do iSide = 1,4
+        call corner_pair_for_side(ismCorners(:,e),iSide,cN1,cN2)
+        i = iSide+4*(e-1)
+        pairN1(i) = min(cN1,cN2)
+        pairN2(i) = max(cN1,cN2)
+        pairElem(i) = e
+        pairSide(i) = iSide
+      enddo
+    enddo
+
+    ! Hash chain by first node id
+    hashSize = max(nNodesFile,nCornerPairs)+1
+    allocate(hashHead(0:hashSize-1),hashNext(1:nCornerPairs))
+    hashHead = 0
+    hashNext = 0
+    do i = 1,nCornerPairs
+      hashKey = pairN1(i)
+      bucket = modulo(hashKey,hashSize)
+      hashNext(i) = hashHead(bucket)
+      hashHead(bucket) = i
+    enddo
+
+    this%sideInfo = 0
+    this%nUniqueSides = 0
+    do e = 1,nElemFile
+      do iSide = 1,4
+        i = iSide+4*(e-1)
+        ePair = 0; sPair = 0
+        bucket = modulo(pairN1(i),hashSize)
+        probe = hashHead(bucket)
+        do while(probe /= 0)
+          if(probe /= i .and. pairN1(probe) == pairN1(i) .and. &
+             pairN2(probe) == pairN2(i)) then
+            ePair = pairElem(probe)
+            sPair = pairSide(probe)
+            exit
+          endif
+          probe = hashNext(probe)
+        enddo
+        this%sideInfo(3,iSide,e) = ePair
+        this%sideInfo(4,iSide,e) = 10*sPair ! flip resolved by RecalculateFlip
+        this%sideInfo(5,iSide,e) = ismBCid(iSide,e)
+        ! Allocate a globalSideID (count each shared side once)
+        if(ePair == 0 .or. e < ePair) then
+          this%nUniqueSides = this%nUniqueSides+1
+          this%sideInfo(2,iSide,e) = this%nUniqueSides
+        else
+          this%sideInfo(2,iSide,e) = this%sideInfo(2,sPair,ePair)
+        endif
+      enddo
+    enddo
+
+    deallocate(hashHead,hashNext,pairN1,pairN2,pairElem,pairSide)
+    deallocate(nodeXY,ismCorners,ismFlag,ismBCid,ismMat,edgeCurve)
+    deallocate(BCNamesLocal,matNamesLocal)
+
+    call this%RecalculateFlip()
+    call this%UpdateDevice()
+
+  contains
+
+    subroutine grow_bc_table(tbl)
+      character(LEN=255),allocatable,intent(inout) :: tbl(:)
+      character(LEN=255),allocatable :: tmp(:)
+      integer :: oldSize
+      oldSize = size(tbl)
+      allocate(tmp(1:2*oldSize))
+      tmp(1:oldSize) = tbl(1:oldSize)
+      tmp(oldSize+1:) = ""
+      call move_alloc(tmp,tbl)
+    endsubroutine grow_bc_table
+
+    subroutine grow_string_table(tbl)
+      character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable,intent(inout) :: tbl(:)
+      character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: tmp(:)
+      integer :: oldSize
+      oldSize = size(tbl)
+      allocate(tmp(1:2*oldSize))
+      tmp(1:oldSize) = tbl(1:oldSize)
+      tmp(oldSize+1:) = ""
+      call move_alloc(tmp,tbl)
+    endsubroutine grow_string_table
+
+  endsubroutine Read_HOHQMesh_Mesh2D_t
+
+  subroutine corner_pair_for_side(corners,iSide,cN1,cN2)
+    !! Returns the two corner-node IDs delimiting a given local side
+    !! using SELF's 2D side convention:
+    !!   Side 1 South = [CN1, CN2]
+    !!   Side 2 East  = [CN2, CN3]
+    !!   Side 3 North = [CN4, CN3]
+    !!   Side 4 West  = [CN1, CN4]
+    implicit none
+    integer,intent(in) :: corners(1:4)
+    integer,intent(in) :: iSide
+    integer,intent(out) :: cN1,cN2
+    select case(iSide)
+    case(1); cN1 = corners(1); cN2 = corners(2)
+    case(2); cN1 = corners(2); cN2 = corners(3)
+    case(3); cN1 = corners(4); cN2 = corners(3)
+    case(4); cN1 = corners(1); cN2 = corners(4)
+    case default; cN1 = 0; cN2 = 0
+    endselect
+  endsubroutine corner_pair_for_side
+
+  subroutine build_nodeCoords_for_element(mesh,e,nGeo,cornerIDs,flag,edgeCurve,nodeXY)
+    !! Fill mesh%nodeCoords(:,:,:,e) for one element. Place the four
+    !! corner nodes from the file's node table, then perform linear
+    !! (nGeo=1) placement or transfinite interpolation (nGeo>1) using
+    !! the (possibly curved) edge curves. For straight sides the edge
+    !! curve is filled in here by linear interpolation between corners
+    !! at Chebyshev-Gauss-Lobatto parametric coordinates.
+    implicit none
+    class(Mesh2D_t),intent(inout) :: mesh
+    integer,intent(in) :: e
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: cornerIDs(1:4)
+    integer,intent(in) :: flag(1:4)
+    real(prec),intent(in) :: edgeCurve(1:2,1:nGeo+1,1:4)
+    real(prec),intent(in) :: nodeXY(:,:)
+    ! Local
+    real(prec) :: P(1:2,1:4)
+    real(prec) :: gS(1:2,1:nGeo+1),gE(1:2,1:nGeo+1)
+    real(prec) :: gN(1:2,1:nGeo+1),gW(1:2,1:nGeo+1)
+    real(prec) :: xi(0:nGeo),wts(0:nGeo)
+    real(prec) :: u(1:nGeo+1),t
+    integer :: i,j
+
+    P(1:2,1) = nodeXY(1:2,cornerIDs(1))
+    P(1:2,2) = nodeXY(1:2,cornerIDs(2))
+    P(1:2,3) = nodeXY(1:2,cornerIDs(3))
+    P(1:2,4) = nodeXY(1:2,cornerIDs(4))
+
+    if(nGeo == 1) then
+      ! Pure bilinear element with the 4 corners
+      mesh%nodeCoords(1:2,1,1,e) = P(1:2,1)
+      mesh%nodeCoords(1:2,nGeo+1,1,e) = P(1:2,2)
+      mesh%nodeCoords(1:2,nGeo+1,nGeo+1,e) = P(1:2,3)
+      mesh%nodeCoords(1:2,1,nGeo+1,e) = P(1:2,4)
+      return
+    endif
+
+    ! Chebyshev-Gauss-Lobatto parametric coordinates on [-1,1] and
+    ! their [0,1] image used in the TFI blending weights. We use
+    ! SELF's quadrature routine to keep node placement consistent
+    ! with the rest of the code.
+    call ChebyshevQuadrature(nGeo,xi,wts,CHEBYSHEV_GAUSS_LOBATTO)
+    do i = 1,nGeo+1
+      u(i) = 0.5_prec*(xi(i-1)+1.0_prec)
+    enddo
+
+    ! Edge curves. HOHQMesh's `edgeMap(2,4)` is `(1,2 ; 2,3 ; 4,3 ; 1,4)`,
+    ! so its sides 1/2/3/4 already run in SELF's (+ξ, +η, +ξ, +η)
+    ! directions. No reversal is needed.
+    do i = 1,nGeo+1
+      if(flag(1) == 1) then
+        gS(1:2,i) = edgeCurve(1:2,i,1)
+      else
+        t = u(i)
+        gS(1:2,i) = (1.0_prec-t)*P(1:2,1)+t*P(1:2,2)
+      endif
+
+      if(flag(2) == 1) then
+        gE(1:2,i) = edgeCurve(1:2,i,2)
+      else
+        t = u(i)
+        gE(1:2,i) = (1.0_prec-t)*P(1:2,2)+t*P(1:2,3)
+      endif
+
+      if(flag(3) == 1) then
+        gN(1:2,i) = edgeCurve(1:2,i,3)
+      else
+        t = u(i)
+        gN(1:2,i) = (1.0_prec-t)*P(1:2,4)+t*P(1:2,3)
+      endif
+
+      if(flag(4) == 1) then
+        gW(1:2,i) = edgeCurve(1:2,i,4)
+      else
+        t = u(i)
+        gW(1:2,i) = (1.0_prec-t)*P(1:2,1)+t*P(1:2,4)
+      endif
+    enddo
+
+    ! Transfinite (Coons-patch) interpolation. u,v in [0,1].
+    do j = 1,nGeo+1
+      do i = 1,nGeo+1
+        mesh%nodeCoords(1:2,i,j,e) = &
+          (1.0_prec-u(j))*gS(1:2,i)+u(j)*gN(1:2,i)+ &
+          (1.0_prec-u(i))*gW(1:2,j)+u(i)*gE(1:2,j)- &
+          ((1.0_prec-u(i))*(1.0_prec-u(j))*P(1:2,1)+ &
+           u(i)*(1.0_prec-u(j))*P(1:2,2)+ &
+           u(i)*u(j)*P(1:2,3)+ &
+           (1.0_prec-u(i))*u(j)*P(1:2,4))
+      enddo
+    enddo
+  endsubroutine build_nodeCoords_for_element
 
   subroutine RecalculateFlip_Mesh2D_t(this)
     implicit none
