@@ -159,6 +159,8 @@ add_fortran_tests (
     "points_locate_3d.f90"
     "points_eval_cache_2d.f90"
     "points_eval_cache_3d.f90"
+    "points_eval_gpu_2d.f90"
+    "points_eval_gpu_3d.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
