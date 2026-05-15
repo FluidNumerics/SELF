@@ -81,12 +81,12 @@ module SELF_Points_t
     procedure,public :: SetPoints => SetPoints_Points_t
 
     generic,public :: LocatePoints => LocatePoints_2D_Points_t,LocatePoints_3D_Points_t
-    procedure,private :: LocatePoints_2D_Points_t
-    procedure,private :: LocatePoints_3D_Points_t
+    procedure,public :: LocatePoints_2D_Points_t
+    procedure,public :: LocatePoints_3D_Points_t
 
     generic,public :: EvaluateScalar => EvalScalar_2D_Points_t,EvalScalar_3D_Points_t
-    procedure,private :: EvalScalar_2D_Points_t
-    procedure,private :: EvalScalar_3D_Points_t
+    procedure,public :: EvalScalar_2D_Points_t
+    procedure,public :: EvalScalar_3D_Points_t
 
   endtype Points_t
 
