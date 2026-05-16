@@ -154,6 +154,13 @@ add_fortran_tests (
     "ec_advection_3d_entropy_conservation.f90"
     "esatmo3d_motionless.f90"
     "esatmo3d_hydrostaticbalance.f90"
+    "points_locate_2d.f90"
+    "points_locate_2d_outside.f90"
+    "points_locate_3d.f90"
+    "points_eval_cache_2d.f90"
+    "points_eval_cache_3d.f90"
+    "points_eval_gpu_2d.f90"
+    "points_eval_gpu_3d.f90"
     )
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
