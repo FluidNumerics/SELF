@@ -104,7 +104,7 @@ contains
       r = 1
       return
     endif
-    if(.not. allocated(pts%lS_cache) .or. .not. allocated(pts%lT_cache)) then
+    if(.not. associated(pts%lS_cache) .or. .not. associated(pts%lT_cache)) then
       print*,"cache arrays not allocated after LocatePoints"
       r = 1
       return

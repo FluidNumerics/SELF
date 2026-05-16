@@ -139,11 +139,16 @@ contains
     class(Points),intent(inout) :: this
 
     if(allocated(this%x)) deallocate(this%x)
-    if(allocated(this%elements)) deallocate(this%elements)
-    if(allocated(this%coordinates)) deallocate(this%coordinates)
-    if(allocated(this%lS_cache)) deallocate(this%lS_cache)
-    if(allocated(this%lT_cache)) deallocate(this%lT_cache)
-    if(allocated(this%lU_cache)) deallocate(this%lU_cache)
+    if(associated(this%elements)) deallocate(this%elements)
+    if(associated(this%coordinates)) deallocate(this%coordinates)
+    if(associated(this%lS_cache)) deallocate(this%lS_cache)
+    if(associated(this%lT_cache)) deallocate(this%lT_cache)
+    if(associated(this%lU_cache)) deallocate(this%lU_cache)
+    this%elements => null()
+    this%coordinates => null()
+    this%lS_cache => null()
+    this%lT_cache => null()
+    this%lU_cache => null()
 
     if(c_associated(this%elements_gpu)) call gpuCheck(hipFree(this%elements_gpu))
     if(c_associated(this%coordinates_gpu)) call gpuCheck(hipFree(this%coordinates_gpu))
@@ -206,7 +211,7 @@ contains
                             hipMemcpyHostToDevice))
 
     if(this%nCached <= 0) return
-    if(.not. allocated(this%lS_cache) .or. .not. allocated(this%lT_cache)) return
+    if(.not. associated(this%lS_cache) .or. .not. associated(this%lT_cache)) return
 
     ! (Re)allocate per-point basis caches on the device if needed.
     if(this%nCachedAlloc /= this%nCached) then
@@ -228,7 +233,7 @@ contains
                             hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%lT_cache_gpu,c_loc(this%lT_cache),nBytes, &
                             hipMemcpyHostToDevice))
-    if(this%nDim == 3 .and. allocated(this%lU_cache)) then
+    if(this%nDim == 3 .and. associated(this%lU_cache)) then
       call gpuCheck(hipMemcpy(this%lU_cache_gpu,c_loc(this%lU_cache),nBytes, &
                               hipMemcpyHostToDevice))
     endif

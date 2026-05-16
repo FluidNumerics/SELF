@@ -60,17 +60,17 @@ module SELF_Points_t
       !! matches.
     real(prec),allocatable :: x(:,:)
       !! Physical coordinates, shape (1:nPoints, 1:nDim). User input.
-    integer,pointer :: elements(:)
+    integer,pointer :: elements(:) => null()
       !! Element id (rank-local) containing each point; 0 = not found.
-    real(prec),pointer :: coordinates(:,:)
+    real(prec),pointer :: coordinates(:,:) => null()
       !! Reference coordinates (s,t[,u]) in [-1,1]^nDim, shape (1:nPoints, 1:nDim).
       !! Defined only where elements(p) > 0.
-    real(prec),pointer :: lS_cache(:,:)
+    real(prec),pointer :: lS_cache(:,:) => null()
       !! Lagrange basis at coordinates(p,1), shape (0:nCached, 1:nPoints).
       !! Filled by LocatePoints for points with elements(p) > 0.
-    real(prec),pointer :: lT_cache(:,:)
+    real(prec),pointer :: lT_cache(:,:) => null()
       !! Lagrange basis at coordinates(p,2), shape (0:nCached, 1:nPoints).
-    real(prec),pointer :: lU_cache(:,:)
+    real(prec),pointer :: lU_cache(:,:) => null()
       !! Lagrange basis at coordinates(p,3), shape (0:nCached, 1:nPoints).
       !! Allocated only for nDim = 3.
 
@@ -121,11 +121,16 @@ contains
     class(Points_t),intent(inout) :: this
 
     if(allocated(this%x)) deallocate(this%x)
-    if(allocated(this%elements)) deallocate(this%elements)
-    if(allocated(this%coordinates)) deallocate(this%coordinates)
-    if(allocated(this%lS_cache)) deallocate(this%lS_cache)
-    if(allocated(this%lT_cache)) deallocate(this%lT_cache)
-    if(allocated(this%lU_cache)) deallocate(this%lU_cache)
+    if(associated(this%elements)) deallocate(this%elements)
+    if(associated(this%coordinates)) deallocate(this%coordinates)
+    if(associated(this%lS_cache)) deallocate(this%lS_cache)
+    if(associated(this%lT_cache)) deallocate(this%lT_cache)
+    if(associated(this%lU_cache)) deallocate(this%lU_cache)
+    this%elements => null()
+    this%coordinates => null()
+    this%lS_cache => null()
+    this%lT_cache => null()
+    this%lU_cache => null()
     this%nPoints = 0
     this%nDim = 0
     this%nCached = 0
@@ -303,9 +308,12 @@ contains
     ! Fill per-point Lagrange basis cache: the basis values are a function of
     ! the reference coordinates only, so callers that sample many times reuse
     ! these without recomputing CalculateLagrangePolynomials per call.
-    if(allocated(this%lS_cache)) deallocate(this%lS_cache)
-    if(allocated(this%lT_cache)) deallocate(this%lT_cache)
-    if(allocated(this%lU_cache)) deallocate(this%lU_cache)
+    if(associated(this%lS_cache)) deallocate(this%lS_cache)
+    if(associated(this%lT_cache)) deallocate(this%lT_cache)
+    if(associated(this%lU_cache)) deallocate(this%lU_cache)
+    this%lS_cache => null()
+    this%lT_cache => null()
+    this%lU_cache => null()
     allocate(this%lS_cache(0:N,1:this%nPoints))
     allocate(this%lT_cache(0:N,1:this%nPoints))
     this%lS_cache = 0.0_prec
@@ -481,9 +489,12 @@ contains
     enddo
 
     ! Fill per-point basis cache (see 2D variant for rationale).
-    if(allocated(this%lS_cache)) deallocate(this%lS_cache)
-    if(allocated(this%lT_cache)) deallocate(this%lT_cache)
-    if(allocated(this%lU_cache)) deallocate(this%lU_cache)
+    if(associated(this%lS_cache)) deallocate(this%lS_cache)
+    if(associated(this%lT_cache)) deallocate(this%lT_cache)
+    if(associated(this%lU_cache)) deallocate(this%lU_cache)
+    this%lS_cache => null()
+    this%lT_cache => null()
+    this%lU_cache => null()
     allocate(this%lS_cache(0:N,1:this%nPoints))
     allocate(this%lT_cache(0:N,1:this%nPoints))
     allocate(this%lU_cache(0:N,1:this%nPoints))
@@ -524,7 +535,7 @@ contains
     endif
 
     N = scalar%interp%N
-    useCache = (this%nCached == N) .and. allocated(this%lS_cache) .and. allocated(this%lT_cache)
+    useCache = (this%nCached == N) .and. associated(this%lS_cache) .and. associated(this%lT_cache)
 
     allocate(lS(0:N),lT(0:N))
     values = 0.0_prec
@@ -579,8 +590,8 @@ contains
     endif
 
     N = scalar%interp%N
-    useCache = (this%nCached == N) .and. allocated(this%lS_cache) .and. &
-               allocated(this%lT_cache) .and. allocated(this%lU_cache)
+    useCache = (this%nCached == N) .and. associated(this%lS_cache) .and. &
+               associated(this%lT_cache) .and. associated(this%lU_cache)
 
     allocate(lS(0:N),lT(0:N),lU(0:N))
     values = 0.0_prec
