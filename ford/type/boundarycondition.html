@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>BoundaryCondition &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>BoundaryCondition
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.9% of total for derived types.</p>Including implementation: 12 statements,  0.0% of total for derived types.">12 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_BoundaryConditions.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_boundaryconditions.f90.html'>SELF_BoundaryConditions.f90</a></li>
+     <li><a href='../module/self_boundaryconditions.html'>SELF_BoundaryConditions</a></li>
+     <li class="active">BoundaryCondition</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-bcmethod">bcMethod</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-bcid~2">bcid</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-bcname">bcname</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-elements~2">elements</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-elements_gpu">elements_gpu</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-nboundaries">nBoundaries</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-next">next</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-prev">prev</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-sides">sides</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-sides_gpu">sides_gpu</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/boundarycondition.html#src">BoundaryCondition</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public :: BoundaryCondition</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~boundarycondition~~InheritsGraph Pages: 1 -->
+<svg id="typeboundaryconditionInheritsGraph" width="335pt" height="60pt"
+ viewBox="0.00 0.00 335.00 60.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~boundarycondition~~InheritsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 56)">
+<title>type~~boundarycondition~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-56 331,-56 331,4 -4,4"/>
+<!-- type~boundarycondition -->
+<g id="type~~boundarycondition~~InheritsGraph_node1" class="node">
+<title>type~boundarycondition</title>
+<polygon fill="none" stroke="black" points="327,-24 212,-24 212,0 327,0 327,-24"/>
+<text text-anchor="middle" x="269.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">BoundaryCondition</text>
+</g>
+<!-- type~boundarycondition&#45;&gt;type~boundarycondition -->
+<g id="type~~boundarycondition~~InheritsGraph_edge2" class="edge">
+<title>type~boundarycondition&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M291.99,-24.01C299.84,-32.97 292.34,-42 269.5,-42 255.58,-42 247.36,-38.65 244.84,-34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="248.3,-34.53 247.01,-24.01 241.46,-33.04 248.3,-34.53"/>
+<text text-anchor="middle" x="269.5" y="-44.4" font-family="Helvetica,sans-Serif" font-size="9.50">next, prev</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~boundarycondition~~InheritsGraph_node2" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~boundarycondition&#45;&gt;c_ptr -->
+<g id="type~~boundarycondition~~InheritsGraph_edge1" class="edge">
+<title>type~boundarycondition&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M211.81,-12C166.14,-12 103.31,-12 64.2,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="64.08,-8.5 54.08,-12 64.08,-15.5 64.08,-8.5"/>
+<text text-anchor="middle" x="133" y="-14.4" font-family="Helvetica,sans-Serif" font-size="9.50">elements_gpu, sides_gpu</text>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~boundarycondition~~InheritedByGraph Pages: 1 -->
+<svg id="typeboundaryconditionInheritedByGraph" width="641pt" height="465pt"
+ viewBox="0.00 0.00 641.00 465.25" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~boundarycondition~~InheritedByGraph" class="graph" transform="scale(0.47 0.47) rotate(0) translate(4 994)">
+<title>type~~boundarycondition~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-994 1371,-994 1371,4 -4,4"/>
+<!-- type~boundarycondition -->
+<g id="type~~boundarycondition~~InheritedByGraph_node1" class="node">
+<title>type~boundarycondition</title>
+<polygon fill="none" stroke="black" points="115,-528 0,-528 0,-504 115,-504 115,-528"/>
+<text text-anchor="middle" x="57.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50">BoundaryCondition</text>
+</g>
+<!-- type~boundarycondition&#45;&gt;type~boundarycondition -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge1" class="edge">
+<title>type~boundarycondition&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M77.01,-528.01C83.82,-536.97 77.32,-546 57.5,-546 45.42,-546 38.29,-542.65 36.1,-538"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="39.57,-538.49 37.99,-528.01 32.69,-537.19 39.57,-538.49"/>
+<text text-anchor="middle" x="57.5" y="-548.4" font-family="Helvetica,sans-Serif" font-size="9.50">next, prev</text>
+</g>
+<!-- type~boundaryconditionlist -->
+<g id="type~~boundarycondition~~InheritedByGraph_node2" class="node">
+<title>type~boundaryconditionlist</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node2"><a xlink:href=".././type/boundaryconditionlist.html" xlink:title="BoundaryConditionList">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="371,-528 238,-528 238,-504 371,-504 371,-528"/>
+<text text-anchor="middle" x="304.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryConditionList</text>
+</a>
+</g>
+</g>
+<!-- type~boundaryconditionlist&#45;&gt;type~boundarycondition -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge2" class="edge">
+<title>type~boundaryconditionlist&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M237.84,-516C203.01,-516 160.3,-516 125.3,-516"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="125.17,-512.5 115.17,-516 125.17,-519.5 125.17,-512.5"/>
+<text text-anchor="middle" x="176.5" y="-518.4" font-family="Helvetica,sans-Serif" font-size="9.50">current, head, tail</text>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node3" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node3"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="630,-678 545,-678 545,-654 630,-654 630,-678"/>
+<text text-anchor="middle" x="587.5" y="-663.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~boundaryconditionlist -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge3" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~boundaryconditionlist</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M563.98,-653.98C514.14,-627.37 394.4,-563.45 337.09,-532.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="338.6,-529.7 328.13,-528.08 335.3,-535.88 338.6,-529.7"/>
+<text text-anchor="middle" x="458" y="-635.4" font-family="Helvetica,sans-Serif" font-size="9.50">hyperbolicBCs, parabolicBCs</text>
+</g>
+<!-- type~dgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node4" class="node">
+<title>type~dgmodel3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node4"><a xlink:href=".././type/dgmodel3d_t.html" xlink:title="DGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="630,-528 545,-528 545,-504 630,-504 630,-528"/>
+<text text-anchor="middle" x="587.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~boundaryconditionlist -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge4" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~boundaryconditionlist</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M544.73,-516C501.81,-516 434.01,-516 381.54,-516"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="381.26,-512.5 371.26,-516 381.26,-519.5 381.26,-512.5"/>
+<text text-anchor="middle" x="458" y="-518.4" font-family="Helvetica,sans-Serif" font-size="9.50">hyperbolicBCs, parabolicBCs</text>
+</g>
+<!-- type~dgmodel1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node5" class="node">
+<title>type~dgmodel1d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node5"><a xlink:href=".././type/dgmodel1d_t.html" xlink:title="DGModel1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="630,-402 545,-402 545,-378 630,-378 630,-402"/>
+<text text-anchor="middle" x="587.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d_t&#45;&gt;type~boundaryconditionlist -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge5" class="edge">
+<title>type~dgmodel1d_t&#45;&gt;type~boundaryconditionlist</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M559.56,-402.08C508.78,-424.85 398.92,-474.11 341.74,-499.75"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="340.05,-496.67 332.36,-503.96 342.92,-503.06 340.05,-496.67"/>
+<text text-anchor="middle" x="458" y="-477.4" font-family="Helvetica,sans-Serif" font-size="9.50">hyperbolicBCs, parabolicBCs</text>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node6" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node6"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743,-717 667,-717 667,-693 743,-693 743,-717"/>
+<text text-anchor="middle" x="705" y="-702.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge7" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M666.96,-706.08C660.95,-705.94 654.79,-705.62 649,-705"/>
+</g>
+<!-- type~dgmodel3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node7" class="node">
+<title>type~dgmodel3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node7"><a xlink:href=".././type/dgmodel3d~2.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743,-528 667,-528 667,-504 743,-504 743,-528"/>
+<text text-anchor="middle" x="705" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d~2&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge9" class="edge">
+<title>type~dgmodel3d~2&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M666.86,-514.21C660.86,-514.43 654.73,-514.97 649,-516"/>
+</g>
+<!-- type~dgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node8" class="node">
+<title>type~dgmodel2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node8"><a xlink:href=".././type/dgmodel2d.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743,-675 667,-675 667,-651 743,-651 743,-675"/>
+<text text-anchor="middle" x="705" y="-660.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge6" class="edge">
+<title>type~dgmodel2d&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M679.72,-675.17C675.3,-677.83 670.88,-680.81 667,-684 657.51,-691.82 661.22,-706.31 649,-705"/>
+<path fill="none" stroke="#ff0000" d="M648,-705C632.73,-703.37 618.26,-694.12 607.42,-685.05"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="609.65,-682.35 599.87,-678.27 604.97,-687.55 609.65,-682.35"/>
+</g>
+<!-- type~dgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node9" class="node">
+<title>type~dgmodel3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node9"><a xlink:href=".././type/dgmodel3d.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743,-486 667,-486 667,-462 743,-462 743,-486"/>
+<text text-anchor="middle" x="705" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge8" class="edge">
+<title>type~dgmodel3d&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M679.72,-486.17C675.3,-488.83 670.88,-491.81 667,-495 657.51,-502.82 661.1,-513.82 649,-516"/>
+<path fill="none" stroke="#00ff00" d="M648,-516C645.51,-516.45 642.95,-516.81 640.36,-517.1"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="639.98,-513.62 630.28,-517.87 640.52,-520.6 639.98,-513.62"/>
+</g>
+<!-- type~dgmodel1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node10" class="node">
+<title>type~dgmodel1d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node10"><a xlink:href=".././type/dgmodel1d.html" xlink:title="DGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743,-318 667,-318 667,-294 743,-294 743,-318"/>
+<text text-anchor="middle" x="705" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d&#45;&gt;type~dgmodel1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge10" class="edge">
+<title>type~dgmodel1d&#45;&gt;type~dgmodel1d_t</title>
+<path fill="none" stroke="#0000ff" d="M666.95,-299.65C660.48,-300.23 654.17,-302.07 649,-306"/>
+</g>
+<!-- type~dgmodel1d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node11" class="node">
+<title>type~dgmodel1d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node11"><a xlink:href=".././type/dgmodel1d~2.html" xlink:title="DGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743,-276 667,-276 667,-252 743,-252 743,-276"/>
+<text text-anchor="middle" x="705" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d~2&#45;&gt;type~dgmodel1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge11" class="edge">
+<title>type~dgmodel1d~2&#45;&gt;type~dgmodel1d_t</title>
+<path fill="none" stroke="#0000ff" d="M679.72,-276.17C675.3,-278.83 670.88,-281.81 667,-285 657.51,-292.82 658.79,-298.57 649,-306"/>
+<path fill="none" stroke="#0000ff" d="M648,-306C625.94,-322.75 608.78,-350 598.68,-368.91"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="595.5,-367.44 594.05,-377.93 601.73,-370.63 595.5,-367.44"/>
+</g>
+<!-- type~lineareuler2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node12" class="node">
+<title>type~lineareuler2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node12"><a xlink:href=".././type/lineareuler2d_t.html" xlink:title="LinearEuler2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="901,-885 803,-885 803,-861 901,-861 901,-885"/>
+<text text-anchor="middle" x="852" y="-870.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge12" class="edge">
+<title>type~lineareuler2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M802.69,-865.84C794.28,-862.73 786.24,-858.3 780,-852 759.5,-831.31 787.15,-803.68 762,-789"/>
+</g>
+<!-- type~advection_diffusion_2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node13" class="node">
+<title>type~advection_diffusion_2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node13"><a xlink:href=".././type/advection_diffusion_2d_t.html" xlink:title="advection_diffusion_2d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="924,-843 780,-843 780,-819 924,-819 924,-843"/>
+<text text-anchor="middle" x="852" y="-828.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge13" class="edge">
+<title>type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M797.55,-818.88C791.39,-816.43 785.39,-813.49 780,-810 769.68,-803.32 772.62,-795.2 762,-789"/>
+</g>
+<!-- type~advection_diffusion_3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node14" class="node">
+<title>type~advection_diffusion_3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node14"><a xlink:href=".././type/advection_diffusion_3d_t.html" xlink:title="advection_diffusion_3d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="924,-528 780,-528 780,-504 924,-504 924,-528"/>
+<text text-anchor="middle" x="852" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge18" class="edge">
+<title>type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M797.55,-503.88C791.39,-501.43 785.39,-498.49 780,-495 769.68,-488.32 774.12,-471.95 762,-474"/>
+</g>
+<!-- type~nulldgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node15" class="node">
+<title>type~nulldgmodel3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node15"><a xlink:href=".././type/nulldgmodel3d_t.html" xlink:title="NullDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="905,-486 799,-486 799,-462 905,-462 905,-486"/>
+<text text-anchor="middle" x="852" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge19" class="edge">
+<title>type~nulldgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M798.99,-471.09C786.79,-471.21 773.88,-471.99 762,-474"/>
+</g>
+<!-- type~ecdgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node16" class="node">
+<title>type~ecdgmodel3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node16"><a xlink:href=".././type/ecdgmodel3d_t.html" xlink:title="ECDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="902,-444 802,-444 802,-420 902,-420 902,-444"/>
+<text text-anchor="middle" x="852" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge20" class="edge">
+<title>type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M802,-442.44C794.3,-445.2 786.69,-448.67 780,-453 769.68,-459.68 774.12,-471.95 762,-474"/>
+</g>
+<!-- type~advection_diffusion_1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node17" class="node">
+<title>type~advection_diffusion_1d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node17"><a xlink:href=".././type/advection_diffusion_1d_t.html" xlink:title="advection_diffusion_1d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="924,-203 780,-203 780,-179 924,-179 924,-203"/>
+<text text-anchor="middle" x="852" y="-188.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge21" class="edge">
+<title>type~advection_diffusion_1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#0000ff" d="M812.76,-178.9C790.44,-172.37 765.9,-166.33 762,-170"/>
+</g>
+<!-- type~burgers1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node18" class="node">
+<title>type~burgers1d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node18"><a xlink:href=".././type/burgers1d_t.html" xlink:title="Burgers1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="891.5,-161 812.5,-161 812.5,-137 891.5,-137 891.5,-161"/>
+<text text-anchor="middle" x="852" y="-146.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge23" class="edge">
+<title>type~burgers1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#0000ff" d="M812.29,-149.65C794.94,-151.88 775.41,-157.38 762,-170"/>
+</g>
+<!-- type~ecdgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node19" class="node">
+<title>type~ecdgmodel2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node19"><a xlink:href=".././type/ecdgmodel2d_t.html" xlink:title="ECDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="902,-801 802,-801 802,-777 902,-777 902,-801"/>
+<text text-anchor="middle" x="852" y="-786.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge14" class="edge">
+<title>type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M801.95,-797.85C788.25,-798.04 773.88,-795.93 762,-789"/>
+</g>
+<!-- type~nulldgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node20" class="node">
+<title>type~nulldgmodel2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node20"><a xlink:href=".././type/nulldgmodel2d_t.html" xlink:title="NullDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="905,-759 799,-759 799,-735 905,-735 905,-759"/>
+<text text-anchor="middle" x="852" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge15" class="edge">
+<title>type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M798.66,-758.68C792.11,-761.23 785.72,-764.3 780,-768 769.68,-774.68 772.62,-795.2 762,-789"/>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node21" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node21"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="923.5,-675 780.5,-675 780.5,-651 923.5,-651 923.5,-675"/>
+<text text-anchor="middle" x="852" y="-660.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge16" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M832.29,-675.03C816.17,-686.32 793.43,-704.66 780,-726 764.49,-750.65 787.15,-803.68 762,-789"/>
+<path fill="none" stroke="#00ff00" d="M761,-789C720.11,-765.13 770.21,-722.75 743,-684 742.55,-683.37 742.08,-682.75 741.59,-682.15"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="743.83,-679.45 734.11,-675.23 739.07,-684.59 743.83,-679.45"/>
+</g>
+<!-- type~lineareuler3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node22" class="node">
+<title>type~lineareuler3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node22"><a xlink:href=".././type/lineareuler3d_t.html" xlink:title="LinearEuler3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="901,-360 803,-360 803,-336 901,-336 901,-360"/>
+<text text-anchor="middle" x="852" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge17" class="edge">
+<title>type~lineareuler3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M832.29,-360.03C816.17,-371.32 793.43,-389.66 780,-411 764.49,-435.65 790.71,-469.15 762,-474"/>
+<path fill="none" stroke="#00ffff" d="M761,-474C758.49,-474.42 755.9,-474.76 753.28,-475.02"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="752.87,-471.54 743.12,-475.69 753.33,-478.53 752.87,-471.54"/>
+</g>
+<!-- type~nulldgmodel1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node23" class="node">
+<title>type~nulldgmodel1d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node23"><a xlink:href=".././type/nulldgmodel1d_t.html" xlink:title="NullDGModel1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="905,-88 799,-88 799,-64 905,-64 905,-88"/>
+<text text-anchor="middle" x="852" y="-73.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge22" class="edge">
+<title>type~nulldgmodel1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#0000ff" d="M828.68,-88.04C813.3,-97.28 793.31,-111.26 780,-128 767.36,-143.9 776.79,-156.08 762,-170"/>
+<path fill="none" stroke="#0000ff" d="M761,-170C723.33,-205.46 772.42,-242.45 743,-285 742.56,-285.64 742.09,-286.26 741.6,-286.86"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="739.08,-284.43 734.16,-293.8 743.86,-289.55 739.08,-284.43"/>
+</g>
+<!-- type~burgers1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node24" class="node">
+<title>type~burgers1d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node24"><a xlink:href=".././type/burgers1d.html" xlink:title="Burgers1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1063.5,-150 993.5,-150 993.5,-126 1063.5,-126 1063.5,-150"/>
+<text text-anchor="middle" x="1028.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d&#45;&gt;type~burgers1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge36" class="edge">
+<title>type~burgers1d&#45;&gt;type~burgers1d_t</title>
+<path fill="none" stroke="#00ffff" d="M993.12,-135.22C977.68,-134.68 959.31,-135.03 943,-138"/>
+</g>
+<!-- type~nulldgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node25" class="node">
+<title>type~nulldgmodel3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node25"><a xlink:href=".././type/nulldgmodel3d.html" xlink:title="NullDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1077,-486 980,-486 980,-462 1077,-462 1077,-486"/>
+<text text-anchor="middle" x="1028.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d&#45;&gt;type~nulldgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge30" class="edge">
+<title>type~nulldgmodel3d&#45;&gt;type~nulldgmodel3d_t</title>
+<path fill="none" stroke="#7fff00" d="M979.56,-472.01C967.59,-472.06 954.8,-472.58 943,-474"/>
+</g>
+<!-- type~advection_diffusion_1d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node26" class="node">
+<title>type~advection_diffusion_1d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node26"><a xlink:href=".././type/advection_diffusion_1d~2.html" xlink:title="advection_diffusion_1d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1096,-234 961,-234 961,-210 1096,-210 1096,-234"/>
+<text text-anchor="middle" x="1028.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d~2&#45;&gt;type~advection_diffusion_1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge35" class="edge">
+<title>type~advection_diffusion_1d~2&#45;&gt;type~advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ff7f" d="M991.77,-209.96C976.89,-205.78 959.3,-201.9 943,-201"/>
+</g>
+<!-- type~lineareuler3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node27" class="node">
+<title>type~lineareuler3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node27"><a xlink:href=".././type/lineareuler3d~2.html" xlink:title="LinearEuler3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1073,-318 984,-318 984,-294 1073,-294 1073,-318"/>
+<text text-anchor="middle" x="1028.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d~2&#45;&gt;type~lineareuler3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge45" class="edge">
+<title>type~lineareuler3d~2&#45;&gt;type~lineareuler3d_t</title>
+<path fill="none" stroke="#ff00ff" d="M983.58,-300.51C970.23,-300.28 955.74,-301.54 943,-306"/>
+</g>
+<!-- type~nulldgmodel2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node28" class="node">
+<title>type~nulldgmodel2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node28"><a xlink:href=".././type/nulldgmodel2d~2.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1077,-738 980,-738 980,-714 1077,-714 1077,-738"/>
+<text text-anchor="middle" x="1028.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge41" class="edge">
+<title>type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#0000ff" d="M979.67,-722.14C967.58,-722.21 954.7,-723.21 943,-726"/>
+</g>
+<!-- type~linearshallowwater2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node29" class="node">
+<title>type~linearshallowwater2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node29"><a xlink:href=".././type/linearshallowwater2d.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1095.5,-654 961.5,-654 961.5,-630 1095.5,-630 1095.5,-654"/>
+<text text-anchor="middle" x="1028.5" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge42" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M961.19,-639.05C955,-639.66 948.85,-640.61 943,-642"/>
+</g>
+<!-- type~nulldgmodel1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node30" class="node">
+<title>type~nulldgmodel1d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node30"><a xlink:href=".././type/nulldgmodel1d.html" xlink:title="NullDGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1077,-66 980,-66 980,-42 1077,-42 1077,-66"/>
+<text text-anchor="middle" x="1028.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d&#45;&gt;type~nulldgmodel1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge46" class="edge">
+<title>type~nulldgmodel1d&#45;&gt;type~nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff007f" d="M979.65,-50.05C967.56,-50.13 954.69,-51.15 943,-54"/>
+</g>
+<!-- type~nulldgmodel1d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node31" class="node">
+<title>type~nulldgmodel1d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node31"><a xlink:href=".././type/nulldgmodel1d~2.html" xlink:title="NullDGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1077,-24 980,-24 980,0 1077,0 1077,-24"/>
+<text text-anchor="middle" x="1028.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d~2&#45;&gt;type~nulldgmodel1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge47" class="edge">
+<title>type~nulldgmodel1d~2&#45;&gt;type~nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff007f" d="M979.86,-23.44C973.25,-26.04 966.76,-29.19 961,-33 950.74,-39.78 954.94,-51.09 943,-54"/>
+<path fill="none" stroke="#ff007f" d="M942,-54C932.04,-56.43 921.46,-59.03 911.19,-61.56"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="910.36,-58.16 901.49,-63.95 912.03,-64.95 910.36,-58.16"/>
+</g>
+<!-- type~ecdgmodel3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node32" class="node">
+<title>type~ecdgmodel3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node32"><a xlink:href=".././type/ecdgmodel3d~2.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1074,-402 983,-402 983,-378 1074,-378 1074,-402"/>
+<text text-anchor="middle" x="1028.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d~2&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge33" class="edge">
+<title>type~ecdgmodel3d~2&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M982.71,-384.49C969.6,-384.34 955.46,-385.63 943,-390"/>
+</g>
+<!-- type~advection_diffusion_1d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node33" class="node">
+<title>type~advection_diffusion_1d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node33"><a xlink:href=".././type/advection_diffusion_1d.html" xlink:title="advection_diffusion_1d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1096,-192 961,-192 961,-168 1096,-168 1096,-192"/>
+<text text-anchor="middle" x="1028.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d&#45;&gt;type~advection_diffusion_1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge34" class="edge">
+<title>type~advection_diffusion_1d&#45;&gt;type~advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ff7f" d="M997.42,-192.07C981.47,-197.29 961.41,-202.01 943,-201"/>
+<path fill="none" stroke="#00ff7f" d="M942,-201C939.49,-200.86 936.94,-200.7 934.36,-200.52"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="934.59,-197.03 924.35,-199.74 934.05,-204.01 934.59,-197.03"/>
+</g>
+<!-- type~burgers1d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node34" class="node">
+<title>type~burgers1d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node34"><a xlink:href=".././type/burgers1d~2.html" xlink:title="Burgers1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1063.5,-108 993.5,-108 993.5,-84 1063.5,-84 1063.5,-108"/>
+<text text-anchor="middle" x="1028.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d~2&#45;&gt;type~burgers1d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge37" class="edge">
+<title>type~burgers1d~2&#45;&gt;type~burgers1d_t</title>
+<path fill="none" stroke="#00ffff" d="M993.4,-102.85C982.47,-106.04 970.7,-110.59 961,-117 950.74,-123.78 955.09,-135.8 943,-138"/>
+<path fill="none" stroke="#00ffff" d="M942,-138C929.07,-140.36 914.99,-142.35 901.92,-143.98"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="901.21,-140.53 891.7,-145.19 902.04,-147.49 901.21,-140.53"/>
+</g>
+<!-- type~advection_diffusion_2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node35" class="node">
+<title>type~advection_diffusion_2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node35"><a xlink:href=".././type/advection_diffusion_2d~2.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1096,-906 961,-906 961,-882 1096,-882 1096,-906"/>
+<text text-anchor="middle" x="1028.5" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge27" class="edge">
+<title>type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff7f00" d="M980.67,-881.9C968.44,-878.86 955.25,-875.7 943,-873"/>
+</g>
+<!-- type~advection_diffusion_2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node36" class="node">
+<title>type~advection_diffusion_2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node36"><a xlink:href=".././type/advection_diffusion_2d.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1096,-864 961,-864 961,-840 1096,-840 1096,-864"/>
+<text text-anchor="middle" x="1028.5" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge26" class="edge">
+<title>type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff7f00" d="M992.34,-864.06C973.57,-869.84 952.45,-875.09 943,-873"/>
+<path fill="none" stroke="#ff7f00" d="M942,-873C930,-870.35 934.32,-858.68 924,-852 921.39,-850.31 918.63,-848.75 915.79,-847.31"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="917.01,-844.02 906.45,-843.12 914.15,-850.41 917.01,-844.02"/>
+</g>
+<!-- type~advection_diffusion_3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node37" class="node">
+<title>type~advection_diffusion_3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node37"><a xlink:href=".././type/advection_diffusion_3d~2.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1096,-570 961,-570 961,-546 1096,-546 1096,-570"/>
+<text text-anchor="middle" x="1028.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge29" class="edge">
+<title>type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#ffff00" d="M987.91,-545.91C973.87,-542.23 957.87,-538.7 943,-537"/>
+</g>
+<!-- type~ecdgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node38" class="node">
+<title>type~ecdgmodel3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node38"><a xlink:href=".././type/ecdgmodel3d.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1074,-360 983,-360 983,-336 1074,-336 1074,-360"/>
+<text text-anchor="middle" x="1028.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge32" class="edge">
+<title>type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M983,-358.25C975.32,-361.06 967.67,-364.59 961,-369 950.74,-375.78 954.6,-385.94 943,-390"/>
+<path fill="none" stroke="#00ff00" d="M942,-390C922.32,-396.9 901.18,-406.76 884.44,-415.2"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="882.44,-412.29 875.14,-419.97 885.63,-418.52 882.44,-412.29"/>
+</g>
+<!-- type~ecdgmodel2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node39" class="node">
+<title>type~ecdgmodel2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node39"><a xlink:href=".././type/ecdgmodel2d~2.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1074,-822 983,-822 983,-798 1074,-798 1074,-822"/>
+<text text-anchor="middle" x="1028.5" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge39" class="edge">
+<title>type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#007fff" d="M982.77,-809.9C969.93,-809.9 955.91,-809.93 943,-810"/>
+</g>
+<!-- type~linearshallowwater2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node40" class="node">
+<title>type~linearshallowwater2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node40"><a xlink:href=".././type/linearshallowwater2d~2.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1095.5,-612 961.5,-612 961.5,-588 1095.5,-588 1095.5,-612"/>
+<text text-anchor="middle" x="1028.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge43" class="edge">
+<title>type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M978.12,-612.14C972.11,-614.6 966.25,-617.53 961,-621 950.74,-627.78 954.96,-639.15 943,-642"/>
+<path fill="none" stroke="#7f00ff" d="M942,-642C933.04,-644.13 923.57,-646.38 914.28,-648.57"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="913.23,-645.23 904.31,-650.93 914.84,-652.04 913.23,-645.23"/>
+</g>
+<!-- type~nulldgmodel3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node41" class="node">
+<title>type~nulldgmodel3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node41"><a xlink:href=".././type/nulldgmodel3d~2.html" xlink:title="NullDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1077,-444 980,-444 980,-420 1077,-420 1077,-444"/>
+<text text-anchor="middle" x="1028.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d~2&#45;&gt;type~nulldgmodel3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge31" class="edge">
+<title>type~nulldgmodel3d~2&#45;&gt;type~nulldgmodel3d_t</title>
+<path fill="none" stroke="#7fff00" d="M979.86,-443.44C973.25,-446.04 966.76,-449.19 961,-453 950.74,-459.78 955.2,-472.53 943,-474"/>
+<path fill="none" stroke="#7fff00" d="M942,-474C933.42,-475.03 924.34,-475.61 915.38,-475.89"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="915.29,-472.39 905.36,-476.08 915.43,-479.39 915.29,-472.39"/>
+</g>
+<!-- type~ecdgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node42" class="node">
+<title>type~ecdgmodel2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node42"><a xlink:href=".././type/ecdgmodel2d.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1074,-780 983,-780 983,-756 1074,-756 1074,-780"/>
+<text text-anchor="middle" x="1028.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge38" class="edge">
+<title>type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#007fff" d="M983,-778.25C975.32,-781.06 967.67,-784.59 961,-789 950.74,-795.78 955.29,-809.93 943,-810"/>
+<path fill="none" stroke="#007fff" d="M942,-810C927.18,-810.09 911.34,-807.32 897.18,-803.76"/>
+<polygon fill="#007fff" stroke="#007fff" points="897.78,-800.3 887.22,-801.07 895.96,-807.06 897.78,-800.3"/>
+</g>
+<!-- type~nulldgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node43" class="node">
+<title>type~nulldgmodel2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node43"><a xlink:href=".././type/nulldgmodel2d.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1077,-696 980,-696 980,-672 1077,-672 1077,-696"/>
+<text text-anchor="middle" x="1028.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge40" class="edge">
+<title>type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#0000ff" d="M979.86,-695.44C973.25,-698.04 966.76,-701.19 961,-705 950.74,-711.78 954.96,-723.15 943,-726"/>
+<path fill="none" stroke="#0000ff" d="M942,-726C933.04,-728.13 923.57,-730.38 914.28,-732.57"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="913.23,-729.23 904.31,-734.93 914.84,-736.04 913.23,-729.23"/>
+</g>
+<!-- type~lineareuler2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node44" class="node">
+<title>type~lineareuler2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node44"><a xlink:href=".././type/lineareuler2d.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1073,-990 984,-990 984,-966 1073,-966 1073,-990"/>
+<text text-anchor="middle" x="1028.5" y="-975.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge24" class="edge">
+<title>type~lineareuler2d&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" d="M983.83,-969.44C970.5,-966.22 955.95,-962.08 943,-957"/>
+</g>
+<!-- type~advection_diffusion_3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node45" class="node">
+<title>type~advection_diffusion_3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node45"><a xlink:href=".././type/advection_diffusion_3d.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1096,-528 961,-528 961,-504 1096,-504 1096,-528"/>
+<text text-anchor="middle" x="1028.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge28" class="edge">
+<title>type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#ffff00" d="M989.81,-528.1C971.78,-533.33 952.16,-538.05 943,-537"/>
+<path fill="none" stroke="#ffff00" d="M942,-537C929.92,-535.62 917.11,-533.18 905.08,-530.45"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="905.73,-527.01 895.19,-528.1 904.11,-533.82 905.73,-527.01"/>
+</g>
+<!-- type~lineareuler2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node46" class="node">
+<title>type~lineareuler2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node46"><a xlink:href=".././type/lineareuler2d~2.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1073,-948 984,-948 984,-924 1073,-924 1073,-948"/>
+<text text-anchor="middle" x="1028.5" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge25" class="edge">
+<title>type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" d="M987.69,-948.09C967.97,-953.68 947.43,-958.74 943,-957"/>
+<path fill="none" stroke="#ff0000" d="M942,-957C909.81,-944.36 882.58,-913.84 867.01,-893.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="869.8,-891.17 861.07,-885.17 864.15,-895.31 869.8,-891.17"/>
+</g>
+<!-- type~lineareuler3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node47" class="node">
+<title>type~lineareuler3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node47"><a xlink:href=".././type/lineareuler3d.html" xlink:title="LinearEuler3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1073,-276 984,-276 984,-252 1073,-252 1073,-276"/>
+<text text-anchor="middle" x="1028.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d&#45;&gt;type~lineareuler3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge44" class="edge">
+<title>type~lineareuler3d&#45;&gt;type~lineareuler3d_t</title>
+<path fill="none" stroke="#ff00ff" d="M983.7,-274C975.78,-276.85 967.87,-280.46 961,-285 950.74,-291.78 954.6,-301.94 943,-306"/>
+<path fill="none" stroke="#ff00ff" d="M942,-306C922.32,-312.9 901.18,-322.76 884.44,-331.2"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="882.44,-328.29 875.14,-335.97 885.63,-334.52 882.44,-328.29"/>
+</g>
+<!-- type~ecadvection3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node48" class="node">
+<title>type~ecadvection3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node48"><a xlink:href=".././type/ecadvection3d_t.html" xlink:title="ECAdvection3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1236,-360 1133,-360 1133,-336 1236,-336 1236,-360"/>
+<text text-anchor="middle" x="1184.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge48" class="edge">
+<title>type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#007fff" d="M1132.82,-345.98C1126.78,-346.33 1120.74,-346.97 1115,-348"/>
+</g>
+<!-- type~ecadvection2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node49" class="node">
+<title>type~ecadvection2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node49"><a xlink:href=".././type/ecadvection2d_t.html" xlink:title="ECAdvection2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1236,-780 1133,-780 1133,-756 1236,-756 1236,-780"/>
+<text text-anchor="middle" x="1184.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge51" class="edge">
+<title>type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#7f00ff" d="M1132.88,-766.34C1126.83,-766.63 1120.77,-767.15 1115,-768"/>
+</g>
+<!-- type~esatmo2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node50" class="node">
+<title>type~esatmo2d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node50"><a xlink:href=".././type/esatmo2d_t.html" xlink:title="ESAtmo2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1223.5,-738 1145.5,-738 1145.5,-714 1223.5,-714 1223.5,-738"/>
+<text text-anchor="middle" x="1184.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge50" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#7f00ff" d="M1148.39,-738.07C1143.01,-740.62 1137.69,-743.6 1133,-747 1123.05,-754.22 1127.16,-766.21 1115,-768"/>
+<path fill="none" stroke="#7f00ff" d="M1114,-768C1104.52,-769.39 1094.38,-770.07 1084.53,-770.32"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1084.37,-766.82 1074.41,-770.42 1084.44,-773.82 1084.37,-766.82"/>
+</g>
+<!-- type~esatmo3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_node51" class="node">
+<title>type~esatmo3d_t</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node51"><a xlink:href=".././type/esatmo3d_t.html" xlink:title="ESAtmo3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1223.5,-308 1145.5,-308 1145.5,-284 1223.5,-284 1223.5,-308"/>
+<text text-anchor="middle" x="1184.5" y="-293.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge49" class="edge">
+<title>type~esatmo3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#007fff" d="M1160.6,-308.02C1151.57,-313.27 1141.37,-319.86 1133,-327 1123.65,-334.98 1127.1,-345.83 1115,-348"/>
+<path fill="none" stroke="#007fff" d="M1114,-348C1104.46,-349.71 1094.22,-350.54 1084.27,-350.83"/>
+<polygon fill="#007fff" stroke="#007fff" points="1084.02,-347.33 1074.06,-350.95 1084.1,-354.33 1084.02,-347.33"/>
+</g>
+<!-- type~ecadvection3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node52" class="node">
+<title>type~ecadvection3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node52"><a xlink:href=".././type/ecadvection3d~2.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1367,-386 1273,-386 1273,-362 1367,-362 1367,-386"/>
+<text text-anchor="middle" x="1320" y="-371.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge53" class="edge">
+<title>type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" d="M1293.46,-361.98C1281.98,-357.54 1268.09,-353.47 1255,-353"/>
+</g>
+<!-- type~ecadvection2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node53" class="node">
+<title>type~ecadvection2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node53"><a xlink:href=".././type/ecadvection2d.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1367,-801 1273,-801 1273,-777 1367,-777 1367,-801"/>
+<text text-anchor="middle" x="1320" y="-786.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge54" class="edge">
+<title>type~ecadvection2d&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#7fff00" d="M1294.38,-776.91C1282.73,-772.24 1268.45,-768 1255,-768"/>
+</g>
+<!-- type~esatmo2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node54" class="node">
+<title>type~esatmo2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node54"><a xlink:href=".././type/esatmo2d~2.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1354.5,-717 1285.5,-717 1285.5,-693 1354.5,-693 1354.5,-717"/>
+<text text-anchor="middle" x="1320" y="-702.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d~2&#45;&gt;type~esatmo2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge57" class="edge">
+<title>type~esatmo2d~2&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" d="M1285.22,-701.26C1275.3,-701.16 1264.55,-702.04 1255,-705"/>
+</g>
+<!-- type~ecadvection3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node55" class="node">
+<title>type~ecadvection3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node55"><a xlink:href=".././type/ecadvection3d.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1367,-344 1273,-344 1273,-320 1367,-320 1367,-344"/>
+<text text-anchor="middle" x="1320" y="-329.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge52" class="edge">
+<title>type~ecadvection3d&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" d="M1295.58,-344.03C1283.71,-348.99 1268.91,-353.5 1255,-353"/>
+<path fill="none" stroke="#ff0000" d="M1254,-353C1251.5,-352.91 1248.94,-352.8 1246.37,-352.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1246.53,-349.18 1236.35,-352.13 1246.15,-356.17 1246.53,-349.18"/>
+</g>
+<!-- type~ecadvection2d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node56" class="node">
+<title>type~ecadvection2d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node56"><a xlink:href=".././type/ecadvection2d~2.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1367,-759 1273,-759 1273,-735 1367,-735 1367,-759"/>
+<text text-anchor="middle" x="1320" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge55" class="edge">
+<title>type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#7fff00" d="M1294.38,-759.09C1282.73,-763.76 1268.45,-768 1255,-768"/>
+<path fill="none" stroke="#7fff00" d="M1254,-768C1251.45,-768 1248.85,-768 1246.22,-768"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1246,-764.5 1236,-768 1246,-771.5 1246,-764.5"/>
+</g>
+<!-- type~esatmo2d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node57" class="node">
+<title>type~esatmo2d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node57"><a xlink:href=".././type/esatmo2d.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1354.5,-675 1285.5,-675 1285.5,-651 1354.5,-651 1354.5,-675"/>
+<text text-anchor="middle" x="1320" y="-660.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d&#45;&gt;type~esatmo2d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge56" class="edge">
+<title>type~esatmo2d&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" d="M1287.76,-675.02C1282.61,-677.62 1277.49,-680.62 1273,-684 1263.18,-691.39 1266.74,-701.36 1255,-705"/>
+<path fill="none" stroke="#00ffff" d="M1254,-705C1247.38,-707.06 1240.39,-709.21 1233.51,-711.33"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1232.09,-708.1 1223.56,-714.38 1234.15,-714.79 1232.09,-708.1"/>
+</g>
+<!-- type~esatmo3d -->
+<g id="type~~boundarycondition~~InheritedByGraph_node58" class="node">
+<title>type~esatmo3d</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node58"><a xlink:href=".././type/esatmo3d.html" xlink:title="ESAtmo3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1354.5,-302 1285.5,-302 1285.5,-278 1354.5,-278 1354.5,-302"/>
+<text text-anchor="middle" x="1320" y="-287.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d&#45;&gt;type~esatmo3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge58" class="edge">
+<title>type~esatmo3d&#45;&gt;type~esatmo3d_t</title>
+<path fill="none" stroke="#7f00ff" d="M1285.21,-287.52C1275.39,-287.46 1264.7,-288.06 1255,-290"/>
+</g>
+<!-- type~esatmo3d~2 -->
+<g id="type~~boundarycondition~~InheritedByGraph_node59" class="node">
+<title>type~esatmo3d~2</title>
+<g id="a_type~~boundarycondition~~InheritedByGraph_node59"><a xlink:href=".././type/esatmo3d~2.html" xlink:title="ESAtmo3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1354.5,-260 1285.5,-260 1285.5,-236 1354.5,-236 1354.5,-260"/>
+<text text-anchor="middle" x="1320" y="-245.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d~2&#45;&gt;type~esatmo3d_t -->
+<g id="type~~boundarycondition~~InheritedByGraph_edge59" class="edge">
+<title>type~esatmo3d~2&#45;&gt;type~esatmo3d_t</title>
+<path fill="none" stroke="#7f00ff" d="M1287.76,-260.02C1282.61,-262.62 1277.49,-265.62 1273,-269 1263.18,-276.39 1267.05,-287.58 1255,-290"/>
+<path fill="none" stroke="#7f00ff" d="M1254,-290C1247.62,-291.28 1240.86,-292.28 1234.16,-293.08"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1233.34,-289.64 1223.76,-294.15 1234.06,-296.6 1233.34,-289.64"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypeboundaryconditionInheritedByGraph = svgPanZoom('#typeboundaryconditionInheritedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-bcmethod">bcMethod</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-bcid~2">bcid</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-bcname">bcname</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-elements~2">elements</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-elements_gpu">elements_gpu</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-nboundaries">nBoundaries</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-next">next</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-prev">prev</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-sides">sides</a>
+      <a class="list-group-item" href="../type/boundarycondition.html#variable-sides_gpu">sides_gpu</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/boundarycondition.html#src">BoundaryCondition</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-bcmethod"></span>procedure(<a href='../interface/self_bcmethod.html'>SELF_bcMethod</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>bcMethod</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bcid~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>bcid</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bcname"></span>character,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>bcname</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elements~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>elements</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elements_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>elements_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nboundaries"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nBoundaries</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-next"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>next</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prev"></span>type(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>prev</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sides"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>sides</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sides_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>sides_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type </span><span class="n">BoundaryCondition</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">SELF_bcMethod</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcid</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="n">SELF_BCNAME_LENGTH</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcname</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nBoundaries</span><span class="w"> </span><span class="c">! Number of boundaries this BC applies to</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elements</span><span class="p">(:)</span><span class="w"> </span><span class="c">! List of elements this BC applies to</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sides</span><span class="p">(:)</span><span class="w"> </span><span class="c">! List of local sides this BC applies to</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elements_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span><span class="w"> </span><span class="c">! Device pointer for elements</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sides_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span><span class="w"> </span><span class="c">! Device pointer for sides</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<span class="w">  </span><span class="k">endtype </span><span class="n">BoundaryCondition</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-05-16 16:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

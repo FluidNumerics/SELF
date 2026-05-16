@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>ECAdvection3D_t &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>ECAdvection3D_t
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.7% of total for derived types.</p>Including implementation: 827 statements,  1.2% of total for derived types.">10 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_ECAdvection3D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_ecadvection3d_t.f90.html'>SELF_ECAdvection3D_t.f90</a></li>
+     <li><a href='../module/self_ecadvection3d_t.html'>SELF_ECAdvection3D_t</a></li>
+     <li class="active">ECAdvection3D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-dsdt~2">dSdt</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-flux~2">flux</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-fluxdivergence~2">fluxDivergence</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-geometry~2">geometry</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-hyperbolicbcs~2">hyperbolicBCs</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-mesh~2">mesh</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-parabolicbcs~2">parabolicBCs</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-solution~2">solution</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-solutiongradient~2">solutionGradient</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-source~2">source</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-timeintegrator">timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-twopointflux">twoPointFlux</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-u~2">u</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-v~2">v</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-w">w</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-worksol~2">workSol</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-additionalfree">AdditionalFree</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-additionalinit~5">AdditionalInit</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-boundaryflux~2">BoundaryFlux</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-calculateentropy~2">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-calculatesolutiongradient~2">CalculateSolutionGradient</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-calculatetendency~3">CalculateTendency</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-fluxmethod~2">FluxMethod</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-free~8">Free</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-init~8">Init</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-mapboundaryconditions~2">MapBoundaryConditions</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-pretendency">PreTendency</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-readmodel~2">ReadModel</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-reportmetrics~2">ReportMetrics</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setboundarycondition~2">SetBoundaryCondition</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setgradientboundarycondition~2">SetGradientBoundaryCondition</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setmetadata~2">SetMetadata</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setnumberofvariables~2">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setsolution~6">SetSolution</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-settimeintegrator~6">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-sourcemethod~2">SourceMethod</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-twopointfluxmethod">TwoPointFluxMethod</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updategrk2~2">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updategrk3~2">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updategrk4~2">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updatesolution~2">UpdateSolution</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-writemodel~2">WriteModel</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-writetecplot~2">WriteTecplot</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-entropy_func~6">entropy_func</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-flux2d">flux2D</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-flux3d">flux3D</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-riemannflux1d">riemannflux1d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-riemannflux2d~2">riemannflux2d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-riemannflux3d~2">riemannflux3d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-source3d">source3d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-twopointflux3d">twopointflux3d</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/ecadvection3d_t.html#src">ECAdvection3D_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/ecdgmodel3d.html'>ECDGModel3D</a>) :: ECAdvection3D_t</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~ecadvection3d_t~~InheritsGraph Pages: 1 -->
+<svg id="typeecadvection3d_tInheritsGraph" width="641pt" height="71pt"
+ viewBox="0.00 0.00 641.00 71.47" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~ecadvection3d_t~~InheritsGraph" class="graph" transform="scale(0.2 0.2) rotate(0) translate(4 352)">
+<title>type~~ecadvection3d_t~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-352 3189,-352 3189,4 -4,4"/>
+<!-- type~ecadvection3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node1" class="node">
+<title>type~ecadvection3d_t</title>
+<polygon fill="none" stroke="black" points="3185,-116 3082,-116 3082,-92 3185,-92 3185,-116"/>
+<text text-anchor="middle" x="3133.5" y="-101.6" font-family="Helvetica,sans-Serif" font-size="10.50">ECAdvection3D_t</text>
+</g>
+<!-- type~ecdgmodel3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node2" class="node">
+<title>type~ecdgmodel3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node2"><a xlink:href=".././type/ecdgmodel3d.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="3045,-116 2954,-116 2954,-92 3045,-92 3045,-116"/>
+<text text-anchor="middle" x="2999.5" y="-101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge1" class="edge">
+<title>type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M3081.84,-104C3073.17,-104 3064.12,-104 3055.34,-104"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="3055.2,-100.5 3045.2,-104 3055.2,-107.5 3055.2,-100.5"/>
+</g>
+<!-- type~ecdgmodel3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node3" class="node">
+<title>type~ecdgmodel3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node3"><a xlink:href=".././type/ecdgmodel3d_t.html" xlink:title="ECDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2917,-116 2817,-116 2817,-92 2917,-92 2917,-116"/>
+<text text-anchor="middle" x="2867" y="-101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge2" class="edge">
+<title>type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M2953.95,-104C2945.37,-104 2936.25,-104 2927.29,-104"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2927.27,-100.5 2917.27,-104 2927.27,-107.5 2927.27,-100.5"/>
+</g>
+<!-- type~mappedtwopointvector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node4" class="node">
+<title>type~mappedtwopointvector3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node4"><a xlink:href=".././type/mappedtwopointvector3d.html" xlink:title="MappedTwoPointVector3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2626,-94 2476,-94 2476,-70 2626,-70 2626,-94"/>
+<text text-anchor="middle" x="2551" y="-79.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedTwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d_t&#45;&gt;type~mappedtwopointvector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge3" class="edge">
+<title>type~ecdgmodel3d_t&#45;&gt;type~mappedtwopointvector3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2816.94,-100.56C2768.69,-97.18 2694.09,-91.96 2636.33,-87.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2636.34,-84.4 2626.12,-87.19 2635.85,-91.38 2636.34,-84.4"/>
+<text text-anchor="middle" x="2768.5" y="-101.4" font-family="Helvetica,sans-Serif" font-size="9.50">twoPointFlux</text>
+</g>
+<!-- type~dgmodel3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node5" class="node">
+<title>type~dgmodel3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node5"><a xlink:href=".././type/dgmodel3d.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2720,-149 2644,-149 2644,-125 2720,-125 2720,-149"/>
+<text text-anchor="middle" x="2682" y="-134.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge4" class="edge">
+<title>type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M2816.96,-112.84C2790.02,-117.7 2756.76,-123.7 2730.13,-128.5"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2729.49,-125.06 2720.27,-130.28 2730.73,-131.95 2729.49,-125.06"/>
+</g>
+<!-- type~mappedtwopointvector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node6" class="node">
+<title>type~mappedtwopointvector3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node6"><a xlink:href=".././type/mappedtwopointvector3d_t.html" xlink:title="MappedTwoPointVector3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1854,-73 1695,-73 1695,-49 1854,-49 1854,-73"/>
+<text text-anchor="middle" x="1774.5" y="-58.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedTwoPointVector3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedtwopointvector3d&#45;&gt;type~mappedtwopointvector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge5" class="edge">
+<title>type~mappedtwopointvector3d&#45;&gt;type~mappedtwopointvector3d_t</title>
+<path fill="none" stroke="#ff0000" d="M2475.74,-79.99C2332.5,-76.1 2018.64,-67.59 1864.5,-63.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1864.22,-59.9 1854.13,-63.13 1864.03,-66.9 1864.22,-59.9"/>
+</g>
+<!-- type~dgmodel3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node7" class="node">
+<title>type~dgmodel3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node7"><a xlink:href=".././type/dgmodel3d_t.html" xlink:title="DGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2458,-191 2373,-191 2373,-167 2458,-167 2458,-191"/>
+<text text-anchor="middle" x="2415.5" y="-176.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge6" class="edge">
+<title>type~dgmodel3d&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#00ffff" d="M2643.94,-142.88C2598.09,-150.16 2519.76,-162.6 2468.06,-170.81"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2467.42,-167.37 2458.1,-172.39 2468.52,-174.28 2467.42,-167.37"/>
+</g>
+<!-- type~semhex -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node11" class="node">
+<title>type~semhex</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node11"><a xlink:href=".././type/semhex.html" xlink:title="SEMHex">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1518,-144 1463,-144 1463,-120 1518,-120 1518,-144"/>
+<text text-anchor="middle" x="1490.5" y="-129.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMHex</text>
+</a>
+</g>
+</g>
+<!-- type~mappedtwopointvector3d_t&#45;&gt;type~semhex -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge7" class="edge">
+<title>type~mappedtwopointvector3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1694.89,-66.86C1654.4,-71.47 1604.71,-79.63 1562,-94 1546.94,-99.07 1531.28,-107.18 1518.55,-114.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1516.62,-111.69 1509.86,-119.85 1520.23,-117.69 1516.62,-111.69"/>
+<text text-anchor="middle" x="1619.5" y="-96.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~twopointvector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node13" class="node">
+<title>type~twopointvector3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node13"><a xlink:href=".././type/twopointvector3d.html" xlink:title="TwoPointVector3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1544,-24 1437,-24 1437,0 1544,0 1544,-24"/>
+<text text-anchor="middle" x="1490.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedtwopointvector3d_t&#45;&gt;type~twopointvector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge8" class="edge">
+<title>type~mappedtwopointvector3d_t&#45;&gt;type~twopointvector3d</title>
+<path fill="none" stroke="#ff0000" d="M1727.06,-48.99C1711.25,-45.15 1693.42,-41.1 1677,-38 1636.43,-30.34 1590.47,-23.88 1554.45,-19.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1554.45,-15.79 1544.09,-18.02 1553.58,-22.74 1554.45,-15.79"/>
+</g>
+<!-- type~mappedvector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node8" class="node">
+<title>type~mappedvector3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node8"><a xlink:href=".././type/mappedvector3d.html" xlink:title="MappedVector3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2095.5,-237 1991.5,-237 1991.5,-213 2095.5,-213 2095.5,-237"/>
+<text text-anchor="middle" x="2043.5" y="-222.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mappedvector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge10" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mappedvector3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2372.78,-184.19C2307.61,-192.29 2181.35,-207.99 2105.82,-217.38"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2105.01,-213.95 2095.51,-218.66 2105.87,-220.9 2105.01,-213.95"/>
+<text text-anchor="middle" x="2241.5" y="-215.4" font-family="Helvetica,sans-Serif" font-size="9.50">solutionGradient, flux</text>
+</g>
+<!-- type~mesh3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node9" class="node">
+<title>type~mesh3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node9"><a xlink:href=".././type/mesh3d.html" xlink:title="Mesh3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2071,-279 2016,-279 2016,-255 2071,-255 2071,-279"/>
+<text text-anchor="middle" x="2043.5" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mesh3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge11" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mesh3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2403.5,-191.1C2392.43,-202.41 2374.29,-218.77 2355,-227 2306.5,-247.7 2153.14,-260 2081.74,-264.74"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2081.17,-261.27 2071.42,-265.41 2081.62,-268.26 2081.17,-261.27"/>
+<text text-anchor="middle" x="2241.5" y="-262.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~model -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node10" class="node">
+<title>type~model</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node10"><a xlink:href=".././type/model.html" xlink:title="Model">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2070.5,-195 2016.5,-195 2016.5,-171 2070.5,-171 2070.5,-195"/>
+<text text-anchor="middle" x="2043.5" y="-180.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Model</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~model -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge14" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~model</title>
+<path fill="none" stroke="#00ffff" d="M2240.5,-163C2184.51,-160.43 2119.9,-169.34 2080.64,-176.09"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2079.98,-172.66 2070.74,-177.84 2081.2,-179.55 2079.98,-172.66"/>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~semhex -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge12" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2372.87,-174.02C2338.08,-170.13 2287.14,-165.05 2242.5,-163"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2240.5,-163C1966.84,-150.44 1636.83,-137.58 1528.15,-133.4"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1528.17,-129.9 1518.04,-133.01 1527.9,-136.89 1528.17,-129.9"/>
+<text text-anchor="middle" x="1915.5" y="-152.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedscalar3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node12" class="node">
+<title>type~mappedscalar3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node12"><a xlink:href=".././type/mappedscalar3d.html" xlink:title="MappedScalar3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2095.5,-115 1991.5,-115 1991.5,-91 2095.5,-91 2095.5,-115"/>
+<text text-anchor="middle" x="2043.5" y="-100.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mappedscalar3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge9" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mappedscalar3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2400.43,-166.68C2389,-157.42 2372.05,-145.29 2355,-139 2272.54,-108.56 2170.12,-102.23 2106.01,-101.68"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2105.68,-98.18 2095.67,-101.64 2105.66,-105.18 2105.68,-98.18"/>
+<text text-anchor="middle" x="2241.5" y="-141.4" font-family="Helvetica,sans-Serif" font-size="9.50">solution, source, fluxDivergence, dSdt, workSol</text>
+</g>
+<!-- type~boundaryconditionlist -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node14" class="node">
+<title>type~boundaryconditionlist</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node14"><a xlink:href=".././type/boundaryconditionlist.html" xlink:title="BoundaryConditionList">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2110,-321 1977,-321 1977,-297 2110,-297 2110,-321"/>
+<text text-anchor="middle" x="2043.5" y="-306.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryConditionList</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~boundaryconditionlist -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge13" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~boundaryconditionlist</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2410.8,-191.09C2403.72,-211.96 2386.13,-254.41 2355,-274 2284.58,-318.32 2187.09,-322.1 2120.24,-318"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2120.41,-314.51 2110.19,-317.31 2119.93,-321.49 2120.41,-314.51"/>
+<text text-anchor="middle" x="2241.5" y="-321.4" font-family="Helvetica,sans-Serif" font-size="9.50">hyperbolicBCs, parabolicBCs</text>
+</g>
+<!-- type~mappedvector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node18" class="node">
+<title>type~mappedvector3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node18"><a xlink:href=".././type/mappedvector3d_t.html" xlink:title="MappedVector3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1831,-213 1718,-213 1718,-189 1831,-189 1831,-213"/>
+<text text-anchor="middle" x="1774.5" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector3d&#45;&gt;type~mappedvector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge15" class="edge">
+<title>type~mappedvector3d&#45;&gt;type~mappedvector3d_t</title>
+<path fill="none" stroke="#ff0000" d="M1991.34,-220.4C1948.68,-216.57 1887.63,-211.08 1841.33,-206.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1841.37,-203.41 1831.1,-206 1840.74,-210.38 1841.37,-203.41"/>
+</g>
+<!-- type~mesh3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node19" class="node">
+<title>type~mesh3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node19"><a xlink:href=".././type/mesh3d_t.html" xlink:title="Mesh3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1806.5,-279 1742.5,-279 1742.5,-255 1806.5,-255 1806.5,-279"/>
+<text text-anchor="middle" x="1774.5" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d&#45;&gt;type~mesh3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge16" class="edge">
+<title>type~mesh3d&#45;&gt;type~mesh3d_t</title>
+<path fill="none" stroke="#ffda00" d="M2015.92,-267C1969.33,-267 1872.59,-267 1817.08,-267"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1816.88,-263.5 1806.88,-267 1816.88,-270.5 1816.88,-263.5"/>
+</g>
+<!-- type~vector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node15" class="node">
+<title>type~vector3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node15"><a xlink:href=".././type/vector3d.html" xlink:title="Vector3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1312,-186 1251,-186 1251,-162 1312,-162 1312,-186"/>
+<text text-anchor="middle" x="1281.5" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Vector3D</text>
+</a>
+</g>
+</g>
+<!-- type~semhex&#45;&gt;type~vector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge17" class="edge">
+<title>type~semhex&#45;&gt;type~vector3d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1462.86,-137.4C1427.13,-144.66 1363.39,-157.59 1322.04,-165.98"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1321.15,-162.59 1312.04,-168.01 1322.54,-169.45 1321.15,-162.59"/>
+<text text-anchor="middle" x="1393" y="-158.4" font-family="Helvetica,sans-Serif" font-size="9.50">x, nHat</text>
+</g>
+<!-- type~scalar3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node20" class="node">
+<title>type~scalar3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node20"><a xlink:href=".././type/scalar3d.html" xlink:title="Scalar3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1312,-102 1251,-102 1251,-78 1312,-78 1312,-102"/>
+<text text-anchor="middle" x="1281.5" y="-87.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- type~semhex&#45;&gt;type~scalar3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge19" class="edge">
+<title>type~semhex&#45;&gt;type~scalar3d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1462.86,-126.6C1427.13,-119.34 1363.39,-106.41 1322.04,-98.02"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1322.54,-94.55 1312.04,-95.99 1321.15,-101.41 1322.54,-94.55"/>
+<text text-anchor="middle" x="1393" y="-119.4" font-family="Helvetica,sans-Serif" font-size="9.50">nScale, J</text>
+</g>
+<!-- type~tensor3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node21" class="node">
+<title>type~tensor3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node21"><a xlink:href=".././type/tensor3d.html" xlink:title="Tensor3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1312.5,-144 1250.5,-144 1250.5,-120 1312.5,-120 1312.5,-144"/>
+<text text-anchor="middle" x="1281.5" y="-129.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- type~semhex&#45;&gt;type~tensor3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge18" class="edge">
+<title>type~semhex&#45;&gt;type~tensor3d</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1462.86,-132C1427.33,-132 1364.1,-132 1322.74,-132"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1322.73,-128.5 1312.73,-132 1322.73,-135.5 1322.73,-128.5"/>
+<text text-anchor="middle" x="1393" y="-134.4" font-family="Helvetica,sans-Serif" font-size="9.50">dxds, dsdx</text>
+</g>
+<!-- type~mappedscalar3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node16" class="node">
+<title>type~mappedscalar3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node16"><a xlink:href=".././type/mappedscalar3d_t.html" xlink:title="MappedScalar3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1831,-115 1718,-115 1718,-91 1831,-91 1831,-115"/>
+<text text-anchor="middle" x="1774.5" y="-100.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar3d&#45;&gt;type~mappedscalar3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge20" class="edge">
+<title>type~mappedscalar3d&#45;&gt;type~mappedscalar3d_t</title>
+<path fill="none" stroke="#0091ff" d="M1991.34,-103C1948.68,-103 1887.63,-103 1841.33,-103"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="1841.1,-99.5 1831.1,-103 1841.1,-106.5 1841.1,-99.5"/>
+</g>
+<!-- type~twopointvector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node17" class="node">
+<title>type~twopointvector3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node17"><a xlink:href=".././type/twopointvector3d_t.html" xlink:title="TwoPointVector3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1196,-38 1080,-38 1080,-14 1196,-14 1196,-38"/>
+<text text-anchor="middle" x="1138" y="-23.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">TwoPointVector3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~twopointvector3d&#45;&gt;type~twopointvector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge21" class="edge">
+<title>type~twopointvector3d&#45;&gt;type~twopointvector3d_t</title>
+<path fill="none" stroke="#4800ff" d="M1436.65,-14.11C1375.07,-16.57 1273.24,-20.64 1206.12,-23.32"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1205.92,-19.82 1196.07,-23.72 1206.2,-26.82 1205.92,-19.82"/>
+</g>
+<!-- type~boundarycondition -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node22" class="node">
+<title>type~boundarycondition</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node22"><a xlink:href=".././type/boundarycondition.html" xlink:title="BoundaryCondition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1677,-320 1562,-320 1562,-296 1677,-296 1677,-320"/>
+<text text-anchor="middle" x="1619.5" y="-305.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryCondition</text>
+</a>
+</g>
+</g>
+<!-- type~boundaryconditionlist&#45;&gt;type~boundarycondition -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge22" class="edge">
+<title>type~boundaryconditionlist&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1976.56,-308.84C1897.81,-308.66 1766.79,-308.35 1687.54,-308.16"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1687.2,-304.66 1677.19,-308.13 1687.19,-311.66 1687.2,-304.66"/>
+<text text-anchor="middle" x="1915.5" y="-310.4" font-family="Helvetica,sans-Serif" font-size="9.50">current, head, tail</text>
+</g>
+<!-- type~vector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node23" class="node">
+<title>type~vector3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node23"><a xlink:href=".././type/vector3d_t.html" xlink:title="Vector3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1025,-186 955,-186 955,-162 1025,-162 1025,-186"/>
+<text text-anchor="middle" x="990" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Vector3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~vector3d&#45;&gt;type~vector3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge23" class="edge">
+<title>type~vector3d&#45;&gt;type~vector3d_t</title>
+<path fill="none" stroke="#ff0000" d="M1250.88,-174C1199.9,-174 1095.3,-174 1035.52,-174"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1035.26,-170.5 1025.26,-174 1035.26,-177.5 1035.26,-170.5"/>
+</g>
+<!-- type~mappedscalar3d_t&#45;&gt;type~semhex -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge24" class="edge">
+<title>type~mappedscalar3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1717.67,-105.59C1674.93,-107.97 1614.59,-112.18 1562,-119 1550.96,-120.43 1539.03,-122.45 1528.18,-124.47"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1527.34,-121.07 1518.18,-126.39 1528.66,-127.94 1527.34,-121.07"/>
+<text text-anchor="middle" x="1619.5" y="-121.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedscalar3d_t&#45;&gt;type~scalar3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge25" class="edge">
+<title>type~mappedscalar3d_t&#45;&gt;type~scalar3d</title>
+<path fill="none" stroke="#ffbf00" d="M1717.78,-91.57C1709.9,-88.97 1702.08,-85.81 1695,-82 1685.58,-76.92 1687,-69.8 1677,-66 1554.34,-19.36 1394.77,-55.81 1321.9,-77.22"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1320.78,-73.9 1312.21,-80.13 1322.79,-80.61 1320.78,-73.9"/>
+</g>
+<!-- type~self_dataobj -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node24" class="node">
+<title>type~self_dataobj</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node24"><a xlink:href=".././type/self_dataobj.html" xlink:title="SELF_DataObj">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="760,-168 673,-168 673,-144 760,-144 760,-168"/>
+<text text-anchor="middle" x="716.5" y="-153.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataObj</text>
+</a>
+</g>
+</g>
+<!-- type~twopointvector3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge26" class="edge">
+<title>type~twopointvector3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#7fff00" d="M1079.59,-36.15C1035.28,-44.26 972.53,-56.32 918,-69 883.03,-77.13 875.34,-83.7 840,-90"/>
+<path fill="none" stroke="#7fff00" d="M838,-90C800.5,-96.56 762.92,-120.59 739.94,-137.76"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="737.67,-135.09 731.87,-143.96 741.94,-140.64 737.67,-135.09"/>
+</g>
+<!-- type~mappedvector3d_t&#45;&gt;type~semhex -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge27" class="edge">
+<title>type~mappedvector3d_t&#45;&gt;type~semhex</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1726.97,-188.97C1711.15,-185 1693.34,-180.66 1677,-177 1626.14,-165.6 1612.5,-166.89 1562,-154 1550.78,-151.13 1538.69,-147.55 1527.76,-144.11"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1528.68,-140.74 1518.09,-141.02 1526.55,-147.4 1528.68,-140.74"/>
+<text text-anchor="middle" x="1619.5" y="-179.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedvector3d_t&#45;&gt;type~vector3d -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge28" class="edge">
+<title>type~mappedvector3d_t&#45;&gt;type~vector3d</title>
+<path fill="none" stroke="#00ff3f" d="M1717.65,-197.93C1617.42,-192.42 1409.34,-180.97 1322.22,-176.18"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1322.38,-172.69 1312.21,-175.63 1322,-179.68 1322.38,-172.69"/>
+</g>
+<!-- type~semmesh -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node25" class="node">
+<title>type~semmesh</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node25"><a xlink:href=".././type/semmesh.html" xlink:title="SEMMesh">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1522,-279 1459,-279 1459,-255 1522,-255 1522,-279"/>
+<text text-anchor="middle" x="1490.5" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMMesh</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d_t&#45;&gt;type~semmesh -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge29" class="edge">
+<title>type~mesh3d_t&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#00ffff" d="M1742.24,-267C1690.94,-267 1588.92,-267 1532.1,-267"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1532.04,-263.5 1522.04,-267 1532.04,-270.5 1532.04,-263.5"/>
+</g>
+<!-- type~scalar3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node26" class="node">
+<title>type~scalar3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node26"><a xlink:href=".././type/scalar3d_t.html" xlink:title="Scalar3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1025,-102 955,-102 955,-78 1025,-78 1025,-102"/>
+<text text-anchor="middle" x="990" y="-87.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~scalar3d&#45;&gt;type~scalar3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge30" class="edge">
+<title>type~scalar3d&#45;&gt;type~scalar3d_t</title>
+<path fill="none" stroke="#003fff" d="M1250.88,-90C1199.9,-90 1095.3,-90 1035.52,-90"/>
+<polygon fill="#003fff" stroke="#003fff" points="1035.26,-86.5 1025.26,-90 1035.26,-93.5 1035.26,-86.5"/>
+</g>
+<!-- type~tensor3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node27" class="node">
+<title>type~tensor3d_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node27"><a xlink:href=".././type/tensor3d_t.html" xlink:title="Tensor3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1025.5,-144 954.5,-144 954.5,-120 1025.5,-120 1025.5,-144"/>
+<text text-anchor="middle" x="990" y="-129.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~tensor3d&#45;&gt;type~tensor3d_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge31" class="edge">
+<title>type~tensor3d&#45;&gt;type~tensor3d_t</title>
+<path fill="none" stroke="#7f00ff" d="M1250.34,-132C1199.24,-132 1095.42,-132 1035.8,-132"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1035.56,-128.5 1025.56,-132 1035.56,-135.5 1035.56,-128.5"/>
+</g>
+<!-- type~boundarycondition&#45;&gt;type~boundarycondition -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge33" class="edge">
+<title>type~boundarycondition&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1640.66,-320.01C1648.05,-328.97 1641,-338 1619.5,-338 1606.4,-338 1598.66,-334.65 1596.29,-330"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1599.76,-330.51 1598.34,-320.01 1592.9,-329.11 1599.76,-330.51"/>
+<text text-anchor="middle" x="1619.5" y="-340.4" font-family="Helvetica,sans-Serif" font-size="9.50">next, prev</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node28" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-277 0,-277 0,-253 54,-253 54,-277"/>
+<text text-anchor="middle" x="27" y="-262.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~boundarycondition&#45;&gt;c_ptr -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge32" class="edge">
+<title>type~boundarycondition&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1561.76,-308C1516.37,-308 1451.1,-308 1394,-308 1394,-308 1394,-308 495,-308 320.13,-308 274.25,-319.16 102,-289"/>
+<text text-anchor="middle" x="839" y="-310.4" font-family="Helvetica,sans-Serif" font-size="9.50">elements_gpu, sides_gpu</text>
+</g>
+<!-- type~vector3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge34" class="edge">
+<title>type~vector3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#ff0000" d="M954.72,-166.77C942.7,-163.49 929.38,-158.98 918,-153 878.55,-132.28 883.87,-82.18 840,-90"/>
+</g>
+<!-- type~lagrange -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node29" class="node">
+<title>type~lagrange</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node29"><a xlink:href=".././type/lagrange.html" xlink:title="Lagrange">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="593,-143 529,-143 529,-119 593,-119 593,-143"/>
+<text text-anchor="middle" x="561" y="-128.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~lagrange -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge35" class="edge">
+<title>type~self_dataobj&#45;&gt;type~lagrange</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M672.74,-149.04C651.09,-145.51 624.92,-141.25 603.45,-137.75"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="603.77,-134.26 593.33,-136.1 602.64,-141.17 603.77,-134.26"/>
+<text text-anchor="middle" x="640.5" y="-147.4" font-family="Helvetica,sans-Serif" font-size="9.50">interp</text>
+</g>
+<!-- type~metadata -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node30" class="node">
+<title>type~metadata</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node30"><a xlink:href=".././type/metadata.html" xlink:title="Metadata">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="592.5,-227 529.5,-227 529.5,-203 592.5,-203 592.5,-227"/>
+<text text-anchor="middle" x="561" y="-212.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Metadata</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~metadata -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge36" class="edge">
+<title>type~self_dataobj&#45;&gt;type~metadata</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M684.07,-168.08C660.34,-177.2 627.63,-189.78 602.03,-199.61"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="600.68,-196.38 592.61,-203.24 603.2,-202.92 600.68,-196.38"/>
+<text text-anchor="middle" x="640.5" y="-191.4" font-family="Helvetica,sans-Serif" font-size="9.50">meta</text>
+</g>
+<!-- EquationParser -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node31" class="node">
+<title>EquationParser</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="608,-185 514,-185 514,-161 608,-161 608,-185"/>
+<text text-anchor="middle" x="561" y="-170.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EquationParser</text>
+</g>
+<!-- type~self_dataobj&#45;&gt;EquationParser -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge37" class="edge">
+<title>type~self_dataobj&#45;&gt;EquationParser</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M672.74,-160.74C655.83,-162.61 636.16,-164.79 618.13,-166.78"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="617.57,-163.32 608.02,-167.9 618.35,-170.28 617.57,-163.32"/>
+<text text-anchor="middle" x="640.5" y="-167.4" font-family="Helvetica,sans-Serif" font-size="9.50">eqn</text>
+</g>
+<!-- type~domaindecomposition -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node32" class="node">
+<title>type~domaindecomposition</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node32"><a xlink:href=".././type/domaindecomposition.html" xlink:title="DomainDecomposition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1349,-279 1214,-279 1214,-255 1349,-255 1349,-279"/>
+<text text-anchor="middle" x="1281.5" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- type~semmesh&#45;&gt;type~domaindecomposition -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge38" class="edge">
+<title>type~semmesh&#45;&gt;type~domaindecomposition</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1458.96,-267C1432.75,-267 1393.86,-267 1359.24,-267"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1359.14,-263.5 1349.14,-267 1359.14,-270.5 1359.14,-263.5"/>
+<text text-anchor="middle" x="1393" y="-269.4" font-family="Helvetica,sans-Serif" font-size="9.50">decomp</text>
+</g>
+<!-- type~scalar3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge39" class="edge">
+<title>type~scalar3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#00ffff" d="M954.97,-86.63C924.58,-84.41 878.96,-83.06 840,-90"/>
+</g>
+<!-- type~tensor3d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge40" class="edge">
+<title>type~tensor3d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#0000ff" d="M954.19,-121.78C911.07,-109.19 842.89,-89.49 840,-90"/>
+</g>
+<!-- type~lagrange&#45;&gt;c_ptr -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge41" class="edge">
+<title>type~lagrange&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M495,-270C461.14,-288.5 186.48,-281.14 148,-284 127.49,-285.53 122.31,-292.21 102,-289"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M100,-289C87.95,-286.89 75.18,-283.16 63.79,-279.25"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="64.78,-275.89 54.18,-275.81 62.42,-282.48 64.78,-275.89"/>
+<text text-anchor="middle" x="312.5" y="-286.4" font-family="Helvetica,sans-Serif" font-size="9.50">qWeights_gpu, iMatrix_gpu, dMatrix_gpu, dgMatrix_gpu, bMatrix_gpu</text>
+</g>
+<!-- type~lagrange_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node33" class="node">
+<title>type~lagrange_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node33"><a xlink:href=".././type/lagrange_t.html" xlink:title="Lagrange_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="349,-234 276,-234 276,-210 349,-210 349,-234"/>
+<text text-anchor="middle" x="312.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- type~lagrange&#45;&gt;type~lagrange_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge42" class="edge">
+<title>type~lagrange&#45;&gt;type~lagrange_t</title>
+<path fill="none" stroke="#ff0000" d="M528.77,-140.13C523.12,-143.09 517.81,-146.96 514,-152 498.01,-173.17 519.28,-257.28 496,-270"/>
+<path fill="none" stroke="#ff0000" d="M495,-270C483.91,-276.06 487.95,-254.29 477,-248 441.09,-227.37 393.8,-221.73 359.33,-220.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="359.12,-217.23 349.06,-220.57 359,-224.23 359.12,-217.23"/>
+</g>
+<!-- type~domaindecomposition_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_node34" class="node">
+<title>type~domaindecomposition_t</title>
+<g id="a_type~~ecadvection3d_t~~InheritsGraph_node34"><a xlink:href=".././type/domaindecomposition_t.html" xlink:title="DomainDecomposition_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1062,-279 918,-279 918,-255 1062,-255 1062,-279"/>
+<text text-anchor="middle" x="990" y="-264.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- type~domaindecomposition&#45;&gt;type~domaindecomposition_t -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge43" class="edge">
+<title>type~domaindecomposition&#45;&gt;type~domaindecomposition_t</title>
+<path fill="none" stroke="#7f00ff" d="M1213.72,-267C1171.66,-267 1117.08,-267 1072.48,-267"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1072.25,-263.5 1062.25,-267 1072.25,-270.5 1072.25,-263.5"/>
+</g>
+<!-- type~lagrange_t&#45;&gt;c_ptr -->
+<g id="type~~ecadvection3d_t~~InheritsGraph_edge44" class="edge">
+<title>type~lagrange_t&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M275.88,-227.4C221.53,-235.65 118.48,-251.28 63.94,-259.55"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="63.39,-256.09 54.03,-261.05 64.44,-263.01 63.39,-256.09"/>
+<text text-anchor="middle" x="101" y="-259.4" font-family="Helvetica,sans-Serif" font-size="9.50">blas_handle</text>
+</g>
+</g>
+</svg>
+</div><script>var pantypeecadvection3d_tInheritsGraph = svgPanZoom('#typeecadvection3d_tInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~ecadvection3d_t~~InheritedByGraph Pages: 1 -->
+<svg id="typeecadvection3d_tInheritedByGraph" width="241pt" height="74pt"
+ viewBox="0.00 0.00 241.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~ecadvection3d_t~~InheritedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>type~~ecadvection3d_t~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 237,-70 237,4 -4,4"/>
+<!-- type~ecadvection3d_t -->
+<g id="type~~ecadvection3d_t~~InheritedByGraph_node1" class="node">
+<title>type~ecadvection3d_t</title>
+<polygon fill="none" stroke="black" points="103,-45 0,-45 0,-21 103,-21 103,-45"/>
+<text text-anchor="middle" x="51.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">ECAdvection3D_t</text>
+</g>
+<!-- type~ecadvection3d -->
+<g id="type~~ecadvection3d_t~~InheritedByGraph_node2" class="node">
+<title>type~ecadvection3d</title>
+<g id="a_type~~ecadvection3d_t~~InheritedByGraph_node2"><a xlink:href=".././type/ecadvection3d.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="233,-66 139,-66 139,-42 233,-42 233,-66"/>
+<text text-anchor="middle" x="186" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~ecadvection3d_t~~InheritedByGraph_edge1" class="edge">
+<title>type~ecadvection3d&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" d="M138.66,-46.66C130.4,-45.35 121.68,-43.96 113.09,-42.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="113.53,-39.13 103.11,-41.02 112.44,-46.04 113.53,-39.13"/>
+</g>
+<!-- type~ecadvection3d~2 -->
+<g id="type~~ecadvection3d_t~~InheritedByGraph_node3" class="node">
+<title>type~ecadvection3d~2</title>
+<g id="a_type~~ecadvection3d_t~~InheritedByGraph_node3"><a xlink:href=".././type/ecadvection3d~2.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="233,-24 139,-24 139,0 233,0 233,-24"/>
+<text text-anchor="middle" x="186" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~ecadvection3d_t~~InheritedByGraph_edge2" class="edge">
+<title>type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" d="M138.66,-19.34C130.4,-20.65 121.68,-22.04 113.09,-23.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="112.44,-19.96 103.11,-24.98 113.53,-26.87 112.44,-19.96"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-dsdt~2">dSdt</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-flux~2">flux</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-fluxdivergence~2">fluxDivergence</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-geometry~2">geometry</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-hyperbolicbcs~2">hyperbolicBCs</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-mesh~2">mesh</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-parabolicbcs~2">parabolicBCs</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-solution~2">solution</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-solutiongradient~2">solutionGradient</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-source~2">source</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-timeintegrator">timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-twopointflux">twoPointFlux</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-u~2">u</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-v~2">v</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-w">w</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#variable-worksol~2">workSol</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-additionalfree">AdditionalFree</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-additionalinit~5">AdditionalInit</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-boundaryflux~2">BoundaryFlux</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-calculateentropy~2">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-calculatesolutiongradient~2">CalculateSolutionGradient</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-calculatetendency~3">CalculateTendency</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-fluxmethod~2">FluxMethod</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-free~8">Free</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-init~8">Init</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-mapboundaryconditions~2">MapBoundaryConditions</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-pretendency">PreTendency</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-readmodel~2">ReadModel</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-reportmetrics~2">ReportMetrics</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setboundarycondition~2">SetBoundaryCondition</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setgradientboundarycondition~2">SetGradientBoundaryCondition</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setmetadata~2">SetMetadata</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setnumberofvariables~2">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-setsolution~6">SetSolution</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-settimeintegrator~6">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-sourcemethod~2">SourceMethod</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-twopointfluxmethod">TwoPointFluxMethod</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updategrk2~2">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updategrk3~2">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updategrk4~2">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-updatesolution~2">UpdateSolution</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-writemodel~2">WriteModel</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-writetecplot~2">WriteTecplot</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-entropy_func~6">entropy_func</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-flux2d">flux2D</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-flux3d">flux3D</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-riemannflux1d">riemannflux1d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-riemannflux2d~2">riemannflux2d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-riemannflux3d~2">riemannflux3d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-source3d">source3d</a>
+      <a class="list-group-item" href="../type/ecadvection3d_t.html#boundprocedure-twopointflux3d">twopointflux3d</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/ecadvection3d_t.html#src">ECAdvection3D_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-dsdt~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux~2"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~2"></span>type(<a href='../type/semhex.html'>SEMHex</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs~2"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh~2"></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs~2"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient~2"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-twopointflux"></span>type(<a href='../type/mappedtwopointvector3d.html'>MappedTwoPointVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>twoPointFlux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-u~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>u</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-v~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>v</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-w"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>w</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol~2"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalfree"></span><h3>procedure, public :: <strong>AdditionalFree</strong>  => <a href='../proc/additionalfree_model.html'>AdditionalFree_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalfree_model.html'>AdditionalFree_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalinit~5"></span><h3>procedure, public :: <strong>AdditionalInit</strong>  => <a href='../proc/additionalinit_ecadvection3d_t.html'>AdditionalInit_ECAdvection3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalinit_ecadvection3d_t.html'>AdditionalInit_ECAdvection3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecadvection3d_t.html'>ECAdvection3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionaloutput"></span><h3>procedure, public :: <strong>AdditionalOutput</strong>  => <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>(this, fileid)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=HID_T),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileid</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-boundaryflux~2"></span><h3>procedure, public :: <strong>BoundaryFlux</strong>  => <a href='../proc/boundaryflux_dgmodel3d_t.html'>BoundaryFlux_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/boundaryflux_dgmodel3d_t.html'>BoundaryFlux_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculateentropy~2"></span><h3>procedure, public :: <strong>CalculateEntropy</strong>  => <a href='../proc/calculateentropy_dgmodel3d_t.html'>CalculateEntropy_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculateentropy_dgmodel3d_t.html'>CalculateEntropy_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatesolutiongradient~2"></span><h3>procedure, public :: <strong>CalculateSolutionGradient</strong>  => <a href='../proc/calculatesolutiongradient_dgmodel3d_t.html'>CalculateSolutionGradient_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculatesolutiongradient_dgmodel3d_t.html'>CalculateSolutionGradient_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatetendency~3"></span><h3>procedure, public :: <strong>CalculateTendency</strong>  => <a href='../proc/calculatetendency_ecdgmodel3d_t.html'>CalculateTendency_ECDGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculatetendency_ecdgmodel3d_t.html'>CalculateTendency_ECDGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecdgmodel3d_t.html'>ECDGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-euler_timeintegrator"></span><h3>procedure, public :: <strong>Euler_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/euler_timeintegrator.html'>Euler_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-fluxmethod~2"></span><h3>procedure, public :: <strong>FluxMethod</strong>  => <a href='../proc/fluxmethod_dgmodel3d_t.html'>fluxmethod_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/fluxmethod_dgmodel3d_t.html'>fluxmethod_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-forwardstep"></span><h3>procedure, public :: <strong>ForwardStep</strong>  => <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>(this, tn, dt, ioInterval)</h3>
+<p>Forward steps the model using the associated tendency procedure and time integrator</p><a href="../proc/forwardstep_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ioInterval</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~8"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_ecdgmodel3d_t.html'>Free_ECDGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_ecdgmodel3d_t.html'>Free_ECDGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecdgmodel3d_t.html'>ECDGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-getsimulationtime"></span><h3>procedure, public :: <strong>GetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/getsimulationtime.html'>GetSimulationTime</a>(this, t)</h3>
+<p>Returns the current simulation time stored in the model % t attribute</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-incrementiocounter"></span><h3>procedure, public :: <strong>IncrementIOCounter</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/incrementiocounter.html'>IncrementIOCounter</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~8"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_ecdgmodel3d_t.html'>Init_ECDGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_ecdgmodel3d_t.html'>Init_ECDGModel3D_t</a>(this, mesh, geometry)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecdgmodel3d_t.html'>ECDGModel3D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semhex.html'>SEMHex</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk2_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK2_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk2_timeintegrator.html'>LowStorageRK2_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk3_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK3_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk3_timeintegrator.html'>LowStorageRK3_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk4_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK4_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk4_timeintegrator.html'>LowStorageRK4_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-mapboundaryconditions~2"></span><h3>procedure, public :: <strong>MapBoundaryConditions</strong>  => <a href='../proc/mapboundaryconditions_dgmodel3d_t.html'>MapBoundaryConditions_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/mapboundaryconditions_dgmodel3d_t.html'>MapBoundaryConditions_DGModel3D_t</a>(this)</h3>
+<p>Scan the mesh sideInfo and populate the elements/sides
+arrays for each registered boundary condition.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-pretendency"></span><h3>procedure, public :: <strong>PreTendency</strong>  => <a href='../proc/pretendency_model.html'>PreTendency_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/pretendency_model.html'>PreTendency_Model</a>(this)</h3>
+<p>PreTendency is a template routine that is used to house any additional calculations
+that you want to execute at the beginning of the tendency calculation routine.
+This default PreTendency simply returns back to the caller without executing any instructions</p><a href="../proc/pretendency_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-printtype"></span><h3>procedure, public :: <strong>PrintType</strong>  => <a href='../proc/printtype_model.html'>PrintType_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/printtype_model.html'>PrintType_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-readmodel~2"></span><h3>procedure, public :: <strong>ReadModel</strong>  => <a href='../proc/read_dgmodel3d_t.html'>Read_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/read_dgmodel3d_t.html'>Read_DGModel3D_t</a>(this, fileName)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportentropy"></span><h3>procedure, public :: <strong>ReportEntropy</strong>  => <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportmetrics~2"></span><h3>procedure, public :: <strong>ReportMetrics</strong>  => <a href='../proc/reportmetrics_dgmodel3d_t.html'>ReportMetrics_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportmetrics_dgmodel3d_t.html'>ReportMetrics_DGModel3D_t</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportusermetrics"></span><h3>procedure, public :: <strong>ReportUserMetrics</strong>  => <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>(this)</h3>
+<p>Method that can be overridden by users to
+report their own custom metrics after file io</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setboundarycondition~2"></span><h3>procedure, public :: <strong>SetBoundaryCondition</strong>  => <a href='../proc/setboundarycondition_dgmodel3d_t.html'>setboundarycondition_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setboundarycondition_dgmodel3d_t.html'>setboundarycondition_DGModel3D_t</a>(this)</h3>
+<p>Apply registered boundary conditions for the solution.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setgradientboundarycondition~2"></span><h3>procedure, public :: <strong>SetGradientBoundaryCondition</strong>  => <a href='../proc/setgradientboundarycondition_dgmodel3d_t.html'>setgradientboundarycondition_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setgradientboundarycondition_dgmodel3d_t.html'>setgradientboundarycondition_DGModel3D_t</a>(this)</h3>
+<p>Apply registered boundary conditions for the solution gradient.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setmetadata~2"></span><h3>procedure, public :: <strong>SetMetadata</strong>  => <a href='../proc/setmetadata_dgmodel3d_t.html'>SetMetadata_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setmetadata_dgmodel3d_t.html'>SetMetadata_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setnumberofvariables~2"></span><h3>procedure, public :: <strong>SetNumberOfVariables</strong>  => <a href='../proc/setnumberofvariables_model.html'>SetNumberOfVariables_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setnumberofvariables_model.html'>SetNumberOfVariables_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsimulationtime"></span><h3>procedure, public :: <strong>SetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setsimulationtime.html'>SetSimulationTime</a>(this, t)</h3>
+<p>Sets the model % t attribute with the provided simulation time</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsolution~6"></span><h3>generic, public :: <strong>SetSolution</strong>  => <a href='../type/dgmodel3d_t.html#boundprocedure-setsolutionfromchar_dgmodel3d_t'>SetSolutionFromChar_DGModel3D_t</a>, <a href='../type/dgmodel3d_t.html#boundprocedure-setsolutionfromeqn_dgmodel3d_t'>SetSolutionFromEqn_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setsolutionfromchar_dgmodel3d_t.html'>SetSolutionFromChar_DGModel3D_t</a>(this, eqnChar)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqnChar</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setsolutionfromeqn_dgmodel3d_t.html'>SetSolutionFromEqn_DGModel3D_t</a>(this, eqn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-settimeintegrator~6"></span><h3>generic, public :: <strong>SetTimeIntegrator</strong>  => <a href='../type/model.html#boundprocedure-settimeintegrator_withchar'>SetTimeIntegrator_withChar</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/settimeintegrator_withchar.html'>SetTimeIntegrator_withChar</a>(this, integrator)</h3>
+<p>Sets the time integrator method, using a character input</p><a href="../proc/settimeintegrator_withchar.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>integrator</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-sourcemethod~2"></span><h3>procedure, public :: <strong>SourceMethod</strong>  => <a href='../proc/sourcemethod_dgmodel3d_t.html'>sourcemethod_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/sourcemethod_dgmodel3d_t.html'>sourcemethod_DGModel3D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-twopointfluxmethod"></span><h3>procedure, public :: <strong>TwoPointFluxMethod</strong>  => <a href='../proc/twopointfluxmethod_ecdgmodel3d_t.html'>TwoPointFluxMethod_ECDGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/twopointfluxmethod_ecdgmodel3d_t.html'>TwoPointFluxMethod_ECDGModel3D_t</a>(this)</h3>
+<p>Computes pre-projected SCALAR contravariant two-point fluxes for all
+node pairs, following Trixi.jl for curved meshes. Each direction r
+uses the correct partner AND the correct averaged metric Ja^r.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecdgmodel3d_t.html'>ECDGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk2~2"></span><h3>procedure, public :: <strong>UpdateGRK2</strong>  => <a href='../proc/updategrk2_dgmodel3d_t.html'>UpdateGRK2_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk2_dgmodel3d_t.html'>UpdateGRK2_DGModel3D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk3~2"></span><h3>procedure, public :: <strong>UpdateGRK3</strong>  => <a href='../proc/updategrk3_dgmodel3d_t.html'>UpdateGRK3_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk3_dgmodel3d_t.html'>UpdateGRK3_DGModel3D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk4~2"></span><h3>procedure, public :: <strong>UpdateGRK4</strong>  => <a href='../proc/updategrk4_dgmodel3d_t.html'>UpdateGRK4_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk4_dgmodel3d_t.html'>UpdateGRK4_DGModel3D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatesolution~2"></span><h3>procedure, public :: <strong>UpdateSolution</strong>  => <a href='../proc/updatesolution_dgmodel3d_t.html'>UpdateSolution_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatesolution_dgmodel3d_t.html'>UpdateSolution_DGModel3D_t</a>(this, dt)</h3>
+<p>Computes a solution update as , where dt is either provided through the interface
+or taken as the Model's stored time step size (model % dt)</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writemodel~2"></span><h3>procedure, public :: <strong>WriteModel</strong>  => <a href='../proc/write_dgmodel3d_t.html'>Write_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/write_dgmodel3d_t.html'>Write_DGModel3D_t</a>(this, fileName)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writetecplot~2"></span><h3>procedure, public :: <strong>WriteTecplot</strong>  => <a href='../proc/writetecplot_dgmodel3d_t.html'>WriteTecplot_DGModel3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/writetecplot_dgmodel3d_t.html'>WriteTecplot_DGModel3D_t</a>(this, filename)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel3d_t.html'>DGModel3D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-entropy_func~6"></span><h3>procedure, public :: <strong>entropy_func</strong>  => <a href='../proc/entropy_func_ecadvection3d_t.html'>entropy_func_ECAdvection3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/entropy_func_ecadvection3d_t.html'>entropy_func_ECAdvection3D_t</a>(this, s) result(e)</h3>
+<p>Quadratic entropy: eta(u) = u^2 / 2</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecadvection3d_t.html'>ECAdvection3D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux1d"></span><h3>procedure, public :: <strong>flux1D</strong>  => <a href='../proc/flux1d_model.html'>flux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux1d_model.html'>flux1d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux2d"></span><h3>procedure, public :: <strong>flux2D</strong>  => <a href='../proc/flux2d_model.html'>flux2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux2d_model.html'>flux2d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:2)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux3d"></span><h3>procedure, public :: <strong>flux3D</strong>  => <a href='../proc/flux3d_model.html'>flux3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux3d_model.html'>flux3d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:3)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux1d"></span><h3>procedure, public :: <strong>riemannflux1d</strong>  => <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux2d~2"></span><h3>procedure, public :: <strong>riemannflux2d</strong>  => <a href='../proc/riemannflux2d_model.html'>riemannflux2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux2d_model.html'>riemannflux2d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux3d~2"></span><h3>procedure, public :: <strong>riemannflux3d</strong>  => <a href='../proc/riemannflux3d_ecadvection3d_t.html'>riemannflux3d_ECAdvection3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux3d_ecadvection3d_t.html'>riemannflux3d_ECAdvection3D_t</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>
+<p>Local Lax-Friedrichs (Rusanov) Riemann flux for linear advection.
+Uses the per-face spectral radius lambda = |u.n|, matching upwind
+(Godunov) for linear advection: tangential faces (u.n=0) contribute
+zero flux, avoiding spurious dissipation across element interfaces
+whose face normal is perpendicular to the velocity.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecadvection3d_t.html'>ECAdvection3D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source1d"></span><h3>procedure, public :: <strong>source1d</strong>  => <a href='../proc/source1d_model.html'>source1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source1d_model.html'>source1d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source2d"></span><h3>procedure, public :: <strong>source2d</strong>  => <a href='../proc/source2d_model.html'>source2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source2d_model.html'>source2d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source3d"></span><h3>procedure, public :: <strong>source3d</strong>  => <a href='../proc/source3d_model.html'>source3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source3d_model.html'>source3d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-twopointflux3d"></span><h3>procedure, public :: <strong>twopointflux3d</strong>  => <a href='../proc/twopointflux3d_ecadvection3d_t.html'>twopointflux3d_ECAdvection3D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/twopointflux3d_ecadvection3d_t.html'>twopointflux3d_ECAdvection3D_t</a>(this, sL, sR) result(flux)</h3>
+<p>Arithmetic-mean two-point flux for linear advection.
+Entropy-conserving with respect to eta(u) = u^2/2.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/ecadvection3d_t.html'>ECAdvection3D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:3)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">ECDGModel3D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ECAdvection3D_t</span>
+
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="c">! x-component of advection velocity</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="c">! y-component of advection velocity</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="c">! z-component of advection velocity</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy_func</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">entropy_func_ECAdvection3D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">twopointflux3d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">twopointflux3d_ECAdvection3D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">riemannflux3d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">riemannflux3d_ECAdvection3D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalInit</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalInit_ECAdvection3D_t</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">ECAdvection3D_t</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-05-16 16:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

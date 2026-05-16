@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_ECAdvection2D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_ECAdvection2D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.7% of total for source files.">111 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_ECAdvection2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_ECAdvection2D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_ecadvection2d~2.html">SELF_ECAdvection2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_ecadvection2d.f90~2.html#src">SELF_ECAdvection2D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_ecadvection2df902EfferentGraph" width="641pt" height="189pt"
+ viewBox="0.00 0.00 641.00 189.24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph" class="graph" transform="scale(0.19 0.19) rotate(0) translate(4 976.42)">
+<title>sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-976.42 3317,-976.42 3317,4 -4,4"/>
+<!-- sourcefile~self_ecadvection2d.f90~2 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_ecadvection2d.f90~2</title>
+<polygon fill="none" stroke="black" points="3313,-438 3168,-438 3168,-414 3313,-414 3313,-438"/>
+<text text-anchor="middle" x="3240.5" y="-423.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_ECAdvection2D.f90</text>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_gpuinterfaces.f90.html" xlink:title="SELF_GPUInterfaces.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2940.5,-638 2801.5,-638 2801.5,-614 2940.5,-614 2940.5,-638"/>
+<text text-anchor="middle" x="2871" y="-623.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3054,-586C3020.74,-597.01 2983.05,-605.86 2950.63,-612.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2949.88,-609 2940.75,-614.37 2951.24,-615.86 2949.88,-609"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_geometry_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_geometry_2d.f90.html" xlink:title="SELF_Geometry_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1691,-627 1554,-627 1554,-603 1691,-603 1691,-627"/>
+<text text-anchor="middle" x="1622.5" y="-612.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2870,-586C2738.7,-578.83 2707.81,-613.67 2577,-627 2355.91,-649.53 2299.96,-670.09 2078,-659"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2076,-659C2015.02,-656.11 2012.66,-614.06 1955,-594 1909.59,-578.2 1896.57,-574.1 1848.5,-575"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_boundaryconditions.f90.html" xlink:title="SELF_BoundaryConditions.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2163,-281 1991,-281 1991,-257 2163,-257 2163,-281"/>
+<text text-anchor="middle" x="2077" y="-266.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3231.03,-438.32C3207.77,-470.86 3139.06,-558.5 3056,-586"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3054,-586C3000.19,-603.81 2996.36,-541.04 2942,-525 2834.06,-493.15 2802.04,-506 2689.5,-506 2689.5,-506 2689.5,-506 2473,-506 2306.34,-506 2313.27,-367.08 2163,-295 2154.62,-290.98 2145.48,-287.41 2136.4,-284.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2137.2,-280.89 2126.61,-281.12 2135.04,-287.55 2137.2,-280.89"/>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="443.5,-861 358.5,-861 358.5,-837 443.5,-837 443.5,-861"/>
+<text text-anchor="middle" x="401" y="-846.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2076,-659C2072.8,-658.85 1851.33,-695.5 1848.5,-697"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1846.5,-697C1737.31,-755.07 1808.32,-869.58 1704,-936 1607.16,-997.66 1561.81,-962 1447,-962 1447,-962 1447,-962 746.5,-962 624.87,-962 490.57,-897.61 432.03,-866.04"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="433.43,-862.82 422.97,-861.09 430.07,-868.96 433.43,-862.82"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_ecdgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_ecdgmodel2d_t.f90.html" xlink:title="SELF_ECDGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2764,-558 2613,-558 2613,-534 2764,-534 2764,-558"/>
+<text text-anchor="middle" x="2688.5" y="-543.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3054,-586C2977.21,-611.42 2952.77,-590.41 2872,-586"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2870,-586C2824.01,-583.49 2772.86,-571.22 2736.79,-560.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2737.61,-557.52 2727.03,-558.09 2735.65,-564.24 2737.61,-557.52"/>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_ecadvection2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_ecadvection2d_t.f90.html" xlink:title="SELF_ECAdvection2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="3132,-438 2978,-438 2978,-414 3132,-414 3132,-438"/>
+<text text-anchor="middle" x="3055" y="-423.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecadvection2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3167.77,-426C3159.48,-426 3150.96,-426 3142.5,-426"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="3142.23,-422.5 3132.23,-426 3142.23,-429.5 3142.23,-422.5"/>
+</g>
+<!-- sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_mesh_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_mesh_2d.f90.html" xlink:title="SELF_Mesh_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1502,-361 1390,-361 1390,-337 1502,-337 1502,-361"/>
+<text text-anchor="middle" x="1446" y="-346.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3229.89,-413.7C3190.96,-365.34 3038.99,-191 2872,-191 2872,-191 2872,-191 2266,-191 2141.18,-191 2110.08,-210.59 1991,-248 1925.28,-268.65 1915.89,-294.67 1848.5,-309"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1846.5,-309C1729.9,-329.64 1592.14,-340.5 1512.64,-345.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1512.06,-342 1502.29,-346.11 1512.48,-348.99 1512.06,-342"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2830.05,-638.04C2759.23,-658.3 2606.69,-697 2475,-697 2475,-697 2475,-697 2266,-697 2173.22,-697 1931.02,-654.59 1848.5,-697"/>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1609.64,-602.76C1592.5,-584.51 1560.71,-548.5 1541,-513 1518.07,-471.7 1529.32,-453.49 1505,-413 1494.99,-396.34 1480.25,-380.14 1468.14,-368.21"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1470.27,-365.41 1460.63,-361.03 1465.43,-370.47 1470.27,-365.41"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-380 0,-380 0,-356 116,-356 116,-380"/>
+<text text-anchor="middle" x="58" y="-365.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1147.5,-716C1110.55,-714.7 1103.01,-728.59 1067,-737 1026.34,-746.49 1013.83,-740.66 975,-756"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M973,-756C857.09,-801.78 873.11,-925.47 748.5,-924"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M746.5,-924C655.97,-922.93 637.59,-890.23 557.5,-848"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-748 499,-748 499,-724 614,-724 614,-748"/>
+<text text-anchor="middle" x="556.5" y="-733.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1605.21,-627.2C1575.52,-648.75 1509.83,-693.21 1447,-714"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1445,-714C1320.31,-755.26 1280.83,-715.08 1149.5,-716"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1147.5,-716C1068.85,-713.23 1052.07,-660.08 975,-676"/>
+</g>
+<!-- sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_tensor_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_tensor_2d.f90.html" xlink:title="SELF_Tensor_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1505,-647 1387,-647 1387,-623 1505,-623 1505,-647"/>
+<text text-anchor="middle" x="1446" y="-632.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1553.53,-622.79C1540.92,-624.24 1527.75,-625.75 1515.13,-627.19"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1514.69,-623.72 1505.16,-628.33 1515.49,-630.67 1514.69,-623.72"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="792,-630 703,-630 703,-606 792,-606 792,-630"/>
+<text text-anchor="middle" x="747.5" y="-615.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1582.31,-602.95C1520.94,-585.17 1398.12,-554 1291.5,-554 1291.5,-554 1291.5,-554 1147.5,-554 1028.75,-554 997.39,-549.49 881,-573 848.27,-579.61 812.49,-592.09 786.37,-602.24"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="784.88,-599.07 776.86,-605.99 787.45,-605.58 784.88,-599.07"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_scalar_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_scalar_2d.f90.html" xlink:title="SELF_Scalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1349.5,-766 1231.5,-766 1231.5,-742 1349.5,-742 1349.5,-766"/>
+<text text-anchor="middle" x="1290.5" y="-751.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1445,-714C1415.66,-723.71 1382.55,-732.59 1354.61,-739.51"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1353.45,-736.19 1344.56,-741.96 1355.11,-742.99 1353.45,-736.19"/>
+</g>
+<!-- sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_vector_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_vector_2d.f90.html" xlink:title="SELF_Vector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1505,-511 1387,-511 1387,-487 1505,-487 1505,-511"/>
+<text text-anchor="middle" x="1446" y="-496.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1603.16,-602.81C1572.18,-582.21 1509.39,-540.47 1473.58,-516.67"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1475.36,-513.65 1465.1,-511.03 1471.49,-519.48 1475.36,-513.65"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-189 152,-189 152,-165 303,-165 303,-189"/>
+<text text-anchor="middle" x="227.5" y="-174.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1596.96,-603C1579.44,-593.4 1556.35,-578.5 1541,-560 1515.59,-529.37 1531.19,-507.97 1505,-478 1464.57,-431.74 1428.7,-451.12 1387,-406 1362.98,-380.02 1377.89,-357.99 1351,-335 1261.17,-258.18 959.41,-200.69 845,-171 802.69,-160.02 791.29,-160.94 748.5,-152"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M746.5,-152C595.82,-124.81 552.32,-122.87 402,-152"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M2067.49,-256.65C2049.59,-231.57 2005.48,-174.38 1955,-143 1823.75,-61.41 1778.05,-38 1623.5,-38 1623.5,-38 1623.5,-38 555.5,-38 493.79,-38 328.78,-122.91 259.65,-160.01"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="257.69,-157.08 250.55,-164.91 261.01,-163.25 257.69,-157.08"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-458 499.5,-458 499.5,-434 613.5,-434 613.5,-458"/>
+<text text-anchor="middle" x="556.5" y="-443.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M2026.96,-256.91C1917.64,-232.52 1647.83,-186.57 1447,-271"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1445,-271C1411.72,-285.1 1410.66,-300.68 1387,-328 1369.31,-348.43 1374.56,-363.76 1351,-377 1288.29,-412.24 803.26,-435.78 623.9,-443.36"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="623.65,-439.86 613.8,-443.78 623.94,-446.86 623.65,-439.86"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="291,-861 164,-861 164,-837 291,-837 291,-861"/>
+<text text-anchor="middle" x="227.5" y="-846.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M358.48,-849C341.26,-849 320.76,-849 301.19,-849"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="301.07,-845.5 291.07,-849 301.07,-852.5 301.07,-845.5"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_dgmodel2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_dgmodel2d.f90.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2537.5,-558 2410.5,-558 2410.5,-534 2537.5,-534 2537.5,-558"/>
+<text text-anchor="middle" x="2474" y="-543.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M2612.88,-546C2591.81,-546 2568.92,-546 2547.95,-546"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="2547.83,-542.5 2537.83,-546 2547.83,-549.5 2547.83,-542.5"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_mappedtwopointvector_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_mappedtwopointvector_2d.f90.html" xlink:title="SELF_MappedTwoPointVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2577,-618 2371,-618 2371,-594 2577,-594 2577,-618"/>
+<text text-anchor="middle" x="2474" y="-603.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M2644.75,-558.07C2610.96,-567.61 2563.64,-580.97 2527.54,-591.16"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="2526.35,-587.86 2517.68,-593.95 2528.25,-594.6 2526.35,-587.86"/>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M2266,-269C2235.97,-267.42 2203.2,-266.98 2173.56,-267.06"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="2173.2,-263.56 2163.21,-267.11 2173.23,-270.56 2173.2,-263.56"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_ecdgmodel2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_ecdgmodel2d.f90.html" xlink:title="SELF_ECDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2942,-558 2800,-558 2800,-534 2942,-534 2942,-558"/>
+<text text-anchor="middle" x="2871" y="-543.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M3035.55,-438.17C3003.17,-459.51 2936.02,-503.79 2898.62,-528.45"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="2896.65,-525.55 2890.23,-533.98 2900.51,-531.4 2896.65,-525.55"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1194,-128 1103,-128 1103,-104 1194,-104 1194,-128"/>
+<text text-anchor="middle" x="1148.5" y="-113.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M3014.85,-413.98C2900.97,-379.92 2559.47,-284.3 2268,-269"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M2266,-269C2117.77,-252.61 2100.26,-176.8 1955,-143 1811.12,-109.52 1771.22,-119 1623.5,-119 1623.5,-119 1623.5,-119 1445,-119 1361.03,-119 1263.64,-117.77 1204.32,-116.89"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1204.11,-113.39 1194.05,-116.73 1204,-120.38 1204.11,-113.39"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_mesh_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_mesh_2d_t.f90.html" xlink:title="SELF_Mesh_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1351,-368 1230,-368 1230,-344 1351,-344 1351,-368"/>
+<text text-anchor="middle" x="1290.5" y="-353.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1389.58,-351.53C1380.44,-351.94 1370.86,-352.38 1361.41,-352.81"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1361.08,-349.32 1351.25,-353.28 1361.39,-356.32 1361.08,-349.32"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff6d00" stroke-dasharray="5,2" d="M539.07,-748.09C512.07,-767.97 458.14,-807.67 426.58,-830.91"/>
+<polygon fill="#ff6d00" stroke="#ff6d00" points="424.29,-828.25 418.31,-836.99 428.44,-833.88 424.29,-828.25"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff6d00" stroke-dasharray="5,2" d="M524.64,-723.94C494.05,-712.95 445.6,-698.13 402,-696"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-440 339,-440 339,-416 463,-416 463,-440"/>
+<text text-anchor="middle" x="401" y="-425.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#ff6d00" stroke-dasharray="5,2" d="M517.98,-723.95C510.97,-720.34 504.22,-715.77 499,-710 428.94,-632.56 409.06,-502.09 403.78,-450.23"/>
+<polygon fill="#ff6d00" stroke="#ff6d00" points="407.26,-449.76 402.84,-440.13 400.29,-450.41 407.26,-449.76"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node29" class="node">
+<title>sourcefile~self_tensor_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node29"><a xlink:href=".././sourcefile/self_tensor_2d_t.f90.html" xlink:title="SELF_Tensor_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-606 910.5,-606 910.5,-582 1037.5,-582 1037.5,-606"/>
+<text text-anchor="middle" x="974" y="-591.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_tensor_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_tensor_2d.f90&#45;&gt;sourcefile~self_tensor_2d_t.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1386.9,-629.93C1301.32,-622.47 1141.46,-608.52 1048.05,-600.37"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1048.1,-596.86 1037.83,-599.48 1047.49,-603.84 1048.1,-596.86"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#b6ff00" stroke-dasharray="5,2" d="M555.5,-618C480.94,-600.76 478.43,-699.73 402,-696"/>
+<path fill="none" stroke="#b6ff00" stroke-dasharray="5,2" d="M400,-696C223.27,-687.38 102.52,-461.04 68.67,-389.48"/>
+<polygon fill="#b6ff00" stroke="#b6ff00" points="71.7,-387.68 64.31,-380.08 65.35,-390.63 71.7,-387.68"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#b6ff00" stroke-dasharray="5,2" d="M730.78,-630.28C706.55,-648.88 658.25,-684.71 614,-710 608.08,-713.38 601.64,-716.68 595.3,-719.73"/>
+<polygon fill="#b6ff00" stroke="#b6ff00" points="593.74,-716.59 586.15,-723.99 596.7,-722.94 593.74,-716.59"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#b6ff00" stroke-dasharray="5,2" d="M733.21,-605.91C700.81,-576.42 617.56,-500.66 578.42,-465.04"/>
+<polygon fill="#b6ff00" stroke="#b6ff00" points="580.53,-462.22 570.78,-458.08 575.82,-467.4 580.53,-462.22"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-380 181,-380 181,-356 274,-356 274,-380"/>
+<text text-anchor="middle" x="227.5" y="-365.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#b6ff00" stroke-dasharray="5,2" d="M702.71,-623.53C663.99,-627.12 606.25,-629.28 557.5,-618"/>
+<path fill="none" stroke="#b6ff00" stroke-dasharray="5,2" d="M555.5,-618C528.57,-611.77 516.08,-613.74 499,-592 447.26,-526.13 518.89,-469.39 463,-407 444.05,-385.85 428.83,-397.31 402,-388"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_ecdgmodel2d.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#00ff24" stroke-dasharray="5,2" d="M2799.96,-546C2791.55,-546 2782.9,-546 2774.31,-546"/>
+<polygon fill="#00ff24" stroke="#00ff24" points="2774.29,-542.5 2764.29,-546 2774.29,-549.5 2774.29,-542.5"/>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1147.5,-756C1071.79,-743.9 1046.31,-727.84 975,-756"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_scalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_scalar_2d_t.f90.html" xlink:title="SELF_Scalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-648 910.5,-648 910.5,-624 1037.5,-624 1037.5,-648"/>
+<text text-anchor="middle" x="974" y="-633.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_scalar_2d.f90&#45;&gt;sourcefile~self_scalar_2d_t.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1231.28,-759.3C1206,-760.45 1176.14,-760.26 1149.5,-756"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1147.5,-756C1124.88,-752.38 1118.85,-746.53 1103,-730 1079.33,-705.32 1093.6,-683.49 1067,-662 1061.14,-657.27 1054.47,-653.39 1047.46,-650.23"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1048.31,-646.8 1037.73,-646.33 1045.71,-653.3 1048.31,-646.8"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node28" class="node">
+<title>sourcefile~self_vector_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node28"><a xlink:href=".././sourcefile/self_vector_2d_t.f90.html" xlink:title="SELF_Vector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-477 910.5,-477 910.5,-453 1037.5,-453 1037.5,-477"/>
+<text text-anchor="middle" x="974" y="-462.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_vector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_vector_2d.f90&#45;&gt;sourcefile~self_vector_2d_t.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1386.9,-494.8C1301.32,-488.61 1141.46,-477.04 1048.05,-470.28"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1048.06,-466.78 1037.83,-469.55 1047.55,-473.76 1048.06,-466.78"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M175.76,-189.12C167.25,-192.66 158.93,-197.2 152,-203 105.37,-242.01 77.59,-310.73 65.75,-345.9"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="62.34,-345.08 62.58,-355.67 69,-347.24 62.34,-345.08"/>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#0024ff" stroke-dasharray="5,2" d="M528.66,-433.87C510.34,-425.79 485.42,-415.2 463,-407 436.33,-397.25 428.83,-397.31 402,-388"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node26" class="node">
+<title>sourcefile~self_dgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node26"><a xlink:href=".././sourcefile/self_dgmodel2d_t.f90.html" xlink:title="SELF_DGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2335,-558 2199,-558 2199,-534 2335,-534 2335,-558"/>
+<text text-anchor="middle" x="2267" y="-543.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M2410.38,-546C2389.85,-546 2366.78,-546 2345.3,-546"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="2345.22,-542.5 2335.22,-546 2345.22,-549.5 2345.22,-542.5"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node30" class="node">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node30"><a xlink:href=".././sourcefile/self_mappedtwopointvector_2d_t.f90.html" xlink:title="SELF_MappedTwoPointVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1955,-669 1740,-669 1740,-645 1955,-645 1955,-669"/>
+<text text-anchor="middle" x="1847.5" y="-654.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d_t.f90</title>
+<path fill="none" stroke="#b600ff" stroke-dasharray="5,2" d="M2370.97,-614.16C2273.4,-621.98 2122.15,-634.17 1991,-645 1982.64,-645.69 1974.01,-646.41 1965.32,-647.13"/>
+<polygon fill="#b600ff" stroke="#b600ff" points="1964.77,-643.66 1955.1,-647.98 1965.36,-650.64 1964.77,-643.66"/>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1102.92,-115.63C1029.18,-115.05 877.17,-114 748.5,-114 748.5,-114 748.5,-114 555.5,-114 410.17,-114 344.21,-26.06 228.5,-114"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node27" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node27"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-166 881,-166 881,-142 1067,-142 1067,-166"/>
+<text text-anchor="middle" x="974" y="-151.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1102.63,-125.88C1083.32,-130.14 1060.4,-135.19 1039.34,-139.83"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1038.5,-136.43 1029.49,-142 1040.01,-143.26 1038.5,-136.43"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M973,-270C873.94,-233.65 600.53,-269.26 499,-298 451.93,-311.32 449.19,-362.87 402,-350"/>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M400,-350C307.49,-322.7 323.38,-199.65 228.5,-217"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1284.31,-368.09C1271.43,-397.42 1235.98,-474.05 1194,-530 1146.09,-593.85 1137.26,-619.11 1067,-657 1030.25,-676.82 1015.85,-667.35 975,-676"/>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M973,-676C932.27,-685.2 912.96,-668.14 881,-695 847.7,-722.98 880.97,-761.55 845,-786 773.33,-834.72 734.02,-807.25 650,-786 625.44,-779.79 600.31,-765.61 582.46,-753.93"/>
+<polygon fill="#ff006d" stroke="#ff006d" points="584.08,-750.8 573.83,-748.11 580.16,-756.61 584.08,-750.8"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1229.97,-358.5C1205,-358.69 1175.73,-357.77 1149.5,-354"/>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1147.5,-354C1063.09,-341.88 1055.05,-299.38 975,-270"/>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M973,-270C933.33,-255.44 913.61,-272.87 881,-246 852.47,-222.49 874.24,-193.64 845,-171 810.44,-144.24 791.29,-160.94 748.5,-152"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1282.36,-343.77C1259.85,-305.17 1190.12,-185.64 1161.72,-136.95"/>
+<polygon fill="#ff006d" stroke="#ff006d" points="1164.68,-135.08 1156.62,-128.21 1158.64,-138.61 1164.68,-135.08"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1147.5,-354C861.4,-318.01 786.27,-348.92 499,-374 455.61,-377.79 443.52,-401.15 402,-388"/>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1270.77,-343.97C1217.58,-309.81 1065.43,-212.08 1002.63,-171.74"/>
+<polygon fill="#ff006d" stroke="#ff006d" points="1004.34,-168.68 994.03,-166.22 1000.55,-174.57 1004.34,-168.68"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node31" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node31"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-460 165.5,-460 165.5,-436 289.5,-436 289.5,-460"/>
+<text text-anchor="middle" x="227.5" y="-445.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff006d" stroke-dasharray="5,2" d="M1273.84,-368.15C1238.94,-394.54 1151.18,-457.02 1067,-486 782.65,-583.89 411.84,-499.26 278.76,-462.77"/>
+<polygon fill="#ff006d" stroke="#ff006d" points="279.42,-459.32 268.85,-460.02 277.55,-466.06 279.42,-459.32"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M338.91,-419.54C288.59,-412.3 215.46,-401.14 152,-389 141.42,-386.98 130.21,-384.62 119.37,-382.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="120.07,-378.81 109.55,-380.05 118.55,-385.64 120.07,-378.81"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M391.42,-415.99C378.52,-397.45 354.03,-360.41 339,-326 316.2,-273.8 342.24,-244.29 303,-203 299.78,-199.61 296.1,-196.67 292.13,-194.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="293.51,-190.86 283.06,-189.08 290.12,-196.99 293.51,-190.86"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M365.44,-415.87C346.92,-409.38 323.72,-401.25 303,-394 293.2,-390.57 282.68,-386.9 272.72,-383.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="273.59,-380.02 263,-380.03 271.29,-386.63 273.59,-380.02"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M338.57,-435.16C325.98,-436.63 312.63,-438.19 299.73,-439.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="299.03,-436.25 289.5,-440.89 299.84,-443.2 299.03,-436.25"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M555.5,-696C498.42,-658.63 466.96,-716.85 402,-696"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M746.5,-772C694.95,-778.62 636.24,-763.9 598.12,-751.33"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="599.01,-747.93 588.42,-748.02 596.76,-754.56 599.01,-747.93"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M910.46,-630.99C876.51,-628.26 834.96,-624.93 802.44,-622.32"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="802.47,-618.82 792.22,-621.51 801.91,-625.79 802.47,-618.82"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M910.21,-625.95C900.15,-623.14 890.08,-619.56 881,-615 811.83,-580.27 820.55,-530.27 748.5,-502"/>
+</g>
+<!-- sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_scalar_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M910.35,-647.22C899.95,-650.85 889.72,-655.65 881,-662 857.68,-678.97 866.02,-696.25 845,-716 808.86,-749.96 797.68,-765.68 748.5,-772"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M746.5,-772C682.92,-780.17 673.88,-737.9 614,-715 589.26,-705.54 579.67,-710.51 557.5,-696"/>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M555.5,-696C523.75,-675.22 515.19,-666.31 499,-632 455.78,-540.41 529.3,-483.55 463,-407 444.41,-385.54 429.07,-396.58 402,-388"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M180.73,-368C163.89,-368 144.46,-368 126.13,-368"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="126.09,-364.5 116.09,-368 126.09,-371.5 126.09,-364.5"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2198.97,-548.4C2143.25,-550.64 2061.89,-554.47 1991,-560 1927.51,-564.95 1912.15,-572.85 1848.5,-575"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1846.5,-575C1787.82,-576.1 1721.78,-589.51 1676.9,-600.5"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1675.95,-597.13 1667.1,-602.95 1677.65,-603.92 1675.95,-597.13"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2216.59,-533.85C2209.89,-530.34 2203.71,-525.82 2199,-520 2135.35,-441.23 2229.5,-371.38 2163,-295 2160.15,-291.73 2156.9,-288.86 2153.37,-286.35"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="2155.07,-283.28 2144.7,-281.11 2151.45,-289.27 2155.07,-283.28"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2076,-309C2033.77,-281.2 1897.95,-298.49 1848.5,-309"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2260.12,-533.85C2240.42,-494.51 2172.63,-369.64 2078,-309"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2076,-309C2043.41,-288.11 2025.24,-308.06 1991,-290 1914.38,-249.58 1928.76,-189.6 1848.5,-157"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1846.5,-157C1486.09,-10.61 1364,-76 975,-76 975,-76 975,-76 746.5,-76 589.71,-76 555.07,-118.04 402,-152"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M400,-152C371.87,-156.83 341.04,-161.51 313.38,-165.49"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="312.74,-162.05 303.34,-166.93 313.73,-168.98 312.74,-162.05"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1621.5,-271C1544.09,-266.26 1518.94,-242.02 1447,-271"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1846.5,-157C1722.52,-107.88 781.33,-227.84 650,-251 509.71,-275.74 348.71,-327.04 272.67,-352.7"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="271.3,-349.47 262.95,-355.99 273.55,-356.1 271.3,-349.47"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node32" class="node">
+<title>sourcefile~self_mappedscalar_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node32"><a xlink:href=".././sourcefile/self_mappedscalar_2d.f90.html" xlink:title="SELF_MappedScalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2157,-593 1997,-593 1997,-569 2157,-569 2157,-593"/>
+<text text-anchor="middle" x="2077" y="-578.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2201.3,-558.05C2185.56,-560.98 2168.59,-564.13 2152.44,-567.14"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="2151.69,-563.72 2142.5,-568.99 2152.97,-570.6 2151.69,-563.72"/>
+</g>
+<!-- sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node33" class="node">
+<title>sourcefile~self_model.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node33"><a xlink:href=".././sourcefile/self_model.f90.html" xlink:title="SELF_Model.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="795.5,-322 699.5,-322 699.5,-298 795.5,-298 795.5,-322"/>
+<text text-anchor="middle" x="747.5" y="-307.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2076,-309C2030.78,-279.23 2008.9,-300.07 1955,-295 1807.93,-281.17 1770.39,-286.63 1623.5,-271"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1621.5,-271C1569.9,-263.42 1557.06,-260.12 1505,-257 1310.31,-245.34 1261.37,-267.87 1067,-284 975.74,-291.57 869.75,-300.19 805.97,-305.36"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="805.41,-301.89 795.72,-306.19 805.97,-308.87 805.41,-301.89"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node36" class="node">
+<title>sourcefile~self_mappedvector_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node36"><a xlink:href=".././sourcefile/self_mappedvector_2d.f90.html" xlink:title="SELF_MappedVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2157,-513 1997,-513 1997,-489 2157,-489 2157,-513"/>
+<text text-anchor="middle" x="2077" y="-498.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2215.62,-533.94C2191.71,-528.22 2162.96,-521.34 2137.94,-515.35"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="2138.73,-511.94 2128.19,-513.01 2137.1,-518.75 2138.73,-511.94"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node34" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node34"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-204 650,-204 650,-180 845,-180 845,-204"/>
+<text text-anchor="middle" x="747.5" y="-189.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M901.97,-166.02C878.92,-169.92 853.19,-174.28 829.48,-178.29"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="828.73,-174.87 819.46,-179.99 829.9,-181.77 828.73,-174.87"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M928.26,-452.97C852.6,-433.48 694.25,-396.32 557.5,-388"/>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M555.5,-388C485.82,-378.82 469.81,-368.49 402,-350"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M746.5,-464C676.54,-484.97 682.95,-531.82 650,-597 626.22,-644.04 648.91,-670.51 614,-710 611.14,-713.23 607.8,-716.09 604.2,-718.6"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="602.18,-715.73 595.42,-723.89 605.79,-721.73 602.18,-715.73"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M955.38,-477.01C916.06,-503.81 820.93,-568.64 774.66,-600.17"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="772.64,-597.31 766.34,-605.84 776.58,-603.1 772.64,-597.31"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M910.15,-455.08C864.35,-450.14 801.33,-448.17 748.5,-464"/>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M746.5,-464C700.13,-477.9 644.75,-469.92 605.97,-460.6"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="606.54,-457.13 595.99,-458.08 604.83,-463.92 606.54,-457.13"/>
+</g>
+<!-- sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_vector_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M555.5,-388C487.4,-383.86 466.45,-410.36 402,-388"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M910.16,-605.12C900.21,-607.79 890.18,-611.05 881,-615 863.34,-622.6 863.03,-632.3 845,-639 772.37,-665.99 575.79,-671.69 499,-682 455.83,-687.8 443.62,-708.84 402,-696"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M910.3,-601.35C899.9,-604.47 889.69,-608.85 881,-615 856.54,-632.31 869.5,-654.76 845,-672 779.54,-718.07 686.64,-731.73 624.33,-735.39"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="624.03,-731.9 614.22,-735.91 624.39,-738.89 624.03,-731.9"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge79" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M910.46,-600.69C876.51,-604.31 834.96,-608.76 802.44,-612.23"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="801.79,-608.78 792.22,-613.33 802.54,-615.74 801.79,-608.78"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge80" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M944.4,-581.96C901.85,-564.12 819.27,-529.78 748.5,-502"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M746.5,-502C705.36,-485.85 692.37,-490.57 650,-478 633.41,-473.08 615.37,-467.01 599.67,-461.48"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="600.83,-458.17 590.23,-458.12 598.48,-464.77 600.83,-458.17"/>
+</g>
+<!-- sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_tensor_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M910.32,-592.65C812.35,-587.45 621.5,-564.47 499,-467 474.66,-447.64 487.45,-426.22 463,-407 440.68,-389.45 428.83,-397.31 402,-388"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge82" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1782.6,-644.96C1756,-639.96 1724.96,-634.11 1697.4,-628.92"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1697.89,-625.45 1687.41,-627.04 1696.59,-632.33 1697.89,-625.45"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge81" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1147.5,-924C1071.01,-918.85 1051.62,-921.26 975,-924"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge83" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1758.55,-669.11C1751.65,-672.72 1745.31,-677.28 1740,-683 1673.51,-754.67 1777.19,-835.18 1704,-900 1611.67,-981.77 1272.66,-930.69 1149.5,-924"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1147.5,-924C1111.34,-920.63 1102.94,-915.19 1067,-910 974.68,-896.67 730.67,-908.84 650,-862 608.43,-837.87 580.11,-786.81 566.6,-757.64"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="569.71,-756.03 562.44,-748.32 563.31,-758.88 569.71,-756.03"/>
+</g>
+<!-- sourcefile~self_twopointvector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node35" class="node">
+<title>sourcefile~self_twopointvector_2d.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node35"><a xlink:href=".././sourcefile/self_twopointvector_2d.f90.html" xlink:title="SELF_TwoPointVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1704,-846 1541,-846 1541,-822 1704,-822 1704,-846"/>
+<text text-anchor="middle" x="1622.5" y="-831.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_twopointvector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge84" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_twopointvector_2d.f90</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1760.79,-669.03C1753.15,-672.63 1746.04,-677.2 1740,-683 1698.29,-723.03 1744.22,-766.47 1704,-808 1700.75,-811.35 1697.07,-814.28 1693.11,-816.82"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1691.12,-813.92 1684.06,-821.82 1694.5,-820.05 1691.12,-813.92"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge85" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M187.28,-435.88C175.74,-431.89 163.2,-427.15 152,-422 129.03,-411.44 104.34,-396.95 86.18,-385.63"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="87.65,-382.42 77.32,-380.04 83.91,-388.34 87.65,-382.42"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node37" class="node">
+<title>sourcefile~self_mappedscalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node37"><a xlink:href=".././sourcefile/self_mappedscalar_2d_t.f90.html" xlink:title="SELF_MappedScalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1932,-627 1763,-627 1763,-603 1932,-603 1932,-627"/>
+<text text-anchor="middle" x="1847.5" y="-612.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge86" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1996.75,-592.84C1978.08,-595.63 1958.03,-598.63 1938.91,-601.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1938.38,-598.03 1929.01,-602.97 1939.41,-604.95 1938.38,-598.03"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge87" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M699.31,-307.52C660.95,-306.22 605.52,-305.96 557.5,-312"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M555.5,-312C453.57,-324.82 428.69,-281.11 339,-231 321.3,-221.11 320.8,-212.69 303,-203 295.9,-199.14 288.11,-195.67 280.34,-192.63"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="281.49,-189.32 270.9,-189.13 279.06,-195.89 281.49,-189.32"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge88" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M729.73,-322.07C696.38,-346.06 621.61,-399.87 582.47,-428.03"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="580.31,-425.28 574.23,-433.96 584.4,-430.96 580.31,-425.28"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge89" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M555.5,-312C528.43,-315.4 522.52,-322.18 499,-336 481.53,-346.27 480.61,-353.96 463,-364 437.69,-378.42 429.52,-397.55 402,-388"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M400,-388C362.79,-375.09 318.59,-370.16 284.38,-368.43"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="284.25,-364.92 274.11,-367.98 283.95,-371.91 284.25,-364.92"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge90" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M400,-217C323.83,-214.1 303.48,-203.29 228.5,-217"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M226.5,-217C152.65,-230.5 95.46,-308.49 71.4,-346.79"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="68.24,-345.25 66.01,-355.61 74.21,-348.9 68.24,-345.25"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge92" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M728.1,-204.22C705.28,-220.53 667.28,-251.72 650,-289 610.51,-374.19 667.98,-633.17 614,-710 611.82,-713.1 609.18,-715.83 606.25,-718.25"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="604.2,-715.41 597.9,-723.93 608.14,-721.2 604.2,-715.41"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge91" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M649.74,-202.61C580.77,-209.29 485.8,-216.71 402,-217"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M400,-217C355.79,-215.31 306.76,-202.75 272.48,-192.15"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="273.38,-188.76 262.79,-189.08 271.26,-195.43 273.38,-188.76"/>
+</g>
+<!-- sourcefile~self_twopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node39" class="node">
+<title>sourcefile~self_twopointvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node39"><a xlink:href=".././sourcefile/self_twopointvector_2d_t.f90.html" xlink:title="SELF_TwoPointVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1060,-728 888,-728 888,-704 1060,-704 1060,-728"/>
+<text text-anchor="middle" x="974" y="-713.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_twopointvector_2d.f90&#45;&gt;sourcefile~self_twopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge93" class="edge">
+<title>sourcefile~self_twopointvector_2d.f90&#45;&gt;sourcefile~self_twopointvector_2d_t.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1573.31,-846.03C1475.92,-867.46 1252.22,-901.71 1103,-808 1074.7,-790.23 1093.12,-762.84 1067,-742 1062.26,-738.22 1057,-734.99 1051.47,-732.23"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1052.5,-728.86 1041.94,-728.01 1049.67,-735.26 1052.5,-728.86"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node38" class="node">
+<title>sourcefile~self_mappedvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_node38"><a xlink:href=".././sourcefile/self_mappedvector_2d_t.f90.html" xlink:title="SELF_MappedVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1932,-512 1763,-512 1763,-488 1932,-488 1932,-512"/>
+<text text-anchor="middle" x="1847.5" y="-497.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge94" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1996.75,-500.65C1979.2,-500.57 1960.43,-500.49 1942.36,-500.41"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1942.12,-496.91 1932.11,-500.37 1942.09,-503.91 1942.12,-496.91"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge98" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1762.83,-615C1742.73,-615 1721.34,-615 1701.5,-615"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1701.29,-611.5 1691.29,-615 1701.29,-618.5 1701.29,-611.5"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge101" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1832.12,-602.81C1811.42,-585.14 1772.17,-551.23 1740,-521 1723.51,-505.51 1722.21,-498.43 1704,-485 1638.08,-436.38 1611.39,-440.88 1541,-399 1524.47,-389.17 1521.83,-384.3 1505,-375 1498.9,-371.63 1492.28,-368.34 1485.77,-365.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1486.93,-361.98 1476.38,-361.03 1484.03,-368.35 1486.93,-361.98"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge95" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1762.81,-620.98C1754.29,-624.5 1746.43,-629.37 1740,-636 1671.37,-706.85 1775.23,-786.76 1704,-855 1662.46,-894.79 1504.53,-886 1447,-886 1447,-886 1447,-886 1289.5,-886 1148.71,-886 1115.59,-916.37 975,-924"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-924C873.29,-927.57 848.27,-925.18 748.5,-924"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge96" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1445,-794C1368.97,-789.13 1166.02,-812.81 1103,-770 1072.41,-749.22 1096.13,-717.77 1067,-695 1034.11,-669.29 1015.89,-667.55 975,-676"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge97" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1762.76,-625.22C1754.74,-628.03 1747,-631.56 1740,-636 1666.31,-682.72 1710.07,-783.17 1623.5,-794"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1621.5,-794C1601.11,-796.55 1505.6,-697.55 1465.16,-654.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1467.67,-652.09 1458.28,-647.18 1462.56,-656.87 1467.67,-652.09"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_scalar_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge100" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_scalar_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1621.5,-794C1544.54,-803.62 1524.4,-798.96 1447,-794"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1445,-794C1406.23,-791.52 1363.59,-779.63 1333.1,-769.45"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1333.85,-766.01 1323.25,-766.08 1331.58,-772.63 1333.85,-766.01"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge99" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1792.52,-602.97C1714.93,-584.71 1577.2,-548.36 1541,-513 1507.21,-479.99 1538.34,-446.47 1505,-413 1465.61,-373.45 1429.09,-406.67 1387,-370 1361.22,-347.54 1371.03,-329.71 1351,-302 1328.63,-271.05 1325.15,-258.06 1291.5,-240"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge105" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1823.08,-512.18C1801.12,-523.89 1767.61,-542.49 1740,-561 1723.16,-572.29 1721.92,-579.52 1704,-589 1696.44,-593 1688.16,-596.52 1679.87,-599.58"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1678.47,-596.36 1670.18,-602.96 1680.78,-602.97 1678.47,-596.36"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge108" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1621.5,-385C1586.88,-370.78 1546.01,-361.96 1512.53,-356.61"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1512.81,-353.11 1502.39,-355.06 1511.75,-360.03 1512.81,-353.11"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge102" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1835.16,-487.87C1812.09,-463.63 1757.31,-408.31 1704,-371 1636.89,-324.04 1609.81,-329.43 1541,-285 1523.97,-274.01 1521.22,-269.16 1505,-257 1349.03,-140.02 1344.46,0 1149.5,0 1149.5,0 1149.5,0 555.5,0 401.59,0 348.02,-17.02 228.5,-114"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M226.5,-114C196.36,-137.16 177.5,-127.81 152,-156 100.02,-213.45 73.59,-304.59 63.7,-346.11"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="60.26,-345.46 61.44,-355.99 67.09,-347.02 60.26,-345.46"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge103" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1621.5,-499C1494.4,-515.17 1191.44,-626.47 1067,-657 1026.45,-666.95 1015.81,-667.17 975,-676"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge104" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_tensor_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1801.71,-512.07C1741.7,-528.63 1632.19,-560.21 1541,-594 1521.14,-601.36 1499.44,-610.73 1481.89,-618.66"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1480.26,-615.56 1472.61,-622.89 1483.16,-621.93 1480.26,-615.56"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_vector_2d.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge107" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_vector_2d.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1762.79,-494.46C1720.82,-492.99 1669.3,-493.17 1623.5,-499"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1621.5,-499C1586.65,-503.43 1547.57,-503.85 1515.25,-502.98"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1515.11,-499.48 1505,-502.66 1514.89,-506.47 1515.11,-499.48"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge106" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1833.58,-487.74C1809.92,-466.05 1757.19,-421.14 1704,-399 1670.47,-385.05 1657.09,-398.8 1623.5,-385"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1621.5,-385C1568.18,-363.09 1557.56,-351.66 1505,-328 1411.41,-285.87 1377.75,-295.62 1291.5,-240"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1289.5,-240C1225.56,-198.86 1142.14,-177.22 1077.28,-165.94"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1077.48,-162.42 1067.04,-164.21 1076.32,-169.32 1077.48,-162.42"/>
+</g>
+<!-- sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge109" class="edge">
+<title>sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M746.5,-848C663.12,-858.16 631.8,-887.18 557.5,-848"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M555.5,-848C470.57,-803.22 493.42,-725.35 402,-696"/>
+</g>
+<!-- sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge110" class="edge">
+<title>sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M904.18,-728.03C895.76,-731.56 887.76,-736.12 881,-742 850.98,-768.13 875.43,-798.35 845,-824 811.21,-852.49 792.37,-842.66 748.5,-848"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M746.5,-848C702.63,-853.34 688.74,-845.27 650,-824 618.72,-806.82 590.2,-776.45 573.34,-756.27"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="575.88,-753.85 566.85,-748.31 570.46,-758.27 575.88,-753.85"/>
+</g>
+<!-- sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge112" class="edge">
+<title>sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M945.47,-703.98C905.33,-686.46 830.63,-653.85 785.65,-634.22"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="786.82,-630.91 776.25,-630.12 784.02,-637.32 786.82,-630.91"/>
+</g>
+<!-- sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection2d.f90~2~~EfferentGraph_edge111" class="edge">
+<title>sourcefile~self_twopointvector_2d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M887.69,-715.28C816.95,-710.46 717.41,-693.39 650,-639 594.64,-594.33 570.35,-508.53 561.62,-468.11"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="565.03,-467.3 559.6,-458.2 558.17,-468.69 565.03,-467.3"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_ecadvection2df902EfferentGraph = svgPanZoom('#sourcefileself_ecadvection2df902EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_ecadvection2d~2.html">SELF_ECAdvection2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_ecadvection2d.f90~2.html#src">SELF_ECAdvection2D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_ECAdvection2D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_ECAdvection2D_t</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_ECDGModel2D_t</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPU</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPUInterfaces</span>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_BoundaryConditions</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Mesh_2D</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Geometry_2D</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">  </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-37" name="ln-37" href="#ln-37"></a>
+<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="nb">  </span><span class="k">implicit none</span>
+<a id="ln-39" name="ln-39" href="#ln-39"></a>
+<a id="ln-40" name="ln-40" href="#ln-40"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">ECAdvection2D_t</span><span class="p">),</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ECAdvection2D</span>
+<a id="ln-41" name="ln-41" href="#ln-41"></a>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="w">  </span><span class="k">contains</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_ECAdvection2D</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_ECAdvection2D</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalInit</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalInit_ECAdvection2D</span>
+<a id="ln-47" name="ln-47" href="#ln-47"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BoundaryFlux</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">BoundaryFlux_ECAdvection2D</span>
+<a id="ln-48" name="ln-48" href="#ln-48"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">TwoPointFluxMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">TwoPointFluxMethod_ECAdvection2D</span>
+<a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SourceMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SourceMethod_ECAdvection2D</span>
+<a id="ln-50" name="ln-50" href="#ln-50"></a>
+<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">  </span><span class="k">endtype </span><span class="n">ECAdvection2D</span>
+<a id="ln-52" name="ln-52" href="#ln-52"></a>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">  </span><span class="k">interface</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="k">    subroutine </span><span class="n">hbc2d_mirror_ecadvection2d_gpu</span><span class="p">(</span><span class="n">extboundary</span><span class="p">,</span><span class="n">boundary</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">                                              </span><span class="n">elements</span><span class="p">,</span><span class="n">sides</span><span class="p">,</span><span class="n">nBoundaries</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nel</span><span class="p">,</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;hbc2d_mirror_ecadvection2d_gpu&quot;</span><span class="p">)</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="nb">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">extboundary</span><span class="p">,</span><span class="n">boundary</span><span class="p">,</span><span class="n">elements</span><span class="p">,</span><span class="n">sides</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nBoundaries</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nel</span><span class="p">,</span><span class="n">nvar</span>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">hbc2d_mirror_ecadvection2d_gpu</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-62" name="ln-62" href="#ln-62"></a>
+<a id="ln-63" name="ln-63" href="#ln-63"></a><span class="k">  interface</span>
+<a id="ln-64" name="ln-64" href="#ln-64"></a><span class="k">    subroutine </span><span class="n">boundaryflux_ecadvection2d_gpu</span><span class="p">(</span><span class="n">fb</span><span class="p">,</span><span class="n">fextb</span><span class="p">,</span><span class="n">nhat</span><span class="p">,</span><span class="n">nscale</span><span class="p">,</span><span class="n">flux</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nel</span><span class="p">,</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;boundaryflux_ecadvection2d_gpu&quot;</span><span class="p">)</span>
+<a id="ln-66" name="ln-66" href="#ln-66"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-67" name="ln-67" href="#ln-67"></a><span class="nb">      </span><span class="k">use </span><span class="n">SELF_Constants</span>
+<a id="ln-68" name="ln-68" href="#ln-68"></a><span class="w">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fb</span><span class="p">,</span><span class="n">fextb</span><span class="p">,</span><span class="n">nhat</span><span class="p">,</span><span class="n">nscale</span><span class="p">,</span><span class="n">flux</span>
+<a id="ln-69" name="ln-69" href="#ln-69"></a><span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="n">c_prec</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="n">v</span>
+<a id="ln-70" name="ln-70" href="#ln-70"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nel</span><span class="p">,</span><span class="n">nvar</span>
+<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">boundaryflux_ecadvection2d_gpu</span>
+<a id="ln-72" name="ln-72" href="#ln-72"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-73" name="ln-73" href="#ln-73"></a>
+<a id="ln-74" name="ln-74" href="#ln-74"></a><span class="k">  interface</span>
+<a id="ln-75" name="ln-75" href="#ln-75"></a><span class="k">    subroutine </span><span class="n">twopointfluxmethod_ecadvection2d_gpu</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">dsdx</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span><span class="p">)</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-76" name="ln-76" href="#ln-76"></a><span class="w">      </span><span class="k">bind</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;twopointfluxmethod_ecadvection2d_gpu&quot;</span><span class="p">)</span>
+<a id="ln-77" name="ln-77" href="#ln-77"></a><span class="w">      </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<a id="ln-78" name="ln-78" href="#ln-78"></a><span class="nb">      </span><span class="k">use </span><span class="n">SELF_Constants</span>
+<a id="ln-79" name="ln-79" href="#ln-79"></a><span class="w">      </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">dsdx</span>
+<a id="ln-80" name="ln-80" href="#ln-80"></a><span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="n">c_prec</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="n">v</span>
+<a id="ln-81" name="ln-81" href="#ln-81"></a><span class="w">      </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">),</span><span class="k">value</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">nel</span>
+<a id="ln-82" name="ln-82" href="#ln-82"></a><span class="w">    </span><span class="k">endsubroutine </span><span class="n">twopointfluxmethod_ecadvection2d_gpu</span>
+<a id="ln-83" name="ln-83" href="#ln-83"></a><span class="w">  </span><span class="k">endinterface</span>
+<a id="ln-84" name="ln-84" href="#ln-84"></a>
+<a id="ln-85" name="ln-85" href="#ln-85"></a><span class="k">contains</span>
+<a id="ln-86" name="ln-86" href="#ln-86"></a>
+<a id="ln-87" name="ln-87" href="#ln-87"></a><span class="k">  subroutine </span><span class="n">Init_ECAdvection2D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">geometry</span><span class="p">)</span>
+<a id="ln-88" name="ln-88" href="#ln-88"></a><span class="w">    </span><span class="c">!! Initialize EC Advection 2D, then upload BC element/side arrays to GPU.</span>
+<a id="ln-89" name="ln-89" href="#ln-89"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-90" name="ln-90" href="#ln-90"></a><span class="k">    class</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-91" name="ln-91" href="#ln-91"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+<a id="ln-92" name="ln-92" href="#ln-92"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">SEMQuad</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">geometry</span>
+<a id="ln-93" name="ln-93" href="#ln-93"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-94" name="ln-94" href="#ln-94"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-95" name="ln-95" href="#ln-95"></a>
+<a id="ln-96" name="ln-96" href="#ln-96"></a><span class="w">    </span><span class="k">call </span><span class="n">Init_ECDGModel2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">geometry</span><span class="p">)</span>
+<a id="ln-97" name="ln-97" href="#ln-97"></a>
+<a id="ln-98" name="ln-98" href="#ln-98"></a><span class="w">    </span><span class="c">! Upload hyperbolic BC element/side arrays to device</span>
+<a id="ln-99" name="ln-99" href="#ln-99"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-100" name="ln-100" href="#ln-100"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<a id="ln-101" name="ln-101" href="#ln-101"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-102" name="ln-102" href="#ln-102"></a><span class="k">        call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">)))</span>
+<a id="ln-103" name="ln-103" href="#ln-103"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-104" name="ln-104" href="#ln-104"></a><span class="w">                                </span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-105" name="ln-105" href="#ln-105"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">)))</span>
+<a id="ln-106" name="ln-106" href="#ln-106"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-107" name="ln-107" href="#ln-107"></a><span class="w">                                </span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-108" name="ln-108" href="#ln-108"></a><span class="w">      </span><span class="k">endif</span>
+<a id="ln-109" name="ln-109" href="#ln-109"></a><span class="k">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-110" name="ln-110" href="#ln-110"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-111" name="ln-111" href="#ln-111"></a>
+<a id="ln-112" name="ln-112" href="#ln-112"></a><span class="k">  endsubroutine </span><span class="n">Init_ECAdvection2D</span>
+<a id="ln-113" name="ln-113" href="#ln-113"></a>
+<a id="ln-114" name="ln-114" href="#ln-114"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">Free_ECAdvection2D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-115" name="ln-115" href="#ln-115"></a><span class="w">    </span><span class="c">!! Free EC Advection 2D, including GPU BC arrays.</span>
+<a id="ln-116" name="ln-116" href="#ln-116"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-117" name="ln-117" href="#ln-117"></a><span class="k">    class</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-118" name="ln-118" href="#ln-118"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-119" name="ln-119" href="#ln-119"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-120" name="ln-120" href="#ln-120"></a>
+<a id="ln-121" name="ln-121" href="#ln-121"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-122" name="ln-122" href="#ln-122"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<a id="ln-123" name="ln-123" href="#ln-123"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">c_associated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">))</span><span class="w"> </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipFree</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">))</span>
+<a id="ln-124" name="ln-124" href="#ln-124"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">c_associated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">))</span><span class="w"> </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipFree</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">))</span>
+<a id="ln-125" name="ln-125" href="#ln-125"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<a id="ln-126" name="ln-126" href="#ln-126"></a><span class="nb">      </span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<a id="ln-127" name="ln-127" href="#ln-127"></a><span class="nb">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-128" name="ln-128" href="#ln-128"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-129" name="ln-129" href="#ln-129"></a>
+<a id="ln-130" name="ln-130" href="#ln-130"></a><span class="k">    call </span><span class="n">Free_ECDGModel2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-131" name="ln-131" href="#ln-131"></a>
+<a id="ln-132" name="ln-132" href="#ln-132"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">Free_ECAdvection2D</span>
+<a id="ln-133" name="ln-133" href="#ln-133"></a>
+<a id="ln-134" name="ln-134" href="#ln-134"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">AdditionalInit_ECAdvection2D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-135" name="ln-135" href="#ln-135"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-136" name="ln-136" href="#ln-136"></a><span class="k">    class</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-137" name="ln-137" href="#ln-137"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-138" name="ln-138" href="#ln-138"></a><span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">SELF_bcMethod</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bcfunc</span>
+<a id="ln-139" name="ln-139" href="#ln-139"></a>
+<a id="ln-140" name="ln-140" href="#ln-140"></a><span class="w">    </span><span class="c">! Call parent _t AdditionalInit (registers CPU mirror BC)</span>
+<a id="ln-141" name="ln-141" href="#ln-141"></a><span class="w">    </span><span class="k">call </span><span class="n">AdditionalInit_ECAdvection2D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-142" name="ln-142" href="#ln-142"></a>
+<a id="ln-143" name="ln-143" href="#ln-143"></a><span class="w">    </span><span class="c">! Re-register with GPU-accelerated version</span>
+<a id="ln-144" name="ln-144" href="#ln-144"></a><span class="w">    </span><span class="n">bcfunc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">hbc2d_Mirror_ECAdvection2D_GPU_wrapper</span>
+<a id="ln-145" name="ln-145" href="#ln-145"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">RegisterBoundaryCondition</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-146" name="ln-146" href="#ln-146"></a><span class="w">      </span><span class="n">SELF_BC_NONORMALFLOW</span><span class="p">,</span><span class="s2">&quot;no_normal_flow&quot;</span><span class="p">,</span><span class="n">bcfunc</span><span class="p">)</span>
+<a id="ln-147" name="ln-147" href="#ln-147"></a>
+<a id="ln-148" name="ln-148" href="#ln-148"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">AdditionalInit_ECAdvection2D</span>
+<a id="ln-149" name="ln-149" href="#ln-149"></a>
+<a id="ln-150" name="ln-150" href="#ln-150"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">hbc2d_Mirror_ECAdvection2D_GPU_wrapper</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span><span class="n">mymodel</span><span class="p">)</span>
+<a id="ln-151" name="ln-151" href="#ln-151"></a><span class="w">    </span><span class="c">!! GPU-accelerated mirror BC for 2D EC Advection.</span>
+<a id="ln-152" name="ln-152" href="#ln-152"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-153" name="ln-153" href="#ln-153"></a><span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">Model</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mymodel</span>
+<a id="ln-154" name="ln-154" href="#ln-154"></a>
+<a id="ln-155" name="ln-155" href="#ln-155"></a><span class="w">    </span><span class="k">select type</span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mymodel</span><span class="p">)</span>
+<a id="ln-156" name="ln-156" href="#ln-156"></a><span class="w">    </span><span class="k">class is</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">)</span>
+<a id="ln-157" name="ln-157" href="#ln-157"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-158" name="ln-158" href="#ln-158"></a><span class="k">        call </span><span class="n">hbc2d_mirror_ecadvection2d_gpu</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-159" name="ln-159" href="#ln-159"></a><span class="w">          </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-160" name="ln-160" href="#ln-160"></a><span class="w">          </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-161" name="ln-161" href="#ln-161"></a><span class="w">          </span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-162" name="ln-162" href="#ln-162"></a><span class="w">          </span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="p">,</span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-163" name="ln-163" href="#ln-163"></a><span class="w">          </span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nElem</span><span class="p">,</span><span class="n">m</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-164" name="ln-164" href="#ln-164"></a><span class="w">      </span><span class="k">endif</span>
+<a id="ln-165" name="ln-165" href="#ln-165"></a><span class="k">    endselect</span>
+<a id="ln-166" name="ln-166" href="#ln-166"></a>
+<a id="ln-167" name="ln-167" href="#ln-167"></a><span class="k">  endsubroutine </span><span class="n">hbc2d_Mirror_ECAdvection2D_GPU_wrapper</span>
+<a id="ln-168" name="ln-168" href="#ln-168"></a>
+<a id="ln-169" name="ln-169" href="#ln-169"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">BoundaryFlux_ECAdvection2D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-170" name="ln-170" href="#ln-170"></a><span class="w">    </span><span class="c">!! LLF Riemann flux on GPU — fully device-resident.</span>
+<a id="ln-171" name="ln-171" href="#ln-171"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-172" name="ln-172" href="#ln-172"></a><span class="k">    class</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-173" name="ln-173" href="#ln-173"></a>
+<a id="ln-174" name="ln-174" href="#ln-174"></a><span class="w">    </span><span class="k">call </span><span class="n">boundaryflux_ecadvection2d_gpu</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-175" name="ln-175" href="#ln-175"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-176" name="ln-176" href="#ln-176"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extboundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-177" name="ln-177" href="#ln-177"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">nhat</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-178" name="ln-178" href="#ln-178"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">nscale</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-179" name="ln-179" href="#ln-179"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">boundarynormal_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-180" name="ln-180" href="#ln-180"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">u</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-181" name="ln-181" href="#ln-181"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-182" name="ln-182" href="#ln-182"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-183" name="ln-183" href="#ln-183"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-184" name="ln-184" href="#ln-184"></a>
+<a id="ln-185" name="ln-185" href="#ln-185"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">BoundaryFlux_ECAdvection2D</span>
+<a id="ln-186" name="ln-186" href="#ln-186"></a>
+<a id="ln-187" name="ln-187" href="#ln-187"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">TwoPointFluxMethod_ECAdvection2D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-188" name="ln-188" href="#ln-188"></a><span class="w">    </span><span class="c">!! Contravariant EC two-point flux on GPU — fully device-resident.</span>
+<a id="ln-189" name="ln-189" href="#ln-189"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-190" name="ln-190" href="#ln-190"></a><span class="k">    class</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-191" name="ln-191" href="#ln-191"></a>
+<a id="ln-192" name="ln-192" href="#ln-192"></a><span class="w">    </span><span class="k">call </span><span class="n">twopointfluxmethod_ecadvection2d_gpu</span><span class="p">(</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-193" name="ln-193" href="#ln-193"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">twoPointFlux</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-194" name="ln-194" href="#ln-194"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-195" name="ln-195" href="#ln-195"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">dsdx</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-196" name="ln-196" href="#ln-196"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">u</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-197" name="ln-197" href="#ln-197"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-198" name="ln-198" href="#ln-198"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-199" name="ln-199" href="#ln-199"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="p">)</span>
+<a id="ln-200" name="ln-200" href="#ln-200"></a>
+<a id="ln-201" name="ln-201" href="#ln-201"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">TwoPointFluxMethod_ECAdvection2D</span>
+<a id="ln-202" name="ln-202" href="#ln-202"></a>
+<a id="ln-203" name="ln-203" href="#ln-203"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">SourceMethod_ECAdvection2D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-204" name="ln-204" href="#ln-204"></a><span class="w">    </span><span class="c">!! No source term — upload the zero-initialised host array to device.</span>
+<a id="ln-205" name="ln-205" href="#ln-205"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-206" name="ln-206" href="#ln-206"></a><span class="k">    class</span><span class="p">(</span><span class="n">ECAdvection2D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-207" name="ln-207" href="#ln-207"></a>
+<a id="ln-208" name="ln-208" href="#ln-208"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-209" name="ln-209" href="#ln-209"></a><span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-210" name="ln-210" href="#ln-210"></a><span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-211" name="ln-211" href="#ln-211"></a><span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-212" name="ln-212" href="#ln-212"></a>
+<a id="ln-213" name="ln-213" href="#ln-213"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">SourceMethod_ECAdvection2D</span>
+<a id="ln-214" name="ln-214" href="#ln-214"></a>
+<a id="ln-215" name="ln-215" href="#ln-215"></a><span class="k">endmodule </span><span class="n">SELF_ECAdvection2D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-05-16 16:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

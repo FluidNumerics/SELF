@@ -1,0 +1,407 @@
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+
+module SELF_DGModel3D
+
+  use SELF_DGModel3D_t
+  use SELF_GPU
+  use SELF_GPUInterfaces
+  use SELF_BoundaryConditions
+  use SELF_Geometry_3D
+  use SELF_Mesh_3D
+
+  implicit none
+
+  type,extends(DGModel3D_t) :: DGModel3D
+
+  contains
+
+    procedure :: Init => Init_DGModel3D
+    procedure :: Free => Free_DGModel3D
+
+    procedure :: UpdateSolution => UpdateSolution_DGModel3D
+
+    procedure :: CalculateEntropy => CalculateEntropy_DGModel3D
+    procedure :: BoundaryFlux => BoundaryFlux_DGModel3D
+    procedure :: FluxMethod => fluxmethod_DGModel3D
+    procedure :: SourceMethod => sourcemethod_DGModel3D
+
+    procedure :: UpdateGRK2 => UpdateGRK2_DGModel3D
+    procedure :: UpdateGRK3 => UpdateGRK3_DGModel3D
+    procedure :: UpdateGRK4 => UpdateGRK4_DGModel3D
+
+    procedure :: CalculateSolutionGradient => CalculateSolutionGradient_DGModel3D
+    procedure :: CalculateTendency => CalculateTendency_DGModel3D
+
+  endtype DGModel3D
+
+contains
+
+  subroutine UpdateSolution_DGModel3D(this,dt)
+    !! Computes a solution update as , where dt is either provided through the interface
+    !! or taken as the Model's stored time step size (model % dt)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    real(prec),optional,intent(in) :: dt
+    ! Local
+    real(prec) :: dtLoc
+    integer :: ndof
+
+    if(present(dt)) then
+      dtLoc = dt
+    else
+      dtLoc = this%dt
+    endif
+    ndof = this%solution%nvar* &
+           this%solution%nelem* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)
+
+    call UpdateSolution_gpu(this%solution%interior_gpu,this%dsdt%interior_gpu,dtLoc,ndof)
+
+  endsubroutine UpdateSolution_DGModel3D
+
+  subroutine UpdateGRK2_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
+    ! Local
+    integer :: ndof
+
+    ndof = this%solution%nvar* &
+           this%solution%nelem* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)
+
+    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
+                       rk2_a(m),rk2_g(m),this%dt,ndof)
+
+  endsubroutine UpdateGRK2_DGModel3D
+
+  subroutine UpdateGRK3_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
+    ! Local
+    integer :: ndof
+
+    ndof = this%solution%nvar* &
+           this%solution%nelem* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)
+
+    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
+                       rk3_a(m),rk3_g(m),this%dt,ndof)
+
+  endsubroutine UpdateGRK3_DGModel3D
+
+  subroutine UpdateGRK4_DGModel3D(this,m)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    integer,intent(in) :: m
+    ! Local
+    integer :: ndof
+
+    ndof = this%solution%nvar* &
+           this%solution%nelem* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)
+
+    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
+                       rk4_a(m),rk4_g(m),this%dt,ndof)
+
+  endsubroutine UpdateGRK4_DGModel3D
+
+  subroutine CalculateSolutionGradient_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+
+    call this%solution%AverageSides()
+
+    call this%solution%MappedDGGradient(this%solutionGradient%interior_gpu)
+
+    ! interpolate the solutiongradient to the element boundaries
+    call this%solutionGradient%BoundaryInterp()
+
+    ! perform the side exchange to populate the
+    ! solutionGradient % extBoundary attribute
+    call this%solutionGradient%SideExchange(this%mesh)
+
+  endsubroutine CalculateSolutionGradient_DGModel3D
+
+  subroutine CalculateEntropy_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: iel,i,j,k,ierror
+    real(prec) :: e,jac
+    real(prec) :: s(1:this%nvar)
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
+
+    e = 0.0_prec
+    do iel = 1,this%geometry%nelem
+      do k = 1,this%solution%interp%N+1
+        do j = 1,this%solution%interp%N+1
+          do i = 1,this%solution%interp%N+1
+            jac = abs(this%geometry%J%interior(i,j,k,iel,1))
+            s = this%solution%interior(i,j,k,iel,1:this%nvar)
+            e = e+this%entropy_func(s)*jac* &
+                this%solution%interp%qWeights(i)* &
+                this%solution%interp%qWeights(j)* &
+                this%solution%interp%qWeights(k)
+          enddo
+        enddo
+      enddo
+    enddo
+
+    if(this%mesh%decomp%mpiEnabled) then
+      call mpi_allreduce(e, &
+                         this%entropy, &
+                         1, &
+                         this%mesh%decomp%mpiPrec, &
+                         MPI_SUM, &
+                         this%mesh%decomp%mpiComm, &
+                         iError)
+    else
+      this%entropy = e
+    endif
+
+  endsubroutine CalculateEntropy_DGModel3D
+
+  subroutine fluxmethod_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: iel
+    integer :: i,j,k
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem)
+
+      s = this%solution%interior(i,j,k,iel,1:this%nvar)
+      dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+      this%flux%interior(i,j,k,iel,1:this%nvar,1:3) = this%flux3d(s,dsdx)
+
+    enddo
+
+    call gpuCheck(hipMemcpy(this%flux%interior_gpu, &
+                            c_loc(this%flux%interior), &
+                            sizeof(this%flux%interior), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine fluxmethod_DGModel3D
+
+  subroutine BoundaryFlux_DGModel3D(this)
+    ! this method uses an linear upwind solver for the
+    ! advective flux and the bassi-rebay method for the
+    ! diffusive fluxes
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
+    real(prec) :: dsdx(1:this%nvar,1:3)
+    real(prec) :: nhat(1:3),nmag
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%boundary), &
+                            this%solution%boundary_gpu,sizeof(this%solution%boundary), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%extboundary), &
+                            this%solution%extboundary_gpu,sizeof(this%solution%extboundary), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%avgboundary), &
+                            this%solutiongradient%avgboundary_gpu,sizeof(this%solutiongradient%avgboundary), &
+                            hipMemcpyDeviceToHost))
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:6,iel=1:this%mesh%nElem)
+      ! Get the boundary normals on cell edges from the mesh geometry
+      nhat = this%geometry%nHat%boundary(i,j,k,iEl,1,1:3)
+      sL = this%solution%boundary(i,j,k,iel,1:this%nvar) ! interior solution
+      sR = this%solution%extboundary(i,j,k,iel,1:this%nvar) ! exterior solution
+      dsdx = this%solutiongradient%avgboundary(i,j,k,iel,1:this%nvar,1:3)
+      nmag = this%geometry%nScale%boundary(i,j,k,iEl,1)
+
+      this%flux%boundaryNormal(i,j,k,iEl,1:this%nvar) = this%riemannflux3d(sL,sR,dsdx,nhat)*nmag
+
+    enddo
+
+    call gpuCheck(hipMemcpy(this%flux%boundarynormal_gpu, &
+                            c_loc(this%flux%boundarynormal), &
+                            sizeof(this%flux%boundarynormal), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine BoundaryFlux_DGModel3D
+
+  subroutine sourcemethod_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: i,j,k,iel
+    real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:3)
+
+    call gpuCheck(hipMemcpy(c_loc(this%solution%interior), &
+                            this%solution%interior_gpu,sizeof(this%solution%interior), &
+                            hipMemcpyDeviceToHost))
+
+    call gpuCheck(hipMemcpy(c_loc(this%solutiongradient%interior), &
+                            this%solutiongradient%interior_gpu,sizeof(this%solutiongradient%interior), &
+                            hipMemcpyDeviceToHost))
+
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem)
+
+      s = this%solution%interior(i,j,k,iel,1:this%nvar)
+      dsdx = this%solutionGradient%interior(i,j,k,iel,1:this%nvar,1:3)
+      this%source%interior(i,j,k,iel,1:this%nvar) = this%source3d(s,dsdx)
+
+    enddo
+
+    call gpuCheck(hipMemcpy(this%source%interior_gpu, &
+                            c_loc(this%source%interior), &
+                            sizeof(this%source%interior), &
+                            hipMemcpyHostToDevice))
+
+  endsubroutine sourcemethod_DGModel3D
+
+  subroutine Init_DGModel3D(this,mesh,geometry)
+    !! Initialize the 3D DG model, then upload BC element/side arrays to GPU.
+    implicit none
+    class(DGModel3D),intent(out) :: this
+    type(Mesh3D),intent(in),target :: mesh
+    type(SEMHex),intent(in),target :: geometry
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    call Init_DGModel3D_t(this,mesh,geometry)
+
+    ! Upload hyperbolic BC element/side arrays to device
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+    ! Upload parabolic BC element/side arrays to device
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(bc%nBoundaries > 0) then
+        call gpuCheck(hipMalloc(bc%elements_gpu,sizeof(bc%elements)))
+        call gpuCheck(hipMemcpy(bc%elements_gpu,c_loc(bc%elements), &
+                                sizeof(bc%elements),hipMemcpyHostToDevice))
+        call gpuCheck(hipMalloc(bc%sides_gpu,sizeof(bc%sides)))
+        call gpuCheck(hipMemcpy(bc%sides_gpu,c_loc(bc%sides), &
+                                sizeof(bc%sides),hipMemcpyHostToDevice))
+      endif
+      bc => bc%next
+    enddo
+
+  endsubroutine Init_DGModel3D
+
+  subroutine Free_DGModel3D(this)
+    !! Free the 3D DG model, including GPU BC arrays.
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    type(BoundaryCondition),pointer :: bc
+
+    ! Free hyperbolic BC device arrays
+    bc => this%hyperbolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    ! Free parabolic BC device arrays
+    bc => this%parabolicBCs%head
+    do while(associated(bc))
+      if(c_associated(bc%elements_gpu)) call gpuCheck(hipFree(bc%elements_gpu))
+      if(c_associated(bc%sides_gpu)) call gpuCheck(hipFree(bc%sides_gpu))
+      bc%elements_gpu = c_null_ptr
+      bc%sides_gpu = c_null_ptr
+      bc => bc%next
+    enddo
+
+    call Free_DGModel3D_t(this)
+
+  endsubroutine Free_DGModel3D
+
+  subroutine CalculateTendency_DGModel3D(this)
+    implicit none
+    class(DGModel3D),intent(inout) :: this
+    ! Local
+    integer :: ndof
+
+    call this%solution%BoundaryInterp()
+    call this%solution%SideExchange(this%mesh)
+
+    call this%PreTendency() ! User-supplied
+    call this%SetBoundaryCondition() ! User-supplied
+
+    if(this%gradient_enabled) then
+      call this%CalculateSolutionGradient()
+      call this%SetGradientBoundaryCondition() ! User-supplied
+      call this%solutionGradient%AverageSides()
+    endif
+
+    call this%SourceMethod() ! User supplied
+    call this%BoundaryFlux() ! User supplied
+    call this%FluxMethod() ! User supplied
+
+    call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)
+
+    ndof = this%solution%nvar* &
+           this%solution%nelem* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)* &
+           (this%solution%interp%N+1)
+
+    call CalculateDSDt_gpu(this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                           this%dsdt%interior_gpu,ndof)
+
+  endsubroutine CalculateTendency_DGModel3D
+
+endmodule SELF_DGModel3D

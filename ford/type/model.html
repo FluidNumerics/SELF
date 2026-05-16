@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Model &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Model
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 3.7% of total for derived types.</p>Including implementation: 411 statements,  0.6% of total for derived types.">50 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Model.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_model.f90.html'>SELF_Model.f90</a></li>
+     <li><a href='../module/self_model.html'>SELF_Model</a></li>
+     <li class="active">Model</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/model.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/model.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/model.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/model.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/model.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/model.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/model.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/model.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/model.html#variable-timeintegrator">timeIntegrator</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/model.html#boundprocedure-additionalfree">AdditionalFree</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-additionalinit~2">AdditionalInit</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-calculateentropy~4">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-calculatetendency~8">CalculateTendency</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-pretendency">PreTendency</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-readmodel~4">ReadModel</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-reportmetrics~3">ReportMetrics</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-setnumberofvariables~2">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-settimeintegrator~18">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-settimeintegrator_withchar">SetTimeIntegrator_withChar</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updategrk2~4">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updategrk3~4">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updategrk4~4">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updatesolution~4">UpdateSolution</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-writemodel~4">WriteModel</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-writetecplot~6">WriteTecplot</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-entropy_func~2">entropy_func</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-flux2d">flux2D</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-flux3d">flux3D</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-riemannflux1d">riemannflux1d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-riemannflux2d~2">riemannflux2d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-riemannflux3d">riemannflux3d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-source3d">source3d</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/model.html#src">Model</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, abstract :: Model</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~model~~InheritedByGraph Pages: 1 -->
+<svg id="typemodelInheritedByGraph" width="641pt" height="699pt"
+ viewBox="0.00 0.00 641.00 699.15" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~model~~InheritedByGraph" class="graph" transform="scale(0.7 0.7) rotate(0) translate(4 994)">
+<title>type~~model~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-994 911,-994 911,4 -4,4"/>
+<!-- type~model -->
+<g id="type~~model~~InheritedByGraph_node1" class="node">
+<title>type~model</title>
+<polygon fill="none" stroke="black" points="54,-444 0,-444 0,-420 54,-420 54,-444"/>
+<text text-anchor="middle" x="27" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50">Model</text>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_node2" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node2"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="175,-759 90,-759 90,-735 175,-735 175,-759"/>
+<text text-anchor="middle" x="132.5" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~model -->
+<g id="type~~model~~InheritedByGraph_edge1" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~model</title>
+<path fill="none" stroke="#ff0000" d="M127.44,-734.65C111.82,-687.12 55.45,-515.55 35.26,-454.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="38.48,-452.67 32.03,-444.26 31.83,-454.86 38.48,-452.67"/>
+</g>
+<!-- type~dgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_node3" class="node">
+<title>type~dgmodel3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node3"><a xlink:href=".././type/dgmodel3d_t.html" xlink:title="DGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="175,-444 90,-444 90,-420 175,-420 175,-444"/>
+<text text-anchor="middle" x="132.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~model -->
+<g id="type~~model~~InheritedByGraph_edge2" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~model</title>
+<path fill="none" stroke="#ff0000" d="M90,-432C81.46,-432 72.53,-432 64.19,-432"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="64.03,-428.5 54.03,-432 64.03,-435.5 64.03,-428.5"/>
+</g>
+<!-- type~dgmodel1d_t -->
+<g id="type~~model~~InheritedByGraph_node4" class="node">
+<title>type~dgmodel1d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node4"><a xlink:href=".././type/dgmodel1d_t.html" xlink:title="DGModel1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="175,-171 90,-171 90,-147 175,-147 175,-171"/>
+<text text-anchor="middle" x="132.5" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d_t&#45;&gt;type~model -->
+<g id="type~~model~~InheritedByGraph_edge3" class="edge">
+<title>type~dgmodel1d_t&#45;&gt;type~model</title>
+<path fill="none" stroke="#ff0000" d="M126.92,-171.08C110.86,-213.45 56.95,-355.63 36.22,-410.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="32.92,-409.16 32.65,-419.75 39.46,-411.64 32.92,-409.16"/>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~model~~InheritedByGraph_node5" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node5"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="287,-801 211,-801 211,-777 287,-777 287,-801"/>
+<text text-anchor="middle" x="249" y="-786.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_edge5" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M215.19,-776.96C202.97,-772.48 188.93,-767.33 175.97,-762.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="176.91,-759.2 166.32,-759.04 174.5,-765.77 176.91,-759.2"/>
+</g>
+<!-- type~dgmodel3d~2 -->
+<g id="type~~model~~InheritedByGraph_node6" class="node">
+<title>type~dgmodel3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node6"><a xlink:href=".././type/dgmodel3d~2.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="287,-465 211,-465 211,-441 287,-441 287,-465"/>
+<text text-anchor="middle" x="249" y="-450.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d~2&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_edge7" class="edge">
+<title>type~dgmodel3d~2&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M210.83,-446.18C202.66,-444.68 193.87,-443.07 185.25,-441.49"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="185.72,-438.02 175.25,-439.66 184.45,-444.9 185.72,-438.02"/>
+</g>
+<!-- type~dgmodel2d -->
+<g id="type~~model~~InheritedByGraph_node7" class="node">
+<title>type~dgmodel2d</title>
+<g id="a_type~~model~~InheritedByGraph_node7"><a xlink:href=".././type/dgmodel2d.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="287,-759 211,-759 211,-735 287,-735 287,-759"/>
+<text text-anchor="middle" x="249" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_edge4" class="edge">
+<title>type~dgmodel2d&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M210.83,-747C202.75,-747 194.06,-747 185.53,-747"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="185.25,-743.5 175.25,-747 185.25,-750.5 185.25,-743.5"/>
+</g>
+<!-- type~dgmodel3d -->
+<g id="type~~model~~InheritedByGraph_node8" class="node">
+<title>type~dgmodel3d</title>
+<g id="a_type~~model~~InheritedByGraph_node8"><a xlink:href=".././type/dgmodel3d.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="287,-423 211,-423 211,-399 287,-399 287,-423"/>
+<text text-anchor="middle" x="249" y="-408.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_edge6" class="edge">
+<title>type~dgmodel3d&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M210.83,-417.82C202.66,-419.32 193.87,-420.93 185.25,-422.51"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="184.45,-419.1 175.25,-424.34 185.72,-425.98 184.45,-419.1"/>
+</g>
+<!-- type~dgmodel1d -->
+<g id="type~~model~~InheritedByGraph_node9" class="node">
+<title>type~dgmodel1d</title>
+<g id="a_type~~model~~InheritedByGraph_node9"><a xlink:href=".././type/dgmodel1d.html" xlink:title="DGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="287,-171 211,-171 211,-147 287,-147 287,-171"/>
+<text text-anchor="middle" x="249" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d&#45;&gt;type~dgmodel1d_t -->
+<g id="type~~model~~InheritedByGraph_edge8" class="edge">
+<title>type~dgmodel1d&#45;&gt;type~dgmodel1d_t</title>
+<path fill="none" stroke="#0000ff" d="M210.83,-159C202.75,-159 194.06,-159 185.53,-159"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="185.25,-155.5 175.25,-159 185.25,-162.5 185.25,-155.5"/>
+</g>
+<!-- type~dgmodel1d~2 -->
+<g id="type~~model~~InheritedByGraph_node10" class="node">
+<title>type~dgmodel1d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node10"><a xlink:href=".././type/dgmodel1d~2.html" xlink:title="DGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="287,-129 211,-129 211,-105 287,-105 287,-129"/>
+<text text-anchor="middle" x="249" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d~2&#45;&gt;type~dgmodel1d_t -->
+<g id="type~~model~~InheritedByGraph_edge9" class="edge">
+<title>type~dgmodel1d~2&#45;&gt;type~dgmodel1d_t</title>
+<path fill="none" stroke="#0000ff" d="M215.19,-129.04C202.97,-133.52 188.93,-138.67 175.97,-143.42"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="174.5,-140.23 166.32,-146.96 176.91,-146.8 174.5,-140.23"/>
+</g>
+<!-- type~lineareuler2d_t -->
+<g id="type~~model~~InheritedByGraph_node11" class="node">
+<title>type~lineareuler2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node11"><a xlink:href=".././type/lineareuler2d_t.html" xlink:title="LinearEuler2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="444,-948 346,-948 346,-924 444,-924 444,-948"/>
+<text text-anchor="middle" x="395" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge10" class="edge">
+<title>type~lineareuler2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M375.56,-923.8C359.61,-912.39 336.98,-893.98 323,-873 295.65,-831.94 318.49,-805.97 287,-768 286.29,-767.15 285.54,-766.32 284.75,-765.52"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="286.84,-762.71 276.88,-759.08 282.4,-768.12 286.84,-762.71"/>
+</g>
+<!-- type~advection_diffusion_2d_t -->
+<g id="type~~model~~InheritedByGraph_node12" class="node">
+<title>type~advection_diffusion_2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node12"><a xlink:href=".././type/advection_diffusion_2d_t.html" xlink:title="advection_diffusion_2d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="467,-864 323,-864 323,-840 467,-840 467,-864"/>
+<text text-anchor="middle" x="395" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge11" class="edge">
+<title>type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M379.98,-839.88C360,-822.88 321.91,-791.42 287,-768 285.16,-766.76 283.23,-765.53 281.28,-764.31"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="283.01,-761.26 272.63,-759.13 279.41,-767.27 283.01,-761.26"/>
+</g>
+<!-- type~advection_diffusion_3d_t -->
+<g id="type~~model~~InheritedByGraph_node13" class="node">
+<title>type~advection_diffusion_3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node13"><a xlink:href=".././type/advection_diffusion_3d_t.html" xlink:title="advection_diffusion_3d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="467,-528 323,-528 323,-504 467,-504 467,-528"/>
+<text text-anchor="middle" x="395" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~model~~InheritedByGraph_edge16" class="edge">
+<title>type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M379.98,-503.88C360,-486.88 321.91,-455.42 287,-432 285.16,-430.76 283.23,-429.53 281.28,-428.31"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="283.01,-425.26 272.63,-423.13 279.41,-431.27 283.01,-425.26"/>
+</g>
+<!-- type~nulldgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_node14" class="node">
+<title>type~nulldgmodel3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node14"><a xlink:href=".././type/nulldgmodel3d_t.html" xlink:title="NullDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="448,-444 342,-444 342,-420 448,-420 448,-444"/>
+<text text-anchor="middle" x="395" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~model~~InheritedByGraph_edge17" class="edge">
+<title>type~nulldgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M341.61,-424.36C327.11,-422.25 311.47,-419.96 297.28,-417.9"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="297.65,-414.41 287.25,-416.43 296.64,-421.34 297.65,-414.41"/>
+</g>
+<!-- type~ecdgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_node15" class="node">
+<title>type~ecdgmodel3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node15"><a xlink:href=".././type/ecdgmodel3d_t.html" xlink:title="ECDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="445,-402 345,-402 345,-378 445,-378 445,-402"/>
+<text text-anchor="middle" x="395" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~model~~InheritedByGraph_edge18" class="edge">
+<title>type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M344.85,-397.17C329.49,-399.41 312.58,-401.87 297.35,-404.09"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="296.5,-400.68 287.11,-405.59 297.51,-407.61 296.5,-400.68"/>
+</g>
+<!-- type~advection_diffusion_1d_t -->
+<g id="type~~model~~InheritedByGraph_node16" class="node">
+<title>type~advection_diffusion_1d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node16"><a xlink:href=".././type/advection_diffusion_1d_t.html" xlink:title="advection_diffusion_1d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="467,-192 323,-192 323,-168 467,-168 467,-192"/>
+<text text-anchor="middle" x="395" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~model~~InheritedByGraph_edge19" class="edge">
+<title>type~advection_diffusion_1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#0000ff" d="M322.84,-169.62C314.17,-168.36 305.49,-167.09 297.29,-165.9"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="297.6,-162.41 287.2,-164.43 296.59,-169.33 297.6,-162.41"/>
+</g>
+<!-- type~burgers1d_t -->
+<g id="type~~model~~InheritedByGraph_node17" class="node">
+<title>type~burgers1d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node17"><a xlink:href=".././type/burgers1d_t.html" xlink:title="Burgers1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="434.5,-150 355.5,-150 355.5,-126 434.5,-126 434.5,-150"/>
+<text text-anchor="middle" x="395" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~model~~InheritedByGraph_edge21" class="edge">
+<title>type~burgers1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#0000ff" d="M355.41,-143.63C337.56,-146.23 316.18,-149.35 297.36,-152.09"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="296.59,-148.67 287.2,-153.57 297.6,-155.59 296.59,-148.67"/>
+</g>
+<!-- type~ecdgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_node18" class="node">
+<title>type~ecdgmodel2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node18"><a xlink:href=".././type/ecdgmodel2d_t.html" xlink:title="ECDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="445,-780 345,-780 345,-756 445,-756 445,-780"/>
+<text text-anchor="middle" x="395" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge12" class="edge">
+<title>type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M344.85,-760.83C329.49,-758.59 312.58,-756.13 297.35,-753.91"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="297.51,-750.39 287.11,-752.41 296.5,-757.32 297.51,-750.39"/>
+</g>
+<!-- type~nulldgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_node19" class="node">
+<title>type~nulldgmodel2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node19"><a xlink:href=".././type/nulldgmodel2d_t.html" xlink:title="NullDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="448,-738 342,-738 342,-714 448,-714 448,-738"/>
+<text text-anchor="middle" x="395" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge13" class="edge">
+<title>type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M341.61,-733.64C327.11,-735.75 311.47,-738.04 297.28,-740.1"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="296.64,-736.66 287.25,-741.57 297.65,-743.59 296.64,-736.66"/>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~model~~InheritedByGraph_node20" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node20"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="466.5,-654 323.5,-654 323.5,-630 466.5,-630 466.5,-654"/>
+<text text-anchor="middle" x="395" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge14" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff00" d="M377.48,-654.04C352.33,-672.38 304.28,-707.42 274.89,-728.85"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="272.79,-726.05 266.77,-734.77 276.91,-731.71 272.79,-726.05"/>
+</g>
+<!-- type~lineareuler3d_t -->
+<g id="type~~model~~InheritedByGraph_node21" class="node">
+<title>type~lineareuler3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node21"><a xlink:href=".././type/lineareuler3d_t.html" xlink:title="LinearEuler3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="444,-318 346,-318 346,-294 444,-294 444,-318"/>
+<text text-anchor="middle" x="395" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~model~~InheritedByGraph_edge15" class="edge">
+<title>type~lineareuler3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#00ffff" d="M377.48,-318.04C352.33,-336.38 304.28,-371.42 274.89,-392.85"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="272.79,-390.05 266.77,-398.77 276.91,-395.71 272.79,-390.05"/>
+</g>
+<!-- type~nulldgmodel1d_t -->
+<g id="type~~model~~InheritedByGraph_node22" class="node">
+<title>type~nulldgmodel1d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node22"><a xlink:href=".././type/nulldgmodel1d_t.html" xlink:title="NullDGModel1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="448,-66 342,-66 342,-42 448,-42 448,-66"/>
+<text text-anchor="middle" x="395" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~model~~InheritedByGraph_edge20" class="edge">
+<title>type~nulldgmodel1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#0000ff" d="M379.98,-66.12C360,-83.12 321.91,-114.58 287,-138 285.16,-139.24 283.23,-140.47 281.28,-141.69"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="279.41,-138.73 272.63,-146.87 283.01,-144.74 279.41,-138.73"/>
+</g>
+<!-- type~burgers1d -->
+<g id="type~~model~~InheritedByGraph_node23" class="node">
+<title>type~burgers1d</title>
+<g id="a_type~~model~~InheritedByGraph_node23"><a xlink:href=".././type/burgers1d.html" xlink:title="Burgers1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="605.5,-150 535.5,-150 535.5,-126 605.5,-126 605.5,-150"/>
+<text text-anchor="middle" x="570.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d&#45;&gt;type~burgers1d_t -->
+<g id="type~~model~~InheritedByGraph_edge34" class="edge">
+<title>type~burgers1d&#45;&gt;type~burgers1d_t</title>
+<path fill="none" stroke="#00ffff" d="M535.22,-138C509.45,-138 473.78,-138 445,-138"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="444.74,-134.5 434.74,-138 444.74,-141.5 444.74,-134.5"/>
+</g>
+<!-- type~nulldgmodel3d -->
+<g id="type~~model~~InheritedByGraph_node24" class="node">
+<title>type~nulldgmodel3d</title>
+<g id="a_type~~model~~InheritedByGraph_node24"><a xlink:href=".././type/nulldgmodel3d.html" xlink:title="NullDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="619,-486 522,-486 522,-462 619,-462 619,-486"/>
+<text text-anchor="middle" x="570.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d&#45;&gt;type~nulldgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_edge28" class="edge">
+<title>type~nulldgmodel3d&#45;&gt;type~nulldgmodel3d_t</title>
+<path fill="none" stroke="#7fff00" d="M521.63,-462.41C501.28,-457.49 477.34,-451.69 455.84,-446.48"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="456.37,-443.01 445.83,-444.06 454.73,-449.82 456.37,-443.01"/>
+</g>
+<!-- type~advection_diffusion_1d~2 -->
+<g id="type~~model~~InheritedByGraph_node25" class="node">
+<title>type~advection_diffusion_1d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node25"><a xlink:href=".././type/advection_diffusion_1d~2.html" xlink:title="advection_diffusion_1d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="638,-234 503,-234 503,-210 638,-210 638,-234"/>
+<text text-anchor="middle" x="570.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d~2&#45;&gt;type~advection_diffusion_1d_t -->
+<g id="type~~model~~InheritedByGraph_edge33" class="edge">
+<title>type~advection_diffusion_1d~2&#45;&gt;type~advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ff7f" d="M519.78,-209.96C499.73,-205.11 476.42,-199.47 455.48,-194.4"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="456.27,-190.99 445.73,-192.04 454.62,-197.79 456.27,-190.99"/>
+</g>
+<!-- type~lineareuler3d~2 -->
+<g id="type~~model~~InheritedByGraph_node26" class="node">
+<title>type~lineareuler3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node26"><a xlink:href=".././type/lineareuler3d~2.html" xlink:title="LinearEuler3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="615,-318 526,-318 526,-294 615,-294 615,-318"/>
+<text text-anchor="middle" x="570.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d~2&#45;&gt;type~lineareuler3d_t -->
+<g id="type~~model~~InheritedByGraph_edge43" class="edge">
+<title>type~lineareuler3d~2&#45;&gt;type~lineareuler3d_t</title>
+<path fill="none" stroke="#ff00ff" d="M525.72,-306C504.03,-306 477.55,-306 454.19,-306"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="454.04,-302.5 444.04,-306 454.04,-309.5 454.04,-302.5"/>
+</g>
+<!-- type~nulldgmodel2d~2 -->
+<g id="type~~model~~InheritedByGraph_node27" class="node">
+<title>type~nulldgmodel2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node27"><a xlink:href=".././type/nulldgmodel2d~2.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="619,-738 522,-738 522,-714 619,-714 619,-738"/>
+<text text-anchor="middle" x="570.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_edge39" class="edge">
+<title>type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#0000ff" d="M521.63,-726C502.06,-726 479.17,-726 458.32,-726"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="458.28,-722.5 448.28,-726 458.28,-729.5 458.28,-722.5"/>
+</g>
+<!-- type~linearshallowwater2d -->
+<g id="type~~model~~InheritedByGraph_node28" class="node">
+<title>type~linearshallowwater2d</title>
+<g id="a_type~~model~~InheritedByGraph_node28"><a xlink:href=".././type/linearshallowwater2d.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="637.5,-654 503.5,-654 503.5,-630 637.5,-630 637.5,-654"/>
+<text text-anchor="middle" x="570.5" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~model~~InheritedByGraph_edge40" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M503.41,-642C494.65,-642 485.58,-642 476.6,-642"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="476.52,-638.5 466.52,-642 476.52,-645.5 476.52,-638.5"/>
+</g>
+<!-- type~nulldgmodel1d -->
+<g id="type~~model~~InheritedByGraph_node29" class="node">
+<title>type~nulldgmodel1d</title>
+<g id="a_type~~model~~InheritedByGraph_node29"><a xlink:href=".././type/nulldgmodel1d.html" xlink:title="NullDGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="619,-66 522,-66 522,-42 619,-42 619,-66"/>
+<text text-anchor="middle" x="570.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d&#45;&gt;type~nulldgmodel1d_t -->
+<g id="type~~model~~InheritedByGraph_edge44" class="edge">
+<title>type~nulldgmodel1d&#45;&gt;type~nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff007f" d="M521.63,-54C502.06,-54 479.17,-54 458.32,-54"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="458.28,-50.5 448.28,-54 458.28,-57.5 458.28,-50.5"/>
+</g>
+<!-- type~nulldgmodel1d~2 -->
+<g id="type~~model~~InheritedByGraph_node30" class="node">
+<title>type~nulldgmodel1d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node30"><a xlink:href=".././type/nulldgmodel1d~2.html" xlink:title="NullDGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="619,-24 522,-24 522,0 619,0 619,-24"/>
+<text text-anchor="middle" x="570.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d~2&#45;&gt;type~nulldgmodel1d_t -->
+<g id="type~~model~~InheritedByGraph_edge45" class="edge">
+<title>type~nulldgmodel1d~2&#45;&gt;type~nulldgmodel1d_t</title>
+<path fill="none" stroke="#ff007f" d="M521.63,-23.59C501.28,-28.51 477.34,-34.31 455.84,-39.52"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="454.73,-36.18 445.83,-41.94 456.37,-42.99 454.73,-36.18"/>
+</g>
+<!-- type~ecdgmodel3d~2 -->
+<g id="type~~model~~InheritedByGraph_node31" class="node">
+<title>type~ecdgmodel3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node31"><a xlink:href=".././type/ecdgmodel3d~2.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="616,-402 525,-402 525,-378 616,-378 616,-402"/>
+<text text-anchor="middle" x="570.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d~2&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_edge31" class="edge">
+<title>type~ecdgmodel3d~2&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M524.82,-390C503.66,-390 478.1,-390 455.34,-390"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="455.11,-386.5 445.11,-390 455.11,-393.5 455.11,-386.5"/>
+</g>
+<!-- type~advection_diffusion_1d -->
+<g id="type~~model~~InheritedByGraph_node32" class="node">
+<title>type~advection_diffusion_1d</title>
+<g id="a_type~~model~~InheritedByGraph_node32"><a xlink:href=".././type/advection_diffusion_1d.html" xlink:title="advection_diffusion_1d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="638,-192 503,-192 503,-168 638,-168 638,-192"/>
+<text text-anchor="middle" x="570.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d&#45;&gt;type~advection_diffusion_1d_t -->
+<g id="type~~model~~InheritedByGraph_edge32" class="edge">
+<title>type~advection_diffusion_1d&#45;&gt;type~advection_diffusion_1d_t</title>
+<path fill="none" stroke="#00ff7f" d="M502.92,-180C494.47,-180 485.75,-180 477.11,-180"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="477.01,-176.5 467.01,-180 477.01,-183.5 477.01,-176.5"/>
+</g>
+<!-- type~burgers1d~2 -->
+<g id="type~~model~~InheritedByGraph_node33" class="node">
+<title>type~burgers1d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node33"><a xlink:href=".././type/burgers1d~2.html" xlink:title="Burgers1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="605.5,-108 535.5,-108 535.5,-84 605.5,-84 605.5,-108"/>
+<text text-anchor="middle" x="570.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d~2&#45;&gt;type~burgers1d_t -->
+<g id="type~~model~~InheritedByGraph_edge35" class="edge">
+<title>type~burgers1d~2&#45;&gt;type~burgers1d_t</title>
+<path fill="none" stroke="#00ffff" d="M535.22,-104.3C509.34,-110.56 473.47,-119.25 444.63,-126.23"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="443.64,-122.87 434.74,-128.62 445.29,-129.67 443.64,-122.87"/>
+</g>
+<!-- type~advection_diffusion_2d~2 -->
+<g id="type~~model~~InheritedByGraph_node34" class="node">
+<title>type~advection_diffusion_2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node34"><a xlink:href=".././type/advection_diffusion_2d~2.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="638,-906 503,-906 503,-882 638,-882 638,-906"/>
+<text text-anchor="middle" x="570.5" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~model~~InheritedByGraph_edge25" class="edge">
+<title>type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff7f00" d="M519.78,-881.96C499.73,-877.11 476.42,-871.47 455.48,-866.4"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="456.27,-862.99 445.73,-864.04 454.62,-869.79 456.27,-862.99"/>
+</g>
+<!-- type~advection_diffusion_2d -->
+<g id="type~~model~~InheritedByGraph_node35" class="node">
+<title>type~advection_diffusion_2d</title>
+<g id="a_type~~model~~InheritedByGraph_node35"><a xlink:href=".././type/advection_diffusion_2d.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="638,-864 503,-864 503,-840 638,-840 638,-864"/>
+<text text-anchor="middle" x="570.5" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~model~~InheritedByGraph_edge24" class="edge">
+<title>type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff7f00" d="M502.92,-852C494.47,-852 485.75,-852 477.11,-852"/>
+<polygon fill="#ff7f00" stroke="#ff7f00" points="477.01,-848.5 467.01,-852 477.01,-855.5 477.01,-848.5"/>
+</g>
+<!-- type~advection_diffusion_3d~2 -->
+<g id="type~~model~~InheritedByGraph_node36" class="node">
+<title>type~advection_diffusion_3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node36"><a xlink:href=".././type/advection_diffusion_3d~2.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="638,-570 503,-570 503,-546 638,-546 638,-570"/>
+<text text-anchor="middle" x="570.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~model~~InheritedByGraph_edge27" class="edge">
+<title>type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#ffff00" d="M519.78,-545.96C499.73,-541.11 476.42,-535.47 455.48,-530.4"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="456.27,-526.99 445.73,-528.04 454.62,-533.79 456.27,-526.99"/>
+</g>
+<!-- type~ecdgmodel3d -->
+<g id="type~~model~~InheritedByGraph_node37" class="node">
+<title>type~ecdgmodel3d</title>
+<g id="a_type~~model~~InheritedByGraph_node37"><a xlink:href=".././type/ecdgmodel3d.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="616,-360 525,-360 525,-336 616,-336 616,-360"/>
+<text text-anchor="middle" x="570.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_edge30" class="edge">
+<title>type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#00ff00" d="M524.82,-358.82C503.57,-363.96 477.87,-370.18 455.03,-375.71"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="454,-372.36 445.11,-378.11 455.65,-379.16 454,-372.36"/>
+</g>
+<!-- type~ecdgmodel2d~2 -->
+<g id="type~~model~~InheritedByGraph_node38" class="node">
+<title>type~ecdgmodel2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node38"><a xlink:href=".././type/ecdgmodel2d~2.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="616,-822 525,-822 525,-798 616,-798 616,-822"/>
+<text text-anchor="middle" x="570.5" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_edge37" class="edge">
+<title>type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#007fff" d="M524.82,-799.18C503.57,-794.04 477.87,-787.82 455.03,-782.29"/>
+<polygon fill="#007fff" stroke="#007fff" points="455.65,-778.84 445.11,-779.89 454,-785.64 455.65,-778.84"/>
+</g>
+<!-- type~linearshallowwater2d~2 -->
+<g id="type~~model~~InheritedByGraph_node39" class="node">
+<title>type~linearshallowwater2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node39"><a xlink:href=".././type/linearshallowwater2d~2.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="637.5,-612 503.5,-612 503.5,-588 637.5,-588 637.5,-612"/>
+<text text-anchor="middle" x="570.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~model~~InheritedByGraph_edge41" class="edge">
+<title>type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M519.78,-612.04C499.73,-616.89 476.42,-622.53 455.48,-627.6"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="454.62,-624.21 445.73,-629.96 456.27,-631.01 454.62,-624.21"/>
+</g>
+<!-- type~nulldgmodel3d~2 -->
+<g id="type~~model~~InheritedByGraph_node40" class="node">
+<title>type~nulldgmodel3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node40"><a xlink:href=".././type/nulldgmodel3d~2.html" xlink:title="NullDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="619,-444 522,-444 522,-420 619,-420 619,-444"/>
+<text text-anchor="middle" x="570.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d~2&#45;&gt;type~nulldgmodel3d_t -->
+<g id="type~~model~~InheritedByGraph_edge29" class="edge">
+<title>type~nulldgmodel3d~2&#45;&gt;type~nulldgmodel3d_t</title>
+<path fill="none" stroke="#7fff00" d="M521.63,-432C502.06,-432 479.17,-432 458.32,-432"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="458.28,-428.5 448.28,-432 458.28,-435.5 458.28,-428.5"/>
+</g>
+<!-- type~ecdgmodel2d -->
+<g id="type~~model~~InheritedByGraph_node41" class="node">
+<title>type~ecdgmodel2d</title>
+<g id="a_type~~model~~InheritedByGraph_node41"><a xlink:href=".././type/ecdgmodel2d.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="616,-780 525,-780 525,-756 616,-756 616,-780"/>
+<text text-anchor="middle" x="570.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_edge36" class="edge">
+<title>type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#007fff" d="M524.82,-768C503.66,-768 478.1,-768 455.34,-768"/>
+<polygon fill="#007fff" stroke="#007fff" points="455.11,-764.5 445.11,-768 455.11,-771.5 455.11,-764.5"/>
+</g>
+<!-- type~nulldgmodel2d -->
+<g id="type~~model~~InheritedByGraph_node42" class="node">
+<title>type~nulldgmodel2d</title>
+<g id="a_type~~model~~InheritedByGraph_node42"><a xlink:href=".././type/nulldgmodel2d.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="619,-696 522,-696 522,-672 619,-672 619,-696"/>
+<text text-anchor="middle" x="570.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~model~~InheritedByGraph_edge38" class="edge">
+<title>type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#0000ff" d="M521.63,-695.59C501.28,-700.51 477.34,-706.31 455.84,-711.52"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="454.73,-708.18 445.83,-713.94 456.37,-714.99 454.73,-708.18"/>
+</g>
+<!-- type~lineareuler2d -->
+<g id="type~~model~~InheritedByGraph_node43" class="node">
+<title>type~lineareuler2d</title>
+<g id="a_type~~model~~InheritedByGraph_node43"><a xlink:href=".././type/lineareuler2d.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="615,-990 526,-990 526,-966 615,-966 615,-990"/>
+<text text-anchor="middle" x="570.5" y="-975.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~model~~InheritedByGraph_edge22" class="edge">
+<title>type~lineareuler2d&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" d="M525.72,-967.4C503.93,-962.13 477.31,-955.68 453.87,-950.01"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="454.58,-946.58 444.04,-947.63 452.94,-953.38 454.58,-946.58"/>
+</g>
+<!-- type~advection_diffusion_3d -->
+<g id="type~~model~~InheritedByGraph_node44" class="node">
+<title>type~advection_diffusion_3d</title>
+<g id="a_type~~model~~InheritedByGraph_node44"><a xlink:href=".././type/advection_diffusion_3d.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="638,-528 503,-528 503,-504 638,-504 638,-528"/>
+<text text-anchor="middle" x="570.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~model~~InheritedByGraph_edge26" class="edge">
+<title>type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#ffff00" d="M502.92,-516C494.47,-516 485.75,-516 477.11,-516"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="477.01,-512.5 467.01,-516 477.01,-519.5 477.01,-512.5"/>
+</g>
+<!-- type~lineareuler2d~2 -->
+<g id="type~~model~~InheritedByGraph_node45" class="node">
+<title>type~lineareuler2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node45"><a xlink:href=".././type/lineareuler2d~2.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="615,-948 526,-948 526,-924 615,-924 615,-948"/>
+<text text-anchor="middle" x="570.5" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~model~~InheritedByGraph_edge23" class="edge">
+<title>type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#ff0000" d="M525.72,-936C504.03,-936 477.55,-936 454.19,-936"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="454.04,-932.5 444.04,-936 454.04,-939.5 454.04,-932.5"/>
+</g>
+<!-- type~lineareuler3d -->
+<g id="type~~model~~InheritedByGraph_node46" class="node">
+<title>type~lineareuler3d</title>
+<g id="a_type~~model~~InheritedByGraph_node46"><a xlink:href=".././type/lineareuler3d.html" xlink:title="LinearEuler3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="615,-276 526,-276 526,-252 615,-252 615,-276"/>
+<text text-anchor="middle" x="570.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d&#45;&gt;type~lineareuler3d_t -->
+<g id="type~~model~~InheritedByGraph_edge42" class="edge">
+<title>type~lineareuler3d&#45;&gt;type~lineareuler3d_t</title>
+<path fill="none" stroke="#ff00ff" d="M525.72,-274.6C503.93,-279.87 477.31,-286.32 453.87,-291.99"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="452.94,-288.62 444.04,-294.37 454.58,-295.42 452.94,-288.62"/>
+</g>
+<!-- type~ecadvection3d_t -->
+<g id="type~~model~~InheritedByGraph_node47" class="node">
+<title>type~ecadvection3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node47"><a xlink:href=".././type/ecadvection3d_t.html" xlink:title="ECAdvection3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="777,-381 674,-381 674,-357 777,-357 777,-381"/>
+<text text-anchor="middle" x="725.5" y="-366.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~model~~InheritedByGraph_edge46" class="edge">
+<title>type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#007fff" d="M673.98,-362.07C658.63,-359.96 641.69,-357.63 626.09,-355.49"/>
+<polygon fill="#007fff" stroke="#007fff" points="626.43,-352.01 616.05,-354.11 625.48,-358.94 626.43,-352.01"/>
+</g>
+<!-- type~ecadvection2d_t -->
+<g id="type~~model~~InheritedByGraph_node48" class="node">
+<title>type~ecadvection2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node48"><a xlink:href=".././type/ecadvection2d_t.html" xlink:title="ECAdvection2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="777,-801 674,-801 674,-777 777,-777 777,-801"/>
+<text text-anchor="middle" x="725.5" y="-786.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge49" class="edge">
+<title>type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#7f00ff" d="M673.98,-782.07C658.63,-779.96 641.69,-777.63 626.09,-775.49"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="626.43,-772.01 616.05,-774.11 625.48,-778.94 626.43,-772.01"/>
+</g>
+<!-- type~esatmo2d_t -->
+<g id="type~~model~~InheritedByGraph_node49" class="node">
+<title>type~esatmo2d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node49"><a xlink:href=".././type/esatmo2d_t.html" xlink:title="ESAtmo2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="764.5,-759 686.5,-759 686.5,-735 764.5,-735 764.5,-759"/>
+<text text-anchor="middle" x="725.5" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~model~~InheritedByGraph_edge48" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#7f00ff" d="M686.29,-752.25C668.12,-754.74 646.08,-757.76 626.18,-760.49"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="625.43,-757.06 616,-761.89 626.39,-764 625.43,-757.06"/>
+</g>
+<!-- type~esatmo3d_t -->
+<g id="type~~model~~InheritedByGraph_node50" class="node">
+<title>type~esatmo3d_t</title>
+<g id="a_type~~model~~InheritedByGraph_node50"><a xlink:href=".././type/esatmo3d_t.html" xlink:title="ESAtmo3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="764.5,-339 686.5,-339 686.5,-315 764.5,-315 764.5,-339"/>
+<text text-anchor="middle" x="725.5" y="-324.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~model~~InheritedByGraph_edge47" class="edge">
+<title>type~esatmo3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#007fff" d="M686.29,-332.25C668.12,-334.74 646.08,-337.76 626.18,-340.49"/>
+<polygon fill="#007fff" stroke="#007fff" points="625.43,-337.06 616,-341.89 626.39,-344 625.43,-337.06"/>
+</g>
+<!-- type~ecadvection3d~2 -->
+<g id="type~~model~~InheritedByGraph_node51" class="node">
+<title>type~ecadvection3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node51"><a xlink:href=".././type/ecadvection3d~2.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="907,-423 813,-423 813,-399 907,-399 907,-423"/>
+<text text-anchor="middle" x="860" y="-408.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~model~~InheritedByGraph_edge51" class="edge">
+<title>type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" d="M821.03,-398.96C806.48,-394.35 789.68,-389.03 774.32,-384.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="775.06,-380.72 764.47,-381.04 772.95,-387.4 775.06,-380.72"/>
+</g>
+<!-- type~ecadvection2d -->
+<g id="type~~model~~InheritedByGraph_node52" class="node">
+<title>type~ecadvection2d</title>
+<g id="a_type~~model~~InheritedByGraph_node52"><a xlink:href=".././type/ecadvection2d.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="907,-843 813,-843 813,-819 907,-819 907,-843"/>
+<text text-anchor="middle" x="860" y="-828.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~model~~InheritedByGraph_edge52" class="edge">
+<title>type~ecadvection2d&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#7fff00" d="M821.03,-818.96C806.48,-814.35 789.68,-809.03 774.32,-804.16"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="775.06,-800.72 764.47,-801.04 772.95,-807.4 775.06,-800.72"/>
+</g>
+<!-- type~esatmo2d~2 -->
+<g id="type~~model~~InheritedByGraph_node53" class="node">
+<title>type~esatmo2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node53"><a xlink:href=".././type/esatmo2d~2.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="894.5,-759 825.5,-759 825.5,-735 894.5,-735 894.5,-759"/>
+<text text-anchor="middle" x="860" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d~2&#45;&gt;type~esatmo2d_t -->
+<g id="type~~model~~InheritedByGraph_edge55" class="edge">
+<title>type~esatmo2d~2&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" d="M825.22,-747C809.98,-747 791.7,-747 775.03,-747"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="774.9,-743.5 764.9,-747 774.9,-750.5 774.9,-743.5"/>
+</g>
+<!-- type~ecadvection3d -->
+<g id="type~~model~~InheritedByGraph_node54" class="node">
+<title>type~ecadvection3d</title>
+<g id="a_type~~model~~InheritedByGraph_node54"><a xlink:href=".././type/ecadvection3d.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="907,-381 813,-381 813,-357 907,-357 907,-381"/>
+<text text-anchor="middle" x="860" y="-366.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~model~~InheritedByGraph_edge50" class="edge">
+<title>type~ecadvection3d&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#ff0000" d="M812.66,-369C804.49,-369 795.87,-369 787.37,-369"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="787.11,-365.5 777.11,-369 787.11,-372.5 787.11,-365.5"/>
+</g>
+<!-- type~ecadvection2d~2 -->
+<g id="type~~model~~InheritedByGraph_node55" class="node">
+<title>type~ecadvection2d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node55"><a xlink:href=".././type/ecadvection2d~2.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="907,-801 813,-801 813,-777 907,-777 907,-801"/>
+<text text-anchor="middle" x="860" y="-786.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~model~~InheritedByGraph_edge53" class="edge">
+<title>type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#7fff00" d="M812.66,-789C804.49,-789 795.87,-789 787.37,-789"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="787.11,-785.5 777.11,-789 787.11,-792.5 787.11,-785.5"/>
+</g>
+<!-- type~esatmo2d -->
+<g id="type~~model~~InheritedByGraph_node56" class="node">
+<title>type~esatmo2d</title>
+<g id="a_type~~model~~InheritedByGraph_node56"><a xlink:href=".././type/esatmo2d.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="894.5,-717 825.5,-717 825.5,-693 894.5,-693 894.5,-717"/>
+<text text-anchor="middle" x="860" y="-702.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d&#45;&gt;type~esatmo2d_t -->
+<g id="type~~model~~InheritedByGraph_edge54" class="edge">
+<title>type~esatmo2d&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" d="M825.22,-715.71C809.71,-720.62 791.05,-726.54 774.14,-731.9"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="772.9,-728.62 764.43,-734.98 775.02,-735.29 772.9,-728.62"/>
+</g>
+<!-- type~esatmo3d -->
+<g id="type~~model~~InheritedByGraph_node57" class="node">
+<title>type~esatmo3d</title>
+<g id="a_type~~model~~InheritedByGraph_node57"><a xlink:href=".././type/esatmo3d.html" xlink:title="ESAtmo3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="894.5,-339 825.5,-339 825.5,-315 894.5,-315 894.5,-339"/>
+<text text-anchor="middle" x="860" y="-324.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d&#45;&gt;type~esatmo3d_t -->
+<g id="type~~model~~InheritedByGraph_edge56" class="edge">
+<title>type~esatmo3d&#45;&gt;type~esatmo3d_t</title>
+<path fill="none" stroke="#7f00ff" d="M825.22,-327C809.98,-327 791.7,-327 775.03,-327"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="774.9,-323.5 764.9,-327 774.9,-330.5 774.9,-323.5"/>
+</g>
+<!-- type~esatmo3d~2 -->
+<g id="type~~model~~InheritedByGraph_node58" class="node">
+<title>type~esatmo3d~2</title>
+<g id="a_type~~model~~InheritedByGraph_node58"><a xlink:href=".././type/esatmo3d~2.html" xlink:title="ESAtmo3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="894.5,-297 825.5,-297 825.5,-273 894.5,-273 894.5,-297"/>
+<text text-anchor="middle" x="860" y="-282.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d~2&#45;&gt;type~esatmo3d_t -->
+<g id="type~~model~~InheritedByGraph_edge57" class="edge">
+<title>type~esatmo3d~2&#45;&gt;type~esatmo3d_t</title>
+<path fill="none" stroke="#7f00ff" d="M825.22,-295.71C809.71,-300.62 791.05,-306.54 774.14,-311.9"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="772.9,-308.62 764.43,-314.98 775.02,-315.29 772.9,-308.62"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypemodelInheritedByGraph = svgPanZoom('#typemodelInheritedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/model.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/model.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/model.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/model.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/model.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/model.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/model.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/model.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/model.html#variable-timeintegrator">timeIntegrator</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/model.html#boundprocedure-additionalfree">AdditionalFree</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-additionalinit~2">AdditionalInit</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-calculateentropy~4">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-calculatetendency~8">CalculateTendency</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-pretendency">PreTendency</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-readmodel~4">ReadModel</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-reportmetrics~3">ReportMetrics</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-setnumberofvariables~2">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-settimeintegrator~18">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-settimeintegrator_withchar">SetTimeIntegrator_withChar</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updategrk2~4">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updategrk3~4">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updategrk4~4">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-updatesolution~4">UpdateSolution</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-writemodel~4">WriteModel</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-writetecplot~6">WriteTecplot</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-entropy_func~2">entropy_func</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-flux2d">flux2D</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-flux3d">flux3D</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-riemannflux1d">riemannflux1d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-riemannflux2d~2">riemannflux2d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-riemannflux3d">riemannflux3d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/model.html#boundprocedure-source3d">source3d</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/model.html#src">Model</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalfree"></span><h3>procedure, public :: <strong>AdditionalFree</strong>  => <a href='../proc/additionalfree_model.html'>AdditionalFree_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalfree_model.html'>AdditionalFree_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalinit~2"></span><h3>procedure, public :: <strong>AdditionalInit</strong>  => <a href='../proc/additionalinit_model.html'>AdditionalInit_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalinit_model.html'>AdditionalInit_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionaloutput"></span><h3>procedure, public :: <strong>AdditionalOutput</strong>  => <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>(this, fileid)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=HID_T),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileid</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculateentropy~4"></span><h3>procedure, public :: <strong>CalculateEntropy</strong>  => <a href='../proc/calculateentropy_model.html'>CalculateEntropy_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculateentropy_model.html'>CalculateEntropy_Model</a>(this)</h3>
+<p>Base method for calculating entropy of a model
+When this method is not overridden, the entropy
+is simply set to 0.0. When you develop a model
+built on top of this abstract class or one of its
+children, it is recommended that you define a
+convex mathematical entropy function that is used
+as a measure of the model stability.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatetendency~8"></span><h3>procedure(<a href='../interface/calculatetendency.html'>CalculateTendency</a>), public, deferred :: <strong>CalculateTendency</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine CalculateTendency(this)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-euler_timeintegrator"></span><h3>procedure, public :: <strong>Euler_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/euler_timeintegrator.html'>Euler_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-forwardstep"></span><h3>procedure, public :: <strong>ForwardStep</strong>  => <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>(this, tn, dt, ioInterval)</h3>
+<p>Forward steps the model using the associated tendency procedure and time integrator</p><a href="../proc/forwardstep_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ioInterval</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-getsimulationtime"></span><h3>procedure, public :: <strong>GetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/getsimulationtime.html'>GetSimulationTime</a>(this, t)</h3>
+<p>Returns the current simulation time stored in the model % t attribute</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-incrementiocounter"></span><h3>procedure, public :: <strong>IncrementIOCounter</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/incrementiocounter.html'>IncrementIOCounter</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk2_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK2_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk2_timeintegrator.html'>LowStorageRK2_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk3_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK3_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk3_timeintegrator.html'>LowStorageRK3_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk4_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK4_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk4_timeintegrator.html'>LowStorageRK4_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-pretendency"></span><h3>procedure, public :: <strong>PreTendency</strong>  => <a href='../proc/pretendency_model.html'>PreTendency_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/pretendency_model.html'>PreTendency_Model</a>(this)</h3>
+<p>PreTendency is a template routine that is used to house any additional calculations
+that you want to execute at the beginning of the tendency calculation routine.
+This default PreTendency simply returns back to the caller without executing any instructions</p><a href="../proc/pretendency_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-printtype"></span><h3>procedure, public :: <strong>PrintType</strong>  => <a href='../proc/printtype_model.html'>PrintType_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/printtype_model.html'>PrintType_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-readmodel~4"></span><h3>procedure(<a href='../interface/readmodel.html'>ReadModel</a>), public, deferred :: <strong>ReadModel</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine ReadModel(this, filename)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportentropy"></span><h3>procedure, public :: <strong>ReportEntropy</strong>  => <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportmetrics~3"></span><h3>procedure, public :: <strong>ReportMetrics</strong>  => <a href='../proc/reportmetrics_model.html'>ReportMetrics_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportmetrics_model.html'>ReportMetrics_Model</a>(this)</h3>
+<p>Method that can be overridden by users to
+report their own custom metrics after file io</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportusermetrics"></span><h3>procedure, public :: <strong>ReportUserMetrics</strong>  => <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>(this)</h3>
+<p>Method that can be overridden by users to
+report their own custom metrics after file io</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setnumberofvariables~2"></span><h3>procedure, public :: <strong>SetNumberOfVariables</strong>  => <a href='../proc/setnumberofvariables_model.html'>SetNumberOfVariables_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setnumberofvariables_model.html'>SetNumberOfVariables_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsimulationtime"></span><h3>procedure, public :: <strong>SetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setsimulationtime.html'>SetSimulationTime</a>(this, t)</h3>
+<p>Sets the model % t attribute with the provided simulation time</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-settimeintegrator~18"></span><h3>generic, public :: <strong>SetTimeIntegrator</strong>  => <a href='../type/model.html#boundprocedure-settimeintegrator_withchar'>SetTimeIntegrator_withChar</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/settimeintegrator_withchar.html'>SetTimeIntegrator_withChar</a>(this, integrator)</h3>
+<p>Sets the time integrator method, using a character input</p><a href="../proc/settimeintegrator_withchar.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>integrator</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-settimeintegrator_withchar"></span><h3>procedure, private :: <strong>SetTimeIntegrator_withChar</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/settimeintegrator_withchar.html'>SetTimeIntegrator_withChar</a>(this, integrator)</h3>
+<p>Sets the time integrator method, using a character input</p><a href="../proc/settimeintegrator_withchar.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>integrator</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk2~4"></span><h3>procedure(<a href='../interface/updategrk.html'>UpdateGRK</a>), public, deferred :: <strong>UpdateGRK2</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine UpdateGRK(this, m)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk3~4"></span><h3>procedure(<a href='../interface/updategrk.html'>UpdateGRK</a>), public, deferred :: <strong>UpdateGRK3</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine UpdateGRK(this, m)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk4~4"></span><h3>procedure(<a href='../interface/updategrk.html'>UpdateGRK</a>), public, deferred :: <strong>UpdateGRK4</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine UpdateGRK(this, m)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatesolution~4"></span><h3>procedure(<a href='../interface/updatesolution.html'>UpdateSolution</a>), public, deferred :: <strong>UpdateSolution</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine UpdateSolution(this, dt)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writemodel~4"></span><h3>procedure(<a href='../interface/writemodel.html'>WriteModel</a>), public, deferred :: <strong>WriteModel</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine WriteModel(this, filename)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writetecplot~6"></span><h3>procedure(<a href='../interface/writetecplot.html'>WriteTecplot</a>), public, deferred :: <strong>WriteTecplot</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>subroutine WriteTecplot(this, filename)<small>Prototype</small></h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-entropy_func~2"></span><h3>procedure, public :: <strong>entropy_func</strong>  => <a href='../proc/entropy_func_model.html'>entropy_func_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/entropy_func_model.html'>entropy_func_Model</a>(this, s) result(e)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux1d"></span><h3>procedure, public :: <strong>flux1D</strong>  => <a href='../proc/flux1d_model.html'>flux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux1d_model.html'>flux1d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux2d"></span><h3>procedure, public :: <strong>flux2D</strong>  => <a href='../proc/flux2d_model.html'>flux2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux2d_model.html'>flux2d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:2)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux3d"></span><h3>procedure, public :: <strong>flux3D</strong>  => <a href='../proc/flux3d_model.html'>flux3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux3d_model.html'>flux3d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:3)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux1d"></span><h3>procedure, public :: <strong>riemannflux1d</strong>  => <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux2d~2"></span><h3>procedure, public :: <strong>riemannflux2d</strong>  => <a href='../proc/riemannflux2d_model.html'>riemannflux2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux2d_model.html'>riemannflux2d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux3d"></span><h3>procedure, public :: <strong>riemannflux3d</strong>  => <a href='../proc/riemannflux3d_model.html'>riemannflux3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux3d_model.html'>riemannflux3d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source1d"></span><h3>procedure, public :: <strong>source1d</strong>  => <a href='../proc/source1d_model.html'>source1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source1d_model.html'>source1d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source2d"></span><h3>procedure, public :: <strong>source2d</strong>  => <a href='../proc/source2d_model.html'>source2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source2d_model.html'>source2d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source3d"></span><h3>procedure, public :: <strong>source3d</strong>  => <a href='../proc/source3d_model.html'>source3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source3d_model.html'>source3d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">abstract</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Model</span>
+
+<span class="w">    </span><span class="c">! Time integration attributes</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">SELF_timeIntegrator</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">timeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Euler_timeIntegrator</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dt</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">t</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ioIterate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gradient_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="w">    </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">prescribed_bcs_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span>
+<span class="w">    </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">tecplot_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nvar</span>
+<span class="w">    </span><span class="c">! Standard Diagnostics</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy</span><span class="w"> </span><span class="c">! Mathematical entropy function for the model</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">IncrementIOCounter</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">PrintType</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">PrintType_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetNumberOfVariables</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetNumberOfVariables_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalInit</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalInit_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalFree</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalFree_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AdditionalOutput</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdditionalOutput_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ForwardStep</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ForwardStep_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Euler_timeIntegrator</span>
+
+<span class="w">    </span><span class="c">! Runge-Kutta methods</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">LowStorageRK2_timeIntegrator</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">UpdateGRK</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateGRK2</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">LowStorageRK3_timeIntegrator</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">UpdateGRK</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateGRK3</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">LowStorageRK4_timeIntegrator</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">UpdateGRK</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateGRK4</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">PreTendency</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">PreTendency_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">entropy_func</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">entropy_func_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux1D</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">flux1d_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux2D</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">flux2d_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flux3D</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">flux3d_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">riemannflux1d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">riemannflux1d_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">riemannflux2d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">riemannflux2d_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">riemannflux3d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">riemannflux3d_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">source1d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">source1d_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">source2d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">source2d_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">source3d</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">source3d_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ReportEntropy</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ReportEntropy_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ReportMetrics</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ReportMetrics_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ReportUserMetrics</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ReportUserMetrics_Model</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CalculateEntropy</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">CalculateEntropy_Model</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">UpdateSolution</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateSolution</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">CalculateTendency</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CalculateTendency</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">ReadModel</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ReadModel</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">WriteModel</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">WriteModel</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">(</span><span class="n">WriteTecplot</span><span class="p">),</span><span class="k">deferred</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">WriteTecplot</span>
+
+<span class="w">    </span><span class="k">generic</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetTimeIntegrator</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetTimeIntegrator_withChar</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetTimeIntegrator_withChar</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetSimulationTime</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">GetSimulationTime</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">Model</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-05-16 16:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

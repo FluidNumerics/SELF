@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_Mesh_2D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_Mesh_2D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for source files.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_Mesh_2D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mesh_2d.html">SELF_Mesh_2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_mesh_2d.f90.html#src">SELF_Mesh_2D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_mesh_2d.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_mesh_2df90EfferentGraph" width="641pt" height="135pt"
+ viewBox="0.00 0.00 641.00 135.26" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph" class="graph" transform="scale(0.43 0.43) rotate(0) translate(4 314)">
+<title>sourcefile~~self_mesh_2d.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-314 1503,-314 1503,4 -4,4"/>
+<!-- sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_mesh_2d.f90</title>
+<polygon fill="none" stroke="black" points="1499,-260 1387,-260 1387,-236 1499,-236 1499,-260"/>
+<text text-anchor="middle" x="1443" y="-245.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_Mesh_2D.f90</text>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_mesh_2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_mesh_2d_t.f90.html" xlink:title="SELF_Mesh_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1351,-260 1230,-260 1230,-236 1351,-236 1351,-260"/>
+<text text-anchor="middle" x="1290.5" y="-245.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_mesh_2d.f90&#45;&gt;sourcefile~self_mesh_2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1386.81,-248C1378.58,-248 1370.01,-248 1361.52,-248"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1361.24,-244.5 1351.24,-248 1361.24,-251.5 1361.24,-244.5"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-164 0,-164 0,-140 116,-140 116,-164"/>
+<text text-anchor="middle" x="58" y="-149.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1240.65,-260.02C1225.75,-263.34 1209.27,-266.67 1194,-269 1097.42,-283.74 1072.32,-279.42 975,-288"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-222 881,-222 881,-198 1067,-198 1067,-222"/>
+<text text-anchor="middle" x="974" y="-207.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-208C1124.87,-205.01 1100.42,-203.97 1077.25,-204"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1077.03,-200.5 1067.05,-204.07 1077.08,-207.5 1077.03,-200.5"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-144 499,-144 499,-120 614,-120 614,-144"/>
+<text text-anchor="middle" x="556.5" y="-129.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-170C703.13,-164.27 654.77,-154.49 617.83,-146.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="618.25,-142.79 607.73,-144.01 616.72,-149.62 618.25,-142.79"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-104 181,-104 181,-80 274,-80 274,-104"/>
+<text text-anchor="middle" x="227.5" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1256.96,-235.95C1228.93,-226.23 1187.17,-213.35 1149.5,-208"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-208C1111.1,-202.83 1103.37,-194.34 1067,-189 926.69,-168.41 888.85,-190.27 748.5,-170"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-170C608.3,-145.67 599.7,-62.71 463,-31 409.31,-18.55 392.37,-17.25 339,-31 306.74,-39.31 273.82,-59.27 252.4,-74.11"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="250.37,-71.26 244.24,-79.9 254.42,-76.97 250.37,-71.26"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-226 165.5,-226 165.5,-202 289.5,-202 289.5,-226"/>
+<text text-anchor="middle" x="227.5" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-208C1110.61,-203.12 1103.68,-224.74 1067,-231 927.21,-254.84 890.31,-250 748.5,-250 748.5,-250 748.5,-250 555.5,-250 466.95,-250 365.72,-236.8 299.64,-226.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="300.18,-222.92 289.75,-224.8 299.08,-229.83 300.18,-222.92"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-184 152,-184 152,-160 303,-160 303,-184"/>
+<text text-anchor="middle" x="227.5" y="-169.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-170C594.86,-149.98 416.06,-157.44 313.13,-164.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="312.82,-161.22 303.1,-165.43 313.33,-168.2 312.82,-161.22"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1194,-260 1103,-260 1103,-236 1194,-236 1194,-260"/>
+<text text-anchor="middle" x="1148.5" y="-245.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_mesh_2d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1229.72,-248C1221.27,-248 1212.61,-248 1204.26,-248"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1204.25,-244.5 1194.25,-248 1204.25,-251.5 1204.25,-244.5"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-222 650,-222 650,-198 845,-198 845,-222"/>
+<text text-anchor="middle" x="747.5" y="-207.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M880.72,-210C872.38,-210 863.88,-210 855.43,-210"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="855.16,-206.5 845.16,-210 855.16,-213.5 855.16,-206.5"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M517.94,-119.96C469.06,-104.98 380.7,-80.25 303,-71 236.36,-63.06 214.85,-47.47 152,-71 119.54,-83.15 90.95,-112.32 74.31,-132.13"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="71.53,-130 67.93,-139.97 76.96,-134.42 71.53,-130"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-144 339,-144 339,-120 463,-120 463,-144"/>
+<text text-anchor="middle" x="401" y="-129.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M498.78,-132C490.43,-132 481.74,-132 473.15,-132"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="473.13,-128.5 463.13,-132 473.13,-135.5 473.13,-128.5"/>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="443.5,-64 358.5,-64 358.5,-40 443.5,-40 443.5,-64"/>
+<text text-anchor="middle" x="401" y="-49.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M536.4,-119.9C517.97,-108.45 489.09,-91.11 463,-78 456.28,-74.62 449.02,-71.28 441.93,-68.17"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="443.01,-64.82 432.44,-64.09 440.25,-71.25 443.01,-64.82"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M191.59,-104.06C179.09,-108.42 164.9,-113.39 152,-118 135.38,-123.94 117.12,-130.58 101.23,-136.41"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="99.85,-133.19 91.67,-139.92 102.26,-139.76 99.85,-133.19"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M179.68,-201.89C170.43,-199.19 160.85,-196.18 152,-193 132.1,-185.85 110.46,-176.41 93.06,-168.39"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="94.42,-165.16 83.87,-164.11 91.46,-171.51 94.42,-165.16"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M151.57,-163.05C143.15,-162.05 134.6,-161.03 126.29,-160.03"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="126.62,-156.55 116.28,-158.84 125.79,-163.5 126.62,-156.55"/>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1111.68,-260.08C1077.15,-270.83 1023.19,-285.25 975,-288"/>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M973,-288C642.31,-306.89 548.66,-338.94 228.5,-254"/>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M1102.63,-238.12C1083.32,-233.86 1060.4,-228.81 1039.34,-224.17"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="1040.01,-220.74 1029.49,-222 1038.5,-227.57 1040.01,-220.74"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-212C321.53,-212.48 304.35,-274.12 228.5,-254"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M226.5,-254C193.47,-245.24 182.16,-251.06 152,-235 121.58,-218.81 93.02,-190.64 75.77,-171.67"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="78.36,-169.31 69.1,-164.16 73.13,-173.96 78.36,-169.31"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M692.37,-197.95C678.34,-194.15 663.41,-189.48 650,-184 627.05,-174.63 602.67,-160.75 584.71,-149.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="586.27,-146.53 575.94,-144.19 582.56,-152.46 586.27,-146.53"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M649.98,-210.71C580.91,-211.18 485.73,-211.76 402,-212"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-212C376.93,-212.14 321.47,-198.22 279.82,-186.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="280.66,-183.36 270.09,-184.06 278.79,-190.11 280.66,-183.36"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M338.64,-135.6C278.79,-139.11 187.99,-144.43 126.21,-148.06"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="125.96,-144.57 116.18,-148.65 126.37,-151.55 125.96,-144.57"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M348.54,-120C328.19,-115.25 304.76,-109.79 284.03,-104.95"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="284.63,-101.5 274.09,-102.63 283.04,-108.31 284.63,-101.5"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M383.99,-144.1C365.39,-157.66 333.36,-179.51 303,-193 298.36,-195.06 293.47,-196.97 288.5,-198.73"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="287.27,-195.45 278.89,-201.93 289.48,-202.09 287.27,-195.45"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M348.54,-144C330.14,-148.29 309.22,-153.17 290.06,-157.64"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="289.16,-154.26 280.22,-159.94 290.75,-161.08 289.16,-154.26"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="291,-24 164,-24 164,0 291,0 291,-24"/>
+<text text-anchor="middle" x="227.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M358.48,-42.32C337.93,-37.52 312.71,-31.64 289.97,-26.34"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="290.6,-22.89 280.06,-24.03 289.01,-29.71 290.6,-22.89"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_mesh_2df90EfferentGraph = svgPanZoom('#sourcefileself_mesh_2df90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_mesh_2d.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefileself_mesh_2df90AfferentGraph" width="641pt" height="192pt"
+ viewBox="0.00 0.00 641.00 191.60" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph" class="graph" transform="scale(0.32 0.32) rotate(0) translate(4 597.12)">
+<title>sourcefile~~self_mesh_2d.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-597.12 2007,-597.12 2007,4 -4,4"/>
+<!-- sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node1" class="node">
+<title>sourcefile~self_mesh_2d.f90</title>
+<polygon fill="none" stroke="black" points="112,-504.61 0,-504.61 0,-480.61 112,-480.61 112,-504.61"/>
+<text text-anchor="middle" x="56" y="-490.21" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_Mesh_2D.f90</text>
+</g>
+<!-- sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node2" class="node">
+<title>sourcefile~self_geometry_2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/self_geometry_2d.f90.html" xlink:title="SELF_Geometry_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="285,-504.61 148,-504.61 148,-480.61 285,-480.61 285,-504.61"/>
+<text text-anchor="middle" x="216.5" y="-490.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge1" class="edge">
+<title>sourcefile~self_geometry_2d.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M147.82,-492.61C139.33,-492.61 130.65,-492.61 122.2,-492.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="122.02,-489.11 112.02,-492.61 122.02,-496.11 122.02,-489.11"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node3" class="node">
+<title>sourcefile~self_dgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/self_dgmodel2d_t.f90.html" xlink:title="SELF_DGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="897.5,-302.61 761.5,-302.61 761.5,-278.61 897.5,-278.61 897.5,-302.61"/>
+<text text-anchor="middle" x="829.5" y="-288.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge2" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M761.1,-289.05C717.19,-288.42 658.67,-288.3 607,-290.61"/>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge8" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M761.48,-298.87C747.33,-303.05 733.28,-309.3 722,-318.61 693.49,-342.15 714.76,-370.37 686,-393.61 657.91,-416.31 641.71,-402.66 607,-412.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M605,-412.61C570.29,-422.56 559.87,-419.09 526,-431.61 470.07,-452.28 465.84,-486.75 406.5,-492.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M404.5,-492.61C368.78,-496.14 329.03,-496.62 295.4,-496.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="295.24,-492.52 285.17,-495.81 295.09,-499.52 295.24,-492.52"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node10" class="node">
+<title>sourcefile~self_mappedscalar_2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/self_mappedscalar_2d.f90.html" xlink:title="SELF_MappedScalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="686,-464.61 526,-464.61 526,-440.61 686,-440.61 686,-464.61"/>
+<text text-anchor="middle" x="606" y="-450.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge23" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M796.7,-302.73C773.55,-312.88 742.75,-329.3 722,-351.61 696.82,-378.69 713.78,-402.21 686,-426.61 681.86,-430.24 677.21,-433.37 672.28,-436.06"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="670.65,-432.96 663.16,-440.45 673.69,-439.26 670.65,-432.96"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node13" class="node">
+<title>sourcefile~self_mappedvector_2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node13"><a xlink:href=".././sourcefile/self_mappedvector_2d.f90.html" xlink:title="SELF_MappedVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="686,-384.61 526,-384.61 526,-360.61 686,-360.61 686,-384.61"/>
+<text text-anchor="middle" x="606" y="-370.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge34" class="edge">
+<title>sourcefile~self_dgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedvector_2d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M762.38,-302.67C748.56,-306.63 734.42,-311.83 722,-318.61 702.95,-329.01 705.04,-341.19 686,-351.61 682.36,-353.6 678.52,-355.41 674.57,-357.06"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="673.32,-353.79 665.21,-360.61 675.81,-360.34 673.32,-353.79"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node4" class="node">
+<title>sourcefile~self_mappedvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/self_mappedvector_2d_t.f90.html" xlink:title="SELF_MappedVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="490,-342.61 321,-342.61 321,-318.61 490,-318.61 490,-342.61"/>
+<text text-anchor="middle" x="405.5" y="-328.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge3" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M360.67,-318.49C309.63,-304.81 230.59,-285.12 217.5,-290.61"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge9" class="edge">
+<title>sourcefile~self_mappedvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M390.44,-342.79C358.01,-370.88 277.76,-440.4 239.06,-473.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="236.73,-471.32 231.46,-480.51 241.31,-476.61 236.73,-471.32"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node5" class="node">
+<title>sourcefile~self_ecadvection2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/self_ecadvection2d.f90~2.html" xlink:title="SELF_ECAdvection2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2003,-552.61 1858,-552.61 1858,-528.61 2003,-528.61 2003,-552.61"/>
+<text text-anchor="middle" x="1930.5" y="-538.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge5" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M828.5,-576.61C558.77,-545.15 484.51,-626.06 217.5,-576.61"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge11" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1744,-558.61C1338,-566.43 1234.83,-614.27 830.5,-576.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M828.5,-576.61C780.31,-570.94 763.72,-577.39 722,-552.61 701.15,-540.23 707.74,-522.35 686,-511.61 574.38,-456.44 530.41,-480.37 406.5,-492.61"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node19" class="node">
+<title>sourcefile~self_ecdgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node19"><a xlink:href=".././sourcefile/self_ecdgmodel2d_t.f90.html" xlink:title="SELF_ECDGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1388,-390.61 1237,-390.61 1237,-366.61 1388,-366.61 1388,-390.61"/>
+<text text-anchor="middle" x="1312.5" y="-376.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge44" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M1857.76,-550.92C1823.94,-554.95 1782.97,-558.61 1746,-558.61"/>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M1744,-558.61C1607.21,-558.61 1568.77,-541.95 1446,-481.61 1401.36,-459.67 1357.34,-421.19 1332.96,-397.99"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="1335.1,-395.18 1325.47,-390.75 1330.23,-400.21 1335.1,-395.18"/>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node37" class="node">
+<title>sourcefile~self_ecadvection2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node37"><a xlink:href=".././sourcefile/self_ecadvection2d_t.f90.html" xlink:title="SELF_ECAdvection2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1822,-474.61 1668,-474.61 1668,-450.61 1822,-450.61 1822,-474.61"/>
+<text text-anchor="middle" x="1745" y="-460.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge55" class="edge">
+<title>sourcefile~self_ecadvection2d.f90~2&#45;&gt;sourcefile~self_ecadvection2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1901.23,-528.59C1869.71,-515.19 1818.59,-493.46 1783.69,-478.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1784.87,-475.33 1774.3,-474.64 1782.14,-481.77 1784.87,-475.33"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node6" class="node">
+<title>sourcefile~self_mappedscalar_2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/self_mappedscalar_2d_t.f90.html" xlink:title="SELF_MappedScalar_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="490,-544.61 321,-544.61 321,-520.61 490,-520.61 490,-544.61"/>
+<text text-anchor="middle" x="405.5" y="-530.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge4" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M368.8,-544.63C323.04,-559.41 246.19,-581.92 217.5,-576.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M215.5,-576.61C163.05,-566.89 109.83,-532.58 80.35,-510.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="82.09,-507.86 71.99,-504.66 77.89,-513.46 82.09,-507.86"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge10" class="edge">
+<title>sourcefile~self_mappedscalar_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M348.39,-520.61C328.05,-516.26 304.89,-511.3 283.76,-506.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="284.4,-503.34 273.89,-504.67 282.94,-510.19 284.4,-503.34"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node7" class="node">
+<title>sourcefile~self_dgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/self_dgmodel2d.f90~2.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1139.5,-262.61 1012.5,-262.61 1012.5,-238.61 1139.5,-238.61 1139.5,-262.61"/>
+<text text-anchor="middle" x="1076" y="-248.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge6" class="edge">
+<title>sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1012.49,-242.55C962.5,-238.02 891.02,-235.86 830.5,-250.61"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge13" class="edge">
+<title>sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1051.69,-262.83C1024.73,-276.5 978.72,-298.45 937,-311.61 890.99,-326.12 877.19,-320.47 830.5,-332.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M828.5,-332.61C781.97,-344.7 763.74,-327.75 722,-351.61 700.66,-363.81 706.97,-380.78 686,-393.61 655.2,-412.46 641.73,-402.7 607,-412.61"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge18" class="edge">
+<title>sourcefile~self_dgmodel2d.f90~2&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1012.35,-260.86C980.55,-266.06 941.63,-272.43 907.97,-277.94"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="907,-274.55 897.7,-279.62 908.13,-281.45 907,-274.55"/>
+</g>
+<!-- sourcefile~self_esatmo2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node8" class="node">
+<title>sourcefile~self_esatmo2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/self_esatmo2d.f90~2.html" xlink:title="SELF_ESAtmo2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1990.5,-390.61 1870.5,-390.61 1870.5,-366.61 1990.5,-366.61 1990.5,-390.61"/>
+<text text-anchor="middle" x="1930.5" y="-376.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge7" class="edge">
+<title>sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_mesh_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1870.5,-389.18C1833.51,-393.28 1785.53,-393.87 1746,-378.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1744,-378.61C1589.67,-319.01 1765.43,-121.43 1632,-23.61 1565.33,25.27 1528.33,-16.18 1446,-23.61 1342.07,-32.98 1314.24,-33.36 1215,-65.61 1169.91,-80.26 876.56,-239.39 830.5,-250.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M828.5,-250.61C781.44,-260.44 769.32,-261.07 722,-269.61 670.87,-278.84 658.9,-288.29 607,-290.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M605,-290.61C432.95,-298.29 376.33,-224.02 217.5,-290.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M215.5,-290.61C135.28,-326.49 84.62,-426.9 65.56,-471.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="62.31,-469.87 61.68,-480.44 68.77,-472.57 62.31,-469.87"/>
+</g>
+<!-- sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge16" class="edge">
+<title>sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1744,-378.61C1659.42,-345.95 1630.57,-382.7 1540,-378.61"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1538,-378.61C1480.41,-376.01 1467.34,-363.53 1410,-357.61 1281.78,-344.37 955.25,-300.19 830.5,-332.61"/>
+</g>
+<!-- sourcefile~self_esatmo2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node17" class="node">
+<title>sourcefile~self_esatmo2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node17"><a xlink:href=".././sourcefile/self_esatmo2d_t.f90.html" xlink:title="SELF_ESAtmo2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1809.5,-431.61 1680.5,-431.61 1680.5,-407.61 1809.5,-407.61 1809.5,-431.61"/>
+<text text-anchor="middle" x="1745" y="-417.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_esatmo2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge38" class="edge">
+<title>sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_esatmo2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1875.44,-390.69C1854.9,-395.28 1831.32,-400.55 1809.96,-405.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1808.99,-401.95 1799.99,-407.54 1810.52,-408.78 1808.99,-401.95"/>
+</g>
+<!-- sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge43" class="edge">
+<title>sourcefile~self_esatmo2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M1538,-378.61C1491.87,-376.53 1440.35,-376.37 1398.31,-376.81"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="1398.07,-373.31 1388.12,-376.92 1398.16,-380.31 1398.07,-373.31"/>
+</g>
+<!-- sourcefile~self_points.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node9" class="node">
+<title>sourcefile~self_points.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/self_points.f90~2.html" xlink:title="SELF_Points.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1123.5,-510.61 1028.5,-510.61 1028.5,-486.61 1123.5,-486.61 1123.5,-510.61"/>
+<text text-anchor="middle" x="1076" y="-496.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Points.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_points.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge12" class="edge">
+<title>sourcefile~self_points.f90~2&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1028.27,-495.91C1009.96,-493.14 989.44,-487.8 973,-477.61 950.93,-463.93 960,-443.65 937,-431.61 871.92,-397.55 677.61,-392.36 607,-412.61"/>
+</g>
+<!-- sourcefile~self_points.f90~2&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge25" class="edge">
+<title>sourcefile~self_points.f90~2&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1028.24,-509.7C968.33,-523.32 867.75,-543.98 830.5,-538.61"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M828.5,-538.61C760.48,-528.8 750.36,-502.7 686,-478.61 676.16,-474.93 665.54,-471.24 655.36,-467.84"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="656.38,-464.49 645.79,-464.69 654.19,-471.14 656.38,-464.49"/>
+</g>
+<!-- sourcefile~self_points_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node12" class="node">
+<title>sourcefile~self_points_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node12"><a xlink:href=".././sourcefile/self_points_t.f90.html" xlink:title="SELF_Points_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="881.5,-464.61 777.5,-464.61 777.5,-440.61 881.5,-440.61 881.5,-464.61"/>
+<text text-anchor="middle" x="829.5" y="-450.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Points_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_points.f90~2&#45;&gt;sourcefile~self_points_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge33" class="edge">
+<title>sourcefile~self_points.f90~2&#45;&gt;sourcefile~self_points_t.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1028.44,-489.85C989.57,-482.54 933.88,-472.06 891.46,-464.08"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="892.01,-460.62 881.53,-462.21 890.71,-467.5 892.01,-460.62"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge21" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M581.63,-464.74C558.68,-476.38 522.49,-493.99 490,-506.61 480.13,-510.44 469.45,-514.11 459.12,-517.43"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="457.86,-514.16 449.37,-520.5 459.96,-520.84 457.86,-514.16"/>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node11" class="node">
+<title>sourcefile~self_dgmodel2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node11"><a xlink:href=".././sourcefile/self_dgmodel2d.f90.html" xlink:title="SELF_DGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1139.5,-220.61 1012.5,-220.61 1012.5,-196.61 1139.5,-196.61 1139.5,-220.61"/>
+<text text-anchor="middle" x="1076" y="-206.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge17" class="edge">
+<title>sourcefile~self_dgmodel2d.f90&#45;&gt;sourcefile~self_dgmodel2d_t.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1012.37,-215.68C998.88,-218.77 985.06,-223.22 973,-229.61 953.28,-240.06 956.53,-253.81 937,-264.61 927.85,-269.67 917.72,-273.76 907.46,-277.06"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="906.19,-273.78 897.6,-279.98 908.19,-280.49 906.19,-273.78"/>
+</g>
+<!-- sourcefile~self_points_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge15" class="edge">
+<title>sourcefile~self_points_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M777.3,-440.9C717.04,-427.51 623.11,-407.99 607,-412.61"/>
+</g>
+<!-- sourcefile~self_points_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge26" class="edge">
+<title>sourcefile~self_points_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M777.41,-452.61C753.28,-452.61 723.78,-452.61 696.14,-452.61"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="696.06,-449.11 686.06,-452.61 696.06,-456.11 696.06,-449.11"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge19" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90&#45;&gt;sourcefile~self_mappedvector_2d_t.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M548.12,-360.57C524.76,-355.63 497.54,-349.87 473.25,-344.73"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="473.9,-341.29 463.39,-342.65 472.45,-348.14 473.9,-341.29"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node14" class="node">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node14"><a xlink:href=".././sourcefile/self_mappedtwopointvector_2d_t.f90.html" xlink:title="SELF_MappedTwoPointVector_2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="937,-384.61 722,-384.61 722,-360.61 937,-360.61 937,-384.61"/>
+<text text-anchor="middle" x="829.5" y="-370.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge14" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d_t.f90&#45;&gt;sourcefile~self_geometry_2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M738.64,-384.63C698,-391.14 649.63,-400.38 607,-412.61"/>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node15" class="node">
+<title>sourcefile~self_mappedvector_2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node15"><a xlink:href=".././sourcefile/self_mappedvector_2d.f90~2.html" xlink:title="SELF_MappedVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="686,-342.61 526,-342.61 526,-318.61 686,-318.61 686,-342.61"/>
+<text text-anchor="middle" x="606" y="-328.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_2d.f90~2&#45;&gt;sourcefile~self_mappedvector_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge20" class="edge">
+<title>sourcefile~self_mappedvector_2d.f90~2&#45;&gt;sourcefile~self_mappedvector_2d_t.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M525.98,-330.61C517.51,-330.61 508.83,-330.61 500.21,-330.61"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="500.13,-327.11 490.13,-330.61 500.13,-334.11 500.13,-327.11"/>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node16" class="node">
+<title>sourcefile~self_mappedscalar_2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node16"><a xlink:href=".././sourcefile/self_mappedscalar_2d.f90~2.html" xlink:title="SELF_MappedScalar_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="686,-544.61 526,-544.61 526,-520.61 686,-520.61 686,-544.61"/>
+<text text-anchor="middle" x="606" y="-530.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_2d.f90~2&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge22" class="edge">
+<title>sourcefile~self_mappedscalar_2d.f90~2&#45;&gt;sourcefile~self_mappedscalar_2d_t.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M525.98,-532.61C517.51,-532.61 508.83,-532.61 500.21,-532.61"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="500.13,-529.11 490.13,-532.61 500.13,-536.11 500.13,-529.11"/>
+</g>
+<!-- sourcefile~self_esatmo2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge24" class="edge">
+<title>sourcefile~self_esatmo2d_t.f90&#45;&gt;sourcefile~self_mappedscalar_2d.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1688.46,-431.73C1681.3,-434.41 1674.29,-437.67 1668,-441.61 1647.73,-454.31 1653.42,-470.97 1632,-481.61 1472.07,-561.01 1007.23,-564.09 830.5,-538.61"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node26" class="node">
+<title>sourcefile~self_ecdgmodel2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node26"><a xlink:href=".././sourcefile/self_ecdgmodel2d.f90.html" xlink:title="SELF_ECDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1610,-430.61 1468,-430.61 1468,-406.61 1610,-406.61 1610,-430.61"/>
+<text text-anchor="middle" x="1539" y="-416.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_esatmo2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge52" class="edge">
+<title>sourcefile~self_esatmo2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1680.29,-419.3C1661.38,-419.2 1640.41,-419.1 1620.57,-419"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1620.33,-415.5 1610.32,-418.95 1620.3,-422.5 1620.33,-415.5"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node18" class="node">
+<title>sourcefile~self_advection_diffusion_2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node18"><a xlink:href=".././sourcefile/self_advection_diffusion_2d_t.f90.html" xlink:title="SELF_advection_diffusion_2d_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1410,-98.61 1215,-98.61 1215,-74.61 1410,-74.61 1410,-98.61"/>
+<text text-anchor="middle" x="1312.5" y="-84.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_2d_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge27" class="edge">
+<title>sourcefile~self_advection_diffusion_2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1288.16,-98.75C1246.02,-120.68 1157.18,-166.9 1109.26,-191.83"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1107.5,-188.79 1100.25,-196.51 1110.73,-195 1107.5,-188.79"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge28" class="edge">
+<title>sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1283.22,-366.57C1261.97,-356.28 1233.46,-339.63 1215,-317.61 1187.85,-285.23 1211.52,-256.6 1179,-229.61 1170.48,-222.54 1160.2,-217.65 1149.48,-214.3"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1150.13,-210.85 1139.56,-211.64 1148.31,-217.61 1150.13,-210.85"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node25" class="node">
+<title>sourcefile~self_mappedtwopointvector_2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node25"><a xlink:href=".././sourcefile/self_mappedtwopointvector_2d.f90.html" xlink:title="SELF_MappedTwoPointVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1179,-426.61 973,-426.61 973,-402.61 1179,-402.61 1179,-426.61"/>
+<text text-anchor="middle" x="1076" y="-412.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge51" class="edge">
+<title>sourcefile~self_ecdgmodel2d_t.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d.f90</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1236.98,-390.05C1214.22,-393.54 1188.96,-397.42 1165.37,-401.04"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1164.72,-397.6 1155.37,-402.58 1165.79,-404.52 1164.72,-397.6"/>
+</g>
+<!-- sourcefile~self_points.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node20" class="node">
+<title>sourcefile~self_points.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node20"><a xlink:href=".././sourcefile/self_points.f90.html" xlink:title="SELF_Points.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1123.5,-468.61 1028.5,-468.61 1028.5,-444.61 1123.5,-444.61 1123.5,-468.61"/>
+<text text-anchor="middle" x="1076" y="-454.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Points.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_points.f90&#45;&gt;sourcefile~self_points_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge32" class="edge">
+<title>sourcefile~self_points.f90&#45;&gt;sourcefile~self_points_t.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1028.44,-455.85C989.65,-455.21 934.11,-454.3 891.73,-453.61"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="891.59,-450.11 881.53,-453.44 891.47,-457.11 891.59,-450.11"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node21" class="node">
+<title>sourcefile~self_mappedtwopointvector_2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node21"><a xlink:href=".././sourcefile/self_mappedtwopointvector_2d.f90~2.html" xlink:title="SELF_MappedTwoPointVector_2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1179,-384.61 973,-384.61 973,-360.61 1179,-360.61 1179,-384.61"/>
+<text text-anchor="middle" x="1076" y="-370.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d.f90~2&#45;&gt;sourcefile~self_mappedtwopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge36" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d.f90~2&#45;&gt;sourcefile~self_mappedtwopointvector_2d_t.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M972.73,-372.61C964.26,-372.61 955.67,-372.61 947.11,-372.61"/>
+<polygon fill="#003fff" stroke="#003fff" points="947.09,-369.11 937.09,-372.61 947.09,-376.11 947.09,-369.11"/>
+</g>
+<!-- sourcefile~self_nulldgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node22" class="node">
+<title>sourcefile~self_nulldgmodel2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node22"><a xlink:href=".././sourcefile/self_nulldgmodel2d_t.f90.html" xlink:title="SELF_NullDGModel2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1391,-308.61 1234,-308.61 1234,-284.61 1391,-284.61 1391,-308.61"/>
+<text text-anchor="middle" x="1312.5" y="-294.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge30" class="edge">
+<title>sourcefile~self_nulldgmodel2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1291.59,-284.42C1266.29,-269.44 1220.86,-244.21 1179,-229.61 1169.65,-226.35 1159.64,-223.52 1149.67,-221.09"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1150.28,-217.64 1139.74,-218.8 1148.7,-224.46 1150.28,-217.64"/>
+</g>
+<!-- sourcefile~self_lineareuler2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node23" class="node">
+<title>sourcefile~self_lineareuler2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node23"><a xlink:href=".././sourcefile/self_lineareuler2d_t.f90.html" xlink:title="SELF_LinearEuler2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1387,-224.61 1238,-224.61 1238,-200.61 1387,-200.61 1387,-224.61"/>
+<text text-anchor="middle" x="1312.5" y="-210.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge29" class="edge">
+<title>sourcefile~self_lineareuler2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1237.95,-211.35C1209.83,-210.87 1177.81,-210.33 1149.77,-209.85"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1149.69,-206.35 1139.64,-209.68 1149.57,-213.35 1149.69,-206.35"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node24" class="node">
+<title>sourcefile~self_linearshallowwater2d_t.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node24"><a xlink:href=".././sourcefile/self_linearshallowwater2d_t.f90.html" xlink:title="SELF_LinearShallowWater2D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1409.5,-182.61 1215.5,-182.61 1215.5,-158.61 1409.5,-158.61 1409.5,-182.61"/>
+<text text-anchor="middle" x="1312.5" y="-168.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge31" class="edge">
+<title>sourcefile~self_linearshallowwater2d_t.f90&#45;&gt;sourcefile~self_dgmodel2d.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1237.3,-182.63C1209.34,-187.16 1177.58,-192.31 1149.75,-196.82"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1149,-193.4 1139.69,-198.45 1150.12,-200.31 1149,-193.4"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_2d.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge35" class="edge">
+<title>sourcefile~self_mappedtwopointvector_2d.f90&#45;&gt;sourcefile~self_mappedtwopointvector_2d_t.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1004.94,-402.57C975.52,-397.52 941.15,-391.62 910.73,-386.39"/>
+<polygon fill="#003fff" stroke="#003fff" points="911.02,-382.89 900.57,-384.65 909.84,-389.79 911.02,-382.89"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge41" class="edge">
+<title>sourcefile~self_ecdgmodel2d.f90&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M1470.64,-406.61C1445.67,-402.16 1417.15,-397.08 1391.33,-392.48"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="1391.66,-388.98 1381.2,-390.67 1390.43,-395.87 1391.66,-388.98"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node27" class="node">
+<title>sourcefile~self_advection_diffusion_2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node27"><a xlink:href=".././sourcefile/self_advection_diffusion_2d.f90.html" xlink:title="SELF_advection_diffusion_2d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1632,-98.61 1446,-98.61 1446,-74.61 1632,-74.61 1632,-98.61"/>
+<text text-anchor="middle" x="1539" y="-84.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_2d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge39" class="edge">
+<title>sourcefile~self_advection_diffusion_2d.f90&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1445.72,-86.61C1437.38,-86.61 1428.88,-86.61 1420.43,-86.61"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="1420.16,-83.11 1410.16,-86.61 1420.16,-90.11 1420.16,-83.11"/>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node28" class="node">
+<title>sourcefile~self_nulldgmodel2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node28"><a xlink:href=".././sourcefile/self_nulldgmodel2d.f90.html" xlink:title="SELF_NullDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1613,-350.61 1465,-350.61 1465,-326.61 1613,-326.61 1613,-350.61"/>
+<text text-anchor="middle" x="1539" y="-336.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge45" class="edge">
+<title>sourcefile~self_nulldgmodel2d.f90&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1473.67,-326.57C1446.9,-321.56 1415.65,-315.72 1387.89,-310.53"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="1388.32,-307.04 1377.84,-308.65 1387.03,-313.93 1388.32,-307.04"/>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node29" class="node">
+<title>sourcefile~self_lineareuler2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node29"><a xlink:href=".././sourcefile/self_lineareuler2d.f90.html" xlink:title="SELF_LinearEuler2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1609,-266.61 1469,-266.61 1469,-242.61 1609,-242.61 1609,-266.61"/>
+<text text-anchor="middle" x="1539" y="-252.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90&#45;&gt;sourcefile~self_lineareuler2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge47" class="edge">
+<title>sourcefile~self_lineareuler2d.f90&#45;&gt;sourcefile~self_lineareuler2d_t.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1473.67,-242.57C1446.9,-237.56 1415.65,-231.72 1387.89,-226.53"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1388.32,-223.04 1377.84,-224.65 1387.03,-229.93 1388.32,-223.04"/>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node30" class="node">
+<title>sourcefile~self_lineareuler2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node30"><a xlink:href=".././sourcefile/self_lineareuler2d.f90~2.html" xlink:title="SELF_LinearEuler2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1609,-224.61 1469,-224.61 1469,-200.61 1609,-200.61 1609,-224.61"/>
+<text text-anchor="middle" x="1539" y="-210.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearEuler2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lineareuler2d.f90~2&#45;&gt;sourcefile~self_lineareuler2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge48" class="edge">
+<title>sourcefile~self_lineareuler2d.f90~2&#45;&gt;sourcefile~self_lineareuler2d_t.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1468.81,-212.61C1446.25,-212.61 1420.96,-212.61 1397.44,-212.61"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1397.13,-209.11 1387.13,-212.61 1397.13,-216.11 1397.13,-209.11"/>
+</g>
+<!-- sourcefile~self_esatmo2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node31" class="node">
+<title>sourcefile~self_esatmo2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node31"><a xlink:href=".././sourcefile/self_esatmo2d.f90.html" xlink:title="SELF_ESAtmo2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1990.5,-432.61 1870.5,-432.61 1870.5,-408.61 1990.5,-408.61 1990.5,-432.61"/>
+<text text-anchor="middle" x="1930.5" y="-418.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_esatmo2d.f90&#45;&gt;sourcefile~self_esatmo2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge37" class="edge">
+<title>sourcefile~self_esatmo2d.f90&#45;&gt;sourcefile~self_esatmo2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1870.43,-420.29C1854.38,-420.2 1836.79,-420.1 1820.03,-420.01"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1819.73,-416.51 1809.71,-419.96 1819.7,-423.51 1819.73,-416.51"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node32" class="node">
+<title>sourcefile~self_advection_diffusion_2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node32"><a xlink:href=".././sourcefile/self_advection_diffusion_2d.f90~2.html" xlink:title="SELF_advection_diffusion_2d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1632,-56.61 1446,-56.61 1446,-32.61 1632,-32.61 1632,-56.61"/>
+<text text-anchor="middle" x="1539" y="-42.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_2d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_2d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge40" class="edge">
+<title>sourcefile~self_advection_diffusion_2d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_2d_t.f90</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M1473.67,-56.64C1446.9,-61.65 1415.65,-67.5 1387.89,-72.69"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="1387.03,-69.29 1377.84,-74.57 1388.32,-76.17 1387.03,-69.29"/>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node33" class="node">
+<title>sourcefile~self_ecdgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node33"><a xlink:href=".././sourcefile/self_ecdgmodel2d.f90~2.html" xlink:title="SELF_ECDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1610,-472.61 1468,-472.61 1468,-448.61 1610,-448.61 1610,-472.61"/>
+<text text-anchor="middle" x="1539" y="-458.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge42" class="edge">
+<title>sourcefile~self_ecdgmodel2d.f90~2&#45;&gt;sourcefile~self_ecdgmodel2d_t.f90</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M1477.13,-448.59C1466.64,-445.99 1455.93,-442.99 1446,-439.61 1410.34,-427.48 1371.39,-408.85 1345.01,-395.37"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="1346.38,-392.14 1335.89,-390.66 1343.17,-398.36 1346.38,-392.14"/>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node34" class="node">
+<title>sourcefile~self_nulldgmodel2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node34"><a xlink:href=".././sourcefile/self_nulldgmodel2d.f90~2.html" xlink:title="SELF_NullDGModel2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1613,-308.61 1465,-308.61 1465,-284.61 1613,-284.61 1613,-308.61"/>
+<text text-anchor="middle" x="1539" y="-294.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel2d.f90~2&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge46" class="edge">
+<title>sourcefile~self_nulldgmodel2d.f90~2&#45;&gt;sourcefile~self_nulldgmodel2d_t.f90</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1464.8,-296.61C1444.57,-296.61 1422.4,-296.61 1401.42,-296.61"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="1401.24,-293.11 1391.24,-296.61 1401.24,-300.11 1401.24,-293.11"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node35" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node35"><a xlink:href=".././sourcefile/self_linearshallowwater2d.f90.html" xlink:title="SELF_LinearShallowWater2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1631.5,-182.61 1446.5,-182.61 1446.5,-158.61 1631.5,-158.61 1631.5,-182.61"/>
+<text text-anchor="middle" x="1539" y="-168.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge49" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1446.36,-170.61C1437.55,-170.61 1428.57,-170.61 1419.64,-170.61"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1419.59,-167.11 1409.59,-170.61 1419.59,-174.11 1419.59,-167.11"/>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node36" class="node">
+<title>sourcefile~self_linearshallowwater2d.f90~2</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node36"><a xlink:href=".././sourcefile/self_linearshallowwater2d.f90~2.html" xlink:title="SELF_LinearShallowWater2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1631.5,-140.61 1446.5,-140.61 1446.5,-116.61 1631.5,-116.61 1631.5,-140.61"/>
+<text text-anchor="middle" x="1539" y="-126.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinearShallowWater2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge50" class="edge">
+<title>sourcefile~self_linearshallowwater2d.f90~2&#45;&gt;sourcefile~self_linearshallowwater2d_t.f90</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1473.67,-140.64C1446.9,-145.65 1415.65,-151.5 1387.89,-156.69"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="1387.03,-153.29 1377.84,-158.57 1388.32,-160.17 1387.03,-153.29"/>
+</g>
+<!-- sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge53" class="edge">
+<title>sourcefile~self_ecadvection2d_t.f90&#45;&gt;sourcefile~self_ecdgmodel2d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1688.26,-450.59C1662.73,-445.08 1632.31,-438.52 1605.68,-432.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1606.19,-429.3 1595.68,-430.62 1604.71,-436.15 1606.19,-429.3"/>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_node38" class="node">
+<title>sourcefile~self_ecadvection2d.f90</title>
+<g id="a_sourcefile~~self_mesh_2d.f90~~AfferentGraph_node38"><a xlink:href=".././sourcefile/self_ecadvection2d.f90.html" xlink:title="SELF_ECAdvection2D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2003,-474.61 1858,-474.61 1858,-450.61 2003,-450.61 2003,-474.61"/>
+<text text-anchor="middle" x="1930.5" y="-460.21" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection2d.f90&#45;&gt;sourcefile~self_ecadvection2d_t.f90 -->
+<g id="sourcefile~~self_mesh_2d.f90~~AfferentGraph_edge54" class="edge">
+<title>sourcefile~self_ecadvection2d.f90&#45;&gt;sourcefile~self_ecadvection2d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1857.77,-462.61C1849.48,-462.61 1840.96,-462.61 1832.5,-462.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1832.23,-459.11 1822.23,-462.61 1832.23,-466.11 1832.23,-459.11"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_mesh_2df90AfferentGraph = svgPanZoom('#sourcefileself_mesh_2df90AfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mesh_2d.html">SELF_Mesh_2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_mesh_2d.f90.html#src">SELF_Mesh_2D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_Mesh_2D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Mesh_2D_t</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">implicit none</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">Mesh2D_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Mesh2D</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">  </span><span class="k">endtype </span><span class="n">Mesh2D</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="k">endmodule </span><span class="n">SELF_Mesh_2D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-05-16 16:28            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
