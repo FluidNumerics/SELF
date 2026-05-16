@@ -60,17 +60,17 @@ module SELF_Points_t
       !! matches.
     real(prec),allocatable :: x(:,:)
       !! Physical coordinates, shape (1:nPoints, 1:nDim). User input.
-    integer,allocatable :: elements(:)
+    integer,pointer :: elements(:)
       !! Element id (rank-local) containing each point; 0 = not found.
-    real(prec),allocatable :: coordinates(:,:)
+    real(prec),pointer :: coordinates(:,:)
       !! Reference coordinates (s,t[,u]) in [-1,1]^nDim, shape (1:nPoints, 1:nDim).
       !! Defined only where elements(p) > 0.
-    real(prec),allocatable :: lS_cache(:,:)
+    real(prec),pointer :: lS_cache(:,:)
       !! Lagrange basis at coordinates(p,1), shape (0:nCached, 1:nPoints).
       !! Filled by LocatePoints for points with elements(p) > 0.
-    real(prec),allocatable :: lT_cache(:,:)
+    real(prec),pointer :: lT_cache(:,:)
       !! Lagrange basis at coordinates(p,2), shape (0:nCached, 1:nPoints).
-    real(prec),allocatable :: lU_cache(:,:)
+    real(prec),pointer :: lU_cache(:,:)
       !! Lagrange basis at coordinates(p,3), shape (0:nCached, 1:nPoints).
       !! Allocated only for nDim = 3.
 
