@@ -78,7 +78,7 @@ contains
     real(prec) :: xIn(nPoints,2)
     real(prec) :: integral,wi,wj,jLoc,maxOther,expected,nodeErr
     real(prec) :: f_atNode
-    integer :: p,i,j,iEl,iElP,iStar,jStar,k
+    integer :: p,i,j,iEl,iElP,iStar,jStar
 
     r = 0
 
@@ -104,7 +104,7 @@ contains
       xIn(p,1) = 0.07_prec+0.86_prec*real(modulo(7*p+1,nPoints),prec)/real(nPoints,prec)
       xIn(p,2) = 0.07_prec+0.86_prec*real(modulo(11*p+3,nPoints),prec)/real(nPoints,prec)
     enddo
-    iStar = controlDegree/2+1  ! a strictly interior node
+    iStar = controlDegree/2+1 ! a strictly interior node
     jStar = controlDegree/2+1
     xIn(nPoints,1) = geometry%x%interior(iStar,jStar,1,1,1)
     xIn(nPoints,2) = geometry%x%interior(iStar,jStar,1,1,2)
@@ -201,9 +201,6 @@ contains
     call geometry%Free()
     call mesh%Free()
     call interp%Free()
-
-    ! Silence the unused-variable warning for k under some compilers.
-    k = 0
 
   endfunction points_dirac_delta_2d
 endprogram test

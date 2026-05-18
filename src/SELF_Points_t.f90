@@ -673,7 +673,7 @@ contains
     type(SEMQuad),intent(in) :: geometry
     class(MappedScalar2D_t),intent(inout) :: scalar
     ! Local
-    integer :: p,iEl,i,j,m,n,N
+    integer :: p,iEl,i,j,mm,nn,N
     real(prec) :: J0,wi,wj
     real(prec),allocatable :: lS(:),lT(:)
     logical :: useCache
@@ -715,9 +715,9 @@ contains
       ! Polynomial interpolation of the nodal Jacobian determinant at the
       ! source's reference coordinates.
       J0 = 0.0_prec
-      do n = 1,N+1
-        do m = 1,N+1
-          J0 = J0+lS(m-1)*lT(n-1)*geometry%J%interior(m,n,iEl,1)
+      do nn = 1,N+1
+        do mm = 1,N+1
+          J0 = J0+lS(mm-1)*lT(nn-1)*geometry%J%interior(mm,nn,iEl,1)
         enddo
       enddo
       if(abs(J0) < tiny(1.0_prec)*1.0e3_prec) then
@@ -758,7 +758,7 @@ contains
     type(SEMHex),intent(in) :: geometry
     class(MappedScalar3D_t),intent(inout) :: scalar
     ! Local
-    integer :: p,iEl,i,j,k,m,n,l,N
+    integer :: p,iEl,i,j,k,mm,nn,ll,N
     real(prec) :: J0,wi,wj,wk
     real(prec),allocatable :: lS(:),lT(:),lU(:)
     logical :: useCache
@@ -799,10 +799,10 @@ contains
 
       ! Polynomial interpolation of the nodal Jacobian determinant.
       J0 = 0.0_prec
-      do l = 1,N+1
-        do n = 1,N+1
-          do m = 1,N+1
-            J0 = J0+lS(m-1)*lT(n-1)*lU(l-1)*geometry%J%interior(m,n,l,iEl,1)
+      do ll = 1,N+1
+        do nn = 1,N+1
+          do mm = 1,N+1
+            J0 = J0+lS(mm-1)*lT(nn-1)*lU(ll-1)*geometry%J%interior(mm,nn,ll,iEl,1)
           enddo
         enddo
       enddo
