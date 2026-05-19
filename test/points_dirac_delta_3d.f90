@@ -188,6 +188,56 @@ contains
 
     print*,"DiracDelta 3D: conservation, isolation, and node-coincident checks passed"
 
+#ifndef ENABLE_GPU
+    ! --- useCache=False fallback (host build only) ---------------------------
+    block
+      integer,parameter :: altDegree = controlDegree+2
+      type(Lagrange),target :: interp2
+      type(SEMHex),target :: geometry2
+      type(MappedScalar3D) :: f2
+      real(prec) :: integral2
+
+      call interp2%Init(N=altDegree, &
+                        controlNodeType=GAUSS_LOBATTO, &
+                        M=targetDegree, &
+                        targetNodeType=UNIFORM)
+      call geometry2%Init(interp2,mesh%nElem)
+      call geometry2%GenerateFromMesh(mesh)
+      call f2%Init(interp2,nPoints,mesh%nelem)
+      call f2%AssociateGeometry(geometry2)
+
+      call pts%DiracDelta(geometry2,f2)
+
+      do p = 1,nPoints
+        iElP = pts%elements(p)
+        if(iElP <= 0) cycle
+        integral2 = 0.0_prec
+        do k = 1,interp2%N+1
+          do j = 1,interp2%N+1
+            do i = 1,interp2%N+1
+              integral2 = integral2+f2%interior(i,j,k,iElP,p) &
+                          *interp2%qWeights(i)*interp2%qWeights(j) &
+                          *interp2%qWeights(k) &
+                          *geometry2%J%interior(i,j,k,iElP,1)
+            enddo
+          enddo
+        enddo
+        if(abs(integral2-1.0_prec) > conservationTol) then
+          print*,"(useCache=F) conservation failure p=",p, &
+            "  integral=",integral2,"  tol=",conservationTol
+          r = 1
+          return
+        endif
+      enddo
+      print*,"DiracDelta 3D: useCache=False conservation check passed"
+
+      call f2%DissociateGeometry()
+      call f2%Free()
+      call geometry2%Free()
+      call interp2%Free()
+    endblock
+#endif
+
     call pts%Free()
     call f%DissociateGeometry()
     call f%Free()
