@@ -88,6 +88,10 @@ module SELF_Points_t
     procedure,public :: EvalScalar_2D_Points_t
     procedure,public :: EvalScalar_3D_Points_t
 
+    generic,public :: DiracDelta => DiracDelta_2D_Points_t,DiracDelta_3D_Points_t
+    procedure,public :: DiracDelta_2D_Points_t
+    procedure,public :: DiracDelta_3D_Points_t
+
   endtype Points_t
 
 contains
@@ -630,6 +634,199 @@ contains
     deallocate(lS,lT,lU)
 
   endsubroutine EvalScalar_3D_Points_t
+
+  subroutine DiracDelta_2D_Points_t(this,geometry,scalar)
+    !! Scatter a discrete Dirac delta of unit strength (S = 1) onto a 2D
+    !! MappedScalar, one variable per stored point. Variable p of scalar
+    !! receives the delta associated with point p.
+    !!
+    !! After the call, for the element iEl = elements(p) > 0:
+    !!
+    !!   scalar%interior(i,j,iEl,p) = l_i(xi_p) * l_j(eta_p)
+    !!                              / ( w_i * w_j * J_0(p) )
+    !!
+    !! and scalar%interior(i,j,iEl',p) = 0 for all iEl' /= iEl. The J_0(p)
+    !! denominator is the polynomial interpolation of geometry%J at the
+    !! source's reference coordinates, J_0 = sum_{m,n} l_m(xi_p) l_n(eta_p)
+    !! * J_{m,n}^{iEl}. For points with elements(p) == 0 (not located on this
+    !! rank), variable p is filled with zeros.
+    !!
+    !! This is the post-mass-matrix form: it can be added directly to dSdt /
+    !! the source term in a DGSEM model without further mass-matrix inversion,
+    !! since SELF's MappedDGDivergence already divides by w_i w_j J_{ij}.
+    !!
+    !! Conservation property (exact for affine elements):
+    !!   sum_{i,j} scalar%interior(i,j,iEl,p) * w_i * w_j * J_{ij}^{iEl} = 1
+    !! For curved elements the equality holds up to LGL aliasing error.
+    !!
+    !! Requirements:
+    !!   - scalar%nVar == this%nPoints
+    !!   - LocatePoints must have been called against the same geometry. The
+    !!     cached basis is reused when this%nCached == scalar%interp%N;
+    !!     otherwise the per-point Lagrange basis is recomputed on the fly.
+    !!
+    !! Points that lie on a shared face/edge receive their contribution in the
+    !! single element selected by LocatePoints — no S/2 face split is
+    !! performed.
+    implicit none
+    class(Points_t),intent(in) :: this
+    type(SEMQuad),intent(in) :: geometry
+    class(MappedScalar2D_t),intent(inout) :: scalar
+    ! Local
+    integer :: p,iEl,i,j,mm,nn,N
+    real(prec) :: J0,wi,wj
+    real(prec),allocatable :: lS(:),lT(:)
+    logical :: useCache
+
+    if(this%nDim /= 2) then
+      print*,"SELF_Points_t::DiracDelta (2D): nDim must be 2"
+      stop 1
+    endif
+    if(scalar%nVar /= this%nPoints) then
+      print*,"SELF_Points_t::DiracDelta (2D): scalar%nVar (",scalar%nVar, &
+        ") must equal nPoints (",this%nPoints,")"
+      stop 1
+    endif
+
+    N = scalar%interp%N
+    useCache = (this%nCached == N) .and. associated(this%lS_cache) .and. &
+               associated(this%lT_cache)
+
+    ! Each variable column is owned exclusively by a single point. Zero the
+    ! field and only fill the containing element for points we located.
+    scalar%interior = 0.0_prec
+
+    if(this%nPoints == 0) return
+
+    allocate(lS(0:N),lT(0:N))
+
+    do p = 1,this%nPoints
+      iEl = this%elements(p)
+      if(iEl <= 0) cycle
+
+      if(useCache) then
+        lS = this%lS_cache(:,p)
+        lT = this%lT_cache(:,p)
+      else
+        lS = scalar%interp%CalculateLagrangePolynomials(this%coordinates(p,1))
+        lT = scalar%interp%CalculateLagrangePolynomials(this%coordinates(p,2))
+      endif
+
+      ! Polynomial interpolation of the nodal Jacobian determinant at the
+      ! source's reference coordinates.
+      J0 = 0.0_prec
+      do nn = 1,N+1
+        do mm = 1,N+1
+          J0 = J0+lS(mm-1)*lT(nn-1)*geometry%J%interior(mm,nn,iEl,1)
+        enddo
+      enddo
+      if(abs(J0) < tiny(1.0_prec)*1.0e3_prec) then
+        print*,"SELF_Points_t::DiracDelta (2D): vanishing Jacobian at point ",p
+        stop 1
+      endif
+
+      ! Rank-1 scatter into the (i,j) tensor product, post-mass-matrix form.
+      do j = 1,N+1
+        wj = scalar%interp%qWeights(j)
+        do i = 1,N+1
+          wi = scalar%interp%qWeights(i)
+          scalar%interior(i,j,iEl,p) = lS(i-1)*lT(j-1)/(wi*wj*J0)
+        enddo
+      enddo
+    enddo
+
+    deallocate(lS,lT)
+
+  endsubroutine DiracDelta_2D_Points_t
+
+  subroutine DiracDelta_3D_Points_t(this,geometry,scalar)
+    !! Scatter a discrete Dirac delta of unit strength (S = 1) onto a 3D
+    !! MappedScalar, one variable per stored point. See DiracDelta_2D_Points_t
+    !! for the full specification; this is the direct 3D analogue.
+    !!
+    !! For the element iEl = elements(p) > 0:
+    !!
+    !!   scalar%interior(i,j,k,iEl,p) = l_i(xi_p) * l_j(eta_p) * l_k(zeta_p)
+    !!                                / ( w_i * w_j * w_k * J_0(p) )
+    !!
+    !! and zero in all other elements. J_0(p) is the polynomial interpolation
+    !! of geometry%J at the source point. Conservation:
+    !!   sum_{i,j,k} scalar%interior(i,j,k,iEl,p) * w_i*w_j*w_k*J_{ijk} = 1
+    !! (exact on affine elements).
+    implicit none
+    class(Points_t),intent(in) :: this
+    type(SEMHex),intent(in) :: geometry
+    class(MappedScalar3D_t),intent(inout) :: scalar
+    ! Local
+    integer :: p,iEl,i,j,k,mm,nn,ll,N
+    real(prec) :: J0,wi,wj,wk
+    real(prec),allocatable :: lS(:),lT(:),lU(:)
+    logical :: useCache
+
+    if(this%nDim /= 3) then
+      print*,"SELF_Points_t::DiracDelta (3D): nDim must be 3"
+      stop 1
+    endif
+    if(scalar%nVar /= this%nPoints) then
+      print*,"SELF_Points_t::DiracDelta (3D): scalar%nVar (",scalar%nVar, &
+        ") must equal nPoints (",this%nPoints,")"
+      stop 1
+    endif
+
+    N = scalar%interp%N
+    useCache = (this%nCached == N) .and. associated(this%lS_cache) .and. &
+               associated(this%lT_cache) .and. associated(this%lU_cache)
+
+    scalar%interior = 0.0_prec
+
+    if(this%nPoints == 0) return
+
+    allocate(lS(0:N),lT(0:N),lU(0:N))
+
+    do p = 1,this%nPoints
+      iEl = this%elements(p)
+      if(iEl <= 0) cycle
+
+      if(useCache) then
+        lS = this%lS_cache(:,p)
+        lT = this%lT_cache(:,p)
+        lU = this%lU_cache(:,p)
+      else
+        lS = scalar%interp%CalculateLagrangePolynomials(this%coordinates(p,1))
+        lT = scalar%interp%CalculateLagrangePolynomials(this%coordinates(p,2))
+        lU = scalar%interp%CalculateLagrangePolynomials(this%coordinates(p,3))
+      endif
+
+      ! Polynomial interpolation of the nodal Jacobian determinant.
+      J0 = 0.0_prec
+      do ll = 1,N+1
+        do nn = 1,N+1
+          do mm = 1,N+1
+            J0 = J0+lS(mm-1)*lT(nn-1)*lU(ll-1)*geometry%J%interior(mm,nn,ll,iEl,1)
+          enddo
+        enddo
+      enddo
+      if(abs(J0) < tiny(1.0_prec)*1.0e3_prec) then
+        print*,"SELF_Points_t::DiracDelta (3D): vanishing Jacobian at point ",p
+        stop 1
+      endif
+
+      do k = 1,N+1
+        wk = scalar%interp%qWeights(k)
+        do j = 1,N+1
+          wj = scalar%interp%qWeights(j)
+          do i = 1,N+1
+            wi = scalar%interp%qWeights(i)
+            scalar%interior(i,j,k,iEl,p) = lS(i-1)*lT(j-1)*lU(k-1)/ &
+                                           (wi*wj*wk*J0)
+          enddo
+        enddo
+      enddo
+    enddo
+
+    deallocate(lS,lT,lU)
+
+  endsubroutine DiracDelta_3D_Points_t
 
   ! ===== Internal helpers =====================================================
 

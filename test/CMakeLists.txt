@@ -161,7 +161,23 @@ add_fortran_tests (
     "points_eval_cache_3d.f90"
     "points_eval_gpu_2d.f90"
     "points_eval_gpu_3d.f90"
+    "points_dirac_delta_2d.f90"
+    "points_dirac_delta_3d.f90"
+    "points_dirac_delta_2d_ndim_mismatch.f90"
+    "points_dirac_delta_3d_ndim_mismatch.f90"
+    "points_dirac_delta_2d_nvar_mismatch.f90"
+    "points_dirac_delta_3d_nvar_mismatch.f90"
     )
+
+# Mark the four DiracDelta guard tests as expected-to-fail: each program
+# intentionally triggers a stop 1 inside the guard, and a non-zero exit
+# code is the success criterion.
+set_tests_properties(
+    points_dirac_delta_2d_ndim_mismatch
+    points_dirac_delta_3d_ndim_mismatch
+    points_dirac_delta_2d_nvar_mismatch
+    points_dirac_delta_3d_nvar_mismatch
+    PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
