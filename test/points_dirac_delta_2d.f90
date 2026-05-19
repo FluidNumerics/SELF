@@ -114,6 +114,7 @@ contains
     call pts%LocatePoints(geometry)
 
     call pts%DiracDelta(geometry,f)
+    call f%UpdateHost()
 
     ! --- (1) + (2) Conservation and other-element zeros ----------------------
     do p = 1,nPoints

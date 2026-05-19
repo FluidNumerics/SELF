@@ -107,6 +107,7 @@ contains
     call pts%LocatePoints(geometry)
 
     call pts%DiracDelta(geometry,f)
+    call f%UpdateHost()
 
     do p = 1,nPoints
       iElP = pts%elements(p)
