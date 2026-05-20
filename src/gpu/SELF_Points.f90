@@ -75,6 +75,12 @@ module SELF_Points
     procedure,private :: EvalScalar_3D_dev_Points
     generic,public :: EvaluateScalar => EvalScalar_2D_dev_Points,EvalScalar_3D_dev_Points
 
+    ! Override the host scatter so device-resident scalars are written by a
+    ! device kernel. The override falls back to the inherited host path for
+    ! non-GPU scalar subtypes.
+    procedure,public :: DiracDelta_2D_Points_t => DiracDelta_2D_Points
+    procedure,public :: DiracDelta_3D_Points_t => DiracDelta_3D_Points
+
   endtype Points
 
   interface
@@ -95,6 +101,26 @@ module SELF_Points
       type(c_ptr),value :: values,elements,lS,lT,lU,scalar
       integer(c_int),value :: N,nPoints,nElem,nVar
     endsubroutine EvalScalarPoints_3D_gpu
+  endinterface
+
+  interface
+    subroutine DiracDelta_2D_gpu(scalar,J,lS,lT,qW,elements,N,nPoints,nElem,nVar) &
+      bind(c,name="DiracDelta_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: scalar,J,lS,lT,qW,elements
+      integer(c_int),value :: N,nPoints,nElem,nVar
+    endsubroutine DiracDelta_2D_gpu
+  endinterface
+
+  interface
+    subroutine DiracDelta_3D_gpu(scalar,J,lS,lT,lU,qW,elements,N,nPoints,nElem,nVar) &
+      bind(c,name="DiracDelta_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: scalar,J,lS,lT,lU,qW,elements
+      integer(c_int),value :: N,nPoints,nElem,nVar
+    endsubroutine DiracDelta_3D_gpu
   endinterface
 
 contains
@@ -296,5 +322,99 @@ contains
                                  scalar%interp%N,this%nPoints,scalar%nElem,scalar%nVar)
 
   endsubroutine EvalScalar_3D_dev_Points
+
+  subroutine DiracDelta_2D_Points(this,geometry,scalar)
+    !! GPU override of DiracDelta_2D_Points_t. When the scalar is a
+    !! device-resident MappedScalar2D, the kernel writes scalar%interior_gpu
+    !! directly (host array left stale; caller may UpdateHost). For non-GPU
+    !! scalar subtypes, defers to the inherited host implementation.
+    !!
+    !! Requires the per-point basis cache to be in sync with scalar%interp%N
+    !! (LocatePoints + UpdateDevice).
+    implicit none
+    class(Points),intent(in) :: this
+    type(SEMQuad),intent(in) :: geometry
+    class(MappedScalar2D_t),intent(inout) :: scalar
+    ! Local
+    integer :: N
+
+    select type(scalar)
+    type is(MappedScalar2D)
+
+      if(this%nDim /= 2) then
+        print*,"SELF_Points (gpu)::DiracDelta (2D): nDim must be 2"
+        stop 1
+      endif
+      if(scalar%nVar /= this%nPoints) then
+        print*,"SELF_Points (gpu)::DiracDelta (2D): scalar%nVar (",scalar%nVar, &
+          ") must equal nPoints (",this%nPoints,")"
+        stop 1
+      endif
+      N = scalar%interp%N
+      if(this%nCached /= N .or. .not. c_associated(this%lS_cache_gpu) .or. &
+         .not. c_associated(this%lT_cache_gpu)) then
+        print*,"SELF_Points (gpu)::DiracDelta (2D): basis cache not synchronized; ", &
+          "call LocatePoints (or UpdateDevice) first. nCached=", &
+          this%nCached," scalar%N=",N
+        stop 1
+      endif
+
+      call DiracDelta_2D_gpu(scalar%interior_gpu, &
+                             geometry%J%interior_gpu, &
+                             this%lS_cache_gpu,this%lT_cache_gpu, &
+                             scalar%interp%qWeights_gpu, &
+                             this%elements_gpu, &
+                             N,this%nPoints,scalar%nElem,scalar%nVar)
+
+    class default
+      ! Host-only scalar subtype: fall back to the inherited base impl.
+      call this%Points_t%DiracDelta_2D_Points_t(geometry,scalar)
+    endselect
+
+  endsubroutine DiracDelta_2D_Points
+
+  subroutine DiracDelta_3D_Points(this,geometry,scalar)
+    !! GPU override of DiracDelta_3D_Points_t. See DiracDelta_2D_Points.
+    implicit none
+    class(Points),intent(in) :: this
+    type(SEMHex),intent(in) :: geometry
+    class(MappedScalar3D_t),intent(inout) :: scalar
+    ! Local
+    integer :: N
+
+    select type(scalar)
+    type is(MappedScalar3D)
+
+      if(this%nDim /= 3) then
+        print*,"SELF_Points (gpu)::DiracDelta (3D): nDim must be 3"
+        stop 1
+      endif
+      if(scalar%nVar /= this%nPoints) then
+        print*,"SELF_Points (gpu)::DiracDelta (3D): scalar%nVar (",scalar%nVar, &
+          ") must equal nPoints (",this%nPoints,")"
+        stop 1
+      endif
+      N = scalar%interp%N
+      if(this%nCached /= N .or. .not. c_associated(this%lS_cache_gpu) .or. &
+         .not. c_associated(this%lT_cache_gpu) .or. &
+         .not. c_associated(this%lU_cache_gpu)) then
+        print*,"SELF_Points (gpu)::DiracDelta (3D): basis cache not synchronized; ", &
+          "call LocatePoints (or UpdateDevice) first. nCached=", &
+          this%nCached," scalar%N=",N
+        stop 1
+      endif
+
+      call DiracDelta_3D_gpu(scalar%interior_gpu, &
+                             geometry%J%interior_gpu, &
+                             this%lS_cache_gpu,this%lT_cache_gpu,this%lU_cache_gpu, &
+                             scalar%interp%qWeights_gpu, &
+                             this%elements_gpu, &
+                             N,this%nPoints,scalar%nElem,scalar%nVar)
+
+    class default
+      call this%Points_t%DiracDelta_3D_Points_t(geometry,scalar)
+    endselect
+
+  endsubroutine DiracDelta_3D_Points
 
 endmodule SELF_Points
