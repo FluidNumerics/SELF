@@ -56,7 +56,6 @@ program esatmo3d_abc_flow
   use SELF_Lagrange
   use SELF_Mesh_3D
   use SELF_Geometry_3D
-  use SELF_MappedScalar_3D
   use SELF_ESAtmo3D
 
   implicit none
@@ -94,8 +93,11 @@ program esatmo3d_abc_flow
   type(Lagrange),target :: interp
   type(Mesh3D),target :: mesh
   type(SEMHex),target :: geometry
-  type(MappedScalar3D) :: vel ! velocity workspace (u,v,w) for curl
-  real(prec),allocatable :: gradv(:,:,:,:,:,:) ! d(vel_ivar)/dx_idir
+  ! Velocity (u,v,w) on the collocation grid, host-resident. Diagnostics derive
+  ! vorticity from this array using the interpolant derivative matrix and the
+  ! (constant) geometry metric terms, so the whole diagnostics path is plain
+  ! host Fortran that compiles and runs identically on CPU and GPU builds.
+  real(prec),allocatable :: uvw(:,:,:,:,:) ! (i,j,k,iEl,1:3) -> (u,v,w)
   real(prec) :: e0,h0 ! baseline invariants E(0), H(0)
   real(prec) :: errL2,Eabs,Habs,Rinf
   integer :: iout
@@ -127,11 +129,9 @@ program esatmo3d_abc_flow
   ! zero gravitational acceleration makes the source term vanish identically).
   modelobj%g = 0.0_prec
 
-  ! Velocity workspace and gradient buffer for vorticity diagnostics
-  call vel%Init(interp,3,mesh%nElem)
-  call vel%AssociateGeometry(geometry)
-  allocate(gradv(1:controlDegree+1,1:controlDegree+1,1:controlDegree+1, &
-                 1:mesh%nElem,1:3,1:3))
+  ! Velocity workspace for the vorticity diagnostics
+  allocate(uvw(1:controlDegree+1,1:controlDegree+1,1:controlDegree+1, &
+               1:mesh%nElem,1:3))
 
   ! Initial condition: ABC velocity over a constant rho/theta/Phi background
   call set_abc_initial_condition()
@@ -148,7 +148,7 @@ program esatmo3d_abc_flow
   ! Diagnostic table header + t = 0 row
   write(*,'(A)') ''
   write(*,'(A)') '# ABC flow preservation diagnostics (triply periodic box)'
-  write(*,'(A6,4A16)') 't','E_err','dE/E0','dH/H0','R_inf'
+  write(*,'(A12,4A16)') 't','E_err','dE/E0','dH/H0','R_inf'
   call print_diag_row(0.0_prec,errL2,Eabs,Habs,Rinf)
 
   call modelobj%SetTimeIntegrator(integrator)
@@ -176,8 +176,7 @@ program esatmo3d_abc_flow
   call modelobj%WriteModel()
 
   ! Clean up
-  deallocate(gradv)
-  call vel%free()
+  deallocate(uvw)
   call modelobj%free()
   call mesh%free()
   call geometry%free()
@@ -223,7 +222,11 @@ contains
     !!   Habs     = integral u.omega dV
     !!   Rinf     = max_x |u x omega|
     !! Vorticity omega = curl(u) is obtained from the strong-form mapped gradient
-    !! of the velocity field. Integrals use Gauss-Lobatto quadrature weights and
+    !! of the velocity field, evaluated inline (see velgrad) from the interpolant
+    !! derivative matrix and the constant geometry metric terms. All arrays read
+    !! here are host-resident (solution synced via UpdateHost; geometry/interp
+    !! are constant after setup), so this routine compiles and runs identically
+    !! on CPU and GPU builds. Integrals use Gauss-Lobatto quadrature weights and
     !! the metric Jacobian (cf. CalculateEntropy). Single-rank: no MPI reduction.
     implicit none
     real(prec),intent(out) :: errL2rel,Eabs,Habs,Rinf
@@ -236,17 +239,14 @@ contains
 
     call modelobj%solution%UpdateHost()
 
-    ! Primitive velocity (u,v,w) = (rho*u, rho*v, rho*w) / rho
+    ! Primitive velocity (u,v,w) = (rho*u, rho*v, rho*w) / rho on the host grid
     do concurrent(i=1:interp%N+1,j=1:interp%N+1, &
                   k=1:interp%N+1,iEl=1:mesh%nElem)
       rho = modelobj%solution%interior(i,j,k,iEl,1)
-      vel%interior(i,j,k,iEl,1) = modelobj%solution%interior(i,j,k,iEl,2)/rho
-      vel%interior(i,j,k,iEl,2) = modelobj%solution%interior(i,j,k,iEl,3)/rho
-      vel%interior(i,j,k,iEl,3) = modelobj%solution%interior(i,j,k,iEl,4)/rho
+      uvw(i,j,k,iEl,1) = modelobj%solution%interior(i,j,k,iEl,2)/rho
+      uvw(i,j,k,iEl,2) = modelobj%solution%interior(i,j,k,iEl,3)/rho
+      uvw(i,j,k,iEl,3) = modelobj%solution%interior(i,j,k,iEl,4)/rho
     enddo
-
-    ! Physical-space velocity gradients: gradv(i,j,k,iel,ivar,idir) = d u_ivar / d x_idir
-    call vel%MappedGradient(gradv)
 
     Eint = 0.0_prec
     Hint = 0.0_prec
@@ -262,14 +262,14 @@ contains
             jac = abs(geometry%J%interior(i,j,k,iEl,1))
             wq = interp%qWeights(i)*interp%qWeights(j)*interp%qWeights(k)
 
-            uu = vel%interior(i,j,k,iEl,1)
-            vv = vel%interior(i,j,k,iEl,2)
-            ww = vel%interior(i,j,k,iEl,3)
+            uu = uvw(i,j,k,iEl,1)
+            vv = uvw(i,j,k,iEl,2)
+            ww = uvw(i,j,k,iEl,3)
 
-            ! Vorticity omega = curl(u)
-            wx = gradv(i,j,k,iEl,3,2)-gradv(i,j,k,iEl,2,3) ! dw/dy - dv/dz
-            wy = gradv(i,j,k,iEl,1,3)-gradv(i,j,k,iEl,3,1) ! du/dz - dw/dx
-            wz = gradv(i,j,k,iEl,2,1)-gradv(i,j,k,iEl,1,2) ! dv/dx - du/dy
+            ! Vorticity omega = curl(u); velgrad(ivar,idir,...) = d u_ivar / d x_idir
+            wx = velgrad(3,2,i,j,k,iEl)-velgrad(2,3,i,j,k,iEl) ! dw/dy - dv/dz
+            wy = velgrad(1,3,i,j,k,iEl)-velgrad(3,1,i,j,k,iEl) ! du/dz - dw/dx
+            wz = velgrad(2,1,i,j,k,iEl)-velgrad(1,2,i,j,k,iEl) ! dv/dx - du/dy
 
             ! Energy and helicity integrands
             Eint = Eint+0.5_prec*(uu*uu+vv*vv+ww*ww)*jac*wq
@@ -303,6 +303,40 @@ contains
 
   endsubroutine compute_diagnostics
 
+  function velgrad(ivar,idir,i,j,k,iEl) result(dfdx)
+    !! Strong-form physical-space derivative d(u_ivar)/d(x_idir) of the velocity
+    !! field uvw at collocation node (i,j,k) of element iEl. This is the
+    !! per-node form of the mapped strong gradient (cf. MappedGradient):
+    !!
+    !!   d f / d x_idir = (1/J) * sum_dim sum_ii D(ii,.) f dsdx(.,idir,dim)
+    !!
+    !! contracting the reference-space derivative against the contravariant
+    !! metric vectors. Uses only host-resident, run-constant geometry/interp
+    !! data, so it is backend-agnostic (CPU and GPU builds alike).
+    implicit none
+    integer,intent(in) :: ivar,idir,i,j,k,iEl
+    real(prec) :: dfdx
+    integer :: ii
+    real(prec) :: s
+
+    s = 0.0_prec
+    do ii = 1,interp%N+1
+      s = s+interp%dMatrix(ii,i)*uvw(ii,j,k,iEl,ivar)* &
+          geometry%dsdx%interior(ii,j,k,iEl,1,idir,1)
+    enddo
+    do ii = 1,interp%N+1
+      s = s+interp%dMatrix(ii,j)*uvw(i,ii,k,iEl,ivar)* &
+          geometry%dsdx%interior(i,ii,k,iEl,1,idir,2)
+    enddo
+    do ii = 1,interp%N+1
+      s = s+interp%dMatrix(ii,k)*uvw(i,j,ii,iEl,ivar)* &
+          geometry%dsdx%interior(i,j,ii,iEl,1,idir,3)
+    enddo
+
+    dfdx = s/geometry%J%interior(i,j,k,iEl,1)
+
+  endfunction velgrad
+
   subroutine print_diag_row(tt,errL2rel,Eabs,Habs,Rinf)
     !! Print one row of the diagnostic table, converting absolute energy/helicity
     !! to relative drifts against the baseline values e0, h0.
@@ -314,7 +348,7 @@ contains
     dH = 0.0_prec
     if(abs(h0) > 0.0_prec) dH = (Habs-h0)/h0
 
-    write(*,'(F6.3,4ES16.6)') tt,errL2rel,dE,dH,Rinf
+    write(*,'(ES12.4,4ES16.6)') tt,errL2rel,dE,dH,Rinf
 
   endsubroutine print_diag_row
 
