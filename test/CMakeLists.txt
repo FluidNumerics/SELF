@@ -139,6 +139,7 @@ add_fortran_tests (
     "linear_shallow_water_2d_constant.f90"
     "linear_shallow_water_2d_nonormalflow.f90"
     "linear_shallow_water_2d_radiation.f90"
+    "lineareuler2d_pml_absorption.f90"
     "twopointvectordivergence_2d_constant.f90"
     "twopointvectordivergence_2d_linear.f90"
     "twopointvectordivergence_2d_rotational.f90"
