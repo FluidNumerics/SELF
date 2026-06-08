@@ -137,6 +137,7 @@ module SELF_Model
     procedure(UpdateGRK),deferred :: UpdateGRK4
 
     procedure :: PreTendency => PreTendency_Model
+    procedure :: PostStepHook => PostStepHook_Model
     procedure :: entropy_func => entropy_func_Model
 
     procedure :: flux1D => flux1d_Model
@@ -295,6 +296,23 @@ contains
     if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
 
   endsubroutine PreTendency_Model
+
+  subroutine PostStepHook_Model(this)
+    !! PostStepHook is a template routine invoked by the time integrators once
+    !! immediately after each completed time step (after this%t has advanced by
+    !! this%dt). The default implementation is a no-op.
+    !!
+    !! Override through type-extension to perform lightweight per-step work that
+    !! must stay inside the native time-stepping loop -- e.g. recording receiver
+    !! samples from a device-resident solution -- without driving the integrator
+    !! one step at a time from the host (which would otherwise incur the
+    !! entropy/diagnostic device-to-host copies of ForwardStep).
+    implicit none
+    class(Model),intent(inout) :: this
+
+    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+
+  endsubroutine PostStepHook_Model
 
   pure function entropy_func_Model(this,s) result(e)
     class(Model),intent(in) :: this
@@ -648,6 +666,7 @@ contains
       call this%CalculateTendency()
       call this%UpdateSolution()
       this%t = this%t+this%dt
+      call this%PostStepHook()
 
     enddo
 
@@ -678,6 +697,7 @@ contains
       enddo
 
       this%t = t0+this%dt
+      call this%PostStepHook()
 
     enddo
 
@@ -708,6 +728,7 @@ contains
       enddo
 
       this%t = t0+this%dt
+      call this%PostStepHook()
 
     enddo
 
@@ -738,6 +759,7 @@ contains
       enddo
 
       this%t = t0+this%dt
+      call this%PostStepHook()
 
     enddo
 
