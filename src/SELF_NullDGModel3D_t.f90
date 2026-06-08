@@ -133,10 +133,10 @@ contains
 
   ! endfunction riemannflux3d_NullDGModel3D_t
 
-  ! subroutine PreTendency_NulDGModel3D_t(this)
-  ! !! PreTendency is a template routine that is used to house any additional calculations
+  ! subroutine PreTendencyHook_NulDGModel3D_t(this)
+  ! !! PreTendencyHook is a template routine that is used to house any additional calculations
   ! !! that you want to execute at the beginning of the tendency calculation routine.
-  ! !! This default PreTendency simply returns back to the caller without executing any instructions
+  ! !! This default PreTendencyHook simply returns back to the caller without executing any instructions
   ! !!
   ! !! The intention is to provide a method that can be overridden through type-extension, to handle
   ! !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
@@ -146,7 +146,7 @@ contains
 
   !   return
 
-  ! endsubroutine PreTendency_NulDGModel3D_t
+  ! endsubroutine PreTendencyHook_NulDGModel3D_t
 
   ! pure function source3d_NullDGModel3D_t(this,s,dsdx) result(source)
   !   class(NullDGModel3D_t),intent(in) :: this

@@ -375,7 +375,7 @@ contains
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh)
 
-    call this%PreTendency()
+    call this%PreTendencyHook()
     call this%SetBoundaryCondition()
 
     if(this%gradient_enabled) then
