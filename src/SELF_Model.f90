@@ -136,7 +136,9 @@ module SELF_Model
     procedure :: LowStorageRK4_timeIntegrator
     procedure(UpdateGRK),deferred :: UpdateGRK4
 
-    procedure :: PreTendency => PreTendency_Model
+    procedure :: PreTendencyHook => PreTendencyHook_Model
+    procedure :: PreStepHook => PreStepHook_Model
+    procedure :: PostStepHook => PostStepHook_Model
     procedure :: entropy_func => entropy_func_Model
 
     procedure :: flux1D => flux1d_Model
@@ -281,10 +283,10 @@ contains
 
   endsubroutine PrintType_Model
 
-  subroutine PreTendency_Model(this)
-    !! PreTendency is a template routine that is used to house any additional calculations
+  subroutine PreTendencyHook_Model(this)
+    !! PreTendencyHook is a template routine that is used to house any additional calculations
     !! that you want to execute at the beginning of the tendency calculation routine.
-    !! This default PreTendency simply returns back to the caller without executing any instructions
+    !! This default PreTendencyHook simply returns back to the caller without executing any instructions
     !!
     !! The intention is to provide a method that can be overridden through type-extension, to handle
     !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
@@ -294,7 +296,41 @@ contains
 
     if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
 
-  endsubroutine PreTendency_Model
+  endsubroutine PreTendencyHook_Model
+
+  subroutine PreStepHook_Model(this)
+    !! PreStepHook is a template routine invoked by the time integrators once
+    !! immediately before each time step is taken (before any Runge-Kutta
+    !! stages of that step). The default implementation is a no-op.
+    !!
+    !! This differs from PreTendencyHook, which runs at the start of every
+    !! tendency evaluation (i.e. once per RK stage). PreStepHook fires exactly
+    !! once per step, symmetric with PostStepHook. Override through
+    !! type-extension for lightweight per-step setup that must stay inside the
+    !! native time-stepping loop.
+    implicit none
+    class(Model),intent(inout) :: this
+
+    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+
+  endsubroutine PreStepHook_Model
+
+  subroutine PostStepHook_Model(this)
+    !! PostStepHook is a template routine invoked by the time integrators once
+    !! immediately after each completed time step (after this%t has advanced by
+    !! this%dt). The default implementation is a no-op.
+    !!
+    !! Override through type-extension to perform lightweight per-step work that
+    !! must stay inside the native time-stepping loop -- e.g. recording receiver
+    !! samples from a device-resident solution -- without driving the integrator
+    !! one step at a time from the host (which would otherwise incur the
+    !! entropy/diagnostic device-to-host copies of ForwardStep).
+    implicit none
+    class(Model),intent(inout) :: this
+
+    if(.false.) this%nvar = this%nvar ! suppress unused-dummy-argument warning
+
+  endsubroutine PostStepHook_Model
 
   pure function entropy_func_Model(this,s) result(e)
     class(Model),intent(in) :: this
@@ -643,11 +679,13 @@ contains
     dtLim = this%dt ! Get the max time step size from the dt attribute
     do while(this%t < tn)
 
+      call this%PreStepHook()
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       call this%CalculateTendency()
       call this%UpdateSolution()
       this%t = this%t+this%dt
+      call this%PostStepHook()
 
     enddo
 
@@ -669,6 +707,7 @@ contains
     do while(this%t < tn)
 
       t0 = this%t
+      call this%PreStepHook()
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       do m = 1,2
@@ -678,6 +717,7 @@ contains
       enddo
 
       this%t = t0+this%dt
+      call this%PostStepHook()
 
     enddo
 
@@ -699,6 +739,7 @@ contains
     do while(this%t < tn)
 
       t0 = this%t
+      call this%PreStepHook()
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       do m = 1,3
@@ -708,6 +749,7 @@ contains
       enddo
 
       this%t = t0+this%dt
+      call this%PostStepHook()
 
     enddo
 
@@ -729,6 +771,7 @@ contains
     do while(this%t < tn)
 
       t0 = this%t
+      call this%PreStepHook()
       tRemain = tn-this%t
       this%dt = min(dtLim,tRemain)
       do m = 1,5
@@ -738,6 +781,7 @@ contains
       enddo
 
       this%t = t0+this%dt
+      call this%PostStepHook()
 
     enddo
 

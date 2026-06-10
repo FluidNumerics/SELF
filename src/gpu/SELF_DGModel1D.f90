@@ -404,7 +404,7 @@ contains
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh)
 
-    call this%PreTendency() ! User-supplied
+    call this%PreTendencyHook() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
 
     if(this%gradient_enabled) then
