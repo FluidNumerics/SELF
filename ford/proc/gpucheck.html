@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>gpuCheck &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>gpuCheck
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.1% of total for procedures.">9 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_GPU.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_gpu.f90.html'>SELF_GPU.f90</a></li>
+     <li><a href='../module/self_gpu.html'>SELF_GPU</a></li>
+     <li class="active">gpuCheck</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/gpucheck.html#src">gpuCheck</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine gpuCheck(gpuError_t)</h2>
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~gpucheck~~UsesGraph Pages: 1 -->
+<svg id="procgpucheckUsesGraph" width="194pt" height="32pt"
+ viewBox="0.00 0.00 194.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~gpucheck~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~gpucheck~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 190,-28 190,4 -4,4"/>
+<!-- proc~gpucheck -->
+<g id="proc~~gpucheck~~UsesGraph_node1" class="node">
+<title>proc~gpucheck</title>
+<polygon fill="none" stroke="black" points="186,-24 120,-24 120,0 186,0 186,-24"/>
+<text text-anchor="middle" x="153" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">gpuCheck</text>
+</g>
+<!-- iso_c_binding -->
+<g id="proc~~gpucheck~~UsesGraph_node2" class="node">
+<title>iso_c_binding</title>
+<g id="a_proc~~gpucheck~~UsesGraph_node2"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="84,-24 0,-24 0,0 84,0 84,-24"/>
+<text text-anchor="middle" x="42" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- proc~gpucheck&#45;&gt;iso_c_binding -->
+<g id="proc~~gpucheck~~UsesGraph_edge1" class="edge">
+<title>proc~gpucheck&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M119.89,-12C111.85,-12 103.03,-12 94.32,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="94.2,-8.5 84.2,-12 94.2,-15.5 94.2,-8.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-gpuerror_t"></span>integer(kind=c_int)</td>
+<td></td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>gpuError_t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~gpucheck~~CalledByGraph Pages: 1 -->
+<svg id="procgpucheckCalledByGraph" width="353pt" height="3980pt"
+ viewBox="0.00 0.00 353.00 3980.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~gpucheck~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 3976)">
+<title>proc~~gpucheck~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-3976 349,-3976 349,4 -4,4"/>
+<!-- proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_node1" class="node">
+<title>proc~gpucheck</title>
+<polygon fill="none" stroke="black" points="345,-1998 279,-1998 279,-1974 345,-1974 345,-1998"/>
+<text text-anchor="middle" x="312" y="-1983.6" font-family="Helvetica,sans-Serif" font-size="10.50">gpuCheck</text>
+</g>
+<!-- proc~updatedevice_vector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node2" class="node">
+<title>proc~updatedevice_vector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node2"><a xlink:href=".././proc/updatedevice_vector3d.html" xlink:title="UpdateDevice_Vector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-3972 50.5,-3972 50.5,-3948 192.5,-3948 192.5,-3972"/>
+<text text-anchor="middle" x="121.5" y="-3957.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Vector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_vector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge1" class="edge">
+<title>proc~updatedevice_vector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.64,-3963.19C211.62,-3960.36 230.38,-3953.49 243,-3939 309.7,-3862.42 311.12,-2220.19 311.02,-2008.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.52,-2008.2 311.01,-1998.2 307.52,-2008.21 314.52,-2008.2"/>
+</g>
+<!-- proc~boundaryflux_dgmodel3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node3" class="node">
+<title>proc~boundaryflux_dgmodel3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node3"><a xlink:href=".././proc/boundaryflux_dgmodel3d.html" xlink:title="BoundaryFlux_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-3930 44,-3930 44,-3906 199,-3906 199,-3930"/>
+<text text-anchor="middle" x="121.5" y="-3915.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryFlux_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~boundaryflux_dgmodel3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge2" class="edge">
+<title>proc~boundaryflux_dgmodel3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M199.22,-3920.03C215.88,-3916.66 231.84,-3909.81 243,-3897 308.26,-3822.13 310.93,-2216.81 311,-2008.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.5,-2008.19 311,-1998.18 307.5,-2008.18 314.5,-2008.19"/>
+</g>
+<!-- proc~sourcemethod_dgmodel3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node4" class="node">
+<title>proc~sourcemethod_dgmodel3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node4"><a xlink:href=".././proc/sourcemethod_dgmodel3d.html" xlink:title="sourcemethod_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="200.5,-3888 42.5,-3888 42.5,-3864 200.5,-3864 200.5,-3888"/>
+<text text-anchor="middle" x="121.5" y="-3873.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sourcemethod_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_dgmodel3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge5" class="edge">
+<title>proc~sourcemethod_dgmodel3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M200.78,-3877.7C216.87,-3874.22 232.18,-3867.4 243,-3855 306.79,-3781.87 310.74,-2214.95 310.98,-2008.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.48,-2008.4 310.99,-1998.4 307.48,-2008.4 314.48,-2008.4"/>
+</g>
+<!-- proc~calculateentropy_dgmodel2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node5" class="node">
+<title>proc~calculateentropy_dgmodel2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node5"><a xlink:href=".././proc/calculateentropy_dgmodel2d.html" xlink:title="CalculateEntropy_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-3846 35.5,-3846 35.5,-3822 207.5,-3822 207.5,-3846"/>
+<text text-anchor="middle" x="121.5" y="-3831.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CalculateEntropy_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~calculateentropy_dgmodel2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge3" class="edge">
+<title>proc~calculateentropy_dgmodel2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M207.56,-3834C221.12,-3830.17 233.71,-3823.64 243,-3813 305.36,-3741.57 310.55,-2211.34 310.97,-2008.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.47,-2008.13 310.98,-1998.12 307.47,-2008.12 314.47,-2008.13"/>
+</g>
+<!-- proc~init_ecadvection3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node6" class="node">
+<title>proc~init_ecadvection3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node6"><a xlink:href=".././proc/init_ecadvection3d.html" xlink:title="Init_ECAdvection3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="179.5,-3804 63.5,-3804 63.5,-3780 179.5,-3780 179.5,-3804"/>
+<text text-anchor="middle" x="121.5" y="-3789.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_ecadvection3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge4" class="edge">
+<title>proc~init_ecadvection3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M179.75,-3796.5C202.78,-3795.05 227.49,-3788.75 243,-3771 303.87,-3701.35 310.34,-2210.71 310.94,-2008.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.44,-2008.32 310.97,-1998.31 307.44,-2008.3 314.44,-2008.32"/>
+</g>
+<!-- proc~free_mesh3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node7" class="node">
+<title>proc~free_mesh3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node7"><a xlink:href=".././proc/free_mesh3d.html" xlink:title="Free_Mesh3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-3762 80,-3762 80,-3738 163,-3738 163,-3762"/>
+<text text-anchor="middle" x="121.5" y="-3747.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_mesh3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge6" class="edge">
+<title>proc~free_mesh3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.12,-3754.78C189.96,-3755.47 223.64,-3751.14 243,-3729 302.47,-3661.01 310.15,-2205.43 310.92,-2008.08"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.42,-2008.04 310.96,-1998.02 307.42,-2008.01 314.42,-2008.04"/>
+</g>
+<!-- proc~updatehost_vector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node8" class="node">
+<title>proc~updatehost_vector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node8"><a xlink:href=".././proc/updatehost_vector3d.html" xlink:title="UpdateHost_Vector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-3720 57,-3720 57,-3696 186,-3696 186,-3720"/>
+<text text-anchor="middle" x="121.5" y="-3705.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Vector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_vector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge7" class="edge">
+<title>proc~updatehost_vector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.31,-3711.94C207.35,-3709.74 228.94,-3703.06 243,-3687 300.98,-3620.77 309.94,-2204.47 310.9,-2008.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.4,-2008.21 310.95,-1998.19 307.4,-2008.17 314.4,-2008.21"/>
+</g>
+<!-- proc~calculateentropy_dgmodel3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node9" class="node">
+<title>proc~calculateentropy_dgmodel3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node9"><a xlink:href=".././proc/calculateentropy_dgmodel3d.html" xlink:title="CalculateEntropy_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-3678 35.5,-3678 35.5,-3654 207.5,-3654 207.5,-3678"/>
+<text text-anchor="middle" x="121.5" y="-3663.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CalculateEntropy_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~calculateentropy_dgmodel3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge8" class="edge">
+<title>proc~calculateentropy_dgmodel3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M207.53,-3665.97C221.09,-3662.14 233.69,-3655.62 243,-3645 299.52,-3580.5 309.72,-2201.92 310.88,-2008.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.38,-2008.36 310.94,-1998.34 307.38,-2008.32 314.38,-2008.36"/>
+</g>
+<!-- proc~setboundarycondition_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node10" class="node">
+<title>proc~setboundarycondition_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node10"><a xlink:href=".././proc/setboundarycondition_dgmodel1d.html" xlink:title="setboundarycondition_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="220.5,-3636 22.5,-3636 22.5,-3612 220.5,-3612 220.5,-3636"/>
+<text text-anchor="middle" x="121.5" y="-3621.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setboundarycondition_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~setboundarycondition_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge9" class="edge">
+<title>proc~setboundarycondition_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M220.58,-3619.23C229.06,-3615.37 236.77,-3610.1 243,-3603 298.1,-3540.19 309.52,-2197.8 310.85,-2008.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.36,-2008.06 310.92,-1998.03 307.36,-2008.01 314.36,-2008.06"/>
+</g>
+<!-- proc~updatedevice_points -->
+<g id="proc~~gpucheck~~CalledByGraph_node11" class="node">
+<title>proc~updatedevice_points</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node11"><a xlink:href=".././proc/updatedevice_points.html" xlink:title="UpdateDevice_Points">
+<polygon fill="#d9534f" stroke="#d9534f" points="183.5,-3594 59.5,-3594 59.5,-3570 183.5,-3570 183.5,-3594"/>
+<text text-anchor="middle" x="121.5" y="-3579.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Points</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_points&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge10" class="edge">
+<title>proc~updatedevice_points&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M183.77,-3586.16C205.59,-3584.23 228.36,-3577.67 243,-3561 296.65,-3499.91 309.29,-2194.99 310.83,-2008.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.33,-2008.19 310.91,-1998.16 307.33,-2008.13 314.33,-2008.19"/>
+</g>
+<!-- proc~updatedevice_vector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node12" class="node">
+<title>proc~updatedevice_vector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node12"><a xlink:href=".././proc/updatedevice_vector2d.html" xlink:title="UpdateDevice_Vector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-3552 50.5,-3552 50.5,-3528 192.5,-3528 192.5,-3552"/>
+<text text-anchor="middle" x="121.5" y="-3537.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Vector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_vector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge11" class="edge">
+<title>proc~updatedevice_vector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.56,-3543.11C211.53,-3540.28 230.31,-3533.43 243,-3519 295.18,-3459.66 309.05,-2193.3 310.8,-2008.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.3,-2008.3 310.89,-1998.27 307.3,-2008.24 314.3,-2008.3"/>
+</g>
+<!-- proc~sourcemethod_ecadvection3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node13" class="node">
+<title>proc~sourcemethod_ecadvection3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node13"><a xlink:href=".././proc/sourcemethod_ecadvection3d.html" xlink:title="SourceMethod_ECAdvection3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209.5,-3510 33.5,-3510 33.5,-3486 209.5,-3486 209.5,-3510"/>
+<text text-anchor="middle" x="121.5" y="-3495.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SourceMethod_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_ecadvection3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge12" class="edge">
+<title>proc~sourcemethod_ecadvection3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M209.62,-3497.31C222.37,-3493.41 234.16,-3487.04 243,-3477 293.74,-3419.38 308.82,-2190.17 310.77,-2008.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.27,-2008.4 310.88,-1998.36 307.27,-2008.32 314.27,-2008.4"/>
+</g>
+<!-- proc~free_scalar1d~2 -->
+<g id="proc~~gpucheck~~CalledByGraph_node14" class="node">
+<title>proc~free_scalar1d~2</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node14"><a xlink:href=".././proc/free_scalar1d~2.html" xlink:title="Free_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-3468 77,-3468 77,-3444 166,-3444 166,-3468"/>
+<text text-anchor="middle" x="121.5" y="-3453.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_scalar1d~2&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge13" class="edge">
+<title>proc~free_scalar1d~2&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.29,-3460.79C192.53,-3461.03 224.32,-3456.19 243,-3435 292.32,-3379.06 308.59,-2185.61 310.75,-2008.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.24,-2008.05 310.86,-1998.01 307.25,-2007.97 314.24,-2008.05"/>
+</g>
+<!-- proc~init_mesh3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node15" class="node">
+<title>proc~init_mesh3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node15"><a xlink:href=".././proc/init_mesh3d.html" xlink:title="Init_Mesh3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="160,-3426 83,-3426 83,-3402 160,-3402 160,-3426"/>
+<text text-anchor="middle" x="121.5" y="-3411.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_mesh3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge14" class="edge">
+<title>proc~init_mesh3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M160.18,-3418.63C187.41,-3419.68 222.83,-3415.84 243,-3393 290.86,-3338.79 308.33,-2183.38 310.71,-2008.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.21,-2008.12 310.85,-1998.08 307.21,-2008.03 314.21,-2008.12"/>
+</g>
+<!-- proc~free_esatmo2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node16" class="node">
+<title>proc~free_esatmo2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node16"><a xlink:href=".././proc/free_esatmo2d.html" xlink:title="Free_ESAtmo2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170,-3384 73,-3384 73,-3360 170,-3360 170,-3384"/>
+<text text-anchor="middle" x="121.5" y="-3369.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_esatmo2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge15" class="edge">
+<title>proc~free_esatmo2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M170.15,-3376.76C195.57,-3376.49 225.21,-3371.12 243,-3351 289.4,-3298.52 308.07,-2180.93 310.68,-2008.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.18,-2008.18 310.83,-1998.12 307.18,-2008.07 314.18,-2008.18"/>
+</g>
+<!-- proc~free_ecadvection2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node17" class="node">
+<title>proc~free_ecadvection2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node17"><a xlink:href=".././proc/free_ecadvection2d.html" xlink:title="Free_ECAdvection2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="182.5,-3342 60.5,-3342 60.5,-3318 182.5,-3318 182.5,-3342"/>
+<text text-anchor="middle" x="121.5" y="-3327.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_ecadvection2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge16" class="edge">
+<title>proc~free_ecadvection2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M182.76,-3334.18C204.85,-3332.35 228.08,-3325.85 243,-3309 287.95,-3258.24 307.79,-2178.25 310.64,-2008.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.14,-2008.21 310.81,-1998.15 307.14,-2008.09 314.14,-2008.21"/>
+</g>
+<!-- proc~updatedevice_tensor3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node18" class="node">
+<title>proc~updatedevice_tensor3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node18"><a xlink:href=".././proc/updatedevice_tensor3d.html" xlink:title="UpdateDevice_Tensor3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-3300 50.5,-3300 50.5,-3276 192.5,-3276 192.5,-3300"/>
+<text text-anchor="middle" x="121.5" y="-3285.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_tensor3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge17" class="edge">
+<title>proc~updatedevice_tensor3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.79,-3291C211.66,-3288.14 230.32,-3281.3 243,-3267 286.52,-3217.94 307.53,-2174.32 310.6,-2008.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.1,-2008.22 310.79,-1998.16 307.1,-2008.1 314.1,-2008.22"/>
+</g>
+<!-- proc~setgradientboundarycondition_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node19" class="node">
+<title>proc~setgradientboundarycondition_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node19"><a xlink:href=".././proc/setgradientboundarycondition_dgmodel1d.html" xlink:title="setgradientboundarycondition_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="243,-3258 0,-3258 0,-3234 243,-3234 243,-3258"/>
+<text text-anchor="middle" x="121.5" y="-3243.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setgradientboundarycondition_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~setgradientboundarycondition_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge18" class="edge">
+<title>proc~setgradientboundarycondition_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M233.21,-3233.83C236.75,-3231.26 240.04,-3228.33 243,-3225 285.06,-3177.68 307.22,-2172.26 310.56,-2008.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.06,-2008.22 310.76,-1998.15 307.06,-2008.08 314.06,-2008.22"/>
+</g>
+<!-- proc~free_domaindecomposition -->
+<g id="proc~~gpucheck~~CalledByGraph_node20" class="node">
+<title>proc~free_domaindecomposition</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node20"><a xlink:href=".././proc/free_domaindecomposition.html" xlink:title="Free_DomainDecomposition">
+<polygon fill="#d9534f" stroke="#d9534f" points="203,-3216 40,-3216 40,-3192 203,-3192 203,-3216"/>
+<text text-anchor="middle" x="121.5" y="-3201.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- proc~free_domaindecomposition&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge19" class="edge">
+<title>proc~free_domaindecomposition&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M203.08,-3204.97C218.27,-3201.35 232.62,-3194.66 243,-3183 283.64,-3137.36 306.95,-2167.97 310.52,-2008.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.02,-2008.19 310.74,-1998.12 307.02,-2008.04 314.02,-2008.19"/>
+</g>
+<!-- proc~updatehost_vector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node21" class="node">
+<title>proc~updatehost_vector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node21"><a xlink:href=".././proc/updatehost_vector2d.html" xlink:title="UpdateHost_Vector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-3174 57,-3174 57,-3150 186,-3150 186,-3174"/>
+<text text-anchor="middle" x="121.5" y="-3159.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Vector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_vector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge20" class="edge">
+<title>proc~updatehost_vector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.14,-3165.79C207.17,-3163.58 228.79,-3156.92 243,-3141 282.18,-3097.09 306.62,-2165.4 310.47,-2008.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.97,-2008.15 310.72,-1998.07 306.97,-2007.98 313.97,-2008.15"/>
+</g>
+<!-- proc~init_scalar1d~2 -->
+<g id="proc~~gpucheck~~CalledByGraph_node22" class="node">
+<title>proc~init_scalar1d~2</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node22"><a xlink:href=".././proc/init_scalar1d~2.html" xlink:title="Init_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-3132 80,-3132 80,-3108 163,-3108 163,-3132"/>
+<text text-anchor="middle" x="121.5" y="-3117.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_scalar1d~2&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge21" class="edge">
+<title>proc~init_scalar1d~2&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.25,-3124.65C189.98,-3125.24 223.47,-3120.84 243,-3099 318.3,-3014.79 312.82,-2158.83 311.26,-2008.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.76,-2008.16 311.15,-1998.2 307.76,-2008.24 314.76,-2008.16"/>
+</g>
+<!-- proc~init_scalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node23" class="node">
+<title>proc~init_scalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node23"><a xlink:href=".././proc/init_scalar2d.html" xlink:title="Init_Scalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-3090 80,-3090 80,-3066 163,-3066 163,-3090"/>
+<text text-anchor="middle" x="121.5" y="-3075.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_scalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge22" class="edge">
+<title>proc~init_scalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.24,-3082.64C189.95,-3083.22 223.44,-3078.82 243,-3057 315.49,-2976.13 312.34,-2154.04 311.2,-2008.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.7,-2008.06 311.12,-1998.09 307.7,-2008.12 314.7,-2008.06"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node24" class="node">
+<title>proc~setinteriorfromequation_mappedscalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node24"><a xlink:href=".././proc/setinteriorfromequation_mappedscalar3d.html" xlink:title="SetInteriorFromEquation_MappedScalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-3048 2,-3048 2,-3024 241,-3024 241,-3048"/>
+<text text-anchor="middle" x="121.5" y="-3033.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge23" class="edge">
+<title>proc~setinteriorfromequation_mappedscalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M232.91,-3023.97C236.56,-3021.37 239.95,-3018.4 243,-3015 312.55,-2937.62 311.86,-2152.34 311.15,-2008.55"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.64,-2008.28 311.09,-1998.3 307.64,-2008.32 314.64,-2008.28"/>
+</g>
+<!-- proc~updatedevice_mesh3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node25" class="node">
+<title>proc~updatedevice_mesh3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node25"><a xlink:href=".././proc/updatedevice_mesh3d.html" xlink:title="UpdateDevice_Mesh3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="189.5,-3006 53.5,-3006 53.5,-2982 189.5,-2982 189.5,-3006"/>
+<text text-anchor="middle" x="121.5" y="-2991.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_mesh3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge24" class="edge">
+<title>proc~updatedevice_mesh3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M189.51,-2997.31C209.42,-2994.74 229.49,-2987.99 243,-2973 309.69,-2899.01 311.35,-2148.65 311.08,-2008.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.58,-2008.13 311.05,-1998.14 307.58,-2008.15 314.58,-2008.13"/>
+</g>
+<!-- proc~free_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node26" class="node">
+<title>proc~free_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node26"><a xlink:href=".././proc/free_dgmodel1d.html" xlink:title="Free_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="173.5,-2964 69.5,-2964 69.5,-2940 173.5,-2940 173.5,-2964"/>
+<text text-anchor="middle" x="121.5" y="-2949.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge25" class="edge">
+<title>proc~free_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M173.62,-2956.53C198.14,-2955.75 225.84,-2949.98 243,-2931 306.84,-2860.39 310.83,-2144.76 311,-2008.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.5,-2008.28 311.01,-1998.28 307.5,-2008.28 314.5,-2008.28"/>
+</g>
+<!-- proc~free_scalar1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node27" class="node">
+<title>proc~free_scalar1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node27"><a xlink:href=".././proc/free_scalar1d.html" xlink:title="Free_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-2922 77,-2922 77,-2898 166,-2898 166,-2922"/>
+<text text-anchor="middle" x="121.5" y="-2907.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_scalar1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge26" class="edge">
+<title>proc~free_scalar1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.08,-2914.6C192.24,-2914.77 224.02,-2909.92 243,-2889 304,-2821.75 310.28,-2140.52 310.93,-2008.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.43,-2008.07 310.97,-1998.06 307.43,-2008.04 314.43,-2008.07"/>
+</g>
+<!-- proc~free_twopointvector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node28" class="node">
+<title>proc~free_twopointvector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node28"><a xlink:href=".././proc/free_twopointvector3d.html" xlink:title="Free_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="189,-2880 54,-2880 54,-2856 189,-2856 189,-2880"/>
+<text text-anchor="middle" x="121.5" y="-2865.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_twopointvector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge27" class="edge">
+<title>proc~free_twopointvector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M189.1,-2871.27C209.11,-2868.73 229.35,-2862 243,-2847 301.12,-2783.16 309.7,-2137.38 310.84,-2008.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.34,-2008.15 310.92,-1998.12 307.34,-2008.09 314.34,-2008.15"/>
+</g>
+<!-- proc~sourcemethod_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node29" class="node">
+<title>proc~sourcemethod_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node29"><a xlink:href=".././proc/sourcemethod_dgmodel1d.html" xlink:title="sourcemethod_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="200.5,-2838 42.5,-2838 42.5,-2814 200.5,-2814 200.5,-2838"/>
+<text text-anchor="middle" x="121.5" y="-2823.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sourcemethod_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge28" class="edge">
+<title>proc~sourcemethod_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M200.67,-2827.26C216.67,-2823.78 231.97,-2817.07 243,-2805 298.25,-2744.56 309.09,-2133.83 310.74,-2008.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.25,-2008.18 310.87,-1998.14 307.25,-2008.09 314.25,-2008.18"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node30" class="node">
+<title>proc~setinteriorfromequation_mappedvector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node30"><a xlink:href=".././proc/setinteriorfromequation_mappedvector3d.html" xlink:title="SetInteriorFromEquation_MappedVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-2796 2,-2796 2,-2772 241,-2772 241,-2796"/>
+<text text-anchor="middle" x="121.5" y="-2781.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge29" class="edge">
+<title>proc~setinteriorfromequation_mappedvector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M232.82,-2771.89C236.49,-2769.31 239.91,-2766.36 243,-2763 295.4,-2705.93 308.46,-2129.88 310.64,-2008.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.14,-2008.17 310.81,-1998.11 307.14,-2008.05 314.14,-2008.17"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node31" class="node">
+<title>proc~setinteriorfromequation_mappedscalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node31"><a xlink:href=".././proc/setinteriorfromequation_mappedscalar2d.html" xlink:title="SetInteriorFromEquation_MappedScalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-2754 2,-2754 2,-2730 241,-2730 241,-2754"/>
+<text text-anchor="middle" x="121.5" y="-2739.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge30" class="edge">
+<title>proc~setinteriorfromequation_mappedscalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M232.8,-2729.87C236.48,-2727.3 239.9,-2724.36 243,-2721 292.57,-2667.28 307.79,-2125.52 310.52,-2008.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.03,-2008.1 310.75,-1998.03 307.03,-2007.95 314.03,-2008.1"/>
+</g>
+<!-- proc~free_dgmodel2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node32" class="node">
+<title>proc~free_dgmodel2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node32"><a xlink:href=".././proc/free_dgmodel2d.html" xlink:title="Free_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="173.5,-2712 69.5,-2712 69.5,-2688 173.5,-2688 173.5,-2712"/>
+<text text-anchor="middle" x="121.5" y="-2697.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_dgmodel2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge31" class="edge">
+<title>proc~free_dgmodel2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M173.72,-2704.33C198.11,-2703.46 225.67,-2697.68 243,-2679 289.71,-2628.67 307.07,-2121.84 310.39,-2008.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.89,-2008.27 310.68,-1998.17 306.89,-2008.07 313.89,-2008.27"/>
+</g>
+<!-- proc~updatedevice_scalar1d~2 -->
+<g id="proc~~gpucheck~~CalledByGraph_node33" class="node">
+<title>proc~updatedevice_scalar1d~2</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node33"><a xlink:href=".././proc/updatedevice_scalar1d~2.html" xlink:title="UpdateDevice_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-2670 50.5,-2670 50.5,-2646 192.5,-2646 192.5,-2670"/>
+<text text-anchor="middle" x="121.5" y="-2655.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar1d~2&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge32" class="edge">
+<title>proc~updatedevice_scalar1d~2&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.65,-2660.53C211.4,-2657.64 230.03,-2650.89 243,-2637 286.87,-2590.02 306.31,-2117.62 310.24,-2008.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.74,-2008.36 310.59,-1998.25 306.74,-2008.12 313.74,-2008.36"/>
+</g>
+<!-- proc~init_esatmo2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node34" class="node">
+<title>proc~init_esatmo2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node34"><a xlink:href=".././proc/init_esatmo2d.html" xlink:title="Init_ESAtmo2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="167,-2628 76,-2628 76,-2604 167,-2604 167,-2628"/>
+<text text-anchor="middle" x="121.5" y="-2613.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_esatmo2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge33" class="edge">
+<title>proc~init_esatmo2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M167,-2620.36C192.83,-2620.29 223.94,-2615.26 243,-2595 284.05,-2551.35 305.51,-2112.87 310.07,-2008.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.57,-2008.38 310.5,-1998.24 306.58,-2008.08 313.57,-2008.38"/>
+</g>
+<!-- proc~updatedevice_scalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node35" class="node">
+<title>proc~updatedevice_scalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node35"><a xlink:href=".././proc/updatedevice_scalar2d.html" xlink:title="UpdateDevice_Scalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-2586 50.5,-2586 50.5,-2562 192.5,-2562 192.5,-2586"/>
+<text text-anchor="middle" x="121.5" y="-2571.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge34" class="edge">
+<title>proc~updatedevice_scalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.52,-2576.41C211.26,-2573.51 229.92,-2566.79 243,-2553 281.22,-2512.69 304.64,-2108.41 309.88,-2008.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.38,-2008.31 310.4,-1998.15 306.39,-2007.95 313.38,-2008.31"/>
+</g>
+<!-- proc~init_ecadvection2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node36" class="node">
+<title>proc~init_ecadvection2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node36"><a xlink:href=".././proc/init_ecadvection2d.html" xlink:title="Init_ECAdvection2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="179.5,-2544 63.5,-2544 63.5,-2520 179.5,-2520 179.5,-2544"/>
+<text text-anchor="middle" x="121.5" y="-2529.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_ecadvection2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge35" class="edge">
+<title>proc~init_ecadvection2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M179.61,-2535.77C202.33,-2534.12 226.85,-2527.87 243,-2511 313.24,-2437.62 312.88,-2099.54 311.47,-2008.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.97,-2008.25 311.29,-1998.31 307.97,-2008.37 314.97,-2008.25"/>
+</g>
+<!-- proc~updatehost_tensor3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node37" class="node">
+<title>proc~updatehost_tensor3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node37"><a xlink:href=".././proc/updatehost_tensor3d.html" xlink:title="UpdateHost_Tensor3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186.5,-2502 56.5,-2502 56.5,-2478 186.5,-2478 186.5,-2502"/>
+<text text-anchor="middle" x="121.5" y="-2487.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_tensor3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge36" class="edge">
+<title>proc~updatehost_tensor3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.69,-2493C207.26,-2490.6 228.45,-2484.03 243,-2469 307.68,-2402.18 311.43,-2094.48 311.19,-2008.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.69,-2008.19 311.14,-1998.21 307.69,-2008.23 314.69,-2008.19"/>
+</g>
+<!-- proc~init_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node38" class="node">
+<title>proc~init_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node38"><a xlink:href=".././proc/init_dgmodel1d.html" xlink:title="Init_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170.5,-2460 72.5,-2460 72.5,-2436 170.5,-2436 170.5,-2460"/>
+<text text-anchor="middle" x="121.5" y="-2445.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge37" class="edge">
+<title>proc~init_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M170.57,-2452.01C195.48,-2451.36 224.49,-2445.88 243,-2427 302.06,-2366.78 309.85,-2089.92 310.85,-2008.55"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.36,-2008.44 310.96,-1998.41 307.36,-2008.37 314.36,-2008.44"/>
+</g>
+<!-- proc~free_scalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node39" class="node">
+<title>proc~free_scalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node39"><a xlink:href=".././proc/free_scalar3d.html" xlink:title="Free_Scalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-2418 77,-2418 77,-2394 166,-2394 166,-2418"/>
+<text text-anchor="middle" x="121.5" y="-2403.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_scalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge38" class="edge">
+<title>proc~free_scalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166,-2409.97C191.8,-2409.82 223.22,-2404.86 243,-2385 296.54,-2331.26 308.14,-2084.34 310.46,-2008.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.97,-2008.12 310.75,-1998.03 306.97,-2007.92 313.97,-2008.12"/>
+</g>
+<!-- proc~init_twopointvector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node40" class="node">
+<title>proc~init_twopointvector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node40"><a xlink:href=".././proc/init_twopointvector3d.html" xlink:title="Init_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-2376 57,-2376 57,-2352 186,-2352 186,-2376"/>
+<text text-anchor="middle" x="121.5" y="-2361.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_twopointvector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge39" class="edge">
+<title>proc~init_twopointvector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.28,-2366.6C206.82,-2364.16 228.09,-2357.67 243,-2343 291.01,-2295.73 306.24,-2078.86 309.97,-2008.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.47,-2008.41 310.48,-1998.25 306.48,-2008.06 313.47,-2008.41"/>
+</g>
+<!-- proc~free_dgmodel3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node41" class="node">
+<title>proc~free_dgmodel3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node41"><a xlink:href=".././proc/free_dgmodel3d.html" xlink:title="Free_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="173.5,-2334 69.5,-2334 69.5,-2310 173.5,-2310 173.5,-2334"/>
+<text text-anchor="middle" x="121.5" y="-2319.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_dgmodel3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge40" class="edge">
+<title>proc~free_dgmodel3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M173.74,-2325.42C197.69,-2324.23 224.85,-2318.43 243,-2301 285.44,-2260.23 304.05,-2073.75 309.33,-2008.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="312.85,-2008.44 310.14,-1998.2 305.88,-2007.9 312.85,-2008.44"/>
+</g>
+<!-- proc~setelemtorank_domaindecomposition -->
+<g id="proc~~gpucheck~~CalledByGraph_node42" class="node">
+<title>proc~setelemtorank_domaindecomposition</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node42"><a xlink:href=".././proc/setelemtorank_domaindecomposition.html" xlink:title="SetElemToRank_DomainDecomposition">
+<polygon fill="#d9534f" stroke="#d9534f" points="232.5,-2292 10.5,-2292 10.5,-2268 232.5,-2268 232.5,-2292"/>
+<text text-anchor="middle" x="121.5" y="-2277.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetElemToRank_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- proc~setelemtorank_domaindecomposition&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge41" class="edge">
+<title>proc~setelemtorank_domaindecomposition&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M231.1,-2267.91C235.35,-2265.35 239.35,-2262.4 243,-2259 280.03,-2224.53 301.66,-2067.09 308.56,-2008.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="312.06,-2008.51 309.71,-1998.18 305.1,-2007.71 312.06,-2008.51"/>
+</g>
+<!-- proc~init_dgmodel2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node43" class="node">
+<title>proc~init_dgmodel2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node43"><a xlink:href=".././proc/init_dgmodel2d.html" xlink:title="Init_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170.5,-2250 72.5,-2250 72.5,-2226 170.5,-2226 170.5,-2250"/>
+<text text-anchor="middle" x="121.5" y="-2235.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge42" class="edge">
+<title>proc~init_dgmodel2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M170.8,-2240.95C195.16,-2239.87 223.59,-2234.32 243,-2217 304.53,-2162.1 311.61,-2054.67 311.62,-2008.25"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="315.12,-2008.03 311.51,-1998.07 308.12,-2008.11 315.12,-2008.03"/>
+</g>
+<!-- proc~updatehost_scalar1d~2 -->
+<g id="proc~~gpucheck~~CalledByGraph_node44" class="node">
+<title>proc~updatehost_scalar1d~2</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node44"><a xlink:href=".././proc/updatehost_scalar1d~2.html" xlink:title="UpdateHost_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-2208 57,-2208 57,-2184 186,-2184 186,-2208"/>
+<text text-anchor="middle" x="121.5" y="-2193.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar1d~2&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge43" class="edge">
+<title>proc~updatehost_scalar1d~2&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.27,-2197.06C206.33,-2194.41 227.31,-2188.19 243,-2175 294,-2132.13 306.75,-2047.99 309.94,-2008.05"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.43,-2008.24 310.61,-1998.03 306.45,-2007.77 313.43,-2008.24"/>
+</g>
+<!-- proc~updatehost_scalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node45" class="node">
+<title>proc~updatehost_scalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node45"><a xlink:href=".././proc/updatehost_scalar2d.html" xlink:title="UpdateHost_Scalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-2166 57,-2166 57,-2142 186,-2142 186,-2166"/>
+<text text-anchor="middle" x="121.5" y="-2151.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge44" class="edge">
+<title>proc~updatehost_scalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.24,-2154.16C206.06,-2151.41 226.92,-2145.35 243,-2133 283.47,-2101.91 300.73,-2041.02 307.36,-2008.21"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.82,-2008.72 309.21,-1998.24 303.94,-2007.43 310.82,-2008.72"/>
+</g>
+<!-- proc~sourcemethod_ecadvection2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node46" class="node">
+<title>proc~sourcemethod_ecadvection2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node46"><a xlink:href=".././proc/sourcemethod_ecadvection2d.html" xlink:title="SourceMethod_ECAdvection2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209.5,-2124 33.5,-2124 33.5,-2100 209.5,-2100 209.5,-2124"/>
+<text text-anchor="middle" x="121.5" y="-2109.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SourceMethod_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_ecadvection2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge45" class="edge">
+<title>proc~sourcemethod_ecadvection2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M209.75,-2105.68C221.53,-2102.34 232.99,-2097.62 243,-2091 273.43,-2070.87 293.21,-2031.94 303.21,-2007.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.52,-2008.68 306.9,-1998.09 300,-2006.14 306.52,-2008.68"/>
+</g>
+<!-- proc~free_mappedscalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node47" class="node">
+<title>proc~free_mappedscalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node47"><a xlink:href=".././proc/free_mappedscalar2d.html" xlink:title="Free_MappedScalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="187.5,-2082 55.5,-2082 55.5,-2058 187.5,-2058 187.5,-2082"/>
+<text text-anchor="middle" x="121.5" y="-2067.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_mappedscalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge46" class="edge">
+<title>proc~free_mappedscalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M187.5,-2065.61C206.12,-2062.54 225.97,-2057.44 243,-2049 263.61,-2038.79 282.41,-2020.34 294.99,-2006.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="297.85,-2008.08 301.64,-1998.18 292.51,-2003.55 297.85,-2008.08"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node48" class="node">
+<title>proc~setinteriorfromequation_mappedscalar1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node48"><a xlink:href=".././proc/setinteriorfromequation_mappedscalar1d.html" xlink:title="SetInteriorFromEquation_MappedScalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-2040 2,-2040 2,-2016 241,-2016 241,-2040"/>
+<text text-anchor="middle" x="121.5" y="-2025.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedScalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge47" class="edge">
+<title>proc~setinteriorfromequation_mappedscalar1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M200.26,-2015.94C214.54,-2013.31 229.27,-2010.3 243,-2007 251.46,-2004.96 260.42,-2002.46 268.95,-1999.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="270.19,-2003.18 278.72,-1996.89 268.13,-1996.49 270.19,-2003.18"/>
+</g>
+<!-- proc~init_scalar1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node49" class="node">
+<title>proc~init_scalar1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node49"><a xlink:href=".././proc/init_scalar1d.html" xlink:title="Init_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-1998 80,-1998 80,-1974 163,-1974 163,-1998"/>
+<text text-anchor="middle" x="121.5" y="-1983.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_scalar1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge48" class="edge">
+<title>proc~init_scalar1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.4,-1986C194.53,-1986 237.24,-1986 268.71,-1986"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="268.92,-1989.5 278.92,-1986 268.92,-1982.5 268.92,-1989.5"/>
+</g>
+<!-- proc~updatedevice_twopointvector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node50" class="node">
+<title>proc~updatedevice_twopointvector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node50"><a xlink:href=".././proc/updatedevice_twopointvector3d.html" xlink:title="UpdateDevice_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="215,-1956 28,-1956 28,-1932 215,-1932 215,-1956"/>
+<text text-anchor="middle" x="121.5" y="-1941.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_twopointvector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge49" class="edge">
+<title>proc~updatedevice_twopointvector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M200.26,-1956.06C214.54,-1958.69 229.27,-1961.7 243,-1965 251.46,-1967.04 260.42,-1969.54 268.95,-1972.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="268.13,-1975.51 278.72,-1975.11 270.19,-1968.82 268.13,-1975.51"/>
+</g>
+<!-- proc~init_dgmodel3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node51" class="node">
+<title>proc~init_dgmodel3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node51"><a xlink:href=".././proc/init_dgmodel3d.html" xlink:title="Init_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170.5,-1914 72.5,-1914 72.5,-1890 170.5,-1890 170.5,-1914"/>
+<text text-anchor="middle" x="121.5" y="-1899.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge50" class="edge">
+<title>proc~init_dgmodel3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M170.51,-1904.06C193.42,-1906.59 220.64,-1911.93 243,-1923 263.61,-1933.21 282.41,-1951.66 294.99,-1965.97"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="292.51,-1968.45 301.64,-1973.82 297.85,-1963.92 292.51,-1968.45"/>
+</g>
+<!-- proc~free_mesh2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node52" class="node">
+<title>proc~free_mesh2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node52"><a xlink:href=".././proc/free_mesh2d.html" xlink:title="Free_Mesh2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-1872 80,-1872 80,-1848 163,-1848 163,-1872"/>
+<text text-anchor="middle" x="121.5" y="-1857.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_mesh2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge51" class="edge">
+<title>proc~free_mesh2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.19,-1859.11C188.08,-1860.4 219.53,-1865.48 243,-1881 273.43,-1901.13 293.21,-1940.06 303.21,-1964.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="300,-1965.86 306.9,-1973.91 306.52,-1963.32 300,-1965.86"/>
+</g>
+<!-- proc~free_lagrange -->
+<g id="proc~~gpucheck~~CalledByGraph_node53" class="node">
+<title>proc~free_lagrange</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node53"><a xlink:href=".././proc/free_lagrange.html" xlink:title="Free_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="167,-1830 76,-1830 76,-1806 167,-1806 167,-1830"/>
+<text text-anchor="middle" x="121.5" y="-1815.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~free_lagrange&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge52" class="edge">
+<title>proc~free_lagrange&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M167.16,-1816.11C191.79,-1817.27 221.61,-1822.57 243,-1839 283.47,-1870.09 300.73,-1930.98 307.36,-1963.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="303.94,-1964.57 309.21,-1973.76 310.82,-1963.28 303.94,-1964.57"/>
+</g>
+<!-- proc~free_lagrange~2 -->
+<g id="proc~~gpucheck~~CalledByGraph_node54" class="node">
+<title>proc~free_lagrange~2</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node54"><a xlink:href=".././proc/free_lagrange~2.html" xlink:title="Free_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="167,-1788 76,-1788 76,-1764 167,-1764 167,-1788"/>
+<text text-anchor="middle" x="121.5" y="-1773.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~free_lagrange~2&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge53" class="edge">
+<title>proc~free_lagrange~2&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M167.14,-1773.38C192.07,-1774.26 222.19,-1779.51 243,-1797 294,-1839.87 306.75,-1924.01 309.94,-1963.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.45,-1964.23 310.61,-1973.97 313.43,-1963.76 306.45,-1964.23"/>
+</g>
+<!-- proc~init_mappedscalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node55" class="node">
+<title>proc~init_mappedscalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node55"><a xlink:href=".././proc/init_mappedscalar2d.html" xlink:title="Init_MappedScalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="184.5,-1746 58.5,-1746 58.5,-1722 184.5,-1722 184.5,-1746"/>
+<text text-anchor="middle" x="121.5" y="-1731.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_mappedscalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge54" class="edge">
+<title>proc~init_mappedscalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M184.55,-1732.14C205.3,-1734.57 227.16,-1740.86 243,-1755 304.53,-1809.9 311.61,-1917.33 311.62,-1963.75"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="308.12,-1963.89 311.51,-1973.93 315.12,-1963.97 308.12,-1963.89"/>
+</g>
+<!-- proc~sideexchange_mappedscalar1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node56" class="node">
+<title>proc~sideexchange_mappedscalar1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node56"><a xlink:href=".././proc/sideexchange_mappedscalar1d.html" xlink:title="SideExchange_MappedScalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="214,-1704 29,-1704 29,-1680 214,-1680 214,-1704"/>
+<text text-anchor="middle" x="121.5" y="-1689.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SideExchange_MappedScalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~sideexchange_mappedscalar1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge55" class="edge">
+<title>proc~sideexchange_mappedscalar1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M214.1,-1696.21C224.77,-1699.94 234.76,-1705.33 243,-1713 280.03,-1747.47 301.66,-1904.91 308.56,-1963.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="305.1,-1964.29 309.71,-1973.82 312.06,-1963.49 305.1,-1964.29"/>
+</g>
+<!-- proc~updatedevice_scalar1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node57" class="node">
+<title>proc~updatedevice_scalar1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node57"><a xlink:href=".././proc/updatedevice_scalar1d.html" xlink:title="UpdateDevice_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-1662 50.5,-1662 50.5,-1638 192.5,-1638 192.5,-1662"/>
+<text text-anchor="middle" x="121.5" y="-1647.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge56" class="edge">
+<title>proc~updatedevice_scalar1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.66,-1648.53C211.07,-1651.53 229.52,-1658.05 243,-1671 285.44,-1711.77 304.05,-1898.25 309.33,-1963.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="305.88,-1964.1 310.14,-1973.8 312.85,-1963.56 305.88,-1964.1"/>
+</g>
+<!-- proc~updatehost_twopointvector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node58" class="node">
+<title>proc~updatehost_twopointvector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node58"><a xlink:href=".././proc/updatehost_twopointvector3d.html" xlink:title="UpdateHost_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209,-1620 34,-1620 34,-1596 209,-1596 209,-1620"/>
+<text text-anchor="middle" x="121.5" y="-1605.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_twopointvector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge57" class="edge">
+<title>proc~updatehost_twopointvector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M209.06,-1609.99C221.71,-1613.77 233.62,-1619.76 243,-1629 291.01,-1676.27 306.24,-1893.14 309.97,-1963.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.48,-1963.94 310.48,-1973.75 313.47,-1963.59 306.48,-1963.94"/>
+</g>
+<!-- proc~free_mappedscalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node59" class="node">
+<title>proc~free_mappedscalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node59"><a xlink:href=".././proc/free_mappedscalar3d.html" xlink:title="Free_MappedScalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="187.5,-1578 55.5,-1578 55.5,-1554 187.5,-1554 187.5,-1578"/>
+<text text-anchor="middle" x="121.5" y="-1563.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_mappedscalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge58" class="edge">
+<title>proc~free_mappedscalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M187.7,-1563.39C207.86,-1565.93 228.54,-1572.48 243,-1587 296.54,-1640.74 308.14,-1887.66 310.46,-1963.67"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.97,-1964.08 310.75,-1973.97 313.97,-1963.88 306.97,-1964.08"/>
+</g>
+<!-- proc~free_tensor2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node60" class="node">
+<title>proc~free_tensor2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node60"><a xlink:href=".././proc/free_tensor2d.html" xlink:title="Free_Tensor2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166.5,-1536 76.5,-1536 76.5,-1512 166.5,-1512 166.5,-1536"/>
+<text text-anchor="middle" x="121.5" y="-1521.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_tensor2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge59" class="edge">
+<title>proc~free_tensor2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.7,-1519.92C192.43,-1520.1 223.52,-1525.14 243,-1545 302.06,-1605.22 309.85,-1882.08 310.85,-1963.45"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.36,-1963.63 310.96,-1973.59 314.36,-1963.56 307.36,-1963.63"/>
+</g>
+<!-- proc~init_lagrange~2 -->
+<g id="proc~~gpucheck~~CalledByGraph_node61" class="node">
+<title>proc~init_lagrange~2</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node61"><a xlink:href=".././proc/init_lagrange~2.html" xlink:title="Init_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="164,-1494 79,-1494 79,-1470 164,-1470 164,-1494"/>
+<text text-anchor="middle" x="121.5" y="-1479.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~init_lagrange~2&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge60" class="edge">
+<title>proc~init_lagrange~2&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M164.16,-1477.84C190.4,-1477.65 222.99,-1482.32 243,-1503 307.68,-1569.82 311.43,-1877.52 311.19,-1963.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.69,-1963.77 311.14,-1973.79 314.69,-1963.81 307.69,-1963.77"/>
+</g>
+<!-- proc~free_vector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node62" class="node">
+<title>proc~free_vector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node62"><a xlink:href=".././proc/free_vector2d.html" xlink:title="Free_Vector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-1452 77,-1452 77,-1428 166,-1428 166,-1452"/>
+<text text-anchor="middle" x="121.5" y="-1437.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Vector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_vector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge61" class="edge">
+<title>proc~free_vector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.28,-1435.76C192.19,-1435.8 223.62,-1440.75 243,-1461 313.24,-1534.38 312.88,-1872.46 311.47,-1963.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.97,-1963.63 311.29,-1973.69 314.97,-1963.75 307.97,-1963.63"/>
+</g>
+<!-- proc~free_tensor3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node63" class="node">
+<title>proc~free_tensor3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node63"><a xlink:href=".././proc/free_tensor3d.html" xlink:title="Free_Tensor3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166.5,-1410 76.5,-1410 76.5,-1386 166.5,-1386 166.5,-1410"/>
+<text text-anchor="middle" x="121.5" y="-1395.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_tensor3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge62" class="edge">
+<title>proc~free_tensor3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.65,-1393.69C192.52,-1393.75 223.79,-1398.74 243,-1419 281.22,-1459.31 304.64,-1863.59 309.88,-1963.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.39,-1964.05 310.4,-1973.85 313.38,-1963.69 306.39,-1964.05"/>
+</g>
+<!-- proc~free_twopointvector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node64" class="node">
+<title>proc~free_twopointvector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node64"><a xlink:href=".././proc/free_twopointvector2d.html" xlink:title="Free_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="189,-1368 54,-1368 54,-1344 189,-1344 189,-1368"/>
+<text text-anchor="middle" x="121.5" y="-1353.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_twopointvector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge63" class="edge">
+<title>proc~free_twopointvector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M189.13,-1353.03C209.02,-1355.62 229.18,-1362.3 243,-1377 284.05,-1420.65 305.51,-1859.13 310.07,-1963.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.58,-1963.92 310.5,-1973.76 313.57,-1963.62 306.58,-1963.92"/>
+</g>
+<!-- proc~free_vector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node65" class="node">
+<title>proc~free_vector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node65"><a xlink:href=".././proc/free_vector3d.html" xlink:title="Free_Vector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-1326 77,-1326 77,-1302 166,-1302 166,-1326"/>
+<text text-anchor="middle" x="121.5" y="-1311.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Vector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_vector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge64" class="edge">
+<title>proc~free_vector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.17,-1309.59C192.19,-1309.53 223.8,-1314.43 243,-1335 286.87,-1381.98 306.31,-1854.38 310.24,-1963.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.74,-1963.88 310.59,-1973.75 313.74,-1963.64 306.74,-1963.88"/>
+</g>
+<!-- proc~updatehost_scalar1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node66" class="node">
+<title>proc~updatehost_scalar1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node66"><a xlink:href=".././proc/updatehost_scalar1d.html" xlink:title="UpdateHost_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-1284 57,-1284 57,-1260 186,-1260 186,-1284"/>
+<text text-anchor="middle" x="121.5" y="-1269.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge65" class="edge">
+<title>proc~updatehost_scalar1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.11,-1268.55C207.01,-1270.82 228.56,-1277.43 243,-1293 289.71,-1343.33 307.07,-1850.16 310.39,-1963.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.89,-1963.93 310.68,-1973.83 313.89,-1963.73 306.89,-1963.93"/>
+</g>
+<!-- proc~free_points -->
+<g id="proc~~gpucheck~~CalledByGraph_node67" class="node">
+<title>proc~free_points</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node67"><a xlink:href=".././proc/free_points.html" xlink:title="Free_Points">
+<polygon fill="#d9534f" stroke="#d9534f" points="157.5,-1242 85.5,-1242 85.5,-1218 157.5,-1218 157.5,-1242"/>
+<text text-anchor="middle" x="121.5" y="-1227.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Points</text>
+</a>
+</g>
+</g>
+<!-- proc~free_points&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge66" class="edge">
+<title>proc~free_points&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M157.64,-1225.71C184.99,-1224.52 221.76,-1227.98 243,-1251 292.57,-1304.72 307.79,-1846.48 310.52,-1963.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.03,-1964.05 310.75,-1973.97 314.03,-1963.9 307.03,-1964.05"/>
+</g>
+<!-- proc~init_scalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node68" class="node">
+<title>proc~init_scalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node68"><a xlink:href=".././proc/init_scalar3d.html" xlink:title="Init_Scalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-1200 80,-1200 80,-1176 163,-1176 163,-1200"/>
+<text text-anchor="middle" x="121.5" y="-1185.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_scalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge67" class="edge">
+<title>proc~init_scalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.07,-1183.51C189.71,-1183 223.18,-1187.41 243,-1209 295.4,-1266.07 308.46,-1842.12 310.64,-1963.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.14,-1963.95 310.81,-1973.89 314.14,-1963.83 307.14,-1963.95"/>
+</g>
+<!-- proc~init_mappedscalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node69" class="node">
+<title>proc~init_mappedscalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node69"><a xlink:href=".././proc/init_mappedscalar3d.html" xlink:title="Init_MappedScalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="184.5,-1158 58.5,-1158 58.5,-1134 184.5,-1134 184.5,-1158"/>
+<text text-anchor="middle" x="121.5" y="-1143.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_mappedscalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge68" class="edge">
+<title>proc~init_mappedscalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M184.68,-1142.27C206.07,-1144.37 228.31,-1150.93 243,-1167 298.25,-1227.44 309.09,-1838.17 310.74,-1963.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.25,-1963.91 310.87,-1973.86 314.25,-1963.82 307.25,-1963.91"/>
+</g>
+<!-- proc~init_lagrange -->
+<g id="proc~~gpucheck~~CalledByGraph_node70" class="node">
+<title>proc~init_lagrange</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node70"><a xlink:href=".././proc/init_lagrange.html" xlink:title="Init_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="164,-1116 79,-1116 79,-1092 164,-1092 164,-1116"/>
+<text text-anchor="middle" x="121.5" y="-1101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~init_lagrange&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge69" class="edge">
+<title>proc~init_lagrange&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M164,-1099.44C190.52,-1099.02 223.49,-1103.57 243,-1125 301.12,-1188.84 309.7,-1834.62 310.84,-1963.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.34,-1963.91 310.92,-1973.88 314.34,-1963.85 307.34,-1963.91"/>
+</g>
+<!-- proc~boundaryflux_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node71" class="node">
+<title>proc~boundaryflux_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node71"><a xlink:href=".././proc/boundaryflux_dgmodel1d.html" xlink:title="BoundaryFlux_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-1074 44,-1074 44,-1050 199,-1050 199,-1074"/>
+<text text-anchor="middle" x="121.5" y="-1059.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryFlux_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~boundaryflux_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge70" class="edge">
+<title>proc~boundaryflux_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M199.18,-1060.35C215.74,-1063.73 231.66,-1070.5 243,-1083 304,-1150.25 310.28,-1831.48 310.93,-1963.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.43,-1963.96 310.97,-1973.94 314.43,-1963.93 307.43,-1963.96"/>
+</g>
+<!-- proc~init_twopointvector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node72" class="node">
+<title>proc~init_twopointvector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node72"><a xlink:href=".././proc/init_twopointvector2d.html" xlink:title="Init_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-1032 57,-1032 57,-1008 186,-1008 186,-1032"/>
+<text text-anchor="middle" x="121.5" y="-1017.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_twopointvector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge71" class="edge">
+<title>proc~init_twopointvector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.03,-1016.31C207.04,-1018.53 228.69,-1025.17 243,-1041 306.84,-1111.61 310.83,-1827.24 311,-1963.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.5,-1963.72 311.01,-1973.72 314.5,-1963.72 307.5,-1963.72"/>
+</g>
+<!-- proc~updatedevice_scalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node73" class="node">
+<title>proc~updatedevice_scalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node73"><a xlink:href=".././proc/updatedevice_scalar3d.html" xlink:title="UpdateDevice_Scalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-990 50.5,-990 50.5,-966 192.5,-966 192.5,-990"/>
+<text text-anchor="middle" x="121.5" y="-975.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge72" class="edge">
+<title>proc~updatedevice_scalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.65,-975.13C211.51,-977.99 230.2,-984.8 243,-999 309.69,-1072.99 311.35,-1823.35 311.08,-1963.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.58,-1963.85 311.05,-1973.86 314.58,-1963.87 307.58,-1963.85"/>
+</g>
+<!-- proc~init_tensor2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node74" class="node">
+<title>proc~init_tensor2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node74"><a xlink:href=".././proc/init_tensor2d.html" xlink:title="Init_Tensor2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163.5,-948 79.5,-948 79.5,-924 163.5,-924 163.5,-948"/>
+<text text-anchor="middle" x="121.5" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_tensor2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge75" class="edge">
+<title>proc~init_tensor2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.51,-931.37C190.17,-930.84 223.48,-935.28 243,-957 312.55,-1034.38 311.86,-1819.66 311.15,-1963.45"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.64,-1963.68 311.09,-1973.7 314.64,-1963.72 307.64,-1963.68"/>
+</g>
+<!-- proc~free_esatmo3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node75" class="node">
+<title>proc~free_esatmo3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node75"><a xlink:href=".././proc/free_esatmo3d.html" xlink:title="Free_ESAtmo3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170,-906 73,-906 73,-882 170,-882 170,-906"/>
+<text text-anchor="middle" x="121.5" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_esatmo3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge73" class="edge">
+<title>proc~free_esatmo3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M170.04,-889.33C195.44,-889.64 225.07,-895 243,-915 315.49,-995.87 312.34,-1817.96 311.2,-1963.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.7,-1963.88 311.12,-1973.91 314.7,-1963.94 307.7,-1963.88"/>
+</g>
+<!-- proc~init_mesh2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node76" class="node">
+<title>proc~init_mesh2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node76"><a xlink:href=".././proc/init_mesh2d.html" xlink:title="Init_Mesh2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="160,-864 83,-864 83,-840 160,-840 160,-864"/>
+<text text-anchor="middle" x="121.5" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_mesh2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge74" class="edge">
+<title>proc~init_mesh2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M160.09,-847.44C187.28,-846.44 222.69,-850.29 243,-873 318.3,-957.21 312.82,-1813.17 311.26,-1963.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.76,-1963.76 311.15,-1973.8 314.76,-1963.84 307.76,-1963.76"/>
+</g>
+<!-- proc~updatedevice_twopointvector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node77" class="node">
+<title>proc~updatedevice_twopointvector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node77"><a xlink:href=".././proc/updatedevice_twopointvector2d.html" xlink:title="UpdateDevice_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="215,-822 28,-822 28,-798 215,-798 215,-822"/>
+<text text-anchor="middle" x="121.5" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_twopointvector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge76" class="edge">
+<title>proc~updatedevice_twopointvector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M215.21,-812.72C225.77,-816.67 235.44,-822.52 243,-831 282.18,-874.91 306.62,-1806.6 310.47,-1963.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="306.97,-1964.02 310.72,-1973.93 313.97,-1963.85 306.97,-1964.02"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node78" class="node">
+<title>proc~setinteriorfromequation_mappedvector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node78"><a xlink:href=".././proc/setinteriorfromequation_mappedvector2d.html" xlink:title="SetInteriorFromEquation_MappedVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-780 2,-780 2,-756 241,-756 241,-780"/>
+<text text-anchor="middle" x="121.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge77" class="edge">
+<title>proc~setinteriorfromequation_mappedvector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M233.2,-780.18C236.74,-782.74 240.03,-785.67 243,-789 283.64,-834.64 306.95,-1804.03 310.52,-1963.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.02,-1963.96 310.74,-1973.88 314.02,-1963.81 307.02,-1963.96"/>
+</g>
+<!-- proc~init_points -->
+<g id="proc~~gpucheck~~CalledByGraph_node79" class="node">
+<title>proc~init_points</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node79"><a xlink:href=".././proc/init_points.html" xlink:title="Init_Points">
+<polygon fill="#d9534f" stroke="#d9534f" points="154.5,-738 88.5,-738 88.5,-714 154.5,-714 154.5,-738"/>
+<text text-anchor="middle" x="121.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Points</text>
+</a>
+</g>
+</g>
+<!-- proc~init_points&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge78" class="edge">
+<title>proc~init_points&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M154.57,-721.69C182.34,-719.94 221.35,-722.63 243,-747 285.06,-794.32 307.22,-1799.74 310.56,-1963.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.06,-1963.92 310.76,-1973.85 314.06,-1963.78 307.06,-1963.92"/>
+</g>
+<!-- proc~updatehost_scalar3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node80" class="node">
+<title>proc~updatehost_scalar3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node80"><a xlink:href=".././proc/updatehost_scalar3d.html" xlink:title="UpdateHost_Scalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-696 57,-696 57,-672 186,-672 186,-696"/>
+<text text-anchor="middle" x="121.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge79" class="edge">
+<title>proc~updatehost_scalar3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.19,-680.16C207.22,-682.37 228.84,-689.03 243,-705 286.52,-754.06 307.53,-1797.68 310.6,-1963.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.1,-1963.9 310.79,-1973.84 314.1,-1963.78 307.1,-1963.9"/>
+</g>
+<!-- proc~boundaryflux_dgmodel2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node81" class="node">
+<title>proc~boundaryflux_dgmodel2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node81"><a xlink:href=".././proc/boundaryflux_dgmodel2d.html" xlink:title="BoundaryFlux_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-654 44,-654 44,-630 199,-630 199,-654"/>
+<text text-anchor="middle" x="121.5" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryFlux_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~boundaryflux_dgmodel2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge80" class="edge">
+<title>proc~boundaryflux_dgmodel2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M199.08,-640.1C215.75,-643.46 231.74,-650.28 243,-663 287.95,-713.76 307.79,-1793.75 310.64,-1963.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.14,-1963.91 310.81,-1973.85 314.14,-1963.79 307.14,-1963.91"/>
+</g>
+<!-- proc~free_ecadvection3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node82" class="node">
+<title>proc~free_ecadvection3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node82"><a xlink:href=".././proc/free_ecadvection3d.html" xlink:title="Free_ECAdvection3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="182.5,-612 60.5,-612 60.5,-588 182.5,-588 182.5,-612"/>
+<text text-anchor="middle" x="121.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_ecadvection3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge81" class="edge">
+<title>proc~free_ecadvection3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M182.77,-595.81C204.87,-597.64 228.09,-604.14 243,-621 289.4,-673.48 308.07,-1791.07 310.68,-1963.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.18,-1963.93 310.83,-1973.88 314.18,-1963.82 307.18,-1963.93"/>
+</g>
+<!-- proc~fluxmethod_dgmodel2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node83" class="node">
+<title>proc~fluxmethod_dgmodel2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node83"><a xlink:href=".././proc/fluxmethod_dgmodel2d.html" xlink:title="fluxmethod_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-570 50.5,-570 50.5,-546 192.5,-546 192.5,-570"/>
+<text text-anchor="middle" x="121.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fluxmethod_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~fluxmethod_dgmodel2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge82" class="edge">
+<title>proc~fluxmethod_dgmodel2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.52,-554.92C211.5,-557.75 230.28,-564.59 243,-579 290.86,-633.21 308.33,-1788.62 310.71,-1963.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.21,-1963.97 310.85,-1973.92 314.21,-1963.88 307.21,-1963.97"/>
+</g>
+<!-- proc~free_scalar2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node84" class="node">
+<title>proc~free_scalar2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node84"><a xlink:href=".././proc/free_scalar2d.html" xlink:title="Free_Scalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="166,-528 77,-528 77,-504 166,-504 166,-528"/>
+<text text-anchor="middle" x="121.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~free_scalar2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge83" class="edge">
+<title>proc~free_scalar2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M166.29,-511.21C192.53,-510.97 224.32,-515.81 243,-537 292.32,-592.94 308.59,-1786.39 310.75,-1963.98"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.25,-1964.03 310.86,-1973.99 314.24,-1963.95 307.25,-1964.03"/>
+</g>
+<!-- proc~updatedevice_mesh2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node85" class="node">
+<title>proc~updatedevice_mesh2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node85"><a xlink:href=".././proc/updatedevice_mesh2d.html" xlink:title="UpdateDevice_Mesh2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="189.5,-486 53.5,-486 53.5,-462 189.5,-462 189.5,-486"/>
+<text text-anchor="middle" x="121.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_mesh2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge84" class="edge">
+<title>proc~updatedevice_mesh2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M189.72,-470.5C209.64,-473.06 229.67,-479.86 243,-495 293.74,-552.62 308.82,-1781.83 310.77,-1963.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.27,-1963.68 310.88,-1973.64 314.27,-1963.6 307.27,-1963.68"/>
+</g>
+<!-- proc~updatedevice_tensor2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node86" class="node">
+<title>proc~updatedevice_tensor2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node86"><a xlink:href=".././proc/updatedevice_tensor2d.html" xlink:title="UpdateDevice_Tensor2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-444 50.5,-444 50.5,-420 192.5,-420 192.5,-444"/>
+<text text-anchor="middle" x="121.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_tensor2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge85" class="edge">
+<title>proc~updatedevice_tensor2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.56,-428.89C211.53,-431.72 230.31,-438.57 243,-453 295.18,-512.34 309.05,-1778.7 310.8,-1963.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.3,-1963.76 310.89,-1973.73 314.3,-1963.7 307.3,-1963.76"/>
+</g>
+<!-- proc~init_vector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node87" class="node">
+<title>proc~init_vector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node87"><a xlink:href=".././proc/init_vector2d.html" xlink:title="Init_Vector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-402 80,-402 80,-378 163,-378 163,-402"/>
+<text text-anchor="middle" x="121.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Vector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_vector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge86" class="edge">
+<title>proc~init_vector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.09,-385.25C189.91,-384.57 223.59,-388.9 243,-411 296.65,-472.09 309.29,-1777.01 310.83,-1963.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.33,-1963.87 310.91,-1973.84 314.33,-1963.81 307.33,-1963.87"/>
+</g>
+<!-- proc~init_vector3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node88" class="node">
+<title>proc~init_vector3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node88"><a xlink:href=".././proc/init_vector3d.html" xlink:title="Init_Vector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163,-360 80,-360 80,-336 163,-336 163,-360"/>
+<text text-anchor="middle" x="121.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Vector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_vector3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge87" class="edge">
+<title>proc~init_vector3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.09,-343.24C189.92,-342.56 223.6,-346.89 243,-369 298.1,-431.81 309.52,-1774.2 310.85,-1963.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.36,-1963.99 310.92,-1973.97 314.36,-1963.94 307.36,-1963.99"/>
+</g>
+<!-- proc~init_tensor3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node89" class="node">
+<title>proc~init_tensor3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node89"><a xlink:href=".././proc/init_tensor3d.html" xlink:title="Init_Tensor3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="163.5,-318 79.5,-318 79.5,-294 163.5,-294 163.5,-318"/>
+<text text-anchor="middle" x="121.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_tensor3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge88" class="edge">
+<title>proc~init_tensor3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M163.68,-301.22C190.42,-300.61 223.76,-305.04 243,-327 299.52,-391.5 309.72,-1770.08 310.88,-1963.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.38,-1963.68 310.94,-1973.66 314.38,-1963.64 307.38,-1963.68"/>
+</g>
+<!-- proc~calculateentropy_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node90" class="node">
+<title>proc~calculateentropy_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node90"><a xlink:href=".././proc/calculateentropy_dgmodel1d.html" xlink:title="CalculateEntropy_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-276 35.5,-276 35.5,-252 207.5,-252 207.5,-276"/>
+<text text-anchor="middle" x="121.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CalculateEntropy_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~calculateentropy_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge89" class="edge">
+<title>proc~calculateentropy_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M207.54,-264.02C221.1,-267.85 233.7,-274.37 243,-285 300.98,-351.23 309.94,-1767.53 310.9,-1963.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.4,-1963.83 310.95,-1973.81 314.4,-1963.79 307.4,-1963.83"/>
+</g>
+<!-- proc~updatehost_twopointvector2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node91" class="node">
+<title>proc~updatehost_twopointvector2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node91"><a xlink:href=".././proc/updatehost_twopointvector2d.html" xlink:title="UpdateHost_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209,-234 34,-234 34,-210 209,-210 209,-234"/>
+<text text-anchor="middle" x="121.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_twopointvector2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge90" class="edge">
+<title>proc~updatehost_twopointvector2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M209.07,-222.46C222.05,-226.34 234.05,-232.77 243,-243 302.47,-310.99 310.15,-1766.57 310.92,-1963.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.42,-1963.99 310.96,-1973.98 314.42,-1963.96 307.42,-1963.99"/>
+</g>
+<!-- proc~fluxmethod_dgmodel1d -->
+<g id="proc~~gpucheck~~CalledByGraph_node92" class="node">
+<title>proc~fluxmethod_dgmodel1d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node92"><a xlink:href=".././proc/fluxmethod_dgmodel1d.html" xlink:title="fluxmethod_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-192 50.5,-192 50.5,-168 192.5,-168 192.5,-192"/>
+<text text-anchor="middle" x="121.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fluxmethod_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~fluxmethod_dgmodel1d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge91" class="edge">
+<title>proc~fluxmethod_dgmodel1d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.61,-176.84C211.59,-179.66 230.35,-186.53 243,-201 303.87,-270.65 310.34,-1761.29 310.94,-1963.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.44,-1963.7 310.97,-1973.69 314.44,-1963.68 307.44,-1963.7"/>
+</g>
+<!-- proc~fluxmethod_dgmodel3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node93" class="node">
+<title>proc~fluxmethod_dgmodel3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node93"><a xlink:href=".././proc/fluxmethod_dgmodel3d.html" xlink:title="fluxmethod_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-150 50.5,-150 50.5,-126 192.5,-126 192.5,-150"/>
+<text text-anchor="middle" x="121.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fluxmethod_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~fluxmethod_dgmodel3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge92" class="edge">
+<title>proc~fluxmethod_dgmodel3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M192.62,-134.83C211.6,-137.66 230.36,-144.52 243,-159 305.36,-230.43 310.55,-1760.66 310.97,-1963.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.47,-1963.88 310.98,-1973.88 314.47,-1963.87 307.47,-1963.88"/>
+</g>
+<!-- proc~init_esatmo3d -->
+<g id="proc~~gpucheck~~CalledByGraph_node94" class="node">
+<title>proc~init_esatmo3d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node94"><a xlink:href=".././proc/init_esatmo3d.html" xlink:title="Init_ESAtmo3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="167,-108 76,-108 76,-84 167,-84 167,-108"/>
+<text text-anchor="middle" x="121.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_esatmo3d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge93" class="edge">
+<title>proc~init_esatmo3d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M167.25,-91.14C193.35,-90.99 224.64,-95.96 243,-117 306.79,-190.13 310.74,-1757.05 310.98,-1963.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.48,-1963.6 310.99,-1973.6 314.48,-1963.6 307.48,-1963.6"/>
+</g>
+<!-- proc~updatehost_tensor2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node95" class="node">
+<title>proc~updatehost_tensor2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node95"><a xlink:href=".././proc/updatehost_tensor2d.html" xlink:title="UpdateHost_Tensor2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186.5,-66 56.5,-66 56.5,-42 186.5,-42 186.5,-66"/>
+<text text-anchor="middle" x="121.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_tensor2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge94" class="edge">
+<title>proc~updatehost_tensor2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M186.66,-50.06C207.61,-52.29 229.05,-58.99 243,-75 308.26,-149.87 310.93,-1755.19 311,-1963.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.5,-1963.82 311,-1973.82 314.5,-1963.81 307.5,-1963.82"/>
+</g>
+<!-- proc~sourcemethod_dgmodel2d -->
+<g id="proc~~gpucheck~~CalledByGraph_node96" class="node">
+<title>proc~sourcemethod_dgmodel2d</title>
+<g id="a_proc~~gpucheck~~CalledByGraph_node96"><a xlink:href=".././proc/sourcemethod_dgmodel2d.html" xlink:title="sourcemethod_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="200.5,-24 42.5,-24 42.5,0 200.5,0 200.5,-24"/>
+<text text-anchor="middle" x="121.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sourcemethod_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_dgmodel2d&#45;&gt;proc~gpucheck -->
+<g id="proc~~gpucheck~~CalledByGraph_edge95" class="edge">
+<title>proc~sourcemethod_dgmodel2d&#45;&gt;proc~gpucheck</title>
+<path fill="none" stroke="#ff0000" d="M200.79,-10.29C216.88,-13.77 232.19,-20.59 243,-33 309.7,-109.58 311.12,-1751.81 311.02,-1963.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.52,-1963.79 311.01,-1973.8 314.52,-1963.8 307.52,-1963.79"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/gpucheck.html#src">gpuCheck</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">                      </span><span class="k">subroutine </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">gpuError_t</span><span class="p">)</span>
+<span class="w">                        </span><span class="k">use </span><span class="nb">iso_c_binding</span>
+<span class="nb">                        </span><span class="k">implicit none</span>
+<span class="k">                        </span><span class="kt">integer</span><span class="p">(</span><span class="kt">c_int</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gpuError_t</span>
+
+<span class="w">                        </span><span class="k">if</span><span class="p">(</span><span class="n">gpuError_t</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">hipSuccess</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">                          write</span><span class="p">(</span><span class="o">*</span><span class="p">,</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="s2">&quot;GPU ERROR: Error code = &quot;</span><span class="p">,</span><span class="n">gpuError_t</span>
+<span class="w">                          </span><span class="k">call exit</span><span class="p">(</span><span class="n">gpuError_t</span><span class="p">)</span>
+<span class="w">                        </span><span class="k">endif</span>
+<span class="k">                      endsubroutine </span><span class="n">gpuCheck</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-06-10 13:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

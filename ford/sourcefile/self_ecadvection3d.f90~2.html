@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_ECAdvection3D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_ECAdvection3D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for source files.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_ECAdvection3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_ECAdvection3D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_ecadvection3d.html">SELF_ECAdvection3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_ecadvection3d.f90~2.html#src">SELF_ECAdvection3D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_ecadvection3df902EfferentGraph" width="641pt" height="258pt"
+ viewBox="0.00 0.00 641.00 258.49" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph" class="graph" transform="scale(0.19 0.19) rotate(0) translate(4 1333.21)">
+<title>sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1333.21 3312,-1333.21 3312,4 -4,4"/>
+<!-- sourcefile~self_ecadvection3d.f90~2 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_ecadvection3d.f90~2</title>
+<polygon fill="none" stroke="black" points="3308,-634.16 3163,-634.16 3163,-610.16 3308,-610.16 3308,-634.16"/>
+<text text-anchor="middle" x="3235.5" y="-619.76" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_ECAdvection3D.f90</text>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_ecadvection3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_ecadvection3d_t.f90.html" xlink:title="SELF_ECAdvection3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="3127,-634.16 2973,-634.16 2973,-610.16 3127,-610.16 3127,-634.16"/>
+<text text-anchor="middle" x="3050" y="-619.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_ecadvection3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_ecadvection3d.f90~2&#45;&gt;sourcefile~self_ecadvection3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3162.77,-622.16C3154.48,-622.16 3145.96,-622.16 3137.5,-622.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="3137.23,-618.66 3127.23,-622.16 3137.23,-625.66 3137.23,-618.66"/>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_ecdgmodel3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_ecdgmodel3d.f90.html" xlink:title="SELF_ECDGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2937,-1074.16 2795,-1074.16 2795,-1050.16 2937,-1050.16 2937,-1074.16"/>
+<text text-anchor="middle" x="2866" y="-1059.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_ecdgmodel3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_ecdgmodel3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3043.94,-634.39C3018.94,-694.82 2908.48,-961.88 2876.01,-1040.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2872.71,-1039.2 2872.12,-1049.78 2879.18,-1041.88 2872.71,-1039.2"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_boundaryconditions.f90.html" xlink:title="SELF_BoundaryConditions.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2220,-305.16 2048,-305.16 2048,-281.16 2220,-281.16 2220,-305.16"/>
+<text text-anchor="middle" x="2134" y="-290.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2340,-293.16C2304.26,-291.22 2264.96,-290.81 2230.42,-291.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2230.31,-287.52 2220.33,-291.1 2230.36,-294.52 2230.31,-287.52"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1230,-216.16 1139,-216.16 1139,-192.16 1230,-192.16 1230,-216.16"/>
+<text text-anchor="middle" x="1184.5" y="-201.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_ecadvection3d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M3034.27,-609.97C2963.21,-552.37 2646.84,-309.68 2342,-293.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2340,-293.16C2293.79,-286.25 2283.31,-278.35 2237,-272.16 1857.91,-221.5 1396.69,-208.23 1240.33,-205.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1240.11,-201.56 1230.04,-204.87 1239.97,-208.56 1240.11,-201.56"/>
+</g>
+<!-- sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_ecdgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_ecdgmodel3d_t.f90.html" xlink:title="SELF_ECDGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2759,-1074.16 2608,-1074.16 2608,-1050.16 2759,-1050.16 2759,-1074.16"/>
+<text text-anchor="middle" x="2683.5" y="-1059.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_ecdgmodel3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2794.96,-1062.16C2786.55,-1062.16 2777.9,-1062.16 2769.31,-1062.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2769.29,-1058.66 2759.29,-1062.16 2769.29,-1065.66 2769.29,-1058.66"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_gpuinterfaces.f90.html" xlink:title="SELF_GPUInterfaces.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1043.5,-1216.16 904.5,-1216.16 904.5,-1192.16 1043.5,-1192.16 1043.5,-1216.16"/>
+<text text-anchor="middle" x="974" y="-1201.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2850.79,-1074.21C2821.84,-1097.87 2752.93,-1149.73 2684.5,-1168.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2682.5,-1168.16C2542.07,-1205.98 2175.76,-1120.16 2031,-1106.16 1967.66,-1100.03 1950.83,-1079.33 1888.5,-1092.16"/>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="443.5,-1144.16 358.5,-1144.16 358.5,-1120.16 443.5,-1120.16 443.5,-1144.16"/>
+<text text-anchor="middle" x="401" y="-1129.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_ecdgmodel3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2682.5,-1168.16C2255.77,-1310.91 2126.47,-1282.16 1676.5,-1282.16 1676.5,-1282.16 1676.5,-1282.16 1361.5,-1282.16 1246.12,-1282.16 1217.8,-1269.77 1103,-1258.16 1046.06,-1252.4 1032.23,-1244.07 975,-1244.16"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-604.16 499.5,-604.16 499.5,-580.16 613.5,-580.16 613.5,-604.16"/>
+<text text-anchor="middle" x="556.5" y="-589.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1886.5,-311.16C1642.88,-303.48 1607.24,-476.16 1363.5,-476.16 1363.5,-476.16 1363.5,-476.16 1183.5,-476.16 944.58,-476.16 877.58,-469.43 650,-542.16 626.31,-549.73 601.63,-563.41 583.73,-574.54"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="581.58,-571.76 575.03,-580.09 585.34,-577.67 581.58,-571.76"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-334.16 152,-334.16 152,-310.16 303,-310.16 303,-334.16"/>
+<text text-anchor="middle" x="227.5" y="-319.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2047.96,-301.57C2000.99,-305.67 1941.58,-309.98 1888.5,-311.16"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1886.5,-311.16C1830.64,-312.41 1477.64,-127.83 1423,-116.16 1021.38,-30.41 849.36,96.07 499,-118.16 470.49,-135.59 482.8,-157.25 463,-184.16 439.9,-215.55 438.92,-234.68 402,-247.16"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M400,-247.16C349.91,-263.13 294.63,-288.87 260.73,-305.65"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="259.14,-302.53 251.76,-310.13 262.27,-308.79 259.14,-302.53"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-220.16 881,-220.16 881,-196.16 1067,-196.16 1067,-220.16"/>
+<text text-anchor="middle" x="974" y="-205.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1138.77,-205.02C1120.69,-205.36 1099.03,-205.78 1077.46,-206.19"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1077.17,-202.7 1067.24,-206.39 1077.3,-209.7 1077.17,-202.7"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-509.16 0,-509.16 0,-485.16 116,-485.16 116,-509.16"/>
+<text text-anchor="middle" x="58" y="-494.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1138.83,-196.37C1117.21,-192.92 1090.83,-189.2 1067,-187.16 772.42,-161.99 697.4,-157.83 402,-170.16"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-569.16 181,-569.16 181,-545.16 274,-545.16 274,-569.16"/>
+<text text-anchor="middle" x="227.5" y="-554.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M522.32,-604.17C484.51,-617.27 424.97,-635.9 402,-632.16"/>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M176.75,-334.22C167.94,-337.78 159.28,-342.34 152,-348.16 108.8,-382.69 80.13,-443.08 67.09,-475.36"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="63.79,-474.19 63.4,-484.78 70.3,-476.74 63.79,-474.19"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-220.16 650,-220.16 650,-196.16 845,-196.16 845,-220.16"/>
+<text text-anchor="middle" x="747.5" y="-205.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M880.72,-208.16C872.38,-208.16 863.88,-208.16 855.43,-208.16"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="855.16,-204.66 845.16,-208.16 855.16,-211.66 855.16,-204.66"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_dgmodel3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_dgmodel3d.f90.html" xlink:title="SELF_DGModel3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2572,-1018.16 2445,-1018.16 2445,-994.16 2572,-994.16 2572,-1018.16"/>
+<text text-anchor="middle" x="2508.5" y="-1003.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_ecdgmodel3d_t.f90&#45;&gt;sourcefile~self_dgmodel3d.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M2645.39,-1050.15C2619.37,-1041.72 2584.38,-1030.4 2556.42,-1021.35"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="2557.44,-1018 2546.85,-1018.25 2555.29,-1024.66 2557.44,-1018"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_mappedtwopointvector_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_mappedtwopointvector_3d.f90.html" xlink:title="SELF_MappedTwoPointVector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2237,-1182.16 2031,-1182.16 2031,-1158.16 2237,-1158.16 2237,-1182.16"/>
+<text text-anchor="middle" x="2134" y="-1167.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_ecdgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedtwopointvector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_ecdgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedtwopointvector_3d.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M2621.55,-1074.18C2519.38,-1094.34 2314.12,-1134.83 2205.75,-1156.2"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="2205.02,-1152.78 2195.89,-1158.15 2206.38,-1159.65 2205.02,-1152.78"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M920.73,-1216.19C875.46,-1225.96 808.05,-1238.94 748.5,-1244.16"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="291,-1046.16 164,-1046.16 164,-1022.16 291,-1022.16 291,-1046.16"/>
+<text text-anchor="middle" x="227.5" y="-1031.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M378.97,-1120.14C348.76,-1102.88 292.91,-1070.96 258.41,-1051.25"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="260.12,-1048.2 249.7,-1046.27 256.65,-1054.27 260.12,-1048.2"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M191.59,-545.1C179.09,-540.74 164.9,-535.77 152,-531.16 135.38,-525.22 117.12,-518.57 101.23,-512.75"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="102.26,-509.4 91.67,-509.24 99.85,-515.97 102.26,-509.4"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2501.19,-994.08C2457.71,-910.86 2202.53,-422.42 2146.06,-314.33"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="2149.1,-312.59 2141.37,-305.34 2142.89,-315.83 2149.1,-312.59"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2133,-1092.16C2024.47,-1097.59 1994.94,-1070.25 1888.5,-1092.16"/>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2340,-1055.16C2337.2,-1054.43 2137.89,-1092.01 2135,-1092.16"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2133,-1092.16C2071.43,-1095.24 2056.57,-1081.27 1995,-1078.16 1714.62,-1063.97 1642.44,-1060.48 1363.5,-1092.16"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_dgmodel3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_dgmodel3d_t.f90.html" xlink:title="SELF_DGModel3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2409,-990.16 2273,-990.16 2273,-966.16 2409,-966.16 2409,-990.16"/>
+<text text-anchor="middle" x="2341" y="-975.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_dgmodel3d_t.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2444.93,-995.57C2436.51,-994.15 2427.79,-992.67 2419.16,-991.21"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="2419.52,-987.72 2409.08,-989.51 2418.35,-994.63 2419.52,-987.72"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_geometry_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_geometry_3d.f90.html" xlink:title="SELF_Geometry_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1744,-681.16 1607,-681.16 1607,-657.16 1744,-657.16 1744,-681.16"/>
+<text text-anchor="middle" x="1675.5" y="-666.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2133,-594.16C2088.55,-562.91 1941.66,-582.91 1888.5,-594.16"/>
+</g>
+<!-- sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_mesh_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_mesh_3d.f90.html" xlink:title="SELF_Mesh_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1571,-642.16 1459,-642.16 1459,-618.16 1571,-618.16 1571,-642.16"/>
+<text text-anchor="middle" x="1515" y="-627.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_dgmodel3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2489.24,-1018.32C2458.85,-1037.02 2395.91,-1069.29 2342,-1055.16"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2340,-1055.16C2302.46,-1045.32 2294.96,-1031.16 2273,-999.16 2165.39,-842.37 2290.56,-703.54 2135,-594.16"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2133,-594.16C2110.51,-578.35 1915.78,-552.73 1888.5,-556.16"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M2088.68,-1182.21C2007.55,-1203.18 1829.45,-1244.16 1676.5,-1244.16 1676.5,-1244.16 1676.5,-1244.16 1514,-1244.16 1368,-1244.16 1331.34,-1251.07 1185.5,-1244.16"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1183.5,-1244.16C1130.29,-1241.34 1070.68,-1228.94 1028.87,-1218.69"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1029.45,-1215.23 1018.9,-1216.21 1027.76,-1222.02 1029.45,-1215.23"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1183.5,-1244.16C1090.96,-1239.25 1067.67,-1244.01 975,-1244.16"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_mappedtwopointvector_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_mappedtwopointvector_3d_t.f90.html" xlink:title="SELF_MappedTwoPointVector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1995,-1163.16 1780,-1163.16 1780,-1139.16 1995,-1139.16 1995,-1163.16"/>
+<text text-anchor="middle" x="1887.5" y="-1148.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d.f90&#45;&gt;sourcefile~self_mappedtwopointvector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d.f90&#45;&gt;sourcefile~self_mappedtwopointvector_3d_t.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M2030.73,-1162.21C2022.26,-1161.55 2013.67,-1160.89 2005.11,-1160.22"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="2005.33,-1156.73 1995.09,-1159.44 2004.78,-1163.71 2005.33,-1156.73"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M555.5,-208.16C485.11,-208.27 468.73,-224.76 402,-247.16"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M649.87,-208.1C620.23,-208.1 587.52,-208.11 557.5,-208.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M555.5,-208.16C485.22,-208.27 472.22,-167.23 402,-170.16"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-760.16 499,-760.16 499,-736.16 614,-736.16 614,-760.16"/>
+<text text-anchor="middle" x="556.5" y="-745.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M737.35,-220.37C717.52,-247.57 670.68,-315.92 650,-381.16 626.97,-453.8 658.42,-660.25 614,-722.16 611.79,-725.24 609.13,-727.96 606.18,-730.36"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="604.13,-727.52 597.8,-736.02 608.05,-733.32 604.13,-727.52"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2337.82,-965.83C2328.47,-913.71 2289.74,-706.58 2237,-542.16 2209.26,-455.68 2164.83,-356.94 2145.05,-314.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2148.2,-312.91 2140.79,-305.34 2141.86,-315.88 2148.2,-312.91"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1674.5,-552.16C1536.73,-563.37 1501.72,-552.16 1363.5,-552.16 1363.5,-552.16 1363.5,-552.16 1183.5,-552.16 990.16,-552.16 941.82,-552.97 748.5,-556.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-556.16C698.98,-556.89 645.9,-567.93 608.12,-577.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="607.16,-574.23 598.37,-580.14 608.93,-581 607.16,-574.23"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2337.05,-966.05C2320.96,-900.14 2244.3,-587.3 2237,-580.16 2203.71,-547.6 2173.81,-581.9 2135,-556.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2133,-556.16C2077.12,-519.09 2059.13,-514.74 1995,-495.16 1949.02,-481.12 1934.49,-490.2 1888.5,-476.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1886.5,-476.16C1808.12,-452.24 1814.36,-401.17 1744,-359.16 1513.66,-221.62 1453.78,-130.16 1185.5,-130.16 1185.5,-130.16 1185.5,-130.16 973,-130.16 760.42,-130.16 700.98,-127.87 499,-194.16 452.32,-209.48 448.81,-232.24 402,-247.16"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1886.5,-476.16C1655.91,-417.62 1601.4,-362.16 1363.5,-362.16 1363.5,-362.16 1363.5,-362.16 1183.5,-362.16 990.17,-362.16 939.8,-334.21 748.5,-362.16"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2133,-556.16C2110.09,-540.96 1915.4,-588.47 1888.5,-594.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1886.5,-594.16C1839.46,-604.11 1823.76,-593.23 1780,-613.16 1761.3,-621.67 1761.73,-631.78 1744,-642.16 1737.11,-646.19 1729.5,-649.88 1721.94,-653.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1720.38,-650.01 1712.47,-657.06 1723.05,-656.48 1720.38,-650.01"/>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2133,-556.16C2087.72,-526.12 1942.41,-549.37 1888.5,-556.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1886.5,-556.16C1838.36,-562.22 1824.6,-561.05 1780,-580.16 1762.32,-587.73 1761.19,-595.54 1744,-604.16 1715.54,-618.43 1708.23,-625.51 1676.5,-628.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1674.5,-628.16C1643.97,-630.71 1610.02,-631.42 1581.39,-631.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1581.12,-627.91 1571.11,-631.38 1581.09,-634.91 1581.12,-627.91"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_mappedscalar_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_mappedscalar_3d.f90.html" xlink:title="SELF_MappedScalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2214,-1064.16 2054,-1064.16 2054,-1040.16 2214,-1040.16 2214,-1064.16"/>
+<text text-anchor="middle" x="2134" y="-1049.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedscalar_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedscalar_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2306.61,-990.21C2271.61,-1002.85 2216.5,-1022.74 2178.21,-1036.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2176.6,-1033.42 2168.38,-1040.11 2178.97,-1040.01 2176.6,-1033.42"/>
+</g>
+<!-- sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_model.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_model.f90.html" xlink:title="SELF_Model.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="795.5,-414.16 699.5,-414.16 699.5,-390.16 795.5,-390.16 795.5,-414.16"/>
+<text text-anchor="middle" x="747.5" y="-399.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1886.5,-476.16C1839.9,-464.33 1823.1,-473.85 1780,-495.16 1760.54,-504.78 1762.6,-516.97 1744,-528.16 1716.72,-544.58 1708.34,-552.11 1676.5,-552.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1674.5,-552.16C1527.28,-552.38 1510.72,-438.16 1363.5,-438.16 1363.5,-438.16 1363.5,-438.16 1183.5,-438.16 1047.65,-438.16 888.74,-420.5 805.69,-409.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="806.07,-406.44 795.71,-408.64 805.18,-413.38 806.07,-406.44"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node27" class="node">
+<title>sourcefile~self_mappedvector_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node27"><a xlink:href=".././sourcefile/self_mappedvector_3d.f90.html" xlink:title="SELF_MappedVector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2214,-990.16 2054,-990.16 2054,-966.16 2214,-966.16 2214,-990.16"/>
+<text text-anchor="middle" x="2134" y="-975.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedvector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_dgmodel3d_t.f90&#45;&gt;sourcefile~self_mappedvector_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2272.88,-978.16C2257.31,-978.16 2240.5,-978.16 2224.15,-978.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2224.04,-974.66 2214.04,-978.16 2224.04,-981.66 2224.04,-974.66"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1674.5,-1206.16C1542.35,-1249.26 1274.66,-1309.06 1185.5,-1320.16"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1875.64,-1139.03C1853.66,-1113.74 1803.97,-1052.71 1780,-992.16 1743.86,-900.85 1779.28,-865.8 1744,-774.16 1731.6,-741.95 1708.51,-709.18 1692.82,-689.01"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1695.56,-686.84 1686.61,-681.18 1690.08,-691.19 1695.56,-686.84"/>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1857.68,-1139.08C1720.23,-1081.43 1136.67,-836.01 1103,-811.16 1083.22,-796.56 1088.18,-781.65 1067,-769.16 1031.04,-747.95 1016.72,-751.68 975,-750.16"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node28" class="node">
+<title>sourcefile~self_twopointvector_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node28"><a xlink:href=".././sourcefile/self_twopointvector_3d.f90.html" xlink:title="SELF_TwoPointVector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1266,-1216.16 1103,-1216.16 1103,-1192.16 1266,-1192.16 1266,-1216.16"/>
+<text text-anchor="middle" x="1184.5" y="-1201.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_twopointvector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_mappedtwopointvector_3d_t.f90&#45;&gt;sourcefile~self_twopointvector_3d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1835.67,-1163.22C1792.94,-1173.66 1730.37,-1189.64 1676.5,-1206.16"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1674.5,-1206.16C1602.83,-1228.14 1397.33,-1218.84 1276.75,-1210.96"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1276.64,-1207.44 1266.43,-1210.27 1276.18,-1214.43 1276.64,-1207.44"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1617.97,-681.2C1586.47,-685.11 1547.4,-685.18 1516,-670.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1514,-670.16C1490.67,-659 1475.07,-671.42 1459,-651.16 1410.43,-589.89 1479.64,-355.06 1423,-301.16 1381.85,-262 455.85,-229.08 402,-247.16"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1664.79,-681.34C1650.22,-700.18 1622.75,-738 1607,-774.16 1541.78,-923.88 1660.76,-1054.56 1516,-1130.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1514,-1130.16C1364.5,-1208.23 1349.12,-1279.23 1185.5,-1320.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1183.5,-1320.16C1091.54,-1331.6 1066.77,-1307.33 975,-1320.16"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1625.65,-657.14C1609.68,-653.21 1591.77,-648.8 1575.13,-644.71"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1575.51,-641.2 1564.96,-642.21 1573.83,-647.99 1575.51,-641.2"/>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1183.5,-712.16C1089.95,-723.13 1069.14,-753.29 975,-750.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M973,-750.16C873.28,-746.85 848.28,-750.68 748.5,-750.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_scalar_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_scalar_3d.f90.html" xlink:title="SELF_Scalar_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1243.5,-962.16 1125.5,-962.16 1125.5,-938.16 1243.5,-938.16 1243.5,-962.16"/>
+<text text-anchor="middle" x="1184.5" y="-947.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_scalar_3d.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1361.5,-864.16C1314.34,-884.45 1312.75,-907.92 1266,-929.16 1261.35,-931.27 1256.45,-933.2 1251.46,-934.96"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1250.2,-931.68 1241.79,-938.12 1252.38,-938.34 1250.2,-931.68"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node26" class="node">
+<title>sourcefile~self_tensor_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node26"><a xlink:href=".././sourcefile/self_tensor_3d.f90.html" xlink:title="SELF_Tensor_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1243.5,-802.16 1125.5,-802.16 1125.5,-778.16 1243.5,-778.16 1243.5,-802.16"/>
+<text text-anchor="middle" x="1184.5" y="-787.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_tensor_3d.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1661.03,-681.47C1634.81,-704.91 1574.35,-756.45 1516,-788.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1514,-788.16C1483.69,-804.63 1397.97,-827.46 1363.5,-826.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1361.5,-826.16C1318.24,-824.52 1270.15,-814.08 1235.19,-804.86"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1235.8,-801.4 1225.24,-802.17 1233.98,-808.16 1235.8,-801.4"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node29" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node29"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="792,-722.16 703,-722.16 703,-698.16 792,-698.16 792,-722.16"/>
+<text text-anchor="middle" x="747.5" y="-707.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1514,-670.16C1447.71,-638.2 1258.64,-704 1185.5,-712.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1183.5,-712.16C1130.97,-717.31 1119.53,-694.29 1067,-689.16 984.73,-681.12 963.41,-682.67 881,-689.16 854.89,-691.22 826.16,-695.52 802.14,-699.69"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="801.39,-696.27 792.16,-701.47 802.62,-703.16 801.39,-696.27"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node30" class="node">
+<title>sourcefile~self_vector_3d.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node30"><a xlink:href=".././sourcefile/self_vector_3d.f90.html" xlink:title="SELF_Vector_3D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1243.5,-920.16 1125.5,-920.16 1125.5,-896.16 1243.5,-896.16 1243.5,-920.16"/>
+<text text-anchor="middle" x="1184.5" y="-905.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_vector_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_geometry_3d.f90&#45;&gt;sourcefile~self_vector_3d.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1514,-788.16C1473.07,-810.4 1464.92,-819.84 1423,-840.16 1397.34,-852.59 1389.69,-852.89 1363.5,-864.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1361.5,-864.16C1327.28,-878.88 1287.12,-889.39 1253.8,-896.44"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1252.79,-893.07 1243.7,-898.51 1254.2,-899.93 1252.79,-893.07"/>
+</g>
+<!-- sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1482.33,-642.18C1474.3,-645.99 1465.98,-650.68 1459,-656.16 1371.78,-724.69 1353.69,-752.02 1302,-850.16 1275.85,-899.8 1306.8,-932.64 1266,-971.16 1239.27,-996.4 1216.94,-971.11 1185.5,-990.16"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1183.5,-990.16C1043.96,-1078.74 1007.53,-1114.11 845,-1144.16 759.78,-1159.92 736.42,-1150.66 650,-1144.16 608.54,-1141.04 599.06,-1129.06 557.5,-1130.16"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node31" class="node">
+<title>sourcefile~self_mesh_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node31"><a xlink:href=".././sourcefile/self_mesh_3d_t.f90.html" xlink:title="SELF_Mesh_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1423,-334.16 1302,-334.16 1302,-310.16 1423,-310.16 1423,-334.16"/>
+<text text-anchor="middle" x="1362.5" y="-319.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_mesh_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_mesh_3d.f90&#45;&gt;sourcefile~self_mesh_3d_t.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1508.1,-618.09C1485.39,-571.61 1403.45,-403.91 1374.07,-343.79"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1377.06,-341.93 1369.52,-334.48 1370.77,-345.01 1377.06,-341.93"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M550.57,-760.5C528.55,-815.57 439.14,-1039.26 410.72,-1110.36"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="407.3,-1109.47 406.84,-1120.06 413.8,-1112.07 407.3,-1109.47"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M528.32,-760.17C498.06,-772.37 447.42,-789.33 402,-788.16"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node32" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node32"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-529.16 339,-529.16 339,-505.16 463,-505.16 463,-529.16"/>
+<text text-anchor="middle" x="401" y="-514.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M517.99,-736.1C510.97,-732.5 504.22,-727.92 499,-722.16 466.15,-685.92 483.76,-662.45 463,-618.16 449.35,-589.05 429.51,-557.66 416.2,-537.74"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="419.09,-535.77 410.59,-529.44 413.29,-539.69 419.09,-535.77"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2053.73,-1062.32C2005.61,-1069.18 1943.14,-1079.33 1888.5,-1092.16"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2053.9,-1044.09C2034.65,-1042.46 2014.1,-1040.99 1995,-1040.16 1822.72,-1032.68 1778.49,-1022.05 1607,-1040.16 1496.95,-1051.78 1472.57,-1073.47 1363.5,-1092.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1361.5,-1092.16C1145.34,-1114.88 1088.04,-1117 881,-1183.16 819.25,-1202.89 813.08,-1238.5 748.5,-1244.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-1244.16C623.71,-1255.54 486.91,-1183.78 429.6,-1149.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="431.15,-1146.41 420.78,-1144.22 427.52,-1152.4 431.15,-1146.41"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node37" class="node">
+<title>sourcefile~self_mappedscalar_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node37"><a xlink:href=".././sourcefile/self_mappedscalar_3d_t.f90.html" xlink:title="SELF_MappedScalar_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1972,-646.16 1803,-646.16 1803,-622.16 1972,-622.16 1972,-646.16"/>
+<text text-anchor="middle" x="1887.5" y="-631.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_mappedscalar_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_mappedscalar_3d.f90&#45;&gt;sourcefile~self_mappedscalar_3d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2095.3,-1040.11C2073.97,-1031.62 2048.2,-1018.31 2031,-999.16 1936.42,-893.87 1901.45,-718.64 1891.67,-656.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1895.08,-655.86 1890.13,-646.49 1888.16,-656.9 1895.08,-655.86"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M723.42,-414.37C702.78,-425.98 672.41,-444.8 650,-466.16 616.07,-498.51 585.8,-544.59 569.71,-571.13"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="566.56,-569.58 564.44,-579.96 572.57,-573.16 566.56,-569.58"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M713.97,-390.06C666.18,-371.99 574.49,-336.21 499,-300.16 454.67,-278.99 448.56,-231.48 402,-247.16"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M702.61,-390.11C661.98,-381.59 601.4,-375.83 557.5,-402.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1174.75,-962.24C1155.77,-988.3 1109.1,-1051.55 1067,-1102.16 1042.49,-1131.61 1012.51,-1164.28 993.58,-1184.51"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="990.95,-1182.2 986.66,-1191.88 996.06,-1186.99 990.95,-1182.2"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M746.5,-1130.16C662.57,-1133.69 641.5,-1129.62 557.5,-1130.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1143.49,-962.16C1130.48,-966.31 1116.03,-971.17 1103,-976.16 1086.65,-982.41 1083.03,-985.12 1067,-992.16 925.73,-1054.15 902.63,-1123.67 748.5,-1130.16"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M746.5,-1130.16C687.78,-1137.83 673.08,-1120.25 614,-1116.16 547.01,-1111.52 530.14,-1112.27 463,-1111.16 407.9,-1110.25 393.36,-1102.07 339,-1111.16 287.78,-1119.72 267.79,-1183.12 228.5,-1149.16"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M226.5,-1149.16C186.97,-1113.4 173.62,-1103.88 152,-1055.16 65.81,-860.94 58.88,-596.44 58.8,-519.18"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="62.3,-519.18 58.83,-509.17 55.3,-519.16 62.3,-519.18"/>
+</g>
+<!-- sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node34" class="node">
+<title>sourcefile~self_gpublas.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node34"><a xlink:href=".././sourcefile/self_gpublas.f90.html" xlink:title="SELF_GPUBLAS.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1030.5,-950.16 917.5,-950.16 917.5,-926.16 1030.5,-926.16 1030.5,-950.16"/>
+<text text-anchor="middle" x="974" y="-935.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUBLAS.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1125.42,-946.82C1099.14,-945.3 1067.95,-943.51 1040.8,-941.95"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1040.8,-938.44 1030.61,-941.36 1040.4,-945.43 1040.8,-938.44"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node35" class="node">
+<title>sourcefile~self_scalar_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node35"><a xlink:href=".././sourcefile/self_scalar_3d_t.f90.html" xlink:title="SELF_Scalar_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-802.16 910.5,-802.16 910.5,-778.16 1037.5,-778.16 1037.5,-802.16"/>
+<text text-anchor="middle" x="974" y="-787.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_scalar_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_scalar_3d.f90&#45;&gt;sourcefile~self_scalar_3d_t.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1125.17,-942.05C1117.08,-938.99 1109.37,-934.82 1103,-929.16 1070.18,-899.99 1096.47,-869.71 1067,-837.16 1054.82,-823.71 1037.91,-813.55 1021.9,-806.18"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1023.19,-802.93 1012.62,-802.16 1020.4,-809.35 1023.19,-802.93"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M1168.29,-802.39C1139.35,-825.57 1078.24,-874.05 1067,-879.16 990.2,-914.1 947.53,-865.27 881,-917.16 851.84,-939.9 874.26,-969.55 845,-992.16 775.13,-1046.15 734.58,-1004.8 650,-1030.16 571.15,-1053.8 482.91,-1093.45 435.87,-1115.71"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="434.27,-1112.59 426.75,-1120.05 437.28,-1118.91 434.27,-1112.59"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M1162.01,-778.15C1143.81,-766.94 1118.3,-748.58 1103,-726.16 1072.33,-681.22 1093.16,-656.86 1067,-609.16 993.77,-475.64 983.23,-412.06 845,-348.16 804.73,-329.54 405.33,-362 402,-362.16"/>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M1164.72,-802.3C1147.36,-814.14 1121.52,-833.35 1103,-854.16 1082.83,-876.82 1091.24,-893.91 1067,-912.16 1059.04,-918.15 1049.76,-922.76 1040.22,-926.31"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="1039,-923.03 1030.62,-929.51 1041.21,-929.67 1039,-923.03"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node38" class="node">
+<title>sourcefile~self_tensor_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node38"><a xlink:href=".././sourcefile/self_tensor_3d_t.f90.html" xlink:title="SELF_Tensor_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-642.16 910.5,-642.16 910.5,-618.16 1037.5,-618.16 1037.5,-642.16"/>
+<text text-anchor="middle" x="974" y="-627.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_tensor_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_tensor_3d.f90&#45;&gt;sourcefile~self_tensor_3d_t.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M1166.97,-777.99C1150.33,-765.53 1124.18,-745.32 1103,-726.16 1085.99,-710.77 1084.77,-703.67 1067,-689.16 1047.76,-673.45 1024.15,-658.38 1005.66,-647.41"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="1007.17,-644.24 996.77,-642.21 1003.64,-650.28 1007.17,-644.24"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M2110.34,-990.19C2058.92,-1017.26 1934.32,-1081.4 1888.5,-1092.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1886.5,-1092.16C1837.57,-1103.65 1827.09,-1112.61 1780,-1130.16 1763.91,-1136.16 1760.77,-1140.48 1744,-1144.16 1465.21,-1205.28 1386.64,-1151.35 1103,-1183.16 1085.88,-1185.08 1067.57,-1187.73 1050.3,-1190.5"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1049.57,-1187.07 1040.27,-1192.13 1050.7,-1193.98 1049.57,-1187.07"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1886.5,-978.16C1808.65,-975.5 1253.05,-951.36 1185.5,-990.16"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node33" class="node">
+<title>sourcefile~self_mappedvector_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node33"><a xlink:href=".././sourcefile/self_mappedvector_3d_t.f90.html" xlink:title="SELF_MappedVector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1972,-528.16 1803,-528.16 1803,-504.16 1972,-504.16 1972,-528.16"/>
+<text text-anchor="middle" x="1887.5" y="-513.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_mappedvector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_mappedvector_3d_t.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M2129.94,-966.11C2112.8,-899.01 2028.27,-573.27 1995,-542.16 1990.87,-538.3 1986.27,-534.99 1981.36,-532.14"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1982.72,-528.91 1972.22,-527.52 1979.56,-535.16 1982.72,-528.91"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_mappedvector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M2053.84,-981.7C2005.9,-982.97 1943.57,-983.06 1888.5,-978.16"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1886.5,-978.16C1608.87,-953.47 1543.99,-907.44 1266,-887.16 1193.75,-881.89 1172.13,-865.51 1103,-887.16 1084.41,-892.98 1084.61,-903.84 1067,-912.16 1058.11,-916.36 1048.4,-920.01 1038.74,-923.13"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1037.65,-919.81 1029.12,-926.09 1039.71,-926.5 1037.65,-919.81"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1102.89,-1204.16C1086.81,-1204.16 1069.95,-1204.16 1053.93,-1204.16"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1053.54,-1200.66 1043.54,-1204.16 1053.54,-1207.66 1053.54,-1200.66"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge80" class="edge">
+<title>sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1144.35,-1216.23C1102.76,-1227.97 1034.89,-1244.06 975,-1244.16"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M973,-1244.16C873.22,-1244.32 847.9,-1235.45 748.5,-1244.16"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1136.82,-1216.2C1125.43,-1219.95 1113.51,-1224.6 1103,-1230.16 1085.08,-1239.64 1083.41,-1246.27 1067,-1258.16 1027.07,-1287.09 1024.1,-1315.6 975,-1320.16"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M973,-1320.16C718.08,-1343.83 645.96,-1321.8 402,-1244.16"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node39" class="node">
+<title>sourcefile~self_twopointvector_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node39"><a xlink:href=".././sourcefile/self_twopointvector_3d_t.f90.html" xlink:title="SELF_TwoPointVector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1060,-870.16 888,-870.16 888,-846.16 1060,-846.16 1060,-870.16"/>
+<text text-anchor="middle" x="974" y="-855.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_twopointvector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge79" class="edge">
+<title>sourcefile~self_twopointvector_3d.f90&#45;&gt;sourcefile~self_twopointvector_3d_t.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1179.69,-1192.1C1164.2,-1143.55 1104.96,-962.87 1067,-917.16 1052.17,-899.3 1030.5,-885.04 1011.92,-875.01"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1013.31,-871.79 1002.82,-870.3 1010.09,-878 1013.31,-871.79"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge82" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M702.83,-703.41C685.58,-699.49 666.08,-693.43 650,-684.16 617.92,-665.67 589.09,-633.28 572.44,-612.28"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="575.17,-610.08 566.28,-604.31 569.63,-614.36 575.17,-610.08"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge81" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M555.5,-708.16C529.01,-708.19 522.94,-715.81 499,-727.16 452.99,-748.98 452.91,-789.47 402,-788.16"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M400,-788.16C233.89,-783.89 107.67,-584.34 70.34,-518.2"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="73.4,-516.5 65.48,-509.45 67.28,-519.9 73.4,-516.5"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge83" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M702.96,-709.41C664.66,-708.82 607.38,-708.1 557.5,-708.16"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M555.5,-708.16C479.37,-708.25 477.14,-644.38 402,-632.16"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge84" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M702.66,-718.97C679.26,-723.68 649.98,-729.57 623.85,-734.82"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="623.13,-731.39 614.01,-736.8 624.51,-738.26 623.13,-731.39"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge87" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M1125.48,-916.63C1117.35,-919.64 1109.54,-923.7 1103,-929.16 1092.32,-938.07 1012.11,-1119.52 984.39,-1182.7"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="981.08,-1181.53 980.27,-1192.1 987.49,-1184.34 981.08,-1181.53"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge89" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M973,-978.16C878.61,-1005.69 655.82,-1129.53 557.5,-1130.16"/>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M555.5,-1130.16C521.66,-1131.06 483.61,-1131.56 453.86,-1131.83"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="453.67,-1128.33 443.7,-1131.92 453.73,-1135.33 453.67,-1128.33"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge86" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M1125.19,-920.09C1117.53,-922.6 1109.94,-925.59 1103,-929.16 1084.48,-938.68 1085.76,-950.12 1067,-959.16 1029.39,-977.29 1015.35,-967.44 975,-978.16"/>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M973,-978.16C876.57,-1003.78 848.13,-983.56 748.5,-978.16"/>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge85" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M1125.42,-916.52C1099.14,-920.3 1067.95,-924.79 1040.8,-928.69"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="1040.01,-925.27 1030.61,-930.16 1041.01,-932.2 1040.01,-925.27"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node40" class="node">
+<title>sourcefile~self_vector_3d_t.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node40"><a xlink:href=".././sourcefile/self_vector_3d_t.f90.html" xlink:title="SELF_Vector_3D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-722.16 910.5,-722.16 910.5,-698.16 1037.5,-698.16 1037.5,-722.16"/>
+<text text-anchor="middle" x="974" y="-707.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_vector_3d_t.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge88" class="edge">
+<title>sourcefile~self_vector_3d.f90&#45;&gt;sourcefile~self_vector_3d_t.f90</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M1171.77,-896.06C1155.08,-878.42 1124.14,-844.14 1103,-811.16 1083.04,-780.03 1095.3,-759.96 1067,-736.16 1061.24,-731.31 1054.63,-727.36 1047.65,-724.15"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="1048.54,-720.74 1037.95,-720.21 1045.9,-727.22 1048.54,-720.74"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge93" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1351.97,-309.9C1336.14,-290.34 1302.54,-252.04 1266,-230.16 1257.86,-225.29 1248.71,-221.22 1239.57,-217.86"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1240.69,-214.54 1230.1,-214.61 1238.42,-221.16 1240.69,-214.54"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge90" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1301.62,-318.25C1267.38,-317.16 1223.77,-317.7 1185.5,-324.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1183.5,-324.16C1092.13,-339.58 1067.67,-324.16 975,-324.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M973,-324.16C915.77,-324.16 901.96,-315.65 845,-310.16 717.37,-297.85 685.5,-278.57 557.5,-286.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M555.5,-286.16C485.14,-288.12 468.73,-224.76 402,-247.16"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge91" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1342.15,-310.07C1310.72,-291.26 1246.02,-255.96 1185.5,-244.16"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge92" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M555.5,-286.16C479.4,-288.28 477.99,-357.61 402,-362.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M400,-362.16C275.37,-369.61 141.6,-444.85 85.81,-479.66"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="83.82,-476.78 77.24,-485.08 87.56,-482.7 83.82,-476.78"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge94" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M973,-324.16C871.81,-325.5 848.63,-347.53 748.5,-362.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M746.5,-362.16C661.54,-374.57 631.13,-357.99 557.5,-402.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M555.5,-402.16C450.11,-465.38 523.71,-649.19 402,-632.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M400,-632.16C345.58,-624.55 288.22,-594.27 255.55,-574.59"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="257.37,-571.59 247.02,-569.34 253.71,-577.56 257.37,-571.59"/>
+</g>
+<!-- sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge95" class="edge">
+<title>sourcefile~self_mesh_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M1183.5,-324.16C1001.91,-364.31 1013.57,-491.6 845,-570.16 804.94,-588.83 789.63,-577.99 748.5,-594.16"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M746.5,-594.16C705.97,-611.78 682.62,-588.34 650,-618.16 613.9,-651.16 646.85,-685.92 614,-722.16 610.98,-725.49 607.45,-728.42 603.65,-731"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="601.85,-728 595.01,-736.1 605.41,-734.03 601.85,-728"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge99" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M389.27,-504.96C360.46,-472.2 281.18,-382.06 245.87,-341.9"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="248.46,-339.55 239.22,-334.35 243.2,-344.17 248.46,-339.55"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge96" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M338.64,-513.56C278.79,-510.05 187.99,-504.72 126.21,-501.1"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="126.37,-497.6 116.18,-500.51 125.96,-504.59 126.37,-497.6"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge98" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M348.54,-529.16C328.19,-533.91 304.76,-539.37 284.03,-544.21"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="283.04,-540.85 274.09,-546.53 284.63,-547.66 283.04,-540.85"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node36" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_node36"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-489.16 165.5,-489.16 165.5,-465.16 289.5,-465.16 289.5,-489.16"/>
+<text text-anchor="middle" x="227.5" y="-474.76" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge97" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M348.54,-505.16C330.14,-500.87 309.22,-495.99 290.06,-491.52"/>
+<polygon fill="#ff0098" stroke="#ff0098" points="290.75,-488.08 280.22,-489.22 289.16,-494.9 290.75,-488.08"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge100" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1830.07,-528.16C1786.02,-534.66 1724.46,-537.26 1676.5,-514.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1674.5,-514.16C1619.58,-487.71 1617.98,-463 1571,-424.16 1522.21,-383.82 1499.58,-384.75 1459,-336.16 1437.08,-309.91 1451.37,-287.25 1423,-268.16 1334.98,-208.93 1289.63,-264.46 1185.5,-244.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1183.5,-244.16C1144.06,-235.92 1100.14,-228.14 1062.82,-221.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1062.91,-218.39 1052.48,-220.22 1061.77,-225.3 1062.91,-218.39"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge102" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1819.49,-504.09C1806.08,-500.49 1792.33,-495.92 1780,-490.16 1675.47,-441.3 1665.27,-402.69 1571,-336.16 1554.79,-324.71 1440.78,-244.97 1423,-236.16 1111.45,-81.85 997.66,-113.86 650,-116.16 582.88,-116.6 563.99,-101.38 499,-118.16 451.64,-130.39 450.86,-167.86 402,-170.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-170.16C275.38,-173.1 238.23,-211.14 152,-301.16 102.46,-352.87 75.21,-435.88 64.46,-475.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="61.03,-474.48 61.87,-485.04 67.8,-476.26 61.03,-474.48"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge101" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1858.06,-528.35C1834.93,-539.34 1802.56,-557.26 1780,-580.16 1757.64,-602.86 1768.11,-621.33 1744,-642.16 1739.41,-646.12 1734.17,-649.55 1728.68,-652.5"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1726.76,-649.54 1719.27,-657.04 1729.8,-655.85 1726.76,-649.54"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge103" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1674.5,-590.16C1640.36,-598.15 1602.26,-607.74 1571.97,-615.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1570.83,-612.21 1562.02,-618.1 1572.58,-618.99 1570.83,-612.21"/>
+</g>
+<!-- sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge104" class="edge">
+<title>sourcefile~self_mappedvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1821.67,-528.17C1807.62,-531.81 1793.07,-536.42 1780,-542.16 1762.39,-549.89 1761.19,-557.54 1744,-566.16 1715.54,-580.43 1707.5,-582.9 1676.5,-590.16"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1674.5,-590.16C1539.91,-621.66 1501.72,-590.16 1363.5,-590.16 1363.5,-590.16 1363.5,-590.16 1183.5,-590.16 1086.83,-590.16 837.15,-555.61 748.5,-594.16"/>
+</g>
+<!-- sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge106" class="edge">
+<title>sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M921.43,-950.17C865.97,-962.59 781.31,-979.94 748.5,-978.16"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M746.5,-978.16C660.94,-973.52 637.62,-970.52 557.5,-940.16"/>
+</g>
+<!-- sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge105" class="edge">
+<title>sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M917.21,-950.2C904.94,-953.86 892.26,-958.47 881,-964.16 862.91,-973.31 863.94,-984.93 845,-992.16 659.47,-1062.96 419.92,-1053.33 301.47,-1042.57"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="301.71,-1039.08 291.42,-1041.63 301.05,-1046.05 301.71,-1039.08"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge107" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M950.17,-778.02C930.74,-767.12 902.61,-749.97 881,-731.16 862.46,-715.02 866.09,-701.79 845,-689.16 768.86,-643.56 732.66,-678.48 650,-646.16 626.11,-636.82 601.11,-621.86 583.13,-610.06"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="584.66,-606.87 574.41,-604.22 580.77,-612.69 584.66,-606.87"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge108" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M946.19,-802.2C860.32,-840.42 595.5,-955.64 557.5,-940.16"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M555.5,-940.16C465.72,-906.14 494.3,-814.58 402,-788.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge109" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M919.21,-802.2C826.85,-819.89 634.94,-843.33 499,-769.16 433.51,-733.42 475.66,-643.98 402,-632.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge111" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M930.36,-778.08C885.5,-766.42 812.63,-750.5 748.5,-750.16"/>
+</g>
+<!-- sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge110" class="edge">
+<title>sourcefile~self_scalar_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M947.42,-778.15C921.86,-766.44 881.26,-748.63 845,-736.16 831.27,-731.44 816.2,-727.02 802.14,-723.22"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="802.68,-719.74 792.11,-720.57 800.88,-726.51 802.68,-719.74"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge112" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M165.08,-484.49C152.48,-486 139.16,-487.59 126.36,-489.12"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="125.75,-485.66 116.24,-490.32 126.58,-492.61 125.75,-485.66"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge116" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1871.47,-622.16C1846.32,-602.5 1793.54,-563.15 1744,-538.16 1715.57,-523.82 1704.62,-529.09 1676.5,-514.16"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge117" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1879.38,-646.41C1844.88,-705.04 1689.75,-961.18 1516,-1130.16"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge115" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_geometry_3d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1814.23,-646.2C1794.93,-649.42 1774,-652.91 1754.41,-656.17"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1753.6,-652.76 1744.31,-657.86 1754.75,-659.67 1753.6,-652.76"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge118" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_mesh_3d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1802.84,-627.48C1764.31,-625.51 1718.03,-624.69 1676.5,-628.16"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge119" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1875.8,-646.4C1847.3,-677.9 1765.64,-761.18 1676.5,-788.16"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1674.5,-788.16C1630.07,-801.61 1617.24,-778.21 1571,-774.16 1306.91,-751.03 1239.96,-758.96 975,-750.16"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_scalar_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge114" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_scalar_3d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1879.47,-646.2C1861.08,-676.68 1808.52,-757.61 1744,-802.16 1590.71,-908 1365.93,-938.16 1254.04,-946.75"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1253.61,-943.27 1243.89,-947.49 1254.12,-950.25 1253.61,-943.27"/>
+</g>
+<!-- sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_tensor_3d.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge113" class="edge">
+<title>sourcefile~self_mappedscalar_3d_t.f90&#45;&gt;sourcefile~self_tensor_3d.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1674.5,-788.16C1633.04,-801.63 1417.79,-828.21 1363.5,-826.16"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge120" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M952.09,-618.02C913.27,-596.7 826.87,-554.87 748.5,-556.16"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge121" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M962.99,-618.01C942.93,-594.42 895.42,-542.09 845,-512.16 755.62,-459.11 505.93,-362.38 402,-362.16"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge122" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M960.95,-618.01C939.75,-597.61 893.42,-557.2 845,-542.16 697.63,-496.39 642.56,-514.56 499,-571.16 451.62,-589.84 452.27,-640.34 402,-632.16"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge124" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M930.4,-618.09C874.82,-603.23 780.83,-581.45 748.5,-594.16"/>
+</g>
+<!-- sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge123" class="edge">
+<title>sourcefile~self_tensor_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M926.36,-642.25C911.73,-646.34 895.6,-651.14 881,-656.16 847.94,-667.53 811.19,-682.71 784.8,-694.09"/>
+<polygon fill="#003fff" stroke="#003fff" points="783.35,-690.9 775.57,-698.09 786.14,-697.32 783.35,-690.9"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge126" class="edge">
+<title>sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M913.28,-846.14C843.94,-829.77 729,-794.93 650,-731.16 609.67,-698.61 580.56,-643.73 566.66,-613.58"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="569.82,-612.07 562.54,-604.38 563.43,-614.93 569.82,-612.07"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge125" class="edge">
+<title>sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M941.51,-870.24C920.94,-879.81 895.33,-895.24 881,-917.16 825.11,-1002.66 914.86,-1069.63 845,-1144.16 775.98,-1217.79 499.77,-1269.17 402,-1244.16"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M400,-1244.16C316.97,-1217.74 294.42,-1206.14 228.5,-1149.16"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge128" class="edge">
+<title>sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M906.43,-870.19C825.13,-883.52 693.13,-900.4 650,-878.16 605.76,-855.34 578.06,-800.51 565.47,-769.85"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="568.69,-768.48 561.77,-760.45 562.18,-771.04 568.69,-768.48"/>
+</g>
+<!-- sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge127" class="edge">
+<title>sourcefile~self_twopointvector_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M936.78,-846.07C918.24,-838.42 896.4,-826.95 881,-811.16 855.18,-784.69 873.44,-759.79 845,-736.16 832.85,-726.06 817.13,-719.86 801.93,-716.06"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="802.57,-712.62 792.05,-713.89 801.06,-719.45 802.57,-712.62"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge129" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M947.47,-698C921.95,-686.17 881.38,-668.28 845,-656.16 803.07,-642.19 791.65,-641.72 748.5,-632.16"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M746.5,-632.16C705.79,-623.14 660.05,-613.45 623.77,-605.87"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="624.3,-602.4 613.8,-603.78 622.87,-609.25 624.3,-602.4"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge130" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M950.68,-722.39C925.74,-735.37 883.78,-755.22 845,-764.16 652.87,-808.47 592.53,-838.93 402,-788.16"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge131" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M746.5,-632.16C597.01,-599.05 553.15,-656.58 402,-632.16"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge133" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M931.6,-722.18C886.85,-734.09 813.23,-750.5 748.5,-750.16"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M746.5,-750.16C706.03,-749.95 660.69,-749.48 624.57,-749.04"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="624.19,-745.54 614.15,-748.92 624.11,-752.54 624.19,-745.54"/>
+</g>
+<!-- sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_ecadvection3d.f90~2~~EfferentGraph_edge132" class="edge">
+<title>sourcefile~self_vector_3d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M910.46,-710.16C876.51,-710.16 834.96,-710.16 802.44,-710.16"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="802.22,-706.66 792.22,-710.16 802.22,-713.66 802.22,-706.66"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_ecadvection3df902EfferentGraph = svgPanZoom('#sourcefileself_ecadvection3df902EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_ecadvection3d.html">SELF_ECAdvection3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_ecadvection3d.f90~2.html#src">SELF_ECAdvection3D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_ECAdvection3D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_ECAdvection3D_t</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">implicit none</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">ECAdvection3D_t</span><span class="p">),</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ECAdvection3D</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">  </span><span class="k">endtype </span><span class="n">ECAdvection3D</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="k">endmodule </span><span class="n">SELF_ECAdvection3D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-06-10 13:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_DGModel1D.f90 &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_DGModel1D.f90
+    <small>Source File</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.4% of total for source files.">235 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DGModel1D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li class="active">SELF_DGModel1D.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_dgmodel1d~2.html">SELF_DGModel1D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_dgmodel1d.f90.html#src">SELF_DGModel1D.f90</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      
+      <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_dgmodel1d.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefileself_dgmodel1df90EfferentGraph" width="641pt" height="253pt"
+ viewBox="0.00 0.00 641.00 253.39" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph" class="graph" transform="scale(0.28 0.28) rotate(0) translate(4 900.87)">
+<title>sourcefile~~self_dgmodel1d.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-900.87 2285,-900.87 2285,4 -4,4"/>
+<!-- sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node1" class="node">
+<title>sourcefile~self_dgmodel1d.f90</title>
+<polygon fill="none" stroke="black" points="2281,-228.34 2154,-228.34 2154,-204.34 2281,-204.34 2281,-228.34"/>
+<text text-anchor="middle" x="2217.5" y="-213.94" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_DGModel1D.f90</text>
+</g>
+<!-- sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node2" class="node">
+<title>sourcefile~self_supportroutines.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/self_supportroutines.f90.html" xlink:title="SELF_SupportRoutines.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="303,-510.34 152,-510.34 152,-486.34 303,-486.34 303,-510.34"/>
+<text text-anchor="middle" x="227.5" y="-495.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge1" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2208.91,-228.66C2188.04,-261.47 2126.31,-351.54 2051,-397.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2049,-397.34C2029.83,-409 1687.04,-276.52 1665,-272.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1663,-272.34C1550.9,-247.43 1519.73,-253.32 1405,-258.34 1293.23,-263.24 503.98,-300.35 402,-346.34"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node3" class="node">
+<title>sourcefile~self_mappedscalar_1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/self_mappedscalar_1d.f90.html" xlink:title="SELF_MappedScalar_1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1946,-409.34 1786,-409.34 1786,-385.34 1946,-385.34 1946,-409.34"/>
+<text text-anchor="middle" x="1866" y="-394.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_mappedscalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge2" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_mappedscalar_1d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2049,-397.34C2016.91,-410.41 1978.92,-412.28 1945.97,-410.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1946.16,-406.66 1935.92,-409.37 1945.62,-413.64 1946.16,-406.66"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node4" class="node">
+<title>sourcefile~self_dgmodel1d_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/self_dgmodel1d_t.f90.html" xlink:title="SELF_DGModel1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="2118,-228.34 1982,-228.34 1982,-204.34 2118,-204.34 2118,-228.34"/>
+<text text-anchor="middle" x="2050" y="-213.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_dgmodel1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge5" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_dgmodel1d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2153.93,-216.34C2145.51,-216.34 2136.79,-216.34 2128.16,-216.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2128.08,-212.84 2118.08,-216.34 2128.08,-219.84 2128.08,-212.84"/>
+</g>
+<!-- sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node5" class="node">
+<title>sourcefile~self_model.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/self_model.f90.html" xlink:title="SELF_Model.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="795.5,-92.34 699.5,-92.34 699.5,-68.34 795.5,-68.34 795.5,-92.34"/>
+<text text-anchor="middle" x="747.5" y="-77.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge4" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-80.34C916.29,-77.84 851.43,-78.19 806.06,-78.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="805.76,-75.45 795.83,-79.13 805.89,-82.45 805.76,-75.45"/>
+</g>
+<!-- sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node6" class="node">
+<title>sourcefile~self_metadata.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node6"><a xlink:href=".././sourcefile/self_metadata.f90.html" xlink:title="SELF_Metadata.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="613.5,-52.34 499.5,-52.34 499.5,-28.34 613.5,-28.34 613.5,-52.34"/>
+<text text-anchor="middle" x="556.5" y="-37.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge3" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-40.34C705.96,-34.65 660.04,-34.5 623.62,-35.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="623.45,-32.36 613.61,-36.27 623.74,-39.35 623.45,-32.36"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node7" class="node">
+<title>sourcefile~self_boundaryconditions.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node7"><a xlink:href=".././sourcefile/self_boundaryconditions.f90.html" xlink:title="SELF_BoundaryConditions.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1750,-170.34 1578,-170.34 1578,-146.34 1750,-146.34 1750,-170.34"/>
+<text text-anchor="middle" x="1664" y="-155.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge6" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1865,-158.34C1831.01,-155.09 1793.63,-154.34 1760.47,-154.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1760.28,-151.15 1750.33,-154.77 1760.37,-158.14 1760.28,-151.15"/>
+</g>
+<!-- sourcefile~self_mesh_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node8" class="node">
+<title>sourcefile~self_mesh_1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node8"><a xlink:href=".././sourcefile/self_mesh_1d.f90.html" xlink:title="SELF_Mesh_1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1369,-473.34 1257,-473.34 1257,-449.34 1369,-449.34 1369,-473.34"/>
+<text text-anchor="middle" x="1313" y="-458.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_mesh_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge7" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_mesh_1d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1663,-272.34C1580.69,-256.75 1547.97,-232.09 1474.5,-272.34"/>
+</g>
+<!-- sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node9" class="node">
+<title>sourcefile~self_hdf5.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node9"><a xlink:href=".././sourcefile/self_hdf5.f90.html" xlink:title="SELF_HDF5.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="274,-432.34 181,-432.34 181,-408.34 274,-408.34 274,-432.34"/>
+<text text-anchor="middle" x="227.5" y="-417.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge8" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2163.2,-204.33C2148.59,-201.22 2132.71,-197.99 2118,-195.34 2007.02,-175.35 1979.25,-169.08 1867,-158.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1865,-158.34C1809.28,-149.19 1804.52,-119.02 1750,-104.34 1631.32,-72.4 1597.41,-80.34 1474.5,-80.34 1474.5,-80.34 1474.5,-80.34 1312,-80.34 1162.22,-80.34 1124.63,-86.94 975,-80.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M973,-80.34C922.39,-77.84 798.68,-47.39 748.5,-40.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-40.34C661.47,-28.4 643.32,2.4 557.5,-0.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M555.5,-0.34C526.67,-1.26 408.79,-55.84 402,-60.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M400,-60.34C278.37,-140.99 240.76,-332.93 231.28,-398.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.79,-397.81 229.9,-408.19 234.73,-398.76 227.79,-397.81"/>
+</g>
+<!-- sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node10" class="node">
+<title>sourcefile~self_gpu.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node10"><a xlink:href=".././sourcefile/self_gpu.f90.html" xlink:title="SELF_GPU.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="443.5,-824.34 358.5,-824.34 358.5,-800.34 443.5,-800.34 443.5,-824.34"/>
+<text text-anchor="middle" x="401" y="-809.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge9" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1312,-849.34C1296.36,-848.06 764.17,-810.51 748.5,-811.34"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node11" class="node">
+<title>sourcefile~self_gpuinterfaces.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node11"><a xlink:href=".././sourcefile/self_gpuinterfaces.f90.html" xlink:title="SELF_GPUInterfaces.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1043.5,-786.34 904.5,-786.34 904.5,-762.34 1043.5,-762.34 1043.5,-786.34"/>
+<text text-anchor="middle" x="974" y="-771.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge10" class="edge">
+<title>sourcefile~self_dgmodel1d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2049,-397.34C1846.72,-479.72 1938.56,-677.12 1750,-787.34 1581.02,-886.12 1508.9,-867.35 1314,-849.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1312,-849.34C1211.92,-833.45 1097.04,-805.84 1030.56,-788.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1031.27,-785.48 1020.72,-786.4 1029.54,-792.27 1031.27,-785.48"/>
+</g>
+<!-- sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node12" class="node">
+<title>sourcefile~self_constants.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node12"><a xlink:href=".././sourcefile/self_constants.f90.html" xlink:title="SELF_Constants.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="116,-644.34 0,-644.34 0,-620.34 116,-620.34 116,-644.34"/>
+<text text-anchor="middle" x="58" y="-629.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge11" class="edge">
+<title>sourcefile~self_supportroutines.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M211.34,-510.47C181.94,-533.99 117.02,-585.93 82.18,-613.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="79.63,-611.36 74,-620.34 84,-616.82 79.63,-611.36"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge13" class="edge">
+<title>sourcefile~self_mappedscalar_1d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M1849.84,-409.35C1833,-423.16 1805.6,-447.07 1786,-471.34 1766.46,-495.54 1770.07,-507.59 1750,-531.34 1671.46,-624.27 1650.62,-654.51 1542,-709.34 1279.17,-842.04 1168.93,-691.85 881,-753.34 818.13,-766.77 812.69,-807.9 748.5,-811.34"/>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M746.5,-811.34C642.86,-816.06 521.49,-814.84 454.01,-813.57"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="453.72,-810.06 443.66,-813.36 453.58,-817.06 453.72,-810.06"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node15" class="node">
+<title>sourcefile~self_mappedscalar_1d_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node15"><a xlink:href=".././sourcefile/self_mappedscalar_1d_t.f90.html" xlink:title="SELF_MappedScalar_1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1748.5,-522.34 1579.5,-522.34 1579.5,-498.34 1748.5,-498.34 1748.5,-522.34"/>
+<text text-anchor="middle" x="1664" y="-507.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_1d.f90&#45;&gt;sourcefile~self_mappedscalar_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge12" class="edge">
+<title>sourcefile~self_mappedscalar_1d.f90&#45;&gt;sourcefile~self_mappedscalar_1d_t.f90</title>
+<path fill="none" stroke="#ff9900" stroke-dasharray="5,2" d="M1820.16,-409.47C1808.74,-413.26 1796.68,-417.91 1786,-423.34 1748.62,-442.36 1710.07,-472.17 1686.81,-491.49"/>
+<polygon fill="#ff9900" stroke="#ff9900" points="1684.36,-488.97 1678.97,-498.09 1688.87,-494.33 1684.36,-488.97"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge14" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1161,-232.34C1078.37,-234.94 1057.08,-222.49 975,-232.34"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_mappedscalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge15" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_mappedscalar_1d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M2036.78,-228.5C2005.82,-259.28 1924.14,-340.52 1886.5,-377.95"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1883.79,-375.71 1879.17,-385.24 1888.73,-380.67 1883.79,-375.71"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_model.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge17" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_model.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1981.8,-215.48C1947.36,-214.41 1904.82,-212.14 1867,-207.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1865,-207.34C1826.9,-202.51 1817.82,-193.84 1786,-172.34 1767.51,-159.85 1770.38,-146.44 1750,-137.34 1637.94,-87.29 1597.24,-118.34 1474.5,-118.34 1474.5,-118.34 1474.5,-118.34 1161,-118.34 1033.84,-118.34 885.56,-100.22 805.99,-89"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="806.09,-85.48 795.7,-87.53 805.1,-92.41 806.09,-85.48"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge16" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1865,-207.34C1776.6,-196.42 1753.87,-214.22 1665,-220.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1663,-220.34C1578.75,-226.15 1558.75,-202.16 1474.5,-196.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1472.5,-196.34C1400.02,-191.34 1386.57,-159.87 1314,-156.34"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge18" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_boundaryconditions.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1865,-207.34C1812.04,-200.63 1752.8,-185.07 1712.64,-173.27"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1713.44,-169.86 1702.85,-170.36 1711.44,-176.57 1713.44,-169.86"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_mesh_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge19" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_mesh_1d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1663,-220.34C1576.3,-226.32 1550.72,-230.59 1474.5,-272.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1472.5,-272.34C1444.58,-287.64 1429.27,-275.73 1405,-296.34 1358.91,-335.5 1331.93,-404.15 1320.5,-439.28"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1317.09,-438.44 1317.44,-449.03 1323.77,-440.53 1317.09,-438.44"/>
+</g>
+<!-- sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge20" class="edge">
+<title>sourcefile~self_dgmodel1d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1472.5,-196.34C1334.35,-186.81 1301.31,-239.31 1163,-232.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1161,-232.34C1118.76,-232.72 1108.88,-223.87 1067,-218.34 882.05,-193.93 829.99,-219.39 650,-170.34 591.83,-154.49 450.9,-25.08 402,-60.34"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge21" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M711.62,-92.39C633.28,-121.19 442.17,-201.57 339,-332.34 307.4,-372.4 332.57,-399.77 303,-441.34 291.56,-457.43 274.25,-471.06 259.19,-480.95"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="257.24,-478.05 250.65,-486.34 260.98,-483.97 257.24,-478.05"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge23" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M699.29,-70.35C676.32,-65.49 648.33,-59.57 623.3,-54.27"/>
+<polygon fill="#33ff00" stroke="#33ff00" points="624.01,-50.84 613.5,-52.2 622.56,-57.69 624.01,-50.84"/>
+</g>
+<!-- sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge22" class="edge">
+<title>sourcefile~self_model.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#33ff00" stroke-dasharray="5,2" d="M699.47,-72.7C683.1,-68.77 665.08,-62.92 650,-54.34 630.6,-43.31 633.05,-30.97 614,-19.34 591.38,-5.54 583.98,0.5 557.5,-0.34"/>
+</g>
+<!-- sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge24" class="edge">
+<title>sourcefile~self_metadata.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M499.31,-35.25C467.98,-35.26 429.79,-40.3 402,-60.34"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge25" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1472.5,-158.34C1416.69,-161.29 1030.39,-224.91 975,-232.34"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M973,-232.34C908.78,-240.19 459.4,-316.49 402,-346.34"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M400,-346.34C344.99,-371.15 348.6,-401.82 303,-441.34 287.16,-455.07 268.41,-469.41 253.68,-480.27"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="251.54,-477.5 245.53,-486.23 255.67,-483.15 251.54,-477.5"/>
+</g>
+<!-- sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge26" class="edge">
+<title>sourcefile~self_boundaryconditions.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1577.56,-156.44C1545.25,-156.22 1508.16,-156.57 1474.5,-158.34"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1472.5,-158.34C1402.15,-162.06 1384.3,-160.92 1314,-156.34"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1312,-156.34C1249.52,-152.27 797.56,-195.25 748.5,-156.34"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M746.5,-156.34C708.05,-125.38 689.46,-131.01 650,-101.34 632.16,-87.93 632.4,-78.97 614,-66.34 609.04,-62.94 603.56,-59.78 598.02,-56.93"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="599.26,-53.64 588.73,-52.43 596.2,-59.94 599.26,-53.64"/>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge27" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1161,-384.34C1017.87,-349.95 643.86,-382.17 499,-408.34 412.75,-423.92 316.39,-461.01 265.18,-482.4"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="263.71,-479.22 255.85,-486.33 266.43,-485.67 263.71,-479.22"/>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge32" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1295.16,-449.32C1268.6,-431.16 1214.65,-397.43 1163,-384.34"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1161,-384.34C996.68,-342.7 557.7,-241.33 402,-308.34"/>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge28" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1161,-384.34C1073.81,-365.02 1061.82,-439.45 975,-460.34"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M973,-460.34C833.19,-493.98 791.42,-453.29 650,-479.34 456.81,-514.94 422.13,-579.25 228.5,-612.34"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M226.5,-612.34C193.52,-616.85 156.81,-621.3 126.18,-624.85"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="125.58,-621.4 116.04,-626.02 126.38,-628.35 125.58,-621.4"/>
+</g>
+<!-- sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node13" class="node">
+<title>sourcefile~self_data.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node13"><a xlink:href=".././sourcefile/self_data.f90.html" xlink:title="SELF_Data.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="792,-512.34 703,-512.34 703,-488.34 792,-488.34 792,-512.34"/>
+<text text-anchor="middle" x="747.5" y="-497.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge29" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M973,-460.34C915.21,-474.25 847.98,-485.6 802.27,-492.61"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="801.64,-489.17 792.28,-494.13 802.69,-496.09 801.64,-489.17"/>
+</g>
+<!-- sourcefile~self_scalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node14" class="node">
+<title>sourcefile~self_scalar_1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node14"><a xlink:href=".././sourcefile/self_scalar_1d.f90.html" xlink:title="SELF_Scalar_1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1221,-669.34 1103,-669.34 1103,-645.34 1221,-645.34 1221,-669.34"/>
+<text text-anchor="middle" x="1162" y="-654.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_scalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge30" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_scalar_1d.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1308.44,-473.77C1299.08,-504.47 1270.95,-584.77 1221,-631.34 1217.26,-634.83 1212.98,-637.9 1208.47,-640.6"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1206.77,-637.54 1199.6,-645.34 1210.07,-643.71 1206.77,-637.54"/>
+</g>
+<!-- sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node16" class="node">
+<title>sourcefile~self_lagrange.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node16"><a xlink:href=".././sourcefile/self_lagrange.f90.html" xlink:title="SELF_Lagrange.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="614,-664.34 499,-664.34 499,-640.34 614,-640.34 614,-664.34"/>
+<text text-anchor="middle" x="556.5" y="-649.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge31" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1306.48,-473.35C1290.26,-506.68 1239.13,-599.13 1163,-617.34"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1161,-617.34C1119.27,-627.32 1109.46,-633.15 1067,-639.34 926.68,-659.8 890.25,-654.33 748.5,-658.34"/>
+</g>
+<!-- sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node17" class="node">
+<title>sourcefile~self_mesh.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node17"><a xlink:href=".././sourcefile/self_mesh.f90.html" xlink:title="SELF_Mesh.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1207.5,-550.34 1116.5,-550.34 1116.5,-526.34 1207.5,-526.34 1207.5,-550.34"/>
+<text text-anchor="middle" x="1162" y="-535.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_mesh.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge33" class="edge">
+<title>sourcefile~self_mesh_1d.f90&#45;&gt;sourcefile~self_mesh.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1291.68,-473.42C1273.42,-484.1 1245.75,-499.89 1221,-512.34 1214.43,-515.65 1207.34,-519 1200.46,-522.14"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1198.95,-518.98 1191.26,-526.28 1201.82,-525.37 1198.95,-518.98"/>
+</g>
+<!-- sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge34" class="edge">
+<title>sourcefile~self_hdf5.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#3200ff" stroke-dasharray="5,2" d="M206.81,-432.41C190.75,-442.91 168.16,-459.25 152,-477.34 114.27,-519.58 83.52,-579.3 68.66,-610.86"/>
+<polygon fill="#3200ff" stroke="#3200ff" points="65.42,-609.51 64.4,-620.06 71.78,-612.45 65.42,-609.51"/>
+</g>
+<!-- sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node18" class="node">
+<title>sourcefile~self_gpu_enums.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node18"><a xlink:href=".././sourcefile/self_gpu_enums.f90.html" xlink:title="SELF_GPU_enums.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="291,-784.34 164,-784.34 164,-760.34 291,-760.34 291,-784.34"/>
+<text text-anchor="middle" x="227.5" y="-769.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge35" class="edge">
+<title>sourcefile~self_gpu.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M358.48,-802.66C337.93,-797.87 312.71,-791.98 289.97,-786.68"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="290.6,-783.23 280.06,-784.37 289.01,-790.05 290.6,-783.23"/>
+</g>
+<!-- sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge36" class="edge">
+<title>sourcefile~self_gpuinterfaces.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#ff0098" stroke-dasharray="5,2" d="M920.29,-786.39C875.02,-795.93 807.86,-808.16 748.5,-811.34"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge38" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M741.44,-488.04C715.77,-425.55 599.73,-143.14 566.45,-62.13"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="569.52,-60.39 562.48,-52.47 563.05,-63.05 569.52,-60.39"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge39" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M702.97,-490.96C647.48,-479.25 548.47,-459.2 463,-446.34 402.06,-437.17 331.75,-429.8 284.13,-425.28"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="284.31,-421.78 274.03,-424.33 283.66,-428.75 284.31,-421.78"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge37" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M726.52,-512.47C678.91,-541.34 562.32,-611.78 557.5,-612.34"/>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M555.5,-612.34C411.15,-629.24 371.82,-588.25 228.5,-612.34"/>
+</g>
+<!-- sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge40" class="edge">
+<title>sourcefile~self_data.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M718.41,-512.54C697.53,-522.7 669.43,-538.8 650,-559.34 626.77,-583.9 638.63,-603.19 614,-626.34 610.4,-629.72 606.29,-632.73 601.96,-635.38"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="599.96,-632.48 592.86,-640.34 603.31,-638.63 599.96,-632.48"/>
+</g>
+<!-- sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge45" class="edge">
+<title>sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1104.43,-669.38C964.98,-698.87 612.06,-772.34 557.5,-772.34"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M555.5,-772.34C517.15,-775.43 474.94,-787.06 444.51,-796.99"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="443.04,-793.79 434.66,-800.28 445.25,-800.43 443.04,-793.79"/>
+</g>
+<!-- sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge44" class="edge">
+<title>sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_gpuinterfaces.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1130.56,-669.47C1121.48,-673.49 1111.65,-678.24 1103,-683.34 1085.77,-693.5 1083.21,-698.63 1067,-710.34 1045.04,-726.21 1019.76,-743.74 1001.26,-756.44"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="999.04,-753.72 992.77,-762.26 1003,-759.5 999.04,-753.72"/>
+</g>
+<!-- sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge43" class="edge">
+<title>sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M555.5,-772.34C459.22,-780.11 433.23,-770.13 339,-791.34 287.9,-802.85 277.21,-851.6 228.5,-832.34"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M226.5,-832.34C191.96,-818.06 178.97,-819.22 152,-793.34 109.33,-752.41 80.11,-687.63 66.94,-654.08"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="70.06,-652.45 63.23,-644.35 63.52,-654.95 70.06,-652.45"/>
+</g>
+<!-- sourcefile~self_scalar_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node19" class="node">
+<title>sourcefile~self_scalar_1d_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node19"><a xlink:href=".././sourcefile/self_scalar_1d_t.f90.html" xlink:title="SELF_Scalar_1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1037.5,-630.34 910.5,-630.34 910.5,-606.34 1037.5,-606.34 1037.5,-630.34"/>
+<text text-anchor="middle" x="974" y="-615.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_scalar_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge41" class="edge">
+<title>sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_scalar_1d_t.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1103.68,-645.32C1084.32,-641.26 1062.53,-636.7 1042.46,-632.49"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="1042.96,-629.02 1032.45,-630.39 1041.52,-635.87 1042.96,-629.02"/>
+</g>
+<!-- sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node21" class="node">
+<title>sourcefile~self_gpublas.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node21"><a xlink:href=".././sourcefile/self_gpublas.f90.html" xlink:title="SELF_GPUBLAS.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="457.5,-744.34 344.5,-744.34 344.5,-720.34 457.5,-720.34 457.5,-744.34"/>
+<text text-anchor="middle" x="401" y="-729.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUBLAS.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_gpublas.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge42" class="edge">
+<title>sourcefile~self_scalar_1d.f90&#45;&gt;sourcefile~self_gpublas.f90</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M555.5,-772.34C514.99,-772.34 470.36,-759.14 439.72,-747.9"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="440.87,-744.6 430.28,-744.34 438.4,-751.15 440.87,-744.6"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_mesh_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge49" class="edge">
+<title>sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_mesh_1d.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1472.5,-310.34C1398.18,-296.43 1343.65,-395.34 1323.03,-440.12"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1319.82,-438.72 1318.94,-449.27 1326.22,-441.57 1319.82,-438.72"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge51" class="edge">
+<title>sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1657.93,-498.33C1640.05,-458.05 1575.57,-329.26 1474.5,-310.34"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1472.5,-310.34C1097.24,-240.11 995.75,-285.47 614,-281.34 562.89,-280.79 549.64,-274.43 499,-281.34 487.92,-282.86 412.13,-303.59 402,-308.34"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M400,-308.34C372.82,-318.82 364.23,-317.77 339,-332.34 304.73,-352.13 269.75,-381.94 248.58,-401.28"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="246.14,-398.77 241.17,-408.13 250.89,-403.91 246.14,-398.77"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge47" class="edge">
+<title>sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1312,-735.34C1252.56,-742.44 1124.51,-830.71 1067,-847.34 929.78,-887.02 890.93,-879.54 748.5,-890.34"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_scalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge48" class="edge">
+<title>sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_scalar_1d.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1472.5,-695.34C1405.18,-722.65 1386.14,-726.73 1314,-735.34"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1312,-735.34C1260.77,-741.46 1209.26,-701.96 1182.28,-676.91"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1184.36,-674.06 1174.72,-669.67 1179.52,-679.11 1184.36,-674.06"/>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge50" class="edge">
+<title>sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1655.57,-522.61C1633.41,-557.85 1563.73,-659.15 1474.5,-695.34"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1472.5,-695.34C1406.77,-722.01 1232.42,-602.8 1163,-617.34"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node20" class="node">
+<title>sourcefile~self_geometry_1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node20"><a xlink:href=".././sourcefile/self_geometry_1d.f90.html" xlink:title="SELF_Geometry_1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1542,-551.34 1405,-551.34 1405,-527.34 1542,-527.34 1542,-551.34"/>
+<text text-anchor="middle" x="1473.5" y="-536.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_geometry_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge46" class="edge">
+<title>sourcefile~self_mappedscalar_1d_t.f90&#45;&gt;sourcefile~self_geometry_1d.f90</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1584.97,-522.35C1574.22,-524 1563.19,-525.7 1552.44,-527.35"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1551.6,-523.94 1542.25,-528.92 1552.67,-530.86 1551.6,-523.94"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge54" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_gpu.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M544.91,-664.38C527.95,-683.53 493.51,-721.99 463,-753.34 449.85,-766.85 434.61,-781.6 422.64,-792.97"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="420.17,-790.49 415.31,-799.91 424.98,-795.58 420.17,-790.49"/>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge52" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M523.75,-664.42C493.11,-675.16 445.15,-689.58 402,-692.34"/>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M400,-692.34C323.93,-697.21 303.62,-705.25 228.5,-692.34"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node23" class="node">
+<title>sourcefile~self_lagrange_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node23"><a xlink:href=".././sourcefile/self_lagrange_t.f90.html" xlink:title="SELF_Lagrange_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463,-664.34 339,-664.34 339,-640.34 463,-640.34 463,-664.34"/>
+<text text-anchor="middle" x="401" y="-649.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge53" class="edge">
+<title>sourcefile~self_lagrange.f90&#45;&gt;sourcefile~self_lagrange_t.f90</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M498.78,-652.34C490.43,-652.34 481.74,-652.34 473.15,-652.34"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="473.13,-648.84 463.13,-652.34 473.13,-655.84 473.13,-648.84"/>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge55" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1116.12,-548.68C1100.59,-552.18 1083.05,-556.03 1067,-559.34 968.65,-579.63 944.78,-590.06 845,-601.34 717.94,-615.71 684.6,-598.29 557.5,-612.34"/>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node22" class="node">
+<title>sourcefile~self_domaindecomposition.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node22"><a xlink:href=".././sourcefile/self_domaindecomposition.f90.html" xlink:title="SELF_DomainDecomposition.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="1067,-550.34 881,-550.34 881,-526.34 1067,-526.34 1067,-550.34"/>
+<text text-anchor="middle" x="974" y="-535.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge56" class="edge">
+<title>sourcefile~self_mesh.f90&#45;&gt;sourcefile~self_domaindecomposition.f90</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M1116.45,-538.34C1104.43,-538.34 1090.91,-538.34 1077.12,-538.34"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="1077.05,-534.84 1067.05,-538.34 1077.05,-541.84 1077.05,-534.84"/>
+</g>
+<!-- sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_metadata.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge57" class="edge">
+<title>sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_metadata.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M944.33,-606.33C924,-596.47 897.5,-580.64 881,-559.34 823.27,-484.82 822.36,-214.92 748.5,-156.34"/>
+</g>
+<!-- sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge59" class="edge">
+<title>sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M951,-606.22C926,-592.92 883.66,-571.82 845,-559.34 760.97,-532.22 736.29,-540.08 650,-521.34 518.31,-492.75 364.59,-454.73 284.11,-434.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="284.75,-431.02 274.2,-431.97 283.04,-437.81 284.75,-431.02"/>
+</g>
+<!-- sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge58" class="edge">
+<title>sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M951.14,-630.4C926.28,-643.43 884.05,-663.52 845,-672.34 652.75,-715.77 598.69,-679.75 402,-692.34"/>
+</g>
+<!-- sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge60" class="edge">
+<title>sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M951.85,-606.2C932.74,-594.9 904.15,-577.17 881,-559.34 863.8,-546.1 864.02,-536.8 845,-526.34 831.9,-519.14 816.7,-513.85 802.28,-509.99"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="803.02,-506.56 792.47,-507.54 801.32,-513.35 803.02,-506.56"/>
+</g>
+<!-- sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge61" class="edge">
+<title>sourcefile~self_scalar_1d_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M928.26,-630.35C883.23,-641.47 811.62,-656.55 748.5,-658.34"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.5,-658.34C706.03,-659.49 660.69,-658.14 624.56,-656.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="624.31,-652.91 614.15,-655.92 623.96,-659.91 624.31,-652.91"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge62" class="edge">
+<title>sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1456.54,-551.55C1429.19,-571.41 1370.79,-609.35 1314,-617.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1312,-617.34C1252.49,-625.72 1271.44,-550 1221,-517.34 1198.23,-502.6 1187.41,-510.17 1163,-498.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1161,-498.34C1118.03,-477.52 1113.23,-458.28 1067,-446.34 926.32,-410.02 496.75,-461.73 313.15,-486.45"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="312.45,-483.01 303.01,-487.82 313.39,-489.95 312.45,-483.01"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_mesh_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge67" class="edge">
+<title>sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_mesh_1d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1448.08,-527.33C1421.21,-514.1 1377.83,-492.75 1347.72,-477.94"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1348.96,-474.65 1338.45,-473.37 1345.87,-480.93 1348.96,-474.65"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge63" class="edge">
+<title>sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1460.84,-551.35C1442.42,-569.91 1405.01,-606.06 1369,-631.34 1243.99,-719.1 1208.05,-736.75 1067,-795.34 930.58,-852.01 896.14,-885.39 748.5,-890.34"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M746.5,-890.34C514.86,-893.36 442.57,-920.89 228.5,-832.34"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_data.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge64" class="edge">
+<title>sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_data.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1161,-498.34C1098.84,-469.58 899.28,-484.91 802.34,-494.51"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="801.77,-491.05 792.17,-495.53 802.47,-498.01 801.77,-491.05"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_scalar_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge65" class="edge">
+<title>sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_scalar_1d.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1312,-617.34C1276.41,-622.35 1237.2,-633.1 1207.93,-642.19"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="1206.5,-638.98 1198.02,-645.33 1208.61,-645.65 1206.5,-638.98"/>
+</g>
+<!-- sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge66" class="edge">
+<title>sourcefile~self_geometry_1d.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M1312,-617.34C1246.42,-626.57 1227.81,-603.76 1163,-617.34"/>
+</g>
+<!-- sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge69" class="edge">
+<title>sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M354.8,-720.26C320.39,-711.44 271.74,-699.77 228.5,-692.34"/>
+</g>
+<!-- sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_gpu_enums.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge68" class="edge">
+<title>sourcefile~self_gpublas.f90&#45;&gt;sourcefile~self_gpu_enums.f90</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M348.54,-744.34C330.14,-748.64 309.22,-753.52 290.06,-757.99"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="289.16,-754.6 280.22,-760.28 290.75,-761.42 289.16,-754.6"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node24" class="node">
+<title>sourcefile~self_domaindecomposition_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node24"><a xlink:href=".././sourcefile/self_domaindecomposition_t.f90.html" xlink:title="SELF_DomainDecomposition_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="845,-592.34 650,-592.34 650,-568.34 845,-568.34 845,-592.34"/>
+<text text-anchor="middle" x="747.5" y="-577.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge70" class="edge">
+<title>sourcefile~self_domaindecomposition.f90&#45;&gt;sourcefile~self_domaindecomposition_t.f90</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M908.67,-550.38C881.9,-555.39 850.65,-561.23 822.89,-566.42"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="822.03,-563.03 812.84,-568.31 823.32,-569.91 822.03,-563.03"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge74" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M386.54,-640.26C356.86,-613.61 285.59,-549.6 249.78,-517.45"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="251.67,-514.45 241.89,-510.37 247,-519.66 251.67,-514.45"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge73" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_hdf5.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M395.35,-640.26C383.4,-610.27 349.29,-530.99 303,-477.34 289.84,-462.09 272,-448.27 257.07,-438.05"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="258.95,-435.1 248.68,-432.47 255.07,-440.93 258.95,-435.1"/>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge71" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M363.24,-664.46C320.94,-677.77 254.04,-696.73 228.5,-692.34"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M226.5,-692.34C192.82,-686.56 184.3,-684.5 152,-673.34 131.88,-666.39 110.06,-656.89 92.62,-648.78"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="93.96,-645.54 83.42,-644.44 90.98,-651.87 93.96,-645.54"/>
+</g>
+<!-- sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node25" class="node">
+<title>sourcefile~self_quadrature.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~EfferentGraph_node25"><a xlink:href=".././sourcefile/self_quadrature.f90.html" xlink:title="SELF_Quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="289.5,-664.34 165.5,-664.34 165.5,-640.34 289.5,-640.34 289.5,-664.34"/>
+<text text-anchor="middle" x="227.5" y="-649.94" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge72" class="edge">
+<title>sourcefile~self_lagrange_t.f90&#45;&gt;sourcefile~self_quadrature.f90</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M338.57,-652.34C325.98,-652.34 312.63,-652.34 299.73,-652.34"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="299.5,-648.84 289.5,-652.34 299.5,-655.84 299.5,-648.84"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge76" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_supportroutines.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M670.62,-568.33C575.4,-553.26 412.56,-527.48 313.31,-511.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.74,-508.29 303.32,-510.19 312.65,-515.21 313.74,-508.29"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge75" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M685.02,-592.39C648.17,-599.2 600.3,-607.33 557.5,-612.34"/>
+</g>
+<!-- sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge77" class="edge">
+<title>sourcefile~self_domaindecomposition_t.f90&#45;&gt;sourcefile~self_lagrange.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M714.87,-592.39C682.98,-604.54 633.6,-623.35 598.68,-636.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="597.34,-633.42 589.24,-640.25 599.83,-639.96 597.34,-633.42"/>
+</g>
+<!-- sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~EfferentGraph_edge78" class="edge">
+<title>sourcefile~self_quadrature.f90&#45;&gt;sourcefile~self_constants.f90</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M165.08,-645.01C152.48,-643.5 139.16,-641.91 126.36,-640.39"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="126.58,-636.89 116.24,-639.18 125.75,-643.84 126.58,-636.89"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefileself_dgmodel1df90EfferentGraph = svgPanZoom('#sourcefileself_dgmodel1df90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: sourcefile~~self_dgmodel1d.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefileself_dgmodel1df90AfferentGraph" width="588pt" height="242pt"
+ viewBox="0.00 0.00 588.00 242.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 238)">
+<title>sourcefile~~self_dgmodel1d.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-238 584,-238 584,4 -4,4"/>
+<!-- sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node1" class="node">
+<title>sourcefile~self_dgmodel1d.f90</title>
+<polygon fill="none" stroke="black" points="127,-171 0,-171 0,-147 127,-147 127,-171"/>
+<text text-anchor="middle" x="63.5" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_DGModel1D.f90</text>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node2" class="node">
+<title>sourcefile~self_advection_diffusion_1d_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/self_advection_diffusion_1d_t.f90.html" xlink:title="SELF_advection_diffusion_1d_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="358,-192 163,-192 163,-168 358,-168 358,-192"/>
+<text text-anchor="middle" x="260.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_1d_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge1" class="edge">
+<title>sourcefile~self_advection_diffusion_1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M162.86,-169.59C154.21,-168.66 145.55,-167.73 137.16,-166.83"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="137.39,-163.33 127.07,-165.74 136.64,-170.29 137.39,-163.33"/>
+</g>
+<!-- sourcefile~self_burgers1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node3" class="node">
+<title>sourcefile~self_burgers1d_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/self_burgers1d_t.f90.html" xlink:title="SELF_Burgers1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="325.5,-150 195.5,-150 195.5,-126 325.5,-126 325.5,-150"/>
+<text text-anchor="middle" x="260.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Burgers1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_burgers1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge2" class="edge">
+<title>sourcefile~self_burgers1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M195.38,-144.91C176.84,-146.9 156.48,-149.09 137.44,-151.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="136.9,-147.68 127.33,-152.23 137.65,-154.64 136.9,-147.68"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node4" class="node">
+<title>sourcefile~self_advection_diffusion_1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/self_advection_diffusion_1d.f90.html" xlink:title="SELF_advection_diffusion_1d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="580,-234 394,-234 394,-210 580,-210 580,-234"/>
+<text text-anchor="middle" x="487" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_1d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge3" class="edge">
+<title>sourcefile~self_advection_diffusion_1d.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M393.93,-224.21C328.64,-223.8 239.39,-219.21 163,-201 139.64,-195.43 114.78,-184.79 95.87,-175.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="97.35,-172.44 86.84,-171.12 94.23,-178.7 97.35,-172.44"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge5" class="edge">
+<title>sourcefile~self_advection_diffusion_1d.f90&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M421.67,-209.96C394.9,-204.96 363.65,-199.11 335.89,-193.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="336.32,-190.44 325.84,-192.04 335.03,-197.32 336.32,-190.44"/>
+</g>
+<!-- sourcefile~self_nulldgmodel1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node5" class="node">
+<title>sourcefile~self_nulldgmodel1d_t.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/self_nulldgmodel1d_t.f90.html" xlink:title="SELF_NullDGModel1D_t.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="339,-66 182,-66 182,-42 339,-42 339,-66"/>
+<text text-anchor="middle" x="260.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel1D_t.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge4" class="edge">
+<title>sourcefile~self_nulldgmodel1d_t.f90&#45;&gt;sourcefile~self_dgmodel1d.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M237.13,-66.04C202.4,-84.75 135.4,-120.82 95.86,-142.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="94.05,-139.11 86.91,-146.93 97.37,-145.27 94.05,-139.11"/>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90~2 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node6" class="node">
+<title>sourcefile~self_advection_diffusion_1d.f90~2</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/self_advection_diffusion_1d.f90~2.html" xlink:title="SELF_advection_diffusion_1d.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="580,-192 394,-192 394,-168 580,-168 580,-192"/>
+<text text-anchor="middle" x="487" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_advection_diffusion_1d.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_advection_diffusion_1d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge6" class="edge">
+<title>sourcefile~self_advection_diffusion_1d.f90~2&#45;&gt;sourcefile~self_advection_diffusion_1d_t.f90</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M393.72,-180C385.38,-180 376.88,-180 368.43,-180"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="368.16,-176.5 358.16,-180 368.16,-183.5 368.16,-176.5"/>
+</g>
+<!-- sourcefile~self_burgers1d.f90~2 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node7" class="node">
+<title>sourcefile~self_burgers1d.f90~2</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/self_burgers1d.f90~2.html" xlink:title="SELF_Burgers1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="547.5,-150 426.5,-150 426.5,-126 547.5,-126 547.5,-150"/>
+<text text-anchor="middle" x="487" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Burgers1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_burgers1d.f90~2&#45;&gt;sourcefile~self_burgers1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge8" class="edge">
+<title>sourcefile~self_burgers1d.f90~2&#45;&gt;sourcefile~self_burgers1d_t.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M426.43,-138C398.66,-138 365.32,-138 335.91,-138"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="335.69,-134.5 325.69,-138 335.69,-141.5 335.69,-134.5"/>
+</g>
+<!-- sourcefile~self_burgers1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node8" class="node">
+<title>sourcefile~self_burgers1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/self_burgers1d.f90.html" xlink:title="SELF_Burgers1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="547.5,-108 426.5,-108 426.5,-84 547.5,-84 547.5,-108"/>
+<text text-anchor="middle" x="487" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Burgers1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_burgers1d.f90&#45;&gt;sourcefile~self_burgers1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge7" class="edge">
+<title>sourcefile~self_burgers1d.f90&#45;&gt;sourcefile~self_burgers1d_t.f90</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M426.43,-107.14C398.53,-112.36 365.03,-118.63 335.52,-124.15"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="334.87,-120.71 325.69,-125.99 336.16,-127.59 334.87,-120.71"/>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90~2 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node9" class="node">
+<title>sourcefile~self_nulldgmodel1d.f90~2</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/self_nulldgmodel1d.f90~2.html" xlink:title="SELF_NullDGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="561,-66 413,-66 413,-42 561,-42 561,-66"/>
+<text text-anchor="middle" x="487" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90~2&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge10" class="edge">
+<title>sourcefile~self_nulldgmodel1d.f90~2&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M412.8,-54C392.57,-54 370.4,-54 349.42,-54"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="349.24,-50.5 339.24,-54 349.24,-57.5 349.24,-50.5"/>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node10" class="node">
+<title>sourcefile~self_nulldgmodel1d.f90</title>
+<g id="a_sourcefile~~self_dgmodel1d.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/self_nulldgmodel1d.f90.html" xlink:title="SELF_NullDGModel1D.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="561,-24 413,-24 413,0 561,0 561,-24"/>
+<text text-anchor="middle" x="487" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_NullDGModel1D.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~self_nulldgmodel1d.f90&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90 -->
+<g id="sourcefile~~self_dgmodel1d.f90~~AfferentGraph_edge9" class="edge">
+<title>sourcefile~self_nulldgmodel1d.f90&#45;&gt;sourcefile~self_nulldgmodel1d_t.f90</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M421.67,-24.04C394.9,-29.04 363.65,-34.89 335.89,-40.08"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="335.03,-36.68 325.84,-41.96 336.32,-43.56 335.03,-36.68"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="202pt" height="32pt"
+ viewBox="0.00 0.00 201.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 197.5,-28 197.5,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node">
+<title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="193.5,-24 88.5,-24 88.5,0 193.5,0 193.5,-24"/>
+<text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_dgmodel1d~2.html">SELF_DGModel1D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/self_dgmodel1d.f90.html#src">SELF_DGModel1D.f90</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Maintainers : support@fluidnumerics.com</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">! Official Repository : https://github.com/FluidNumerics/self/</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">!</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! Copyright © 2024 Fluid Numerics LLC</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">!</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">!</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">!    the documentation and/or other materials provided with the distribution.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">!    this software without specific prior written permission.</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">!</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="c">! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="c">!</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="c">! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="k">module </span><span class="n">SELF_DGModel1D</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_SupportRoutines</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Metadata</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Mesh_1D</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_MappedScalar_1D</span>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_HDF5</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">  </span><span class="k">use </span><span class="n">HDF5</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="w">  </span><span class="k">use </span><span class="n">FEQParse</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_Model</span>
+<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_DGModel1D_t</span>
+<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPU</span>
+<a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_GPUInterfaces</span>
+<a id="ln-40" name="ln-40" href="#ln-40"></a><span class="w">  </span><span class="k">use </span><span class="n">SELF_BoundaryConditions</span>
+<a id="ln-41" name="ln-41" href="#ln-41"></a>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="w">  </span><span class="k">implicit none</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="k">  type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">DGModel1D_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">DGModel1D</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">  </span><span class="k">contains</span>
+<a id="ln-47" name="ln-47" href="#ln-47"></a>
+<a id="ln-48" name="ln-48" href="#ln-48"></a><span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_DGModel1D</span>
+<a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_DGModel1D</span>
+<a id="ln-50" name="ln-50" href="#ln-50"></a>
+<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateSolution</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateSolution_DGModel1D</span>
+<a id="ln-52" name="ln-52" href="#ln-52"></a>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CalculateEntropy</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">CalculateEntropy_DGModel1D</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BoundaryFlux</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">BoundaryFlux_DGModel1D</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">FluxMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">fluxmethod_DGModel1D</span>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SourceMethod</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">sourcemethod_DGModel1D</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetBoundaryCondition</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">setboundarycondition_DGModel1D</span>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetGradientBoundaryCondition</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">setgradientboundarycondition_DGModel1D</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateGRK2</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateGRK2_DGModel1D</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateGRK3</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateGRK3_DGModel1D</span>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateGRK4</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateGRK4_DGModel1D</span>
+<a id="ln-63" name="ln-63" href="#ln-63"></a>
+<a id="ln-64" name="ln-64" href="#ln-64"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CalculateSolutionGradient</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">CalculateSolutionGradient_DGModel1D</span>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CalculateTendency</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">CalculateTendency_DGModel1D</span>
+<a id="ln-66" name="ln-66" href="#ln-66"></a>
+<a id="ln-67" name="ln-67" href="#ln-67"></a><span class="w">  </span><span class="k">endtype </span><span class="n">DGModel1D</span>
+<a id="ln-68" name="ln-68" href="#ln-68"></a>
+<a id="ln-69" name="ln-69" href="#ln-69"></a><span class="k">contains</span>
+<a id="ln-70" name="ln-70" href="#ln-70"></a>
+<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="k">  subroutine </span><span class="n">UpdateSolution_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">dt</span><span class="p">)</span>
+<a id="ln-72" name="ln-72" href="#ln-72"></a><span class="w">    </span><span class="c">!! Computes a solution update as , where dt is either provided through the interface</span>
+<a id="ln-73" name="ln-73" href="#ln-73"></a><span class="w">    </span><span class="c">!! or taken as the Model&#39;s stored time step size (model % dt)</span>
+<a id="ln-74" name="ln-74" href="#ln-74"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-75" name="ln-75" href="#ln-75"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-76" name="ln-76" href="#ln-76"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dt</span>
+<a id="ln-77" name="ln-77" href="#ln-77"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-78" name="ln-78" href="#ln-78"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dtLoc</span>
+<a id="ln-79" name="ln-79" href="#ln-79"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-80" name="ln-80" href="#ln-80"></a>
+<a id="ln-81" name="ln-81" href="#ln-81"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">dt</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-82" name="ln-82" href="#ln-82"></a><span class="k">      </span><span class="n">dtLoc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dt</span>
+<a id="ln-83" name="ln-83" href="#ln-83"></a><span class="w">    </span><span class="k">else</span>
+<a id="ln-84" name="ln-84" href="#ln-84"></a><span class="k">      </span><span class="n">dtLoc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">dt</span>
+<a id="ln-85" name="ln-85" href="#ln-85"></a><span class="w">    </span><span class="k">endif</span>
+<a id="ln-86" name="ln-86" href="#ln-86"></a><span class="k">    </span><span class="n">ndof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-87" name="ln-87" href="#ln-87"></a>
+<a id="ln-88" name="ln-88" href="#ln-88"></a><span class="w">    </span><span class="k">call </span><span class="n">UpdateSolution_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">dsdt</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">dtLoc</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span>
+<a id="ln-89" name="ln-89" href="#ln-89"></a>
+<a id="ln-90" name="ln-90" href="#ln-90"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">UpdateSolution_DGModel1D</span>
+<a id="ln-91" name="ln-91" href="#ln-91"></a>
+<a id="ln-92" name="ln-92" href="#ln-92"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">UpdateGRK2_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+<a id="ln-93" name="ln-93" href="#ln-93"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-94" name="ln-94" href="#ln-94"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-95" name="ln-95" href="#ln-95"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m</span>
+<a id="ln-96" name="ln-96" href="#ln-96"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-97" name="ln-97" href="#ln-97"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-98" name="ln-98" href="#ln-98"></a>
+<a id="ln-99" name="ln-99" href="#ln-99"></a><span class="w">    </span><span class="n">ndof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-100" name="ln-100" href="#ln-100"></a><span class="w">    </span><span class="k">call </span><span class="n">UpdateGRK_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">worksol</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">dsdt</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-101" name="ln-101" href="#ln-101"></a><span class="w">                       </span><span class="n">rk2_a</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">rk2_g</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">dt</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span>
+<a id="ln-102" name="ln-102" href="#ln-102"></a>
+<a id="ln-103" name="ln-103" href="#ln-103"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">UpdateGRK2_DGModel1D</span>
+<a id="ln-104" name="ln-104" href="#ln-104"></a>
+<a id="ln-105" name="ln-105" href="#ln-105"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">UpdateGRK3_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+<a id="ln-106" name="ln-106" href="#ln-106"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-107" name="ln-107" href="#ln-107"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-108" name="ln-108" href="#ln-108"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m</span>
+<a id="ln-109" name="ln-109" href="#ln-109"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-110" name="ln-110" href="#ln-110"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-111" name="ln-111" href="#ln-111"></a>
+<a id="ln-112" name="ln-112" href="#ln-112"></a><span class="w">    </span><span class="n">ndof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-113" name="ln-113" href="#ln-113"></a><span class="w">    </span><span class="k">call </span><span class="n">UpdateGRK_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">worksol</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">dsdt</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-114" name="ln-114" href="#ln-114"></a><span class="w">                       </span><span class="n">rk3_a</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">rk3_g</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">dt</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span>
+<a id="ln-115" name="ln-115" href="#ln-115"></a>
+<a id="ln-116" name="ln-116" href="#ln-116"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">UpdateGRK3_DGModel1D</span>
+<a id="ln-117" name="ln-117" href="#ln-117"></a>
+<a id="ln-118" name="ln-118" href="#ln-118"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">UpdateGRK4_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+<a id="ln-119" name="ln-119" href="#ln-119"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-120" name="ln-120" href="#ln-120"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-121" name="ln-121" href="#ln-121"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m</span>
+<a id="ln-122" name="ln-122" href="#ln-122"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-123" name="ln-123" href="#ln-123"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-124" name="ln-124" href="#ln-124"></a>
+<a id="ln-125" name="ln-125" href="#ln-125"></a><span class="w">    </span><span class="n">ndof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-126" name="ln-126" href="#ln-126"></a><span class="w">    </span><span class="k">call </span><span class="n">UpdateGRK_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">worksol</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">dsdt</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-127" name="ln-127" href="#ln-127"></a><span class="w">                       </span><span class="n">rk4_a</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">rk4_g</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">this</span><span class="p">%</span><span class="n">dt</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span>
+<a id="ln-128" name="ln-128" href="#ln-128"></a>
+<a id="ln-129" name="ln-129" href="#ln-129"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">UpdateGRK4_DGModel1D</span>
+<a id="ln-130" name="ln-130" href="#ln-130"></a>
+<a id="ln-131" name="ln-131" href="#ln-131"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">CalculateSolutionGradient_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-132" name="ln-132" href="#ln-132"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-133" name="ln-133" href="#ln-133"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-134" name="ln-134" href="#ln-134"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-135" name="ln-135" href="#ln-135"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-136" name="ln-136" href="#ln-136"></a>
+<a id="ln-137" name="ln-137" href="#ln-137"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">AverageSides</span><span class="p">()</span>
+<a id="ln-138" name="ln-138" href="#ln-138"></a>
+<a id="ln-139" name="ln-139" href="#ln-139"></a><span class="w">    </span><span class="c">! Account for the outward pointing normal before computing dg derivative</span>
+<a id="ln-140" name="ln-140" href="#ln-140"></a><span class="w">    </span><span class="n">ndof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="o">*</span><span class="mi">2</span>
+<a id="ln-141" name="ln-141" href="#ln-141"></a><span class="w">    </span><span class="k">call </span><span class="n">GradientNormal_1D_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundarynormal_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-142" name="ln-142" href="#ln-142"></a><span class="w">                               </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">avgBoundary_gpu</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span>
+<a id="ln-143" name="ln-143" href="#ln-143"></a>
+<a id="ln-144" name="ln-144" href="#ln-144"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">MappedDGDerivative</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">)</span>
+<a id="ln-145" name="ln-145" href="#ln-145"></a>
+<a id="ln-146" name="ln-146" href="#ln-146"></a><span class="w">    </span><span class="c">! interpolate the solutiongradient to the element boundaries</span>
+<a id="ln-147" name="ln-147" href="#ln-147"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">BoundaryInterp</span><span class="p">()</span>
+<a id="ln-148" name="ln-148" href="#ln-148"></a>
+<a id="ln-149" name="ln-149" href="#ln-149"></a><span class="w">    </span><span class="c">! perform the side exchange to populate the</span>
+<a id="ln-150" name="ln-150" href="#ln-150"></a><span class="w">    </span><span class="c">! solutionGradient % extBoundary attribute</span>
+<a id="ln-151" name="ln-151" href="#ln-151"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">SideExchange</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">)</span>
+<a id="ln-152" name="ln-152" href="#ln-152"></a>
+<a id="ln-153" name="ln-153" href="#ln-153"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">CalculateSolutionGradient_DGModel1D</span>
+<a id="ln-154" name="ln-154" href="#ln-154"></a>
+<a id="ln-155" name="ln-155" href="#ln-155"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">CalculateEntropy_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-156" name="ln-156" href="#ln-156"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-157" name="ln-157" href="#ln-157"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-158" name="ln-158" href="#ln-158"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-159" name="ln-159" href="#ln-159"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span><span class="p">,</span><span class="n">i</span>
+<a id="ln-160" name="ln-160" href="#ln-160"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">),</span><span class="n">J</span>
+<a id="ln-161" name="ln-161" href="#ln-161"></a>
+<a id="ln-162" name="ln-162" href="#ln-162"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-163" name="ln-163" href="#ln-163"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-164" name="ln-164" href="#ln-164"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-165" name="ln-165" href="#ln-165"></a>
+<a id="ln-166" name="ln-166" href="#ln-166"></a><span class="w">    </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_prec</span>
+<a id="ln-167" name="ln-167" href="#ln-167"></a><span class="w">    </span><span class="k">do </span><span class="n">iel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">nelem</span>
+<a id="ln-168" name="ln-168" href="#ln-168"></a><span class="w">      </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+<a id="ln-169" name="ln-169" href="#ln-169"></a><span class="w">        </span><span class="n">J</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">geometry</span><span class="p">%</span><span class="n">dxds</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-170" name="ln-170" href="#ln-170"></a><span class="w">        </span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-171" name="ln-171" href="#ln-171"></a><span class="w">        </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">entropy_func</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">J</span>
+<a id="ln-172" name="ln-172" href="#ln-172"></a><span class="w">      </span><span class="k">enddo</span>
+<a id="ln-173" name="ln-173" href="#ln-173"></a><span class="k">    enddo</span>
+<a id="ln-174" name="ln-174" href="#ln-174"></a>
+<a id="ln-175" name="ln-175" href="#ln-175"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">entropy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e</span>
+<a id="ln-176" name="ln-176" href="#ln-176"></a>
+<a id="ln-177" name="ln-177" href="#ln-177"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">CalculateEntropy_DGModel1D</span>
+<a id="ln-178" name="ln-178" href="#ln-178"></a>
+<a id="ln-179" name="ln-179" href="#ln-179"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">Init_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">geometry</span><span class="p">)</span>
+<a id="ln-180" name="ln-180" href="#ln-180"></a><span class="w">    </span><span class="c">!! Initialize the 1D DG model, then upload BC element/side arrays to GPU.</span>
+<a id="ln-181" name="ln-181" href="#ln-181"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-182" name="ln-182" href="#ln-182"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-183" name="ln-183" href="#ln-183"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mesh</span>
+<a id="ln-184" name="ln-184" href="#ln-184"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">target</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">geometry</span>
+<a id="ln-185" name="ln-185" href="#ln-185"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-186" name="ln-186" href="#ln-186"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-187" name="ln-187" href="#ln-187"></a>
+<a id="ln-188" name="ln-188" href="#ln-188"></a><span class="w">    </span><span class="k">call </span><span class="n">Init_DGModel1D_t</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">geometry</span><span class="p">)</span>
+<a id="ln-189" name="ln-189" href="#ln-189"></a>
+<a id="ln-190" name="ln-190" href="#ln-190"></a><span class="w">    </span><span class="c">! Upload hyperbolic BC element/side arrays to device</span>
+<a id="ln-191" name="ln-191" href="#ln-191"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-192" name="ln-192" href="#ln-192"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<a id="ln-193" name="ln-193" href="#ln-193"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-194" name="ln-194" href="#ln-194"></a><span class="k">        call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">)))</span>
+<a id="ln-195" name="ln-195" href="#ln-195"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-196" name="ln-196" href="#ln-196"></a><span class="w">                                </span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-197" name="ln-197" href="#ln-197"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">)))</span>
+<a id="ln-198" name="ln-198" href="#ln-198"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-199" name="ln-199" href="#ln-199"></a><span class="w">                                </span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-200" name="ln-200" href="#ln-200"></a><span class="w">      </span><span class="k">endif</span>
+<a id="ln-201" name="ln-201" href="#ln-201"></a><span class="k">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-202" name="ln-202" href="#ln-202"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-203" name="ln-203" href="#ln-203"></a>
+<a id="ln-204" name="ln-204" href="#ln-204"></a><span class="w">    </span><span class="c">! Upload parabolic BC element/side arrays to device</span>
+<a id="ln-205" name="ln-205" href="#ln-205"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">parabolicBCs</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-206" name="ln-206" href="#ln-206"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<a id="ln-207" name="ln-207" href="#ln-207"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">nBoundaries</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-208" name="ln-208" href="#ln-208"></a><span class="k">        call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">)))</span>
+<a id="ln-209" name="ln-209" href="#ln-209"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-210" name="ln-210" href="#ln-210"></a><span class="w">                                </span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-211" name="ln-211" href="#ln-211"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMalloc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">)))</span>
+<a id="ln-212" name="ln-212" href="#ln-212"></a><span class="w">        </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">,</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-213" name="ln-213" href="#ln-213"></a><span class="w">                                </span><span class="n">sizeof</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides</span><span class="p">),</span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-214" name="ln-214" href="#ln-214"></a><span class="w">      </span><span class="k">endif</span>
+<a id="ln-215" name="ln-215" href="#ln-215"></a><span class="k">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-216" name="ln-216" href="#ln-216"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-217" name="ln-217" href="#ln-217"></a>
+<a id="ln-218" name="ln-218" href="#ln-218"></a><span class="k">  endsubroutine </span><span class="n">Init_DGModel1D</span>
+<a id="ln-219" name="ln-219" href="#ln-219"></a>
+<a id="ln-220" name="ln-220" href="#ln-220"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">Free_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-221" name="ln-221" href="#ln-221"></a><span class="w">    </span><span class="c">!! Free the 1D DG model, including GPU BC arrays.</span>
+<a id="ln-222" name="ln-222" href="#ln-222"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-223" name="ln-223" href="#ln-223"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-224" name="ln-224" href="#ln-224"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-225" name="ln-225" href="#ln-225"></a><span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">BoundaryCondition</span><span class="p">),</span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">bc</span>
+<a id="ln-226" name="ln-226" href="#ln-226"></a>
+<a id="ln-227" name="ln-227" href="#ln-227"></a><span class="w">    </span><span class="c">! Free hyperbolic BC device arrays</span>
+<a id="ln-228" name="ln-228" href="#ln-228"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">hyperbolicBCs</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-229" name="ln-229" href="#ln-229"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<a id="ln-230" name="ln-230" href="#ln-230"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">c_associated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">))</span><span class="w"> </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipFree</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">))</span>
+<a id="ln-231" name="ln-231" href="#ln-231"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">c_associated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">))</span><span class="w"> </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipFree</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">))</span>
+<a id="ln-232" name="ln-232" href="#ln-232"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<a id="ln-233" name="ln-233" href="#ln-233"></a><span class="nb">      </span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<a id="ln-234" name="ln-234" href="#ln-234"></a><span class="nb">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-235" name="ln-235" href="#ln-235"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-236" name="ln-236" href="#ln-236"></a>
+<a id="ln-237" name="ln-237" href="#ln-237"></a><span class="w">    </span><span class="c">! Free parabolic BC device arrays</span>
+<a id="ln-238" name="ln-238" href="#ln-238"></a><span class="w">    </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">parabolicBCs</span><span class="p">%</span><span class="n">head</span>
+<a id="ln-239" name="ln-239" href="#ln-239"></a><span class="w">    </span><span class="k">do while</span><span class="p">(</span><span class="nb">associated</span><span class="p">(</span><span class="n">bc</span><span class="p">))</span>
+<a id="ln-240" name="ln-240" href="#ln-240"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">c_associated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">))</span><span class="w"> </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipFree</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="p">))</span>
+<a id="ln-241" name="ln-241" href="#ln-241"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">c_associated</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">))</span><span class="w"> </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipFree</span><span class="p">(</span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="p">))</span>
+<a id="ln-242" name="ln-242" href="#ln-242"></a><span class="w">      </span><span class="n">bc</span><span class="p">%</span><span class="n">elements_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<a id="ln-243" name="ln-243" href="#ln-243"></a><span class="nb">      </span><span class="n">bc</span><span class="p">%</span><span class="n">sides_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span>
+<a id="ln-244" name="ln-244" href="#ln-244"></a><span class="nb">      </span><span class="n">bc</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">bc</span><span class="p">%</span><span class="n">next</span>
+<a id="ln-245" name="ln-245" href="#ln-245"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-246" name="ln-246" href="#ln-246"></a>
+<a id="ln-247" name="ln-247" href="#ln-247"></a><span class="k">    call </span><span class="n">Free_DGModel1D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-248" name="ln-248" href="#ln-248"></a>
+<a id="ln-249" name="ln-249" href="#ln-249"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">Free_DGModel1D</span>
+<a id="ln-250" name="ln-250" href="#ln-250"></a>
+<a id="ln-251" name="ln-251" href="#ln-251"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">setboundarycondition_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-252" name="ln-252" href="#ln-252"></a><span class="w">    </span><span class="c">!! Apply boundary conditions for the solution on GPU.</span>
+<a id="ln-253" name="ln-253" href="#ln-253"></a><span class="w">    </span><span class="c">!! Syncs boundary data from device, applies host-side BC dispatch</span>
+<a id="ln-254" name="ln-254" href="#ln-254"></a><span class="w">    </span><span class="c">!! (periodic defaults + registered BCs), then syncs back to device.</span>
+<a id="ln-255" name="ln-255" href="#ln-255"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-256" name="ln-256" href="#ln-256"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-257" name="ln-257" href="#ln-257"></a>
+<a id="ln-258" name="ln-258" href="#ln-258"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-259" name="ln-259" href="#ln-259"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-260" name="ln-260" href="#ln-260"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-261" name="ln-261" href="#ln-261"></a>
+<a id="ln-262" name="ln-262" href="#ln-262"></a><span class="w">    </span><span class="k">call </span><span class="n">setboundarycondition_DGModel1D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-263" name="ln-263" href="#ln-263"></a>
+<a id="ln-264" name="ln-264" href="#ln-264"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-265" name="ln-265" href="#ln-265"></a><span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-266" name="ln-266" href="#ln-266"></a><span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-267" name="ln-267" href="#ln-267"></a><span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-268" name="ln-268" href="#ln-268"></a>
+<a id="ln-269" name="ln-269" href="#ln-269"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">setboundarycondition_DGModel1D</span>
+<a id="ln-270" name="ln-270" href="#ln-270"></a>
+<a id="ln-271" name="ln-271" href="#ln-271"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">setgradientboundarycondition_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-272" name="ln-272" href="#ln-272"></a><span class="w">    </span><span class="c">!! Apply gradient boundary conditions on GPU.</span>
+<a id="ln-273" name="ln-273" href="#ln-273"></a><span class="w">    </span><span class="c">!! Syncs gradient boundary data from device, applies host-side BC dispatch</span>
+<a id="ln-274" name="ln-274" href="#ln-274"></a><span class="w">    </span><span class="c">!! (periodic defaults + registered BCs), then syncs back to device.</span>
+<a id="ln-275" name="ln-275" href="#ln-275"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-276" name="ln-276" href="#ln-276"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-277" name="ln-277" href="#ln-277"></a>
+<a id="ln-278" name="ln-278" href="#ln-278"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-279" name="ln-279" href="#ln-279"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-280" name="ln-280" href="#ln-280"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-281" name="ln-281" href="#ln-281"></a>
+<a id="ln-282" name="ln-282" href="#ln-282"></a><span class="w">    </span><span class="k">call </span><span class="n">setgradientboundarycondition_DGModel1D_t</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-283" name="ln-283" href="#ln-283"></a>
+<a id="ln-284" name="ln-284" href="#ln-284"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">extBoundary_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-285" name="ln-285" href="#ln-285"></a><span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-286" name="ln-286" href="#ln-286"></a><span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">extBoundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-287" name="ln-287" href="#ln-287"></a><span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-288" name="ln-288" href="#ln-288"></a>
+<a id="ln-289" name="ln-289" href="#ln-289"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">setgradientboundarycondition_DGModel1D</span>
+<a id="ln-290" name="ln-290" href="#ln-290"></a>
+<a id="ln-291" name="ln-291" href="#ln-291"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">BoundaryFlux_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-292" name="ln-292" href="#ln-292"></a><span class="w">    </span><span class="c">! this method uses an linear upwind solver for the</span>
+<a id="ln-293" name="ln-293" href="#ln-293"></a><span class="w">    </span><span class="c">! advective flux and the bassi-rebay method for the</span>
+<a id="ln-294" name="ln-294" href="#ln-294"></a><span class="w">    </span><span class="c">! diffusive fluxes</span>
+<a id="ln-295" name="ln-295" href="#ln-295"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-296" name="ln-296" href="#ln-296"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-297" name="ln-297" href="#ln-297"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-298" name="ln-298" href="#ln-298"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-299" name="ln-299" href="#ln-299"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iside</span>
+<a id="ln-300" name="ln-300" href="#ln-300"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fin</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-301" name="ln-301" href="#ln-301"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fout</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-302" name="ln-302" href="#ln-302"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dfdx</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">),</span><span class="n">nhat</span>
+<a id="ln-303" name="ln-303" href="#ln-303"></a>
+<a id="ln-304" name="ln-304" href="#ln-304"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-305" name="ln-305" href="#ln-305"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-306" name="ln-306" href="#ln-306"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-307" name="ln-307" href="#ln-307"></a>
+<a id="ln-308" name="ln-308" href="#ln-308"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extboundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-309" name="ln-309" href="#ln-309"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extboundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extboundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-310" name="ln-310" href="#ln-310"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-311" name="ln-311" href="#ln-311"></a>
+<a id="ln-312" name="ln-312" href="#ln-312"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">avgboundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-313" name="ln-313" href="#ln-313"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">avgboundary_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">avgboundary</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-314" name="ln-314" href="#ln-314"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-315" name="ln-315" href="#ln-315"></a>
+<a id="ln-316" name="ln-316" href="#ln-316"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">iside</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-317" name="ln-317" href="#ln-317"></a>
+<a id="ln-318" name="ln-318" href="#ln-318"></a><span class="w">      </span><span class="c">! set the normal velocity</span>
+<a id="ln-319" name="ln-319" href="#ln-319"></a><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">iside</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-320" name="ln-320" href="#ln-320"></a><span class="k">        </span><span class="n">nhat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mf">1.0_prec</span>
+<a id="ln-321" name="ln-321" href="#ln-321"></a><span class="w">      </span><span class="k">else</span>
+<a id="ln-322" name="ln-322" href="#ln-322"></a><span class="k">        </span><span class="n">nhat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0_prec</span>
+<a id="ln-323" name="ln-323" href="#ln-323"></a><span class="w">      </span><span class="k">endif</span>
+<a id="ln-324" name="ln-324" href="#ln-324"></a>
+<a id="ln-325" name="ln-325" href="#ln-325"></a><span class="k">      </span><span class="n">fin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">boundary</span><span class="p">(</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="c">! interior solution</span>
+<a id="ln-326" name="ln-326" href="#ln-326"></a><span class="w">      </span><span class="n">fout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">extboundary</span><span class="p">(</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="c">! exterior solution</span>
+<a id="ln-327" name="ln-327" href="#ln-327"></a><span class="w">      </span><span class="n">dfdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">avgboundary</span><span class="p">(</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="c">! average solution gradient (with direction taken into account)</span>
+<a id="ln-328" name="ln-328" href="#ln-328"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">boundarynormal</span><span class="p">(</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-329" name="ln-329" href="#ln-329"></a><span class="w">        </span><span class="n">this</span><span class="p">%</span><span class="n">riemannflux1d</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span><span class="n">fout</span><span class="p">,</span><span class="n">dfdx</span><span class="p">,</span><span class="n">nhat</span><span class="p">)</span>
+<a id="ln-330" name="ln-330" href="#ln-330"></a>
+<a id="ln-331" name="ln-331" href="#ln-331"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-332" name="ln-332" href="#ln-332"></a>
+<a id="ln-333" name="ln-333" href="#ln-333"></a><span class="k">    call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">boundarynormal_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-334" name="ln-334" href="#ln-334"></a><span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">boundarynormal</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-335" name="ln-335" href="#ln-335"></a><span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">boundarynormal</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-336" name="ln-336" href="#ln-336"></a><span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-337" name="ln-337" href="#ln-337"></a>
+<a id="ln-338" name="ln-338" href="#ln-338"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">BoundaryFlux_DGModel1D</span>
+<a id="ln-339" name="ln-339" href="#ln-339"></a>
+<a id="ln-340" name="ln-340" href="#ln-340"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">fluxmethod_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-341" name="ln-341" href="#ln-341"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-342" name="ln-342" href="#ln-342"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-343" name="ln-343" href="#ln-343"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-344" name="ln-344" href="#ln-344"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-345" name="ln-345" href="#ln-345"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span>
+<a id="ln-346" name="ln-346" href="#ln-346"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">),</span><span class="n">dfdx</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-347" name="ln-347" href="#ln-347"></a>
+<a id="ln-348" name="ln-348" href="#ln-348"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-349" name="ln-349" href="#ln-349"></a>
+<a id="ln-350" name="ln-350" href="#ln-350"></a><span class="w">      </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-351" name="ln-351" href="#ln-351"></a><span class="w">      </span><span class="n">dfdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-352" name="ln-352" href="#ln-352"></a>
+<a id="ln-353" name="ln-353" href="#ln-353"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-354" name="ln-354" href="#ln-354"></a><span class="w">        </span><span class="n">this</span><span class="p">%</span><span class="n">flux1d</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">dfdx</span><span class="p">)</span>
+<a id="ln-355" name="ln-355" href="#ln-355"></a>
+<a id="ln-356" name="ln-356" href="#ln-356"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-357" name="ln-357" href="#ln-357"></a>
+<a id="ln-358" name="ln-358" href="#ln-358"></a><span class="k">    call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-359" name="ln-359" href="#ln-359"></a><span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-360" name="ln-360" href="#ln-360"></a><span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-361" name="ln-361" href="#ln-361"></a><span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-362" name="ln-362" href="#ln-362"></a>
+<a id="ln-363" name="ln-363" href="#ln-363"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">fluxmethod_DGModel1D</span>
+<a id="ln-364" name="ln-364" href="#ln-364"></a>
+<a id="ln-365" name="ln-365" href="#ln-365"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">sourcemethod_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-366" name="ln-366" href="#ln-366"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-367" name="ln-367" href="#ln-367"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-368" name="ln-368" href="#ln-368"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-369" name="ln-369" href="#ln-369"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">iel</span>
+<a id="ln-370" name="ln-370" href="#ln-370"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span>
+<a id="ln-371" name="ln-371" href="#ln-371"></a><span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">),</span><span class="n">dfdx</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-372" name="ln-372" href="#ln-372"></a>
+<a id="ln-373" name="ln-373" href="#ln-373"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-374" name="ln-374" href="#ln-374"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-375" name="ln-375" href="#ln-375"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-376" name="ln-376" href="#ln-376"></a>
+<a id="ln-377" name="ln-377" href="#ln-377"></a><span class="w">    </span><span class="k">call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-378" name="ln-378" href="#ln-378"></a><span class="w">                            </span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solutiongradient</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-379" name="ln-379" href="#ln-379"></a><span class="w">                            </span><span class="n">hipMemcpyDeviceToHost</span><span class="p">))</span>
+<a id="ln-380" name="ln-380" href="#ln-380"></a>
+<a id="ln-381" name="ln-381" href="#ln-381"></a><span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="k">concurrent</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">%</span><span class="n">nElem</span><span class="p">)</span>
+<a id="ln-382" name="ln-382" href="#ln-382"></a>
+<a id="ln-383" name="ln-383" href="#ln-383"></a><span class="w">      </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-384" name="ln-384" href="#ln-384"></a><span class="w">      </span><span class="n">dfdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span>
+<a id="ln-385" name="ln-385" href="#ln-385"></a>
+<a id="ln-386" name="ln-386" href="#ln-386"></a><span class="w">      </span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-387" name="ln-387" href="#ln-387"></a><span class="w">        </span><span class="n">this</span><span class="p">%</span><span class="n">source1d</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">dfdx</span><span class="p">)</span>
+<a id="ln-388" name="ln-388" href="#ln-388"></a>
+<a id="ln-389" name="ln-389" href="#ln-389"></a><span class="w">    </span><span class="k">enddo</span>
+<a id="ln-390" name="ln-390" href="#ln-390"></a>
+<a id="ln-391" name="ln-391" href="#ln-391"></a><span class="k">    call </span><span class="n">gpuCheck</span><span class="p">(</span><span class="n">hipMemcpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-392" name="ln-392" href="#ln-392"></a><span class="w">                            </span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-393" name="ln-393" href="#ln-393"></a><span class="w">                            </span><span class="n">sizeof</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior</span><span class="p">),</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-394" name="ln-394" href="#ln-394"></a><span class="w">                            </span><span class="n">hipMemcpyHostToDevice</span><span class="p">))</span>
+<a id="ln-395" name="ln-395" href="#ln-395"></a>
+<a id="ln-396" name="ln-396" href="#ln-396"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">sourcemethod_DGModel1D</span>
+<a id="ln-397" name="ln-397" href="#ln-397"></a>
+<a id="ln-398" name="ln-398" href="#ln-398"></a><span class="w">  </span><span class="k">subroutine </span><span class="n">CalculateTendency_DGModel1D</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a id="ln-399" name="ln-399" href="#ln-399"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-400" name="ln-400" href="#ln-400"></a><span class="k">    class</span><span class="p">(</span><span class="n">DGModel1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<a id="ln-401" name="ln-401" href="#ln-401"></a><span class="w">    </span><span class="c">! Local</span>
+<a id="ln-402" name="ln-402" href="#ln-402"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ndof</span>
+<a id="ln-403" name="ln-403" href="#ln-403"></a>
+<a id="ln-404" name="ln-404" href="#ln-404"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">BoundaryInterp</span><span class="p">()</span>
+<a id="ln-405" name="ln-405" href="#ln-405"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">SideExchange</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">mesh</span><span class="p">)</span>
+<a id="ln-406" name="ln-406" href="#ln-406"></a>
+<a id="ln-407" name="ln-407" href="#ln-407"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">PreTendencyHook</span><span class="p">()</span><span class="w"> </span><span class="c">! User-supplied</span>
+<a id="ln-408" name="ln-408" href="#ln-408"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">SetBoundaryCondition</span><span class="p">()</span><span class="w"> </span><span class="c">! User-supplied</span>
+<a id="ln-409" name="ln-409" href="#ln-409"></a>
+<a id="ln-410" name="ln-410" href="#ln-410"></a><span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">gradient_enabled</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<a id="ln-411" name="ln-411" href="#ln-411"></a><span class="k">      call </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">AverageSides</span><span class="p">()</span>
+<a id="ln-412" name="ln-412" href="#ln-412"></a><span class="w">      </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">CalculateSolutionGradient</span><span class="p">()</span>
+<a id="ln-413" name="ln-413" href="#ln-413"></a><span class="w">      </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">SetGradientBoundaryCondition</span><span class="p">()</span><span class="w"> </span><span class="c">! User-supplied</span>
+<a id="ln-414" name="ln-414" href="#ln-414"></a><span class="w">      </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">solutionGradient</span><span class="p">%</span><span class="n">AverageSides</span><span class="p">()</span>
+<a id="ln-415" name="ln-415" href="#ln-415"></a><span class="w">    </span><span class="k">endif</span>
+<a id="ln-416" name="ln-416" href="#ln-416"></a>
+<a id="ln-417" name="ln-417" href="#ln-417"></a><span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">SourceMethod</span><span class="p">()</span><span class="w"> </span><span class="c">! User supplied</span>
+<a id="ln-418" name="ln-418" href="#ln-418"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">BoundaryFlux</span><span class="p">()</span><span class="w"> </span><span class="c">! User supplied</span>
+<a id="ln-419" name="ln-419" href="#ln-419"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">FluxMethod</span><span class="p">()</span><span class="w"> </span><span class="c">! User supplied</span>
+<a id="ln-420" name="ln-420" href="#ln-420"></a>
+<a id="ln-421" name="ln-421" href="#ln-421"></a><span class="w">    </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">flux</span><span class="p">%</span><span class="n">MappedDGDerivative</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">fluxDivergence</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">)</span>
+<a id="ln-422" name="ln-422" href="#ln-422"></a>
+<a id="ln-423" name="ln-423" href="#ln-423"></a><span class="w">    </span><span class="n">ndof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nvar</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">nelem</span><span class="o">*</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">solution</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a id="ln-424" name="ln-424" href="#ln-424"></a><span class="w">    </span><span class="k">call </span><span class="n">CalculateDSDt_gpu</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">fluxDivergence</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">source</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-425" name="ln-425" href="#ln-425"></a><span class="w">                           </span><span class="n">this</span><span class="p">%</span><span class="n">dsdt</span><span class="p">%</span><span class="n">interior_gpu</span><span class="p">,</span><span class="n">ndof</span><span class="p">)</span>
+<a id="ln-426" name="ln-426" href="#ln-426"></a>
+<a id="ln-427" name="ln-427" href="#ln-427"></a><span class="w">  </span><span class="k">endsubroutine </span><span class="n">CalculateTendency_DGModel1D</span>
+<a id="ln-428" name="ln-428" href="#ln-428"></a>
+<a id="ln-429" name="ln-429" href="#ln-429"></a><span class="k">endmodule </span><span class="n">SELF_DGModel1D</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-06-10 13:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

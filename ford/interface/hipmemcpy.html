@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>hipMemcpy &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>hipMemcpy
+   <small>Interface</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.1% of total for procedures.</p>Including implementation: 13 statements,  0.1% of total for procedures.">13 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_GPU.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_gpu.f90.html'>SELF_GPU.f90</a></li>
+     <li><a href='../module/self_gpu.html'>SELF_GPU</a></li>
+     <li class="active">hipMemcpy</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../interface/hipmemcpy.html#proc-hipmemcpy_">hipMemcpy_</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>public interface hipMemcpy</h2>
+   
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: interface~~hipmemcpy~~CalledByGraph Pages: 1 -->
+<svg id="interfacehipmemcpyCalledByGraph" width="361pt" height="2300pt"
+ viewBox="0.00 0.00 361.00 2300.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="interface~~hipmemcpy~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 2296)">
+<title>interface~~hipmemcpy~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-2296 357,-2296 357,4 -4,4"/>
+<!-- interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node1" class="node">
+<title>interface~hipmemcpy</title>
+<polygon fill="none" stroke="black" points="353,-1158 279,-1158 279,-1134 353,-1134 353,-1158"/>
+<text text-anchor="middle" x="316" y="-1143.6" font-family="Helvetica,sans-Serif" font-size="10.50">hipMemcpy</text>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node2" class="node">
+<title>proc~setinteriorfromequation_mappedscalar3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node2"><a xlink:href=".././proc/setinteriorfromequation_mappedscalar3d.html" xlink:title="SetInteriorFromEquation_MappedScalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-2292 2,-2292 2,-2268 241,-2268 241,-2292"/>
+<text text-anchor="middle" x="121.5" y="-2277.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedScalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge1" class="edge">
+<title>proc~setinteriorfromequation_mappedscalar3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M232.92,-2267.97C236.56,-2265.37 239.95,-2262.4 243,-2259 318.47,-2174.91 316.17,-1318.85 315.18,-1168.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.68,-1168.17 315.11,-1158.2 311.68,-1168.22 318.68,-1168.17"/>
+</g>
+<!-- proc~updatedevice_mesh3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node3" class="node">
+<title>proc~updatedevice_mesh3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node3"><a xlink:href=".././proc/updatedevice_mesh3d.html" xlink:title="UpdateDevice_Mesh3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="189.5,-2250 53.5,-2250 53.5,-2226 189.5,-2226 189.5,-2250"/>
+<text text-anchor="middle" x="121.5" y="-2235.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_mesh3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge3" class="edge">
+<title>proc~updatedevice_mesh3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M189.52,-2241.32C209.43,-2238.75 229.51,-2232 243,-2217 315.66,-2136.24 315.69,-1314.06 315.12,-1168.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.62,-1168.08 315.07,-1158.09 311.62,-1168.11 318.62,-1168.08"/>
+</g>
+<!-- proc~updatedevice_scalar3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node4" class="node">
+<title>proc~updatedevice_scalar3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node4"><a xlink:href=".././proc/updatedevice_scalar3d.html" xlink:title="UpdateDevice_Scalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-2208 50.5,-2208 50.5,-2184 192.5,-2184 192.5,-2208"/>
+<text text-anchor="middle" x="121.5" y="-2193.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge2" class="edge">
+<title>proc~updatedevice_scalar3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.64,-2198.86C211.5,-2196 230.2,-2189.19 243,-2175 312.72,-2097.73 315.19,-1312.36 315.05,-1168.55"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.55,-1168.3 315.04,-1158.31 311.55,-1168.31 318.55,-1168.3"/>
+</g>
+<!-- proc~boundaryflux_dgmodel3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node5" class="node">
+<title>proc~boundaryflux_dgmodel3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node5"><a xlink:href=".././proc/boundaryflux_dgmodel3d.html" xlink:title="BoundaryFlux_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-2166 44,-2166 44,-2142 199,-2142 199,-2166"/>
+<text text-anchor="middle" x="121.5" y="-2151.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryFlux_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~boundaryflux_dgmodel3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge5" class="edge">
+<title>proc~boundaryflux_dgmodel3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M199.2,-2155.67C215.76,-2152.29 231.67,-2145.52 243,-2133 309.86,-2059.12 314.67,-1308.67 314.98,-1168.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.48,-1168.15 315,-1158.14 311.48,-1168.14 318.48,-1168.15"/>
+</g>
+<!-- proc~updatedevice_vector3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node6" class="node">
+<title>proc~updatedevice_vector3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node6"><a xlink:href=".././proc/updatedevice_vector3d.html" xlink:title="UpdateDevice_Vector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-2124 50.5,-2124 50.5,-2100 192.5,-2100 192.5,-2124"/>
+<text text-anchor="middle" x="121.5" y="-2109.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Vector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_vector3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge4" class="edge">
+<title>proc~updatedevice_vector3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.59,-2114.81C211.45,-2111.95 230.15,-2105.15 243,-2091 307.01,-2020.5 314.13,-1304.78 314.91,-1168.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.41,-1168.3 314.96,-1158.28 311.41,-1168.27 318.41,-1168.3"/>
+</g>
+<!-- proc~sideexchange_mappedscalar1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node7" class="node">
+<title>proc~sideexchange_mappedscalar1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node7"><a xlink:href=".././proc/sideexchange_mappedscalar1d.html" xlink:title="SideExchange_MappedScalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="214,-2082 29,-2082 29,-2058 214,-2058 214,-2082"/>
+<text text-anchor="middle" x="121.5" y="-2067.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SideExchange_MappedScalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~sideexchange_mappedscalar1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge6" class="edge">
+<title>proc~sideexchange_mappedscalar1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M214.16,-2067.46C225.09,-2063.53 235.13,-2057.63 243,-2049 304.17,-1981.86 313.57,-1300.54 314.82,-1168.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.33,-1168.09 314.91,-1158.06 311.33,-1168.03 318.33,-1168.09"/>
+</g>
+<!-- proc~calculateentropy_dgmodel2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node8" class="node">
+<title>proc~calculateentropy_dgmodel2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node8"><a xlink:href=".././proc/calculateentropy_dgmodel2d.html" xlink:title="CalculateEntropy_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-2040 35.5,-2040 35.5,-2016 207.5,-2016 207.5,-2040"/>
+<text text-anchor="middle" x="121.5" y="-2025.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CalculateEntropy_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~calculateentropy_dgmodel2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge7" class="edge">
+<title>proc~calculateentropy_dgmodel2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M207.78,-2027.47C221.14,-2023.65 233.61,-2017.26 243,-2007 301.29,-1943.27 312.97,-1297.4 314.73,-1168.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.23,-1168.17 314.86,-1158.12 311.23,-1168.08 318.23,-1168.17"/>
+</g>
+<!-- proc~init_ecadvection3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node9" class="node">
+<title>proc~init_ecadvection3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node9"><a xlink:href=".././proc/init_ecadvection3d.html" xlink:title="Init_ECAdvection3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="179.5,-1998 63.5,-1998 63.5,-1974 179.5,-1974 179.5,-1998"/>
+<text text-anchor="middle" x="121.5" y="-1983.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_ecadvection3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge8" class="edge">
+<title>proc~init_ecadvection3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M179.65,-1990.11C202.51,-1988.56 227.13,-1982.28 243,-1965 298.42,-1904.67 312.34,-1293.86 314.63,-1168.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.13,-1168.2 314.81,-1158.14 311.13,-1168.08 318.13,-1168.2"/>
+</g>
+<!-- proc~sourcemethod_dgmodel3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node10" class="node">
+<title>proc~sourcemethod_dgmodel3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node10"><a xlink:href=".././proc/sourcemethod_dgmodel3d.html" xlink:title="sourcemethod_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="200.5,-1956 42.5,-1956 42.5,-1932 200.5,-1932 200.5,-1956"/>
+<text text-anchor="middle" x="121.5" y="-1941.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sourcemethod_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_dgmodel3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge9" class="edge">
+<title>proc~sourcemethod_dgmodel3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M200.59,-1945.18C216.59,-1941.7 231.91,-1935.02 243,-1923 295.57,-1866.04 311.69,-1289.9 314.52,-1168.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.02,-1168.19 314.75,-1158.11 311.02,-1168.03 318.02,-1168.19"/>
+</g>
+<!-- proc~sourcemethod_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node11" class="node">
+<title>proc~sourcemethod_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node11"><a xlink:href=".././proc/sourcemethod_dgmodel1d.html" xlink:title="sourcemethod_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="200.5,-1914 42.5,-1914 42.5,-1890 200.5,-1890 200.5,-1914"/>
+<text text-anchor="middle" x="121.5" y="-1899.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sourcemethod_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge10" class="edge">
+<title>proc~sourcemethod_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M200.54,-1903.14C216.55,-1899.66 231.88,-1892.99 243,-1881 292.74,-1827.39 311.01,-1285.54 314.4,-1168.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.9,-1168.12 314.68,-1158.03 310.9,-1167.93 317.9,-1168.12"/>
+</g>
+<!-- proc~updatedevice_twopointvector2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node12" class="node">
+<title>proc~updatedevice_twopointvector2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node12"><a xlink:href=".././proc/updatedevice_twopointvector2d.html" xlink:title="UpdateDevice_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="215,-1872 28,-1872 28,-1848 215,-1848 215,-1872"/>
+<text text-anchor="middle" x="121.5" y="-1857.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_twopointvector2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge11" class="edge">
+<title>proc~updatedevice_twopointvector2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M215.16,-1856.85C225.66,-1852.95 235.32,-1847.23 243,-1839 289.88,-1788.77 310.26,-1281.86 314.25,-1168.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.76,-1168.29 314.6,-1158.18 310.76,-1168.05 317.76,-1168.29"/>
+</g>
+<!-- proc~updatedevice_scalar1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node13" class="node">
+<title>proc~updatedevice_scalar1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node13"><a xlink:href=".././proc/updatedevice_scalar1d.html" xlink:title="UpdateDevice_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-1830 50.5,-1830 50.5,-1806 192.5,-1806 192.5,-1830"/>
+<text text-anchor="middle" x="121.5" y="-1815.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge12" class="edge">
+<title>proc~updatedevice_scalar1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.6,-1820.48C211.34,-1817.58 229.99,-1810.85 243,-1797 287.04,-1750.13 309.47,-1277.65 314.09,-1168.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.6,-1168.38 314.52,-1158.25 310.6,-1168.09 317.6,-1168.38"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node14" class="node">
+<title>proc~setinteriorfromequation_mappedvector3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node14"><a xlink:href=".././proc/setinteriorfromequation_mappedvector3d.html" xlink:title="SetInteriorFromEquation_MappedVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-1788 2,-1788 2,-1764 241,-1764 241,-1788"/>
+<text text-anchor="middle" x="121.5" y="-1773.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge13" class="edge">
+<title>proc~setinteriorfromequation_mappedvector3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M232.43,-1763.94C236.24,-1761.36 239.79,-1758.39 243,-1755 284.22,-1711.45 308.65,-1272.9 313.92,-1168.31"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.42,-1168.4 314.42,-1158.24 310.43,-1168.05 317.42,-1168.4"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node15" class="node">
+<title>proc~setinteriorfromequation_mappedscalar2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node15"><a xlink:href=".././proc/setinteriorfromequation_mappedscalar2d.html" xlink:title="SetInteriorFromEquation_MappedScalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-1746 2,-1746 2,-1722 241,-1722 241,-1746"/>
+<text text-anchor="middle" x="121.5" y="-1731.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge14" class="edge">
+<title>proc~setinteriorfromequation_mappedscalar2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M232.4,-1721.91C236.21,-1719.33 239.77,-1716.38 243,-1713 281.39,-1672.79 307.74,-1268.44 313.71,-1168.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.22,-1168.34 314.31,-1158.15 310.23,-1167.92 317.22,-1168.34"/>
+</g>
+<!-- proc~updatehost_twopointvector3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node16" class="node">
+<title>proc~updatehost_twopointvector3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node16"><a xlink:href=".././proc/updatehost_twopointvector3d.html" xlink:title="UpdateHost_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209,-1704 34,-1704 34,-1680 209,-1680 209,-1704"/>
+<text text-anchor="middle" x="121.5" y="-1689.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_twopointvector3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge15" class="edge">
+<title>proc~updatehost_twopointvector3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M209.17,-1690.52C221.89,-1686.69 233.79,-1680.55 243,-1671 313.66,-1597.74 315.96,-1258.9 315.29,-1168.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.79,-1168.28 315.19,-1158.32 311.79,-1168.35 318.79,-1168.28"/>
+</g>
+<!-- proc~updatedevice_scalar1d~2 -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node17" class="node">
+<title>proc~updatedevice_scalar1d~2</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node17"><a xlink:href=".././proc/updatedevice_scalar1d~2.html" xlink:title="UpdateDevice_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-1662 50.5,-1662 50.5,-1638 192.5,-1638 192.5,-1662"/>
+<text text-anchor="middle" x="121.5" y="-1647.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar1d~2&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge17" class="edge">
+<title>proc~updatedevice_scalar1d~2&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.58,-1652.12C211.22,-1649.19 229.8,-1642.53 243,-1629 308.02,-1562.36 314.47,-1254.53 314.99,-1168.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.49,-1168.23 315.03,-1158.22 311.49,-1168.2 318.49,-1168.23"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node18" class="node">
+<title>proc~setinteriorfromequation_mappedvector2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node18"><a xlink:href=".././proc/setinteriorfromequation_mappedvector2d.html" xlink:title="SetInteriorFromEquation_MappedVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-1620 2,-1620 2,-1596 241,-1596 241,-1620"/>
+<text text-anchor="middle" x="121.5" y="-1605.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedvector2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge16" class="edge">
+<title>proc~setinteriorfromequation_mappedvector2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M231.98,-1595.94C235.94,-1593.36 239.64,-1590.4 243,-1587 302.4,-1526.96 312.84,-1249.98 314.64,-1168.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.14,-1168.48 314.84,-1158.42 311.14,-1168.35 318.14,-1168.48"/>
+</g>
+<!-- proc~init_esatmo2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node19" class="node">
+<title>proc~init_esatmo2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node19"><a xlink:href=".././proc/init_esatmo2d.html" xlink:title="Init_ESAtmo2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="167,-1578 76,-1578 76,-1554 167,-1554 167,-1578"/>
+<text text-anchor="middle" x="121.5" y="-1563.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_esatmo2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge18" class="edge">
+<title>proc~init_esatmo2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M167.11,-1569.89C192.65,-1569.57 223.42,-1564.46 243,-1545 296.89,-1491.43 311.1,-1244.39 314.22,-1168.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.73,-1168.16 314.62,-1158.03 310.74,-1167.89 317.73,-1168.16"/>
+</g>
+<!-- proc~updatedevice_scalar2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node20" class="node">
+<title>proc~updatedevice_scalar2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node20"><a xlink:href=".././proc/updatedevice_scalar2d.html" xlink:title="UpdateDevice_Scalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-1536 50.5,-1536 50.5,-1512 192.5,-1512 192.5,-1536"/>
+<text text-anchor="middle" x="121.5" y="-1521.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_scalar2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge19" class="edge">
+<title>proc~updatedevice_scalar2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.78,-1525.58C211.19,-1522.59 229.61,-1516.04 243,-1503 291.37,-1455.89 309.15,-1238.91 313.71,-1168.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="317.2,-1168.45 314.33,-1158.25 310.22,-1168.02 317.2,-1168.45"/>
+</g>
+<!-- proc~init_ecadvection2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node21" class="node">
+<title>proc~init_ecadvection2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node21"><a xlink:href=".././proc/init_ecadvection2d.html" xlink:title="Init_ECAdvection2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="179.5,-1494 63.5,-1494 63.5,-1470 179.5,-1470 179.5,-1494"/>
+<text text-anchor="middle" x="121.5" y="-1479.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_ecadvection2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge20" class="edge">
+<title>proc~init_ecadvection2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M179.77,-1484.92C202.1,-1483.05 226.29,-1476.86 243,-1461 285.89,-1420.29 306.96,-1233.03 313.07,-1168.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="316.56,-1168.48 313.98,-1158.21 309.59,-1167.85 316.56,-1168.48"/>
+</g>
+<!-- proc~updatehost_scalar3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node22" class="node">
+<title>proc~updatehost_scalar3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node22"><a xlink:href=".././proc/updatehost_scalar3d.html" xlink:title="UpdateHost_Scalar3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-1452 57,-1452 57,-1428 186,-1428 186,-1452"/>
+<text text-anchor="middle" x="121.5" y="-1437.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge21" class="edge">
+<title>proc~updatehost_scalar3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.03,-1441.96C206.42,-1439.45 227.67,-1433.07 243,-1419 280.4,-1384.66 304.42,-1227.14 312.22,-1168.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="315.71,-1168.55 313.53,-1158.18 308.77,-1167.65 315.71,-1168.55"/>
+</g>
+<!-- proc~boundaryflux_dgmodel2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node23" class="node">
+<title>proc~boundaryflux_dgmodel2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node23"><a xlink:href=".././proc/boundaryflux_dgmodel2d.html" xlink:title="BoundaryFlux_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-1410 44,-1410 44,-1386 199,-1386 199,-1410"/>
+<text text-anchor="middle" x="121.5" y="-1395.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryFlux_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~boundaryflux_dgmodel2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge22" class="edge">
+<title>proc~boundaryflux_dgmodel2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M199.15,-1397.31C215.12,-1393.91 230.79,-1387.72 243,-1377 305.26,-1322.33 314.32,-1214.78 315.2,-1168.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="318.7,-1168.12 315.28,-1158.09 311.7,-1168.07 318.7,-1168.12"/>
+</g>
+<!-- proc~updatehost_vector3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node24" class="node">
+<title>proc~updatehost_vector3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node24"><a xlink:href=".././proc/updatehost_vector3d.html" xlink:title="UpdateHost_Vector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-1368 57,-1368 57,-1344 186,-1344 186,-1368"/>
+<text text-anchor="middle" x="121.5" y="-1353.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Vector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_vector3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge23" class="edge">
+<title>proc~updatehost_vector3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.13,-1356.89C206.18,-1354.23 227.19,-1348.04 243,-1335 294.75,-1292.32 309.36,-1208.09 313.44,-1168.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="316.93,-1168.32 314.34,-1158.05 309.96,-1167.7 316.93,-1168.32"/>
+</g>
+<!-- proc~calculateentropy_dgmodel3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node25" class="node">
+<title>proc~calculateentropy_dgmodel3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node25"><a xlink:href=".././proc/calculateentropy_dgmodel3d.html" xlink:title="CalculateEntropy_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-1326 35.5,-1326 35.5,-1302 207.5,-1302 207.5,-1326"/>
+<text text-anchor="middle" x="121.5" y="-1311.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CalculateEntropy_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~calculateentropy_dgmodel3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge24" class="edge">
+<title>proc~calculateentropy_dgmodel3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M207.7,-1309.55C220.38,-1306.04 232.64,-1300.78 243,-1293 284.25,-1262.04 303.2,-1201.1 310.73,-1168.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="314.2,-1168.77 312.87,-1158.26 307.35,-1167.31 314.2,-1168.77"/>
+</g>
+<!-- proc~init_lagrange~2 -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node26" class="node">
+<title>proc~init_lagrange~2</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node26"><a xlink:href=".././proc/init_lagrange~2.html" xlink:title="Init_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="164,-1284 79,-1284 79,-1260 164,-1260 164,-1284"/>
+<text text-anchor="middle" x="121.5" y="-1269.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~init_lagrange~2&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge25" class="edge">
+<title>proc~init_lagrange~2&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M164.18,-1272.61C188.83,-1271.15 219.69,-1265.98 243,-1251 274.24,-1230.93 295.49,-1191.98 306.4,-1167.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="309.74,-1168.68 310.44,-1158.1 303.3,-1165.93 309.74,-1168.68"/>
+</g>
+<!-- proc~updatehost_tensor3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node27" class="node">
+<title>proc~updatehost_tensor3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node27"><a xlink:href=".././proc/updatehost_tensor3d.html" xlink:title="UpdateHost_Tensor3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186.5,-1242 56.5,-1242 56.5,-1218 186.5,-1218 186.5,-1242"/>
+<text text-anchor="middle" x="121.5" y="-1227.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_tensor3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge26" class="edge">
+<title>proc~updatehost_tensor3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.73,-1225.41C205.52,-1222.34 225.66,-1217.28 243,-1209 264.62,-1198.67 284.74,-1179.97 298.19,-1165.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="300.81,-1167.93 304.93,-1158.17 295.63,-1163.23 300.81,-1167.93"/>
+</g>
+<!-- proc~init_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node28" class="node">
+<title>proc~init_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node28"><a xlink:href=".././proc/init_dgmodel1d.html" xlink:title="Init_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170.5,-1200 72.5,-1200 72.5,-1176 170.5,-1176 170.5,-1200"/>
+<text text-anchor="middle" x="121.5" y="-1185.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge27" class="edge">
+<title>proc~init_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M170.54,-1180.89C192.71,-1177.28 219.32,-1172.5 243,-1167 251.57,-1165.01 260.63,-1162.61 269.33,-1160.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="270.31,-1163.51 278.95,-1157.37 268.37,-1156.78 270.31,-1163.51"/>
+</g>
+<!-- proc~setboundarycondition_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node29" class="node">
+<title>proc~setboundarycondition_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node29"><a xlink:href=".././proc/setboundarycondition_dgmodel1d.html" xlink:title="setboundarycondition_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="220.5,-1158 22.5,-1158 22.5,-1134 220.5,-1134 220.5,-1158"/>
+<text text-anchor="middle" x="121.5" y="-1143.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setboundarycondition_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~setboundarycondition_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge28" class="edge">
+<title>proc~setboundarycondition_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M220.72,-1146C237.43,-1146 254.06,-1146 268.59,-1146"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="268.78,-1149.5 278.78,-1146 268.78,-1142.5 268.78,-1149.5"/>
+</g>
+<!-- proc~updatedevice_mesh2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node30" class="node">
+<title>proc~updatedevice_mesh2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node30"><a xlink:href=".././proc/updatedevice_mesh2d.html" xlink:title="UpdateDevice_Mesh2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="189.5,-1116 53.5,-1116 53.5,-1092 189.5,-1092 189.5,-1116"/>
+<text text-anchor="middle" x="121.5" y="-1101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_mesh2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge29" class="edge">
+<title>proc~updatedevice_mesh2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M189.69,-1114.35C207.13,-1117.4 225.83,-1121.01 243,-1125 251.57,-1126.99 260.63,-1129.39 269.33,-1131.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="268.37,-1135.22 278.95,-1134.63 270.31,-1128.49 268.37,-1135.22"/>
+</g>
+<!-- proc~updatedevice_points -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node31" class="node">
+<title>proc~updatedevice_points</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node31"><a xlink:href=".././proc/updatedevice_points.html" xlink:title="UpdateDevice_Points">
+<polygon fill="#d9534f" stroke="#d9534f" points="183.5,-1074 59.5,-1074 59.5,-1050 183.5,-1050 183.5,-1074"/>
+<text text-anchor="middle" x="121.5" y="-1059.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Points</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_points&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge30" class="edge">
+<title>proc~updatedevice_points&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M183.63,-1066.1C203.29,-1069.12 224.7,-1074.26 243,-1083 264.62,-1093.33 284.74,-1112.03 298.19,-1126.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="295.63,-1128.77 304.93,-1133.83 300.81,-1124.07 295.63,-1128.77"/>
+</g>
+<!-- proc~updatedevice_tensor2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node32" class="node">
+<title>proc~updatedevice_tensor2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node32"><a xlink:href=".././proc/updatedevice_tensor2d.html" xlink:title="UpdateDevice_Tensor2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-1032 50.5,-1032 50.5,-1008 192.5,-1008 192.5,-1032"/>
+<text text-anchor="middle" x="121.5" y="-1017.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_tensor2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge31" class="edge">
+<title>proc~updatedevice_tensor2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.58,-1022.7C210.08,-1025.85 228.08,-1031.41 243,-1041 274.24,-1061.07 295.49,-1100.02 306.4,-1124.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="303.3,-1126.07 310.44,-1133.9 309.74,-1123.32 303.3,-1126.07"/>
+</g>
+<!-- proc~fluxmethod_dgmodel2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node33" class="node">
+<title>proc~fluxmethod_dgmodel2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node33"><a xlink:href=".././proc/fluxmethod_dgmodel2d.html" xlink:title="fluxmethod_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-990 50.5,-990 50.5,-966 192.5,-966 192.5,-990"/>
+<text text-anchor="middle" x="121.5" y="-975.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fluxmethod_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~fluxmethod_dgmodel2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge32" class="edge">
+<title>proc~fluxmethod_dgmodel2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.65,-979.09C210.43,-982.21 228.56,-988.16 243,-999 284.25,-1029.96 303.2,-1090.9 310.73,-1123.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="307.35,-1124.69 312.87,-1133.74 314.2,-1123.23 307.35,-1124.69"/>
+</g>
+<!-- proc~updatedevice_vector2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node34" class="node">
+<title>proc~updatedevice_vector2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node34"><a xlink:href=".././proc/updatedevice_vector2d.html" xlink:title="UpdateDevice_Vector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-948 50.5,-948 50.5,-924 192.5,-924 192.5,-948"/>
+<text text-anchor="middle" x="121.5" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Vector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_vector2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge33" class="edge">
+<title>proc~updatedevice_vector2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.7,-936.11C210.69,-939.2 228.91,-945.38 243,-957 294.75,-999.68 309.36,-1083.91 313.44,-1123.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="309.96,-1124.3 314.34,-1133.95 316.93,-1123.68 309.96,-1124.3"/>
+</g>
+<!-- proc~sourcemethod_ecadvection3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node35" class="node">
+<title>proc~sourcemethod_ecadvection3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node35"><a xlink:href=".././proc/sourcemethod_ecadvection3d.html" xlink:title="SourceMethod_ECAdvection3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209.5,-906 33.5,-906 33.5,-882 209.5,-882 209.5,-906"/>
+<text text-anchor="middle" x="121.5" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SourceMethod_ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_ecadvection3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge34" class="edge">
+<title>proc~sourcemethod_ecadvection3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M209.72,-897.39C221.92,-901.07 233.51,-906.66 243,-915 305.26,-969.67 314.32,-1077.22 315.2,-1123.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.7,-1123.93 315.28,-1133.91 318.7,-1123.88 311.7,-1123.93"/>
+</g>
+<!-- proc~calculateentropy_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node36" class="node">
+<title>proc~calculateentropy_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node36"><a xlink:href=".././proc/calculateentropy_dgmodel1d.html" xlink:title="CalculateEntropy_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-864 35.5,-864 35.5,-840 207.5,-840 207.5,-864"/>
+<text text-anchor="middle" x="121.5" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CalculateEntropy_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~calculateentropy_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge35" class="edge">
+<title>proc~calculateentropy_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M207.59,-854.3C220.65,-857.99 233.07,-863.88 243,-873 280.4,-907.34 304.42,-1064.86 312.22,-1123.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="308.77,-1124.35 313.53,-1133.82 315.71,-1123.45 308.77,-1124.35"/>
+</g>
+<!-- proc~updatehost_twopointvector2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node37" class="node">
+<title>proc~updatehost_twopointvector2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node37"><a xlink:href=".././proc/updatehost_twopointvector2d.html" xlink:title="UpdateHost_TwoPointVector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209,-822 34,-822 34,-798 209,-798 209,-822"/>
+<text text-anchor="middle" x="121.5" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_TwoPointVector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_twopointvector2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge36" class="edge">
+<title>proc~updatehost_twopointvector2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M209.07,-812.38C221.65,-816.13 233.53,-822.01 243,-831 285.89,-871.71 306.96,-1058.97 313.07,-1123.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="309.59,-1124.15 313.98,-1133.79 316.56,-1123.52 309.59,-1124.15"/>
+</g>
+<!-- proc~updatehost_scalar1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node38" class="node">
+<title>proc~updatehost_scalar1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node38"><a xlink:href=".././proc/updatehost_scalar1d.html" xlink:title="UpdateHost_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-780 57,-780 57,-756 186,-756 186,-780"/>
+<text text-anchor="middle" x="121.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge37" class="edge">
+<title>proc~updatehost_scalar1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.19,-765.49C206.72,-767.93 228.02,-774.41 243,-789 291.37,-836.11 309.15,-1053.09 313.71,-1123.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.22,-1123.98 314.33,-1133.75 317.2,-1123.55 310.22,-1123.98"/>
+</g>
+<!-- proc~setelemtorank_domaindecomposition -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node39" class="node">
+<title>proc~setelemtorank_domaindecomposition</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node39"><a xlink:href=".././proc/setelemtorank_domaindecomposition.html" xlink:title="SetElemToRank_DomainDecomposition">
+<polygon fill="#d9534f" stroke="#d9534f" points="232.5,-738 10.5,-738 10.5,-714 232.5,-714 232.5,-738"/>
+<text text-anchor="middle" x="121.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetElemToRank_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- proc~setelemtorank_domaindecomposition&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge38" class="edge">
+<title>proc~setelemtorank_domaindecomposition&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M231.91,-738.13C235.89,-740.69 239.61,-743.63 243,-747 296.89,-800.57 311.1,-1047.61 314.22,-1123.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.74,-1124.11 314.62,-1133.97 317.73,-1123.84 310.74,-1124.11"/>
+</g>
+<!-- proc~init_dgmodel2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node40" class="node">
+<title>proc~init_dgmodel2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node40"><a xlink:href=".././proc/init_dgmodel2d.html" xlink:title="Init_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170.5,-696 72.5,-696 72.5,-672 170.5,-672 170.5,-696"/>
+<text text-anchor="middle" x="121.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge39" class="edge">
+<title>proc~init_dgmodel2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M170.5,-680.05C195.4,-680.72 224.41,-686.21 243,-705 302.4,-765.04 312.84,-1042.02 314.64,-1123.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.14,-1123.65 314.84,-1133.58 318.14,-1123.52 311.14,-1123.65"/>
+</g>
+<!-- proc~updatehost_scalar1d~2 -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node41" class="node">
+<title>proc~updatehost_scalar1d~2</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node41"><a xlink:href=".././proc/updatehost_scalar1d~2.html" xlink:title="UpdateHost_Scalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-654 57,-654 57,-630 186,-630 186,-654"/>
+<text text-anchor="middle" x="121.5" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar1d~2&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge40" class="edge">
+<title>proc~updatehost_scalar1d~2&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.31,-639.03C206.97,-641.4 228.32,-647.95 243,-663 308.02,-729.64 314.47,-1037.47 314.99,-1123.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.49,-1123.8 315.03,-1133.78 318.49,-1123.77 311.49,-1123.8"/>
+</g>
+<!-- proc~updatedevice_tensor3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node42" class="node">
+<title>proc~updatedevice_tensor3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node42"><a xlink:href=".././proc/updatedevice_tensor3d.html" xlink:title="UpdateDevice_Tensor3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-612 50.5,-612 50.5,-588 192.5,-588 192.5,-612"/>
+<text text-anchor="middle" x="121.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_Tensor3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_tensor3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge41" class="edge">
+<title>proc~updatedevice_tensor3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.68,-597.78C211.32,-600.71 229.88,-607.4 243,-621 313.66,-694.26 315.96,-1033.1 315.29,-1123.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.79,-1123.65 315.19,-1133.68 318.79,-1123.72 311.79,-1123.65"/>
+</g>
+<!-- proc~fluxmethod_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node43" class="node">
+<title>proc~fluxmethod_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node43"><a xlink:href=".././proc/fluxmethod_dgmodel1d.html" xlink:title="fluxmethod_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-570 50.5,-570 50.5,-546 192.5,-546 192.5,-570"/>
+<text text-anchor="middle" x="121.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fluxmethod_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~fluxmethod_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge42" class="edge">
+<title>proc~fluxmethod_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.77,-555.7C211.41,-558.63 229.95,-565.33 243,-579 281.39,-619.21 307.74,-1023.56 313.71,-1123.67"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.23,-1124.08 314.31,-1133.85 317.22,-1123.66 310.23,-1124.08"/>
+</g>
+<!-- proc~updatehost_scalar2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node44" class="node">
+<title>proc~updatehost_scalar2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node44"><a xlink:href=".././proc/updatehost_scalar2d.html" xlink:title="UpdateHost_Scalar2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-528 57,-528 57,-504 186,-504 186,-528"/>
+<text text-anchor="middle" x="121.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_scalar2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge43" class="edge">
+<title>proc~updatehost_scalar2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.25,-512.74C207.04,-515.07 228.47,-521.66 243,-537 284.22,-580.55 308.65,-1019.1 313.92,-1123.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.43,-1123.95 314.42,-1133.76 317.42,-1123.6 310.43,-1123.95"/>
+</g>
+<!-- proc~sourcemethod_ecadvection2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node45" class="node">
+<title>proc~sourcemethod_ecadvection2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node45"><a xlink:href=".././proc/sourcemethod_ecadvection2d.html" xlink:title="SourceMethod_ECAdvection2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="209.5,-486 33.5,-486 33.5,-462 209.5,-462 209.5,-486"/>
+<text text-anchor="middle" x="121.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SourceMethod_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_ecadvection2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge44" class="edge">
+<title>proc~sourcemethod_ecadvection2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M209.69,-475.37C222.27,-479.22 233.99,-485.4 243,-495 287.04,-541.87 309.47,-1014.35 314.09,-1123.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.6,-1123.91 314.52,-1133.75 317.6,-1123.62 310.6,-1123.91"/>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node46" class="node">
+<title>proc~setinteriorfromequation_mappedscalar1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node46"><a xlink:href=".././proc/setinteriorfromequation_mappedscalar1d.html" xlink:title="SetInteriorFromEquation_MappedScalar1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-444 2,-444 2,-420 241,-420 241,-444"/>
+<text text-anchor="middle" x="121.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SetInteriorFromEquation_MappedScalar1D</text>
+</a>
+</g>
+</g>
+<!-- proc~setinteriorfromequation_mappedscalar1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge45" class="edge">
+<title>proc~setinteriorfromequation_mappedscalar1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M232.49,-444C236.28,-446.6 239.81,-449.58 243,-453 289.88,-503.23 310.26,-1010.14 314.25,-1123.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.76,-1123.95 314.6,-1133.82 317.76,-1123.71 310.76,-1123.95"/>
+</g>
+<!-- proc~init_lagrange -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node47" class="node">
+<title>proc~init_lagrange</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node47"><a xlink:href=".././proc/init_lagrange.html" xlink:title="Init_Lagrange">
+<polygon fill="#d9534f" stroke="#d9534f" points="164,-402 79,-402 79,-378 164,-378 164,-402"/>
+<text text-anchor="middle" x="121.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- proc~init_lagrange&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge46" class="edge">
+<title>proc~init_lagrange&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M164.16,-385.56C190.58,-385.22 223.36,-389.83 243,-411 292.74,-464.61 311.01,-1006.46 314.4,-1123.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="310.9,-1124.07 314.68,-1133.97 317.9,-1123.88 310.9,-1124.07"/>
+</g>
+<!-- proc~fluxmethod_dgmodel3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node48" class="node">
+<title>proc~fluxmethod_dgmodel3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node48"><a xlink:href=".././proc/fluxmethod_dgmodel3d.html" xlink:title="fluxmethod_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="192.5,-360 50.5,-360 50.5,-336 192.5,-336 192.5,-360"/>
+<text text-anchor="middle" x="121.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fluxmethod_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~fluxmethod_dgmodel3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge47" class="edge">
+<title>proc~fluxmethod_dgmodel3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M192.76,-345.37C211.5,-348.27 230.11,-355.03 243,-369 295.57,-425.96 311.69,-1002.1 314.52,-1123.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.02,-1123.97 314.75,-1133.89 318.02,-1123.81 311.02,-1123.97"/>
+</g>
+<!-- proc~boundaryflux_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node49" class="node">
+<title>proc~boundaryflux_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node49"><a xlink:href=".././proc/boundaryflux_dgmodel1d.html" xlink:title="BoundaryFlux_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-318 44,-318 44,-294 199,-294 199,-318"/>
+<text text-anchor="middle" x="121.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryFlux_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~boundaryflux_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge48" class="edge">
+<title>proc~boundaryflux_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M199.07,-304.45C215.63,-307.83 231.58,-314.57 243,-327 298.42,-387.33 312.34,-998.14 314.63,-1123.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.13,-1123.92 314.81,-1133.86 318.13,-1123.8 311.13,-1123.92"/>
+</g>
+<!-- proc~init_esatmo3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node50" class="node">
+<title>proc~init_esatmo3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node50"><a xlink:href=".././proc/init_esatmo3d.html" xlink:title="Init_ESAtmo3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="167,-276 76,-276 76,-252 167,-252 167,-276"/>
+<text text-anchor="middle" x="121.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_esatmo3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge49" class="edge">
+<title>proc~init_esatmo3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M167.2,-259.45C193.11,-259.45 224.23,-264.47 243,-285 301.29,-348.73 312.97,-994.6 314.73,-1123.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.23,-1123.92 314.86,-1133.88 318.23,-1123.83 311.23,-1123.92"/>
+</g>
+<!-- proc~setgradientboundarycondition_dgmodel1d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node51" class="node">
+<title>proc~setgradientboundarycondition_dgmodel1d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node51"><a xlink:href=".././proc/setgradientboundarycondition_dgmodel1d.html" xlink:title="setgradientboundarycondition_DGModel1D">
+<polygon fill="#d9534f" stroke="#d9534f" points="243,-234 0,-234 0,-210 243,-210 243,-234"/>
+<text text-anchor="middle" x="121.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setgradientboundarycondition_DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- proc~setgradientboundarycondition_dgmodel1d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge50" class="edge">
+<title>proc~setgradientboundarycondition_dgmodel1d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M232.85,-234.08C236.52,-236.67 239.93,-239.63 243,-243 304.17,-310.14 313.57,-991.46 314.82,-1123.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.33,-1123.97 314.91,-1133.94 318.33,-1123.91 311.33,-1123.97"/>
+</g>
+<!-- proc~updatehost_tensor2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node52" class="node">
+<title>proc~updatehost_tensor2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node52"><a xlink:href=".././proc/updatehost_tensor2d.html" xlink:title="UpdateHost_Tensor2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186.5,-192 56.5,-192 56.5,-168 186.5,-168 186.5,-192"/>
+<text text-anchor="middle" x="121.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_tensor2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge51" class="edge">
+<title>proc~updatehost_tensor2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.62,-176.41C207.43,-178.7 228.8,-185.36 243,-201 307.01,-271.5 314.13,-987.22 314.91,-1123.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.41,-1123.73 314.96,-1133.72 318.41,-1123.7 311.41,-1123.73"/>
+</g>
+<!-- proc~sourcemethod_dgmodel2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node53" class="node">
+<title>proc~sourcemethod_dgmodel2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node53"><a xlink:href=".././proc/sourcemethod_dgmodel2d.html" xlink:title="sourcemethod_DGModel2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="200.5,-150 42.5,-150 42.5,-126 200.5,-126 200.5,-150"/>
+<text text-anchor="middle" x="121.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sourcemethod_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- proc~sourcemethod_dgmodel2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge52" class="edge">
+<title>proc~sourcemethod_dgmodel2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M200.76,-136.66C216.76,-140.15 232.03,-146.88 243,-159 309.86,-232.88 314.67,-983.33 314.98,-1123.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.48,-1123.86 315,-1133.86 318.48,-1123.85 311.48,-1123.86"/>
+</g>
+<!-- proc~updatehost_vector2d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node54" class="node">
+<title>proc~updatehost_vector2d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node54"><a xlink:href=".././proc/updatehost_vector2d.html" xlink:title="UpdateHost_Vector2D">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-108 57,-108 57,-84 186,-84 186,-108"/>
+<text text-anchor="middle" x="121.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_Vector2D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_vector2d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge53" class="edge">
+<title>proc~updatehost_vector2d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M186.04,-92.29C207.06,-94.51 228.7,-101.15 243,-117 312.72,-194.27 315.19,-979.64 315.05,-1123.45"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.55,-1123.69 315.04,-1133.69 318.55,-1123.7 311.55,-1123.69"/>
+</g>
+<!-- proc~updatedevice_twopointvector3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node55" class="node">
+<title>proc~updatedevice_twopointvector3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node55"><a xlink:href=".././proc/updatedevice_twopointvector3d.html" xlink:title="UpdateDevice_TwoPointVector3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="215,-66 28,-66 28,-42 215,-42 215,-66"/>
+<text text-anchor="middle" x="121.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_TwoPointVector3D</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_twopointvector3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge54" class="edge">
+<title>proc~updatedevice_twopointvector3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M215.15,-56.78C225.72,-60.72 235.4,-66.55 243,-75 315.66,-155.76 315.69,-977.94 315.12,-1123.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.62,-1123.89 315.07,-1133.91 318.62,-1123.92 311.62,-1123.89"/>
+</g>
+<!-- proc~init_dgmodel3d -->
+<g id="interface~~hipmemcpy~~CalledByGraph_node56" class="node">
+<title>proc~init_dgmodel3d</title>
+<g id="a_interface~~hipmemcpy~~CalledByGraph_node56"><a xlink:href=".././proc/init_dgmodel3d.html" xlink:title="Init_DGModel3D">
+<polygon fill="#d9534f" stroke="#d9534f" points="170.5,-24 72.5,-24 72.5,0 170.5,0 170.5,-24"/>
+<text text-anchor="middle" x="121.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Init_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- proc~init_dgmodel3d&#45;&gt;interface~hipmemcpy -->
+<g id="interface~~hipmemcpy~~CalledByGraph_edge55" class="edge">
+<title>proc~init_dgmodel3d&#45;&gt;interface~hipmemcpy</title>
+<path fill="none" stroke="#ff0000" d="M170.64,-7.35C195.89,-7.73 225.2,-13.17 243,-33 318.47,-117.09 316.17,-973.15 315.18,-1123.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.68,-1123.78 315.11,-1133.8 318.68,-1123.83 311.68,-1123.78"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+<br>
+     <section class="visible-xs visible-sm hidden-md">
+       <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../interface/hipmemcpy.html#proc-hipmemcpy_">hipMemcpy_</a>
+    </div>
+  </div>
+</div>
+
+     </section>
+     <br class="visible-xs visible-sm hidden-md">
+     
+   <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-hipmemcpy_"></span><h3>public function hipMemcpy_(dest, src, sizeBytes, myKind) bind(c,name="hipMemcpy")</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>dest</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>src</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_size_t),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>sizeBytes</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>myKind</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer(kind=c_int)</small></h4>  
+
+  </div>
+  </div>
+
+
+
+
+ </div>
+</div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-06-10 13:06            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
