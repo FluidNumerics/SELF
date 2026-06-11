@@ -30,6 +30,22 @@ jobs:
             context: docker/x86_sm100
             selfish_image: higherordermethods/selfish:latest-x86-cuda130-sm100
             tag_suffix: x86-cuda130-sm100
+            double_precision: "ON"
+          - variant: x86-cuda130-sm100-sp
+            context: docker/x86_sm100
+            selfish_image: higherordermethods/selfish:latest-x86-cuda130-sm100
+            tag_suffix: x86-cuda130-sm100-sp
+            double_precision: "OFF"
+          - variant: x86-rocm643-gfx942
+            context: docker/x86_gfx942
+            selfish_image: higherordermethods/selfish:latest-x86-rocm643-gfx942
+            tag_suffix: x86-rocm643-gfx942
+            double_precision: "ON"
+          - variant: x86-rocm643-gfx942-sp
+            context: docker/x86_gfx942
+            selfish_image: higherordermethods/selfish:latest-x86-rocm643-gfx942
+            tag_suffix: x86-rocm643-gfx942-sp
+            double_precision: "OFF"
 
     steps:
       - name: Checkout repository
@@ -70,5 +86,6 @@ jobs:
           build-args: |
             SELFISH_IMAGE=${{ matrix.selfish_image }}
             SELFISH_SHA=${{ steps.selfish.outputs.sha }}
+            SELF_DOUBLE_PRECISION=${{ matrix.double_precision }}
           cache-from: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache-${{ matrix.tag_suffix }}
           cache-to: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache-${{ matrix.tag_suffix }},mode=max

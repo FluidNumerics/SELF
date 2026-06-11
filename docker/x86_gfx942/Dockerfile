@@ -1,4 +1,4 @@
-ARG SELFISH_IMAGE=higherordermethods/selfish:latest-x86-cuda130-sm100
+ARG SELFISH_IMAGE=higherordermethods/selfish:latest-x86-rocm643-gfx942
 FROM ${SELFISH_IMAGE}
 
 ARG SELFISH_SHA=""
@@ -18,10 +18,11 @@ RUN source /opt/spack-environment/activate.sh && \
       -DCMAKE_INSTALL_PREFIX=/opt/self/install \
       -DCMAKE_BUILD_TYPE=Release \
       -DSELF_ENABLE_GPU=ON \
-      -DSELF_GPU_BACKEND=CUDA \
+      -DSELF_GPU_BACKEND=HIP \
       -DSELF_ENABLE_TESTING=ON \
       -DSELF_ENABLE_DOUBLE_PRECISION=${SELF_DOUBLE_PRECISION} \
-      -DCMAKE_CUDA_ARCHITECTURES="100" \
+      -DCMAKE_HIP_ARCHITECTURES="gfx942" \
+      -DGPU_TARGETS="gfx942" \
       -DSELF_ENABLE_EXAMPLES=ON \
       /opt/self/src && \
     make -j$(nproc) && \
