@@ -91,6 +91,11 @@ contains
     class(LinearEuler2D_t),intent(inout) :: this
 
     this%nvar = 5
+    ! Only the first four variables (rho, u, v, P) are advanced in time. The
+    ! fifth variable, the sound speed c, is a spatially-varying but
+    ! time-constant background field: its flux and source are identically zero,
+    ! so it is excluded from time integration rather than stepped to a no-op.
+    this%nstepped = 4
 
   endsubroutine SetNumberOfVariables_LinearEuler2D_t
 

@@ -75,7 +75,7 @@ contains
     else
       dtLoc = this%dt
     endif
-    ndof = this%solution%nvar* &
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
@@ -91,7 +91,7 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
@@ -108,7 +108,7 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
@@ -125,7 +125,7 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)

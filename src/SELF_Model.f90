@@ -107,6 +107,12 @@ module SELF_Model
     logical :: prescribed_bcs_enabled = .true.
     logical :: tecplot_enabled = .true.
     integer :: nvar
+    ! Number of leading prognostic variables that are advanced in time by the
+    ! time integrator. Variables (nstepped+1:nvar) are auxiliary/diagnostic
+    ! state that is carried in `solution` (e.g. a spatially-varying, time-constant
+    ! sound speed) but never forward-stepped. Defaulted to nvar in the model
+    ! Init, so models that do not set it behave exactly as before.
+    integer :: nstepped = 0
     ! Standard Diagnostics
     real(prec) :: entropy ! Mathematical entropy function for the model
 
