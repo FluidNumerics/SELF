@@ -26,6 +26,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - variant: x86-cuda124-sm70
+            context: docker/x86_sm70
+            selfish_image: higherordermethods/selfish:latest-x86-cuda124-sm70
+            tag_suffix: x86-cuda124-sm70
+            double_precision: "ON"
+          - variant: x86-cuda124-sm70-sp
+            context: docker/x86_sm70
+            selfish_image: higherordermethods/selfish:latest-x86-cuda124-sm70
+            tag_suffix: x86-cuda124-sm70-sp
+            double_precision: "OFF"
           - variant: x86-cuda130-sm100
             context: docker/x86_sm100
             selfish_image: higherordermethods/selfish:latest-x86-cuda130-sm100
@@ -65,6 +75,16 @@ jobs:
             context: docker/x86_gfx942
             selfish_image: higherordermethods/selfish:latest-x86-rocm643-gfx942
             tag_suffix: x86-rocm643-gfx942-sp
+            double_precision: "OFF"
+          - variant: x86
+            context: docker/x86
+            selfish_image: higherordermethods/selfish:latest-x86-none
+            tag_suffix: x86
+            double_precision: "ON"
+          - variant: x86-sp
+            context: docker/x86
+            selfish_image: higherordermethods/selfish:latest-x86-none
+            tag_suffix: x86-sp
             double_precision: "OFF"
 
     steps:

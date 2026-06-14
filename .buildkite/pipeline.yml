@@ -12,9 +12,7 @@ steps:
     if: build.branch != "main"
     command: buildkite-agent pipeline upload .buildkite/x86-cpu-debug-tests.yml
 
-  # Main-branch publish: build → on-hardware ctest → push to higherordermethods/self
-  # on Docker Hub. Covers MI210 (gfx90a), V100 (sm70), and x86 CPU. B200/B300
-  # (sm100) is published from GitHub Actions because we have no Blackwell agent.
-  - label: ":pipeline: Release & Publish"
-    if: build.branch == "main"
-    command: buildkite-agent pipeline upload .buildkite/release-and-publish.yml
+  # Main-branch release images (MI210/gfx90a, V100/sm70, x86 CPU, and the
+  # Blackwell sm100/sm103 targets) are built and pushed from GitHub Actions
+  # (.github/workflows/docker-publish.yml). Buildkite only runs the on-hardware
+  # GPU coverage tests on pull-request branches above.
