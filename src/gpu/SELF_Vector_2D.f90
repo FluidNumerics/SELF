@@ -116,7 +116,7 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundaryNormal_gpu,sizeof(this%boundaryNormal)))
-    workSize = (interp%N+1)*(interp%M+1)*nelem*nvar*2*prec
+    workSize = int(interp%N+1,c_size_t)*(interp%M+1)*nelem*nvar*2*prec
     call gpuCheck(hipMalloc(this%interpWork,workSize))
 
     call this%UpdateDevice()

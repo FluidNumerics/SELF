@@ -111,9 +111,9 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize = (interp%N+1)*(interp%M+1)*nelem*nvar*prec
+    workSize = int(interp%N+1,c_size_t)*(interp%M+1)*nelem*nvar*prec
     call gpuCheck(hipMalloc(this%interpWork,workSize))
-    workSize = (interp%N+1)*(interp%N+1)*nelem*nvar*4*prec
+    workSize = int(interp%N+1,c_size_t)*(interp%N+1)*nelem*nvar*4*prec
     call gpuCheck(hipMalloc(this%jas_gpu,workSize))
 
     call hipblasCheck(hipblasCreate(this%blas_handle))
