@@ -1,9 +1,13 @@
-ARG SELFISH_IMAGE=higherordermethods/selfish:latest-x86
+ARG SELFISH_IMAGE=higherordermethods/selfish:latest-x86-none
 FROM ${SELFISH_IMAGE}
 
 ARG SELFISH_SHA=""
 LABEL org.opencontainers.image.base.name="${SELFISH_IMAGE}"
 LABEL org.opencontainers.image.base.digest="${SELFISH_SHA}"
+
+# Floating-point precision of the build. ON -> double precision (default),
+# OFF -> single precision. Maps to the SELF_ENABLE_DOUBLE_PRECISION CMake option.
+ARG SELF_DOUBLE_PRECISION=ON
 
 COPY . /opt/self/src
 
@@ -15,6 +19,7 @@ RUN source /opt/spack-environment/activate.sh && \
       -DCMAKE_BUILD_TYPE=Release \
       -DSELF_ENABLE_GPU=OFF \
       -DSELF_ENABLE_TESTING=ON \
+      -DSELF_ENABLE_DOUBLE_PRECISION=${SELF_DOUBLE_PRECISION} \
       -DSELF_ENABLE_EXAMPLES=ON \
       /opt/self/src && \
     make -j$(nproc) && \
