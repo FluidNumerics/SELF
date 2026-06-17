@@ -64,7 +64,13 @@ module SELF_Constants
 !                                                             !
 ! ------------------------------------------------------------!
   integer,parameter    :: maxInverseIters = 1000
-  real(prec),parameter :: newtonTolerance = 10.0**(-8)
+  ! Convergence tolerance on the reference-coordinate Newton step. This must be
+  ! precision-aware: the smallest achievable step is ~ (2/h)*|x|*epsilon, which
+  ! grows as the element size h shrinks. A fixed 1e-8 is unreachable in real32
+  ! on fine meshes, causing LocatePoints to reject interior points. Using
+  ! sqrt(epsilon) gives ~3.4e-4 (real32) / ~1.5e-8 (real64); the resulting
+  ! physical placement error ~ sqrt(epsilon)*h/2 is negligible in either case.
+  real(prec),parameter :: newtonTolerance = sqrt(epsilon(1.0_prec))
   integer,parameter    :: newtonMax = 500
 
 !*************************************************************!
