@@ -72,6 +72,14 @@ module SELF_Constants
   ! physical placement error ~ sqrt(epsilon)*h/2 is negligible in either case.
   real(prec),parameter :: newtonTolerance = sqrt(epsilon(1.0_prec))
   integer,parameter    :: newtonMax = 500
+  ! Tolerance for accepting a located reference coordinate as lying inside the
+  ! bi-unit cube [-1,1]^d. A point on an element edge/corner inverts to xi = +/-1,
+  ! but its physical coordinate carries rounding ~|x|*epsilon which the Newton
+  ! map amplifies by ~2/h, so the recovered xi can sit ~ (2/h)*|x|*epsilon beyond
+  ! +/-1 on fine meshes. The acceptance window must exceed that, hence it is
+  ! precision-aware. max(1e-6, sqrt(epsilon)) leaves real64 behavior unchanged
+  ! (1e-6 wins) and widens the window to ~3.4e-4 in real32.
+  real(prec),parameter :: locateTolerance = max(1.0e-6_prec,sqrt(epsilon(1.0_prec)))
 
 !*************************************************************!
 ! ----------------- TIME STEPPING CONSTANTS ------------------!
