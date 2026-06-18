@@ -156,6 +156,7 @@ add_fortran_tests (
     "esatmo3d_motionless.f90"
     "esatmo3d_hydrostaticbalance.f90"
     "points_locate_2d.f90"
+    "points_locate_2d_fine.f90"
     "points_locate_2d_outside.f90"
     "points_locate_3d.f90"
     "points_eval_cache_2d.f90"

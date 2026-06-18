@@ -208,7 +208,14 @@ contains
     gMax(1) = maxval(bbMax(1,:))
     gMax(2) = maxval(bbMax(2,:))
     bbDiag = sqrt((gMax(1)-gMin(1))**2+(gMax(2)-gMin(2))**2)
-    slack = max(bbDiag*1.0e-8_prec,tiny(1.0_prec)*1.0e6_prec)
+    ! Geometric slack for the spatial-hash binning and the broad-phase AABB
+    ! reject. The relative factor must stay above the floating-point rounding of
+    ! the coordinates (~epsilon) so that a point sitting on an element edge or
+    ! corner is not spuriously rejected; a fixed 1e-8 is below epsilon in
+    ! single precision. max(1e-8, 100*epsilon) leaves double precision unchanged
+    ! and widens the slack just enough in single precision.
+    slack = max(bbDiag*max(1.0e-8_prec,100.0_prec*epsilon(1.0_prec)), &
+                tiny(1.0_prec)*1.0e6_prec)
     gMin = gMin-slack
     gMax = gMax+slack
 
@@ -299,8 +306,8 @@ contains
         if(.not. converged) cycle
 
         ! Accept if reference coords lie in the (slightly inflated) bi-unit cube.
-        if(abs(xi(1)) <= 1.0_prec+1.0e-6_prec .and. &
-           abs(xi(2)) <= 1.0_prec+1.0e-6_prec) then
+        if(abs(xi(1)) <= 1.0_prec+locateTolerance .and. &
+           abs(xi(2)) <= 1.0_prec+locateTolerance) then
           this%elements(p) = iEl
           this%coordinates(p,1) = min(1.0_prec,max(-1.0_prec,xi(1)))
           this%coordinates(p,2) = min(1.0_prec,max(-1.0_prec,xi(2)))
@@ -379,7 +386,14 @@ contains
     gMax(2) = maxval(bbMax(2,:))
     gMax(3) = maxval(bbMax(3,:))
     bbDiag = sqrt((gMax(1)-gMin(1))**2+(gMax(2)-gMin(2))**2+(gMax(3)-gMin(3))**2)
-    slack = max(bbDiag*1.0e-8_prec,tiny(1.0_prec)*1.0e6_prec)
+    ! Geometric slack for the spatial-hash binning and the broad-phase AABB
+    ! reject. The relative factor must stay above the floating-point rounding of
+    ! the coordinates (~epsilon) so that a point sitting on an element edge or
+    ! corner is not spuriously rejected; a fixed 1e-8 is below epsilon in
+    ! single precision. max(1e-8, 100*epsilon) leaves double precision unchanged
+    ! and widens the slack just enough in single precision.
+    slack = max(bbDiag*max(1.0e-8_prec,100.0_prec*epsilon(1.0_prec)), &
+                tiny(1.0_prec)*1.0e6_prec)
     gMin = gMin-slack
     gMax = gMax+slack
 
@@ -480,9 +494,9 @@ contains
         call NewtonInverse_3D(geometry,iEl,N,xTarget,xi,converged)
         if(.not. converged) cycle
 
-        if(abs(xi(1)) <= 1.0_prec+1.0e-6_prec .and. &
-           abs(xi(2)) <= 1.0_prec+1.0e-6_prec .and. &
-           abs(xi(3)) <= 1.0_prec+1.0e-6_prec) then
+        if(abs(xi(1)) <= 1.0_prec+locateTolerance .and. &
+           abs(xi(2)) <= 1.0_prec+locateTolerance .and. &
+           abs(xi(3)) <= 1.0_prec+locateTolerance) then
           this%elements(p) = iEl
           this%coordinates(p,1) = min(1.0_prec,max(-1.0_prec,xi(1)))
           this%coordinates(p,2) = min(1.0_prec,max(-1.0_prec,xi(2)))
@@ -845,13 +859,21 @@ contains
   endfunction ClampCell
 
   subroutine BuildElementBBoxes_2D(geometry,N,nElem,bbMin,bbMax)
-    !! Axis-aligned bounding box of geometry%x%interior nodes for each element.
+    !! Axis-aligned bounding box of each element. The box is taken over the
+    !! element's boundary nodes (geometry%x%boundary), which are evaluated at
+    !! the element edges (reference coordinate = +/-1) and therefore reach the
+    !! true element boundary and corners. Using the interior nodes alone is not
+    !! sufficient: for Gauss quadrature the interior nodes are strictly inside
+    !! [-1,1], so a box built from them under-covers the element by a fixed
+    !! fraction of its size and rejects points lying on element edges/corners.
+    !! The boundary nodes give the correct extent for both Gauss and
+    !! Gauss-Lobatto node sets.
     implicit none
     type(SEMQuad),intent(in) :: geometry
     integer,intent(in) :: N,nElem
     real(prec),intent(out) :: bbMin(1:2,1:nElem),bbMax(1:2,1:nElem)
     ! Local
-    integer :: iEl,i,j
+    integer :: iEl,i,iSide
     real(prec) :: xv,yv
 
     do iEl = 1,nElem
@@ -859,10 +881,10 @@ contains
       bbMin(2,iEl) = huge(1.0_prec)
       bbMax(1,iEl) = -huge(1.0_prec)
       bbMax(2,iEl) = -huge(1.0_prec)
-      do j = 1,N+1
+      do iSide = 1,4
         do i = 1,N+1
-          xv = geometry%x%interior(i,j,iEl,1,1)
-          yv = geometry%x%interior(i,j,iEl,1,2)
+          xv = geometry%x%boundary(i,iSide,iEl,1,1)
+          yv = geometry%x%boundary(i,iSide,iEl,1,2)
           if(xv < bbMin(1,iEl)) bbMin(1,iEl) = xv
           if(yv < bbMin(2,iEl)) bbMin(2,iEl) = yv
           if(xv > bbMax(1,iEl)) bbMax(1,iEl) = xv
@@ -874,12 +896,17 @@ contains
   endsubroutine BuildElementBBoxes_2D
 
   subroutine BuildElementBBoxes_3D(geometry,N,nElem,bbMin,bbMax)
+    !! Axis-aligned bounding box of each element, taken over the boundary nodes
+    !! (geometry%x%boundary) which are evaluated on the element faces (reference
+    !! coordinate = +/-1) and so reach the true element boundary, edges and
+    !! corners. See BuildElementBBoxes_2D for why the interior nodes alone are
+    !! insufficient (Gauss interior nodes under-cover the element).
     implicit none
     type(SEMHex),intent(in) :: geometry
     integer,intent(in) :: N,nElem
     real(prec),intent(out) :: bbMin(1:3,1:nElem),bbMax(1:3,1:nElem)
     ! Local
-    integer :: iEl,i,j,k
+    integer :: iEl,i,j,iSide
     real(prec) :: xv,yv,zv
 
     do iEl = 1,nElem
@@ -889,12 +916,12 @@ contains
       bbMax(1,iEl) = -huge(1.0_prec)
       bbMax(2,iEl) = -huge(1.0_prec)
       bbMax(3,iEl) = -huge(1.0_prec)
-      do k = 1,N+1
+      do iSide = 1,6
         do j = 1,N+1
           do i = 1,N+1
-            xv = geometry%x%interior(i,j,k,iEl,1,1)
-            yv = geometry%x%interior(i,j,k,iEl,1,2)
-            zv = geometry%x%interior(i,j,k,iEl,1,3)
+            xv = geometry%x%boundary(i,j,iSide,iEl,1,1)
+            yv = geometry%x%boundary(i,j,iSide,iEl,1,2)
+            zv = geometry%x%boundary(i,j,iSide,iEl,1,3)
             if(xv < bbMin(1,iEl)) bbMin(1,iEl) = xv
             if(yv < bbMin(2,iEl)) bbMin(2,iEl) = yv
             if(zv < bbMin(3,iEl)) bbMin(3,iEl) = zv
