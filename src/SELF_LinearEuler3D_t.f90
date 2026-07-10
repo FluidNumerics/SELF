@@ -27,17 +27,20 @@
 module self_LinearEuler3D_t
 !! This module defines a class that can be used to solve the Linear Euler
 !! equations in 3-D. The Linear Euler Equations, here, are the Euler equations
-!! linearized about a motionless background state.
+!! linearized about a motionless background state. The sound speed is carried
+!! as a solution variable (static in time, possibly spatially varying) so that
+!! heterogeneous media are supported, mirroring the 2-D model.
 !!
-!! The conserved variables are
-
+!! The solution variables are
+!!
 !! \begin{equation}
 !! \vec{s} = \begin{pmatrix}
 !!     \rho \\
 !!      u \\
 !!      v \\
 !!      w \\
-!!      p
+!!      p \\
+!!      c
 !!  \end{pmatrix}
 !! \end{equation}
 !!
@@ -49,31 +52,36 @@ module self_LinearEuler3D_t
 !!      \frac{p}{\rho_0} \hat{x} \\
 !!      \frac{p}{\rho_0} \hat{y} \\
 !!      \frac{p}{\rho_0} \hat{z} \\
-!!      c^2 \rho_0 ( u \hat{x} + v \hat{y} + w \hat{z})
+!!      c^2 \rho_0 ( u \hat{x} + v \hat{y} + w \hat{z}) \\
+!!      0
 !!  \end{pmatrix}
 !! \end{equation}
 !!
-!! and the source terms are null.
+!! and the source terms are null. The sound speed variable has zero flux and
+!! zero source; it is set by the initial condition and preserved in time.
+!! The Riemann flux is the impedance-matched (characteristic) flux, identical
+!! in form to the 2-D model's; see riemannflux3d_LinearEuler3D_t.
 !!
 
   use self_model
   use self_dgmodel3D
   use self_mesh
+  use SELF_BoundaryConditions
 
   implicit none
 
   type,extends(dgmodel3D) :: LinearEuler3D_t
     ! Add any additional attributes here that are specific to your model
     real(prec) :: rho0 = 1.0_prec ! Reference density
-    real(prec) :: c = 1.0_prec ! Sound speed
+    real(prec) :: c = 1.0_prec ! Reference sound speed (used to fill variable 6 in initial conditions)
     real(prec) :: g = 0.0_prec ! gravitational acceleration (y-direction only)
 
   contains
     procedure :: SourceMethod => sourcemethod_LinearEuler3D_t
     procedure :: SetNumberOfVariables => SetNumberOfVariables_LinearEuler3D_t
     procedure :: SetMetadata => SetMetadata_LinearEuler3D_t
+    procedure :: AdditionalInit => AdditionalInit_LinearEuler3D_t
     procedure :: entropy_func => entropy_func_LinearEuler3D_t
-    !procedure :: hbc3D_NoNormalFlow => hbc3D_NoNormalFlow_LinearEuler3D_t
     procedure :: flux3D => flux3D_LinearEuler3D_t
     procedure :: riemannflux3D => riemannflux3D_LinearEuler3D_t
     procedure :: SphericalSoundWave => SphericalSoundWave_LinearEuler3D_t
@@ -86,7 +94,7 @@ contains
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
 
-    this%nvar = 5
+    this%nvar = 6
 
   endsubroutine SetNumberOfVariables_LinearEuler3D_t
 
@@ -109,38 +117,65 @@ contains
     call this%solution%SetName(5,"P") ! Pressure
     call this%solution%SetUnits(5,"kg⋅m⁻¹⋅s⁻²")
 
+    call this%solution%SetName(6,"c") ! Sound speed (static; possibly heterogeneous)
+    call this%solution%SetUnits(6,"m⋅s⁻¹")
+
   endsubroutine SetMetadata_LinearEuler3D_t
+
+  subroutine AdditionalInit_LinearEuler3D_t(this)
+    !! Register the (CPU) radiation boundary condition. GPU builds overwrite
+    !! this registration with the device kernel in AdditionalInit_LinearEuler3D.
+    implicit none
+    class(LinearEuler3D_t),intent(inout) :: this
+    ! Local
+    procedure(SELF_bcMethod),pointer :: bcfunc
+
+    bcfunc => hbc3d_Radiation_LinearEuler3D
+    call this%hyperbolicBCs%RegisterBoundaryCondition( &
+      SELF_BC_RADIATION,"radiation",bcfunc)
+
+  endsubroutine AdditionalInit_LinearEuler3D_t
+
+  subroutine hbc3d_Radiation_LinearEuler3D(bc,mymodel)
+    !! Radiation BC: zero acoustic perturbation in the exterior state; the
+    !! sound speed (variable 6) is copied from the interior side so the
+    !! Riemann solver sees a consistent c.
+    class(BoundaryCondition),intent(in) :: bc
+    class(Model),intent(inout) :: mymodel
+    ! Local
+    integer :: n,i,j,iEl,s
+
+    select type(m => mymodel)
+    class is(LinearEuler3D_t)
+      do n = 1,bc%nBoundaries
+        iEl = bc%elements(n)
+        s = bc%sides(n)
+        do j = 1,m%solution%interp%N+1
+          do i = 1,m%solution%interp%N+1
+            m%solution%extBoundary(i,j,s,iEl,1:5) = 0.0_prec
+            m%solution%extBoundary(i,j,s,iEl,6) = m%solution%boundary(i,j,s,iEl,6) ! c preserved
+          enddo
+        enddo
+      enddo
+    endselect
+
+  endsubroutine hbc3d_Radiation_LinearEuler3D
 
   pure function entropy_func_LinearEuler3D_t(this,s) result(e)
     !! The entropy function is the sum of kinetic and internal energy
     !! For the linear model, this is
     !!
     !! \begin{equation}
-    !!   e = \frac{1}{2} \left( \rho_0*( u^2 + v^2 ) + \frac{P^2}{\rho_0 c^2} \right)
+    !!   e = \frac{1}{2} \left( \rho_0*( u^2 + v^2 + w^2 ) + \frac{P^2}{\rho_0 c^2} \right)
     class(LinearEuler3D_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec) :: e
 
-    e = 0.5_prec*this%rho0*(s(2)*s(2)+s(3)*(3)+s(4)*s(4))+ &
-        0.5_prec*(s(5)*s(5)/(this%rho0*this%c*this%c))
+    e = 0.5_prec*this%rho0*(s(2)*s(2)+s(3)*s(3)+s(4)*s(4))+ &
+        0.5_prec*(s(5)*s(5)/(this%rho0*s(6)*s(6)))
 
   endfunction entropy_func_LinearEuler3D_t
 
-  ! pure function hbc3D_NoNormalFlow_LinearEuler3D_t(this,s,nhat) result(exts)
-  !   class(LinearEuler3D_t),intent(in) :: this
-  !   real(prec),intent(in) :: s(1:this%nvar)
-  !   real(prec),intent(in) :: nhat(1:2)
-  !   real(prec) :: exts(1:this%nvar)
-  !   ! Local
-  !   integer :: ivar
-
-  !   exts(1) = s(1) ! density
-  !   exts(2) = (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
-  !   exts(3) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
-  !   exts(4) = (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! w
-  !   exts(5) = s(4) ! p
-
-  ! endfunction hbc3D_NoNormalFlow_LinearEuler3D_t
   subroutine sourcemethod_LinearEuler3D_t(this)
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
@@ -171,16 +206,28 @@ contains
     flux(4,2) = 0.0_prec ! z-velocity, y flux; 0
     flux(4,3) = s(5)/this%rho0 ! z-velocity, z flux; p/rho0
 
-    flux(5,1) = this%c*this%c*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
-    flux(5,2) = this%c*this%c*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
-    flux(5,3) = this%c*this%c*this%rho0*s(4) ! pressure, y flux : rho0*c^2*w
+    flux(5,1) = s(6)*s(6)*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
+    flux(5,2) = s(6)*s(6)*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
+    flux(5,3) = s(6)*s(6)*this%rho0*s(4) ! pressure, z flux : rho0*c^2*w
+
+    flux(6,1) = 0.0_prec ! sound speed, x flux; 0 (c held fixed in time)
+    flux(6,2) = 0.0_prec ! sound speed, y flux; 0
+    flux(6,3) = 0.0_prec ! sound speed, z flux; 0
     if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux3D_LinearEuler3D_t
 
   pure function riemannflux3D_LinearEuler3D_t(this,sL,sR,dsdx,nhat) result(flux)
-    !! Uses a local lax-friedrich's upwind flux
-    !! The max eigenvalue is taken as the sound speed
+    !! Impedance-matched (characteristic/Godunov) Riemann flux, identical in
+    !! form to the 2-D model's. The interface states are resolved with the
+    !! acoustic impedances Z = rho0*c on either side, so material interfaces
+    !! in a heterogeneous sound-speed field are handled with the physically
+    !! correct transmission/reflection:
+    !!
+    !!   un* = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR)
+    !!   p*  = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR)) / (ZL + ZR)
+    !!
+    !! The sound speed variable carries zero flux.
     class(LinearEuler3D_t),intent(in) :: this
     real(prec),intent(in) :: sL(1:this%nvar)
     real(prec),intent(in) :: sR(1:this%nvar)
@@ -188,33 +235,29 @@ contains
     real(prec),intent(in) :: nhat(1:3)
     real(prec) :: flux(1:this%nvar)
     ! Local
-    real(prec) :: fL(1:this%nvar)
-    real(prec) :: fR(1:this%nvar)
-    real(prec) :: u,v,w,p,c,rho0
+    real(prec) :: rho0,cL,cR,ZL,ZR,unL,unR,pL,pR,un_star,p_star,c2_avg
 
-    u = sL(2)
-    v = sL(3)
-    w = sL(4)
-    p = sL(5)
     rho0 = this%rho0
-    c = this%c
-    fL(1) = rho0*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! density
-    fL(2) = p*nhat(1)/rho0 ! u
-    fL(3) = p*nhat(2)/rho0 ! v
-    fL(4) = p*nhat(3)/rho0 ! w
-    fL(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
+    cL = sL(6)
+    cR = sR(6)
+    ZL = rho0*cL
+    ZR = rho0*cR
 
-    u = sR(2)
-    v = sR(3)
-    w = sR(4)
-    p = sR(5)
-    fR(1) = rho0*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! density
-    fR(2) = p*nhat(1)/rho0 ! u
-    fR(3) = p*nhat(2)/rho0 ! v'
-    fR(4) = p*nhat(3)/rho0 ! w
-    fR(5) = rho0*c*c*(u*nhat(1)+v*nhat(2)+w*nhat(3)) ! pressure
+    unL = sL(2)*nhat(1)+sL(3)*nhat(2)+sL(4)*nhat(3)
+    unR = sR(2)*nhat(1)+sR(3)*nhat(2)+sR(4)*nhat(3)
+    pL = sL(5)
+    pR = sR(5)
 
-    flux(1:5) = 0.5_prec*(fL(1:5)+fR(1:5))+c*(sL(1:5)-sR(1:5))
+    un_star = (ZL*unL+ZR*unR+(pL-pR))/(ZL+ZR)
+    p_star = (ZR*pL+ZL*pR+ZL*ZR*(unL-unR))/(ZL+ZR)
+    c2_avg = 0.5_prec*(cL*cL+cR*cR)
+
+    flux(1) = rho0*un_star
+    flux(2) = p_star*nhat(1)/rho0
+    flux(3) = p_star*nhat(2)/rho0
+    flux(4) = p_star*nhat(3)/rho0
+    flux(5) = rho0*c2_avg*un_star
+    flux(6) = 0.0_prec
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux3D_LinearEuler3D_t
@@ -260,6 +303,7 @@ contains
       this%solution%interior(i,j,k,iEl,3) = 0.0_prec
       this%solution%interior(i,j,k,iEl,4) = 0.0_prec
       this%solution%interior(i,j,k,iEl,5) = rho*this%c*this%c
+      this%solution%interior(i,j,k,iEl,6) = this%c ! uniform background sound speed
 
     enddo
 
