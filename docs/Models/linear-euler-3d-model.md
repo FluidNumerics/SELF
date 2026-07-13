@@ -20,11 +20,12 @@ $$
     u \\ 
     v \\ 
     w \\
-    p
+    p \\
+    c
     \end{pmatrix}
 $$
 
-where $\rho$ is a density anomaly, referenced to the density $\rho_0$, $u$, $v$, and $w$ are the $x$, $y$, and $z$ components of the fluid velocity (respectively), and $p$ is the pressure. When we assume an ideal gas, and a motionless background state, the conservative fluxes are
+where $\rho$ is a density anomaly, referenced to the density $\rho_0$, $u$, $v$, and $w$ are the $x$, $y$, and $z$ components of the fluid velocity (respectively), and $p$ is the pressure. The sound speed $c$ is carried as a solution variable so that heterogeneous (spatially varying) media are supported; it has zero flux and zero source, so it is static in time and is set by the initial condition (mirroring the 2-D model). When we assume an ideal gas, and a motionless background state, the conservative fluxes are
 
 $$
     \overleftrightarrow{f} = 
@@ -33,11 +34,12 @@ $$
     p \hat{x} \\
     p \hat{y} \\
     p \hat{z} \\
-    \rho_0c^2(u \hat{x} + v \hat{y} + w \hat{z})
+    \rho_0c^2(u \hat{x} + v \hat{y} + w \hat{z}) \\
+    0
     \end{pmatrix}
 $$
 
-where $c$ is the (constant) speed of sound. The source term is set to zero.
+The source term is set to zero.
 
 $$
     \vec{q} = \vec{0}
@@ -46,44 +48,35 @@ $$
 To track stability of the Euler equation, the total entropy function is
 
 $$
-    e = \frac{1}{2} \int_V u^2 + v^2 + \frac{p}{\rho_0 c^2} \hspace{1mm} dV
+    e = \frac{1}{2} \int_V \rho_0 (u^2 + v^2 + w^2) + \frac{p^2}{\rho_0 c^2} \hspace{1mm} dV
 $$
 
 ## Implementation
-The Linear Euler 3D model is implemented as a type extension of the [`DGModel3D` class](../ford/type/dgmodel3d_t.html). The [`LinearEuler3D_t` class](../ford/type/lineareuler3d_t.html) adds parameters for the reference density and the speed speed of sound and overrides the `SetMetadata`, `entropy_func`, `flux3d`, and `riemannflux3d` type-bound procedures.
+The Linear Euler 3D model is implemented as a type extension of the [`DGModel3D` class](../ford/type/dgmodel3d_t.html). The [`LinearEuler3D_t` class](../ford/type/lineareuler3d_t.html) adds parameters for the reference density and the reference speed of sound and overrides the `SetMetadata`, `entropy_func`, `flux3d`, and `riemannflux3d` type-bound procedures.
 
 ### Riemann Solver
-The `LinearEuler3D` class is defined using the conservative form of the conservation law. The Riemman solver for the hyperbolic part of Euler equation is the local Lax Friedrichs upwind riemann solver
+The `LinearEuler3D` class is defined using the conservative form of the conservation law. The Riemann solver for the hyperbolic part of the Euler equation is the impedance-matched (characteristic/Godunov) upwind flux, identical in form to the 2-D model's. With the acoustic impedances $Z_L = \rho_0 c_L$ and $Z_R = \rho_0 c_R$ evaluated from the per-node sound speed on either side of the face, the interface normal velocity and pressure are
 
 $$
-    \overleftrightarrow{f}_h^* \cdot \hat{n} = \frac{1}{2}( \overleftrightarrow{f}_L \cdot \hat{n}  + \overleftrightarrow{f}_R \cdot \hat{n}  + c (\vec{s}_L - \vec{s}_R))
+    u_n^* = \frac{Z_L u_{n,L} + Z_R u_{n,R} + (p_L - p_R)}{Z_L + Z_R}, \qquad
+    p^* = \frac{Z_R p_L + Z_L p_R + Z_L Z_R (u_{n,L} - u_{n,R})}{Z_L + Z_R}
 $$
 
-where 
+and the normal flux is
 
 $$
-    \overleftrightarrow{f}_L \cdot \hat{n} = 
+    \overleftrightarrow{f}_h^* \cdot \hat{n} = 
     \begin{pmatrix}
-    \rho_0(u_L n_x + v_L n_y + w_L n_z) \\
-    p_L n_x \\
-    p_L n_y \\
-    p_L n_z \\
-    \rho_0c^2(u_L n_x + v_L n_y + w_L n_z)
-    \end{pmatrix}
+    \rho_0 u_n^* \\
+    p^* n_x / \rho_0 \\
+    p^* n_y / \rho_0 \\
+    p^* n_z / \rho_0 \\
+    \rho_0 \overline{c^2} u_n^* \\
+    0
+    \end{pmatrix}, \qquad \overline{c^2} = \frac{1}{2}(c_L^2 + c_R^2)
 $$
 
-$$
-    \overleftrightarrow{f}_R \cdot \hat{n} = 
-    \begin{pmatrix}
-    \rho_0(u_R n_x + v_R n_y + w_R n_z) \\
-    p_R n_x \\
-    p_R n_y \\
-    p_R n_z \\
-    \rho_0c^2(u_R n_x + v_R n_y + w_R n_z)
-    \end{pmatrix}
-$$
-
-The details for this implementation can be found in [`self_lineareuler3d_t.f90`](../ford/sourcefile/self_lineareuler3d_t.f90.html)
+Because the interface states are resolved with the one-sided impedances, material interfaces in a heterogeneous sound-speed field produce the physically correct transmission and reflection. The details for this implementation can be found in [`self_lineareuler3d_t.f90`](../ford/sourcefile/self_lineareuler3d_t.f90.html)
 
 ### Boundary conditions
 When initializing the mesh for your Euler 3D equation solver, you can change the boundary conditions to 

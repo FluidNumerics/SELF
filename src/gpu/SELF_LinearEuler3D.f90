@@ -41,34 +41,34 @@ module self_LinearEuler3D
   endtype LinearEuler3D
 
   interface
-    subroutine hbc3d_radiation_lineareuler3d_gpu(extboundary, &
+    subroutine hbc3d_radiation_lineareuler3d_gpu(extboundary,boundary, &
                                                  elements,sides,nBoundaries,N,nel) &
       bind(c,name="hbc3d_radiation_lineareuler3d_gpu")
       use iso_c_binding
-      type(c_ptr),value :: extboundary,elements,sides
+      type(c_ptr),value :: extboundary,boundary,elements,sides
       integer(c_int),value :: nBoundaries,N,nel
     endsubroutine hbc3d_radiation_lineareuler3d_gpu
   endinterface
 
   interface
-    subroutine fluxmethod_LinearEuler3D_gpu(solution,flux,rho0,c,N,nel,nvar) &
+    subroutine fluxmethod_LinearEuler3D_gpu(solution,flux,rho0,N,nel,nvar) &
       bind(c,name="fluxmethod_LinearEuler3D_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: solution,flux
-      real(c_prec),value :: rho0,c
+      real(c_prec),value :: rho0
       integer(c_int),value :: N,nel,nvar
     endsubroutine fluxmethod_LinearEuler3D_gpu
   endinterface
 
   interface
-    subroutine boundaryflux_LinearEuler3D_gpu(fb,fextb,nhat,nscale,flux,rho0,c,N,nel) &
+    subroutine boundaryflux_LinearEuler3D_gpu(fb,fextb,nhat,nscale,flux,rho0,N,nel,nvar) &
       bind(c,name="boundaryflux_LinearEuler3D_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fb,fextb,flux,nhat,nscale
-      real(c_prec),value :: rho0,c
-      integer(c_int),value :: N,nel
+      real(c_prec),value :: rho0
+      integer(c_int),value :: N,nel,nvar
     endsubroutine boundaryflux_LinearEuler3D_gpu
   endinterface
 
@@ -79,6 +79,10 @@ contains
     class(LinearEuler3D),intent(inout) :: this
     ! Local
     procedure(SELF_bcMethod),pointer :: bcfunc
+
+    ! Register GPU-accelerated BC methods, overwriting the CPU versions
+    ! from the parent _t AdditionalInit
+    call AdditionalInit_LinearEuler3D_t(this)
 
     bcfunc => hbc3d_Radiation_LinearEuler3D_GPU_wrapper
     call this%hyperbolicBCs%RegisterBoundaryCondition( &
@@ -95,6 +99,7 @@ contains
       if(bc%nBoundaries > 0) then
         call hbc3d_radiation_lineareuler3d_gpu( &
           m%solution%extBoundary_gpu, &
+          m%solution%boundary_gpu, &
           bc%elements_gpu,bc%sides_gpu, &
           bc%nBoundaries,m%solution%interp%N,m%solution%nElem)
       endif
@@ -111,8 +116,8 @@ contains
                                         this%geometry%nhat%boundary_gpu, &
                                         this%geometry%nscale%boundary_gpu, &
                                         this%flux%boundarynormal_gpu, &
-                                        this%rho0,this%c,this%solution%interp%N, &
-                                        this%solution%nelem)
+                                        this%rho0,this%solution%interp%N, &
+                                        this%solution%nelem,this%solution%nvar)
 
   endsubroutine boundaryflux_LinearEuler3D
 
@@ -122,7 +127,7 @@ contains
 
     call fluxmethod_LinearEuler3D_gpu(this%solution%interior_gpu, &
                                       this%flux%interior_gpu, &
-                                      this%rho0,this%c,this%solution%interp%N,this%solution%nelem, &
+                                      this%rho0,this%solution%interp%N,this%solution%nelem, &
                                       this%solution%nvar)
 
   endsubroutine fluxmethod_LinearEuler3D
