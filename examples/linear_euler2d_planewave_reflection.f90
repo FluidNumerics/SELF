@@ -109,6 +109,7 @@ contains
       this%solution%interior(i,j,iel,3) = v*(shi+shr) ! v
       this%solution%interior(i,j,iel,4) = p*(shi+shr) ! pressure
       this%solution%interior(i,j,iel,5) = this%c ! sound speed (uniform background)
+      this%solution%interior(i,j,iel,6) = this%rho0 ! background density (uniform)
 
     enddo
 
@@ -150,6 +151,7 @@ contains
           m%solution%extBoundary(i,j,iEl,3) = v*(shi+shr) ! v
           m%solution%extBoundary(i,j,iEl,4) = p*(shi+shr) ! pressure
           m%solution%extBoundary(i,j,iEl,5) = m%c ! sound speed
+          m%solution%extBoundary(i,j,iEl,6) = m%rho0 ! background density
         enddo
       enddo
     endselect

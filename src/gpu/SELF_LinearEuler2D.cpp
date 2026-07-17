@@ -29,13 +29,15 @@
 #include "SELF_GPU_Macros.h"
 
 
-__global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, real rho0, int ndof){
+__global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, int ndof){
   // Characteristic-decomposition (impedance-matched) interface flux for
-  // linear acoustics with possibly discontinuous sound speed. See the
-  // CPU-side Fortran subroutine riemannflux2d_LinearEuler2D_t for the
-  // derivation. This replaces LLF, which over-dissipates the tangential
+  // linear acoustics with possibly discontinuous sound speed and background
+  // density. See the CPU-side Fortran subroutine riemannflux2d_LinearEuler2D_t
+  // for the derivation. This replaces LLF, which over-dissipates the tangential
   // and entropy modes and fails to stably handle the impedance mismatch
-  // at high polynomial order (aliasing instability).
+  // at high polynomial order (aliasing instability). The per-side background
+  // density rho0 is read from variable 6 (index 5); the impedances use each
+  // side's own rho0, and the reconstructed fluxes use the face average.
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
@@ -43,10 +45,13 @@ __global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *n
     real ny  = nhat[idof+ndof];
     real nm  = nmag[idof];
 
-    real cL  = fb[idof + 4*ndof];
-    real cR  = extfb[idof + 4*ndof];
-    real ZL  = rho0*cL;
-    real ZR  = rho0*cR;
+    real cL     = fb[idof + 4*ndof];
+    real cR     = extfb[idof + 4*ndof];
+    real rho0L  = fb[idof + 5*ndof];
+    real rho0R  = extfb[idof + 5*ndof];
+    real rho0_avg = 0.5*(rho0L + rho0R);
+    real ZL  = rho0L*cL;
+    real ZR  = rho0R*cR;
 
     real unL = fb[idof +     ndof]*nx + fb[idof + 2*ndof]*ny;
     real unR = extfb[idof +  ndof]*nx + extfb[idof + 2*ndof]*ny;
@@ -57,17 +62,18 @@ __global__ void boundaryflux_LinearEuler2D_kernel(real *fb, real *extfb, real *n
     real p_star  = (ZR*pL  + ZL*pR  + ZL*ZR*(unL - unR)) / (ZL + ZR);
     real c2_avg  = 0.5*(cL*cL + cR*cR);
 
-    flux[idof]          = (rho0*un_star) * nm;          // density
-    flux[idof + ndof]   = (p_star*nx/rho0) * nm;        // u
-    flux[idof + 2*ndof] = (p_star*ny/rho0) * nm;        // v
-    flux[idof + 3*ndof] = (rho0*c2_avg*un_star) * nm;   // pressure
-    flux[idof + 4*ndof] = 0.0;                          // sound speed
+    flux[idof]          = (rho0_avg*un_star) * nm;          // density
+    flux[idof + ndof]   = (p_star*nx/rho0_avg) * nm;        // u
+    flux[idof + 2*ndof] = (p_star*ny/rho0_avg) * nm;        // v
+    flux[idof + 3*ndof] = (rho0_avg*c2_avg*un_star) * nm;   // pressure
+    flux[idof + 4*ndof] = 0.0;                              // sound speed
+    flux[idof + 5*ndof] = 0.0;                              // background density
   }
 }
 
 extern "C"
 {
-  void boundaryflux_LinearEuler2D_gpu(real *fb, real *extfb,real *nhat, real *nmag, real *flux, real rho0, int N, int nel, int nvar){
+  void boundaryflux_LinearEuler2D_gpu(real *fb, real *extfb,real *nhat, real *nmag, real *flux, int N, int nel, int nvar){
     int threads_per_block = 256;
     uint32_t ndof = (N+1)*4*nel;
     int nblocks_x = ndof/threads_per_block +1;
@@ -75,11 +81,11 @@ extern "C"
     dim3 nblocks(nblocks_x,nvar,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    boundaryflux_LinearEuler2D_kernel<<<nblocks,nthreads>>>(fb,extfb,nhat,nmag,flux,rho0,ndof);
+    boundaryflux_LinearEuler2D_kernel<<<nblocks,nthreads>>>(fb,extfb,nhat,nmag,flux,ndof);
   }
 }
 
-  __global__ void fluxmethod_LinearEuler2D_gpukernel(real *solution, real *flux, real rho0, int ndof, int nvar){
+  __global__ void fluxmethod_LinearEuler2D_gpukernel(real *solution, real *flux, int ndof, int nvar){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
@@ -87,6 +93,7 @@ extern "C"
     real v = solution[idof + 2*ndof];
     real p = solution[idof + 3*ndof];
     real c = solution[idof + 4*ndof];
+    real rho0 = solution[idof + 5*ndof];
 
     flux[idof + ndof*(0 + nvar*0)] = rho0*u; // density, x flux ; rho0*u
     flux[idof + ndof*(0 + nvar*1)] = rho0*v; // density, y flux ; rho0*v
@@ -102,16 +109,19 @@ extern "C"
 
     flux[idof + ndof*(4 + nvar*0)] = 0.0; // sound speed, x flux; 0 (c held fixed in time)
     flux[idof + ndof*(4 + nvar*1)] = 0.0; // sound speed, y flux; 0 (c held fixed in time)
+
+    flux[idof + ndof*(5 + nvar*0)] = 0.0; // background density, x flux; 0 (rho0 held fixed in time)
+    flux[idof + ndof*(5 + nvar*1)] = 0.0; // background density, y flux; 0 (rho0 held fixed in time)
   }
 
 }
 extern "C"
 {
-  void fluxmethod_LinearEuler2D_gpu(real *solution, real *flux, real rho0, int N, int nel, int nvar){
+  void fluxmethod_LinearEuler2D_gpu(real *solution, real *flux, int N, int nel, int nvar){
     int ndof = (N+1)*(N+1)*nel;
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block +1;
-    fluxmethod_LinearEuler2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,flux,rho0,ndof,nvar);
+    fluxmethod_LinearEuler2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,flux,ndof,nvar);
   }
 
 }
@@ -143,6 +153,7 @@ __global__ void hbc2d_nonormalflow_lineareuler2d_kernel(
     extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = (nx*nx-ny*ny)*v - 2.0*nx*ny*u; // v
     extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // pressure
     extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)]; // c
+    extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)]; // rho0
   }
 }
 
@@ -165,8 +176,9 @@ extern "C"
 // ============================================================
 // Radiation BC kernel for 2D Linear Euler
 // Sets density/u/v/p extBoundary = 0 on pre-filtered boundary
-// faces. The sound speed (variable 4) is copied from the
-// interior side so that face Riemann fluxes see a consistent c.
+// faces. The sound speed (index 4) and background density (index 5)
+// are copied from the interior side so that face Riemann fluxes see
+// a consistent c and rho0.
 // ============================================================
 __global__ void hbc2d_radiation_lineareuler2d_kernel(
     real *extBoundary, real *boundary,
@@ -187,6 +199,7 @@ __global__ void hbc2d_radiation_lineareuler2d_kernel(
     extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)]; // c preserved
+    extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)]; // rho0 preserved
   }
 }
 

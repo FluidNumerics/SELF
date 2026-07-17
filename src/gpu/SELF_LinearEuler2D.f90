@@ -62,23 +62,21 @@ module self_LinearEuler2D
   endinterface
 
   interface
-    subroutine fluxmethod_LinearEuler2D_gpu(solution,flux,rho0,N,nel,nvar) &
+    subroutine fluxmethod_LinearEuler2D_gpu(solution,flux,N,nel,nvar) &
       bind(c,name="fluxmethod_LinearEuler2D_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: solution,flux
-      real(c_prec),value :: rho0
       integer(c_int),value :: N,nel,nvar
     endsubroutine fluxmethod_LinearEuler2D_gpu
   endinterface
 
   interface
-    subroutine boundaryflux_LinearEuler2D_gpu(fb,fextb,nhat,nscale,flux,rho0,N,nel,nvar) &
+    subroutine boundaryflux_LinearEuler2D_gpu(fb,fextb,nhat,nscale,flux,N,nel,nvar) &
       bind(c,name="boundaryflux_LinearEuler2D_gpu")
       use iso_c_binding
       use SELF_Constants
       type(c_ptr),value :: fb,fextb,flux,nhat,nscale
-      real(c_prec),value :: rho0
       integer(c_int),value :: N,nel,nvar
     endsubroutine boundaryflux_LinearEuler2D_gpu
   endinterface
@@ -162,7 +160,7 @@ contains
                                         this%geometry%nhat%boundary_gpu, &
                                         this%geometry%nscale%boundary_gpu, &
                                         this%flux%boundarynormal_gpu, &
-                                        this%rho0,this%solution%interp%N, &
+                                        this%solution%interp%N, &
                                         this%solution%nelem,this%solution%nvar)
 
   endsubroutine boundaryflux_LinearEuler2D
@@ -173,7 +171,7 @@ contains
 
     call fluxmethod_LinearEuler2D_gpu(this%solution%interior_gpu, &
                                       this%flux%interior_gpu, &
-                                      this%rho0,this%solution%interp%N,this%solution%nelem, &
+                                      this%solution%interp%N,this%solution%nelem, &
                                       this%solution%nvar)
 
   endsubroutine fluxmethod_LinearEuler2D
