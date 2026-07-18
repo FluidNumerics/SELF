@@ -25,14 +25,23 @@ module lineareuler2d_boneandmarrow_model
 !! "Bone" (disk of radius 6.5 about (-0.5, 0)), and
 !! "Marrow" (smaller disk of radius 1.5 about (-1.5, 0.5))
 !! nested inside the bone region. We map each material to a
-!! representative sound speed and write that into solution(...,5),
-!! which is held fixed in time by the LinearEuler2D model.
+!! representative sound speed and background density and write those
+!! into solution(...,5) (c) and solution(...,6) (rho0), which are
+!! held fixed in time by the LinearEuler2D model.
+!!
+!! This exercises a genuinely heterogeneous background: both the
+!! sound speed AND the background density jump across the material
+!! interfaces, so the impedance Z = rho0*c is two-valued at each
+!! face and the impedance-matched Riemann solver resolves the
+!! (entropy-stable) reflection/transmission. The materials are
+!! piecewise-constant per element (aligned with mesh boundaries), so
+!! the flux-divergence interior is exactly entropy-conservative.
 !!
 !! Initial condition: a small Gaussian pressure / density bump is
 !! placed in the Muscle region, well outside the bone region. The
 !! transient acoustic pulse propagates outward, refracts/reflects
-!! at the material interfaces (because c is discontinuous across
-!! them), and radiates out through the outer boundary.
+!! at the material interfaces (because c and rho0 are discontinuous
+!! across them), and radiates out through the outer boundary.
 
   use self_lineareuler2d
 
@@ -44,6 +53,11 @@ module lineareuler2d_boneandmarrow_model
     real(prec) :: c_muscle = 1.0_prec
     real(prec) :: c_bone = 2.3_prec
     real(prec) :: c_marrow = 0.92_prec
+    ! Background densities in normalized units (muscle = 1.0), preserving
+    ! real-tissue ratios (cortical bone ~1.8x muscle, marrow ~0.93x).
+    real(prec) :: rho0_muscle = 1.0_prec
+    real(prec) :: rho0_bone = 1.8_prec
+    real(prec) :: rho0_marrow = 0.93_prec
     real(prec) :: bump_x0 = 10.0_prec ! Pulse center, well into the muscle annulus
     real(prec) :: bump_y0 = 0.0_prec
     real(prec) :: bump_L = 0.6_prec ! Halfwidth (e-folding length) of the bump
@@ -63,24 +77,24 @@ module lineareuler2d_boneandmarrow_model
 contains
 
   subroutine setInitialCondition(this)
-    !! Material-aware initial condition: stamp `c` from the per-
-    !! element material id, then add a Gaussian rho/p bump only in
+    !! Material-aware initial condition: stamp `c` and `rho0` from the
+    !! per-element material id, then add a Gaussian rho/p bump only in
     !! Muscle elements (so the pulse starts cleanly in a uniform
     !! medium and the bone/marrow inclusions are seen as scatterers).
     implicit none
     class(lineareuler2d_boneandmarrow),intent(inout) :: this
     integer :: i,j,iel,matid
-    real(prec) :: c_mat,x,y,r2,shape
+    real(prec) :: c_mat,rho0_mat,x,y,r2,shape
     character(LEN=64) :: matname
 
     do iel = 1,this%mesh%nElem
       matid = this%mesh%elemMaterial(iel)
       matname = this%mesh%materialNames(matid)
       select case(trim(matname))
-      case("Muscle"); c_mat = this%c_muscle
-      case("Bone"); c_mat = this%c_bone
-      case("Marrow"); c_mat = this%c_marrow
-      case default; c_mat = this%c_muscle
+      case("Muscle"); c_mat = this%c_muscle; rho0_mat = this%rho0_muscle
+      case("Bone"); c_mat = this%c_bone; rho0_mat = this%rho0_bone
+      case("Marrow"); c_mat = this%c_marrow; rho0_mat = this%rho0_marrow
+      case default; c_mat = this%c_muscle; rho0_mat = this%rho0_muscle
       endselect
 
       do j = 1,this%solution%N+1
@@ -100,6 +114,7 @@ contains
           this%solution%interior(i,j,iel,3) = 0.0_prec ! v
           this%solution%interior(i,j,iel,4) = shape*c_mat*c_mat ! p = rho * c^2 (acoustic)
           this%solution%interior(i,j,iel,5) = c_mat ! sound speed for this material
+          this%solution%interior(i,j,iel,6) = rho0_mat ! background density for this material
         enddo
       enddo
     enddo

@@ -93,6 +93,7 @@ module self_LinearEuler2D_PML_t
     procedure :: SetMetadata => SetMetadata_LinearEuler2D_PML_t
     procedure :: AdditionalInit => AdditionalInit_LinearEuler2D_PML_t
     procedure :: AdditionalFree => AdditionalFree_LinearEuler2D_PML_t
+    procedure :: entropy_func => entropy_func_LinearEuler2D_PML_t
     procedure :: flux2d => flux2d_LinearEuler2D_PML_t
     procedure :: riemannflux2d => riemannflux2d_LinearEuler2D_PML_t
     procedure :: sourcemethod => sourcemethod_LinearEuler2D_PML_t
@@ -135,6 +136,21 @@ contains
     call this%sigma_y%SetUnits(1,"s⁻¹")
 
   endsubroutine SetMetadata_LinearEuler2D_PML_t
+
+  pure function entropy_func_LinearEuler2D_PML_t(this,s) result(e)
+    !! Acoustic energy for the PML model. The background density is the scalar
+    !! this%rho0 (the PML variant does not carry a per-node background density;
+    !! its variable 6 is the auxiliary phi_rho, not rho0), and the sound speed
+    !! is taken from s(5). This overrides the parent entropy_func, which reads
+    !! rho0 from s(6).
+    class(LinearEuler2D_PML_t),intent(in) :: this
+    real(prec),intent(in) :: s(1:this%nvar)
+    real(prec) :: e
+
+    e = 0.5_prec*this%rho0*(s(2)*s(2)+s(3)*s(3))+ &
+        0.5_prec*(s(4)*s(4)/(this%rho0*s(5)*s(5)))
+
+  endfunction entropy_func_LinearEuler2D_PML_t
 
   subroutine AdditionalInit_LinearEuler2D_PML_t(this)
     implicit none

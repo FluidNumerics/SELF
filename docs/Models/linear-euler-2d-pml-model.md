@@ -76,7 +76,8 @@ Both paths are covered step-by-step in the [PML tutorial](../Tutorials/LinearEul
 * `SetMetadata` — registers names and units for the four PML auxiliaries (plus `sigma_x`, `sigma_y`).
 * `AdditionalInit` — allocates `sigma_x` and `sigma_y` and registers PML-aware no-normal-flow and radiation boundary handlers.
 * `AdditionalFree` — releases the damping fields.
-* `flux2d`, `riemannflux2d` — reuse the parent linear-Euler flux for variables 1–5 and return zero for variables 6–9 (auxiliaries carry no flux).
+* `flux2d`, `riemannflux2d` — use the parent linear-Euler acoustic flux form for variables 1–5 and return zero for variables 6–9 (auxiliaries carry no flux). Note the PML variant uses the **scalar** background density `rho0`: unlike the parent model (which carries `rho0` as a per-node solution variable in slot 6), the PML model repurposes slot 6 for the auxiliary `phi_rho`.
+* `entropy_func` — acoustic energy using the scalar `rho0` and the per-node sound speed `s(5)`. This override is required because the parent's `entropy_func` reads `rho0` from `s(6)`, which the PML model uses for `phi_rho`.
 * `sourcemethod` — implements the ADE source term node-by-node. We override `sourcemethod` rather than `source2d` because the pure `source2d(s, dsdx)` signature has no access to the per-node $\sigma_x(i,j,iel)$, $\sigma_y(i,j,iel)$ lookups.
 
 A new procedure `SetPMLProfile(x_interior_min, x_interior_max, y_interior_min, y_interior_max, pml_width, sigma_max, ramp_exponent)` populates `sigma_x` and `sigma_y` from the per-element material tags and the geometric ramp.

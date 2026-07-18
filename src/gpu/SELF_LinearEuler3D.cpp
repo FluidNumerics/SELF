@@ -30,14 +30,16 @@
 
 
 // Impedance-matched (characteristic/Godunov) Riemann flux with a per-node
-// sound speed carried as solution variable 6 (0-based index 5), mirroring the
-// 2-D model. The interface states are resolved with the acoustic impedances
-// Z = rho0*c on either side:
+// sound speed carried as solution variable 6 (0-based index 5) and background
+// density as variable 7 (0-based index 6), mirroring the 2-D model. The
+// interface states are resolved with the per-side acoustic impedances
+// Z = rho0*c (each side using its own rho0 and c):
 //   un* = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR)
 //   p*  = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR)) / (ZL + ZR)
-// Variable layout (0-based): 0=rho, 1=u, 2=v, 3=w, 4=p, 5=c. The sound-speed
-// variable carries zero flux.
-__global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, real rho0, int ndof){
+// Variable layout (0-based): 0=rho, 1=u, 2=v, 3=w, 4=p, 5=c, 6=rho0. The
+// reconstructed fluxes use the face-average rho0. The sound-speed and
+// background-density variables carry zero flux.
+__global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, int ndof){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
@@ -49,8 +51,11 @@ __global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *n
 
     real cL = fb[idof + 5*ndof];
     real cR = extfb[idof + 5*ndof];
-    real ZL = rho0*cL;
-    real ZR = rho0*cR;
+    real rho0L = fb[idof + 6*ndof];
+    real rho0R = extfb[idof + 6*ndof];
+    real rho0_avg = 0.5*(rho0L + rho0R);
+    real ZL = rho0L*cL;
+    real ZR = rho0R*cR;
 
     real unL = fb[idof + ndof]*nx + fb[idof + 2*ndof]*ny + fb[idof + 3*ndof]*nz;
     real unR = extfb[idof + ndof]*nx + extfb[idof + 2*ndof]*ny + extfb[idof + 3*ndof]*nz;
@@ -61,18 +66,19 @@ __global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *n
     real p_star = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR))/(ZL + ZR);
     real c2_avg = 0.5*(cL*cL + cR*cR);
 
-    flux[idof] = (rho0*un_star)*nm;              // density
-    flux[idof+ndof] = (p_star*nx/rho0)*nm;       // u
-    flux[idof+2*ndof] = (p_star*ny/rho0)*nm;     // v
-    flux[idof+3*ndof] = (p_star*nz/rho0)*nm;     // w
-    flux[idof+4*ndof] = (rho0*c2_avg*un_star)*nm; // pressure
+    flux[idof] = (rho0_avg*un_star)*nm;              // density
+    flux[idof+ndof] = (p_star*nx/rho0_avg)*nm;       // u
+    flux[idof+2*ndof] = (p_star*ny/rho0_avg)*nm;     // v
+    flux[idof+3*ndof] = (p_star*nz/rho0_avg)*nm;     // w
+    flux[idof+4*ndof] = (rho0_avg*c2_avg*un_star)*nm; // pressure
     flux[idof+5*ndof] = 0.0;                     // sound speed (static)
+    flux[idof+6*ndof] = 0.0;                     // background density (static)
   }
 }
 
 extern "C"
 {
-  void boundaryflux_LinearEuler3D_gpu(real *fb, real *extfb,real *nhat, real *nmag, real *flux, real rho0, int N, int nel, int nvar){
+  void boundaryflux_LinearEuler3D_gpu(real *fb, real *extfb,real *nhat, real *nmag, real *flux, int N, int nel, int nvar){
     int threads_per_block = 256;
     uint32_t ndof = (N+1)*(N+1)*6*nel;
     int nblocks_x = ndof/threads_per_block +1;
@@ -80,11 +86,11 @@ extern "C"
     dim3 nblocks(nblocks_x,1,1);
     dim3 nthreads(threads_per_block,1,1);
 
-    boundaryflux_LinearEuler3D_kernel<<<nblocks,nthreads>>>(fb,extfb,nhat,nmag,flux,rho0,ndof);
+    boundaryflux_LinearEuler3D_kernel<<<nblocks,nthreads>>>(fb,extfb,nhat,nmag,flux,ndof);
   }
 }
 
-  __global__ void fluxmethod_LinearEuler3D_gpukernel(real *solution, real *flux, real rho0, int ndof, int nvar){
+  __global__ void fluxmethod_LinearEuler3D_gpukernel(real *solution, real *flux, int ndof, int nvar){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
@@ -93,6 +99,7 @@ extern "C"
     real w = solution[idof + 3*ndof];
     real p = solution[idof + 4*ndof];
     real c = solution[idof + 5*ndof];
+    real rho0 = solution[idof + 6*ndof];
 
     flux[idof + ndof*(0 + nvar*0)] = rho0*u; // density, x flux ; rho0*u
     flux[idof + ndof*(0 + nvar*1)] = rho0*v; // density, y flux ; rho0*v
@@ -118,23 +125,28 @@ extern "C"
     flux[idof + ndof*(5 + nvar*1)] = 0.0; // sound speed, y flux; 0
     flux[idof + ndof*(5 + nvar*2)] = 0.0; // sound speed, z flux; 0
 
+    flux[idof + ndof*(6 + nvar*0)] = 0.0; // background density, x flux; 0 (rho0 held fixed in time)
+    flux[idof + ndof*(6 + nvar*1)] = 0.0; // background density, y flux; 0
+    flux[idof + ndof*(6 + nvar*2)] = 0.0; // background density, z flux; 0
+
   }
 
 }
 extern "C"
 {
-  void fluxmethod_LinearEuler3D_gpu(real *solution, real *flux, real rho0, int N, int nel, int nvar){
+  void fluxmethod_LinearEuler3D_gpu(real *solution, real *flux, int N, int nel, int nvar){
     int ndof = (N+1)*(N+1)*(N+1)*nel;
     int threads_per_block = 256;
     int nblocks_x = ndof/threads_per_block +1;
-    fluxmethod_LinearEuler3D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,flux,rho0,ndof,nvar);
+    fluxmethod_LinearEuler3D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(solution,flux,ndof,nvar);
   }
 
 }
 // Radiation BC kernel for 3D Linear Euler
 // Zeroes the acoustic perturbation (rho,u,v,w,p) in extBoundary on
-// pre-filtered boundary faces; the sound speed (variable 5, 0-based) is
-// copied from the interior side so face Riemann fluxes see a consistent c.
+// pre-filtered boundary faces; the sound speed (index 5) and background
+// density (index 6) are copied from the interior side so face Riemann fluxes
+// see a consistent c and rho0.
 __global__ void hbc3d_radiation_lineareuler3d_kernel(
     real *extBoundary, real *boundary,
     int *elements, int *sides,
@@ -157,6 +169,7 @@ __global__ void hbc3d_radiation_lineareuler3d_kernel(
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,3,N,nel)] = 0.0;
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)] = 0.0;
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)]; // c preserved
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,6,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,6,N,nel)]; // rho0 preserved
   }
 }
 
