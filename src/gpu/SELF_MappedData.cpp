@@ -317,6 +317,124 @@ extern "C"
   }
 }
 
+// Aggregated MPI halo pack/unpack for the 3-D side exchange.
+//
+// haloSides holds (element, side, flip) integer triplets, with 0-based element
+// and side indices, for every locally-owned side whose neighbor element lives
+// on another rank. Entries are grouped by neighbor rank and sorted by global
+// side id within each group so that the send and receive buffers on the two
+// ranks of an interface enumerate sides in the same order; no per-message
+// metadata is required. Buffer layout for entry n, variable ivar:
+//   buf[i + (N+1)*(j + (N+1)*(ivar + nVar*n))]
+// The sender packs its boundary trace in its native (i,j) orientation; the
+// receiver applies its side's flip permutation during the unpack (the same
+// permutation ApplyFlip_3D applies for the per-side message implementation).
+
+__global__ void HaloPack_3D(real *boundary, real *sendBuf, int *haloSides, int N, int nVar, int nEl, int nHalo){
+
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t ndof = (N+1)*(N+1)*nHalo;
+
+  if(idof < ndof){
+    uint32_t i = idof % (N+1);
+    uint32_t j = (idof/(N+1)) % (N+1);
+    uint32_t n = idof/(N+1)/(N+1);
+    uint32_t ivar = blockIdx.y;
+    int e1 = haloSides[3*n];
+    int s1 = haloSides[3*n+1];
+
+    sendBuf[i + (N+1)*(j + (N+1)*(ivar + nVar*n))] = boundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)];
+  }
+
+}
+
+extern "C"
+{
+  void HaloPack_3D_gpu(real *boundary, real *sendBuf, int *haloSides, int N, int nVar, int nEl, int nHalo)
+  {
+    int ndof = (N+1)*(N+1)*nHalo;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,nVar,1);
+    dim3 nthreads(threads_per_block,1,1);
+    HaloPack_3D<<<nblocks,nthreads>>>(boundary, sendBuf, haloSides, N, nVar, nEl, nHalo);
+    // The packed send buffer must be complete before MPI_Isend is posted on
+    // the host; synchronize the device before returning.
+#ifdef __HIP_PLATFORM_AMD__
+    CHECK(hipDeviceSynchronize());
+#else
+    CHECK(cudaDeviceSynchronize());
+#endif
+  }
+}
+
+__global__ void HaloUnpack_3D(real *recvBuf, real *extBoundary, int *haloSides, int N, int nVar, int nEl, int nHalo){
+
+  uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
+  uint32_t ndof = (N+1)*(N+1)*nHalo;
+
+  if(idof < ndof){
+    uint32_t i = idof % (N+1);
+    uint32_t j = (idof/(N+1)) % (N+1);
+    uint32_t n = idof/(N+1)/(N+1);
+    uint32_t ivar = blockIdx.y;
+    int e1 = haloSides[3*n];
+    int s1 = haloSides[3*n+1];
+    int flip = haloSides[3*n+2];
+    int i2 = i;
+    int j2 = j;
+
+    // extBoundary(i,j) receives the neighbor's trace at (i2,j2); this is the
+    // same permutation ApplyFlip_3D applies in the per-side implementation.
+    if(flip == 1){
+      i2 = N-i;
+      j2 = j;
+    }
+    else if(flip == 2){
+      i2 = N-i;
+      j2 = N-j;
+    }
+    else if(flip == 3){
+      i2 = i;
+      j2 = N-j;
+    }
+    else if(flip == 4){
+      i2 = j;
+      j2 = i;
+    }
+    else if(flip == 5){
+      i2 = N-j;
+      j2 = i;
+    }
+    else if(flip == 6){
+      i2 = N-j;
+      j2 = N-i;
+    }
+    else if(flip == 7){
+      i2 = j;
+      j2 = N-i;
+    }
+
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,ivar,N,nEl)] = recvBuf[i2 + (N+1)*(j2 + (N+1)*(ivar + nVar*n))];
+  }
+
+}
+
+extern "C"
+{
+  void HaloUnpack_3D_gpu(real *recvBuf, real *extBoundary, int *haloSides, int N, int nVar, int nEl, int nHalo)
+  {
+    int ndof = (N+1)*(N+1)*nHalo;
+    int threads_per_block = 256;
+    int nblocks_x = ndof/threads_per_block + 1;
+
+    dim3 nblocks(nblocks_x,nVar,1);
+    dim3 nthreads(threads_per_block,1,1);
+    HaloUnpack_3D<<<nblocks,nthreads>>>(recvBuf, extBoundary, haloSides, N, nVar, nEl, nHalo);
+  }
+}
+
 __global__ void ContravariantWeight_gpukernel(real *scalar, real *dsdx, real *tensor, int ndof){
 
   uint32_t ivar = blockIdx.y; // variable dimension

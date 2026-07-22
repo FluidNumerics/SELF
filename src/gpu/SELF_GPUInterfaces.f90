@@ -187,6 +187,26 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    subroutine HaloPack_3D_gpu(boundary,sendbuf,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloPack_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: boundary,sendbuf,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloPack_3D_gpu
+  endinterface
+
+  interface
+    subroutine HaloUnpack_3D_gpu(recvbuf,extboundary,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloUnpack_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: recvbuf,extboundary,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloUnpack_3D_gpu
+  endinterface
+
+  interface
     subroutine DG_BoundaryContribution_3D_gpu(bmatrix,qweights,bf,df,N,nvar,nel) &
       bind(c,name="DG_BoundaryContribution_3D_gpu")
       use iso_c_binding
