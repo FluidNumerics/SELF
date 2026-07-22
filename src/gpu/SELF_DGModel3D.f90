@@ -75,7 +75,10 @@ contains
     else
       dtLoc = this%dt
     endif
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
@@ -92,7 +95,10 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
@@ -110,7 +116,10 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
@@ -128,7 +137,10 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
