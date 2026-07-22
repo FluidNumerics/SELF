@@ -182,7 +182,9 @@ factor-9 refinement granularity, transition elements with reduced quality
 priori), a more complex mesh-generation step, and coarsening constrained to
 full sibling groups. Mortar-based 2:1 AMR would invert these trade-offs but
 touches the numerics (mortar projections in the flux path) — explicitly out of
-scope per the requirements.
+scope per the requirements. A full scoping of the mortar route, for
+comparison, is in the companion document
+[Mortar (Nonconforming) Interfaces for 2D Models](Mortar2D-Design.md).
 
 ---
 
