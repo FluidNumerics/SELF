@@ -32,11 +32,17 @@ module self_LinearEuler3D_t
 !! possibly spatially varying) so that heterogeneous media are supported,
 !! mirroring the 2-D model.
 !!
+!! The density anomaly is not carried as a solution variable: for a motionless
+!! background state it is slaved to the pressure through \(\rho = p/c^2\) and
+!! never feeds back into the velocity or pressure dynamics, so only the
+!! velocity components and the pressure are forward-stepped. If the density
+!! anomaly is needed as a diagnostic, it can be recovered pointwise as
+!! \(\rho = p/c^2\).
+!!
 !! The solution variables are
 !!
 !! \begin{equation}
 !! \vec{s} = \begin{pmatrix}
-!!     \rho \\
 !!      u \\
 !!      v \\
 !!      w \\
@@ -50,7 +56,6 @@ module self_LinearEuler3D_t
 !!
 !! \begin{equation}
 !! \overleftrightarrow{f} = \begin{pmatrix}
-!!     \rho_0 u \hat{x} + \rho_0 v \hat{y} + \rho_0 w \hat{z} \\
 !!      \frac{p}{\rho_0} \hat{x} \\
 !!      \frac{p}{\rho_0} \hat{y} \\
 !!      \frac{p}{\rho_0} \hat{z} \\
@@ -77,8 +82,8 @@ module self_LinearEuler3D_t
 
   type,extends(dgmodel3D) :: LinearEuler3D_t
     ! Add any additional attributes here that are specific to your model
-    real(prec) :: rho0 = 1.0_prec ! Reference density (used to fill variable 7 in initial conditions)
-    real(prec) :: c = 1.0_prec ! Reference sound speed (used to fill variable 6 in initial conditions)
+    real(prec) :: rho0 = 1.0_prec ! Reference density (used to fill variable 6 in initial conditions)
+    real(prec) :: c = 1.0_prec ! Reference sound speed (used to fill variable 5 in initial conditions)
     real(prec) :: g = 0.0_prec ! gravitational acceleration (y-direction only)
 
   contains
@@ -99,13 +104,13 @@ contains
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
 
-    this%nvar = 7
-    ! Only the first five variables (rho, u, v, w, P) are advanced in time. The
-    ! sixth and seventh variables, the sound speed c and background density
+    this%nvar = 6
+    ! Only the first four variables (u, v, w, P) are advanced in time. The
+    ! fifth and sixth variables, the sound speed c and background density
     ! rho0, are spatially-varying but time-constant background fields: their
     ! flux and source are identically zero, so they are excluded from time
     ! integration rather than stepped to a no-op.
-    this%nstepped = 5
+    this%nstepped = 4
 
   endsubroutine SetNumberOfVariables_LinearEuler3D_t
 
@@ -113,26 +118,23 @@ contains
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
 
-    call this%solution%SetName(1,"rho") ! Density
-    call this%solution%SetUnits(1,"kg⋅m⁻³")
+    call this%solution%SetName(1,"u") ! x-velocity component
+    call this%solution%SetUnits(1,"m⋅s⁻¹")
 
-    call this%solution%SetName(2,"u") ! x-velocity component
+    call this%solution%SetName(2,"v") ! y-velocity component
     call this%solution%SetUnits(2,"m⋅s⁻¹")
 
-    call this%solution%SetName(3,"v") ! y-velocity component
+    call this%solution%SetName(3,"w") ! z-velocity component
     call this%solution%SetUnits(3,"m⋅s⁻¹")
 
-    call this%solution%SetName(4,"w") ! z-velocity component
-    call this%solution%SetUnits(4,"m⋅s⁻¹")
+    call this%solution%SetName(4,"P") ! Pressure
+    call this%solution%SetUnits(4,"kg⋅m⁻¹⋅s⁻²")
 
-    call this%solution%SetName(5,"P") ! Pressure
-    call this%solution%SetUnits(5,"kg⋅m⁻¹⋅s⁻²")
+    call this%solution%SetName(5,"c") ! Sound speed (static; possibly heterogeneous)
+    call this%solution%SetUnits(5,"m⋅s⁻¹")
 
-    call this%solution%SetName(6,"c") ! Sound speed (static; possibly heterogeneous)
-    call this%solution%SetUnits(6,"m⋅s⁻¹")
-
-    call this%solution%SetName(7,"rho0") ! Background density (static; possibly heterogeneous)
-    call this%solution%SetUnits(7,"kg⋅m⁻³")
+    call this%solution%SetName(6,"rho0") ! Background density (static; possibly heterogeneous)
+    call this%solution%SetUnits(6,"kg⋅m⁻³")
 
   endsubroutine SetMetadata_LinearEuler3D_t
 
@@ -152,7 +154,7 @@ contains
 
   subroutine hbc3d_Radiation_LinearEuler3D(bc,mymodel)
     !! Radiation BC: zero acoustic perturbation in the exterior state; the
-    !! sound speed (variable 6) and background density (variable 7) are copied
+    !! sound speed (variable 5) and background density (variable 6) are copied
     !! from the interior side so the Riemann solver sees a consistent c and
     !! rho0.
     class(BoundaryCondition),intent(in) :: bc
@@ -167,9 +169,9 @@ contains
         s = bc%sides(n)
         do j = 1,m%solution%interp%N+1
           do i = 1,m%solution%interp%N+1
-            m%solution%extBoundary(i,j,s,iEl,1:5) = 0.0_prec
-            m%solution%extBoundary(i,j,s,iEl,6) = m%solution%boundary(i,j,s,iEl,6) ! c preserved
-            m%solution%extBoundary(i,j,s,iEl,7) = m%solution%boundary(i,j,s,iEl,7) ! rho0 preserved
+            m%solution%extBoundary(i,j,s,iEl,1:4) = 0.0_prec
+            m%solution%extBoundary(i,j,s,iEl,5) = m%solution%boundary(i,j,s,iEl,5) ! c preserved
+            m%solution%extBoundary(i,j,s,iEl,6) = m%solution%boundary(i,j,s,iEl,6) ! rho0 preserved
           enddo
         enddo
       enddo
@@ -184,14 +186,14 @@ contains
     !! \begin{equation}
     !!   e = \frac{1}{2} \left( \rho_0*( u^2 + v^2 + w^2 ) + \frac{P^2}{\rho_0 c^2} \right)
     !!
-    !! where the sound speed c is taken from s(6) and the background density
-    !! rho0 from s(7).
+    !! where the sound speed c is taken from s(5) and the background density
+    !! rho0 from s(6).
     class(LinearEuler3D_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec) :: e
 
-    e = 0.5_prec*s(7)*(s(2)*s(2)+s(3)*s(3)+s(4)*s(4))+ &
-        0.5_prec*(s(5)*s(5)/(s(7)*s(6)*s(6)))
+    e = 0.5_prec*s(6)*(s(1)*s(1)+s(2)*s(2)+s(3)*s(3))+ &
+        0.5_prec*(s(4)*s(4)/(s(6)*s(5)*s(5)))
 
   endfunction entropy_func_LinearEuler3D_t
 
@@ -209,33 +211,29 @@ contains
     real(prec),intent(in) :: dsdx(1:this%nvar,1:3)
     real(prec) :: flux(1:this%nvar,1:3)
 
-    flux(1,1) = s(7)*s(2) ! density, x flux ; rho0*u
-    flux(1,2) = s(7)*s(3) ! density, y flux ; rho0*v
-    flux(1,3) = s(7)*s(4) ! density, y flux ; rho0*w
+    flux(1,1) = s(4)/s(6) ! x-velocity, x flux; p/rho0
+    flux(1,2) = 0.0_prec ! x-velocity, y flux; 0
+    flux(1,3) = 0.0_prec ! x-velocity, z flux; 0
 
-    flux(2,1) = s(5)/s(7) ! x-velocity, x flux; p/rho0
-    flux(2,2) = 0.0_prec ! x-velocity, y flux; 0
-    flux(2,3) = 0.0_prec ! x-velocity, z flux; 0
+    flux(2,1) = 0.0_prec ! y-velocity, x flux; 0
+    flux(2,2) = s(4)/s(6) ! y-velocity, y flux; p/rho0
+    flux(2,3) = 0.0_prec ! y-velocity, z flux; 0
 
-    flux(3,1) = 0.0_prec ! y-velocity, x flux; 0
-    flux(3,2) = s(5)/s(7) ! y-velocity, y flux; p/rho0
-    flux(3,3) = 0.0_prec ! y-velocity, z flux; 0
+    flux(3,1) = 0.0_prec ! z-velocity, x flux; 0
+    flux(3,2) = 0.0_prec ! z-velocity, y flux; 0
+    flux(3,3) = s(4)/s(6) ! z-velocity, z flux; p/rho0
 
-    flux(4,1) = 0.0_prec ! z-velocity, x flux; 0
-    flux(4,2) = 0.0_prec ! z-velocity, y flux; 0
-    flux(4,3) = s(5)/s(7) ! z-velocity, z flux; p/rho0
+    flux(4,1) = s(5)*s(5)*s(6)*s(1) ! pressure, x flux : rho0*c^2*u
+    flux(4,2) = s(5)*s(5)*s(6)*s(2) ! pressure, y flux : rho0*c^2*v
+    flux(4,3) = s(5)*s(5)*s(6)*s(3) ! pressure, z flux : rho0*c^2*w
 
-    flux(5,1) = s(6)*s(6)*s(7)*s(2) ! pressure, x flux : rho0*c^2*u
-    flux(5,2) = s(6)*s(6)*s(7)*s(3) ! pressure, y flux : rho0*c^2*v
-    flux(5,3) = s(6)*s(6)*s(7)*s(4) ! pressure, z flux : rho0*c^2*w
+    flux(5,1) = 0.0_prec ! sound speed, x flux; 0 (c held fixed in time)
+    flux(5,2) = 0.0_prec ! sound speed, y flux; 0
+    flux(5,3) = 0.0_prec ! sound speed, z flux; 0
 
-    flux(6,1) = 0.0_prec ! sound speed, x flux; 0 (c held fixed in time)
-    flux(6,2) = 0.0_prec ! sound speed, y flux; 0
-    flux(6,3) = 0.0_prec ! sound speed, z flux; 0
-
-    flux(7,1) = 0.0_prec ! background density, x flux; 0 (rho0 held fixed in time)
-    flux(7,2) = 0.0_prec ! background density, y flux; 0
-    flux(7,3) = 0.0_prec ! background density, z flux; 0
+    flux(6,1) = 0.0_prec ! background density, x flux; 0 (rho0 held fixed in time)
+    flux(6,2) = 0.0_prec ! background density, y flux; 0
+    flux(6,3) = 0.0_prec ! background density, z flux; 0
     if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux3D_LinearEuler3D_t
@@ -251,7 +249,7 @@ contains
     !!   un* = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR)
     !!   p*  = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR)) / (ZL + ZR)
     !!
-    !! The reconstructed density/momentum/pressure fluxes use the arithmetic
+    !! The reconstructed momentum/pressure fluxes use the arithmetic
     !! averages rho0_avg and c2_avg at the face (see the 2-D model for the
     !! rationale). The sound speed and background density variables carry zero
     !! flux.
@@ -264,30 +262,29 @@ contains
     ! Local
     real(prec) :: rho0L,rho0R,rho0_avg,cL,cR,ZL,ZR,unL,unR,pL,pR,un_star,p_star,c2_avg
 
-    rho0L = sL(7)
-    rho0R = sR(7)
+    rho0L = sL(6)
+    rho0R = sR(6)
     rho0_avg = 0.5_prec*(rho0L+rho0R)
-    cL = sL(6)
-    cR = sR(6)
+    cL = sL(5)
+    cR = sR(5)
     ZL = rho0L*cL
     ZR = rho0R*cR
 
-    unL = sL(2)*nhat(1)+sL(3)*nhat(2)+sL(4)*nhat(3)
-    unR = sR(2)*nhat(1)+sR(3)*nhat(2)+sR(4)*nhat(3)
-    pL = sL(5)
-    pR = sR(5)
+    unL = sL(1)*nhat(1)+sL(2)*nhat(2)+sL(3)*nhat(3)
+    unR = sR(1)*nhat(1)+sR(2)*nhat(2)+sR(3)*nhat(3)
+    pL = sL(4)
+    pR = sR(4)
 
     un_star = (ZL*unL+ZR*unR+(pL-pR))/(ZL+ZR)
     p_star = (ZR*pL+ZL*pR+ZL*ZR*(unL-unR))/(ZL+ZR)
     c2_avg = 0.5_prec*(cL*cL+cR*cR)
 
-    flux(1) = rho0_avg*un_star
-    flux(2) = p_star*nhat(1)/rho0_avg
-    flux(3) = p_star*nhat(2)/rho0_avg
-    flux(4) = p_star*nhat(3)/rho0_avg
-    flux(5) = rho0_avg*c2_avg*un_star
+    flux(1) = p_star*nhat(1)/rho0_avg
+    flux(2) = p_star*nhat(2)/rho0_avg
+    flux(3) = p_star*nhat(3)/rho0_avg
+    flux(4) = rho0_avg*c2_avg*un_star
+    flux(5) = 0.0_prec
     flux(6) = 0.0_prec
-    flux(7) = 0.0_prec
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux3D_LinearEuler3D_t
@@ -298,12 +295,16 @@ contains
     !!
     !! \begin{equation}
     !! \begin{aligned}
-    !! \rho &= \rho_0 + \rho' \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_r^2} \right)
     !! u &= 0 \\
     !! v &= 0 \\
-    !! E &= \frac{P_0}{\gamma - 1} + E \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2}{L_e^2} \right)
+    !! w &= 0 \\
+    !! p &= \rho' c^2 \exp\left( -\ln(2) \frac{(x-x_0)^2 + (y-y_0)^2 + (z-z_0)^2}{L_r^2} \right)
     !! \end{aligned}
     !! \end{equation}
+    !!
+    !! `rhoprime` is the amplitude of the (diagnostic) density anomaly that the
+    !! pressure pulse corresponds to through the acoustic relation p = rho*c^2;
+    !! the density anomaly itself is not a solution variable.
     !!
     implicit none
     class(LinearEuler3D_t),intent(inout) :: this
@@ -328,13 +329,12 @@ contains
 
       rho = (rhoprime)*exp(-log(2.0_prec)*r**2/Lr**2)
 
-      this%solution%interior(i,j,k,iEl,1) = rho
+      this%solution%interior(i,j,k,iEl,1) = 0.0_prec
       this%solution%interior(i,j,k,iEl,2) = 0.0_prec
       this%solution%interior(i,j,k,iEl,3) = 0.0_prec
-      this%solution%interior(i,j,k,iEl,4) = 0.0_prec
-      this%solution%interior(i,j,k,iEl,5) = rho*this%c*this%c
-      this%solution%interior(i,j,k,iEl,6) = this%c ! uniform background sound speed
-      this%solution%interior(i,j,k,iEl,7) = this%rho0 ! uniform background density
+      this%solution%interior(i,j,k,iEl,4) = rho*this%c*this%c
+      this%solution%interior(i,j,k,iEl,5) = this%c ! uniform background sound speed
+      this%solution%interior(i,j,k,iEl,6) = this%rho0 ! uniform background density
 
     enddo
 

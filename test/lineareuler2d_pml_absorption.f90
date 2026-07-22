@@ -119,7 +119,7 @@ program LinearEuler2D_PML_Absorption
 
   ! Initial planar (uniform in y) right-going acoustic pulse:
   !   p(x) = amp * exp(-((x-pulse_x0)/pulse_width)^2)
-  !   rho  = p/c^2,  u = p/(rho0*c),  v = 0
+  !   u = p/(rho0*c),  v = 0
   ! which is the right eigenvector of A for the linear Euler system.
   do iel = 1,mesh%nElem
     do j = 1,modelobj%solution%N+1
@@ -127,18 +127,17 @@ program LinearEuler2D_PML_Absorption
         x = modelobj%geometry%x%interior(i,j,iel,1,1)
         r2 = (x-pulse_x0)**2
         p_loc = amp*exp(-r2/(pulse_width*pulse_width))
-        modelobj%solution%interior(i,j,iel,1) = p_loc/(c0*c0) ! rho
-        modelobj%solution%interior(i,j,iel,2) = p_loc/(modelobj%rho0*c0) ! u
-        modelobj%solution%interior(i,j,iel,3) = 0.0_prec ! v
-        modelobj%solution%interior(i,j,iel,4) = p_loc ! p
-        modelobj%solution%interior(i,j,iel,5) = c0 ! c
-        modelobj%solution%interior(i,j,iel,6:9) = 0.0_prec ! phi_*
+        modelobj%solution%interior(i,j,iel,1) = p_loc/(modelobj%rho0*c0) ! u
+        modelobj%solution%interior(i,j,iel,2) = 0.0_prec ! v
+        modelobj%solution%interior(i,j,iel,3) = p_loc ! p
+        modelobj%solution%interior(i,j,iel,4) = c0 ! c
+        modelobj%solution%interior(i,j,iel,5:7) = 0.0_prec ! phi_*
       enddo
     enddo
   enddo
   call modelobj%solution%UpdateDevice()
 
-  p_max_initial = maxval(modelobj%solution%interior(:,:,:,4))
+  p_max_initial = maxval(modelobj%solution%interior(:,:,:,3))
   print*,"Initial max |p|: ",p_max_initial
   call modelobj%CalculateEntropy()
   e0 = modelobj%entropy
@@ -156,7 +155,7 @@ program LinearEuler2D_PML_Absorption
     if(xmid > x_interior_max) cycle
     do j = 1,modelobj%solution%N+1
       do i = 1,modelobj%solution%N+1
-        p_max_interior = max(p_max_interior,abs(modelobj%solution%interior(i,j,iel,4)))
+        p_max_interior = max(p_max_interior,abs(modelobj%solution%interior(i,j,iel,3)))
       enddo
     enddo
   enddo

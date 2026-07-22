@@ -31,10 +31,12 @@
 
 // ============================================================
 // Riemann boundary-flux kernel (PML variant).
-// Acoustic variables 0..4 use the impedance-matched solver from
-// the parent LinearEuler2D kernel; auxiliary variables 5..8
+// Acoustic variables 0..3 use the impedance-matched solver from
+// the parent LinearEuler2D kernel; auxiliary variables 4..6
 // (the PML phi fields) carry zero flux and are evolved purely by
 // the source term.
+// Variable layout (0-based): 0=u, 1=v, 2=p, 3=c, 4=phi_u,
+// 5=phi_v, 6=phi_p.
 // ============================================================
 __global__ void boundaryflux_LinearEuler2D_PML_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, real rho0, int ndof){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
@@ -44,29 +46,27 @@ __global__ void boundaryflux_LinearEuler2D_PML_kernel(real *fb, real *extfb, rea
     real ny  = nhat[idof+ndof];
     real nm  = nmag[idof];
 
-    real cL  = fb[idof + 4*ndof];
-    real cR  = extfb[idof + 4*ndof];
+    real cL  = fb[idof + 3*ndof];
+    real cR  = extfb[idof + 3*ndof];
     real ZL  = rho0*cL;
     real ZR  = rho0*cR;
 
-    real unL = fb[idof +     ndof]*nx + fb[idof + 2*ndof]*ny;
-    real unR = extfb[idof +  ndof]*nx + extfb[idof + 2*ndof]*ny;
-    real pL  = fb[idof + 3*ndof];
-    real pR  = extfb[idof + 3*ndof];
+    real unL = fb[idof]*nx + fb[idof + ndof]*ny;
+    real unR = extfb[idof]*nx + extfb[idof + ndof]*ny;
+    real pL  = fb[idof + 2*ndof];
+    real pR  = extfb[idof + 2*ndof];
 
     real un_star = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR);
     real p_star  = (ZR*pL  + ZL*pR  + ZL*ZR*(unL - unR)) / (ZL + ZR);
     real c2_avg  = 0.5*(cL*cL + cR*cR);
 
-    flux[idof]          = (rho0*un_star) * nm;          // density
-    flux[idof + ndof]   = (p_star*nx/rho0) * nm;        // u
-    flux[idof + 2*ndof] = (p_star*ny/rho0) * nm;        // v
-    flux[idof + 3*ndof] = (rho0*c2_avg*un_star) * nm;   // pressure
-    flux[idof + 4*ndof] = 0.0;                          // sound speed
-    flux[idof + 5*ndof] = 0.0;                          // phi_rho
-    flux[idof + 6*ndof] = 0.0;                          // phi_u
-    flux[idof + 7*ndof] = 0.0;                          // phi_v
-    flux[idof + 8*ndof] = 0.0;                          // phi_p
+    flux[idof]          = (p_star*nx/rho0) * nm;        // u
+    flux[idof + ndof]   = (p_star*ny/rho0) * nm;        // v
+    flux[idof + 2*ndof] = (rho0*c2_avg*un_star) * nm;   // pressure
+    flux[idof + 3*ndof] = 0.0;                          // sound speed
+    flux[idof + 4*ndof] = 0.0;                          // phi_u
+    flux[idof + 5*ndof] = 0.0;                          // phi_v
+    flux[idof + 6*ndof] = 0.0;                          // phi_p
   }
 }
 
@@ -85,37 +85,34 @@ extern "C"
 }
 
 // ============================================================
-// Interior-flux kernel (PML variant). Acoustic variables 0..4
-// match the parent LinearEuler2D kernel; auxiliary variables 5..8
+// Interior-flux kernel (PML variant). Acoustic variables 0..3
+// match the parent LinearEuler2D kernel; auxiliary variables 4..6
 // have zero flux in both directions.
 // ============================================================
 __global__ void fluxmethod_LinearEuler2D_PML_kernel(real *solution, real *flux, real rho0, int ndof, int nvar){
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
-    real u = solution[idof +     ndof];
-    real v = solution[idof + 2*ndof];
-    real p = solution[idof + 3*ndof];
-    real c = solution[idof + 4*ndof];
+    real u = solution[idof];
+    real v = solution[idof +     ndof];
+    real p = solution[idof + 2*ndof];
+    real c = solution[idof + 3*ndof];
 
-    flux[idof + ndof*(0 + nvar*0)] = rho0*u;   // rho, x-flux
-    flux[idof + ndof*(0 + nvar*1)] = rho0*v;   // rho, y-flux
+    flux[idof + ndof*(0 + nvar*0)] = p/rho0;   // u, x-flux
+    flux[idof + ndof*(0 + nvar*1)] = 0.0;      // u, y-flux
 
-    flux[idof + ndof*(1 + nvar*0)] = p/rho0;   // u, x-flux
-    flux[idof + ndof*(1 + nvar*1)] = 0.0;      // u, y-flux
+    flux[idof + ndof*(1 + nvar*0)] = 0.0;      // v, x-flux
+    flux[idof + ndof*(1 + nvar*1)] = p/rho0;   // v, y-flux
 
-    flux[idof + ndof*(2 + nvar*0)] = 0.0;      // v, x-flux
-    flux[idof + ndof*(2 + nvar*1)] = p/rho0;   // v, y-flux
+    flux[idof + ndof*(2 + nvar*0)] = c*c*rho0*u; // p, x-flux
+    flux[idof + ndof*(2 + nvar*1)] = c*c*rho0*v; // p, y-flux
 
-    flux[idof + ndof*(3 + nvar*0)] = c*c*rho0*u; // p, x-flux
-    flux[idof + ndof*(3 + nvar*1)] = c*c*rho0*v; // p, y-flux
+    flux[idof + ndof*(3 + nvar*0)] = 0.0;      // c, x-flux
+    flux[idof + ndof*(3 + nvar*1)] = 0.0;      // c, y-flux
 
-    flux[idof + ndof*(4 + nvar*0)] = 0.0;      // c, x-flux
-    flux[idof + ndof*(4 + nvar*1)] = 0.0;      // c, y-flux
-
-    // PML auxiliary variables 5..8 (phi_rho, phi_u, phi_v, phi_p)
+    // PML auxiliary variables 4..6 (phi_u, phi_v, phi_p)
     // carry zero flux; they are evolved exclusively by the source.
-    for(int ivar = 5; ivar < 9; ivar++){
+    for(int ivar = 4; ivar < 7; ivar++){
       flux[idof + ndof*(ivar + nvar*0)] = 0.0;
       flux[idof + ndof*(ivar + nvar*1)] = 0.0;
     }
@@ -135,10 +132,10 @@ extern "C"
 // ============================================================
 // Source-term kernel (Hu 2001 unsplit PML, ADE form).
 //
-// For acoustic variables (0..3) the PML adds:
+// For acoustic variables (0..2) the PML adds:
 //   source = -(sigma_x + sigma_y) q - sigma_x sigma_y phi
-// For sound speed (4): source = 0 (held fixed in time).
-// For auxiliaries (5..8): source = q (so dphi/dt = q).
+// For sound speed (3): source = 0 (held fixed in time).
+// For auxiliaries (4..6): source = q (so dphi/dt = q).
 //
 // sigma_x and sigma_y are single-variable MappedScalar2D fields,
 // so their device storage is exactly ndof reals each (one value
@@ -150,28 +147,24 @@ __global__ void sourcemethod_LinearEuler2D_PML_kernel(real *source, real *soluti
   if( idof < ndof ){
     real sx = sigma_x[idof];
     real sy = sigma_y[idof];
-    real rho     = solution[idof +     0*ndof];
-    real u       = solution[idof +     1*ndof];
-    real v       = solution[idof +     2*ndof];
-    real p       = solution[idof +     3*ndof];
-    // solution[idof + 4*ndof] is c (sound speed); not used here.
-    real phi_rho = solution[idof +     5*ndof];
-    real phi_u   = solution[idof +     6*ndof];
-    real phi_v   = solution[idof +     7*ndof];
-    real phi_p   = solution[idof +     8*ndof];
+    real u       = solution[idof +     0*ndof];
+    real v       = solution[idof +     1*ndof];
+    real p       = solution[idof +     2*ndof];
+    // solution[idof + 3*ndof] is c (sound speed); not used here.
+    real phi_u   = solution[idof +     4*ndof];
+    real phi_v   = solution[idof +     5*ndof];
+    real phi_p   = solution[idof +     6*ndof];
 
     real sxy = sx + sy;
     real sxsy = sx * sy;
 
-    source[idof + 0*ndof] = -sxy*rho - sxsy*phi_rho;
-    source[idof + 1*ndof] = -sxy*u   - sxsy*phi_u;
-    source[idof + 2*ndof] = -sxy*v   - sxsy*phi_v;
-    source[idof + 3*ndof] = -sxy*p   - sxsy*phi_p;
-    source[idof + 4*ndof] = 0.0;
-    source[idof + 5*ndof] = rho;
-    source[idof + 6*ndof] = u;
-    source[idof + 7*ndof] = v;
-    source[idof + 8*ndof] = p;
+    source[idof + 0*ndof] = -sxy*u   - sxsy*phi_u;
+    source[idof + 1*ndof] = -sxy*v   - sxsy*phi_v;
+    source[idof + 2*ndof] = -sxy*p   - sxsy*phi_p;
+    source[idof + 3*ndof] = 0.0;
+    source[idof + 4*ndof] = u;
+    source[idof + 5*ndof] = v;
+    source[idof + 6*ndof] = p;
   }
 }
 
@@ -187,8 +180,8 @@ extern "C"
 
 // ============================================================
 // No-normal-flow BC (PML variant).
-// Variables 0..4 follow the parent LinearEuler2D no-normal-flow
-// behaviour; variables 5..8 (PML auxiliaries) are zeroed in
+// Variables 0..3 follow the parent LinearEuler2D no-normal-flow
+// behaviour; variables 4..6 (PML auxiliaries) are zeroed in
 // extBoundary for cleanliness (they have zero Riemann flux, so
 // their exterior state is mathematically irrelevant).
 // ============================================================
@@ -206,20 +199,18 @@ __global__ void hbc2d_nonormalflow_lineareuler2d_pml_kernel(
     uint32_t e1 = elements[n] - 1;
     uint32_t s1 = sides[n] - 1;
 
-    real u  = boundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)];
-    real v  = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)];
+    real u  = boundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)];
+    real v  = boundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)];
     real nx = nhat[VEB_2D_INDEX(i,s1,e1,0,0,N,nel,1)];
     real ny = nhat[VEB_2D_INDEX(i,s1,e1,0,1,N,nel,1)];
 
-    extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)]; // density
-    extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = (ny*ny-nx*nx)*u - 2.0*nx*ny*v;            // u
-    extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = (nx*nx-ny*ny)*v - 2.0*nx*ny*u;            // v
-    extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // pressure
-    extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)]; // c
-    extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = 0.0;                                     // phi_rho
-    extBoundary[SCB_2D_INDEX(i,s1,e1,6,N,nel)] = 0.0;                                     // phi_u
-    extBoundary[SCB_2D_INDEX(i,s1,e1,7,N,nel)] = 0.0;                                     // phi_v
-    extBoundary[SCB_2D_INDEX(i,s1,e1,8,N,nel)] = 0.0;                                     // phi_p
+    extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = (ny*ny-nx*nx)*u - 2.0*nx*ny*v;            // u
+    extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = (nx*nx-ny*ny)*v - 2.0*nx*ny*u;            // v
+    extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)]; // pressure
+    extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // c
+    extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = 0.0;                                     // phi_u
+    extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = 0.0;                                     // phi_v
+    extBoundary[SCB_2D_INDEX(i,s1,e1,6,N,nel)] = 0.0;                                     // phi_p
   }
 }
 
@@ -262,12 +253,10 @@ __global__ void hbc2d_radiation_lineareuler2d_pml_kernel(
     extBoundary[SCB_2D_INDEX(i,s1,e1,0,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,1,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,2,N,nel)] = 0.0;
-    extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = 0.0;
-    extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)]; // c preserved
+    extBoundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)] = boundary[SCB_2D_INDEX(i,s1,e1,3,N,nel)]; // c preserved
+    extBoundary[SCB_2D_INDEX(i,s1,e1,4,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,5,N,nel)] = 0.0;
     extBoundary[SCB_2D_INDEX(i,s1,e1,6,N,nel)] = 0.0;
-    extBoundary[SCB_2D_INDEX(i,s1,e1,7,N,nel)] = 0.0;
-    extBoundary[SCB_2D_INDEX(i,s1,e1,8,N,nel)] = 0.0;
   }
 }
 
