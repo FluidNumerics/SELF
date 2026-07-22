@@ -62,12 +62,13 @@ module SELF_Mesh_1D
 
 contains
 
-  subroutine Init_Mesh1D(this,nElem,nNodes,nBCs)
+  subroutine Init_Mesh1D(this,nElem,nNodes,nBCs,comm)
     implicit none
     class(Mesh1D),intent(out) :: this
     integer,intent(in) :: nElem
     integer,intent(in) :: nNodes
     integer,intent(in) :: nBCs
+    integer,intent(in),optional :: comm
 
     this%nGeo = 1
     this%nElem = nElem
@@ -84,7 +85,7 @@ contains
     allocate(this%BCType(1:4,1:nBCs))
 
     allocate(this%BCNames(1:nBCs))
-    call this%decomp%Init()
+    call this%decomp%Init(comm)
 
   endsubroutine Init_Mesh1D
 
@@ -106,11 +107,12 @@ contains
 
   endsubroutine Free_Mesh1D
 
-  subroutine UniformBlockMesh_Mesh1D(this,nElem,x)
+  subroutine UniformBlockMesh_Mesh1D(this,nElem,x,comm)
     implicit none
     class(Mesh1D),intent(out) :: this
     integer,intent(in) :: nElem
     real(prec),intent(in) :: x(1:2)
+    integer,intent(in),optional :: comm
     ! Local
     integer :: iel,ngeo
     integer :: nid,nNodes
@@ -124,7 +126,7 @@ contains
     ngeo = 1
 
     nNodes = nElem*(nGeo+1)
-    call this%Init(nElem,nNodes,2)
+    call this%Init(nElem,nNodes,2,comm)
     this%quadrature = GAUSS_LOBATTO
 
     ! Set the hopr_nodeCoords

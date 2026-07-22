@@ -207,4 +207,6 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"
                        "advection_diffusion_2d_rk3_pickup_mpi.f90"
                        "advection_diffusion_3d_rk3_mpi.f90"
-                       "advection_diffusion_3d_rk3_pickup_mpi.f90" )
+                       "advection_diffusion_3d_rk3_pickup_mpi.f90"
+                       "structuredmesh_external_comm_2d.f90"
+                       "structuredmesh_external_comm_3d.f90" )

@@ -37,6 +37,7 @@ module SELF_DomainDecomposition_t
   type DomainDecomposition_t
     logical :: mpiEnabled = .false.
     logical :: initialized = .false.
+    logical :: ownsMpi = .false. ! true when SELF called mpi_init and is responsible for MPI_Finalize
     integer :: mpiComm
     integer :: mpiPrec
     integer :: rankId
@@ -63,11 +64,13 @@ module SELF_DomainDecomposition_t
 
 contains
 
-  subroutine Init_DomainDecomposition_t(this)
+  subroutine Init_DomainDecomposition_t(this,comm)
     implicit none
     class(DomainDecomposition_t),intent(inout) :: this
+    integer,intent(in),optional :: comm
     ! Local
     integer       :: ierror
+    logical       :: mpiIsInitialized
 
     this%mpiComm = 0
     this%mpiPrec = prec
@@ -75,10 +78,26 @@ contains
     this%nRanks = 1
     this%nElem = 0
     this%mpiEnabled = .false.
+    this%ownsMpi = .false.
 
-    this%mpiComm = MPI_COMM_WORLD
-    print*,__FILE__," : Initializing MPI"
-    call mpi_init(ierror)
+    call MPI_Initialized(mpiIsInitialized,ierror)
+
+    if(present(comm)) then
+      ! The caller (e.g. mpi4py) owns the MPI lifecycle and provides the communicator.
+      if(.not. mpiIsInitialized) then
+        error stop __FILE__//" : A communicator was provided but MPI is not initialized."// &
+          " Initialize MPI (e.g. via mpi4py or MPI_Init) before creating a mesh with an external communicator."
+      endif
+      this%mpiComm = comm
+    else
+      this%mpiComm = MPI_COMM_WORLD
+      if(.not. mpiIsInitialized) then
+        print*,__FILE__," : Initializing MPI"
+        call mpi_init(ierror)
+        this%ownsMpi = .true.
+      endif
+    endif
+
     call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
     call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
     print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
@@ -99,8 +118,6 @@ contains
 
     this%initialized = .true.
 
-    this%initialized = .true.
-
   endsubroutine Init_DomainDecomposition_t
 
   subroutine Free_DomainDecomposition_t(this)
@@ -108,6 +125,7 @@ contains
     class(DomainDecomposition_t),intent(inout) :: this
     ! Local
     integer :: ierror
+    logical :: mpiIsFinalized
 
     if(associated(this%offSetElem)) then
       deallocate(this%offSetElem)
@@ -119,10 +137,12 @@ contains
     if(allocated(this%requests)) deallocate(this%requests)
     if(allocated(this%stats)) deallocate(this%stats)
 
-    !if(this%mpiEnabled) then
-    print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
-    call MPI_FINALIZE(ierror)
-    !endif
+    call MPI_Finalized(mpiIsFinalized,ierror)
+    if(this%ownsMpi .and. .not. mpiIsFinalized) then
+      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
+      call MPI_FINALIZE(ierror)
+    endif
+    this%ownsMpi = .false.
 
   endsubroutine Free_DomainDecomposition_t
 

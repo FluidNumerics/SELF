@@ -366,7 +366,7 @@ contains
   endfunction gid2eid
 
   subroutine UniformStructuredMesh_Mesh3D_t(this,nxPerTile,nyPerTile,nzPerTile, &
-                                            nTileX,nTileY,nTileZ,dx,dy,dz,bcids)
+                                            nTileX,nTileY,nTileZ,dx,dy,dz,bcids,comm)
   !!
   !! Create a structured mesh and store it in SELF's unstructured mesh format.
   !! The mesh is created in tiles of size (tnx,tny,tnz). Tiling is used to determine
@@ -385,7 +385,8 @@ contains
   !!    - dy : Element width in the y-direction
   !!    - dz : Element width in the z-direction
   !!    - bcids(1:6) : Boundary condition flags for the south, east, north, and west sides of the domain
-  !!    - enableDomainDecomposition : Boolean to determine if domain decomposition is used.
+  !!    - comm (optional) : Externally managed MPI communicator (Fortran integer handle). When
+  !!      provided, the caller owns MPI initialization/finalization.
   !!
   !!  Output
   !!    - this : mesh2d_t object with vertices, faces, and element information
@@ -408,6 +409,7 @@ contains
     real(prec),intent(in) :: dy
     real(prec),intent(in) :: dz
     integer,intent(in) :: bcids(1:6)
+    integer,intent(in),optional :: comm
     ! Local
     integer :: nX,nY,nZ,nGeo,nBCs
     integer :: nGlobalElem
@@ -425,7 +427,7 @@ contains
     integer :: e1,e2,s1,s2
     integer :: nfaces
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     nX = nTileX*nxPerTile
     nY = nTileY*nyPerTile
@@ -716,7 +718,7 @@ contains
   endsubroutine UniformStructuredMesh_Mesh3D_t
 
   subroutine UniformPeriodicMesh_Mesh3D_t(this,nxPerTile,nyPerTile,nzPerTile, &
-                                          nTileX,nTileY,nTileZ,dx,dy,dz)
+                                          nTileX,nTileY,nTileZ,dx,dy,dz,comm)
   !!
   !! Create a fully triply-periodic structured hexahedral mesh and store it in
   !! SELF's unstructured mesh format. Element geometry and ordering are identical
@@ -766,6 +768,7 @@ contains
     real(prec),intent(in) :: dx
     real(prec),intent(in) :: dy
     real(prec),intent(in) :: dz
+    integer,intent(in),optional :: comm
     ! Local
     integer :: nX,nY,nZ,nGeo,nBCs
     integer :: nGlobalElem
@@ -784,7 +787,7 @@ contains
     integer :: e1,e2
     integer :: gx,gy,gz,gxm,gxp,gym,gyp,gzm,gzp
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     nX = nTileX*nxPerTile
     nY = nTileY*nyPerTile
@@ -933,11 +936,12 @@ contains
 
   endsubroutine UniformPeriodicMesh_Mesh3D_t
 
-  subroutine Read_HOPr_Mesh3D_t(this,meshFile)
+  subroutine Read_HOPr_Mesh3D_t(this,meshFile,comm)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     implicit none
     class(Mesh3D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
+    integer,intent(in),optional :: comm
     ! Local
     integer(HID_T) :: fileId
     integer(HID_T) :: offset(1:2),gOffset(1)
@@ -958,7 +962,7 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     if(this%decomp%mpiEnabled) then
       call Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,this%decomp%mpiComm)
