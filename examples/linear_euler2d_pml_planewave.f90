@@ -41,7 +41,6 @@ contains
   subroutine setInitialCondition(this)
     !! Right-going acoustic wave packet:
     !!   p(x,y,0) = amp * exp(-((x-x0)^2 + (y-y0)^2)/L^2)
-    !!   rho      = p/c^2
     !!   u        = p/(rho0*c)
     !!   v        = 0
     !! consistent with a planewave travelling in +x at sound speed c.
@@ -49,7 +48,7 @@ contains
     class(lineareuler2d_pml_planewave),intent(inout) :: this
     ! Local
     integer :: i,j,iel
-    real(prec) :: x,y,r2,p_loc,rho_loc,u_loc
+    real(prec) :: x,y,r2,p_loc,u_loc
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
                   iel=1:this%mesh%nElem)
@@ -57,16 +56,14 @@ contains
       y = this%geometry%x%interior(i,j,iel,1,2)
       r2 = (x-this%x0)**2+(y-this%y0)**2
       p_loc = this%amp*exp(-r2/(this%L*this%L))
-      rho_loc = p_loc/(this%c*this%c)
       u_loc = p_loc/(this%rho0*this%c)
 
-      this%solution%interior(i,j,iel,1) = rho_loc
-      this%solution%interior(i,j,iel,2) = u_loc
-      this%solution%interior(i,j,iel,3) = 0.0_prec
-      this%solution%interior(i,j,iel,4) = p_loc
-      this%solution%interior(i,j,iel,5) = this%c
+      this%solution%interior(i,j,iel,1) = u_loc
+      this%solution%interior(i,j,iel,2) = 0.0_prec
+      this%solution%interior(i,j,iel,3) = p_loc
+      this%solution%interior(i,j,iel,4) = this%c
       ! PML auxiliaries start at zero
-      this%solution%interior(i,j,iel,6:9) = 0.0_prec
+      this%solution%interior(i,j,iel,5:7) = 0.0_prec
     enddo
 
     call this%solution%UpdateDevice()

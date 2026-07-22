@@ -16,7 +16,6 @@ where
 $$
     \vec{s} = 
     \begin{pmatrix}
-    \rho \\ 
     u \\ 
     v \\ 
     p
@@ -28,7 +27,6 @@ and
 $$
     \overleftrightarrow{f} = 
     \begin{pmatrix}
-    \rho_0(u \hat{x} + v \hat{y}) \\
     p \hat{x} \\
     p \hat{y} \\
     \rho_0c^2(u \hat{x} + v \hat{y})
@@ -43,10 +41,11 @@ $$
 
 The variables are defined as follows
 
-* $\rho$ is a density anomaly referenced to the density $\rho_0$
 * $u$ and $v$ are the $x$ and $y$ components of the fluid velocity (respectively)
 * $p$ is the pressure
 * $c$ is the (constant) speed of sound. 
+
+The density anomaly is not carried as a solution variable; when needed as a diagnostic it can be recovered pointwise as $\rho = p/c^2$.
 
 ### Model Domain
 The physical domain is defined by $\vec{x} \in [0, 1]\times[0,1]$. We use the `StructuredMesh` routine to create a domain with 20 × 20 elements that are dimensioned 0.05 × 0.05 . All model boundaries are all tagged with the `SELF_BC_NONORMALFLOW` flag to implement no-normal-flow boundary conditions.
@@ -60,13 +59,11 @@ The initial condition is set using
 
 $$
     \begin{pmatrix}
-    ρ \\ 
     u \\ 
     v \\ 
     P
     \end{pmatrix} = 
     \begin{pmatrix}
-    \frac{1}{c^2} \\
     0 \\ 
     0 \\ 
     1

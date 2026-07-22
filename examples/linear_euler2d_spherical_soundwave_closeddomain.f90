@@ -74,8 +74,9 @@ program LinearEuler_Example
   modelobj%tecplot_enabled = .false. ! Disables tecplot output
   modelobj%rho0 = rho0 ! optional, set the reference density
 
-  ! Set the initial condition. The sound speed `c` is now carried as a
-  ! solution variable, so it is passed in here and written into solution(...,5).
+  ! Set the initial condition. The sound speed `c` is carried as a
+  ! solution variable, so it is passed in here and written into solution(...,4).
+  ! `rhoprime` sets the pressure-pulse amplitude through p = rhoprime*c^2.
   call modelobj%SphericalSoundWave(rhoprime,Lr,x0,y0,c)
 
   call modelobj%WriteModel()
