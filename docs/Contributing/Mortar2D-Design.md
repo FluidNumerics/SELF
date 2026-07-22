@@ -1,6 +1,9 @@
 # Design Assessment: Mortar (Nonconforming) Interfaces for 2D Models
 
-**Status:** Proposal / scoping document — no implementation yet.
+**Status:** Implemented (v1) — see the user guide page
+[Nonconforming (Mortar) Interfaces](../Models/nonconforming-mortar-interfaces.md).
+This document is retained as the design rationale; the section on HOPR mortar-mesh
+reading and quadtree AMR generation remains future work.
 **Scope:** 2D quadrilateral meshes, 2:1 h-nonconforming interfaces ("h-mortars"),
 CPU and GPU backends, MPI-parallel. p-mortars (mixed polynomial degree) are
 noted as a future extension only.

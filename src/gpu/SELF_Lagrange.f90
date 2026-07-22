@@ -43,6 +43,8 @@ module SELF_Lagrange
     type(c_ptr) :: dgMatrix_gpu
     type(c_ptr) :: dSplitMatrix_gpu
     type(c_ptr) :: bMatrix_gpu
+    type(c_ptr) :: mortarR_gpu
+    type(c_ptr) :: mortarP_gpu
 
   contains
 
@@ -92,7 +94,9 @@ contains
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
              this%dSplitMatrix(1:N+1,1:N+1), &
-             this%bMatrix(1:N+1,1:2))
+             this%bMatrix(1:N+1,1:2), &
+             this%mortarR(1:N+1,1:N+1,1:2), &
+             this%mortarP(1:N+1,1:N+1,1:2))
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
@@ -147,12 +151,16 @@ contains
       enddo
     endblock
 
+    call this%CalculateMortarMatrices()
+
     call gpuCheck(hipMalloc(this%iMatrix_gpu,sizeof(this%iMatrix)))
     call gpuCheck(hipMalloc(this%dMatrix_gpu,sizeof(this%dMatrix)))
     call gpuCheck(hipMalloc(this%dgMatrix_gpu,sizeof(this%dgMatrix)))
     call gpuCheck(hipMalloc(this%dSplitMatrix_gpu,sizeof(this%dSplitMatrix)))
     call gpuCheck(hipMalloc(this%bMatrix_gpu,sizeof(this%bMatrix)))
     call gpuCheck(hipMalloc(this%qWeights_gpu,sizeof(this%qWeights)))
+    call gpuCheck(hipMalloc(this%mortarR_gpu,sizeof(this%mortarR)))
+    call gpuCheck(hipMalloc(this%mortarP_gpu,sizeof(this%mortarP)))
 
     call gpuCheck(hipMemcpy(this%iMatrix_gpu, &
                             c_loc(this%iMatrix), &
@@ -184,6 +192,16 @@ contains
                             sizeof(this%qWeights), &
                             hipMemcpyHostToDevice))
 
+    call gpuCheck(hipMemcpy(this%mortarR_gpu, &
+                            c_loc(this%mortarR), &
+                            sizeof(this%mortarR), &
+                            hipMemcpyHostToDevice))
+
+    call gpuCheck(hipMemcpy(this%mortarP_gpu, &
+                            c_loc(this%mortarP), &
+                            sizeof(this%mortarP), &
+                            hipMemcpyHostToDevice))
+
   endsubroutine Init_Lagrange
 
   subroutine Free_Lagrange(this)
@@ -200,6 +218,8 @@ contains
     deallocate(this%dMatrix)
     deallocate(this%dgMatrix)
     deallocate(this%bMatrix)
+    deallocate(this%mortarR)
+    deallocate(this%mortarP)
 
     call gpuCheck(hipFree(this%iMatrix_gpu))
     call gpuCheck(hipFree(this%dMatrix_gpu))
@@ -207,6 +227,8 @@ contains
     call gpuCheck(hipFree(this%dSplitMatrix_gpu))
     call gpuCheck(hipFree(this%bMatrix_gpu))
     call gpuCheck(hipFree(this%qWeights_gpu))
+    call gpuCheck(hipFree(this%mortarR_gpu))
+    call gpuCheck(hipFree(this%mortarP_gpu))
 
   endsubroutine Free_Lagrange
 

@@ -41,12 +41,23 @@ module SELF_MappedVector_2D_t
   type,extends(Vector2D),public :: MappedVector2D_t
     logical :: geometry_associated = .false.
     type(SEMQuad),pointer :: geometry => null()
+
+    ! Mortar exchange work array, allocated on first use for meshes with 2:1
+    ! nonconforming interfaces; same slot layout as MappedScalar2D_t%mortarBuff with a
+    ! trailing physical-direction index. MortarFluxCollect reuses slots 3 and 4 at
+    ! idir=1 to stage the small sides' boundaryNormal traces.
+    real(prec),allocatable,dimension(:,:,:,:,:) :: mortarBuff
+
   contains
 
     procedure,public :: AssociateGeometry => AssociateGeometry_MappedVector2D_t
     procedure,public :: DissociateGeometry => DissociateGeometry_MappedVector2D_t
 
     procedure,public :: SideExchange => SideExchange_MappedVector2D_t
+    procedure,public :: MortarExchange => MortarExchange_MappedVector2D_t
+    procedure,public :: MortarFluxCollect => MortarFluxCollect_MappedVector2D_t
+    procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedVector2D_t
+    procedure,private :: MPIMortarFluxAsync => MPIMortarFluxAsync_MappedVector2D_t
 
     generic,public :: MappedDivergence => MappedDivergence_MappedVector2D_t
     procedure,private :: MappedDivergence_MappedVector2D_t
@@ -292,6 +303,391 @@ contains
     endif
 
   endsubroutine SideExchange_MappedVector2D_t
+
+  subroutine MPIMortarExchangeAsync_MappedVector2D_t(this,mesh)
+    !! Vector analogue of the scalar mortar exchange message posting; each physical
+    !! direction of each variable is exchanged as its own message.
+    implicit none
+    class(MappedVector2D_t),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: m,k,ivar,idir
+    integer :: eB,sB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do m = 1,mesh%nMortars
+
+          eB = mesh%mortarInfo(1,m)
+          sB = mesh%mortarInfo(2,m)
+          rB = mesh%decomp%elemToRank(eB)
+
+          do k = 1,2
+
+            eS = mesh%mortarInfo(2*k+1,m)
+            sS = mesh%mortarInfo(2*k+2,m)/10
+            rS = mesh%decomp%elemToRank(eS)
+            globalSideId = mesh%mortarInfo(6+k,m)
+            tag = globalSideId+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
+
+            if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(this%mortarBuff(:,2+k,m,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(this%boundary(:,sB,eB-offset,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(this%mortarBuff(:,k,m,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(this%boundary(:,sS,eS-offset,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarExchangeAsync_MappedVector2D_t
+
+  subroutine MortarExchange_MappedVector2D_t(this,mesh)
+    !! Fills the extBoundary attribute on all sides participating in a 2:1
+    !! nonconforming (mortar) interface; vector analogue of the scalar MortarExchange
+    !! (see MappedScalar2D_t for the algorithm description).
+    implicit none
+    class(MappedVector2D_t),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: m,k,ivar,idir,i,ii
+    integer :: eB,sB,eS,sS,flip
+    integer :: rankId,offset,N
+    integer,pointer :: elemtorank(:)
+    real(prec) :: fm
+    real(prec) :: extBuff(1:this%interp%N+1)
+
+    ! See https://github.com/FluidNumerics/SELF/issues/54 for the reason behind
+    ! this pointer alias
+    elemtorank => mesh%decomp%elemToRank(:)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
+    N = this%interp%N
+
+    if(.not. allocated(this%mortarBuff)) then
+      allocate(this%mortarBuff(1:N+1,1:4,1:mesh%nMortars,1:this%nvar,1:2))
+      this%mortarBuff = 0.0_prec
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarExchangeAsync(mesh)
+    endif
+
+    ! Stage rank-local traces in the big side's edge orientation
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar,idir=1:2)
+
+      eB = mesh%mortarInfo(1,m)
+      if(elemtorank(eB) == rankId) then
+        sB = mesh%mortarInfo(2,m)
+        do i = 1,N+1
+          this%mortarBuff(i,1,m,ivar,idir) = this%boundary(i,sB,eB-offset,ivar,idir)
+          this%mortarBuff(i,2,m,ivar,idir) = this%boundary(i,sB,eB-offset,ivar,idir)
+        enddo
+      endif
+
+      do k = 1,2
+        eS = mesh%mortarInfo(2*k+1,m)
+        if(elemtorank(eS) == rankId) then
+          sS = mesh%mortarInfo(2*k+2,m)/10
+          flip = mesh%mortarInfo(2*k+2,m)-10*sS
+          if(flip == 0) then
+            do i = 1,N+1
+              this%mortarBuff(i,2+k,m,ivar,idir) = this%boundary(i,sS,eS-offset,ivar,idir)
+            enddo
+          else
+            do i = 1,N+1
+              this%mortarBuff(i,2+k,m,ivar,idir) = this%boundary(N+2-i,sS,eS-offset,ivar,idir)
+            enddo
+          endif
+        endif
+      enddo
+
+    enddo
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+
+      ! Reorient small-side traces received over MPI into the big side's orientation
+      do idir = 1,2
+        do ivar = 1,this%nvar
+          do m = 1,mesh%nMortars
+            eB = mesh%mortarInfo(1,m)
+            if(elemtorank(eB) == rankId) then
+              do k = 1,2
+                eS = mesh%mortarInfo(2*k+1,m)
+                sS = mesh%mortarInfo(2*k+2,m)/10
+                flip = mesh%mortarInfo(2*k+2,m)-10*sS
+                if(elemtorank(eS) /= rankId .and. flip == 1) then
+                  do i = 1,N+1
+                    extBuff(i) = this%mortarBuff(N+2-i,2+k,m,ivar,idir)
+                  enddo
+                  do i = 1,N+1
+                    this%mortarBuff(i,2+k,m,ivar,idir) = extBuff(i)
+                  enddo
+                endif
+              enddo
+            endif
+          enddo
+        enddo
+      enddo
+    endif
+
+    ! Compute external states :
+    !  small sides get the restricted big-side trace (exact),
+    !  the big side gets the L2 projection of the small-side traces
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar,idir=1:2)
+
+      do k = 1,2
+        eS = mesh%mortarInfo(2*k+1,m)
+        if(elemtorank(eS) == rankId) then
+          sS = mesh%mortarInfo(2*k+2,m)/10
+          flip = mesh%mortarInfo(2*k+2,m)-10*sS
+          do i = 1,N+1
+            fm = 0.0_prec
+            do ii = 1,N+1
+              fm = fm+this%interp%mortarR(ii,i,k)*this%mortarBuff(ii,k,m,ivar,idir)
+            enddo
+            if(flip == 0) then
+              this%extBoundary(i,sS,eS-offset,ivar,idir) = fm
+            else
+              this%extBoundary(N+2-i,sS,eS-offset,ivar,idir) = fm
+            endif
+          enddo
+        endif
+      enddo
+
+      eB = mesh%mortarInfo(1,m)
+      if(elemtorank(eB) == rankId) then
+        sB = mesh%mortarInfo(2,m)
+        do i = 1,N+1
+          fm = 0.0_prec
+          do k = 1,2
+            do ii = 1,N+1
+              fm = fm+this%interp%mortarP(ii,i,k)*this%mortarBuff(ii,2+k,m,ivar,idir)
+            enddo
+          enddo
+          this%extBoundary(i,sB,eB-offset,ivar,idir) = fm
+        enddo
+      endif
+
+    enddo
+
+  endsubroutine MortarExchange_MappedVector2D_t
+
+  subroutine MPIMortarFluxAsync_MappedVector2D_t(this,mesh)
+    !! Posts the one-directional messages for MortarFluxCollect : each remote small
+    !! side sends its boundaryNormal trace to the big side's rank.
+    implicit none
+    class(MappedVector2D_t),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: m,k,ivar
+    integer :: eB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    do ivar = 1,this%nvar
+      do m = 1,mesh%nMortars
+
+        eB = mesh%mortarInfo(1,m)
+        rB = mesh%decomp%elemToRank(eB)
+
+        do k = 1,2
+
+          eS = mesh%mortarInfo(2*k+1,m)
+          sS = mesh%mortarInfo(2*k+2,m)/10
+          rS = mesh%decomp%elemToRank(eS)
+          globalSideId = mesh%mortarInfo(6+k,m)
+          tag = globalSideId+mesh%nUniqueSides*(ivar-1)
+
+          if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(this%mortarBuff(:,2+k,m,ivar,1), &
+                           (this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_ISEND(this%boundaryNormal(:,sS,eS-offset,ivar), &
+                           (this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          endif
+
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarFluxAsync_MappedVector2D_t
+
+  subroutine MortarFluxCollect_MappedVector2D_t(this,mesh)
+    !! Replaces the big-side boundaryNormal trace on each mortar interface with the L2
+    !! projection of the two small sides' boundaryNormal traces.
+    !!
+    !! boundaryNormal holds the Riemann-solved surface-flux integrand f* . nHat * nScale
+    !! (see BoundaryFlux in the DG models). Because the small sides' nScale is half the
+    !! big side's and the sub-edge coordinate Jacobian is 1/2, the projected big-side
+    !! integrand is -2 * sum_k P_k g_k, where g_k are the small-side integrands and the
+    !! sign accounts for the opposing outward normals. With this choice, the discrete
+    !! surface integral of the big side equals minus the sum of the small sides'
+    !! discrete surface integrals to roundoff, so the mortar interface is discretely
+    !! conservative. Must be called after the model's BoundaryFlux and before the flux
+    !! divergence is computed.
+    implicit none
+    class(MappedVector2D_t),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: m,k,ivar,i,ii
+    integer :: eB,sB,eS,sS,flip
+    integer :: rankId,offset,N
+    integer,pointer :: elemtorank(:)
+    real(prec) :: fm
+    real(prec) :: extBuff(1:this%interp%N+1)
+
+    ! See https://github.com/FluidNumerics/SELF/issues/54 for the reason behind
+    ! this pointer alias
+    elemtorank => mesh%decomp%elemToRank(:)
+    rankId = mesh%decomp%rankId
+    offset = mesh%decomp%offsetElem(rankId+1)
+    N = this%interp%N
+
+    if(.not. allocated(this%mortarBuff)) then
+      allocate(this%mortarBuff(1:N+1,1:4,1:mesh%nMortars,1:this%nvar,1:2))
+      this%mortarBuff = 0.0_prec
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarFluxAsync(mesh)
+    endif
+
+    ! Stage rank-local small-side integrands in the big side's edge orientation
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar)
+
+      do k = 1,2
+        eS = mesh%mortarInfo(2*k+1,m)
+        if(elemtorank(eS) == rankId) then
+          sS = mesh%mortarInfo(2*k+2,m)/10
+          flip = mesh%mortarInfo(2*k+2,m)-10*sS
+          if(flip == 0) then
+            do i = 1,N+1
+              this%mortarBuff(i,2+k,m,ivar,1) = this%boundaryNormal(i,sS,eS-offset,ivar)
+            enddo
+          else
+            do i = 1,N+1
+              this%mortarBuff(i,2+k,m,ivar,1) = this%boundaryNormal(N+2-i,sS,eS-offset,ivar)
+            enddo
+          endif
+        endif
+      enddo
+
+    enddo
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+
+      ! Reorient small-side integrands received over MPI into the big side's orientation
+      do ivar = 1,this%nvar
+        do m = 1,mesh%nMortars
+          eB = mesh%mortarInfo(1,m)
+          if(elemtorank(eB) == rankId) then
+            do k = 1,2
+              eS = mesh%mortarInfo(2*k+1,m)
+              sS = mesh%mortarInfo(2*k+2,m)/10
+              flip = mesh%mortarInfo(2*k+2,m)-10*sS
+              if(elemtorank(eS) /= rankId .and. flip == 1) then
+                do i = 1,N+1
+                  extBuff(i) = this%mortarBuff(N+2-i,2+k,m,ivar,1)
+                enddo
+                do i = 1,N+1
+                  this%mortarBuff(i,2+k,m,ivar,1) = extBuff(i)
+                enddo
+              endif
+            enddo
+          endif
+        enddo
+      enddo
+    endif
+
+    ! Project the small-side integrands onto the big side's trace space. The factor of
+    ! two converts the solution-space projection (mortarP carries the 1/2 sub-edge
+    ! Jacobian) into the integrand-space projection; the sign accounts for the opposing
+    ! outward normals.
+    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar)
+
+      eB = mesh%mortarInfo(1,m)
+      if(elemtorank(eB) == rankId) then
+        sB = mesh%mortarInfo(2,m)
+        do i = 1,N+1
+          fm = 0.0_prec
+          do k = 1,2
+            do ii = 1,N+1
+              fm = fm+this%interp%mortarP(ii,i,k)*this%mortarBuff(ii,2+k,m,ivar,1)
+            enddo
+          enddo
+          this%boundaryNormal(i,sB,eB-offset,ivar) = -2.0_prec*fm
+        enddo
+      endif
+
+    enddo
+
+  endsubroutine MortarFluxCollect_MappedVector2D_t
 
   subroutine MappedDivergence_MappedVector2D_t(this,df)
     ! Strong Form Operator

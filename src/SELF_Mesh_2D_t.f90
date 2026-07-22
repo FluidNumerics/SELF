@@ -108,6 +108,26 @@ module SELF_Mesh_2D_t
     integer,pointer,dimension(:,:) :: CGNSSideMap
     integer,pointer,dimension(:,:) :: BCType
     character(LEN=255),allocatable :: BCNames(:)
+    ! 2:1 nonconforming (mortar) interface bookkeeping.
+    !
+    ! A mortar interface joins one "big" element edge to the two half-edges of its 2:1
+    ! refined neighbors ("small" sides). Sides that participate in a mortar carry
+    ! sideInfo(3) = 0 (no conforming neighbor) and sideInfo(5) = 0 (no boundary condition),
+    ! so all conforming-side machinery (SideExchange, RecalculateFlip, boundary-condition
+    ! mapping) skips them; sideInfo(1) is set to the mortar index for reference.
+    !
+    ! mortarInfo(1:8,1:nMortars) is replicated on all ranks (element ids are global):
+    !   1 - big element id ; 2 - big local side id
+    !   3 - small element id on the sub-edge covering big-edge coordinate [-1,0]
+    !   4 - 10*(small local side) + flip for that sub-edge
+    !   5 - small element id on the sub-edge covering big-edge coordinate [0,1]
+    !   6 - 10*(small local side) + flip for that sub-edge
+    !   7 - global side id of sub-edge 1 (used as an MPI message tag)
+    !   8 - global side id of sub-edge 2 (used as an MPI message tag)
+    ! flip = 0 when the small side's edge coordinate runs in the same direction as the big
+    ! side's edge coordinate, flip = 1 when reversed (same convention as sideInfo(4)).
+    integer :: nMortars = 0
+    integer,pointer,dimension(:,:) :: mortarInfo => null()
     ! Material tracking: every element has an integer material id
     ! indexing into materialNames. Single-material readers (HOPr,
     ! structured, ISM, ISM-v2) leave nMaterials = 1 with the name
@@ -124,6 +144,7 @@ module SELF_Mesh_2D_t
 
     generic,public :: StructuredMesh => UniformStructuredMesh_Mesh2D_t
     procedure,private :: UniformStructuredMesh_Mesh2D_t
+    procedure,public :: SimpleMortarMesh => SimpleMortarMesh_Mesh2D_t
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D_t
 
     procedure,public :: Read_HOPr => Read_HOPr_Mesh2D_t
@@ -211,6 +232,9 @@ contains
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
+    if(associated(this%mortarInfo)) deallocate(this%mortarInfo)
+    this%mortarInfo => null()
+    this%nMortars = 0
     call this%decomp%Free()
 
   endsubroutine Free_Mesh2D_t
@@ -476,6 +500,151 @@ contains
     call this%UpdateDevice()
 
   endsubroutine UniformStructuredMesh_Mesh2D_t
+
+  subroutine SimpleMortarMesh_Mesh2D_t(this,dx,bcids)
+  !!
+  !! Create the smallest 2:1 nonconforming (mortar) mesh: one "big" element of size
+  !! 2*dx x 2*dx whose east edge is shared with the west edges of two "small" dx x dx
+  !! elements. The mesh is conforming everywhere except at the single mortar interface.
+  !!
+  !!      y = 2*dx  _______________ ______
+  !!               |               |  e3  |
+  !!               |               |______|
+  !!               |      e1       |  e2  |
+  !!               |_______________|______|
+  !!             x = 0           2*dx    3*dx
+  !!
+  !!  Input
+  !!    - this : Fresh/empty mesh2d_t object
+  !!    - dx : Edge length of the small elements; the big element has edge length 2*dx
+  !!    - bcids(1:4) : Boundary condition flags for the south, east, north, and west
+  !!                   sides of the domain
+  !!
+  !!  Output
+  !!    - this : mesh2d_t object with three elements and one mortar interface
+  !!
+  !! This mesh is primarily intended for testing and demonstration of the mortar
+  !! interface support. Element geometry is bilinear (nGeo=1). With domain
+  !! decomposition on two or more ranks, the mortar interface straddles the rank
+  !! boundary (elements 1,2 | 3 for two ranks).
+  !!
+    implicit none
+    class(Mesh2D_t),intent(out) :: this
+    real(prec),intent(in) :: dx
+    integer,intent(in) :: bcids(1:4)
+    ! Local
+    integer,parameter :: nGlobalElem = 3
+    integer,parameter :: nUniqueSides = 10
+    real(prec) :: nodeCoords(1:2,1:2,1:2,1:nGlobalElem)
+    integer :: globalNodeIDs(1:2,1:2,1:nGlobalElem)
+    integer :: sideInfo(1:5,1:4,1:nGlobalElem)
+    integer :: e1,e2
+    integer :: nLocalElems
+    integer :: nGeo,nBCs
+
+    call this%decomp%init()
+
+    nGeo = 1 ! Bilinear element geometry
+    nBCs = 4
+
+    ! Element 1 (big) : [0,2dx] x [0,2dx]
+    nodeCoords(1:2,1,1,1) = [0.0_prec,0.0_prec]
+    nodeCoords(1:2,2,1,1) = [2.0_prec*dx,0.0_prec]
+    nodeCoords(1:2,1,2,1) = [0.0_prec,2.0_prec*dx]
+    nodeCoords(1:2,2,2,1) = [2.0_prec*dx,2.0_prec*dx]
+    globalNodeIDs(1,1,1) = 1
+    globalNodeIDs(2,1,1) = 2
+    globalNodeIDs(1,2,1) = 6
+    globalNodeIDs(2,2,1) = 7
+
+    ! Element 2 (small, lower) : [2dx,3dx] x [0,dx]
+    nodeCoords(1:2,1,1,2) = [2.0_prec*dx,0.0_prec]
+    nodeCoords(1:2,2,1,2) = [3.0_prec*dx,0.0_prec]
+    nodeCoords(1:2,1,2,2) = [2.0_prec*dx,dx]
+    nodeCoords(1:2,2,2,2) = [3.0_prec*dx,dx]
+    globalNodeIDs(1,1,2) = 2
+    globalNodeIDs(2,1,2) = 3
+    globalNodeIDs(1,2,2) = 4
+    globalNodeIDs(2,2,2) = 5
+
+    ! Element 3 (small, upper) : [2dx,3dx] x [dx,2dx]
+    nodeCoords(1:2,1,1,3) = [2.0_prec*dx,dx]
+    nodeCoords(1:2,2,1,3) = [3.0_prec*dx,dx]
+    nodeCoords(1:2,1,2,3) = [2.0_prec*dx,2.0_prec*dx]
+    nodeCoords(1:2,2,2,3) = [3.0_prec*dx,2.0_prec*dx]
+    globalNodeIDs(1,1,3) = 4
+    globalNodeIDs(2,1,3) = 5
+    globalNodeIDs(1,2,3) = 7
+    globalNodeIDs(2,2,3) = 8
+
+    ! Side connectivity. Global side ids:
+    !  1: e1-S, 2: mortar sub-edge 1 (e1-E lower / e2-W), 3: mortar sub-edge 2
+    !  (e1-E upper / e3-W), 4: e1-N, 5: e1-W, 6: e2-S, 7: e2-E, 8: e2-N/e3-S,
+    !  9: e3-E, 10: e3-N
+    sideInfo = 0
+
+    ! Element 1 (big)
+    sideInfo(2,1,1) = 1
+    sideInfo(5,1,1) = bcids(1) ! south -> domain south
+    sideInfo(1,2,1) = 1 ! east -> mortar 1, big side
+    sideInfo(2,2,1) = 2
+    sideInfo(2,3,1) = 4
+    sideInfo(5,3,1) = bcids(3) ! north -> domain north
+    sideInfo(2,4,1) = 5
+    sideInfo(5,4,1) = bcids(4) ! west -> domain west
+
+    ! Element 2 (small, lower)
+    sideInfo(2,1,2) = 6
+    sideInfo(5,1,2) = bcids(1) ! south -> domain south
+    sideInfo(2,2,2) = 7
+    sideInfo(5,2,2) = bcids(2) ! east -> domain east
+    sideInfo(2,3,2) = 8 ! north -> conforming interior side shared with element 3
+    sideInfo(3,3,2) = 3
+    sideInfo(4,3,2) = 10*1 ! neighbor's south side, flip 0
+    sideInfo(1,4,2) = 1 ! west -> mortar 1, small side on sub-edge 1
+    sideInfo(2,4,2) = 2
+
+    ! Element 3 (small, upper)
+    sideInfo(2,1,3) = 8 ! south -> conforming interior side shared with element 2
+    sideInfo(3,1,3) = 2
+    sideInfo(4,1,3) = 10*3 ! neighbor's north side, flip 0
+    sideInfo(2,2,3) = 9
+    sideInfo(5,2,3) = bcids(2) ! east -> domain east
+    sideInfo(2,3,3) = 10
+    sideInfo(5,3,3) = bcids(3) ! north -> domain north
+    sideInfo(1,4,3) = 1 ! west -> mortar 1, small side on sub-edge 2
+    sideInfo(2,4,3) = 3
+
+    ! Domain decomposition. The message count upper bound is oversized relative to
+    ! nUniqueSides to accommodate the per-variable (and per-direction) mortar and
+    ! conforming side messages on this small mesh.
+    call this%decomp%GenerateDecomposition(nGlobalElem,64*nUniqueSides)
+
+    e1 = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    e2 = this%decomp%offsetElem(this%decomp%rankId+2)
+    nLocalElems = e2-e1+1
+
+    call this%Init(nGeo,nLocalElems,nLocalElems*4,nLocalElems*4,nBCs)
+    this%nUniqueSides = nUniqueSides
+    this%quadrature = UNIFORM
+    this%BCType = 0
+    this%elemInfo = 0
+
+    this%nodeCoords(1:2,1:2,1:2,1:nLocalElems) = nodeCoords(1:2,1:2,1:2,e1:e2)
+    this%globalNodeIDs(1:2,1:2,1:nLocalElems) = globalNodeIDs(1:2,1:2,e1:e2)
+    this%sideInfo(1:5,1:4,1:nLocalElems) = sideInfo(1:5,1:4,e1:e2)
+
+    ! The mortar table is replicated on all ranks; element ids are global
+    this%nMortars = 1
+    allocate(this%mortarInfo(1:8,1:1))
+    this%mortarInfo(1:8,1) = [1,2, & ! big element, big local side (east)
+                              2,10*4, & ! sub-edge 1 : element 2, west side, flip 0
+                              3,10*4, & ! sub-edge 2 : element 3, west side, flip 0
+                              2,3] ! global side ids for the two sub-edges
+
+    call this%UpdateDevice()
+
+  endsubroutine SimpleMortarMesh_Mesh2D_t
 
   subroutine Read_HOPr_Mesh2D_t(this,meshFile)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6

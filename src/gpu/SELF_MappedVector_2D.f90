@@ -36,11 +36,19 @@ module SELF_MappedVector_2D
 
   type,extends(MappedVector2D_t),public :: MappedVector2D
 
+    type(c_ptr) :: mortarBuff_gpu = c_null_ptr ! mortar trace staging (lazy allocation)
+
   contains
+    procedure,public :: Free => Free_MappedVector2D
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
     procedure,public :: SideExchange => SideExchange_MappedVector2D
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
+
+    procedure,public :: MortarExchange => MortarExchange_MappedVector2D
+    procedure,public :: MortarFluxCollect => MortarFluxCollect_MappedVector2D
+    procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedVector2D
+    procedure,private :: MPIMortarFluxAsync => MPIMortarFluxAsync_MappedVector2D
 
     generic,public :: MappedDivergence => MappedDivergence_MappedVector2D
     procedure,private :: MappedDivergence_MappedVector2D
@@ -61,6 +69,18 @@ module SELF_MappedVector_2D
   endinterface
 
 contains
+
+  subroutine Free_MappedVector2D(this)
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
+    call Free_Vector2D(this)
+
+  endsubroutine Free_MappedVector2D
 
   subroutine SetInteriorFromEquation_MappedVector2D(this,geometry,time)
   !!  Sets the this % interior attribute using the eqn attribute,
@@ -184,6 +204,243 @@ contains
     endif
 
   endsubroutine SideExchange_MappedVector2D
+
+  subroutine MPIMortarExchangeAsync_MappedVector2D(this,mesh)
+    !! GPU-resident mortar message posting for vector data; messages are posted on
+    !! device memory (GPU-aware MPI), one per variable and physical direction.
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: m,k,ivar,idir
+    integer :: eB,sB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundary(:,:,:,:,:)
+    real(prec),pointer :: mortarBuff(:,:,:,:,:)
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+    call c_f_pointer(this%boundary_gpu,boundary,[this%interp%N+1,4,this%nelem,this%nvar,2])
+    call c_f_pointer(this%mortarBuff_gpu,mortarBuff, &
+                     [this%interp%N+1,4,mesh%nMortars,this%nvar,2])
+
+    do idir = 1,2
+      do ivar = 1,this%nvar
+        do m = 1,mesh%nMortars
+
+          eB = mesh%mortarInfo(1,m)
+          sB = mesh%mortarInfo(2,m)
+          rB = mesh%decomp%elemToRank(eB)
+
+          do k = 1,2
+
+            eS = mesh%mortarInfo(2*k+1,m)
+            sS = mesh%mortarInfo(2*k+2,m)/10
+            rS = mesh%decomp%elemToRank(eS)
+            globalSideId = mesh%mortarInfo(6+k,m)
+            tag = globalSideId+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
+
+            if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(mortarBuff(:,2+k,m,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(boundary(:,sB,eB-offset,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rS,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+              msgCount = msgCount+1
+              call MPI_IRECV(mortarBuff(:,k,m,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+              msgCount = msgCount+1
+              call MPI_ISEND(boundary(:,sS,eS-offset,ivar,idir), &
+                             (this%interp%N+1), &
+                             mesh%decomp%mpiPrec, &
+                             rB,tag, &
+                             mesh%decomp%mpiComm, &
+                             mesh%decomp%requests(msgCount),iError)
+
+            endif
+
+          enddo
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarExchangeAsync_MappedVector2D
+
+  subroutine MortarExchange_MappedVector2D(this,mesh)
+    !! GPU implementation of the vector mortar exchange; the kernels treat the
+    !! (variable, direction) pairs as 2*nvar independent trace lines.
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: offset
+    integer(c_size_t) :: buffSize
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(.not. c_associated(this%mortarBuff_gpu)) then
+      buffSize = int(this%interp%N+1,c_size_t)*4*mesh%nMortars*this%nvar*2*prec
+      call gpuCheck(hipMalloc(this%mortarBuff_gpu,buffSize))
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarExchangeAsync(mesh)
+    endif
+
+    call MortarGather_2D_gpu(this%mortarBuff_gpu,this%boundary_gpu, &
+                             mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankId,offset,this%interp%N,2*this%nvar, &
+                             mesh%nMortars,this%nelem)
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      call MortarFlip_2D_gpu(this%mortarBuff_gpu,mesh%mortarInfo_gpu, &
+                             mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                             this%interp%N,2*this%nvar,mesh%nMortars)
+    endif
+
+    call MortarScatter_2D_gpu(this%extBoundary_gpu,this%mortarBuff_gpu, &
+                              this%interp%mortarR_gpu,this%interp%mortarP_gpu, &
+                              mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                              mesh%decomp%rankId,offset,this%interp%N,2*this%nvar, &
+                              mesh%nMortars,this%nelem)
+
+  endsubroutine MortarExchange_MappedVector2D
+
+  subroutine MPIMortarFluxAsync_MappedVector2D(this,mesh)
+    !! One-directional messages for MortarFluxCollect on device memory : each remote
+    !! small side sends its boundaryNormal trace to the big side's rank.
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: m,k,ivar
+    integer :: eB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundaryNormal(:,:,:,:)
+    real(prec),pointer :: mortarBuff(:,:,:,:)
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+    call c_f_pointer(this%boundarynormal_gpu,boundaryNormal, &
+                     [this%interp%N+1,4,this%nelem,this%nvar])
+    call c_f_pointer(this%mortarBuff_gpu,mortarBuff, &
+                     [this%interp%N+1,4,mesh%nMortars,this%nvar])
+
+    do ivar = 1,this%nvar
+      do m = 1,mesh%nMortars
+
+        eB = mesh%mortarInfo(1,m)
+        rB = mesh%decomp%elemToRank(eB)
+
+        do k = 1,2
+
+          eS = mesh%mortarInfo(2*k+1,m)
+          sS = mesh%mortarInfo(2*k+2,m)/10
+          rS = mesh%decomp%elemToRank(eS)
+          globalSideId = mesh%mortarInfo(6+k,m)
+          tag = globalSideId+mesh%nUniqueSides*(ivar-1)
+
+          if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(mortarBuff(:,2+k,m,ivar), &
+                           (this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_ISEND(boundaryNormal(:,sS,eS-offset,ivar), &
+                           (this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          endif
+
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarFluxAsync_MappedVector2D
+
+  subroutine MortarFluxCollect_MappedVector2D(this,mesh)
+    !! GPU implementation of MortarFluxCollect (see the base class for the algorithm
+    !! and conservation statement). Stages the small sides' boundaryNormal traces in
+    !! the mortar buffer, then overwrites the big side's integrand on device.
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    ! Local
+    integer :: offset
+    integer(c_size_t) :: buffSize
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(.not. c_associated(this%mortarBuff_gpu)) then
+      buffSize = int(this%interp%N+1,c_size_t)*4*mesh%nMortars*this%nvar*2*prec
+      call gpuCheck(hipMalloc(this%mortarBuff_gpu,buffSize))
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarFluxAsync(mesh)
+    endif
+
+    ! Stage rank-local small-side integrands (the big-side slots are gathered too
+    ! but unused by the flux scatter)
+    call MortarGather_2D_gpu(this%mortarBuff_gpu,this%boundarynormal_gpu, &
+                             mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                             mesh%nMortars,this%nelem)
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      call MortarFlip_2D_gpu(this%mortarBuff_gpu,mesh%mortarInfo_gpu, &
+                             mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                             this%interp%N,this%nvar,mesh%nMortars)
+    endif
+
+    call MortarFluxScatter_2D_gpu(this%boundarynormal_gpu,this%mortarBuff_gpu, &
+                                  this%interp%mortarP_gpu, &
+                                  mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                                  mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                                  mesh%nMortars,this%nelem)
+
+  endsubroutine MortarFluxCollect_MappedVector2D
 
   subroutine MappedDivergence_MappedVector2D(this,df)
     implicit none

@@ -90,7 +90,9 @@ contains
              this%iMatrix(1:N+1,1:M+1), &
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
-             this%bMatrix(1:N+1,1:2))
+             this%bMatrix(1:N+1,1:2), &
+             this%mortarR(1:N+1,1:N+1,1:2), &
+             this%mortarP(1:N+1,1:N+1,1:2))
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
@@ -132,6 +134,8 @@ contains
     call this%CalculateDerivativeMatrix()
     this%bMatrix(1:N+1,1) = this%CalculateLagrangePolynomials(-1.0_prec)
     this%bMatrix(1:N+1,2) = this%CalculateLagrangePolynomials(1.0_prec)
+
+    call this%CalculateMortarMatrices()
 
     print*,"Lagrange malloc"
     call gpuCheck(hipMalloc(this%iMatrix_gpu,sizeof(this%iMatrix)))
@@ -188,6 +192,8 @@ contains
     deallocate(this%dMatrix)
     deallocate(this%dgMatrix)
     deallocate(this%bMatrix)
+    deallocate(this%mortarR)
+    deallocate(this%mortarP)
 
     call gpuCheck(hipFree(this%iMatrix_gpu))
     call gpuCheck(hipFree(this%dMatrix_gpu))

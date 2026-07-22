@@ -121,6 +121,33 @@ module SELF_Lagrange_t
     real(prec),pointer,contiguous,dimension(:,:) :: bMatrix
       !! The boundary interpolation matrix that is used to map a grid of nodal values at the control points to the element boundaries.
 
+    real(prec),pointer,contiguous,dimension(:,:,:) :: mortarR
+      !! Mortar restriction matrices for 2:1 nonconforming (mortar) interfaces.
+      !!
+      !! An element edge trace u(xi) = sum_i u_i l_i(xi) on [-1,1] ("big" side) is restricted to
+      !! the two half-edges ("small" sides) of its 2:1 neighbors. Sub-edge k=1 occupies
+      !! xi in [-1,0] and k=2 occupies xi in [0,1], with the sub-edge coordinate s in [-1,1]
+      !! related to the big-edge coordinate through xi_1(s) = (s-1)/2 and xi_2(s) = (s+1)/2.
+      !!
+      !! mortarR(ii,i,k) = l_ii( xi_k(s_i) ), where s_i are the control points; following the
+      !! SELF matrix convention, the restricted trace is u_k(i) = sum_ii mortarR(ii,i,k)*u(ii).
+      !! Restriction of a degree N polynomial is exact.
+
+    real(prec),pointer,contiguous,dimension(:,:,:) :: mortarP
+      !! Mortar L2-projection matrices, the adjoints of mortarR under the exact L2 inner
+      !! product on [-1,1]: given traces g_k(s) on the two sub-edges, the projected big-side
+      !! trace is u(i) = sum_k sum_ii mortarP(ii,i,k)*g_k(ii).
+      !!
+      !! The matrices are built as P_k = M^{-1} B_k with the exact (dense) 1-D mass matrix
+      !! M(m,i) = int l_m l_i dxi and B_k(m,j) = (1/2) int l_m(xi_k(s)) l_j(s) ds, evaluated
+      !! with an internal Gauss rule that is exact for the degree 2N integrands. Consequently
+      !!   sum_k matmul(P_k,R_k) = I   (a polynomial split across both sub-edges is recovered)
+      !!   sum_m w_m (P_k g)_m = (1/2) sum_j w_j g_k(j)   (discrete conservation)
+      !! for any control node type. mortarP carries the 1/2 sub-edge Jacobian appropriate for
+      !! projecting *solution* traces; when projecting surface-flux integrands (which carry the
+      !! small side's nScale = nScale_big/2), scale by 2 (see MortarFluxCollect in the 2-D
+      !! mapped data classes).
+
   contains
 
     procedure,public :: Init => Init_Lagrange_t
@@ -132,6 +159,7 @@ module SELF_Lagrange_t
     procedure,public :: CalculateInterpolationMatrix
     procedure,public :: CalculateDerivativeMatrix
     procedure,public :: CalculateLagrangePolynomials
+    procedure,public :: CalculateMortarMatrices
 
   endtype Lagrange_t
 
@@ -171,7 +199,9 @@ contains
              this%dMatrix(1:N+1,1:N+1), &
              this%dgMatrix(1:N+1,1:N+1), &
              this%dSplitMatrix(1:N+1,1:N+1), &
-             this%bMatrix(1:N+1,1:2))
+             this%bMatrix(1:N+1,1:2), &
+             this%mortarR(1:N+1,1:N+1,1:2), &
+             this%mortarP(1:N+1,1:N+1,1:2))
 
     if(controlNodeType == GAUSS .or. controlNodeType == GAUSS_LOBATTO) then
 
@@ -229,6 +259,8 @@ contains
       enddo
     endblock
 
+    call this%CalculateMortarMatrices()
+
   endsubroutine Init_Lagrange_t
 
   subroutine Free_Lagrange_t(this)
@@ -246,6 +278,8 @@ contains
     deallocate(this%dgMatrix)
     deallocate(this%dSplitMatrix)
     deallocate(this%bMatrix)
+    deallocate(this%mortarR)
+    deallocate(this%mortarP)
 
   endsubroutine Free_Lagrange_t
 
@@ -493,6 +527,170 @@ contains
     enddo
 
   endfunction CalculateLagrangePolynomials
+
+! ================================================================================================ !
+!
+! CalculateMortarMatrices
+!
+!   Builds the 2:1 mortar restriction (mortarR) and L2 projection (mortarP) matrices used at
+!   nonconforming element interfaces (see the type-bound attribute documentation above for the
+!   mathematical definitions and discrete identities).
+!
+!   The projection uses the exact 1-D mass matrix M(m,i) = int l_m l_i dxi and the mixed mass
+!   matrices B_k(m,j) = (1/2) int l_m(xi_k(s)) l_j(s) ds. All integrals are computed with an
+!   internal (N+2)-point Legendre-Gauss rule, which is exact for the degree 2N integrands, so
+!   the identities sum_k P_k R_k = I and the discrete conservation property hold to roundoff
+!   for any control node type. The linear systems M P_k = B_k are solved in float64 with
+!   partially-pivoted Gaussian elimination (the systems are (N+1)x(N+1)).
+!
+! ================================================================================================ !
+
+  subroutine CalculateMortarMatrices(this)
+    implicit none
+    class(Lagrange_t),intent(inout) :: this
+    ! Local
+    integer :: i,ii,k,q,nq
+    real(prec) :: gpts(0:this%N+1)
+    real(prec) :: gwts(0:this%N+1)
+    real(prec) :: lbig(0:this%N)
+    real(prec) :: lsub(0:this%N)
+    real(prec) :: xik
+    real(real64) :: mmat(1:this%N+1,1:this%N+1)
+    real(real64) :: mwork(1:this%N+1,1:this%N+1)
+    real(real64) :: bmat(1:this%N+1,1:this%N+1,1:2)
+    real(real64) :: pmat(1:this%N+1,1:this%N+1)
+
+    nq = this%N+1 ! Internal quadrature rule has nq+1 = N+2 points; exact for degree 2N+3
+
+    call LegendreQuadrature(nq,gpts,gwts,GAUSS)
+
+    mmat = 0.0_real64
+    bmat = 0.0_real64
+    do q = 0,nq
+
+      ! Values of the control-point Lagrange basis at the internal quadrature point; used
+      ! both for the sub-edge (small side) basis in B_k and for the big-side basis in M.
+      lsub = this%CalculateLagrangePolynomials(gpts(q))
+
+      do i = 1,this%N+1
+        do ii = 1,this%N+1
+          mmat(ii,i) = mmat(ii,i)+ &
+                       real(gwts(q),real64)*real(lsub(ii-1),real64)*real(lsub(i-1),real64)
+        enddo
+      enddo
+
+      do k = 1,2
+        ! Map the sub-edge coordinate s = gpts(q) to the big-edge coordinate
+        if(k == 1) then
+          xik = 0.5_prec*(gpts(q)-1.0_prec) ! xi in [-1,0]
+        else
+          xik = 0.5_prec*(gpts(q)+1.0_prec) ! xi in [0,1]
+        endif
+        lbig = this%CalculateLagrangePolynomials(xik)
+
+        ! B_k(m,j) = (1/2) int l_m(xi_k(s)) l_j(s) ds ; the 1/2 is the sub-edge Jacobian
+        do i = 1,this%N+1 ! j index (sub-edge basis)
+          do ii = 1,this%N+1 ! m index (big-edge basis)
+            bmat(ii,i,k) = bmat(ii,i,k)+ &
+                           0.5_real64*real(gwts(q),real64)* &
+                           real(lbig(ii-1),real64)*real(lsub(i-1),real64)
+          enddo
+        enddo
+      enddo
+
+    enddo
+
+    do k = 1,2
+
+      ! Solve M P_k = B_k for the projection matrix; the solver overwrites its
+      ! matrix argument with the factorization, so factor a fresh copy of M
+      mwork = mmat
+      pmat = bmat(1:this%N+1,1:this%N+1,k)
+      call SolveLinearSystems(this%N+1,mwork,pmat)
+
+      ! Store the transpose, following the SELF operator convention
+      ! result(i) = sum_ii matrix(ii,i)*input(ii)
+      do i = 1,this%N+1
+        do ii = 1,this%N+1
+          this%mortarP(ii,i,k) = real(pmat(i,ii),prec)
+        enddo
+      enddo
+
+      ! Restriction: evaluate the big-side basis at the sub-edge images of the control points
+      do i = 1,this%N+1
+        if(k == 1) then
+          xik = 0.5_prec*(this%controlPoints(i)-1.0_prec)
+        else
+          xik = 0.5_prec*(this%controlPoints(i)+1.0_prec)
+        endif
+        lbig = this%CalculateLagrangePolynomials(xik)
+        do ii = 1,this%N+1
+          this%mortarR(ii,i,k) = lbig(ii-1)
+        enddo
+      enddo
+
+    enddo
+
+  endsubroutine CalculateMortarMatrices
+
+! ================================================================================================ !
+!
+! SolveLinearSystems (PRIVATE)
+!
+!   Solves A X = B for X, where A is n x n and B holds n right-hand sides, using Gaussian
+!   elimination with partial pivoting in float64. On exit, B is overwritten with X and A is
+!   overwritten with its factorization. Intended for the small (N+1)x(N+1) operator systems
+!   assembled at initialization; not for use in hot loops.
+!
+! ================================================================================================ !
+
+  subroutine SolveLinearSystems(n,a,b)
+    implicit none
+    integer,intent(in) :: n
+    real(real64),intent(inout) :: a(1:n,1:n)
+    real(real64),intent(inout) :: b(1:n,1:n)
+    ! Local
+    integer :: i,j,p,ipiv
+    real(real64) :: pivmax,factor,swap(1:n)
+
+    do j = 1,n-1
+
+      ! Partial pivoting
+      ipiv = j
+      pivmax = abs(a(j,j))
+      do p = j+1,n
+        if(abs(a(p,j)) > pivmax) then
+          ipiv = p
+          pivmax = abs(a(p,j))
+        endif
+      enddo
+      if(ipiv /= j) then
+        swap = a(j,1:n)
+        a(j,1:n) = a(ipiv,1:n)
+        a(ipiv,1:n) = swap
+        swap = b(j,1:n)
+        b(j,1:n) = b(ipiv,1:n)
+        b(ipiv,1:n) = swap
+      endif
+
+      ! Elimination
+      do i = j+1,n
+        factor = a(i,j)/a(j,j)
+        a(i,j:n) = a(i,j:n)-factor*a(j,j:n)
+        b(i,1:n) = b(i,1:n)-factor*b(j,1:n)
+      enddo
+
+    enddo
+
+    ! Back substitution
+    do j = n,1,-1
+      do i = j+1,n
+        b(j,1:n) = b(j,1:n)-a(j,i)*b(i,1:n)
+      enddo
+      b(j,1:n) = b(j,1:n)/a(j,j)
+    enddo
+
+  endsubroutine SolveLinearSystems
 
   subroutine WriteHDF5_Lagrange_t(this,fileId)
     implicit none
