@@ -11,7 +11,7 @@ The numerics and PML formulation are summarised in the [PML model reference](../
 
 `LinearEuler2D_PML` is a type extension of `LinearEuler2D`. Compared to the parent model it
 
-* extends `nvar` from 5 to 9 (the original acoustic state plus four PML auxiliary variables `phi_rho`, `phi_u`, `phi_v`, `phi_P`);
+* extends `nvar` from 4 to 7 (the original acoustic state plus three PML auxiliary variables `phi_u`, `phi_v`, `phi_P`);
 * carries two per-node fields `sigma_x` and `sigma_y` that hold the PML damping coefficients;
 * registers PML-aware no-normal-flow and radiation boundary handlers automatically.
 
@@ -58,10 +58,10 @@ call modelobj%SetPMLProfile(x_interior_min = 0.0_prec, &
 After this point the PML is fully active. Initial-condition setup, time integration, and IO follow the same patterns as the [parent `LinearEuler2D`](../../Models/linear-euler-2d-model.md).
 
 !!! note
-    Always set the four PML auxiliary variables to zero in your initial condition:
+    Always set the three PML auxiliary variables to zero in your initial condition:
 
     ```fortran
-    this%solution%interior(i,j,iel,6:9) = 0.0_prec
+    this%solution%interior(i,j,iel,5:7) = 0.0_prec
     ```
 
     Their initial value is the integral $\int_0^t \vec{q}\,dt$, so starting them at zero corresponds to "the simulation has just begun".

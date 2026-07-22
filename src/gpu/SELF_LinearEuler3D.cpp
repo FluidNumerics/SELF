@@ -30,13 +30,13 @@
 
 
 // Impedance-matched (characteristic/Godunov) Riemann flux with a per-node
-// sound speed carried as solution variable 6 (0-based index 5) and background
-// density as variable 7 (0-based index 6), mirroring the 2-D model. The
+// sound speed carried as solution variable 5 (0-based index 4) and background
+// density as variable 6 (0-based index 5), mirroring the 2-D model. The
 // interface states are resolved with the per-side acoustic impedances
 // Z = rho0*c (each side using its own rho0 and c):
 //   un* = (ZL*unL + ZR*unR + (pL - pR)) / (ZL + ZR)
 //   p*  = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR)) / (ZL + ZR)
-// Variable layout (0-based): 0=rho, 1=u, 2=v, 3=w, 4=p, 5=c, 6=rho0. The
+// Variable layout (0-based): 0=u, 1=v, 2=w, 3=p, 4=c, 5=rho0. The
 // reconstructed fluxes use the face-average rho0. The sound-speed and
 // background-density variables carry zero flux.
 __global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *nhat, real *nmag, real *flux, int ndof){
@@ -49,30 +49,29 @@ __global__ void boundaryflux_LinearEuler3D_kernel(real *fb, real *extfb, real *n
     real nz = nhat[idof+2*ndof];
     real nm = nmag[idof];
 
-    real cL = fb[idof + 5*ndof];
-    real cR = extfb[idof + 5*ndof];
-    real rho0L = fb[idof + 6*ndof];
-    real rho0R = extfb[idof + 6*ndof];
+    real cL = fb[idof + 4*ndof];
+    real cR = extfb[idof + 4*ndof];
+    real rho0L = fb[idof + 5*ndof];
+    real rho0R = extfb[idof + 5*ndof];
     real rho0_avg = 0.5*(rho0L + rho0R);
     real ZL = rho0L*cL;
     real ZR = rho0R*cR;
 
-    real unL = fb[idof + ndof]*nx + fb[idof + 2*ndof]*ny + fb[idof + 3*ndof]*nz;
-    real unR = extfb[idof + ndof]*nx + extfb[idof + 2*ndof]*ny + extfb[idof + 3*ndof]*nz;
-    real pL = fb[idof + 4*ndof];
-    real pR = extfb[idof + 4*ndof];
+    real unL = fb[idof]*nx + fb[idof + ndof]*ny + fb[idof + 2*ndof]*nz;
+    real unR = extfb[idof]*nx + extfb[idof + ndof]*ny + extfb[idof + 2*ndof]*nz;
+    real pL = fb[idof + 3*ndof];
+    real pR = extfb[idof + 3*ndof];
 
     real un_star = (ZL*unL + ZR*unR + (pL - pR))/(ZL + ZR);
     real p_star = (ZR*pL + ZL*pR + ZL*ZR*(unL - unR))/(ZL + ZR);
     real c2_avg = 0.5*(cL*cL + cR*cR);
 
-    flux[idof] = (rho0_avg*un_star)*nm;              // density
-    flux[idof+ndof] = (p_star*nx/rho0_avg)*nm;       // u
-    flux[idof+2*ndof] = (p_star*ny/rho0_avg)*nm;     // v
-    flux[idof+3*ndof] = (p_star*nz/rho0_avg)*nm;     // w
-    flux[idof+4*ndof] = (rho0_avg*c2_avg*un_star)*nm; // pressure
-    flux[idof+5*ndof] = 0.0;                     // sound speed (static)
-    flux[idof+6*ndof] = 0.0;                     // background density (static)
+    flux[idof] = (p_star*nx/rho0_avg)*nm;            // u
+    flux[idof+ndof] = (p_star*ny/rho0_avg)*nm;       // v
+    flux[idof+2*ndof] = (p_star*nz/rho0_avg)*nm;     // w
+    flux[idof+3*ndof] = (rho0_avg*c2_avg*un_star)*nm; // pressure
+    flux[idof+4*ndof] = 0.0;                     // sound speed (static)
+    flux[idof+5*ndof] = 0.0;                     // background density (static)
   }
 }
 
@@ -94,40 +93,36 @@ extern "C"
   uint32_t idof = threadIdx.x + blockIdx.x*blockDim.x;
 
   if( idof < ndof ){
-    real u = solution[idof + ndof];
-    real v = solution[idof + 2*ndof];
-    real w = solution[idof + 3*ndof];
-    real p = solution[idof + 4*ndof];
-    real c = solution[idof + 5*ndof];
-    real rho0 = solution[idof + 6*ndof];
+    real u = solution[idof];
+    real v = solution[idof + ndof];
+    real w = solution[idof + 2*ndof];
+    real p = solution[idof + 3*ndof];
+    real c = solution[idof + 4*ndof];
+    real rho0 = solution[idof + 5*ndof];
 
-    flux[idof + ndof*(0 + nvar*0)] = rho0*u; // density, x flux ; rho0*u
-    flux[idof + ndof*(0 + nvar*1)] = rho0*v; // density, y flux ; rho0*v
-    flux[idof + ndof*(0 + nvar*2)] = rho0*w; // density, z flux ; rho0*w
+    flux[idof + ndof*(0 + nvar*0)] = p/rho0; // x-velocity, x flux; p/rho0
+    flux[idof + ndof*(0 + nvar*1)] = 0.0; // x-velocity, y flux; 0
+    flux[idof + ndof*(0 + nvar*2)] = 0.0; // x-velocity, z flux; 0
 
-    flux[idof + ndof*(1 + nvar*0)] = p/rho0; // x-velocity, x flux; p/rho0
-    flux[idof + ndof*(1 + nvar*1)] = 0.0; // x-velocity, y flux; 0
-    flux[idof + ndof*(1 + nvar*2)] = 0.0; // x-velocity, z flux; 0
+    flux[idof + ndof*(1 + nvar*0)] = 0.0; // y-velocity, x flux; 0
+    flux[idof + ndof*(1 + nvar*1)] = p/rho0; // y-velocity, y flux; p/rho0
+    flux[idof + ndof*(1 + nvar*2)] = 0.0; // y-velocity, z flux; 0
 
-    flux[idof + ndof*(2 + nvar*0)] = 0.0; // y-velocity, x flux; 0
-    flux[idof + ndof*(2 + nvar*1)] = p/rho0; // y-velocity, y flux; p/rho0
-    flux[idof + ndof*(2 + nvar*2)] = 0.0; // y-velocity, z flux; 0
+    flux[idof + ndof*(2 + nvar*0)] = 0.0; // z-velocity, x flux; 0
+    flux[idof + ndof*(2 + nvar*1)] = 0.0; // z-velocity, y flux; 0
+    flux[idof + ndof*(2 + nvar*2)] = p/rho0; // z-velocity, z flux; p/rho0
 
-    flux[idof + ndof*(3 + nvar*0)] = 0.0; // z-velocity, x flux; 0
-    flux[idof + ndof*(3 + nvar*1)] = 0.0; // z-velocity, y flux; 0
-    flux[idof + ndof*(3 + nvar*2)] = p/rho0; // z-velocity, z flux; p/rho0
+    flux[idof + ndof*(3 + nvar*0)] = c*c*rho0*u; // pressure, x flux : rho0*c^2*u
+    flux[idof + ndof*(3 + nvar*1)] = c*c*rho0*v; // pressure, y flux : rho0*c^2*v
+    flux[idof + ndof*(3 + nvar*2)] = c*c*rho0*w; // pressure, z flux : rho0*c^2*w
 
-    flux[idof + ndof*(4 + nvar*0)] = c*c*rho0*u; // pressure, x flux : rho0*c^2*u
-    flux[idof + ndof*(4 + nvar*1)] = c*c*rho0*v; // pressure, y flux : rho0*c^2*v
-    flux[idof + ndof*(4 + nvar*2)] = c*c*rho0*w; // pressure, z flux : rho0*c^2*w
+    flux[idof + ndof*(4 + nvar*0)] = 0.0; // sound speed, x flux; 0 (c held fixed in time)
+    flux[idof + ndof*(4 + nvar*1)] = 0.0; // sound speed, y flux; 0
+    flux[idof + ndof*(4 + nvar*2)] = 0.0; // sound speed, z flux; 0
 
-    flux[idof + ndof*(5 + nvar*0)] = 0.0; // sound speed, x flux; 0 (c held fixed in time)
-    flux[idof + ndof*(5 + nvar*1)] = 0.0; // sound speed, y flux; 0
-    flux[idof + ndof*(5 + nvar*2)] = 0.0; // sound speed, z flux; 0
-
-    flux[idof + ndof*(6 + nvar*0)] = 0.0; // background density, x flux; 0 (rho0 held fixed in time)
-    flux[idof + ndof*(6 + nvar*1)] = 0.0; // background density, y flux; 0
-    flux[idof + ndof*(6 + nvar*2)] = 0.0; // background density, z flux; 0
+    flux[idof + ndof*(5 + nvar*0)] = 0.0; // background density, x flux; 0 (rho0 held fixed in time)
+    flux[idof + ndof*(5 + nvar*1)] = 0.0; // background density, y flux; 0
+    flux[idof + ndof*(5 + nvar*2)] = 0.0; // background density, z flux; 0
 
   }
 
@@ -143,9 +138,9 @@ extern "C"
 
 }
 // Radiation BC kernel for 3D Linear Euler
-// Zeroes the acoustic perturbation (rho,u,v,w,p) in extBoundary on
-// pre-filtered boundary faces; the sound speed (index 5) and background
-// density (index 6) are copied from the interior side so face Riemann fluxes
+// Zeroes the acoustic perturbation (u,v,w,p) in extBoundary on
+// pre-filtered boundary faces; the sound speed (index 4) and background
+// density (index 5) are copied from the interior side so face Riemann fluxes
 // see a consistent c and rho0.
 __global__ void hbc3d_radiation_lineareuler3d_kernel(
     real *extBoundary, real *boundary,
@@ -167,9 +162,8 @@ __global__ void hbc3d_radiation_lineareuler3d_kernel(
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,1,N,nel)] = 0.0;
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,2,N,nel)] = 0.0;
     extBoundary[SCB_3D_INDEX(i,j,s1,e1,3,N,nel)] = 0.0;
-    extBoundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)] = 0.0;
-    extBoundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)]; // c preserved
-    extBoundary[SCB_3D_INDEX(i,j,s1,e1,6,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,6,N,nel)]; // rho0 preserved
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,4,N,nel)]; // c preserved
+    extBoundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)] = boundary[SCB_3D_INDEX(i,j,s1,e1,5,N,nel)]; // rho0 preserved
   }
 }
 

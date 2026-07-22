@@ -26,7 +26,7 @@ module lineareuler2d_boneandmarrow_model
 !! "Marrow" (smaller disk of radius 1.5 about (-1.5, 0.5))
 !! nested inside the bone region. We map each material to a
 !! representative sound speed and background density and write those
-!! into solution(...,5) (c) and solution(...,6) (rho0), which are
+!! into solution(...,4) (c) and solution(...,5) (rho0), which are
 !! held fixed in time by the LinearEuler2D model.
 !!
 !! This exercises a genuinely heterogeneous background: both the
@@ -37,7 +37,7 @@ module lineareuler2d_boneandmarrow_model
 !! piecewise-constant per element (aligned with mesh boundaries), so
 !! the flux-divergence interior is exactly entropy-conservative.
 !!
-!! Initial condition: a small Gaussian pressure / density bump is
+!! Initial condition: a small Gaussian pressure bump is
 !! placed in the Muscle region, well outside the bone region. The
 !! transient acoustic pulse propagates outward, refracts/reflects
 !! at the material interfaces (because c and rho0 are discontinuous
@@ -61,13 +61,13 @@ module lineareuler2d_boneandmarrow_model
     real(prec) :: bump_x0 = 10.0_prec ! Pulse center, well into the muscle annulus
     real(prec) :: bump_y0 = 0.0_prec
     real(prec) :: bump_L = 0.6_prec ! Halfwidth (e-folding length) of the bump
-    real(prec) :: bump_amp = 1.0e-3_prec ! Density-perturbation amplitude
+    real(prec) :: bump_amp = 1.0e-3_prec ! Pressure-pulse amplitude (in units of rho'*c^2)
 
   contains
 
     ! AdditionalInit is inherited from `lineareuler2d`, which registers both
     ! the no-normal-flow and radiation BCs using the correct CPU/GPU wrappers
-    ! for the current build. The radiation wrapper zeros (rho', u, v, p) and
+    ! for the current build. The radiation wrapper zeros (u, v, p) and
     ! preserves c on the same host/device buffer the rest of the pipeline
     ! reads from, which is what this disk-shaped scatterer test requires.
     procedure :: setInitialCondition
@@ -78,7 +78,7 @@ contains
 
   subroutine setInitialCondition(this)
     !! Material-aware initial condition: stamp `c` and `rho0` from the
-    !! per-element material id, then add a Gaussian rho/p bump only in
+    !! per-element material id, then add a Gaussian pressure bump only in
     !! Muscle elements (so the pulse starts cleanly in a uniform
     !! medium and the bone/marrow inclusions are seen as scatterers).
     implicit none
@@ -109,12 +109,11 @@ contains
             shape = 0.0_prec
           endif
 
-          this%solution%interior(i,j,iel,1) = shape ! density perturbation
-          this%solution%interior(i,j,iel,2) = 0.0_prec ! u
-          this%solution%interior(i,j,iel,3) = 0.0_prec ! v
-          this%solution%interior(i,j,iel,4) = shape*c_mat*c_mat ! p = rho * c^2 (acoustic)
-          this%solution%interior(i,j,iel,5) = c_mat ! sound speed for this material
-          this%solution%interior(i,j,iel,6) = rho0_mat ! background density for this material
+          this%solution%interior(i,j,iel,1) = 0.0_prec ! u
+          this%solution%interior(i,j,iel,2) = 0.0_prec ! v
+          this%solution%interior(i,j,iel,3) = shape*c_mat*c_mat ! p = rho' * c^2 (acoustic)
+          this%solution%interior(i,j,iel,4) = c_mat ! sound speed for this material
+          this%solution%interior(i,j,iel,5) = rho0_mat ! background density for this material
         enddo
       enddo
     enddo

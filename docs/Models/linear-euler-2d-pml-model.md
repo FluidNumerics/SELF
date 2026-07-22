@@ -4,7 +4,7 @@
 
 The [`SELF_LinearEuler2D_PML_t` module](../ford/module/self_lineareuler2d_pml_t.html) defines the [`LinearEuler2D_PML_t` class](../ford/type/lineareuler2d_pml_t.html), a type extension of [`LinearEuler2D_t`](./linear-euler-2d-model.md) that adds a Perfectly Matched Layer (PML) absorbing region for open-domain acoustic simulations.
 
-The interior dynamics are identical to the parent linear Euler 2D model. Inside the PML region the governing equations are augmented with damping coefficients $\sigma_x(x)$, $\sigma_y(y)$ and four auxiliary variables $\phi_\rho, \phi_u, \phi_v, \phi_P$ that together drive outgoing waves to zero with minimal reflection at the interior/PML interface.
+The interior dynamics are identical to the parent linear Euler 2D model. Inside the PML region the governing equations are augmented with damping coefficients $\sigma_x(x)$, $\sigma_y(y)$ and three auxiliary variables $\phi_u, \phi_v, \phi_P$ that together drive outgoing waves to zero with minimal reflection at the interior/PML interface.
 
 ### Formulation
 
@@ -21,25 +21,23 @@ $$
     \frac{\partial \vec{\phi}}{\partial t} = \vec{q}
 $$
 
-where $\vec{q} = (\rho, u, v, p)$ is the acoustic state, $\vec{\phi} = (\phi_\rho, \phi_u, \phi_v, \phi_P)$ is the auxiliary "memory" vector that integrates $\vec{q}$ in time, and $A$, $B$ are the linear-Euler flux Jacobians (see the [Linear Euler 2D reference](./linear-euler-2d-model.md)).
+where $\vec{q} = (u, v, p)$ is the acoustic state, $\vec{\phi} = (\phi_u, \phi_v, \phi_P)$ is the auxiliary "memory" vector that integrates $\vec{q}$ in time, and $A$, $B$ are the linear-Euler flux Jacobians (see the [Linear Euler 2D reference](./linear-euler-2d-model.md)). As in the parent model, the density anomaly is not carried as a solution variable.
 
 In the interior we set $\sigma_x = \sigma_y = 0$ and the system reduces exactly to the standard linear Euler 2D model. The auxiliary $\vec{\phi}$ still integrates $\vec{q}$, but with the coupling coefficient $\sigma_x \sigma_y = 0$ it never feeds back into the dynamics and starts at $\vec{\phi}(t=0) = \vec{0}$.
 
 ### Solution vector
 
-To accommodate the auxiliary $\vec{\phi}$, the PML model carries `nvar = 9`:
+To accommodate the auxiliary $\vec{\phi}$, the PML model carries `nvar = 7`:
 
 | index | name      | meaning                                      |
 |-------|-----------|----------------------------------------------|
-| 1     | `rho`     | density perturbation (acoustic)              |
-| 2     | `u`       | $x$-velocity                                 |
-| 3     | `v`       | $y$-velocity                                 |
-| 4     | `P`       | pressure perturbation                        |
-| 5     | `c`       | sound speed (per-node, static)               |
-| 6     | `phi_rho` | $\int_0^t \rho\,dt$ (PML auxiliary)          |
-| 7     | `phi_u`   | $\int_0^t u\,dt$ (PML auxiliary)             |
-| 8     | `phi_v`   | $\int_0^t v\,dt$ (PML auxiliary)             |
-| 9     | `phi_P`   | $\int_0^t p\,dt$ (PML auxiliary)             |
+| 1     | `u`       | $x$-velocity                                 |
+| 2     | `v`       | $y$-velocity                                 |
+| 3     | `P`       | pressure perturbation                        |
+| 4     | `c`       | sound speed (per-node, static)               |
+| 5     | `phi_u`   | $\int_0^t u\,dt$ (PML auxiliary)             |
+| 6     | `phi_v`   | $\int_0^t v\,dt$ (PML auxiliary)             |
+| 7     | `phi_P`   | $\int_0^t p\,dt$ (PML auxiliary)             |
 
 The auxiliary variables carry **identically zero flux** in both spatial directions. They are evolved exclusively by the source term above. Sound speed $c$ remains static (zero flux, zero source), as in the parent model.
 
@@ -72,33 +70,33 @@ Both paths are covered step-by-step in the [PML tutorial](../Tutorials/LinearEul
 
 `LinearEuler2D_PML_t` is implemented in [`src/SELF_LinearEuler2D_PML_t.f90`](https://github.com/FluidNumerics/SELF/blob/main/src/SELF_LinearEuler2D_PML_t.f90) as a type extension of [`LinearEuler2D_t`](./linear-euler-2d-model.md). It overrides
 
-* `SetNumberOfVariables` — declares `nvar = 9`.
-* `SetMetadata` — registers names and units for the four PML auxiliaries (plus `sigma_x`, `sigma_y`).
+* `SetNumberOfVariables` — declares `nvar = 7`.
+* `SetMetadata` — registers names and units for the three PML auxiliaries (plus `sigma_x`, `sigma_y`).
 * `AdditionalInit` — allocates `sigma_x` and `sigma_y` and registers PML-aware no-normal-flow and radiation boundary handlers.
 * `AdditionalFree` — releases the damping fields.
-* `flux2d`, `riemannflux2d` — use the parent linear-Euler acoustic flux form for variables 1–5 and return zero for variables 6–9 (auxiliaries carry no flux). Note the PML variant uses the **scalar** background density `rho0`: unlike the parent model (which carries `rho0` as a per-node solution variable in slot 6), the PML model repurposes slot 6 for the auxiliary `phi_rho`.
-* `entropy_func` — acoustic energy using the scalar `rho0` and the per-node sound speed `s(5)`. This override is required because the parent's `entropy_func` reads `rho0` from `s(6)`, which the PML model uses for `phi_rho`.
+* `flux2d`, `riemannflux2d` — use the parent linear-Euler acoustic flux form for variables 1–4 and return zero for variables 5–7 (auxiliaries carry no flux). Note the PML variant uses the **scalar** background density `rho0`: unlike the parent model (which carries `rho0` as a per-node solution variable in slot 5), the PML model repurposes slot 5 for the auxiliary `phi_u`.
+* `entropy_func` — acoustic energy using the scalar `rho0` and the per-node sound speed `s(4)`. This override is required because the parent's `entropy_func` reads `rho0` from `s(5)`, which the PML model uses for `phi_u`.
 * `sourcemethod` — implements the ADE source term node-by-node. We override `sourcemethod` rather than `source2d` because the pure `source2d(s, dsdx)` signature has no access to the per-node $\sigma_x(i,j,iel)$, $\sigma_y(i,j,iel)$ lookups.
 
 A new procedure `SetPMLProfile(x_interior_min, x_interior_max, y_interior_min, y_interior_max, pml_width, sigma_max, ramp_exponent)` populates `sigma_x` and `sigma_y` from the per-element material tags and the geometric ramp.
 
 ### Boundary conditions
 
-`LinearEuler2D_PML_t` re-registers both the **no-normal-flow** and **radiation** boundary handlers so that the auxiliary variables 6–9 are also handled at the boundary. Variables 1–5 are treated exactly as in the parent model:
+`LinearEuler2D_PML_t` re-registers both the **no-normal-flow** and **radiation** boundary handlers so that the auxiliary variables 5–7 are also handled at the boundary. Variables 1–4 are treated exactly as in the parent model:
 
-* `SELF_BC_NONORMALFLOW` — reflect $\vec{v}$ about the boundary normal; copy $\rho$, $p$, $c$; zero $\vec{\phi}$ in `extBoundary`.
-* `SELF_BC_RADIATION` — set $\rho = u = v = p = 0$ in the exterior state; copy $c$ from the interior side so the Riemann solver sees a consistent sound speed; zero $\vec{\phi}$.
+* `SELF_BC_NONORMALFLOW` — reflect $\vec{v}$ about the boundary normal; copy $p$, $c$; zero $\vec{\phi}$ in `extBoundary`.
+* `SELF_BC_RADIATION` — set $u = v = p = 0$ in the exterior state; copy $c$ from the interior side so the Riemann solver sees a consistent sound speed; zero $\vec{\phi}$.
 
 Because the auxiliary variables carry zero Riemann flux, their `extBoundary` value is mathematically irrelevant — we zero it purely for diagnostic cleanliness.
 
-`SELF_BC_PRESCRIBED` is *not* automatically registered. If you need it (e.g. driving a planewave in from one side while absorbing on the other), follow the same pattern as the prescribed-BC examples for the parent model and remember to fill `extBoundary(:,:,:,6:9)` (zero is the natural choice).
+`SELF_BC_PRESCRIBED` is *not* automatically registered. If you need it (e.g. driving a planewave in from one side while absorbing on the other), follow the same pattern as the prescribed-BC examples for the parent model and remember to fill `extBoundary(:,:,:,5:7)` (zero is the natural choice).
 
 ## GPU acceleration
 
 When SELF is built with GPU support, the GPU-backed `LinearEuler2D_PML` type (in [`src/gpu/SELF_LinearEuler2D_PML.f90`](https://github.com/FluidNumerics/SELF/blob/main/src/gpu/SELF_LinearEuler2D_PML.f90) and [`src/gpu/SELF_LinearEuler2D_PML.cpp`](https://github.com/FluidNumerics/SELF/blob/main/src/gpu/SELF_LinearEuler2D_PML.cpp)) overrides
 
-* `BoundaryFlux` — launches a 9-variable PML-aware Riemann kernel.
-* `FluxMethod` — launches a 9-variable PML-aware interior-flux kernel.
+* `BoundaryFlux` — launches a 7-variable PML-aware Riemann kernel.
+* `FluxMethod` — launches a 7-variable PML-aware interior-flux kernel.
 * `SourceMethod` — launches the PML source kernel that reads `sigma_x_gpu`, `sigma_y_gpu`, and `solution_gpu`.
 
 The GPU no-normal-flow and radiation BC handlers are re-registered to point to device-resident kernels (`hbc2d_*_lineareuler2d_pml_gpu`). `sigma_x` and `sigma_y` live on the device after `SetPMLProfile` calls `UpdateDevice`, so no host/device traffic is needed during time stepping unless prescribed BCs are enabled.

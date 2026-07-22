@@ -79,10 +79,9 @@ contains
     class(lineareuler2d_planewave),intent(inout) :: this
     ! Local
     integer :: i,j,iel
-    real(prec) :: p,rho,u,v,x,y,phase,shape
+    real(prec) :: p,u,v,x,y,phase,shape
 
     p = this%p
-    rho = this%p/this%c/this%c
     u = this%p*this%wx/this%c
     v = this%p*this%wy/this%c
 
@@ -94,12 +93,11 @@ contains
       phase = this%wx*(x-this%x0)+this%wy*(y-this%y0)-this%c*this%t
       shape = exp(-phase*phase/(this%L*this%L))
 
-      this%solution%interior(i,j,iel,1) = rho*shape ! density
-      this%solution%interior(i,j,iel,2) = u*shape ! u
-      this%solution%interior(i,j,iel,3) = v*shape ! v
-      this%solution%interior(i,j,iel,4) = p*shape ! pressure
-      this%solution%interior(i,j,iel,5) = this%c ! sound speed (uniform background)
-      this%solution%interior(i,j,iel,6) = this%rho0 ! background density (uniform)
+      this%solution%interior(i,j,iel,1) = u*shape ! u
+      this%solution%interior(i,j,iel,2) = v*shape ! v
+      this%solution%interior(i,j,iel,3) = p*shape ! pressure
+      this%solution%interior(i,j,iel,4) = this%c ! sound speed (uniform background)
+      this%solution%interior(i,j,iel,5) = this%rho0 ! background density (uniform)
 
     enddo
 
@@ -113,12 +111,11 @@ contains
     ! Local
     integer :: n,i,iEl,j
     real(prec) :: x(1:2)
-    real(prec) :: p,rho,u,v,phase,shape
+    real(prec) :: p,u,v,phase,shape
 
     select type(m => mymodel)
     class is(lineareuler2d_planewave)
       p = m%p
-      rho = m%p/m%c/m%c
       u = m%p*m%wx/m%c
       v = m%p*m%wy/m%c
 
@@ -131,12 +128,11 @@ contains
           phase = m%wx*(x(1)-m%x0)+m%wy*(x(2)-m%y0)-m%c*m%t
           shape = exp(-phase*phase/(m%L*m%L))
 
-          m%solution%extBoundary(i,j,iEl,1) = rho*shape ! density
-          m%solution%extBoundary(i,j,iEl,2) = u*shape ! u
-          m%solution%extBoundary(i,j,iEl,3) = v*shape ! v
-          m%solution%extBoundary(i,j,iEl,4) = p*shape ! pressure
-          m%solution%extBoundary(i,j,iEl,5) = m%c ! sound speed
-          m%solution%extBoundary(i,j,iEl,6) = m%rho0 ! background density
+          m%solution%extBoundary(i,j,iEl,1) = u*shape ! u
+          m%solution%extBoundary(i,j,iEl,2) = v*shape ! v
+          m%solution%extBoundary(i,j,iEl,3) = p*shape ! pressure
+          m%solution%extBoundary(i,j,iEl,4) = m%c ! sound speed
+          m%solution%extBoundary(i,j,iEl,5) = m%rho0 ! background density
         enddo
       enddo
     endselect

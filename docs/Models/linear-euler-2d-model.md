@@ -14,7 +14,6 @@ For the Linear Euler equations in 2-D
 $$
     \vec{s} = 
     \begin{pmatrix}
-    \rho \\ 
     u \\ 
     v \\ 
     p \\
@@ -23,14 +22,13 @@ $$
     \end{pmatrix}
 $$
 
-where $\rho$ is a density anomaly, referenced to the background density $\rho_0$, $u$ and $v$ are the $x$ and $y$ components of the fluid velocity (respectively), $p$ is the pressure, $c$ is the speed of sound, and $\rho_0$ is the background density. Both the sound speed $c$ and the background density $\rho_0$ are carried as per-node solution variables so that they can vary in space (e.g. across material interfaces); their flux and source are identically zero, so $c$ and $\rho_0$ are held fixed in time at each spatial location. This is entropy-stable for piecewise-constant material regions aligned with element boundaries: element interiors have $\nabla \rho_0 = \nabla c = 0$ (so the flux-divergence form is exact) and the impedance-matched Riemann flux handles the jumps at faces.
+where $u$ and $v$ are the $x$ and $y$ components of the fluid velocity (respectively), $p$ is the pressure, $c$ is the speed of sound, and $\rho_0$ is the background density. The density anomaly is *not* carried as a solution variable: for a motionless background state it is slaved to the pressure through the acoustic relation $\rho = p/c^2$ and never feeds back into the velocity or pressure dynamics, so only the velocity components and the pressure are forward-stepped. If the density anomaly is needed as a diagnostic, it can be recovered pointwise as $\rho = p/c^2$. Both the sound speed $c$ and the background density $\rho_0$ are carried as per-node solution variables so that they can vary in space (e.g. across material interfaces); their flux and source are identically zero, so $c$ and $\rho_0$ are held fixed in time at each spatial location. This is entropy-stable for piecewise-constant material regions aligned with element boundaries: element interiors have $\nabla \rho_0 = \nabla c = 0$ (so the flux-divergence form is exact) and the impedance-matched Riemann flux handles the jumps at faces.
 
 When we assume an ideal gas, and a motionless background state, the conservative fluxes are
 
 $$
     \overleftrightarrow{f} = 
     \begin{pmatrix}
-    \rho_0(u \hat{x} + v \hat{y}) \\
     \frac{p}{\rho_0} \hat{x} \\
     \frac{p}{\rho_0} \hat{y} \\
     \rho_0 c^2 (u \hat{x} + v \hat{y}) \\
@@ -52,14 +50,13 @@ $$
 $$
 
 ## Implementation
-The Linear Euler 2D model is implemented as a type extension of the [`DGModel2D` class](../ford/type/dgmodel2d_t.html). The [`LinearEuler2D_t` class](../ford/type/lineareuler2d_t.html) keeps a scalar `rho0` attribute (used as the reference value that fills variable 6 in the built-in initial conditions) and overrides `SetNumberOfVariables` (to declare `nvar = 6` with `nstepped = 4`, so the last two variables are static), `SetMetadata`, `AdditionalInit`, `entropy_func`, `flux2d`, and `riemannflux2d`. The sound speed lives in `solution(:,:,:,5)` and the background density in `solution(:,:,:,6)`; both can be set independently per node when initializing the simulation.
+The Linear Euler 2D model is implemented as a type extension of the [`DGModel2D` class](../ford/type/dgmodel2d_t.html). The [`LinearEuler2D_t` class](../ford/type/lineareuler2d_t.html) keeps a scalar `rho0` attribute (used as the reference value that fills variable 5 in the built-in initial conditions) and overrides `SetNumberOfVariables` (to declare `nvar = 5` with `nstepped = 3`, so the last two variables are static), `SetMetadata`, `AdditionalInit`, `entropy_func`, `flux2d`, and `riemannflux2d`. The sound speed lives in `solution(:,:,:,4)` and the background density in `solution(:,:,:,5)`; both can be set independently per node when initializing the simulation.
 
 ### Riemann Solver
 The `LinearEuler2D` class is defined using the conservative form of the conservation law. The interface flux is the exact upwind (Godunov) solver for the linearized acoustic system obtained by characteristic decomposition. The normal-flux Jacobian has eigenstructure
 
 * $+c$: right-going acoustic mode, $W_+ = \rho_0 c\, u_n + p$
 * $-c$: left-going  acoustic mode, $W_- = -\rho_0 c\, u_n + p$
-* $0$: entropy density mode, $W_0 = \rho - p/c^2$
 * $0$: tangential vorticity mode, $u_t$
 
 Upwinding each mode by its characteristic direction at the face gives the impedance-matched interface state
@@ -74,7 +71,6 @@ with the per-side acoustic impedance $Z = \rho_0 c$, where each side uses its ow
 $$
     \overleftrightarrow{f}^* \cdot \hat{n} =
     \begin{pmatrix}
-    \overline{\rho_0}\,u_n^* \\
     p^*\, n_x / \overline{\rho_0} \\
     p^*\, n_y / \overline{\rho_0} \\
     \overline{\rho_0}\,\overline{c^2}\,u_n^* \\
@@ -85,7 +81,7 @@ $$
     \overline{c^2} = \tfrac{1}{2}(c_L^2 + c_R^2).
 $$
 
-The reconstructed density/momentum/pressure fluxes use the face-averaged $\overline{\rho_0}$ and $\overline{c^2}$ as a pragmatic treatment of the non-conservative products $p/\rho_0$ and $\rho_0 c^2 \nabla \cdot \vec{v}$ at a face where the coefficients jump; the physically important reflection/transmission is carried exactly by the per-side impedances above. The previously used local Lax-Friedrichs solver was found to over-dissipate the tangential and entropy modes and to fail to stably handle impedance mismatch at high polynomial order (aliasing instability at material interfaces), and has been replaced by the characteristic flux above. Details are in [`self_lineareuler2d_t.f90`](../ford/sourcefile/self_lineareuler2d_t.f90.html).
+The reconstructed momentum/pressure fluxes use the face-averaged $\overline{\rho_0}$ and $\overline{c^2}$ as a pragmatic treatment of the non-conservative products $p/\rho_0$ and $\rho_0 c^2 \nabla \cdot \vec{v}$ at a face where the coefficients jump; the physically important reflection/transmission is carried exactly by the per-side impedances above. The previously used local Lax-Friedrichs solver was found to over-dissipate the tangential mode and to fail to stably handle impedance mismatch at high polynomial order (aliasing instability at material interfaces), and has been replaced by the characteristic flux above. Details are in [`self_lineareuler2d_t.f90`](../ford/sourcefile/self_lineareuler2d_t.f90.html).
 
 ### Boundary conditions
 Boundary conditions are managed through the [extensible boundary-condition system](../Learning/BoundaryConditions.md). Each model registers its hyperbolic boundary conditions inside `AdditionalInit` by calling `hyperbolicBCs%RegisterBoundaryCondition(id, name, fn)`. `LinearEuler2D_t` registers both a no-normal-flow and a radiation handler out of the box (CPU); the GPU build overwrites both registrations with equivalent device kernels. Prescribed boundary conditions are registered by user code (or by an example subclass) so that the external state can be set as a function of position and time.
@@ -93,7 +89,7 @@ Boundary conditions are managed through the [extensible boundary-condition syste
 The built-in boundary identifiers used with the mesh generators are
 
 * `SELF_BC_RADIATION` — set the external state on the boundary to zero in the Riemann solver (open/non-reflecting).
-* `SELF_BC_NONORMALFLOW` — reflect the velocity vector about the boundary normal and prolong $\rho$, $p$, $c$, and $\rho_0$. This produces a reflecting (free-slip) wall and works for arbitrarily oriented normals.
+* `SELF_BC_NONORMALFLOW` — reflect the velocity vector about the boundary normal and prolong $p$, $c$, and $\rho_0$. This produces a reflecting (free-slip) wall and works for arbitrarily oriented normals.
 * `SELF_BC_PRESCRIBED` — use a user-registered handler to fill the external state.
 
 As an example, when using the built-in structured mesh generator,
@@ -119,18 +115,18 @@ integer :: bcids(1:4)
     See the [Structured Mesh documentation](../MeshGeneration/StructuredMesh.md) for details on using the `structuredmesh` procedure, and the [Boundary Condition System](../Learning/BoundaryConditions.md) for how to register new BC handlers.
 
 !!! note
-    To set a prescribed state as a function of position and time, create a type-extension of `LinearEuler2D` and register a custom BC method against `SELF_BC_PRESCRIBED` from `AdditionalInit`. Remember that your handler must also fill `solution%extBoundary(:,:,:,5)` (sound speed) and `solution%extBoundary(:,:,:,6)` (background density) with the appropriate values at the boundary — the planewave examples show this pattern.
+    To set a prescribed state as a function of position and time, create a type-extension of `LinearEuler2D` and register a custom BC method against `SELF_BC_PRESCRIBED` from `AdditionalInit`. Remember that your handler must also fill `solution%extBoundary(:,:,:,4)` (sound speed) and `solution%extBoundary(:,:,:,5)` (background density) with the appropriate values at the boundary — the planewave examples show this pattern.
 
 ### Setting the sound speed and background density
 
-Because $c$ and $\rho_0$ are solution variables, you initialize them the same way you initialize $\rho$, $u$, $v$, and $p$:
+Because $c$ and $\rho_0$ are solution variables, you initialize them the same way you initialize $u$, $v$, and $p$:
 
 ```fortran
-this%solution%interior(i,j,iel,5) = c_value_at_this_node
-this%solution%interior(i,j,iel,6) = rho0_value_at_this_node
+this%solution%interior(i,j,iel,4) = c_value_at_this_node
+this%solution%interior(i,j,iel,5) = rho0_value_at_this_node
 ```
 
-For a uniform background, set every node to the same constants. For a piecewise-constant medium (e.g. bone embedded in marrow), assign the local material's $c$ and $\rho_0$. The `SphericalSoundWave` initializer takes the (uniform) sound speed as an explicit argument and fills the background density from the scalar `this%rho0`:
+For a uniform background, set every node to the same constants. For a piecewise-constant medium (e.g. bone embedded in marrow), assign the local material's $c$ and $\rho_0$. The `SphericalSoundWave` initializer takes the (uniform) sound speed as an explicit argument and fills the background density from the scalar `this%rho0`; its `rhoprime` argument sets the pressure-pulse amplitude through the acoustic relation $p = \rho' c^2$:
 
 ```fortran
 call model%SphericalSoundWave(rhoprime=1.0e-2_prec, Lr=0.1_prec, &
@@ -159,7 +155,7 @@ Out-of-the-box, the no-normal-flow and radiation boundary conditions are GPU acc
 
 For examples, see any of the following
 
-* [`examples/lineareuler2d_spherical_soundwave_closeddomain.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_spherical_soundwave_closeddomain.f90) - Simulation with a gaussian pressure and density anomaly as an initial condition in a domain with no-normal-flow boundary conditions on all sides. Demonstrates uniform sound speed via the `SphericalSoundWave` initializer.
-* [`examples/linear_euler2d_planewave_propagation.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_planewave_propagation.f90) - Gaussian plane wave that propagates at a $45^\circ$ angle through a square domain. The initial and boundary conditions are an exact plane-wave solution to the linear Euler equations. The example subclass carries its own `c` attribute and writes it into `solution(...,5)` for both the initial condition and the prescribed boundary state.
+* [`examples/lineareuler2d_spherical_soundwave_closeddomain.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_spherical_soundwave_closeddomain.f90) - Simulation with a gaussian pressure anomaly as an initial condition in a domain with no-normal-flow boundary conditions on all sides. Demonstrates uniform sound speed via the `SphericalSoundWave` initializer.
+* [`examples/linear_euler2d_planewave_propagation.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_planewave_propagation.f90) - Gaussian plane wave that propagates at a $45^\circ$ angle through a square domain. The initial and boundary conditions are an exact plane-wave solution to the linear Euler equations. The example subclass carries its own `c` attribute and writes it into `solution(...,4)` for both the initial condition and the prescribed boundary state.
 * [`examples/linear_euler2d_planewave_reflection.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_planewave_reflection.f90) - Gaussian plane wave reflected off a wall at $x=1$ via the method of images. Combines prescribed boundary conditions with no-normal-flow on the reflecting side.
-* [`examples/linear_euler2d_boneandmarrow.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_boneandmarrow.f90) - Heterogeneous-medium test on a HOHQMesh ISM-MM mesh tagged with three materials (muscle/bone/marrow). Each material is mapped to a representative sound speed and background density, written into `solution(...,5)` and `solution(...,6)`, and a Gaussian acoustic pulse refracts and reflects at the material interfaces. Exercises the impedance-matched Riemann solver across $\rho_0 c$ (impedance) discontinuities.
+* [`examples/linear_euler2d_boneandmarrow.f90`](https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_boneandmarrow.f90) - Heterogeneous-medium test on a HOHQMesh ISM-MM mesh tagged with three materials (muscle/bone/marrow). Each material is mapped to a representative sound speed and background density, written into `solution(...,4)` and `solution(...,5)`, and a Gaussian acoustic pulse refracts and reflects at the material interfaces. Exercises the impedance-matched Riemann solver across $\rho_0 c$ (impedance) discontinuities.

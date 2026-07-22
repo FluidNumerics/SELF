@@ -32,27 +32,26 @@ module self_LinearEuler2D_PML_t
 !! ADE (Auxiliary Differential Equation) form for the no-mean-flow case.
 !!
 !! In the PML region the dynamics for the acoustic state
-!! q = (rho', u, v, p) become
+!! q = (u, v, p) become
 !!
 !!   dq/dt + A dq/dx + B dq/dy + (sigma_x + sigma_y) q + sigma_x*sigma_y phi = 0
 !!   dphi/dt = q
 !!
-!! where phi = (phi_rho, phi_u, phi_v, phi_P) is a 4-component auxiliary
+!! where phi = (phi_u, phi_v, phi_P) is a 3-component auxiliary
 !! that accumulates the time integral of q. The sigma_x(x), sigma_y(y)
 !! damping coefficients vanish in the interior and rise toward the outer
 !! boundary, leaving the original linear Euler 2D dynamics unaltered where
-!! sigma = 0.
+!! sigma = 0. As in the parent model, the density anomaly is not carried as
+!! a solution variable (it is slaved to the pressure through rho = p/c^2).
 !!
-!! Solution layout (nvar = 9):
-!!   s(1) = rho     (density perturbation)
-!!   s(2) = u       (x-velocity)
-!!   s(3) = v       (y-velocity)
-!!   s(4) = P       (pressure perturbation)
-!!   s(5) = c       (sound speed, static; per-node)
-!!   s(6) = phi_rho (auxiliary; time-integral of rho)
-!!   s(7) = phi_u   (auxiliary; time-integral of u)
-!!   s(8) = phi_v   (auxiliary; time-integral of v)
-!!   s(9) = phi_P   (auxiliary; time-integral of P)
+!! Solution layout (nvar = 7):
+!!   s(1) = u       (x-velocity)
+!!   s(2) = v       (y-velocity)
+!!   s(3) = P       (pressure perturbation)
+!!   s(4) = c       (sound speed, static; per-node)
+!!   s(5) = phi_u   (auxiliary; time-integral of u)
+!!   s(6) = phi_v   (auxiliary; time-integral of v)
+!!   s(7) = phi_P   (auxiliary; time-integral of P)
 !!
 !! The auxiliary variables phi_* have identically zero flux; they evolve
 !! only via the source term. Sound speed c is also static (zero flux,
@@ -107,7 +106,7 @@ contains
     implicit none
     class(LinearEuler2D_PML_t),intent(inout) :: this
 
-    this%nvar = 9
+    this%nvar = 7
 
   endsubroutine SetNumberOfVariables_LinearEuler2D_PML_t
 
@@ -115,20 +114,19 @@ contains
     implicit none
     class(LinearEuler2D_PML_t),intent(inout) :: this
 
-    ! Reuse parent metadata for the first five variables.
+    ! Reuse parent metadata for the first four variables (u, v, P, c). The
+    ! parent also names variable 5 ("rho0"), which is overwritten below since
+    ! the PML model repurposes that slot for phi_u.
     call SetMetadata_LinearEuler2D_t(this)
 
-    call this%solution%SetName(6,"phi_rho")
-    call this%solution%SetUnits(6,"kg⋅m⁻³⋅s")
+    call this%solution%SetName(5,"phi_u")
+    call this%solution%SetUnits(5,"m")
 
-    call this%solution%SetName(7,"phi_u")
-    call this%solution%SetUnits(7,"m")
+    call this%solution%SetName(6,"phi_v")
+    call this%solution%SetUnits(6,"m")
 
-    call this%solution%SetName(8,"phi_v")
-    call this%solution%SetUnits(8,"m")
-
-    call this%solution%SetName(9,"phi_P")
-    call this%solution%SetUnits(9,"kg⋅m⁻¹⋅s⁻¹")
+    call this%solution%SetName(7,"phi_P")
+    call this%solution%SetUnits(7,"kg⋅m⁻¹⋅s⁻¹")
 
     call this%sigma_x%SetName(1,"sigma_x")
     call this%sigma_x%SetUnits(1,"s⁻¹")
@@ -140,15 +138,15 @@ contains
   pure function entropy_func_LinearEuler2D_PML_t(this,s) result(e)
     !! Acoustic energy for the PML model. The background density is the scalar
     !! this%rho0 (the PML variant does not carry a per-node background density;
-    !! its variable 6 is the auxiliary phi_rho, not rho0), and the sound speed
-    !! is taken from s(5). This overrides the parent entropy_func, which reads
-    !! rho0 from s(6).
+    !! its variable 5 is the auxiliary phi_u, not rho0), and the sound speed
+    !! is taken from s(4). This overrides the parent entropy_func, which reads
+    !! rho0 from s(5).
     class(LinearEuler2D_PML_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec) :: e
 
-    e = 0.5_prec*this%rho0*(s(2)*s(2)+s(3)*s(3))+ &
-        0.5_prec*(s(4)*s(4)/(this%rho0*s(5)*s(5)))
+    e = 0.5_prec*this%rho0*(s(1)*s(1)+s(2)*s(2))+ &
+        0.5_prec*(s(3)*s(3)/(this%rho0*s(4)*s(4)))
 
   endfunction entropy_func_LinearEuler2D_PML_t
 
@@ -163,8 +161,8 @@ contains
     call this%sigma_y%Init(this%geometry%x%interp,1,this%mesh%nElem)
 
     ! Register PML-aware BC methods. The PML-aware versions reuse the
-    ! parent acoustic-side behaviour for variables 1-5 and zero the
-    ! auxiliary variables 6-9 in extBoundary so that interior-side
+    ! parent acoustic-side behaviour for variables 1-4 and zero the
+    ! auxiliary variables 5-7 in extBoundary so that interior-side
     ! and exterior-side states are consistent with the zero-flux
     ! treatment of phi_*.
     bcfunc => hbc2d_NoNormalFlow_LinearEuler2D_PML
@@ -255,33 +253,31 @@ contains
   endsubroutine SetPMLProfile_LinearEuler2D_PML_t
 
   pure function flux2d_LinearEuler2D_PML_t(this,s,dsdx) result(flux)
-    !! Interior flux. Variables 1-5 use the parent linear Euler 2D
-    !! flux; auxiliary variables 6-9 carry zero flux in both directions
+    !! Interior flux. Variables 1-4 use the parent linear Euler 2D
+    !! flux; auxiliary variables 5-7 carry zero flux in both directions
     !! and are evolved purely by the PML source term.
     class(LinearEuler2D_PML_t),intent(in) :: this
     real(prec),intent(in) :: s(1:this%nvar)
     real(prec),intent(in) :: dsdx(1:this%nvar,1:2)
     real(prec) :: flux(1:this%nvar,1:2)
 
-    flux(1,1) = this%rho0*s(2) ! density, x flux ; rho0*u
-    flux(1,2) = this%rho0*s(3) ! density, y flux ; rho0*v
-    flux(2,1) = s(4)/this%rho0 ! x-velocity, x flux; p/rho0
-    flux(2,2) = 0.0_prec ! x-velocity, y flux; 0
-    flux(3,1) = 0.0_prec ! y-velocity, x flux; 0
-    flux(3,2) = s(4)/this%rho0 ! y-velocity, y flux; p/rho0
-    flux(4,1) = s(5)*s(5)*this%rho0*s(2) ! pressure, x flux : rho0*c^2*u
-    flux(4,2) = s(5)*s(5)*this%rho0*s(3) ! pressure, y flux : rho0*c^2*v
-    flux(5,1) = 0.0_prec ! sound speed, x flux; 0 (c held fixed in time)
-    flux(5,2) = 0.0_prec ! sound speed, y flux; 0
-    flux(6:9,1) = 0.0_prec ! PML auxiliaries evolve only via source term
-    flux(6:9,2) = 0.0_prec
+    flux(1,1) = s(3)/this%rho0 ! x-velocity, x flux; p/rho0
+    flux(1,2) = 0.0_prec ! x-velocity, y flux; 0
+    flux(2,1) = 0.0_prec ! y-velocity, x flux; 0
+    flux(2,2) = s(3)/this%rho0 ! y-velocity, y flux; p/rho0
+    flux(3,1) = s(4)*s(4)*this%rho0*s(1) ! pressure, x flux : rho0*c^2*u
+    flux(3,2) = s(4)*s(4)*this%rho0*s(2) ! pressure, y flux : rho0*c^2*v
+    flux(4,1) = 0.0_prec ! sound speed, x flux; 0 (c held fixed in time)
+    flux(4,2) = 0.0_prec ! sound speed, y flux; 0
+    flux(5:7,1) = 0.0_prec ! PML auxiliaries evolve only via source term
+    flux(5:7,2) = 0.0_prec
     if(.false.) flux(1,1) = flux(1,1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction flux2d_LinearEuler2D_PML_t
 
   pure function riemannflux2d_LinearEuler2D_PML_t(this,sL,sR,dsdx,nhat) result(flux)
-    !! Impedance-matched Riemann flux for acoustic variables 1-5, with
-    !! zero flux returned for the auxiliary variables 6-9. The acoustic
+    !! Impedance-matched Riemann flux for acoustic variables 1-4, with
+    !! zero flux returned for the auxiliary variables 5-7. The acoustic
     !! formula is identical to the parent LinearEuler2D model; see
     !! riemannflux2d_LinearEuler2D_t for the derivation.
     class(LinearEuler2D_PML_t),intent(in) :: this
@@ -294,26 +290,25 @@ contains
     real(prec) :: rho0,cL,cR,ZL,ZR,unL,unR,pL,pR,un_star,p_star,c2_avg
 
     rho0 = this%rho0
-    cL = sL(5)
-    cR = sR(5)
+    cL = sL(4)
+    cR = sR(4)
     ZL = rho0*cL
     ZR = rho0*cR
 
-    unL = sL(2)*nhat(1)+sL(3)*nhat(2)
-    unR = sR(2)*nhat(1)+sR(3)*nhat(2)
-    pL = sL(4)
-    pR = sR(4)
+    unL = sL(1)*nhat(1)+sL(2)*nhat(2)
+    unR = sR(1)*nhat(1)+sR(2)*nhat(2)
+    pL = sL(3)
+    pR = sR(3)
 
     un_star = (ZL*unL+ZR*unR+(pL-pR))/(ZL+ZR)
     p_star = (ZR*pL+ZL*pR+ZL*ZR*(unL-unR))/(ZL+ZR)
     c2_avg = 0.5_prec*(cL*cL+cR*cR)
 
-    flux(1) = rho0*un_star
-    flux(2) = p_star*nhat(1)/rho0
-    flux(3) = p_star*nhat(2)/rho0
-    flux(4) = rho0*c2_avg*un_star
-    flux(5) = 0.0_prec
-    flux(6:9) = 0.0_prec
+    flux(1) = p_star*nhat(1)/rho0
+    flux(2) = p_star*nhat(2)/rho0
+    flux(3) = rho0*c2_avg*un_star
+    flux(4) = 0.0_prec
+    flux(5:7) = 0.0_prec
     if(.false.) flux(1) = flux(1)+dsdx(1,1) ! suppress unused-dummy-argument warning
 
   endfunction riemannflux2d_LinearEuler2D_PML_t
@@ -344,15 +339,13 @@ contains
       sy = this%sigma_y%interior(i,j,iel,1)
       s = this%solution%interior(i,j,iel,1:this%nvar)
 
-      this%source%interior(i,j,iel,1) = -(sx+sy)*s(1)-sx*sy*s(6)
-      this%source%interior(i,j,iel,2) = -(sx+sy)*s(2)-sx*sy*s(7)
-      this%source%interior(i,j,iel,3) = -(sx+sy)*s(3)-sx*sy*s(8)
-      this%source%interior(i,j,iel,4) = -(sx+sy)*s(4)-sx*sy*s(9)
-      this%source%interior(i,j,iel,5) = 0.0_prec
-      this%source%interior(i,j,iel,6) = s(1)
-      this%source%interior(i,j,iel,7) = s(2)
-      this%source%interior(i,j,iel,8) = s(3)
-      this%source%interior(i,j,iel,9) = s(4)
+      this%source%interior(i,j,iel,1) = -(sx+sy)*s(1)-sx*sy*s(5)
+      this%source%interior(i,j,iel,2) = -(sx+sy)*s(2)-sx*sy*s(6)
+      this%source%interior(i,j,iel,3) = -(sx+sy)*s(3)-sx*sy*s(7)
+      this%source%interior(i,j,iel,4) = 0.0_prec
+      this%source%interior(i,j,iel,5) = s(1)
+      this%source%interior(i,j,iel,6) = s(2)
+      this%source%interior(i,j,iel,7) = s(3)
 
     enddo
 
@@ -360,8 +353,8 @@ contains
 
   subroutine hbc2d_NoNormalFlow_LinearEuler2D_PML(bc,mymodel)
     !! No-normal-flow BC for the PML-augmented linear Euler model.
-    !! Variables 1-5 are treated identically to the parent
-    !! LinearEuler2D no-normal-flow BC. Auxiliary variables 6-9 are
+    !! Variables 1-4 are treated identically to the parent
+    !! LinearEuler2D no-normal-flow BC. Auxiliary variables 5-7 are
     !! given a zero exterior state; since they carry zero Riemann flux
     !! the exterior value is mathematically irrelevant, but zeroing it
     !! keeps the boundary state clean for diagnostics.
@@ -369,7 +362,7 @@ contains
     class(Model),intent(inout) :: mymodel
     ! Local
     integer :: n,i,iEl,j
-    real(prec) :: nhat(1:2),s(1:5)
+    real(prec) :: nhat(1:2),s(1:4)
 
     select type(m => mymodel)
     class is(LinearEuler2D_PML_t)
@@ -378,15 +371,14 @@ contains
         j = bc%sides(n)
         do i = 1,m%solution%interp%N+1
           nhat = m%geometry%nhat%boundary(i,j,iEl,1,1:2)
-          s = m%solution%boundary(i,j,iEl,1:5)
-          m%solution%extBoundary(i,j,iEl,1) = s(1) ! density
+          s = m%solution%boundary(i,j,iEl,1:4)
+          m%solution%extBoundary(i,j,iEl,1) = &
+            (nhat(2)**2-nhat(1)**2)*s(1)-2.0_prec*nhat(1)*nhat(2)*s(2) ! u
           m%solution%extBoundary(i,j,iEl,2) = &
-            (nhat(2)**2-nhat(1)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(3) ! u
-          m%solution%extBoundary(i,j,iEl,3) = &
-            (nhat(1)**2-nhat(2)**2)*s(3)-2.0_prec*nhat(1)*nhat(2)*s(2) ! v
-          m%solution%extBoundary(i,j,iEl,4) = s(4) ! p
-          m%solution%extBoundary(i,j,iEl,5) = s(5) ! c
-          m%solution%extBoundary(i,j,iEl,6:9) = 0.0_prec ! PML auxiliaries
+            (nhat(1)**2-nhat(2)**2)*s(2)-2.0_prec*nhat(1)*nhat(2)*s(1) ! v
+          m%solution%extBoundary(i,j,iEl,3) = s(3) ! p
+          m%solution%extBoundary(i,j,iEl,4) = s(4) ! c
+          m%solution%extBoundary(i,j,iEl,5:7) = 0.0_prec ! PML auxiliaries
         enddo
       enddo
     endselect
@@ -412,9 +404,8 @@ contains
           m%solution%extBoundary(i,j,iEl,1) = 0.0_prec
           m%solution%extBoundary(i,j,iEl,2) = 0.0_prec
           m%solution%extBoundary(i,j,iEl,3) = 0.0_prec
-          m%solution%extBoundary(i,j,iEl,4) = 0.0_prec
-          m%solution%extBoundary(i,j,iEl,5) = m%solution%boundary(i,j,iEl,5) ! c preserved
-          m%solution%extBoundary(i,j,iEl,6:9) = 0.0_prec
+          m%solution%extBoundary(i,j,iEl,4) = m%solution%boundary(i,j,iEl,4) ! c preserved
+          m%solution%extBoundary(i,j,iEl,5:7) = 0.0_prec
         enddo
       enddo
     endselect
