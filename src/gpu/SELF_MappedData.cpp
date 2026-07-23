@@ -595,7 +595,7 @@ extern "C"
 // reals; the launcher only dispatches this kernel when that fits the LDS budget
 // (the Fortran caller falls back to the two-kernel path otherwise).
 __global__ void MappedContravariantDivergence_3D_gpukernel(real *dsdx, real *A, real *f, real *df,
-                                                           int N, int nel, int nvar){
+                                                           real *jacobian, int N, int nel, int nvar){
 
   int iel = blockIdx.x;
   int ivar = blockIdx.y;
@@ -634,7 +634,15 @@ __global__ void MappedContravariantDivergence_3D_gpukernel(real *dsdx, real *A, 
            + sA[a + (N+1)*j]*c2[i + (N+1)*(a + (N+1)*k)]
            + sA[a + (N+1)*k]*c3[i + (N+1)*(j + (N+1)*a)];
     }
-    df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] = acc;
+    // Optional Jacobian weight folded into the write (strong-form path passes a
+    // non-null jacobian; the DG path passes null and applies /J in the fused
+    // boundary-contribution kernel instead). Bitwise-identical to a separate
+    // JacobianWeight pass.
+    if(jacobian){
+      df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] = acc/jacobian[iq + nq*iel];
+    }else{
+      df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] = acc;
+    }
   }
 }
 
@@ -643,20 +651,27 @@ extern "C" void VectorDivergence_3D_gpu(real *A, real *f, real *df, int N, int n
 
 extern "C"
 {
+  // If jacobian is non-null, the /J weight is folded into the epilogue write
+  // (used by the strong-form path, which then skips the separate JacobianWeight
+  // call). The DG path passes null and applies /J in
+  // DG_BoundaryContribution_JacobianWeight_3D_gpu after the boundary terms.
   void MappedContravariantDivergence_3D_gpu(real *dsdx, real *A, real *f, real *df,
-                                            int N, int nvar, int nel)
+                                            real *jacobian, int N, int nvar, int nel)
   {
     int nq = (N+1)*(N+1)*(N+1);
     size_t smem = (size_t)(3*nq + (N+1)*(N+1))*sizeof(real);
     const size_t maxLDS = 65536; // gfx942 LDS budget per block
     if( smem <= maxLDS ){
-      MappedContravariantDivergence_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), smem, 0>>>(dsdx,A,f,df,N,nel,nvar);
+      MappedContravariantDivergence_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), smem, 0>>>(dsdx,A,f,df,jacobian,N,nel,nvar);
     } else {
       // Fallback for very high N (N>=13, LDS would overflow): in-place
-      // contravariant projection followed by the grid-strided divergence.
-      // Numerically identical to the fused path.
+      // contravariant projection followed by the grid-strided divergence, then
+      // the Jacobian weight if requested. Numerically identical to the fused path.
       ContravariantProjection_3D_gpu(f, dsdx, N, nvar, nel);
       VectorDivergence_3D_gpu(A, f, df, N, nvar, nel);
+      if(jacobian){
+        JacobianWeight_3D_gpu(df, jacobian, N, nvar, nel);
+      }
     }
   }
 }
