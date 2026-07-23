@@ -660,13 +660,19 @@ extern "C"
   {
     int nq = (N+1)*(N+1)*(N+1);
     size_t smem = (size_t)(3*nq + (N+1)*(N+1))*sizeof(real);
-    const size_t maxLDS = 65536; // gfx942 LDS budget per block
+    // Portable dynamic-shared-memory ceiling: NVIDIA sm_70 (V100) caps dynamic
+    // shared at 48 KiB per block WITHOUT an opt-in (cudaFuncSetAttribute), and a
+    // launch requesting more fails silently. 48 KiB is also within the AMD
+    // gfx942 LDS budget, so use it as the common threshold; larger requests
+    // (double precision: N >= 12) fall back to the two-kernel path below.
+    const size_t maxLDS = 48*1024;
     if( smem <= maxLDS ){
       MappedContravariantDivergence_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), smem, 0>>>(dsdx,A,f,df,jacobian,N,nel,nvar);
     } else {
-      // Fallback for very high N (N>=13, LDS would overflow): in-place
-      // contravariant projection followed by the grid-strided divergence, then
-      // the Jacobian weight if requested. Numerically identical to the fused path.
+      // Fallback when the fused kernel's LDS request exceeds the ceiling:
+      // in-place contravariant projection followed by the grid-strided
+      // divergence, then the Jacobian weight if requested. Numerically identical
+      // to the fused path.
       ContravariantProjection_3D_gpu(f, dsdx, N, nvar, nel);
       VectorDivergence_3D_gpu(A, f, df, N, nvar, nel);
       if(jacobian){
