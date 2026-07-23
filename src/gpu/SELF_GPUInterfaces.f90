@@ -351,4 +351,17 @@ module SELF_GPUInterfaces
     endsubroutine VectorDivergence_3D_gpu
   endinterface
 
+  interface
+    ! Fused contravariant-projection + interior divergence for 3-D mapped
+    ! vectors. Handles the high-N LDS-overflow case internally (falls back to the
+    ! two-kernel projection + divergence path), so callers use it unconditionally.
+    subroutine MappedContravariantDivergence_3D_gpu(dsdx,A,f,df,N,nVar,nEl) &
+      bind(c,name="MappedContravariantDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: dsdx,A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine MappedContravariantDivergence_3D_gpu
+  endinterface
+
 endmodule SELF_GPUInterfaces

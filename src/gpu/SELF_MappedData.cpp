@@ -568,16 +568,95 @@ extern "C"
   {
 
     int nq = (N+1)*(N+1)*(N+1);
-    // Preserve the original one-thread-per-node launch geometry for N<8 (the
-    // grid-strided body then runs exactly one iteration per thread, so N<8
-    // behaviour and performance are unchanged); use a grid-strided 256-thread
-    // launch for N>=8, where (N+1)^3 exceeds the block-size limit.
-    if( N < 4 ){
-        ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(vector, dsdx, nq);
-    } else if( N < 8 ){
-        ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(vector, dsdx, nq);
+    // Grid-strided single launch, valid for any N. The mapped-vector divergence
+    // reaches this only as the high-N fallback of
+    // MappedContravariantDivergence_3D_gpu (N>=13); it remains a correct
+    // standalone contravariant projection for any degree.
+    ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), 0, 0>>>(vector, dsdx, nq);
+  }
+}
+
+// Fused contravariant-projection + interior divergence for 3-D mapped vectors.
+//
+// Profiling of the LinearEuler3D forward step on MI300X showed the separate
+// ContravariantProjection_3D kernel is the #1 hotspot (memory-bound, ~28% L2
+// hit) because it streams the physical flux + 9 metric terms through global
+// memory, writes the projected field back, and VectorDivergence_3D then re-reads
+// that field from global. This kernel fuses the two: each node's contravariant
+// components are computed ONCE during a shared-memory staging load (physical
+// flux * dsdx), then the tensor contraction reads them from LDS. This removes
+// the global write-back of the projected field and converts the contraction's
+// repeated global re-reads into LDS reads. It leaves the input `f` unmodified
+// (unlike the in-place ContravariantProjection).
+//
+// The arithmetic is IDENTICAL to ContravariantProjection_3D followed by
+// VectorDivergence_3D (same products, same summation order), so `df` is
+// bitwise-identical to the unfused chain. LDS use is (3*(N+1)^3 + (N+1)^2)
+// reals; the launcher only dispatches this kernel when that fits the LDS budget
+// (the Fortran caller falls back to the two-kernel path otherwise).
+__global__ void MappedContravariantDivergence_3D_gpukernel(real *dsdx, real *A, real *f, real *df,
+                                                           int N, int nel, int nvar){
+
+  int iel = blockIdx.x;
+  int ivar = blockIdx.y;
+  int nq = (N+1)*(N+1)*(N+1);
+
+  extern __shared__ real s[];
+  real *c1 = s;              // contravariant component 0, size nq
+  real *c2 = s + nq;         // component 1
+  real *c3 = s + 2*nq;       // component 2
+  real *sA = s + 3*nq;       // derivative matrix, size (N+1)*(N+1)
+
+  for(int idx = threadIdx.x; idx < (N+1)*(N+1); idx += blockDim.x){
+    sA[idx] = A[idx];
+  }
+
+  // Stage the contravariant-projected flux into LDS (projection computed once
+  // per node, identical order to ContravariantProjection_3D_gpukernel).
+  for(int iq = threadIdx.x; iq < nq; iq += blockDim.x){
+    real Fx = f[iq + nq*(iel + nel*(ivar))];
+    real Fy = f[iq + nq*(iel + nel*(ivar + nvar))];
+    real Fz = f[iq + nq*(iel + nel*(ivar + 2*nvar))];
+    c1[iq] = dsdx[iq + nq*iel]*Fx + dsdx[iq + nq*(iel+nel)]*Fy + dsdx[iq + nq*(iel+2*nel)]*Fz;
+    c2[iq] = dsdx[iq + nq*(iel+3*nel)]*Fx + dsdx[iq + nq*(iel+4*nel)]*Fy + dsdx[iq + nq*(iel+5*nel)]*Fz;
+    c3[iq] = dsdx[iq + nq*(iel+6*nel)]*Fx + dsdx[iq + nq*(iel+7*nel)]*Fy + dsdx[iq + nq*(iel+8*nel)]*Fz;
+  }
+  __syncthreads();
+
+  // Tensor contraction from LDS (identical order to VectorDivergence_3D_gpukernel).
+  for(int iq = threadIdx.x; iq < nq; iq += blockDim.x){
+    int i = iq % (N+1);
+    int j = (iq/(N+1)) % (N+1);
+    int k = iq/(N+1)/(N+1);
+    real acc = 0.0;
+    for(int a = 0; a < N+1; a++){
+      acc += sA[a + (N+1)*i]*c1[a + (N+1)*(j + (N+1)*k)]
+           + sA[a + (N+1)*j]*c2[i + (N+1)*(a + (N+1)*k)]
+           + sA[a + (N+1)*k]*c3[i + (N+1)*(j + (N+1)*a)];
+    }
+    df[SC_3D_INDEX(i,j,k,iel,ivar,N,nel)] = acc;
+  }
+}
+
+// Defined in SELF_MatrixMultiply.cpp; used as the high-N fallback below.
+extern "C" void VectorDivergence_3D_gpu(real *A, real *f, real *df, int N, int nvar, int nel);
+
+extern "C"
+{
+  void MappedContravariantDivergence_3D_gpu(real *dsdx, real *A, real *f, real *df,
+                                            int N, int nvar, int nel)
+  {
+    int nq = (N+1)*(N+1)*(N+1);
+    size_t smem = (size_t)(3*nq + (N+1)*(N+1))*sizeof(real);
+    const size_t maxLDS = 65536; // gfx942 LDS budget per block
+    if( smem <= maxLDS ){
+      MappedContravariantDivergence_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), smem, 0>>>(dsdx,A,f,df,N,nel,nvar);
     } else {
-        ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), 0, 0>>>(vector, dsdx, nq);
+      // Fallback for very high N (N>=13, LDS would overflow): in-place
+      // contravariant projection followed by the grid-strided divergence.
+      // Numerically identical to the fused path.
+      ContravariantProjection_3D_gpu(f, dsdx, N, nvar, nel);
+      VectorDivergence_3D_gpu(A, f, df, N, nvar, nel);
     }
   }
 }

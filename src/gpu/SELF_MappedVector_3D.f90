@@ -58,16 +58,6 @@ module SELF_MappedVector_3D
 
   endtype MappedVector3D
 
-  interface
-    subroutine ContravariantProjection_3D_gpu(f,dsdx,N,nvar,nel) &
-      bind(c,name="ContravariantProjection_3D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: f,dsdx
-      integer(c_int),value :: N,nvar,nel
-    endsubroutine ContravariantProjection_3D_gpu
-  endinterface
-
 contains
 
   subroutine Free_MappedVector3D(this)
@@ -230,12 +220,9 @@ contains
     class(MappedVector3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    ! Contravariant projection
-    call ContravariantProjection_3D_gpu(this%interior_gpu, &
-                                        this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
-
-    call VectorDivergence_3D_gpu(this%interp%dMatrix_gpu,this%interior_gpu,df, &
-                                 this%interp%N,this%nvar,this%nelem)
+    ! Fused contravariant projection + interior divergence.
+    call MappedContravariantDivergence_3D_gpu(this%geometry%dsdx%interior_gpu,this%interp%dMatrix_gpu, &
+                                              this%interior_gpu,df,this%interp%N,this%nvar,this%nelem)
 
     call JacobianWeight_3D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
 
@@ -251,12 +238,9 @@ contains
     class(MappedVector3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    ! Contravariant projection
-    call ContravariantProjection_3D_gpu(this%interior_gpu, &
-                                        this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
-
-    call VectorDivergence_3D_gpu(this%interp%dgMatrix_gpu,this%interior_gpu,df, &
-                                 this%interp%N,this%nvar,this%nelem)
+    ! Fused contravariant projection + interior divergence.
+    call MappedContravariantDivergence_3D_gpu(this%geometry%dsdx%interior_gpu,this%interp%dgMatrix_gpu, &
+                                              this%interior_gpu,df,this%interp%N,this%nvar,this%nelem)
 
     ! Boundary terms
     call DG_BoundaryContribution_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
