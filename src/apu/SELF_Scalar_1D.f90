@@ -29,7 +29,6 @@ module SELF_Scalar_1D
   use SELF_Constants
   use SELF_Scalar_1D_t
   use SELF_GPU
-  use SELF_GPUBLAS
   use iso_c_binding
 
   implicit none
@@ -37,7 +36,6 @@ module SELF_Scalar_1D
 ! ---------------------- Scalars ---------------------- !
   type,extends(Scalar1D_t),public :: Scalar1D
     character(3) :: backend = "apu"
-    type(c_ptr) :: blas_handle
 
   contains
 
@@ -49,6 +47,18 @@ module SELF_Scalar_1D
     !procedure,public :: Derivative => Derivative_Scalar1D
 
   endtype Scalar1D
+
+  ! Hand-written tensor-product contraction kernel (see gpu/SELF_MatrixMultiply.cpp),
+  ! shared with the gpu backend and reused here for the APU device model.
+  interface
+    subroutine MatrixOp_1D_gpu(A,f,Af,opArows,opAcols,ncol) &
+      bind(c,name="MatrixOp_1D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,Af
+      integer(c_int),value :: opArows,opAcols,ncol
+    endsubroutine MatrixOp_1D_gpu
+  endinterface
 
 contains
 
@@ -85,8 +95,6 @@ contains
     call gpuCheck(hipMalloc(c_loc(this%extBoundary_gpu),sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(c_loc(this%avgBoundary_gpu),sizeof(this%avgBoundary)))
 
-    call hipblasCheck(hipblasCreate(this%blas_handle))
-
   endsubroutine Init_Scalar1D
 
   subroutine Free_Scalar1D(this)
@@ -104,7 +112,6 @@ contains
     call gpuCheck(hipFree(c_loc(this%boundary_gpu)))
     call gpuCheck(hipFree(c_loc(this%extBoundary_gpu)))
     call gpuCheck(hipFree(c_loc(this%avgBoundary_gpu)))
-    call hipblasCheck(hipblasDestroy(this%blas_handle))
 
   endsubroutine Free_Scalar1D
 
@@ -134,11 +141,11 @@ contains
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call self_blas_matrixop_1d(this%interp%bMatrix_gpu, &
-                               this%interior_gpu, &
-                               this%boundary_gpu, &
-                               2,this%N+1, &
-                               this%nvar*this%nelem,this%blas_handle)
+    call MatrixOp_1D_gpu(this%interp%bMatrix_gpu, &
+                         this%interior_gpu, &
+                         this%boundary_gpu, &
+                         2,this%N+1, &
+                         this%nvar*this%nelem)
 
   endsubroutine BoundaryInterp_Scalar1D
 

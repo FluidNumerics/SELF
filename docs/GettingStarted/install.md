@@ -230,7 +230,7 @@ cmake -DSELF_ENABLE_MULTITHREADING=ON \
 The CMake build system will set the appropriate flags for multithreading for GNU, Intel (`ifort` and `ifx`), LLVM, and Nvidia HPC Compilers. If you are not using `gfortran`, you can set the number of threads for parallelism at runtime using the `OMP_NUM_THREADS` environment variable
 
 ### Enabling GPU Support 
-SELF offers the option to use HIP or CUDA. Some of our "heavy-lifting" kernels, such as divergence, gradient, and grid interpolation operations are expressed using the BLAS API. For these, we use HIPBLAS or CUBLAS. GPU support is enabled in the CMake stage of the build by setting `SELF_ENABLE_GPU=ON`
+SELF offers the option to use HIP or CUDA. Our "heavy-lifting" kernels, such as divergence, gradient, and grid interpolation operations, are implemented as hand-written CUDA/HIP tensor-product contraction kernels (see `src/gpu/SELF_MatrixMultiply.cpp`); SELF has no dependency on a vendor BLAS library (hipBLAS/cuBLAS). GPU support is enabled in the CMake stage of the build by setting `SELF_ENABLE_GPU=ON`
 
 The CMake build system will automatically search for HIP. If HIP is not found, then it will search for CUDA. If neither is found, the build process will fail.
 

@@ -288,4 +288,77 @@ module SELF_GPUInterfaces
     endsubroutine ECDGSurfaceContribution_3D_gpu
   endinterface
 
+  ! MatrixMultiply : hand-written tensor-product contraction kernels that
+  ! replace the cuBLAS/hipBLAS matrix operators (see SELF_MatrixMultiply.cpp).
+
+  interface
+    subroutine MatrixOp_1D_gpu(A,f,Af,opArows,opAcols,ncol) &
+      bind(c,name="MatrixOp_1D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,Af
+      integer(c_int),value :: opArows,opAcols,ncol
+    endsubroutine MatrixOp_1D_gpu
+  endinterface
+
+  interface
+    subroutine GridInterp_2D_gpu(A,f,fInterp,N,M,nVar,nEl) &
+      bind(c,name="GridInterp_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,fInterp
+      integer(c_int),value :: N,M,nVar,nEl
+    endsubroutine GridInterp_2D_gpu
+  endinterface
+
+  interface
+    subroutine GridInterp_3D_gpu(A,f,fInterp,N,M,nVar,nEl) &
+      bind(c,name="GridInterp_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,fInterp
+      integer(c_int),value :: N,M,nVar,nEl
+    endsubroutine GridInterp_3D_gpu
+  endinterface
+
+  interface
+    subroutine ScalarGradient_2D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="ScalarGradient_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine ScalarGradient_2D_gpu
+  endinterface
+
+  interface
+    subroutine ScalarGradient_3D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="ScalarGradient_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine ScalarGradient_3D_gpu
+  endinterface
+
+  interface
+    subroutine VectorDivergence_2D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="VectorDivergence_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine VectorDivergence_2D_gpu
+  endinterface
+
+  interface
+    subroutine VectorDivergence_3D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="VectorDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine VectorDivergence_3D_gpu
+  endinterface
+
 endmodule SELF_GPUInterfaces

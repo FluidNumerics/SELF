@@ -148,10 +148,10 @@ contains
     class(MappedScalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    call self_blas_matrixop_1d(this%interp%dgMatrix_gpu, &
-                               this%interior_gpu, &
-                               df,this%N+1,this%N+1, &
-                               this%nvar*this%nelem,this%blas_handle)
+    call MatrixOp_1D_gpu(this%interp%dgMatrix_gpu, &
+                         this%interior_gpu, &
+                         df,this%N+1,this%N+1, &
+                         this%nvar*this%nelem)
 
     call DGDerivative_BoundaryContribution_1D_gpu(this%interp%bMatrix_gpu, &
                                                   this%interp%qWeights_gpu, &

@@ -3,7 +3,7 @@
 ## SELF
 The Spectral Element Library in Fortran (SELF) is an object oriented suite of Fortran modules that enable researchers to implement conservation law solvers using Spectral Element Methods. One goal of this project is to help dispel the notion that Fortran codes are ancient monoliths designed for a single (potentially unknown) purpose. The other goal is to make it easy to explore high order conservation law solvers on a broad range of compute platforms.
 
-SELF is built with modern compute architecture in mind. Our intention is to enable scientific software developers to build SELF for personal workstations, GPU and multi-GPU accelerated platforms, and HPC clusters. SELF can be built with optional GPU acceleration provided by either CUDA & CUBLAS or HIP & HIPBLAS. With GPU-Aware MPI installed, you can also run SELF applications on multi-GPU platforms.
+SELF is built with modern compute architecture in mind. Our intention is to enable scientific software developers to build SELF for personal workstations, GPU and multi-GPU accelerated platforms, and HPC clusters. SELF can be built with optional GPU acceleration provided by either CUDA or HIP, using hand-written device kernels (no vendor BLAS dependency). With GPU-Aware MPI installed, you can also run SELF applications on multi-GPU platforms.
 
 
 ## Models

@@ -29,7 +29,6 @@ module SELF_Scalar_2D
   use SELF_Constants
   use SELF_Scalar_2D_t
   use SELF_GPU
-  use SELF_GPUBLAS
   use SELF_GPUInterfaces
   use iso_c_binding
 
@@ -37,13 +36,11 @@ module SELF_Scalar_2D
 
   type,extends(Scalar2D_t),public :: Scalar2D
     character(3) :: backend = "gpu"
-    type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
     type(c_ptr) :: boundarynormal_gpu
     type(c_ptr) :: extBoundary_gpu
     type(c_ptr) :: avgBoundary_gpu
-    type(c_ptr) :: interpWork
 
   contains
 
@@ -70,8 +67,6 @@ contains
     type(Lagrange),intent(in),target :: interp
     integer,intent(in) :: nVar
     integer,intent(in) :: nElem
-    ! Local
-    integer(c_size_t) :: workSize
 
     this%interp => interp
     this%nVar = nVar
@@ -99,12 +94,8 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize = int(interp%N+1,c_size_t)*(interp%M+1)*nelem*nvar*prec
-    call gpuCheck(hipMalloc(this%interpWork,workSize))
 
     call this%UpdateDevice()
-
-    call hipblasCheck(hipblasCreate(this%blas_handle))
 
   endsubroutine Init_Scalar2D
 
@@ -128,8 +119,6 @@ contains
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
     call gpuCheck(hipFree(this%boundarynormal_gpu))
-    call gpuCheck(hipFree(this%interpWork))
-    call hipblasCheck(hipblasDestroy(this%blas_handle))
 
   endsubroutine Free_Scalar2D
 
@@ -179,13 +168,8 @@ contains
     class(Scalar2D),intent(inout) :: this
     type(c_ptr),intent(inout) :: f
 
-    call self_blas_matrixop_dim1_2d(this%interp%iMatrix_gpu,this%interior_gpu, &
-                                    this%interpWork,this%N,this%M,this%nvar,this%nelem, &
-                                    this%blas_handle)
-
-    call self_blas_matrixop_dim2_2d(this%interp%iMatrix_gpu,this%interpWork,f, &
-                                    0.0_c_prec,this%N,this%M,this%nvar,this%nelem, &
-                                    this%blas_handle)
+    call GridInterp_2D_gpu(this%interp%iMatrix_gpu,this%interior_gpu, &
+                           f,this%N,this%M,this%nvar,this%nelem)
 
   endsubroutine GridInterp_Scalar2D
 
@@ -193,25 +177,9 @@ contains
     implicit none
     class(Scalar2D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
-    !Local
-    real(prec),pointer :: df_p(:,:,:,:,:)
-    real(prec),pointer :: dfloc(:,:,:,:)
-    type(c_ptr) :: dfc
 
-    call c_f_pointer(df,df_p,[this%interp%N+1,this%interp%N+1,this%nelem,this%nvar,2])
-
-    dfloc(1:,1:,1:,1:) => df_p(1:,1:,1:,1:,1)
-    dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,this%interior_gpu,dfc, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-
-    dfloc(1:,1:,1:,1:) => df_p(1:,1:,1:,1:,2)
-    dfc = c_loc(dfloc)
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,this%interior_gpu,dfc,0.0_c_prec, &
-                                    this%interp%N,this%interp%N,this%nvar,this%nelem,this%blas_handle)
-
-    dfloc => null()
-    df_p => null()
+    call ScalarGradient_2D_gpu(this%interp%dMatrix_gpu,this%interior_gpu,df, &
+                               this%interp%N,this%nvar,this%nelem)
 
   endsubroutine Gradient_Scalar2D
 
