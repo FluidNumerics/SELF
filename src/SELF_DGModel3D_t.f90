@@ -100,6 +100,11 @@ contains
     this%geometry => geometry
     call this%SetNumberOfVariables()
 
+    ! Default the number of time-stepped variables to nvar. Models that carry
+    ! auxiliary/diagnostic variables may set this%nstepped < nvar inside
+    ! SetNumberOfVariables to exclude the trailing variables from time integration.
+    if(this%nstepped <= 0 .or. this%nstepped > this%nvar) this%nstepped = this%nvar
+
     call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
     call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)

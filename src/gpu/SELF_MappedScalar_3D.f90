@@ -37,12 +37,16 @@ module SELF_MappedScalar_3D
 
     type(c_ptr) :: jas_gpu ! jacobian weighted scalar for gradient calculation
 
-    ! Packed device buffers for the aggregated MPI halo exchange. The side
-    ! tables are shared across fields and live on mesh%decomp; the buffers
-    ! are per-field (sized by this field's variable count) and allocated
-    ! lazily on the first exchange.
+    ! Packed device buffers and persistent MPI requests for the aggregated
+    ! halo exchange. The side tables are shared across fields and live on
+    ! mesh%decomp; the buffers and requests are per-field (sized by this
+    ! field's variable count) and created lazily on the first exchange.
     type(c_ptr) :: halo_sendbuf_gpu = c_null_ptr ! packed device send buffer
     type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
+    integer,allocatable :: halo_reqs(:) ! persistent requests; receives in 1:nnbr, sends in nnbr+1:2*nnbr
+    integer :: halo_nactive = 0 ! variable count baked into halo_reqs
+    integer :: halo_inflight = 0 ! variable count of the exchange in flight (0 = none)
+    logical :: halo_static_done = .false. ! all variables have been exchanged at least once
 
   contains
     procedure,public :: Init => Init_MappedScalar3D
@@ -51,7 +55,8 @@ module SELF_MappedScalar_3D
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar3D
 
     procedure,public :: SideExchange => SideExchange_MappedScalar3D
-    procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar3D
+    procedure,public :: SideExchangeStart => SideExchangeStart_MappedScalar3D
+    procedure,public :: SideExchangeFinish => SideExchangeFinish_MappedScalar3D
 
     generic,public :: MappedGradient => MappedGradient_MappedScalar3D
     procedure,private :: MappedGradient_MappedScalar3D
@@ -134,6 +139,9 @@ contains
   subroutine Free_MappedScalar3D(this)
     implicit none
     class(MappedScalar3D),intent(inout) :: this
+    ! Local
+    integer :: n,iError
+    logical :: mpiIsFinalized
 
     this%nVar = 0
     this%nElem = 0
@@ -160,6 +168,22 @@ contains
     if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
     this%halo_sendbuf_gpu = c_null_ptr
     this%halo_recvbuf_gpu = c_null_ptr
+
+    if(allocated(this%halo_reqs)) then
+      ! Persistent requests can only be released while MPI is still
+      ! initialized; if the mesh (and its MPI finalization) was freed first,
+      ! MPI has reclaimed them already.
+      call MPI_FINALIZED(mpiIsFinalized,iError)
+      if(.not. mpiIsFinalized) then
+        do n = 1,size(this%halo_reqs)
+          call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
+        enddo
+      endif
+      deallocate(this%halo_reqs)
+    endif
+    this%halo_nactive = 0
+    this%halo_inflight = 0
+    this%halo_static_done = .false.
 
   endsubroutine Free_MappedScalar3D
 
@@ -200,81 +224,104 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedScalar3D
 
-  subroutine MPIExchangeAsync_MappedScalar3D(this,mesh)
-  !! Post the aggregated halo exchange: one MPI_Irecv/MPI_Isend pair per
-  !! neighboring rank, carrying every (side,variable) boundary trace shared
-  !! with that rank in a single packed device buffer. The pack kernel
-  !! synchronizes the device before returning so the send buffer is complete
-  !! before MPI_Isend is posted. Packed buffers are allocated on first use;
-  !! the shared side tables are built by SideExchange before this is called.
+  subroutine SideExchangeStart_MappedScalar3D(this,mesh,nactive)
+  !! Begin the aggregated halo exchange and launch the local (same-rank)
+  !! side exchange kernel.
+  !!
+  !! One persistent MPI_Recv_init/MPI_Send_init pair per neighboring rank is
+  !! (re)created the first time this is called (and again if the number of
+  !! exchanged variables changes), then re-armed with MPI_Startall on every
+  !! subsequent exchange; receives are always started before sends.
+  !!
+  !! When `nactive` is provided, only the leading `nactive` variables are
+  !! exchanged - the variable index is the outermost dimension of the
+  !! boundary arrays, so the leading variables form a contiguous prefix.
+  !! The first exchange always carries all variables so that the boundary
+  !! traces of static (non-stepped) variables are valid; static traces do
+  !! not change thereafter, so later exchanges may carry the prefix only.
+  !!
+  !! The matching SideExchangeFinish must be called before extBoundary is
+  !! read on interior faces. Between Start and Finish, callers may perform
+  !! any work that does not read interior-face extBoundary entries; the MPI
+  !! messages and the local exchange kernel launched here proceed
+  !! concurrently with that work.
     implicit none
     class(MappedScalar3D),intent(inout) :: this
     type(Mesh3D),intent(inout) :: mesh
+    integer,intent(in),optional :: nactive
     ! Local
-    integer :: n,npts,cnt,disp
+    integer :: n,nnbr,npts,cnt,disp,nact
     integer :: iError
-    integer :: msgCount
+    integer :: offset
     integer(c_size_t) :: worksize
     real(prec),pointer :: sendbuf(:)
     real(prec),pointer :: recvbuf(:)
 
-    npts = (this%interp%N+1)*(this%interp%N+1)*this%nvar
-
-    if(.not. c_associated(this%halo_sendbuf_gpu)) then
-      worksize = int(mesh%decomp%halo_nsides,c_size_t)* &
-                 int(npts,c_size_t)*prec
-      call gpuCheck(hipMalloc(this%halo_sendbuf_gpu,worksize))
-      call gpuCheck(hipMalloc(this%halo_recvbuf_gpu,worksize))
-    endif
-
-    call HaloPack_3D_gpu(this%boundary_gpu,this%halo_sendbuf_gpu, &
-                         mesh%decomp%halo_sides_gpu,this%interp%N,this%nvar, &
-                         this%nelem,mesh%decomp%halo_nsides)
-
-    call c_f_pointer(this%halo_sendbuf_gpu,sendbuf,[mesh%decomp%halo_nsides*npts])
-    call c_f_pointer(this%halo_recvbuf_gpu,recvbuf,[mesh%decomp%halo_nsides*npts])
-
-    msgCount = 0
-    do n = 1,mesh%decomp%halo_nnbr
-
-      cnt = (mesh%decomp%halo_offset(n+1)-mesh%decomp%halo_offset(n))*npts
-      disp = mesh%decomp%halo_offset(n)*npts
-
-      msgCount = msgCount+1
-      call MPI_IRECV(recvbuf(disp+1),cnt, &
-                     mesh%decomp%mpiPrec, &
-                     mesh%decomp%halo_rank(n),0, &
-                     mesh%decomp%mpiComm, &
-                     mesh%decomp%requests(msgCount),iError)
-
-      msgCount = msgCount+1
-      call MPI_ISEND(sendbuf(disp+1),cnt, &
-                     mesh%decomp%mpiPrec, &
-                     mesh%decomp%halo_rank(n),0, &
-                     mesh%decomp%mpiComm, &
-                     mesh%decomp%requests(msgCount),iError)
-
-    enddo
-
-    mesh%decomp%msgCount = msgCount
-
-  endsubroutine MPIExchangeAsync_MappedScalar3D
-
-  subroutine SideExchange_MappedScalar3D(this,mesh)
-    implicit none
-    class(MappedScalar3D),intent(inout) :: this
-    type(Mesh3D),intent(inout) :: mesh
-    ! Local
-    integer :: offset
-
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
     if(mesh%decomp%mpiEnabled) then
+
       if(.not. mesh%decomp%halo_built) then
         call mesh%decomp%BuildHaloExchange(mesh%sideInfo,mesh%nElem,6)
       endif
+
       if(mesh%decomp%halo_nsides > 0) then
-        call this%MPIExchangeAsync(mesh)
+
+        nact = this%nvar
+        if(present(nactive)) then
+          if(this%halo_static_done .and. nactive >= 1 .and. nactive <= this%nvar) then
+            nact = nactive
+          endif
+        endif
+
+        if(.not. c_associated(this%halo_sendbuf_gpu)) then
+          ! Buffers are sized for a full-variable exchange; prefix exchanges
+          ! use the leading portion.
+          worksize = int(mesh%decomp%halo_nsides,c_size_t)* &
+                     int((this%interp%N+1)*(this%interp%N+1)*this%nvar,c_size_t)*prec
+          call gpuCheck(hipMalloc(this%halo_sendbuf_gpu,worksize))
+          call gpuCheck(hipMalloc(this%halo_recvbuf_gpu,worksize))
+        endif
+
+        ! Pack the send buffer; the pack kernel synchronizes the device
+        ! before returning so the buffer is complete before the sends start.
+        call HaloPack_3D_gpu(this%boundary_gpu,this%halo_sendbuf_gpu, &
+                             mesh%decomp%halo_sides_gpu,this%interp%N,nact, &
+                             this%nelem,mesh%decomp%halo_nsides)
+
+        nnbr = mesh%decomp%halo_nnbr
+
+        if(nact /= this%halo_nactive) then
+          ! (Re)create the persistent requests for this variable count
+          if(allocated(this%halo_reqs)) then
+            do n = 1,size(this%halo_reqs)
+              call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
+            enddo
+            deallocate(this%halo_reqs)
+          endif
+          allocate(this%halo_reqs(1:2*nnbr))
+          npts = (this%interp%N+1)*(this%interp%N+1)*nact
+          call c_f_pointer(this%halo_sendbuf_gpu,sendbuf,[mesh%decomp%halo_nsides*npts])
+          call c_f_pointer(this%halo_recvbuf_gpu,recvbuf,[mesh%decomp%halo_nsides*npts])
+          do n = 1,nnbr
+            cnt = (mesh%decomp%halo_offset(n+1)-mesh%decomp%halo_offset(n))*npts
+            disp = mesh%decomp%halo_offset(n)*npts
+            call MPI_RECV_INIT(recvbuf(disp+1),cnt,mesh%decomp%mpiPrec, &
+                               mesh%decomp%halo_rank(n),0,mesh%decomp%mpiComm, &
+                               this%halo_reqs(n),iError)
+            call MPI_SEND_INIT(sendbuf(disp+1),cnt,mesh%decomp%mpiPrec, &
+                               mesh%decomp%halo_rank(n),0,mesh%decomp%mpiComm, &
+                               this%halo_reqs(nnbr+n),iError)
+          enddo
+          this%halo_nactive = nact
+        endif
+
+        ! Arm the receives before the sends
+        call MPI_STARTALL(nnbr,this%halo_reqs(1:nnbr),iError)
+        call MPI_STARTALL(nnbr,this%halo_reqs(nnbr+1:2*nnbr),iError)
+
+        this%halo_inflight = nact
+
       endif
     endif
 
@@ -284,15 +331,44 @@ contains
                              this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
                              mesh%decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
 
-    if(mesh%decomp%mpiEnabled) then
-      if(mesh%decomp%halo_nsides > 0) then
-        call mesh%decomp%FinalizeMPIExchangeAsync()
-        ! Unpack the received traces into extBoundary, applying side flips
-        call HaloUnpack_3D_gpu(this%halo_recvbuf_gpu,this%extboundary_gpu, &
-                               mesh%decomp%halo_sides_gpu,this%interp%N,this%nvar, &
-                               this%nelem,mesh%decomp%halo_nsides)
-      endif
+  endsubroutine SideExchangeStart_MappedScalar3D
+
+  subroutine SideExchangeFinish_MappedScalar3D(this,mesh)
+  !! Complete the aggregated halo exchange started by SideExchangeStart:
+  !! wait on the persistent requests and unpack the received traces into
+  !! extBoundary, applying side flips. The host blocks in MPI_Waitall (which
+  !! also drives MPI progress) while previously launched device kernels
+  !! continue to execute. No-op if no exchange is in flight.
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: iError
+
+    if(this%halo_inflight > 0) then
+
+      call MPI_WAITALL(2*mesh%decomp%halo_nnbr,this%halo_reqs, &
+                       MPI_STATUSES_IGNORE,iError)
+
+      ! Unpack the received traces into extBoundary, applying side flips
+      call HaloUnpack_3D_gpu(this%halo_recvbuf_gpu,this%extboundary_gpu, &
+                             mesh%decomp%halo_sides_gpu,this%interp%N, &
+                             this%halo_inflight,this%nelem,mesh%decomp%halo_nsides)
+
+      if(this%halo_inflight == this%nvar) this%halo_static_done = .true.
+      this%halo_inflight = 0
+
     endif
+
+  endsubroutine SideExchangeFinish_MappedScalar3D
+
+  subroutine SideExchange_MappedScalar3D(this,mesh)
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+
+    call this%SideExchangeStart(mesh)
+    call this%SideExchangeFinish(mesh)
 
   endsubroutine SideExchange_MappedScalar3D
 
