@@ -123,12 +123,8 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize = int(interp%N+1,c_size_t)*(interp%M+1)*nelem*nvar*prec
-    call gpuCheck(hipMalloc(this%interpWork,workSize))
     workSize = int(interp%N+1,c_size_t)*(interp%N+1)*nelem*nvar*4*prec
     call gpuCheck(hipMalloc(this%jas_gpu,workSize))
-
-    call hipblasCheck(hipblasCreate(this%blas_handle))
 
     call this%UpdateDevice()
 
@@ -156,9 +152,7 @@ contains
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
-    call gpuCheck(hipFree(this%interpWork))
     call gpuCheck(hipFree(this%jas_gpu))
-    call hipblasCheck(hipblasDestroy(this%blas_handle))
 
     if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
     if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
@@ -370,26 +364,14 @@ contains
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(c_ptr),intent(out) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
 
     call ContravariantWeight_2D_gpu(this%interior_gpu, &
                                     this%geometry%dsdx%interior_gpu,this%jas_gpu, &
                                     this%interp%N,this%nvar,this%nelem)
 
-    ! From Vector divergence
-    call c_f_pointer(this%jas_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,2*this%nvar,2])
-
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    1.0_c_prec,this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    f_p => null()
+    ! Strong-form divergence of the contravariant-weighted field (jas)
+    call VectorDivergence_2D_gpu(this%interp%dMatrix_gpu,this%jas_gpu,df, &
+                                 this%interp%N,2*this%nvar,this%nelem)
 
     call JacobianWeight_2D_gpu(df,this%geometry%J%interior_gpu,this%N,2*this%nVar,this%nelem)
 
@@ -400,26 +382,14 @@ contains
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(c_ptr),intent(inout) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
 
     call ContravariantWeight_2D_gpu(this%interior_gpu, &
                                     this%geometry%dsdx%interior_gpu,this%jas_gpu, &
                                     this%interp%N,this%nvar,this%nelem)
 
-    ! From Vector divergence
-    call c_f_pointer(this%jas_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,2*this%nvar,2])
-
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dgMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dgMatrix_gpu,fc,df, &
-                                    1.0_c_prec,this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    f_p => null()
+    ! Weak-form (DG) divergence of the contravariant-weighted field (jas)
+    call VectorDivergence_2D_gpu(this%interp%dgMatrix_gpu,this%jas_gpu,df, &
+                                 this%interp%N,2*this%nvar,this%nelem)
 
     ! Do the boundary terms
     call NormalWeight_2D_gpu(this%avgBoundary_gpu, &

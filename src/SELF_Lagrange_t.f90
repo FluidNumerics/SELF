@@ -58,9 +58,6 @@ module SELF_Lagrange_t
 
     integer :: targetNodeType
 
-    type(c_ptr) :: blas_handle = c_null_ptr
-      !! A handle for working with hipblas
-
     real(prec),pointer,contiguous,dimension(:) :: controlPoints
       !! The set of nodes in one dimension where data is known.
       !! To create higher dimension interpolation and differentiation operators, structured grids in two and three

@@ -29,7 +29,6 @@ module SELF_MappedVector_2D
   use SELF_MappedVector_2D_t
   use SELF_GPU
   use SELF_GPUInterfaces
-  use SELF_GPUBLAS
   use iso_c_binding
 
   implicit none
