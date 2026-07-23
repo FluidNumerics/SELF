@@ -535,9 +535,9 @@ extern "C"
 
 __global__ void ContravariantProjection_3D_gpukernel(real *vector, real *dsdx, int nq){
 
-    uint32_t iq = threadIdx.x; // loops over quadrature points and elements
-
-    if( iq < nq ){
+    // Grid-strided over quadrature points so that any polynomial degree N is
+    // supported (nq = (N+1)^3 may exceed the thread-block size).
+    for(uint32_t iq = threadIdx.x; iq < nq; iq += blockDim.x){
       uint32_t iel = blockIdx.x;
       uint32_t nel = gridDim.x;
       uint32_t ivar = blockIdx.y;
@@ -568,11 +568,16 @@ extern "C"
   {
 
     int nq = (N+1)*(N+1)*(N+1);
+    // Preserve the original one-thread-per-node launch geometry for N<8 (the
+    // grid-strided body then runs exactly one iteration per thread, so N<8
+    // behaviour and performance are unchanged); use a grid-strided 256-thread
+    // launch for N>=8, where (N+1)^3 exceeds the block-size limit.
     if( N < 4 ){
         ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(vector, dsdx, nq);
-
-    } else if( N >= 4 && N < 8 ){
+    } else if( N < 8 ){
         ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(vector, dsdx, nq);
+    } else {
+        ContravariantProjection_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), 0, 0>>>(vector, dsdx, nq);
     }
-  } 
+  }
 }
