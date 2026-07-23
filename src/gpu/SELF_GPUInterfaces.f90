@@ -112,6 +112,31 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    ! Fused tendency (source - fluxDivergence) + low-storage RK stage update,
+    ! replacing CalculateDSDt_gpu + UpdateGRK_gpu.
+    subroutine UpdateGRK_CalculateDSDt_gpu(grk,solution,fluxDivergence,source,rk_a,rk_g,dt,ndof) &
+      bind(c,name="UpdateGRK_CalculateDSDt_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: grk,solution,fluxDivergence,source
+      real(c_prec),value :: rk_a,rk_g,dt
+      integer(c_int),value :: ndof
+    endsubroutine UpdateGRK_CalculateDSDt_gpu
+  endinterface
+
+  interface
+    ! Fused tendency + Euler update, replacing CalculateDSDt_gpu + UpdateSolution_gpu.
+    subroutine UpdateSolution_CalculateDSDt_gpu(solution,fluxDivergence,source,dt,ndof) &
+      bind(c,name="UpdateSolution_CalculateDSDt_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: solution,fluxDivergence,source
+      real(c_prec),value :: dt
+      integer(c_int),value :: ndof
+    endsubroutine UpdateSolution_CalculateDSDt_gpu
+  endinterface
+
+  interface
     subroutine AccumulateField_gpu(a,b,ndof) bind(c,name="AccumulateField_gpu")
       use iso_c_binding
       use SELF_Constants

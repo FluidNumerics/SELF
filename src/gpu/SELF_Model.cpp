@@ -129,6 +129,34 @@ __global__ void CalculateDSDt_Model(real *fluxDivergence, real *source, real *dS
 
 }
 
+// Fused CalculateDSDt + RK stage update: forms the tendency
+// (source - fluxDivergence) in a register and applies the low-storage RK stage
+// update in one pass, avoiding the separate dSdt global write + re-read.
+// Bitwise-identical to CalculateDSDt_Model followed by UpdateGRK_Model.
+__global__ void UpdateGRK_CalculateDSDt_Model(real *grk, real *solution, real *fluxDivergence, real *source, real rk_a, real rk_g, real dt, uint32_t ndof){
+
+  size_t i = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if (i < ndof ){
+    real dSdt = source[i]-fluxDivergence[i];
+    grk[i] = rk_a*grk[i] + dSdt;
+    solution[i] += rk_g*dt*grk[i];
+  }
+
+}
+
+// Fused CalculateDSDt + Euler update. Bitwise-identical to CalculateDSDt_Model
+// followed by UpdateSolution_Model.
+__global__ void UpdateSolution_CalculateDSDt_Model(real *solution, real *fluxDivergence, real *source, real dt, uint32_t ndof){
+
+  size_t i = threadIdx.x + blockIdx.x*blockDim.x;
+
+  if (i < ndof ){
+    solution[i] += dt*(source[i]-fluxDivergence[i]);
+  }
+
+}
+
 // Accumulate one field into another (a += b) on the device. Used to
 // fold the parabolic-divergence buffer into the total fluxDivergence
 // before the dSdt computation.
@@ -166,6 +194,26 @@ extern "C"
     uint32_t nthreads = 256;
     uint32_t nblocks_x = ndof/nthreads + 1;
     CalculateDSDt_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(fluxDivergence, source, dSdt, ndof);
+  }
+}
+
+extern "C"
+{
+  void UpdateGRK_CalculateDSDt_gpu(real *grk, real *solution, real *fluxDivergence, real *source, real rk_a, real rk_g, real dt, int ndof)
+  {
+    uint32_t nthreads = 256;
+    uint32_t nblocks_x = ndof/nthreads + 1;
+    UpdateGRK_CalculateDSDt_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(grk, solution, fluxDivergence, source, rk_a, rk_g, dt, ndof);
+  }
+}
+
+extern "C"
+{
+  void UpdateSolution_CalculateDSDt_gpu(real *solution, real *fluxDivergence, real *source, real dt, int ndof)
+  {
+    uint32_t nthreads = 256;
+    uint32_t nblocks_x = ndof/nthreads + 1;
+    UpdateSolution_CalculateDSDt_Model<<<dim3(nblocks_x,1), dim3(nthreads,1,1), 0, 0>>>(solution, fluxDivergence, source, dt, ndof);
   }
 }
 
