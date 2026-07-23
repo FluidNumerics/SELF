@@ -100,6 +100,11 @@ contains
     this%geometry => geometry
     call this%SetNumberOfVariables()
 
+    ! Default the number of time-stepped variables to nvar. Models that carry
+    ! auxiliary/diagnostic variables may set this%nstepped < nvar inside
+    ! SetNumberOfVariables to exclude the trailing variables from time integration.
+    if(this%nstepped <= 0 .or. this%nstepped > this%nvar) this%nstepped = this%nvar
+
     call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
     call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
     call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
@@ -247,7 +252,7 @@ contains
     endif
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%solution%interior(i,j,k,iEl,iVar) = &
         this%solution%interior(i,j,k,iEl,iVar)+ &
@@ -265,7 +270,7 @@ contains
     integer :: i,j,k,iVar,iEl
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%workSol%interior(i,j,k,iEl,iVar) = rk2_a(m)* &
                                               this%workSol%interior(i,j,k,iEl,iVar)+ &
@@ -287,7 +292,7 @@ contains
     integer :: i,j,k,iVar,iEl
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%workSol%interior(i,j,k,iEl,iVar) = rk3_a(m)* &
                                               this%workSol%interior(i,j,k,iEl,iVar)+ &
@@ -309,7 +314,7 @@ contains
     integer :: i,j,k,iVar,iEl
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%workSol%interior(i,j,k,iEl,iVar) = rk4_a(m)* &
                                               this%workSol%interior(i,j,k,iEl,iVar)+ &
