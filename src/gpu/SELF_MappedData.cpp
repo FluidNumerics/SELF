@@ -649,6 +649,27 @@ __global__ void MappedContravariantDivergence_3D_gpukernel(real *dsdx, real *A, 
 // Defined in SELF_MatrixMultiply.cpp; used as the high-N fallback below.
 extern "C" void VectorDivergence_3D_gpu(real *A, real *f, real *df, int N, int nvar, int nel);
 
+// Maximum dynamic shared memory (bytes) a plain <<<...,smem,...>>> launch may
+// request on the active device WITHOUT an opt-in (cudaFuncSetAttribute /
+// hipFuncSetAttribute). This is 48 KiB on NVIDIA sm_70/sm_80 and 64 KiB on AMD
+// gfx942; a launch requesting more fails (silently for sm_70). Queried once and
+// cached, so the fused divergence kernel is used up to the device's real limit
+// (falling back to the two-kernel path above it) rather than a fixed guess.
+static size_t maxDynamicSharedBytes(){
+  static size_t cached = 0;
+  if(cached) return cached;
+  int dev = 0, v = 0;
+#ifdef __HIP_PLATFORM_AMD__
+  CHECK(hipGetDevice(&dev));
+  CHECK(hipDeviceGetAttribute(&v, hipDeviceAttributeMaxSharedMemoryPerBlock, dev));
+#else
+  CHECK(cudaGetDevice(&dev));
+  CHECK(cudaDeviceGetAttribute(&v, cudaDevAttrMaxSharedMemoryPerBlock, dev));
+#endif
+  cached = (size_t)v;
+  return cached;
+}
+
 extern "C"
 {
   // If jacobian is non-null, the /J weight is folded into the epilogue write
@@ -660,12 +681,9 @@ extern "C"
   {
     int nq = (N+1)*(N+1)*(N+1);
     size_t smem = (size_t)(3*nq + (N+1)*(N+1))*sizeof(real);
-    // Portable dynamic-shared-memory ceiling: NVIDIA sm_70 (V100) caps dynamic
-    // shared at 48 KiB per block WITHOUT an opt-in (cudaFuncSetAttribute), and a
-    // launch requesting more fails silently. 48 KiB is also within the AMD
-    // gfx942 LDS budget, so use it as the common threshold; larger requests
-    // (double precision: N >= 12) fall back to the two-kernel path below.
-    const size_t maxLDS = 48*1024;
+    // Use the device's real per-block dynamic-shared limit (48 KiB on sm_70,
+    // 64 KiB on gfx942); requests above it fall back to the two-kernel path.
+    const size_t maxLDS = maxDynamicSharedBytes();
     if( smem <= maxLDS ){
       MappedContravariantDivergence_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), smem, 0>>>(dsdx,A,f,df,jacobian,N,nel,nvar);
     } else {
