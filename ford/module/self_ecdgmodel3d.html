@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_ECDGModel3D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_ECDGModel3D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for modules and submodules.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_ECDGModel3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_ecdgmodel3d.f90~2.html'>SELF_ECDGModel3D.f90</a></li>
+     <li class="active">SELF_ECDGModel3D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_ecdgmodel3d.html#type-ecdgmodel3d~2">ECDGModel3D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_ecdgmodel3d_t.html'>SELF_ECDGModel3D_t</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_ecdgmodel3d~~UsesGraph Pages: 1 -->
+<svg id="moduleself_ecdgmodel3dUsesGraph" width="641pt" height="551pt"
+ viewBox="0.00 0.00 641.00 550.55" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_ecdgmodel3d~~UsesGraph" class="graph" transform="scale(0.23 0.23) rotate(0) translate(4 2365.67)">
+<title>module~~self_ecdgmodel3d~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-2365.67 2755,-2365.67 2755,4 -4,4"/>
+<!-- module~self_ecdgmodel3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node1" class="node">
+<title>module~self_ecdgmodel3d</title>
+<polygon fill="none" stroke="black" points="2751,-2072.53 2630,-2072.53 2630,-2048.53 2751,-2048.53 2751,-2072.53"/>
+<text text-anchor="middle" x="2690.5" y="-2058.13" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_ECDGModel3D</text>
+</g>
+<!-- module~self_ecdgmodel3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node2" class="node">
+<title>module~self_ecdgmodel3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node2"><a xlink:href=".././module/self_ecdgmodel3d_t.html" xlink:title="SELF_ECDGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2594,-2072.53 2464,-2072.53 2464,-2048.53 2594,-2048.53 2594,-2072.53"/>
+<text text-anchor="middle" x="2529" y="-2058.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d&#45;&gt;module~self_ecdgmodel3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge1" class="edge">
+<title>module~self_ecdgmodel3d&#45;&gt;module~self_ecdgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2629.65,-2060.53C2621.42,-2060.53 2612.89,-2060.53 2604.43,-2060.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2604.18,-2057.03 2594.18,-2060.53 2604.18,-2064.03 2604.18,-2057.03"/>
+</g>
+<!-- module~self_mappedtwopointvector_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node3" class="node">
+<title>module~self_mappedtwopointvector_3d</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node3"><a xlink:href=".././module/self_mappedtwopointvector_3d.html" xlink:title="SELF_MappedTwoPointVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2133,-2191.53 1947,-2191.53 1947,-2167.53 2133,-2167.53 2133,-2191.53"/>
+<text text-anchor="middle" x="2040" y="-2177.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d_t&#45;&gt;module~self_mappedtwopointvector_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge2" class="edge">
+<title>module~self_ecdgmodel3d_t&#45;&gt;module~self_mappedtwopointvector_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2478.62,-2072.6C2388.36,-2094.65 2197.09,-2141.39 2100.08,-2165.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2099.03,-2161.75 2090.14,-2167.52 2100.69,-2168.55 2099.03,-2161.75"/>
+</g>
+<!-- module~self_dgmodel3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node4" class="node">
+<title>module~self_dgmodel3d~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node4"><a xlink:href=".././module/self_dgmodel3d~2.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2428,-2052.53 2321,-2052.53 2321,-2028.53 2428,-2028.53 2428,-2052.53"/>
+<text text-anchor="middle" x="2374.5" y="-2038.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel3d_t&#45;&gt;module~self_dgmodel3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge3" class="edge">
+<title>module~self_ecdgmodel3d_t&#45;&gt;module~self_dgmodel3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2463.77,-2052.11C2455.32,-2051 2446.67,-2049.86 2438.24,-2048.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2438.48,-2045.26 2428.11,-2047.43 2437.57,-2052.2 2438.48,-2045.26"/>
+</g>
+<!-- module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node6" class="node">
+<title>module~self_gpuinterfaces</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node6"><a xlink:href=".././module/self_gpuinterfaces.html" xlink:title="SELF_GPUInterfaces">
+<polygon fill="#337ab7" stroke="#337ab7" points="1061,-2152.53 943,-2152.53 943,-2128.53 1061,-2128.53 1061,-2152.53"/>
+<text text-anchor="middle" x="1002" y="-2138.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_3d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge7" class="edge">
+<title>module~self_mappedtwopointvector_3d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2013.17,-2191.64C1987.77,-2202.96 1947.59,-2219.32 1911,-2227.53 1785.46,-2255.72 1751.17,-2251.53 1622.5,-2251.53 1622.5,-2251.53 1622.5,-2251.53 1480.5,-2251.53 1348.55,-2251.53 1322.57,-2202.94 1193.5,-2175.53"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node9" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node9"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-1117.53 5,-1117.53 5,-1093.53 89,-1093.53 89,-1117.53"/>
+<text text-anchor="middle" x="47" y="-1103.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_3d&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge4" class="edge">
+<title>module~self_mappedtwopointvector_3d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1349,-2327.53C1280.24,-2320.56 1262.61,-2328.31 1193.5,-2327.53"/>
+</g>
+<!-- module~self_mappedtwopointvector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node10" class="node">
+<title>module~self_mappedtwopointvector_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node10"><a xlink:href=".././module/self_mappedtwopointvector_3d_t.html" xlink:title="SELF_MappedTwoPointVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1911,-1961.53 1716,-1961.53 1716,-1937.53 1911,-1937.53 1911,-1961.53"/>
+<text text-anchor="middle" x="1813.5" y="-1947.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedTwoPointVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_3d&#45;&gt;module~self_mappedtwopointvector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge5" class="edge">
+<title>module~self_mappedtwopointvector_3d&#45;&gt;module~self_mappedtwopointvector_3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2027.25,-2167.49C1990.66,-2130.01 1878.56,-2015.16 1833.52,-1969.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1835.9,-1966.44 1826.41,-1961.73 1830.89,-1971.33 1835.9,-1966.44"/>
+</g>
+<!-- module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node11" class="node">
+<title>module~self_gpu</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node11"><a xlink:href=".././module/self_gpu.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="523,-2072.53 458,-2072.53 458,-2048.53 523,-2048.53 523,-2072.53"/>
+<text text-anchor="middle" x="490.5" y="-2058.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_3d&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge6" class="edge">
+<title>module~self_mappedtwopointvector_3d&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2031.2,-2191.62C2013.53,-2217.77 1967.56,-2279.2 1911,-2303.53 1682.15,-2401.96 1599.12,-2349.8 1351,-2327.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1349,-2327.53C1267.79,-2315.56 699.43,-2212.22 626,-2175.53"/>
+</g>
+<!-- module~self_dgmodel3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node5" class="node">
+<title>module~self_dgmodel3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node5"><a xlink:href=".././module/self_dgmodel3d_t.html" xlink:title="SELF_DGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2285,-2007.53 2169,-2007.53 2169,-1983.53 2285,-1983.53 2285,-2007.53"/>
+<text text-anchor="middle" x="2227" y="-1993.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge8" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2334.51,-2028.47C2316.66,-2022.95 2295.33,-2016.35 2276.46,-2010.52"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="2277.43,-2007.16 2266.85,-2007.55 2275.37,-2013.84 2277.43,-2007.16"/>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge10" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1812.5,-2213.53C1677.13,-2239.37 1329.34,-2198.79 1193.5,-2175.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1191.5,-2175.53C1151.71,-2167.39 1107.02,-2159.06 1071.15,-2152.57"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1071.74,-2149.12 1061.27,-2150.79 1070.49,-2156.01 1071.74,-2149.12"/>
+</g>
+<!-- module~self_geometry_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node7" class="node">
+<title>module~self_geometry_3d</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node7"><a xlink:href=".././module/self_geometry_3d.html" xlink:title="SELF_Geometry_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1680,-1497.53 1563,-1497.53 1563,-1473.53 1680,-1473.53 1680,-1497.53"/>
+<text text-anchor="middle" x="1621.5" y="-1483.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge9" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2340.08,-2052.61C2309.89,-2061.59 2264.69,-2070.15 2228,-2056.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2226,-2056.53C2038.2,-1986.82 2193.77,-1775.11 2041,-1645.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2039,-1645.53C1983.31,-1598.3 1977.18,-1573.39 1911,-1542.53 1891.2,-1533.3 1768.89,-1510.93 1690.01,-1497.12"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1690.59,-1493.67 1680.14,-1495.39 1689.38,-1500.56 1690.59,-1493.67"/>
+</g>
+<!-- module~self_mesh_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node8" class="node">
+<title>module~self_mesh_3d~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node8"><a xlink:href=".././module/self_mesh_3d~2.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1527,-1765.53 1436,-1765.53 1436,-1741.53 1527,-1741.53 1527,-1765.53"/>
+<text text-anchor="middle" x="1481.5" y="-1751.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge11" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2039,-1645.53C2000.99,-1613.22 1860.54,-1626.32 1814.5,-1645.53"/>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge12" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2226,-2056.53C2134.24,-2022.47 1910.5,-2194.46 1814.5,-2213.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1812.5,-2213.53C1640.8,-2235.75 1597.08,-2177.01 1436,-2113.53 1322.62,-2068.85 1312.11,-1957.51 1193.5,-1985.53"/>
+</g>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node12" class="node">
+<title>module~self_boundaryconditions</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node12"><a xlink:href=".././module/self_boundaryconditions.html" xlink:title="SELF_BoundaryConditions">
+<polygon fill="#337ab7" stroke="#337ab7" points="871,-465.53 720,-465.53 720,-441.53 871,-441.53 871,-465.53"/>
+<text text-anchor="middle" x="795.5" y="-451.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge13" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M2372.4,-2028.12C2358.73,-1876.12 2219.66,-379.53 2041,-379.53 2041,-379.53 2041,-379.53 1191.5,-379.53 1064.56,-379.53 918.54,-416.91 844.67,-438.54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="843.33,-435.28 834.74,-441.48 845.32,-441.99 843.33,-435.28"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge17" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1812.5,-1485.53C1771.45,-1458.11 1713.46,-1462.75 1672.37,-1471.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1671.56,-1467.93 1662.56,-1473.53 1673.09,-1474.76 1671.56,-1467.93"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge18" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2039,-1485.53C2000.16,-1410.33 1984.7,-1584.91 1911,-1626.53 1872.94,-1648.02 1854.38,-1627.63 1814.5,-1645.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1812.5,-1645.53C1749.32,-1673.9 1745.23,-1704.27 1680,-1727.53 1633.7,-1744.04 1577.94,-1750.23 1537.49,-1752.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1537.1,-1748.99 1527.29,-1752.97 1537.45,-1755.98 1537.1,-1748.99"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge20" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-493.53C1281.95,-418.59 1214.97,-503.77 1003,-493.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-493.53C946.86,-493.04 886.13,-479.46 845.02,-468.25"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="845.84,-464.85 835.26,-465.54 843.96,-471.59 845.84,-464.85"/>
+</g>
+<!-- module~self_mappedvector_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node13" class="node">
+<title>module~self_mappedvector_3d~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node13"><a xlink:href=".././module/self_mappedvector_3d~2.html" xlink:title="SELF_MappedVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2110,-2039.53 1970,-2039.53 1970,-2015.53 2110,-2015.53 2110,-2039.53"/>
+<text text-anchor="middle" x="2040" y="-2025.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge14" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2168.98,-2005.39C2153.6,-2008.05 2136.67,-2010.98 2120.3,-2013.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2119.46,-2010.41 2110.2,-2015.56 2120.65,-2017.31 2119.46,-2010.41"/>
+</g>
+<!-- module~self_model -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node14" class="node">
+<title>module~self_model</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node14"><a xlink:href=".././module/self_model.html" xlink:title="SELF_Model">
+<polygon fill="#337ab7" stroke="#337ab7" points="833.5,-353.53 757.5,-353.53 757.5,-329.53 833.5,-329.53 833.5,-353.53"/>
+<text text-anchor="middle" x="795.5" y="-339.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_model -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge16" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-341.53C948.11,-329.84 885.63,-332.08 843.77,-335.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="843.21,-332.34 833.59,-336.78 843.88,-339.31 843.21,-332.34"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node15" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node15"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="374,-921.53 301,-921.53 301,-897.53 374,-897.53 374,-921.53"/>
+<text text-anchor="middle" x="337.5" y="-907.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge19" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-493.53C910.11,-492.71 887.39,-493.35 796.5,-493.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-493.53C697.83,-493.72 667.57,-436.17 578,-472.53 557.32,-480.93 560.32,-494.79 542,-507.53 521.6,-521.72 507.84,-512.81 491.5,-531.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M489.5,-531.53C396.53,-622.75 458.58,-693.74 403,-811.53 389.43,-840.29 368.43,-870.41 354.1,-889.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="351.31,-887.44 348.04,-897.52 356.88,-891.67 351.31,-887.44"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node16" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node16"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="403,-351.53 272,-351.53 272,-327.53 403,-327.53 403,-351.53"/>
+<text text-anchor="middle" x="337.5" y="-337.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge15" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2039,-1485.53C1993.22,-1396.88 1897.47,-1540.95 1814.5,-1485.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1812.5,-1485.53C1539.02,-1302.88 1811.44,-1058.99 1680,-757.53 1621.43,-623.21 1617.07,-551.52 1482.5,-493.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-493.53C1327.52,-387.44 1265.27,-402.03 1085,-355.53 1049.2,-346.3 1039.1,-349.51 1003,-341.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-341.53C919.45,-314.64 959.33,-227.87 883,-188.53 762.46,-126.41 712.01,-159.83 578,-180.53 513.96,-190.43 490.96,-185.82 439,-224.53 416.17,-241.55 421.36,-255.77 403,-277.53 389.89,-293.06 373.34,-308.91 360.28,-320.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="357.81,-318.21 352.66,-327.48 362.46,-323.44 357.81,-318.21"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node21" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node21"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="672,-505.53 578,-505.53 578,-481.53 672,-481.53 672,-505.53"/>
+<text text-anchor="middle" x="625" y="-491.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge21" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-493.53C757.15,-493.6 715.14,-493.6 682.41,-493.59"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="682.13,-490.09 672.13,-493.58 682.13,-497.09 682.13,-490.09"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node22" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-865.53 156,-865.53 156,-841.53 210,-841.53 210,-865.53"/>
+<text text-anchor="middle" x="183" y="-851.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge22" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2224.32,-1983.46C2217.5,-1936.64 2189.57,-1763.05 2133,-1631.53 2102.69,-1561.08 2076.19,-1553.68 2041,-1485.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2039,-1485.53C1787.85,-999.23 1983.7,-667.17 1527,-365.53 1084.62,-73.35 709.16,115.53 338.5,-263.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M336.5,-263.53C309.53,-289.84 290.52,-285.72 272,-318.53 220.86,-409.13 192.43,-742.15 185.61,-831.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="182.12,-831.24 184.86,-841.48 189.1,-831.77 182.12,-831.24"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node23" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="656.5,-585.53 593.5,-585.53 593.5,-561.53 656.5,-561.53 656.5,-585.53"/>
+<text text-anchor="middle" x="625" y="-571.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge23" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-493.53C737.37,-493.64 678.96,-531.59 648.17,-555.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="645.94,-552.47 640.24,-561.4 650.26,-557.98 645.94,-552.47"/>
+</g>
+<!-- module~self_mappedscalar_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node24" class="node">
+<title>module~self_mappedscalar_3d~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node24"><a xlink:href=".././module/self_mappedscalar_3d~2.html" xlink:title="SELF_MappedScalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2110,-1997.53 1970,-1997.53 1970,-1973.53 2110,-1973.53 2110,-1997.53"/>
+<text text-anchor="middle" x="2040" y="-1983.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge24" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2168.98,-1992.45C2153.6,-1991.62 2136.67,-1990.7 2120.3,-1989.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2120.38,-1986.32 2110.2,-1989.27 2120,-1993.31 2120.38,-1986.32"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge25" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M794.5,-2175.53C775.49,-2178.2 644.38,-2219.05 626,-2213.53"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M624,-2213.53C493.29,-2174.32 472.7,-2125.28 338.5,-2100.53"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge26" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M942.97,-2151.42C902.11,-2158.85 846.08,-2168.57 796.5,-2175.53"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M794.5,-2175.53C720.34,-2185.94 692.99,-2209 626,-2175.53"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M624,-2175.53C575.89,-2151.49 584.79,-2119.12 542,-2086.53 537.79,-2083.33 533.13,-2080.32 528.39,-2077.58"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="529.74,-2074.33 519.28,-2072.63 526.4,-2080.48 529.74,-2074.33"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge30" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1616.95,-1497.77C1604.04,-1541.63 1558.76,-1690.24 1527,-1727.53 1524.53,-1730.43 1521.66,-1733.08 1518.58,-1735.48"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1516.38,-1732.75 1510.1,-1741.29 1520.33,-1738.53 1516.38,-1732.75"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge29" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1619.66,-1473.16C1614.34,-1397.55 1583.83,-997.39 1527,-890.53 1401.04,-653.69 1290.97,-651.38 1085,-479.53 1014.29,-420.54 972.23,-430.68 919,-355.53 888.04,-311.83 926.16,-272.24 883,-240.53 723.67,-123.45 623.96,-198.64 439,-268.53 407.88,-280.29 377.42,-304.02 358.35,-320.81"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="355.98,-318.22 350.9,-327.52 360.67,-323.42 355.98,-318.22"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node17" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node17"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="231,-1157.53 135,-1157.53 135,-1133.53 231,-1133.53 231,-1157.53"/>
+<text text-anchor="middle" x="183" y="-1143.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge27" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1349,-904.53C1335.92,-893.24 1208.14,-895.35 1193.5,-904.53"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node18" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node18"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="830,-963.53 761,-963.53 761,-939.53 830,-939.53 830,-963.53"/>
+<text text-anchor="middle" x="795.5" y="-949.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_data -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge28" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1562.86,-1494.34C1537.5,-1496 1507.78,-1494.87 1482.5,-1485.53"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1480.5,-1485.53C1356.42,-1439.7 1449.21,-993.15 1351,-904.53"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1349,-904.53C1274.69,-837.48 956.58,-910.36 839.75,-940.09"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="838.88,-936.7 830.06,-942.58 840.62,-943.49 838.88,-936.7"/>
+</g>
+<!-- module~self_tensor_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node25" class="node">
+<title>module~self_tensor_3d</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node25"><a xlink:href=".././module/self_tensor_3d.html" xlink:title="SELF_Tensor_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1241.5,-1213.53 1143.5,-1213.53 1143.5,-1189.53 1241.5,-1189.53 1241.5,-1213.53"/>
+<text text-anchor="middle" x="1192.5" y="-1199.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_tensor_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge31" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_tensor_3d</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1480.5,-1485.53C1397.59,-1450.24 1423.91,-1382.49 1351,-1329.53"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1349,-1329.53C1299.09,-1293.28 1244.12,-1246.21 1214.77,-1220.44"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1217.01,-1217.75 1207.2,-1213.77 1212.38,-1223 1217.01,-1217.75"/>
+</g>
+<!-- module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node26" class="node">
+<title>module~self_lagrange~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node26"><a xlink:href=".././module/self_lagrange~2.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="672,-1271.53 578,-1271.53 578,-1247.53 672,-1247.53 672,-1271.53"/>
+<text text-anchor="middle" x="625" y="-1257.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge32" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1349,-1329.53C1285.31,-1283.27 1077.32,-1431.48 1003,-1405.53"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1001,-1405.53C926.55,-1378.06 952.46,-1309.9 883,-1271.53 848.91,-1252.7 835.44,-1258.06 796.5,-1257.53"/>
+</g>
+<!-- module~self_vector_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node27" class="node">
+<title>module~self_vector_3d~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node27"><a xlink:href=".././module/self_vector_3d~2.html" xlink:title="SELF_Vector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1241,-1801.53 1144,-1801.53 1144,-1777.53 1241,-1777.53 1241,-1801.53"/>
+<text text-anchor="middle" x="1192.5" y="-1787.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_vector_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge33" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_vector_3d~2</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1480.5,-1485.53C1377.41,-1441.64 1367.69,-1572.24 1300,-1661.53 1279.81,-1688.16 1284.86,-1701.43 1264,-1727.53 1250.81,-1744.03 1232.91,-1759.71 1218.45,-1771.17"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1216.16,-1768.52 1210.4,-1777.41 1220.45,-1774.06 1216.16,-1768.52"/>
+</g>
+<!-- module~self_scalar_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node28" class="node">
+<title>module~self_scalar_3d~2</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node28"><a xlink:href=".././module/self_scalar_3d~2.html" xlink:title="SELF_Scalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1241,-1843.53 1144,-1843.53 1144,-1819.53 1241,-1819.53 1241,-1843.53"/>
+<text text-anchor="middle" x="1192.5" y="-1829.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_scalar_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge34" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_scalar_3d~2</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1480.5,-1485.53C1460.17,-1477.97 1281.45,-1797.64 1264,-1810.53 1259.87,-1813.58 1255.3,-1816.2 1250.52,-1818.43"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1249.08,-1815.24 1241.16,-1822.28 1251.74,-1821.71 1249.08,-1815.24"/>
+</g>
+<!-- module~self_mesh_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge35" class="edge">
+<title>module~self_mesh_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1472.61,-1765.6C1459.47,-1784.94 1431.42,-1823.19 1400,-1847.53 1380.83,-1862.38 1371.14,-1858.03 1351,-1871.53"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1349,-1871.53C1212.69,-1962.89 789.17,-2004.18 626,-2021.53"/>
+</g>
+<!-- module~self_mesh_3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge37" class="edge">
+<title>module~self_mesh_3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1349,-1871.53C1328.86,-1885.03 1320.3,-1882.27 1300,-1895.53 1248.11,-1929.42 1253.15,-1968.72 1193.5,-1985.53"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1191.5,-1985.53C1141.17,-1999.72 1135.52,-2022.04 1085,-2035.53 960.69,-2068.73 924.3,-2044.62 796.5,-2059.53"/>
+</g>
+<!-- module~self_mesh_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node29" class="node">
+<title>module~self_mesh_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node29"><a xlink:href=".././module/self_mesh_3d_t.html" xlink:title="SELF_Mesh_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1400,-1457.53 1300,-1457.53 1300,-1433.53 1400,-1433.53 1400,-1457.53"/>
+<text text-anchor="middle" x="1350" y="-1443.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d~2&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge36" class="edge">
+<title>module~self_mesh_3d~2&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M1452.14,-1741.25C1446.14,-1737.57 1440.32,-1733.01 1436,-1727.53 1427.66,-1716.95 1375.42,-1532.58 1357.23,-1467.81"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="1360.5,-1466.51 1354.43,-1457.82 1353.76,-1468.4 1360.5,-1466.51"/>
+</g>
+<!-- module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge40" class="edge">
+<title>module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1808.65,-1937.23C1794.05,-1890.97 1739.81,-1723.41 1680,-1591.53 1666.2,-1561.11 1647.27,-1527.43 1634.96,-1506.37"/>
+<polygon fill="#003fff" stroke="#003fff" points="1637.91,-1504.48 1629.81,-1497.64 1631.88,-1508.04 1637.91,-1504.48"/>
+</g>
+<!-- module~self_mappedtwopointvector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge42" class="edge">
+<title>module~self_mappedtwopointvector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1480.5,-2099.53C1387.64,-2146.82 1365.15,-2164.47 1264,-2189.53 1150.93,-2217.54 1118.55,-2198.8 1003,-2213.53"/>
+</g>
+<!-- module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge39" class="edge">
+<title>module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1715.75,-1948.64C1649.98,-1948.1 1560.99,-1947.53 1482.5,-1947.53 1482.5,-1947.53 1482.5,-1947.53 1349,-1947.53 933.62,-1947.53 805.83,-1929.39 439,-1734.53 385.26,-1705.98 374.34,-1690.71 338.5,-1641.53"/>
+</g>
+<!-- module~self_twopointvector_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node19" class="node">
+<title>module~self_twopointvector_3d</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node19"><a xlink:href=".././module/self_twopointvector_3d.html" xlink:title="SELF_TwoPointVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1264,-2054.53 1121,-2054.53 1121,-2030.53 1264,-2030.53 1264,-2054.53"/>
+<text text-anchor="middle" x="1192.5" y="-2040.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_twopointvector_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge38" class="edge">
+<title>module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_twopointvector_3d</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1760.89,-1961.63C1746.22,-1965.56 1730.34,-1970.27 1716,-1975.53 1645.44,-2001.41 1628.71,-2011.06 1563,-2047.53 1525.76,-2068.2 1522.93,-2086.12 1482.5,-2099.53"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1480.5,-2099.53C1390.49,-2131.04 1278.16,-2085.68 1224.64,-2059.25"/>
+<polygon fill="#003fff" stroke="#003fff" points="1226.16,-2056.1 1215.66,-2054.72 1223.01,-2062.35 1226.16,-2056.1"/>
+</g>
+<!-- module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge41" class="edge">
+<title>module~self_mappedtwopointvector_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1775.65,-1937.49C1705.42,-1913.48 1549.28,-1854.96 1436,-1774.53 1346.56,-1711.03 1341.67,-1674.99 1264,-1597.53 1259.1,-1592.65 1091.07,-1427.83 1085,-1424.53 1052.13,-1406.66 1038.11,-1418.46 1003,-1405.53"/>
+</g>
+<!-- module~self_gpu&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge43" class="edge">
+<title>module~self_gpu&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M336.5,-2062.53C270.05,-2049.2 232.37,-2110 184,-2062.53"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M182,-2062.53C43.84,-1926.94 45.88,-1258.12 47.62,-1127.63"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="51.12,-1127.67 47.77,-1117.62 44.12,-1127.56 51.12,-1127.67"/>
+</g>
+<!-- module~self_gpu_enums -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node20" class="node">
+<title>module~self_gpu_enums</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node20"><a xlink:href=".././module/self_gpu_enums.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="236,-1940.53 130,-1940.53 130,-1916.53 236,-1916.53 236,-1940.53"/>
+<text text-anchor="middle" x="183" y="-1926.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu&#45;&gt;module~self_gpu_enums -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge44" class="edge">
+<title>module~self_gpu&#45;&gt;module~self_gpu_enums</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M457.91,-2064.77C427.11,-2068.01 379.11,-2070.68 338.5,-2062.53"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M336.5,-2062.53C305.86,-2056.38 297,-2053.29 272,-2034.53 239.91,-2010.45 212.09,-1972.42 196.73,-1949.06"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="199.64,-1947.11 191.28,-1940.6 193.75,-1950.9 199.64,-1947.11"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge45" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M724.82,-465.67C718.38,-469.22 712.57,-473.75 708,-479.53 624.85,-584.64 742.13,-967.33 672,-1081.53 584.31,-1224.32 184.61,-1221.75 184,-1221.53"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge47" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M770.22,-441.36C745.91,-429.62 707.17,-412.13 672,-401.53 624.66,-387.27 495.93,-365.04 412.95,-351.43"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="413.5,-347.98 403.07,-349.82 412.37,-354.89 413.5,-347.98"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge46" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M743.94,-465.53C724.46,-470.16 702.09,-475.47 682.11,-480.21"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="681.13,-476.85 672.21,-482.56 682.75,-483.66 681.13,-476.85"/>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge51" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1995.45,-2039.64C1868.95,-2074.74 1508.8,-2174.14 1482.5,-2175.53"/>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge48" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2029.55,-2039.81C2012.22,-2062.58 1974.59,-2113.18 1947,-2158.53 1929.02,-2188.08 1939.22,-2207.52 1911,-2227.53 1754.03,-2338.84 1671.76,-2254.76 1482.5,-2289.53"/>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge50" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1969.76,-2019.01C1795.09,-1998.33 1340.02,-1949.73 1193.5,-1985.53"/>
+</g>
+<!-- module~self_mappedvector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node36" class="node">
+<title>module~self_mappedvector_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node36"><a xlink:href=".././module/self_mappedvector_3d_t.html" xlink:title="SELF_MappedVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1888,-1617.53 1739,-1617.53 1739,-1593.53 1888,-1593.53 1888,-1617.53"/>
+<text text-anchor="middle" x="1813.5" y="-1603.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge49" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1969.83,-2021.91C1961.15,-2018.48 1953.16,-2013.55 1947,-2006.53 1891.73,-1943.65 1965.04,-1695.47 1911,-1631.53 1907.05,-1626.86 1902.37,-1622.99 1897.22,-1619.77"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1898.63,-1616.56 1888.16,-1614.97 1895.35,-1622.75 1898.63,-1616.56"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge52" class="edge">
+<title>module~self_model&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M624,-339.53C510.89,-354.53 489.99,-415.46 439,-517.53 380.17,-635.3 448.38,-687.96 403,-811.53 392.16,-841.04 370.94,-870.6 355.8,-889.41"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="352.99,-887.32 349.33,-897.26 358.39,-891.77 352.99,-887.32"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge53" class="edge">
+<title>module~self_model&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M489.5,-339.53C464.8,-336.51 437.65,-335.73 413.27,-335.94"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="412.95,-332.45 403,-336.09 413.05,-339.45 412.95,-332.45"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge54" class="edge">
+<title>module~self_model&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M781,-353.71C751.79,-380.06 682.54,-442.53 647.34,-474.28"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="644.65,-471.99 639.57,-481.29 649.34,-477.19 644.65,-471.99"/>
+</g>
+<!-- module~self_model&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge56" class="edge">
+<title>module~self_model&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M757.35,-337.08C722.98,-333.91 670.62,-331.48 626,-339.53"/>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M624,-339.53C566.05,-349.99 549.95,-346.68 491.5,-339.53"/>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M489.5,-339.53C414.92,-330.41 391.96,-210.74 338.5,-263.53"/>
+</g>
+<!-- module~self_model&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge55" class="edge">
+<title>module~self_model&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff5900" stroke-dasharray="5,2" d="M780.34,-353.56C761.79,-369.91 729.12,-400.77 708,-432.53 685.96,-465.67 692.39,-480.35 672,-514.53 663.73,-528.4 652.64,-542.71 643.43,-553.76"/>
+<polygon fill="#ff5900" stroke="#ff5900" points="640.64,-551.64 636.82,-561.52 645.97,-556.18 640.64,-551.64"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge58" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M328.73,-921.56C304.2,-959.51 228.25,-1077.05 197.31,-1124.93"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="194.24,-1123.23 191.76,-1133.53 200.12,-1127.03 194.24,-1123.23"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge57" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M303.78,-897.52C279.06,-888.44 245.15,-875.99 219.72,-866.65"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="220.68,-863.27 210.09,-863.11 218.27,-869.84 220.68,-863.27"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node31" class="node">
+<title>mpi</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node31"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-1691.53 156,-1691.53 156,-1667.53 210,-1667.53 210,-1691.53"/>
+<text text-anchor="middle" x="183" y="-1677.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge59" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M329.11,-921.67C315.45,-944.71 286.34,-996.77 272,-1044.53 253.95,-1104.63 199.4,-1551.68 186.68,-1657.24"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="183.18,-1657.04 185.45,-1667.39 190.12,-1657.88 183.18,-1657.04"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node38" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node38"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-1058.53 0,-1058.53 0,-1034.53 94,-1034.53 94,-1058.53"/>
+<text text-anchor="middle" x="47" y="-1044.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge60" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M317.09,-921.8C288.87,-939.07 234.39,-970.37 184,-987.53"/>
+<path fill="none" stroke="#ffb300" stroke-dasharray="5,2" d="M182,-987.53C146.86,-999.5 108.19,-1017.02 81.47,-1029.86"/>
+<polygon fill="#ffb300" stroke="#ffb300" points="79.66,-1026.84 72.19,-1034.36 82.72,-1033.14 79.66,-1026.84"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge62" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#f0ff00" stroke-dasharray="5,2" d="M335.32,-351.71C327.26,-433.69 279.51,-906.11 236,-1043.53 226.63,-1073.14 209.32,-1104.61 197.26,-1124.63"/>
+<polygon fill="#f0ff00" stroke="#f0ff00" points="194.23,-1122.88 191.98,-1133.23 200.19,-1126.54 194.23,-1122.88"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge61" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#f0ff00" stroke-dasharray="5,2" d="M335.3,-327.3C329.09,-269.83 296.32,-31.18 184,-73.53"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge63" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M141.8,-1133.53C128.14,-1129.45 112.71,-1124.85 98.36,-1120.56"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="99.22,-1117.17 88.64,-1117.66 97.22,-1123.88 99.22,-1117.17"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge64" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#96ff00" stroke-dasharray="5,2" d="M165.57,-1133.39C142.36,-1116.25 99.8,-1084.8 72.76,-1064.82"/>
+<polygon fill="#96ff00" stroke="#96ff00" points="74.69,-1061.9 64.57,-1058.77 70.53,-1067.53 74.69,-1061.9"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge71" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M760.68,-957.26C743.93,-961.17 723.92,-967.51 708,-977.53 662.21,-1006.36 675.04,-1044.66 626,-1067.53"/>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M624,-1067.53C531.66,-1110.59 222.66,-1109.22 99.4,-1106.84"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="99.17,-1103.33 89.1,-1106.63 99.03,-1110.33 99.17,-1103.33"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge66" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M624,-835.53C569.07,-814.3 544.44,-809.74 491.5,-835.53"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge65" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M624,-1067.53C603.1,-1077.28 598.11,-1080.25 578,-1091.53 538.88,-1113.47 535.15,-1133.19 491.5,-1143.53"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge68" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M760.8,-950.17C742.36,-947.54 720.74,-941.04 708,-925.53 655.15,-861.18 702.83,-629.89 672,-552.53 666.18,-537.92 655.57,-523.92 646,-513.24"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="648.38,-510.66 638.99,-505.75 643.27,-515.44 648.38,-510.66"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge69" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M781.36,-939.16C754.55,-914.74 690.6,-860.5 626,-835.53"/>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M624,-835.53C559.14,-810.46 361.14,-783.18 338.5,-797.53"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge70" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M760.7,-949.37C742.69,-946.46 721.52,-939.94 708,-925.53 684.92,-900.95 642.78,-669.45 629.87,-595.87"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="633.28,-595.08 628.11,-585.84 626.39,-596.29 633.28,-595.08"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge67" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#3cff00" stroke-dasharray="5,2" d="M786.44,-963.65C770.64,-987.62 734.76,-1042.99 708,-1091.53 679.58,-1143.08 650.27,-1205.92 635.6,-1238.17"/>
+<polygon fill="#3cff00" stroke="#3cff00" points="632.3,-1236.96 631.37,-1247.51 638.68,-1239.84 632.3,-1236.96"/>
+</g>
+<!-- module~self_twopointvector_3d&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge72" class="edge">
+<title>module~self_twopointvector_3d&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M1170.06,-2054.63C1155.85,-2062.88 1136.95,-2074.32 1121,-2085.53 1104.19,-2097.35 1103.1,-2104.82 1085,-2114.53 1077.53,-2118.54 1069.34,-2122.05 1061.11,-2125.09"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="1059.78,-2121.84 1051.48,-2128.43 1062.08,-2128.46 1059.78,-2121.84"/>
+</g>
+<!-- module~self_twopointvector_3d&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge75" class="edge">
+<title>module~self_twopointvector_3d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M489.5,-2100.53C426.35,-2077.81 404.14,-2114.49 338.5,-2100.53"/>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M336.5,-2100.53C268.18,-2086 233.85,-2111.46 184,-2062.53"/>
+</g>
+<!-- module~self_twopointvector_3d&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge74" class="edge">
+<title>module~self_twopointvector_3d&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M1157.43,-2054.57C1136.75,-2061.34 1109.67,-2069.27 1085,-2073.53 883.63,-2108.31 829.8,-2115.6 626,-2100.53"/>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M624,-2100.53C590.89,-2097.59 554.88,-2086.15 528.76,-2076.25"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="529.85,-2072.92 519.27,-2072.56 527.32,-2079.45 529.85,-2072.92"/>
+</g>
+<!-- module~self_twopointvector_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge73" class="edge">
+<title>module~self_twopointvector_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M624,-2100.53C565.34,-2095.33 549.39,-2111.31 491.5,-2100.53"/>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M489.5,-2100.53C465.92,-2096.14 456.07,-2098.37 439,-2081.53 294.22,-1938.73 317.75,-1853.68 272,-1655.53 227.06,-1460.9 311.77,-1392.36 236,-1207.53 229.33,-1191.27 216.76,-1176.09 205.65,-1164.82"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="207.9,-1162.13 198.28,-1157.68 203.02,-1167.15 207.9,-1162.13"/>
+</g>
+<!-- module~self_twopointvector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node37" class="node">
+<title>module~self_twopointvector_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node37"><a xlink:href=".././module/self_twopointvector_3d_t.html" xlink:title="SELF_TwoPointVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1078,-1457.53 926,-1457.53 926,-1433.53 1078,-1433.53 1078,-1457.53"/>
+<text text-anchor="middle" x="1002" y="-1443.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TwoPointVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_twopointvector_3d&#45;&gt;module~self_twopointvector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge76" class="edge">
+<title>module~self_twopointvector_3d&#45;&gt;module~self_twopointvector_3d_t</title>
+<path fill="none" stroke="#00ff1e" stroke-dasharray="5,2" d="M1185.99,-2030.36C1172.76,-2000.63 1138.95,-1921.66 1121,-1852.53 1094.56,-1750.68 1115.86,-1719.13 1085,-1618.53 1067.33,-1560.94 1033.58,-1498.18 1015.37,-1466.44"/>
+<polygon fill="#00ff1e" stroke="#00ff1e" points="1018.3,-1464.51 1010.26,-1457.62 1012.25,-1468.03 1018.3,-1464.51"/>
+</g>
+<!-- module~self_gpu_enums&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge77" class="edge">
+<title>module~self_gpu_enums&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff78" stroke-dasharray="5,2" d="M175.29,-1916.25C163.94,-1894.85 141.1,-1849.06 130,-1807.53 60.36,-1546.89 49.86,-1216.15 48.28,-1127.97"/>
+<polygon fill="#00ff78" stroke="#00ff78" points="51.77,-1127.74 48.12,-1117.8 44.78,-1127.85 51.77,-1127.74"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge78" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffd1" stroke-dasharray="5,2" d="M578,-501.26C544.47,-507.86 502.99,-518.37 491.5,-531.53"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge79" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffd1" stroke-dasharray="5,2" d="M580.97,-481.5C552.93,-476.35 516.94,-475.13 491.5,-493.53"/>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge83" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M1969.6,-1986.78C1872.43,-1991.35 1693.14,-2010.32 1563,-2085.53 1516.54,-2112.39 1535.88,-2170.04 1482.5,-2175.53"/>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M1480.5,-2175.53C1444.38,-2179.3 1436.09,-2165.61 1400,-2161.53 1285.14,-2148.55 1150.65,-2143.57 1071.37,-2141.67"/>
+<polygon fill="#001dff" stroke="#001dff" points="1071.11,-2138.17 1061.04,-2141.43 1070.95,-2145.16 1071.11,-2138.17"/>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge80" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M1973.85,-1997.63C1964.68,-2000.13 1955.5,-2003.08 1947,-2006.53 1723.03,-2097.5 1713.58,-2218.53 1482.5,-2289.53"/>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M1480.5,-2289.53C1478.5,-2289.77 1195.51,-2327.49 1193.5,-2327.53"/>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M1191.5,-2327.53C935.12,-2325.99 873.96,-2278.73 626,-2213.53"/>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge82" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M2018.09,-1973.43C1993.4,-1959.82 1950.67,-1938.34 1911,-1928.53 1786.26,-1897.69 1751,-1909.53 1622.5,-1909.53 1622.5,-1909.53 1622.5,-1909.53 1480.5,-1909.53 1348.55,-1909.53 1321.36,-1952.93 1193.5,-1985.53"/>
+</g>
+<!-- module~self_mappedscalar_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node30" class="node">
+<title>module~self_mappedscalar_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node30"><a xlink:href=".././module/self_mappedscalar_3d_t.html" xlink:title="SELF_MappedScalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1888,-1575.53 1739,-1575.53 1739,-1551.53 1888,-1551.53 1888,-1575.53"/>
+<text text-anchor="middle" x="1813.5" y="-1561.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d~2&#45;&gt;module~self_mappedscalar_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge81" class="edge">
+<title>module~self_mappedscalar_3d~2&#45;&gt;module~self_mappedscalar_3d_t</title>
+<path fill="none" stroke="#001dff" stroke-dasharray="5,2" d="M2035.85,-1973.2C2019.27,-1908.74 1941.82,-1612.56 1911,-1584.53 1906.88,-1580.78 1902.25,-1577.65 1897.3,-1575.03"/>
+<polygon fill="#001dff" stroke="#001dff" points="1898.66,-1571.8 1888.11,-1570.86 1895.77,-1578.18 1898.66,-1571.8"/>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge87" class="edge">
+<title>module~self_tensor_3d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M1189.8,-1213.77C1183.51,-1254.74 1158.04,-1388.88 1085,-1466.53 987.75,-1569.93 922.25,-1537.68 796.5,-1603.53"/>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge86" class="edge">
+<title>module~self_tensor_3d&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M1187.04,-1213.72C1174.82,-1247.53 1140.42,-1345.57 1121,-1429.53 1097.59,-1530.77 1145.02,-1575.72 1085,-1660.53 951.18,-1849.63 802.59,-1757.58 626,-1907.53"/>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M624,-1907.53C567.73,-1944.25 591.78,-1989.4 542,-2034.53 538.4,-2037.8 534.31,-2040.77 530.06,-2043.44"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="528.16,-2040.49 521.21,-2048.49 531.63,-2046.57 528.16,-2040.49"/>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge84" class="edge">
+<title>module~self_tensor_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M1143.23,-1192.07C1104.04,-1186.58 1048.08,-1183.81 1003,-1201.53"/>
+</g>
+<!-- module~self_tensor_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node32" class="node">
+<title>module~self_tensor_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node32"><a xlink:href=".././module/self_tensor_3d_t.html" xlink:title="SELF_Tensor_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1055.5,-813.53 948.5,-813.53 948.5,-789.53 1055.5,-789.53 1055.5,-813.53"/>
+<text text-anchor="middle" x="1002" y="-799.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;module~self_tensor_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge85" class="edge">
+<title>module~self_tensor_3d&#45;&gt;module~self_tensor_3d_t</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M1187.9,-1189.32C1177.39,-1153.58 1145.91,-1046.08 1121,-956.53 1104.47,-897.12 1128.86,-865.88 1085,-822.53 1079.41,-817.01 1072.59,-812.88 1065.28,-809.8"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="1066.42,-806.49 1055.83,-806.43 1064.07,-813.09 1066.42,-806.49"/>
+</g>
+<!-- module~self_tensor_3d&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge88" class="edge">
+<title>module~self_tensor_3d&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M1187.64,-1189.39C1176.41,-1153.83 1143.18,-1046.79 1121,-956.53 1101.95,-879 1114.17,-854.85 1085,-780.53 1033.11,-648.35 964.93,-641.9 919,-507.53 895.93,-440.03 932.15,-240.24 883,-188.53 666.08,39.67 478.6,37.55 184,-73.53"/>
+<path fill="none" stroke="#3c00ff" stroke-dasharray="5,2" d="M182,-73.53C91.03,-112.82 54.78,-883.01 48.88,-1024.35"/>
+<polygon fill="#3c00ff" stroke="#3c00ff" points="45.38,-1024.29 48.47,-1034.42 52.38,-1024.57 45.38,-1024.29"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge92" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M489.5,-1257.53C414.55,-1252.34 413.08,-1324.41 338.5,-1333.53"/>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M336.5,-1333.53C291.82,-1339 164.87,-1267.65 130,-1235.53 95.73,-1203.98 70.07,-1155.01 57.21,-1127.05"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="60.34,-1125.47 53.06,-1117.77 53.95,-1128.33 60.34,-1125.47"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge91" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M621.26,-1271.68C613.23,-1307.74 589.6,-1417.36 578,-1509.53 570.7,-1567.54 574.14,-1985.68 542,-2034.53 539.3,-2038.64 535.73,-2042.13 531.74,-2045.1"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="529.74,-2042.22 523.09,-2050.46 533.43,-2048.17 529.74,-2042.22"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge89" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M577.96,-1260.06C552.45,-1260.04 520.19,-1259.52 491.5,-1257.53"/>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M489.5,-1257.53C405.61,-1251.72 422.59,-1142.8 338.5,-1143.53"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node33" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node33"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="542,-1039.53 439,-1039.53 439,-1015.53 542,-1015.53 542,-1039.53"/>
+<text text-anchor="middle" x="490.5" y="-1025.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge90" class="edge">
+<title>module~self_lagrange~2&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M617.06,-1247.38C595.64,-1209.88 530.37,-1095.59 503.38,-1048.32"/>
+<polygon fill="#9500ff" stroke="#9500ff" points="506.37,-1046.51 498.37,-1039.56 500.29,-1049.98 506.37,-1046.51"/>
+</g>
+<!-- module~self_lagrange~2&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge93" class="edge">
+<title>module~self_lagrange~2&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#9500ff" stroke-dasharray="5,2" d="M620.96,-1247.51C608.64,-1199.33 562.23,-1022.08 542,-1006.53 478.83,-957.99 259.41,-961.84 184,-987.53"/>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge96" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#f000ff" stroke-dasharray="5,2" d="M1143.84,-1797.08C1135.47,-1800.15 1127.4,-1804.47 1121,-1810.53 1097.37,-1832.92 1030.78,-2048.51 1009.57,-2118.62"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="1006.21,-2117.64 1006.68,-2128.22 1012.92,-2119.66 1006.21,-2117.64"/>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge98" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#f000ff" stroke-dasharray="5,2" d="M1143.61,-1799.14C1105.36,-1807.07 1050.5,-1819.01 1003,-1831.53"/>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge97" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#f000ff" stroke-dasharray="5,2" d="M1143.91,-1800.27C1135.98,-1803.02 1128.05,-1806.4 1121,-1810.53 1101.75,-1821.82 1104.81,-1835.25 1085,-1845.53 1003.91,-1887.61 973.46,-1870.83 883,-1883.53 826.2,-1891.51 670.64,-1871.51 626,-1907.53"/>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge94" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#f000ff" stroke-dasharray="5,2" d="M1143.82,-1785.14C971.12,-1768.7 385.84,-1708.38 338.5,-1641.53"/>
+<path fill="none" stroke="#f000ff" stroke-dasharray="5,2" d="M336.5,-1641.53C273.66,-1550.7 296.43,-1509.25 272,-1401.53 252.6,-1316.01 273.41,-1286.85 236,-1207.53 228.5,-1191.63 215.91,-1176.46 205,-1165.11"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="207.34,-1162.5 197.79,-1157.9 202.38,-1167.45 207.34,-1162.5"/>
+</g>
+<!-- module~self_vector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node34" class="node">
+<title>module~self_vector_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node34"><a xlink:href=".././module/self_vector_3d_t.html" xlink:title="SELF_Vector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1055,-855.53 949,-855.53 949,-831.53 1055,-831.53 1055,-855.53"/>
+<text text-anchor="middle" x="1002" y="-841.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_vector_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge95" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_vector_3d_t</title>
+<path fill="none" stroke="#f000ff" stroke-dasharray="5,2" d="M1183.79,-1777.29C1168.61,-1752.45 1135.06,-1693.85 1121,-1639.53 1061.28,-1408.82 1129.02,-1338.75 1085,-1104.53 1067.86,-1013.35 1029.13,-909.36 1011.74,-865.19"/>
+<polygon fill="#f000ff" stroke="#f000ff" points="1014.94,-863.76 1007.99,-855.76 1008.44,-866.35 1014.94,-863.76"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge99" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#ff00b4" stroke-dasharray="5,2" d="M1184.11,-1843.64C1155.55,-1890.47 1052.14,-2059.97 1015.77,-2119.6"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="1012.56,-2118.14 1010.34,-2128.5 1018.53,-2121.79 1012.56,-2118.14"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge103" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00b4" stroke-dasharray="5,2" d="M1143.77,-1824.9C1105.14,-1821.1 1049.68,-1819.23 1003,-1831.53"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_gpu -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge102" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_gpu</title>
+<path fill="none" stroke="#ff00b4" stroke-dasharray="5,2" d="M1179.28,-1843.58C1133.72,-1887.32 967.55,-2036.36 796.5,-2059.53"/>
+<path fill="none" stroke="#ff00b4" stroke-dasharray="5,2" d="M794.5,-2059.53C701.63,-2068.99 591.92,-2065.82 533.34,-2062.98"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="533.18,-2059.47 523.01,-2062.45 532.82,-2066.46 533.18,-2059.47"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge100" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00b4" stroke-dasharray="5,2" d="M1143.76,-1825.08C988.59,-1803.92 504.66,-1736.47 439,-1709.53 389.11,-1689.06 369.18,-1685.88 338.5,-1641.53"/>
+</g>
+<!-- module~self_scalar_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node35" class="node">
+<title>module~self_scalar_3d_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node35"><a xlink:href=".././module/self_scalar_3d_t.html" xlink:title="SELF_Scalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1055,-1137.53 949,-1137.53 949,-1113.53 1055,-1113.53 1055,-1137.53"/>
+<text text-anchor="middle" x="1002" y="-1123.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_scalar_3d_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge101" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_scalar_3d_t</title>
+<path fill="none" stroke="#ff00b4" stroke-dasharray="5,2" d="M1143.8,-1825.89C1135,-1822.69 1126.79,-1817.84 1121,-1810.53 1034.94,-1701.79 1150.33,-1309.85 1085,-1187.53 1074.69,-1168.23 1055.44,-1153.19 1038.18,-1142.76"/>
+<polygon fill="#ff00b4" stroke="#ff00b4" points="1039.82,-1139.66 1029.4,-1137.73 1036.34,-1145.74 1039.82,-1139.66"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge110" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1331.59,-1457.71C1320.93,-1466.05 1307.87,-1478.02 1300,-1491.53 1265.91,-1550.02 1301.53,-1583.19 1264,-1639.53 1224.09,-1699.46 1072.62,-1813.18 1003,-1831.53"/>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1001,-1831.53C816.31,-1876.17 739.07,-1792.73 578,-1893.53 520.11,-1929.76 557.6,-2003.35 491.5,-2020.53"/>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M489.5,-2020.53C325.66,-2062.63 292.93,-1922.95 184,-1793.53"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge106" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1331.55,-1433.39C1289.08,-1402.93 1179.54,-1318.81 1121,-1222.53 1092.51,-1175.68 1122.97,-1144.08 1085,-1104.53 962.05,-976.47 864.87,-1055.65 708,-972.53 657.69,-945.88 543.19,-811.66 491.5,-835.53"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge105" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1342.01,-1433.36C1331.52,-1414.62 1311.67,-1377.33 1300,-1343.53 1275.78,-1273.41 1282.55,-1252.37 1264,-1180.53 1236.42,-1073.71 1241,-1042.1 1193.5,-942.53"/>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1191.5,-942.53C1148.98,-853.4 1136.83,-831.59 1085,-747.53 1016.93,-637.13 969.22,-627.11 919,-507.53 886.22,-429.5 948.26,-374.43 883,-320.53 732.46,-196.21 470.69,-284.72 374.93,-323.67"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="373.57,-320.45 365.66,-327.5 376.24,-326.92 373.57,-320.45"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge104" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1191.5,-1443.53C1143.96,-1452.72 1133.15,-1461.39 1085,-1466.53 1011.64,-1474.36 987.76,-1493.28 919,-1466.53 898.77,-1458.66 902.84,-1442.33 883,-1433.53 778.14,-1387.01 738.26,-1433.14 626,-1409.53"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge108" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1191.5,-942.53C1151.77,-866.07 1142.31,-844.88 1085,-780.53 1021,-708.67 974.62,-720.06 919,-641.53 892.66,-604.35 917.47,-575.34 883,-545.53 822.79,-493.48 778.13,-545.17 708,-507.53 688.34,-496.98 692.68,-480.93 672,-472.53 633.29,-456.82 619.48,-467.57 578,-472.53 538.72,-477.23 523.56,-470.35 491.5,-493.53"/>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M489.5,-493.53C468.97,-507.53 455.68,-499.11 439,-517.53 350.25,-615.54 450.64,-727.49 338.5,-797.53"/>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M336.5,-797.53C299.7,-820.52 252.05,-836.1 219.89,-844.88"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="218.79,-841.55 210.02,-847.49 220.58,-848.31 218.79,-841.55"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge107" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1299.87,-1439.84C1269.04,-1437.52 1228.62,-1436.74 1193.5,-1443.53"/>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1191.5,-1443.53C1181.01,-1445.56 1013.09,-1409.05 1003,-1405.53"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node39" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node39"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1085,-1651.53 919,-1651.53 919,-1627.53 1085,-1627.53 1085,-1651.53"/>
+<text text-anchor="middle" x="1002" y="-1637.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge109" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1191.5,-1443.53C1167.78,-1448.12 1061.51,-1570.64 1019.84,-1619.6"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="1017.09,-1617.43 1013.29,-1627.32 1022.43,-1621.96 1017.09,-1617.43"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node40" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node40"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1228,-1630.53 1157,-1630.53 1157,-1606.53 1228,-1606.53 1228,-1630.53"/>
+<text text-anchor="middle" x="1192.5" y="-1616.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge111" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff005a" stroke-dasharray="5,2" d="M1320.89,-1457.65C1313.65,-1461.49 1306.18,-1466.16 1300,-1471.53 1257.09,-1508.85 1221.75,-1566.61 1204.63,-1597.44"/>
+<polygon fill="#ff005a" stroke="#ff005a" points="1201.44,-1595.99 1199.73,-1606.44 1207.59,-1599.34 1201.44,-1595.99"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge113" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1758.64,-1551.51C1744.54,-1547.69 1729.51,-1543.01 1716,-1537.53 1692.84,-1528.14 1668.2,-1514.25 1650.03,-1503.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1651.51,-1499.99 1641.16,-1497.71 1647.82,-1505.95 1651.51,-1499.99"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge114" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1620.5,-1675.53C1594.99,-1686.31 1586.92,-1685.57 1563,-1699.53 1545.49,-1709.75 1543.79,-1716.17 1527,-1727.53 1522.66,-1730.46 1517.99,-1733.42 1513.35,-1736.22"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1511.41,-1733.3 1504.58,-1741.4 1514.97,-1739.33 1511.41,-1733.3"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge119" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1349,-1833.53C1220.06,-1903.18 847.57,-1943.83 708,-1988.53 670.59,-2000.51 664.94,-2016.36 626,-2021.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-2021.53C565.41,-2027.43 550.1,-2014.68 491.5,-2020.53"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge112" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1620.5,-771.53C1541.79,-738.96 1558.01,-865.11 1482.5,-904.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-904.53C1448.31,-921.34 1436.18,-893.65 1400,-890.53 1308.35,-882.62 1271.42,-855.65 1193.5,-904.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1191.5,-904.53C1163,-921.36 1142.4,-903.28 1121,-928.53 1057.5,-1003.44 1138.14,-1063.95 1085,-1146.53 1061.25,-1183.43 1043.84,-1185.48 1003,-1201.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-1201.53C825.09,-1270.68 765.37,-1182.42 578,-1157.53 539.39,-1152.4 530.14,-1138.65 491.5,-1143.53"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge117" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1780.55,-1551.51C1758.28,-1541.31 1730.14,-1524.33 1716,-1499.53 1638.42,-1363.44 1770.15,-923.64 1680,-795.53 1664.06,-772.89 1648.09,-782.12 1622.5,-771.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1620.5,-771.53C1561.72,-747.21 1543.35,-828.09 1482.5,-809.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-809.53C1169.44,-714.63 789.7,-615.6 666.59,-583.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="667.38,-580.51 656.83,-581.41 665.64,-587.29 667.38,-580.51"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_tensor_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge115" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_tensor_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-904.53C1341.7,-959.95 1238.66,-1122.02 1205.16,-1180.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1201.93,-1178.94 1200.06,-1189.36 1208.02,-1182.38 1201.93,-1178.94"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge116" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1756.86,-1575.57C1743.48,-1578.49 1729.23,-1581.61 1716,-1584.53 1674.41,-1593.73 1664.93,-1609.27 1622.5,-1605.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1620.5,-1605.53C1526.3,-1597.22 1500.35,-1568.83 1436,-1499.53 1410.84,-1472.44 1430.81,-1444.97 1400,-1424.53 1252.78,-1326.91 1168.73,-1466.68 1003,-1405.53"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_scalar_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge120" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_scalar_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-1675.53C1390.74,-1689.2 1430.89,-1790.38 1351,-1833.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1349,-1833.53C1319.33,-1849.56 1281.61,-1849.47 1250.74,-1845.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1250.98,-1841.67 1240.56,-1843.58 1249.9,-1848.59 1250.98,-1841.67"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge118" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1738.76,-1575.04C1730.84,-1577.6 1723.1,-1580.72 1716,-1584.53 1709.61,-1587.96 1629.18,-1672.71 1622.5,-1675.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1620.5,-1675.53C1564.01,-1699.41 1543.13,-1666.3 1482.5,-1675.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1480.5,-1675.53C1400.75,-1687.68 1379.87,-1683.22 1300,-1694.53 1252.39,-1701.27 1241.58,-1713.36 1193.5,-1713.53"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1191.5,-1713.53C1132.46,-1705.82 1069.03,-1675.92 1032.87,-1656.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1034.3,-1653.37 1023.85,-1651.66 1030.96,-1659.51 1034.3,-1653.37"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge128" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M948.44,-806.15C937.52,-809.36 926.94,-814.47 919,-822.53 870.89,-871.38 910.08,-909.55 883,-972.53 855.15,-1037.31 846.44,-1055.75 796.5,-1105.53"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M794.5,-1105.53C766.92,-1133.02 742.43,-1101.33 708,-1119.53 687.43,-1130.41 692.73,-1146.97 672,-1157.53 574.56,-1207.2 289.37,-1250.84 184,-1221.53"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M182,-1221.53C130.01,-1202.94 85.07,-1153.42 62.84,-1125.46"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="65.58,-1123.29 56.68,-1117.54 60.05,-1127.58 65.58,-1123.29"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge123" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M948.16,-791.88C937.64,-788.1 927.29,-782.84 919,-775.53 890.36,-750.28 913.41,-720.62 883,-697.53 851.98,-673.98 828.96,-705.05 796.5,-683.53"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M794.5,-683.53C760.07,-660.71 736.93,-679.02 708,-649.53 675.8,-616.71 709.75,-578.79 672,-552.53 637.7,-528.68 611.58,-527.68 578,-552.53 472.28,-630.77 610.51,-779.55 491.5,-835.53"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M489.5,-835.53C448.49,-854.48 401.88,-877.56 371.43,-892.85"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="369.5,-889.91 362.14,-897.53 372.64,-896.16 369.5,-889.91"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge122" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M948.4,-813.15C938.51,-815.85 928.35,-818.99 919,-822.53 820.48,-859.83 794.02,-869.71 708,-930.53 643.05,-976.45 634.46,-997.51 578,-1053.53 538.62,-1092.61 545.49,-1130.74 491.5,-1143.53"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M489.5,-1143.53C422.92,-1151.93 405.61,-1142.95 338.5,-1143.53"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge121" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M948.09,-810.43C938.02,-813.39 927.87,-817.32 919,-822.53 894.19,-837.1 840.59,-898.81 813.26,-931.32"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="810.33,-929.36 806.6,-939.27 815.7,-933.85 810.33,-929.36"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge124" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M948.34,-793.46C937.43,-789.6 926.88,-783.91 919,-775.53 873.82,-727.46 924.46,-682.85 883,-631.53 828.54,-564.12 782.28,-590.17 708,-545.53 691.08,-535.37 688.62,-530.18 672,-519.53 667.37,-516.56 662.38,-513.56 657.45,-510.69"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="659.18,-507.65 648.76,-505.74 655.71,-513.73 659.18,-507.65"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge126" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M991.54,-789.49C973.72,-766.04 935.48,-711.94 919,-659.53 890.96,-570.38 948.79,-306.9 883,-240.53 813.39,-170.31 535.07,-188.15 439,-211.53 390.13,-223.42 373.2,-227.13 338.5,-263.53"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge127" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M794.5,-683.53C761.24,-661.49 742.22,-680.04 708,-659.53 679.92,-642.7 655.14,-613.69 640.36,-594.07"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="643.03,-591.79 634.3,-585.79 637.39,-595.92 643.03,-591.79"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge125" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M794.5,-1105.53C766.92,-1133.02 739.13,-1096.14 708,-1119.53 678.12,-1141.98 690.98,-1163.34 672,-1195.53 663.05,-1210.71 651.47,-1226.81 642.16,-1239.06"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="639.2,-1237.18 635.86,-1247.24 644.74,-1241.45 639.2,-1237.18"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge135" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M182,-1029.53C138.62,-1038.34 95.33,-1067.52 70.14,-1087.05"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="67.67,-1084.55 62.01,-1093.51 72.02,-1090.03 67.67,-1084.55"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge131" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M480.96,-1015.51C466.74,-996.27 436.48,-958.42 403,-935.53 396.97,-931.41 390.19,-927.78 383.35,-924.65"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="384.61,-921.38 374.04,-920.68 381.87,-927.82 384.61,-921.38"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge130" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M476.47,-1015.12C464.69,-1003.09 447.88,-983.75 439,-963.53 426.52,-935.12 357.6,-469.56 341.75,-361.71"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="345.19,-361.03 340.27,-351.64 338.26,-362.04 345.19,-361.03"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge129" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M481.69,-1039.87C461.78,-1069.63 405.94,-1142.95 338.5,-1143.53"/>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M336.5,-1143.53C305.02,-1143.8 269.88,-1144.25 241.28,-1144.66"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="241.01,-1141.16 231.06,-1144.81 241.11,-1148.16 241.01,-1141.16"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge133" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M468.47,-1015.4C439.73,-999.12 386.28,-969.89 338.5,-949.53"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge134" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M438.74,-1022.62C377.73,-1017.92 272.49,-1013.64 184,-1029.53"/>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M182,-1029.53C156.66,-1034.67 128.3,-1038.54 104.21,-1041.28"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="103.73,-1037.81 94.17,-1042.38 104.49,-1044.77 103.73,-1037.81"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node41" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node41"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="389.5,-1077.53 285.5,-1077.53 285.5,-1053.53 389.5,-1053.53 389.5,-1077.53"/>
+<text text-anchor="middle" x="337.5" y="-1063.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge132" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M441.72,-1039.55C427.19,-1043.21 411.07,-1047.27 395.97,-1051.07"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="395.07,-1047.69 386.23,-1053.52 396.78,-1054.47 395.07,-1047.69"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge143" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M996.75,-855.65C983.89,-892.62 944.67,-1007.41 919,-1104.53 899.6,-1177.94 939.28,-1220.56 883,-1271.53 792.73,-1353.28 459.89,-1343.28 338.5,-1333.53"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge138" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M948.67,-836.84C835.27,-823.26 570.73,-796.93 491.5,-835.53"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge137" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M991.42,-855.78C972.33,-879.78 927.52,-933.99 883,-972.53 811.89,-1034.09 784.05,-1036.19 708,-1091.53 691.61,-1103.46 689.05,-1108.58 672,-1119.53 652.6,-1131.99 648.44,-1138.22 626,-1143.53"/>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M624,-1143.53C566.1,-1154.27 548.8,-1129.96 491.5,-1143.53"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge136" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M955,-855.6C943.02,-859.42 930.3,-864.09 919,-869.53 882.03,-887.32 843.32,-914.99 819.55,-933.18"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="817.26,-930.53 811.5,-939.42 821.55,-936.06 817.26,-930.53"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge139" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M948.84,-839.06C937.77,-835.86 927.03,-830.72 919,-822.53 870.09,-772.65 928.96,-722.14 883,-669.53 828.2,-606.82 773.99,-653.34 708,-602.53 686.3,-585.82 688.42,-574.44 672,-552.53 662.19,-539.45 650.91,-524.96 641.97,-513.62"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="644.6,-511.3 635.65,-505.63 639.11,-515.65 644.6,-511.3"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge141" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M948.7,-840.2C937.37,-836.99 926.54,-831.55 919,-822.53 847.31,-736.69 960.78,-400.9 883,-320.53 798.39,-233.11 425.07,-178.05 338.5,-263.53"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge142" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M948.89,-834.98C938.55,-831.99 928.09,-827.95 919,-822.53 898.74,-810.44 901.91,-797.64 883,-783.53 813.54,-731.7 773.06,-754.78 708,-697.53 674.5,-668.05 648.84,-621.82 635.72,-594.92"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="638.76,-593.17 631.31,-585.63 632.44,-596.17 638.76,-593.17"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge140" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M998.8,-855.54C990.67,-897.02 958.73,-1036.26 883,-1119.53 825.16,-1183.14 731.5,-1223.82 674.64,-1244.1"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="673.44,-1240.81 665.16,-1247.42 675.75,-1247.42 673.44,-1240.81"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge151" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M997.7,-1137.54C978.9,-1205.81 886.22,-1542.13 883,-1546.53 855.85,-1583.71 837.29,-1582.17 796.5,-1603.53"/>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M794.5,-1603.53C728.16,-1638.27 696.89,-1579.38 626,-1603.53"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge146" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M959.81,-1113.52C937.16,-1106.95 908.55,-1098.72 883,-1091.53 805.36,-1069.7 784.01,-1070.5 708,-1043.53 632.04,-1016.58 616.1,-1002.23 542,-970.53 519.65,-960.97 515.28,-954.59 491.5,-949.53"/>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M489.5,-949.53C454.14,-939.8 414.01,-929.19 384.01,-921.34"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="384.81,-917.93 374.25,-918.79 383.04,-924.71 384.81,-917.93"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge145" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M948.76,-1122.78C875.68,-1120.11 739.16,-1119.45 626,-1143.53"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge144" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M986.62,-1113.3C951.42,-1083.34 860.73,-1006.18 818.61,-970.34"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="820.75,-967.57 810.86,-963.75 816.21,-972.9 820.75,-967.57"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge147" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M997.28,-1113.52C978.58,-1053.35 895.36,-787.01 883,-773.53 825.68,-711.04 762.77,-762.27 708,-697.53 665.11,-646.84 701.05,-612.24 672,-552.53 665.03,-538.2 654.17,-524.05 644.75,-513.2"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="647.21,-510.7 637.92,-505.6 642,-515.38 647.21,-510.7"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge149" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M489.5,-949.53C424.79,-931.72 400.24,-975.84 338.5,-949.53"/>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M336.5,-949.53C309.01,-937.82 298.19,-944.93 272,-930.53 244.54,-915.44 218.2,-890.55 201.61,-873.17"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="204.09,-870.69 194.71,-865.77 198.98,-875.47 204.09,-870.69"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge150" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M995.21,-1113.3C979.72,-1081.32 935,-993.3 883,-930.53 816.34,-850.07 768.23,-858.92 708,-773.53 667.07,-715.51 641.85,-634 631.47,-595.42"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="634.86,-594.52 628.94,-585.73 628.08,-596.29 634.86,-594.52"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge148" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M991.4,-1137.84C964.46,-1170.84 884.39,-1258.72 796.5,-1257.53"/>
+<path fill="none" stroke="#00ffb9" stroke-dasharray="5,2" d="M794.5,-1257.53C757.15,-1257.03 715.14,-1257.52 682.41,-1258.15"/>
+<polygon fill="#00ffb9" stroke="#00ffb9" points="682.06,-1254.65 672.13,-1258.35 682.2,-1261.65 682.06,-1254.65"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge153" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1738.85,-1594.4C1730.87,-1591.78 1723.09,-1588.54 1716,-1584.53 1681.65,-1565.13 1652.36,-1528.97 1636.12,-1506.13"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="1638.93,-1504.04 1630.37,-1497.81 1633.18,-1508.02 1638.93,-1504.04"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge154" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d~2</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1620.5,-1713.53C1606.73,-1723.03 1569.51,-1733.55 1537.19,-1741.42"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="1536.26,-1738.05 1527.35,-1743.77 1537.89,-1744.85 1536.26,-1738.05"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge158" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1620.5,-1713.53C1329.76,-1913.96 1354.42,-2178.82 1003,-2213.53"/>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1001,-2213.53C834.95,-2227.81 787.86,-2253.25 626,-2213.53"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge152" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1742.61,-1617.54C1733.12,-1621.07 1723.94,-1625.63 1716,-1631.53 1691.65,-1649.63 1703.1,-1669.86 1680,-1689.53 1658.92,-1707.48 1645.3,-1697.81 1622.5,-1713.53"/>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1620.5,-1713.53C1595.25,-1730.94 1511.99,-1721.93 1482.5,-1713.53"/>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1480.5,-1713.53C1375.51,-1683.63 1364.51,-1640.13 1264,-1597.53 1253.77,-1593.19 893.8,-1478.17 883,-1475.53 749.41,-1442.93 707.63,-1469.4 578,-1423.53 511.22,-1399.9 498.7,-1383.66 439,-1345.53 422.37,-1334.91 419.87,-1329.78 403,-1319.53 347.29,-1285.67 322.42,-1294.86 272,-1253.53 251.92,-1237.07 252.34,-1227.7 236,-1207.53 224.5,-1193.34 211.27,-1177.58 201.03,-1165.49"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="203.63,-1163.14 194.48,-1157.78 198.29,-1167.67 203.63,-1163.14"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge157" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1738.53,-1598.59C1730.19,-1595.28 1722.41,-1590.73 1716,-1584.53 1700.55,-1569.57 1540.21,-850.51 1527,-833.53 1513.2,-815.8 1504.9,-811.33 1482.5,-809.53"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge155" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1738.95,-1611.16C1703.52,-1612.45 1660.56,-1611.9 1622.5,-1605.53"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge156" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M1480.5,-1713.53C1357.3,-1680.49 1321.05,-1715.02 1193.5,-1713.53"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge164" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M996.21,-1457.7C983.15,-1489.26 943.77,-1574.27 883,-1617.53 817.29,-1664.3 785.03,-1641.65 708,-1665.53 542,-1716.99 511.01,-1772.43 338.5,-1793.53"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M336.5,-1793.53C268.87,-1797.93 227.65,-1845.39 184,-1793.53"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge160" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M794.5,-1371.53C720.7,-1350.4 699.43,-1431.93 626,-1409.53"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M624,-1409.53C601.07,-1402.54 305.41,-1220.53 212.05,-1162.87"/>
+<polygon fill="#002eff" stroke="#002eff" points="213.76,-1159.82 203.41,-1157.54 210.08,-1165.77 213.76,-1159.82"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge159" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M998.01,-1433.22C986.54,-1386.98 942.98,-1219.74 883,-1091.53 862.1,-1046.85 830.05,-998.76 811.39,-972.18"/>
+<polygon fill="#002eff" stroke="#002eff" points="814.03,-969.85 805.39,-963.72 808.32,-973.9 814.03,-969.85"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge161" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M997.19,-1433.4C984.61,-1393.01 943.79,-1259.3 919,-1146.53 898.1,-1051.48 926.8,-1017.44 883,-930.53 832.64,-830.61 759.14,-849.06 708,-749.53 667.32,-670.37 708.41,-633.75 672,-552.53 665.56,-538.18 654.92,-524.2 645.49,-513.45"/>
+<polygon fill="#002eff" stroke="#002eff" points="647.94,-510.94 638.61,-505.91 642.77,-515.66 647.94,-510.94"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge163" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M984.65,-1433.52C933.35,-1394.79 775.01,-1267.12 708,-1119.53 652.85,-998.06 692.18,-953.4 672,-821.53 659.18,-737.71 639.43,-638.8 630.58,-595.59"/>
+<polygon fill="#002eff" stroke="#002eff" points="633.97,-594.7 628.52,-585.61 627.11,-596.11 633.97,-594.7"/>
+</g>
+<!-- module~self_twopointvector_3d_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge162" class="edge">
+<title>module~self_twopointvector_3d_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M955.01,-1433.44C943.03,-1429.63 930.31,-1424.96 919,-1419.53 901.66,-1411.21 900.48,-1403.54 883,-1395.53 846.72,-1378.92 834.86,-1382.51 796.5,-1371.53"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M794.5,-1371.53C733.69,-1354.12 675.06,-1305.79 645.63,-1278.65"/>
+<polygon fill="#002eff" stroke="#002eff" points="647.81,-1275.9 638.12,-1271.6 643.02,-1281 647.81,-1275.9"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge165" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M794.5,-1679.53C707.87,-1705.43 715.24,-1779.01 626,-1793.53"/>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M624,-1793.53C498.76,-1813.91 465.12,-1785.29 338.5,-1793.53"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;mpi -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge167" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;mpi</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M927.61,-1651.55C888.43,-1658.55 839.54,-1668.22 796.5,-1679.53"/>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M794.5,-1679.53C583.06,-1735.1 316.01,-1701.12 220.23,-1685.82"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="220.62,-1682.34 210.19,-1684.19 219.5,-1689.25 220.62,-1682.34"/>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge168" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M969.67,-1627.42C954.31,-1621.36 935.59,-1613.78 919,-1606.53 902.79,-1599.45 899.88,-1594.85 883,-1589.53 612,-1504.21 472.42,-1602.91 272,-1401.53 185.92,-1315.04 186.2,-1274.85 130,-1166.53 111.67,-1131.2 117.99,-1116.29 94,-1084.53 88.52,-1077.28 81.4,-1070.54 74.41,-1064.81"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="76.4,-1061.93 66.35,-1058.58 72.12,-1067.47 76.4,-1061.93"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_node42" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_ecdgmodel3d~~UsesGraph_node42"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="883,-1537.53 708,-1537.53 708,-1513.53 883,-1513.53 883,-1537.53"/>
+<text text-anchor="middle" x="795.5" y="-1523.13" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge166" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M943.97,-1627.52C935.03,-1623.98 926.34,-1619.42 919,-1613.53 894.14,-1593.6 908.01,-1571.28 883,-1551.53 878.27,-1547.8 873.01,-1544.6 867.49,-1541.86"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="868.55,-1538.5 857.99,-1537.66 865.72,-1544.9 868.55,-1538.5"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge169" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff008b" stroke-dasharray="5,2" d="M1162.84,-1630.68C1141.56,-1639.49 1111.71,-1651.42 1085,-1660.53 883.99,-1729.12 835.1,-1756.31 626,-1793.53"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge170" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff008b" stroke-dasharray="5,2" d="M1156.9,-1616.94C1092.28,-1613.36 956.37,-1602.72 919,-1575.53 890.39,-1554.72 912.79,-1523.62 883,-1504.53 809.7,-1457.56 578.43,-1494.36 491.5,-1489.53"/>
+<path fill="none" stroke="#ff008b" stroke-dasharray="5,2" d="M489.5,-1489.53C364.2,-1482.8 343.82,-1412.42 272,-1309.53 244.48,-1270.11 259.83,-1249.28 236,-1207.53 227.17,-1192.07 214.34,-1176.72 203.63,-1165.16"/>
+<polygon fill="#ff008b" stroke="#ff008b" points="206.06,-1162.64 196.63,-1157.81 200.99,-1167.46 206.06,-1162.64"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge171" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff008b" stroke-dasharray="5,2" d="M1156.93,-1622.38C1139.41,-1624.33 1117.23,-1626.81 1095.2,-1629.26"/>
+<polygon fill="#ff008b" stroke="#ff008b" points="1094.66,-1625.8 1085.1,-1630.38 1095.43,-1632.76 1094.66,-1625.8"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge173" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M313.34,-1077.68C287.32,-1091.33 244.94,-1113.56 215.83,-1128.83"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="214.11,-1125.78 206.88,-1133.53 217.36,-1131.98 214.11,-1125.78"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge172" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M285.25,-1062.16C234.4,-1058.81 156.66,-1053.69 104.16,-1050.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="104.22,-1046.73 94.01,-1049.56 103.76,-1053.71 104.22,-1046.73"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge178" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M777.9,-1537.68C748.87,-1557.85 686.22,-1596.73 626,-1603.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-1603.53C571.08,-1609.51 219.33,-1833.37 184,-1793.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M182,-1793.53C151.51,-1757.3 145.05,-1745.43 130,-1700.53 58.15,-1486.15 49.19,-1208.06 48.13,-1127.99"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="51.62,-1127.61 48.02,-1117.65 44.62,-1127.68 51.62,-1127.61"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge176" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M738.09,-1537.53C703.69,-1541.89 659.95,-1541.94 626,-1523.53"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-1523.53C527.37,-1471.14 593.94,-1389.29 578,-1280.53 555.64,-1128 575.12,-1086.1 542,-935.53 491.19,-704.53 380.94,-438.35 347.99,-361.39"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="351.03,-359.62 343.86,-351.81 344.6,-362.38 351.03,-359.62"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge174" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-1523.53C572.07,-1491.91 552.2,-1492.91 491.5,-1489.53"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2 -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge177" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M786.82,-1513.41C760.34,-1471.61 672.62,-1333.13 639.14,-1280.28"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="642.03,-1278.3 633.72,-1271.72 636.12,-1282.04 642.03,-1278.3"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_ecdgmodel3d~~UsesGraph_edge175" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M624,-1523.53C549.25,-1478.44 505.37,-1532.82 439,-1589.53 413.6,-1611.24 430.76,-1636.93 403,-1655.53 347.87,-1692.47 266.89,-1690.36 220.41,-1685.17"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="220.55,-1681.66 210.2,-1683.92 219.7,-1688.61 220.55,-1681.66"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_ecdgmodel3dUsesGraph = svgPanZoom('#moduleself_ecdgmodel3dUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+    
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_ecdgmodel3d.html#type-ecdgmodel3d~2">ECDGModel3D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-ecdgmodel3d~2"></span><h3>type, public, extends(<a href='../type/ecdgmodel3d_t.html'>ECDGModel3D_t</a>) :: <a href='../type/ecdgmodel3d~2.html'>ECDGModel3D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-dsdt"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~2"></span>type(<a href='../type/semhex.html'>SEMHex</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh"></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nstepped"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nstepped</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-twopointflux"></span>type(<a href='../type/mappedtwopointvector3d.html'>MappedTwoPointVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>twoPointFlux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalfree'>AdditionalFree</a></strong>  => AdditionalFree_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalinit~2'>AdditionalInit</a></strong>  => AdditionalInit_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionaloutput'>AdditionalOutput</a></strong>  => AdditionalOutput_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-boundaryflux'>BoundaryFlux</a></strong>  => BoundaryFlux_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-calculateentropy'>CalculateEntropy</a></strong>  => CalculateEntropy_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-calculatesolutiongradient'>CalculateSolutionGradient</a></strong>  => CalculateSolutionGradient_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel3d_t.html#boundprocedure-calculatetendency~13'>CalculateTendency</a></strong>  => CalculateTendency_ECDGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-euler_timeintegrator'>Euler_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-fluxmethod'>FluxMethod</a></strong>  => fluxmethod_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-forwardstep'>ForwardStep</a></strong>  => ForwardStep_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel3d_t.html#boundprocedure-free~8'>Free</a></strong>  => Free_ECDGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-getsimulationtime'>GetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-incrementiocounter'>IncrementIOCounter</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel3d_t.html#boundprocedure-init~8'>Init</a></strong>  => Init_ECDGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk2_timeintegrator'>LowStorageRK2_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk3_timeintegrator'>LowStorageRK3_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk4_timeintegrator'>LowStorageRK4_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-mapboundaryconditions'>MapBoundaryConditions</a></strong>  => MapBoundaryConditions_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-poststephook'>PostStepHook</a></strong>  => PostStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-prestephook'>PreStepHook</a></strong>  => PreStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pretendencyhook'>PreTendencyHook</a></strong>  => PreTendencyHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-printtype'>PrintType</a></strong>  => PrintType_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-readmodel'>ReadModel</a></strong>  => Read_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportentropy'>ReportEntropy</a></strong>  => ReportEntropy_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-reportmetrics'>ReportMetrics</a></strong>  => ReportMetrics_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportusermetrics'>ReportUserMetrics</a></strong>  => ReportUserMetrics_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-setboundarycondition'>SetBoundaryCondition</a></strong>  => setboundarycondition_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-setgradientboundarycondition'>SetGradientBoundaryCondition</a></strong>  => setgradientboundarycondition_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-setmetadata'>SetMetadata</a></strong>  => SetMetadata_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setnumberofvariables'>SetNumberOfVariables</a></strong>  => SetNumberOfVariables_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setsimulationtime'>SetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/ecdgmodel3d~2.html#boundprocedure-setsolution~47'>SetSolution</a></strong>  => SetSolutionFromChar_DGModel3D_t, SetSolutionFromEqn_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/ecdgmodel3d~2.html#boundprocedure-settimeintegrator~48'>SetTimeIntegrator</a></strong>  => SetTimeIntegrator_withChar </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-sourcemethod'>SourceMethod</a></strong>  => sourcemethod_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel3d_t.html#boundprocedure-twopointfluxmethod'>TwoPointFluxMethod</a></strong>  => TwoPointFluxMethod_ECDGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-updategrk2'>UpdateGRK2</a></strong>  => UpdateGRK2_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-updategrk3'>UpdateGRK3</a></strong>  => UpdateGRK3_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-updategrk4'>UpdateGRK4</a></strong>  => UpdateGRK4_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d.html#boundprocedure-updatesolution'>UpdateSolution</a></strong>  => UpdateSolution_DGModel3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-writemodel'>WriteModel</a></strong>  => Write_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-writetecplot~2'>WriteTecplot</a></strong>  => WriteTecplot_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-entropy_func~2'>entropy_func</a></strong>  => entropy_func_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux1d'>flux1D</a></strong>  => flux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux2d'>flux2D</a></strong>  => flux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux3d'>flux3D</a></strong>  => flux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux1d'>riemannflux1d</a></strong>  => riemannflux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux2d'>riemannflux2d</a></strong>  => riemannflux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux3d~2'>riemannflux3d</a></strong>  => riemannflux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source1d'>source1d</a></strong>  => source1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source2d'>source2d</a></strong>  => source2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source3d'>source3d</a></strong>  => source3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/ecdgmodel3d_t.html#boundprocedure-twopointflux3d~3'>twopointflux3d</a></strong>  => twopointflux3d_ECDGModel3D_t </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-07-23 16:03            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

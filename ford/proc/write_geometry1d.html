@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Write_Geometry1D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Write_Geometry1D
+      <small>Subroutine</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.2% of total for procedures.">26 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Geometry_1D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_geometry_1d.f90.html'>SELF_Geometry_1D.f90</a></li>
+     <li><a href='../module/self_geometry_1d.html'>SELF_Geometry_1D</a></li>
+     <li class="active">Write_Geometry1D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/write_geometry1d.html#src">Write_Geometry1D</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public subroutine Write_Geometry1D(myGeom, fileName)</h2>
+    
+
+
+    <h3>Arguments</h3>
+      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-mygeom~10"></span>class(<a href='../type/geometry1d.html'>Geometry1D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>myGeom</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-filename"></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    <br>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~write_geometry1d~~CallsGraph Pages: 1 -->
+<svg id="procwrite_geometry1dCallsGraph" width="641pt" height="777pt"
+ viewBox="0.00 0.00 641.00 777.46" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~write_geometry1d~~CallsGraph" class="graph" transform="scale(0.96 0.96) rotate(0) translate(4 805)">
+<title>proc~~write_geometry1d~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-805 663,-805 663,4 -4,4"/>
+<!-- proc~write_geometry1d -->
+<g id="proc~~write_geometry1d~~CallsGraph_node1" class="node">
+<title>proc~write_geometry1d</title>
+<polygon fill="none" stroke="black" points="114,-213 0,-213 0,-189 114,-189 114,-213"/>
+<text text-anchor="middle" x="57" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50">Write_Geometry1D</text>
+</g>
+<!-- interface~open_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_node2" class="node">
+<title>interface~open_hdf5</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node2"><a xlink:href=".././interface/open_hdf5.html" xlink:title="Open_HDF5">
+<polygon fill="#a7506f" stroke="#a7506f" points="245.5,-234 169.5,-234 169.5,-210 245.5,-210 245.5,-234"/>
+<text text-anchor="middle" x="207.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Open_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~write_geometry1d&#45;&gt;interface~open_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge1" class="edge">
+<title>proc~write_geometry1d&#45;&gt;interface~open_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M114.14,-208.94C128.95,-211.03 144.77,-213.27 159.07,-215.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="158.78,-218.79 169.17,-216.72 159.76,-211.86 158.78,-218.79"/>
+</g>
+<!-- proc~creategroup_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_node3" class="node">
+<title>proc~creategroup_hdf5</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node3"><a xlink:href=".././proc/creategroup_hdf5.html" xlink:title="CreateGroup_HDF5">
+<polygon fill="#d9534f" stroke="#d9534f" points="265,-171 150,-171 150,-147 265,-147 265,-171"/>
+<text text-anchor="middle" x="207.5" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">CreateGroup_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~write_geometry1d&#45;&gt;proc~creategroup_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge2" class="edge">
+<title>proc~write_geometry1d&#45;&gt;proc~creategroup_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M100.55,-188.96C117.18,-184.26 136.41,-178.82 153.88,-173.88"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="155.27,-177.13 163.94,-171.04 153.36,-170.39 155.27,-177.13"/>
+</g>
+<!-- interface~writearray_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_node4" class="node">
+<title>interface~writearray_hdf5</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node4"><a xlink:href=".././interface/writearray_hdf5.html" xlink:title="WriteArray_HDF5">
+<polygon fill="#a7506f" stroke="#a7506f" points="259.5,-570 155.5,-570 155.5,-546 259.5,-546 259.5,-570"/>
+<text text-anchor="middle" x="207.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~write_geometry1d&#45;&gt;interface~writearray_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge3" class="edge">
+<title>proc~write_geometry1d&#45;&gt;interface~writearray_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M63.11,-213.29C84.8,-265.43 169.38,-468.75 197.41,-536.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="194.34,-537.87 201.41,-545.76 200.8,-535.19 194.34,-537.87"/>
+</g>
+<!-- proc~close_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_node5" class="node">
+<title>proc~close_hdf5</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node5"><a xlink:href=".././proc/close_hdf5.html" xlink:title="Close_HDF5">
+<polygon fill="#d9534f" stroke="#d9534f" points="245.5,-66 169.5,-66 169.5,-42 245.5,-42 245.5,-66"/>
+<text text-anchor="middle" x="207.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Close_HDF5</text>
+</a>
+</g>
+</g>
+<!-- proc~write_geometry1d&#45;&gt;proc~close_hdf5 -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge4" class="edge">
+<title>proc~write_geometry1d&#45;&gt;proc~close_hdf5</title>
+<path fill="none" stroke="#ff0000" d="M70.15,-188.97C95.82,-163.56 155.77,-104.22 186.92,-73.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="189.54,-75.72 194.18,-66.2 184.61,-70.74 189.54,-75.72"/>
+</g>
+<!-- proc~open_hdf5_parallel -->
+<g id="proc~~write_geometry1d~~CallsGraph_node8" class="node">
+<title>proc~open_hdf5_parallel</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node8"><a xlink:href=".././proc/open_hdf5_parallel.html" xlink:title="Open_HDF5_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="457.5,-276 336.5,-276 336.5,-252 457.5,-252 457.5,-276"/>
+<text text-anchor="middle" x="397" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Open_HDF5_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~open_hdf5&#45;&gt;proc~open_hdf5_parallel -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge6" class="edge">
+<title>interface~open_hdf5&#45;&gt;proc~open_hdf5_parallel</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M245.84,-230.53C262.69,-234.36 282.84,-238.93 301,-243 310.77,-245.19 321.1,-247.49 331.22,-249.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="330.71,-253.2 341.23,-251.95 332.22,-246.37 330.71,-253.2"/>
+</g>
+<!-- proc~open_hdf5_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node16" class="node">
+<title>proc~open_hdf5_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node16"><a xlink:href=".././proc/open_hdf5_serial.html" xlink:title="Open_HDF5_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="452,-234 342,-234 342,-210 452,-210 452,-234"/>
+<text text-anchor="middle" x="397" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Open_HDF5_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~open_hdf5&#45;&gt;proc~open_hdf5_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge5" class="edge">
+<title>interface~open_hdf5&#45;&gt;proc~open_hdf5_serial</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M245.54,-222C270.07,-222 302.88,-222 331.61,-222"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="331.98,-225.5 341.98,-222 331.98,-218.5 331.98,-225.5"/>
+</g>
+<!-- h5lexists_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node6" class="node">
+<title>h5lexists_f</title>
+<polygon fill="#777777" stroke="#777777" points="430.5,-192 363.5,-192 363.5,-168 430.5,-168 430.5,-192"/>
+<text text-anchor="middle" x="397" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5lexists_f</text>
+</g>
+<!-- proc~creategroup_hdf5&#45;&gt;h5lexists_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge7" class="edge">
+<title>proc~creategroup_hdf5&#45;&gt;h5lexists_f</title>
+<path fill="none" stroke="#7fff00" d="M265.01,-165.33C293.38,-168.51 327.18,-172.29 353.34,-175.22"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="352.99,-178.7 363.32,-176.34 353.77,-171.75 352.99,-178.7"/>
+</g>
+<!-- h5gclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node7" class="node">
+<title>h5gclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="432,-150 362,-150 362,-126 432,-126 432,-150"/>
+<text text-anchor="middle" x="397" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5gclose_f</text>
+</g>
+<!-- proc~creategroup_hdf5&#45;&gt;h5gclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge9" class="edge">
+<title>proc~creategroup_hdf5&#45;&gt;h5gclose_f</title>
+<path fill="none" stroke="#7fff00" d="M265.01,-152.67C292.78,-149.56 325.75,-145.87 351.67,-142.97"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="352.4,-146.41 361.95,-141.81 351.62,-139.45 352.4,-146.41"/>
+</g>
+<!-- h5gcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node17" class="node">
+<title>h5gcreate_f</title>
+<polygon fill="#777777" stroke="#777777" points="435,-108 359,-108 359,-84 435,-84 435,-108"/>
+<text text-anchor="middle" x="397" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5gcreate_f</text>
+</g>
+<!-- proc~creategroup_hdf5&#45;&gt;h5gcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge8" class="edge">
+<title>proc~creategroup_hdf5&#45;&gt;h5gcreate_f</title>
+<path fill="none" stroke="#7fff00" d="M231.53,-146.91C249.92,-137.66 276.57,-125.15 301,-117 316.38,-111.87 333.58,-107.64 349.07,-104.35"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="349.88,-107.75 358.97,-102.32 348.47,-100.9 349.88,-107.75"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node9" class="node">
+<title>proc~writearray_hdf5_real_r3_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node9"><a xlink:href=".././proc/writearray_hdf5_real_r3_serial.html" xlink:title="WriteArray_HDF5_real_r3_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-591 306.5,-591 306.5,-567 487.5,-567 487.5,-591"/>
+<text text-anchor="middle" x="397" y="-576.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r3_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r3_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge10" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r3_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M259.74,-563.74C271.11,-565.01 283.55,-566.41 296.14,-567.82"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="295.92,-571.31 306.25,-568.95 296.7,-564.36 295.92,-571.31"/>
+</g>
+<!-- proc~writearray_hdf5_real_r2_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node10" class="node">
+<title>proc~writearray_hdf5_real_r2_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node10"><a xlink:href=".././proc/writearray_hdf5_real_r2_serial.html" xlink:title="WriteArray_HDF5_real_r2_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-549 306.5,-549 306.5,-525 487.5,-525 487.5,-549"/>
+<text text-anchor="middle" x="397" y="-534.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r2_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r2_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge11" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r2_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M259.74,-552.26C271.11,-550.99 283.55,-549.59 296.14,-548.18"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="296.7,-551.64 306.25,-547.05 295.92,-544.69 296.7,-551.64"/>
+</g>
+<!-- proc~writearray_hdf5_real_r5_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node11" class="node">
+<title>proc~writearray_hdf5_real_r5_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node11"><a xlink:href=".././proc/writearray_hdf5_real_r5_serial.html" xlink:title="WriteArray_HDF5_real_r5_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-507 306.5,-507 306.5,-483 487.5,-483 487.5,-507"/>
+<text text-anchor="middle" x="397" y="-492.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r5_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r5_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge12" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r5_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M231.53,-545.91C249.92,-536.66 276.57,-524.15 301,-516 308.07,-513.64 315.54,-511.47 323.04,-509.49"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="324.05,-512.85 332.9,-507.01 322.34,-506.06 324.05,-512.85"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r2_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node12" class="node">
+<title>proc~writearray_hdf5_int32_r2_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node12"><a xlink:href=".././proc/writearray_hdf5_int32_r2_serial.html" xlink:title="WriteArray_HDF5_int32_r2_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="490.5,-465 303.5,-465 303.5,-441 490.5,-441 490.5,-465"/>
+<text text-anchor="middle" x="397" y="-450.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_int32_r2_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r2_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge13" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r2_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M218.17,-545.85C233.62,-527.33 265.74,-492.24 301,-474 304.99,-471.94 309.18,-470.07 313.47,-468.39"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="314.78,-471.65 323.03,-465 312.44,-465.05 314.78,-471.65"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r4_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node13" class="node">
+<title>proc~writearray_hdf5_int32_r4_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node13"><a xlink:href=".././proc/writearray_hdf5_int32_r4_serial.html" xlink:title="WriteArray_HDF5_int32_r4_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="490.5,-801 303.5,-801 303.5,-777 490.5,-777 490.5,-801"/>
+<text text-anchor="middle" x="397" y="-786.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_int32_r4_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r4_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge14" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r4_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M210.04,-570.24C215.31,-606.6 235.99,-714.71 301,-768 302.57,-769.29 304.2,-770.5 305.88,-771.64"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="304.28,-774.76 314.68,-776.77 307.81,-768.71 304.28,-774.76"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel -->
+<g id="proc~~write_geometry1d~~CallsGraph_node14" class="node">
+<title>proc~writearray_hdf5_real_r4_parallel</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node14"><a xlink:href=".././proc/writearray_hdf5_real_r4_parallel.html" xlink:title="WriteArray_HDF5_real_r4_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="493,-423 301,-423 301,-399 493,-399 493,-423"/>
+<text text-anchor="middle" x="397" y="-408.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r4_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r4_parallel -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge15" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r4_parallel</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M213.84,-545.66C225.58,-520.07 256.21,-461.19 301,-432 303.6,-430.3 306.33,-428.74 309.13,-427.3"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="310.69,-430.44 318.36,-423.13 307.8,-424.06 310.69,-430.44"/>
+</g>
+<!-- proc~writearray_hdf5_real_r1_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node18" class="node">
+<title>proc~writearray_hdf5_real_r1_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node18"><a xlink:href=".././proc/writearray_hdf5_real_r1_serial.html" xlink:title="WriteArray_HDF5_real_r1_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-759 306.5,-759 306.5,-735 487.5,-735 487.5,-759"/>
+<text text-anchor="middle" x="397" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r1_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r1_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge16" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r1_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M211.42,-570.02C219.65,-601.16 246.09,-684.9 301,-726 303.07,-727.55 305.23,-728.99 307.47,-730.33"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="305.94,-733.47 316.42,-734.99 309.17,-727.27 305.94,-733.47"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node19" class="node">
+<title>proc~writearray_hdf5_real_r4_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node19"><a xlink:href=".././proc/writearray_hdf5_real_r4_serial.html" xlink:title="WriteArray_HDF5_real_r4_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="487.5,-717 306.5,-717 306.5,-693 487.5,-693 487.5,-717"/>
+<text text-anchor="middle" x="397" y="-702.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r4_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r4_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge17" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r4_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M213.84,-570.34C225.58,-595.93 256.21,-654.81 301,-684 303.6,-685.7 306.33,-687.26 309.13,-688.7"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="307.8,-691.94 318.36,-692.87 310.69,-685.56 307.8,-691.94"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r1_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node20" class="node">
+<title>proc~writearray_hdf5_int32_r1_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node20"><a xlink:href=".././proc/writearray_hdf5_int32_r1_serial.html" xlink:title="WriteArray_HDF5_int32_r1_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="490.5,-675 303.5,-675 303.5,-651 490.5,-651 490.5,-675"/>
+<text text-anchor="middle" x="397" y="-660.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_int32_r1_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r1_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge18" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r1_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M218.17,-570.15C233.62,-588.67 265.74,-623.76 301,-642 304.99,-644.06 309.18,-645.93 313.47,-647.61"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="312.44,-650.95 323.03,-651 314.78,-644.35 312.44,-650.95"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r3_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_node21" class="node">
+<title>proc~writearray_hdf5_int32_r3_serial</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node21"><a xlink:href=".././proc/writearray_hdf5_int32_r3_serial.html" xlink:title="WriteArray_HDF5_int32_r3_serial">
+<polygon fill="#d9534f" stroke="#d9534f" points="490.5,-633 303.5,-633 303.5,-609 490.5,-609 490.5,-633"/>
+<text text-anchor="middle" x="397" y="-618.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_int32_r3_serial</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r3_serial -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge19" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_int32_r3_serial</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M231.53,-570.09C249.92,-579.34 276.57,-591.85 301,-600 308.07,-602.36 315.54,-604.53 323.04,-606.51"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="322.34,-609.94 332.9,-608.99 324.05,-603.15 322.34,-609.94"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel -->
+<g id="proc~~write_geometry1d~~CallsGraph_node22" class="node">
+<title>proc~writearray_hdf5_real_r3_parallel</title>
+<g id="a_proc~~write_geometry1d~~CallsGraph_node22"><a xlink:href=".././proc/writearray_hdf5_real_r3_parallel.html" xlink:title="WriteArray_HDF5_real_r3_parallel">
+<polygon fill="#d9534f" stroke="#d9534f" points="493,-381 301,-381 301,-357 493,-357 493,-381"/>
+<text text-anchor="middle" x="397" y="-366.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">WriteArray_HDF5_real_r3_parallel</text>
+</a>
+</g>
+</g>
+<!-- interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r3_parallel -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge20" class="edge">
+<title>interface~writearray_hdf5&#45;&gt;proc~writearray_hdf5_real_r3_parallel</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M211.42,-545.98C219.65,-514.84 246.09,-431.1 301,-390 303.07,-388.45 305.23,-387.01 307.47,-385.67"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="309.17,-388.73 316.42,-381.01 305.94,-382.53 309.17,-388.73"/>
+</g>
+<!-- h5fclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node15" class="node">
+<title>h5fclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="430.5,-66 363.5,-66 363.5,-42 430.5,-42 430.5,-66"/>
+<text text-anchor="middle" x="397" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5fclose_f</text>
+</g>
+<!-- proc~close_hdf5&#45;&gt;h5fclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge21" class="edge">
+<title>proc~close_hdf5&#45;&gt;h5fclose_f</title>
+<path fill="none" stroke="#7f00ff" d="M245.54,-54C276.55,-54 320.82,-54 353.31,-54"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="353.42,-57.5 363.42,-54 353.42,-50.5 353.42,-57.5"/>
+</g>
+<!-- h5close_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node23" class="node">
+<title>h5close_f</title>
+<polygon fill="#777777" stroke="#777777" points="428.5,-24 365.5,-24 365.5,0 428.5,0 428.5,-24"/>
+<text text-anchor="middle" x="397" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5close_f</text>
+</g>
+<!-- proc~close_hdf5&#45;&gt;h5close_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge22" class="edge">
+<title>proc~close_hdf5&#45;&gt;h5close_f</title>
+<path fill="none" stroke="#7f00ff" d="M245.84,-45.47C262.69,-41.64 282.84,-37.07 301,-33 318.74,-29.02 338.37,-24.68 355.15,-20.98"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="356.17,-24.34 365.19,-18.77 354.67,-17.5 356.17,-24.34"/>
+</g>
+<!-- h5pcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node24" class="node">
+<title>h5pcreate_f</title>
+<polygon fill="#777777" stroke="#777777" points="632,-381 556,-381 556,-357 632,-357 632,-381"/>
+<text text-anchor="middle" x="594" y="-366.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pcreate_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge23" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#ffaa00" d="M413.77,-276C437.63,-293.71 484.83,-327.01 529,-348 534.41,-350.57 540.22,-352.96 546.06,-355.12"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="545.23,-358.54 555.83,-358.56 547.56,-351.94 545.23,-358.54"/>
+</g>
+<!-- h5fcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node25" class="node">
+<title>h5fcreate_f</title>
+<polygon fill="#777777" stroke="#777777" points="630.5,-255 557.5,-255 557.5,-231 630.5,-231 630.5,-255"/>
+<text text-anchor="middle" x="594" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5fcreate_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5fcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge24" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5fcreate_f</title>
+<path fill="none" stroke="#ffaa00" d="M457.57,-257.59C486.34,-254.49 520.34,-250.83 547.07,-247.95"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="547.73,-251.4 557.3,-246.84 546.98,-244.44 547.73,-251.4"/>
+</g>
+<!-- h5pclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node26" class="node">
+<title>h5pclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="629,-339 559,-339 559,-315 629,-315 629,-339"/>
+<text text-anchor="middle" x="594" y="-324.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pclose_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge25" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#ffaa00" d="M435.6,-276.15C468.03,-286.63 514.91,-301.77 549.07,-312.81"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="548.19,-316.2 558.78,-315.95 550.34,-309.54 548.19,-316.2"/>
+</g>
+<!-- h5open_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node29" class="node">
+<title>h5open_f</title>
+<polygon fill="#777777" stroke="#777777" points="625,-213 563,-213 563,-189 625,-189 625,-213"/>
+<text text-anchor="middle" x="594" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5open_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5open_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge26" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5open_f</title>
+<path fill="none" stroke="#ffaa00" d="M457.63,-253.79C469.55,-250.93 481.83,-247.37 493,-243 510.25,-236.25 512.11,-229.6 529,-222 536.66,-218.56 545.06,-215.39 553.17,-212.62"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="554.46,-215.88 562.87,-209.45 552.28,-209.23 554.46,-215.88"/>
+</g>
+<!-- h5fopen_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node30" class="node">
+<title>h5fopen_f</title>
+<polygon fill="#777777" stroke="#777777" points="627,-171 561,-171 561,-147 627,-147 627,-171"/>
+<text text-anchor="middle" x="594" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5fopen_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5fopen_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge27" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5fopen_f</title>
+<path fill="none" stroke="#ffaa00" d="M457.52,-258.74C470.09,-255.55 482.66,-250.61 493,-243 518.97,-223.88 504.01,-200.39 529,-180 535.44,-174.74 543.24,-170.79 551.15,-167.82"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="552.35,-171.1 560.76,-164.65 550.17,-164.45 552.35,-171.1"/>
+</g>
+<!-- h5pset_fapl_mpio_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node31" class="node">
+<title>h5pset_fapl_mpio_f</title>
+<polygon fill="#777777" stroke="#777777" points="651.5,-297 536.5,-297 536.5,-273 651.5,-273 651.5,-297"/>
+<text text-anchor="middle" x="594" y="-282.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pset_fapl_mpio_f</text>
+</g>
+<!-- proc~open_hdf5_parallel&#45;&gt;h5pset_fapl_mpio_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge28" class="edge">
+<title>proc~open_hdf5_parallel&#45;&gt;h5pset_fapl_mpio_f</title>
+<path fill="none" stroke="#ffaa00" d="M457.57,-270.41C479.32,-272.76 504.07,-275.42 526.4,-277.83"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="526.15,-281.32 536.47,-278.91 526.9,-274.36 526.15,-281.32"/>
+</g>
+<!-- h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node27" class="node">
+<title>h5screate_simple_f</title>
+<polygon fill="#777777" stroke="#777777" points="651.5,-675 536.5,-675 536.5,-651 651.5,-651 651.5,-675"/>
+<text text-anchor="middle" x="594" y="-660.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5screate_simple_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r3_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge29" class="edge">
+<title>proc~writearray_hdf5_real_r3_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#ffff00" d="M473.9,-591.02C480.59,-593.48 487.06,-596.44 493,-600 514.09,-612.64 508.57,-628.33 529,-642 531.54,-643.7 534.23,-645.27 537.02,-646.73"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="535.6,-649.93 546.15,-650.97 538.55,-643.58 535.6,-649.93"/>
+</g>
+<!-- h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node28" class="node">
+<title>h5sclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="628,-633 560,-633 560,-609 628,-609 628,-633"/>
+<text text-anchor="middle" x="594" y="-618.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5sclose_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r3_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge30" class="edge">
+<title>proc~writearray_hdf5_real_r3_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#ffff00" d="M453.88,-591.04C484.45,-597.62 521.74,-605.65 550.02,-611.74"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="549.49,-615.21 560,-613.89 550.96,-608.36 549.49,-615.21"/>
+</g>
+<!-- h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node32" class="node">
+<title>h5dwrite_f</title>
+<polygon fill="#777777" stroke="#777777" points="628,-591 560,-591 560,-567 628,-567 628,-591"/>
+<text text-anchor="middle" x="594" y="-576.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dwrite_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r3_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge31" class="edge">
+<title>proc~writearray_hdf5_real_r3_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#ffff00" d="M487.51,-579C509.2,-579 531.43,-579 549.85,-579"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="549.95,-582.5 559.95,-579 549.95,-575.5 549.95,-582.5"/>
+</g>
+<!-- h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node33" class="node">
+<title>h5dcreate_f</title>
+<polygon fill="#777777" stroke="#777777" points="632,-549 556,-549 556,-525 632,-525 632,-549"/>
+<text text-anchor="middle" x="594" y="-534.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dcreate_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r3_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge32" class="edge">
+<title>proc~writearray_hdf5_real_r3_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#ffff00" d="M453.88,-566.96C483.05,-560.68 518.33,-553.08 546.07,-547.11"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="546.88,-550.51 555.92,-544.99 545.41,-543.67 546.88,-550.51"/>
+</g>
+<!-- h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node34" class="node">
+<title>h5dclose_f</title>
+<polygon fill="#777777" stroke="#777777" points="629,-507 559,-507 559,-483 629,-483 629,-507"/>
+<text text-anchor="middle" x="594" y="-492.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5dclose_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r3_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge33" class="edge">
+<title>proc~writearray_hdf5_real_r3_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#ffff00" d="M473.9,-566.98C480.59,-564.52 487.06,-561.56 493,-558 514.09,-545.36 508.57,-529.67 529,-516 535.15,-511.89 542.16,-508.52 549.25,-505.79"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="550.57,-509.04 558.87,-502.45 548.27,-502.43 550.57,-509.04"/>
+</g>
+<!-- proc~writearray_hdf5_real_r2_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge34" class="edge">
+<title>proc~writearray_hdf5_real_r2_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#aaff00" d="M479.36,-549.18C484.23,-551.64 488.84,-554.55 493,-558 524.28,-583.91 499.05,-614.57 529,-642 530.46,-643.33 532,-644.58 533.61,-645.75"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="531.79,-648.74 542.15,-650.96 535.43,-642.76 531.79,-648.74"/>
+</g>
+<!-- proc~writearray_hdf5_real_r2_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge35" class="edge">
+<title>proc~writearray_hdf5_real_r2_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#aaff00" d="M473.9,-549.02C480.59,-551.48 487.06,-554.44 493,-558 514.09,-570.64 508.57,-586.33 529,-600 535.35,-604.25 542.62,-607.69 549.94,-610.47"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="549.26,-613.94 559.86,-613.86 551.52,-607.31 549.26,-613.94"/>
+</g>
+<!-- proc~writearray_hdf5_real_r2_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge36" class="edge">
+<title>proc~writearray_hdf5_real_r2_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#aaff00" d="M453.88,-549.04C484.45,-555.62 521.74,-563.65 550.02,-569.74"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="549.49,-573.21 560,-571.89 550.96,-566.36 549.49,-573.21"/>
+</g>
+<!-- proc~writearray_hdf5_real_r2_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge37" class="edge">
+<title>proc~writearray_hdf5_real_r2_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#aaff00" d="M487.51,-537C507.41,-537 527.76,-537 545.2,-537"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="545.66,-540.5 555.66,-537 545.66,-533.5 545.66,-540.5"/>
+</g>
+<!-- proc~writearray_hdf5_real_r2_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge38" class="edge">
+<title>proc~writearray_hdf5_real_r2_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#aaff00" d="M453.88,-524.96C484.05,-518.47 520.77,-510.56 548.9,-504.5"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="549.81,-507.88 558.85,-502.36 548.34,-501.04 549.81,-507.88"/>
+</g>
+<!-- proc~writearray_hdf5_real_r5_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge39" class="edge">
+<title>proc~writearray_hdf5_real_r5_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#54ff00" d="M480.76,-507.08C485.18,-509.58 489.31,-512.53 493,-516 535.41,-555.91 488.62,-600.03 529,-642 530.06,-643.11 531.19,-644.15 532.36,-645.15"/>
+<polygon fill="#54ff00" stroke="#54ff00" points="530.52,-648.13 540.74,-650.93 534.5,-642.37 530.52,-648.13"/>
+</g>
+<!-- proc~writearray_hdf5_real_r5_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge40" class="edge">
+<title>proc~writearray_hdf5_real_r5_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#54ff00" d="M479.36,-507.18C484.23,-509.64 488.84,-512.55 493,-516 524.28,-541.91 499.05,-572.57 529,-600 535.07,-605.56 542.64,-609.65 550.43,-612.66"/>
+<polygon fill="#54ff00" stroke="#54ff00" points="549.35,-615.99 559.94,-615.82 551.56,-609.34 549.35,-615.99"/>
+</g>
+<!-- proc~writearray_hdf5_real_r5_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge41" class="edge">
+<title>proc~writearray_hdf5_real_r5_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#54ff00" d="M473.9,-507.02C480.59,-509.48 487.06,-512.44 493,-516 514.09,-528.64 508.57,-544.33 529,-558 535.35,-562.25 542.62,-565.69 549.94,-568.47"/>
+<polygon fill="#54ff00" stroke="#54ff00" points="549.26,-571.94 559.86,-571.86 551.52,-565.31 549.26,-571.94"/>
+</g>
+<!-- proc~writearray_hdf5_real_r5_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge42" class="edge">
+<title>proc~writearray_hdf5_real_r5_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#54ff00" d="M453.88,-507.04C483.05,-513.32 518.33,-520.92 546.07,-526.89"/>
+<polygon fill="#54ff00" stroke="#54ff00" points="545.41,-530.33 555.92,-529.01 546.88,-523.49 545.41,-530.33"/>
+</g>
+<!-- proc~writearray_hdf5_real_r5_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge43" class="edge">
+<title>proc~writearray_hdf5_real_r5_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#54ff00" d="M487.51,-495C508.6,-495 530.19,-495 548.31,-495"/>
+<polygon fill="#54ff00" stroke="#54ff00" points="548.54,-498.5 558.54,-495 548.54,-491.5 548.54,-498.5"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge44" class="edge">
+<title>proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#00ff00" d="M481.48,-465.06C485.66,-467.57 489.55,-470.53 493,-474 546.82,-528.17 477.94,-585.22 529,-642 529.9,-643 530.85,-643.96 531.84,-644.87"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="530.05,-647.89 540.18,-650.99 534.19,-642.25 530.05,-647.89"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge45" class="edge">
+<title>proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#00ff00" d="M480.76,-465.08C485.18,-467.58 489.31,-470.53 493,-474 535.41,-513.91 488.62,-558.03 529,-600 534.76,-605.99 542.26,-610.27 550.09,-613.34"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="549.11,-616.7 559.7,-616.5 551.29,-610.05 549.11,-616.7"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge46" class="edge">
+<title>proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#00ff00" d="M479.36,-465.18C484.23,-467.64 488.84,-470.55 493,-474 524.28,-499.91 499.05,-530.57 529,-558 535.07,-563.56 542.64,-567.65 550.43,-570.66"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="549.35,-573.99 559.94,-573.82 551.56,-567.34 549.35,-573.99"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge47" class="edge">
+<title>proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#00ff00" d="M473.9,-465.02C480.59,-467.48 487.06,-470.44 493,-474 514.09,-486.64 508.57,-502.33 529,-516 534.29,-519.54 540.23,-522.53 546.3,-525.03"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="545.28,-528.39 555.87,-528.59 547.72,-521.82 545.28,-528.39"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge48" class="edge">
+<title>proc~writearray_hdf5_int32_r2_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#00ff00" d="M453.88,-465.04C484.05,-471.53 520.77,-479.44 548.9,-485.5"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="548.34,-488.96 558.85,-487.64 549.81,-482.12 548.34,-488.96"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge49" class="edge">
+<title>proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#00ff55" d="M472.72,-776.99C479.79,-774.53 486.67,-771.57 493,-768 530.13,-747.05 561.9,-707.86 579.15,-683.74"/>
+<polygon fill="#00ff55" stroke="#00ff55" points="582.19,-685.51 585.03,-675.3 576.44,-681.5 582.19,-685.51"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge50" class="edge">
+<title>proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#00ff55" d="M480.76,-776.92C485.18,-774.42 489.31,-771.47 493,-768 535.41,-728.09 488.62,-683.97 529,-642 534.76,-636.01 542.26,-631.73 550.09,-628.66"/>
+<polygon fill="#00ff55" stroke="#00ff55" points="551.29,-631.95 559.7,-625.5 549.11,-625.3 551.29,-631.95"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge51" class="edge">
+<title>proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#00ff55" d="M481.48,-776.94C485.66,-774.43 489.55,-771.47 493,-768 546.82,-713.83 477.94,-656.78 529,-600 534.61,-593.76 542.11,-589.36 550,-586.27"/>
+<polygon fill="#00ff55" stroke="#00ff55" points="551.28,-589.54 559.71,-583.11 549.12,-582.88 551.28,-589.54"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge52" class="edge">
+<title>proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#00ff55" d="M482.07,-776.84C486.05,-774.35 489.74,-771.42 493,-768 558.34,-699.46 467.15,-629.7 529,-558 533.62,-552.65 539.63,-548.65 546.11,-545.67"/>
+<polygon fill="#00ff55" stroke="#00ff55" points="547.73,-548.8 555.84,-541.99 545.25,-542.25 547.73,-548.8"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge53" class="edge">
+<title>proc~writearray_hdf5_int32_r4_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#00ff55" d="M482.19,-776.95C486.14,-774.43 489.78,-771.47 493,-768 569.92,-685.03 456.3,-602.69 529,-516 534.29,-509.69 541.51,-505.27 549.19,-502.16"/>
+<polygon fill="#00ff55" stroke="#00ff55" points="550.32,-505.48 558.7,-499 548.11,-498.84 550.32,-505.48"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge55" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#00ffa9" d="M453.88,-398.96C483.05,-392.68 518.33,-385.08 546.07,-379.11"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="546.88,-382.51 555.92,-376.99 545.41,-375.67 546.88,-382.51"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge56" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#00ffa9" d="M473.9,-398.98C480.59,-396.52 487.06,-393.56 493,-390 514.09,-377.36 508.57,-361.67 529,-348 535.15,-343.89 542.16,-340.52 549.25,-337.79"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="550.57,-341.04 558.87,-334.45 548.27,-334.43 550.57,-341.04"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge54" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#00ffa9" d="M482.07,-423.16C486.05,-425.65 489.74,-428.58 493,-432 558.34,-500.54 467.15,-570.3 529,-642 529.86,-643 530.77,-643.95 531.72,-644.85"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="529.65,-647.67 539.72,-650.94 533.89,-642.1 529.65,-647.67"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge57" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#00ffa9" d="M481.48,-423.06C485.66,-425.57 489.55,-428.53 493,-432 546.82,-486.17 477.94,-543.22 529,-600 534.61,-606.24 542.11,-610.64 550,-613.73"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="549.12,-617.12 559.71,-616.89 551.28,-610.46 549.12,-617.12"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge61" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#00ffa9" d="M480.76,-423.08C485.18,-425.58 489.31,-428.53 493,-432 535.41,-471.91 488.62,-516.03 529,-558 534.76,-563.99 542.26,-568.27 550.09,-571.34"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="549.11,-574.7 559.7,-574.5 551.29,-568.05 549.11,-574.7"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge59" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#00ffa9" d="M479.36,-423.18C484.23,-425.64 488.84,-428.55 493,-432 524.28,-457.91 499.05,-488.57 529,-516 534.04,-520.62 540.12,-524.22 546.49,-527.03"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="545.37,-530.35 555.96,-530.61 547.84,-523.8 545.37,-530.35"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge62" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#00ffa9" d="M473.9,-423.02C480.59,-425.48 487.06,-428.44 493,-432 514.09,-444.64 508.57,-460.33 529,-474 535.15,-478.11 542.16,-481.48 549.25,-484.21"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="548.27,-487.57 558.87,-487.55 550.57,-480.96 548.27,-487.57"/>
+</g>
+<!-- h5pset_dxpl_mpio_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node35" class="node">
+<title>h5pset_dxpl_mpio_f</title>
+<polygon fill="#777777" stroke="#777777" points="653,-465 535,-465 535,-441 653,-441 653,-465"/>
+<text text-anchor="middle" x="594" y="-450.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5pset_dxpl_mpio_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge58" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#00ffa9" d="M453.88,-423.04C476.73,-427.96 503.33,-433.69 527.11,-438.81"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="526.6,-442.28 537.11,-440.96 528.07,-435.44 526.6,-442.28"/>
+</g>
+<!-- h5sselect_hyperslab_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_node36" class="node">
+<title>h5sselect_hyperslab_f</title>
+<polygon fill="#777777" stroke="#777777" points="659,-423 529,-423 529,-399 659,-399 659,-423"/>
+<text text-anchor="middle" x="594" y="-408.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">h5sselect_hyperslab_f</text>
+</g>
+<!-- proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge60" class="edge">
+<title>proc~writearray_hdf5_real_r4_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#00ffa9" d="M493.22,-411C501.81,-411 510.42,-411 518.79,-411"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="518.87,-414.5 528.87,-411 518.87,-407.5 518.87,-414.5"/>
+</g>
+<!-- proc~open_hdf5_serial&#45;&gt;h5fcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge64" class="edge">
+<title>proc~open_hdf5_serial&#45;&gt;h5fcreate_f</title>
+<path fill="none" stroke="#00a9ff" d="M452.06,-227.82C481.97,-231.04 518.75,-235 547.23,-238.07"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="547,-241.57 557.32,-239.16 547.75,-234.61 547,-241.57"/>
+</g>
+<!-- proc~open_hdf5_serial&#45;&gt;h5open_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge63" class="edge">
+<title>proc~open_hdf5_serial&#45;&gt;h5open_f</title>
+<path fill="none" stroke="#00a9ff" d="M452.06,-216.18C483.88,-212.75 523.46,-208.49 552.57,-205.35"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="553.22,-208.8 562.79,-204.25 552.47,-201.84 553.22,-208.8"/>
+</g>
+<!-- proc~open_hdf5_serial&#45;&gt;h5fopen_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge65" class="edge">
+<title>proc~open_hdf5_serial&#45;&gt;h5fopen_f</title>
+<path fill="none" stroke="#00a9ff" d="M452.13,-213.08C465.72,-210.01 480.1,-206.04 493,-201 510.25,-194.25 512.11,-187.6 529,-180 536.04,-176.83 543.72,-173.9 551.22,-171.3"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="552.54,-174.54 560.92,-168.06 550.33,-167.9 552.54,-174.54"/>
+</g>
+<!-- proc~writearray_hdf5_real_r1_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge66" class="edge">
+<title>proc~writearray_hdf5_real_r1_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#0000ff" d="M466.09,-734.95C475.29,-732.46 484.49,-729.5 493,-726 520.98,-714.5 549.9,-695.36 569.39,-681.18"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="571.7,-683.83 577.65,-675.06 567.53,-678.2 571.7,-683.83"/>
+</g>
+<!-- proc~writearray_hdf5_real_r1_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge67" class="edge">
+<title>proc~writearray_hdf5_real_r1_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#0000ff" d="M479.36,-734.82C484.23,-732.36 488.84,-729.45 493,-726 524.28,-700.09 499.05,-669.43 529,-642 535.07,-636.44 542.64,-632.35 550.43,-629.34"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="551.56,-632.66 559.94,-626.18 549.35,-626.01 551.56,-632.66"/>
+</g>
+<!-- proc~writearray_hdf5_real_r1_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge68" class="edge">
+<title>proc~writearray_hdf5_real_r1_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#0000ff" d="M480.76,-734.92C485.18,-732.42 489.31,-729.47 493,-726 535.41,-686.09 488.62,-641.97 529,-600 534.76,-594.01 542.26,-589.73 550.09,-586.66"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="551.29,-589.95 559.7,-583.5 549.11,-583.3 551.29,-589.95"/>
+</g>
+<!-- proc~writearray_hdf5_real_r1_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge69" class="edge">
+<title>proc~writearray_hdf5_real_r1_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#0000ff" d="M481.48,-734.94C485.66,-732.43 489.55,-729.47 493,-726 546.82,-671.83 477.94,-614.78 529,-558 533.68,-552.8 539.66,-548.88 546.08,-545.94"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="547.61,-549.1 555.71,-542.27 545.12,-542.56 547.61,-549.1"/>
+</g>
+<!-- proc~writearray_hdf5_real_r1_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge70" class="edge">
+<title>proc~writearray_hdf5_real_r1_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#0000ff" d="M482.07,-734.84C486.05,-732.35 489.74,-729.42 493,-726 558.34,-657.46 467.15,-587.7 529,-516 534.38,-509.77 541.63,-505.38 549.33,-502.28"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="550.46,-505.59 558.84,-499.12 548.25,-498.95 550.46,-505.59"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge71" class="edge">
+<title>proc~writearray_hdf5_real_r4_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#5400ff" d="M453.88,-692.96C476.73,-688.04 503.33,-682.31 527.11,-677.19"/>
+<polygon fill="#5400ff" stroke="#5400ff" points="528.07,-680.56 537.11,-675.04 526.6,-673.72 528.07,-680.56"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge72" class="edge">
+<title>proc~writearray_hdf5_real_r4_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#5400ff" d="M473.9,-692.98C480.59,-690.52 487.06,-687.56 493,-684 514.09,-671.36 508.57,-655.67 529,-642 535.35,-637.75 542.62,-634.31 549.94,-631.53"/>
+<polygon fill="#5400ff" stroke="#5400ff" points="551.52,-634.69 559.86,-628.14 549.26,-628.06 551.52,-634.69"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge73" class="edge">
+<title>proc~writearray_hdf5_real_r4_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#5400ff" d="M479.36,-692.82C484.23,-690.36 488.84,-687.45 493,-684 524.28,-658.09 499.05,-627.43 529,-600 535.07,-594.44 542.64,-590.35 550.43,-587.34"/>
+<polygon fill="#5400ff" stroke="#5400ff" points="551.56,-590.66 559.94,-584.18 549.35,-584.01 551.56,-590.66"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge74" class="edge">
+<title>proc~writearray_hdf5_real_r4_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#5400ff" d="M480.76,-692.92C485.18,-690.42 489.31,-687.47 493,-684 535.41,-644.09 488.62,-599.97 529,-558 533.79,-553.02 539.79,-549.22 546.17,-546.32"/>
+<polygon fill="#5400ff" stroke="#5400ff" points="547.61,-549.51 555.71,-542.68 545.11,-542.97 547.61,-549.51"/>
+</g>
+<!-- proc~writearray_hdf5_real_r4_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge75" class="edge">
+<title>proc~writearray_hdf5_real_r4_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#5400ff" d="M481.48,-692.94C485.66,-690.43 489.55,-687.47 493,-684 546.82,-629.83 477.94,-572.78 529,-516 534.39,-510.01 541.51,-505.72 549.05,-502.65"/>
+<polygon fill="#5400ff" stroke="#5400ff" points="550.36,-505.9 558.71,-499.39 548.12,-499.27 550.36,-505.9"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge76" class="edge">
+<title>proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#aa00ff" d="M490.65,-663C502.61,-663 514.67,-663 526.1,-663"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="526.41,-666.5 536.41,-663 526.41,-659.5 526.41,-666.5"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge77" class="edge">
+<title>proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#aa00ff" d="M453.88,-650.96C484.45,-644.38 521.74,-636.35 550.02,-630.26"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="550.96,-633.64 560,-628.11 549.49,-626.79 550.96,-633.64"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge78" class="edge">
+<title>proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#aa00ff" d="M473.9,-650.98C480.59,-648.52 487.06,-645.56 493,-642 514.09,-629.36 508.57,-613.67 529,-600 535.35,-595.75 542.62,-592.31 549.94,-589.53"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="551.52,-592.69 559.86,-586.14 549.26,-586.06 551.52,-592.69"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge79" class="edge">
+<title>proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#aa00ff" d="M479.36,-650.82C484.23,-648.36 488.84,-645.45 493,-642 524.28,-616.09 499.05,-585.43 529,-558 534.04,-553.38 540.12,-549.78 546.49,-546.97"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="547.84,-550.2 555.96,-543.39 545.37,-543.65 547.84,-550.2"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge80" class="edge">
+<title>proc~writearray_hdf5_int32_r1_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#aa00ff" d="M480.76,-650.92C485.18,-648.42 489.31,-645.47 493,-642 535.41,-602.09 488.62,-557.97 529,-516 534.53,-510.25 541.66,-506.08 549.13,-503.04"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="550.37,-506.32 558.7,-499.78 548.11,-499.69 550.37,-506.32"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge81" class="edge">
+<title>proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#ff00ff" d="M453.88,-633.04C476.73,-637.96 503.33,-643.69 527.11,-648.81"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="526.6,-652.28 537.11,-650.96 528.07,-645.44 526.6,-652.28"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge82" class="edge">
+<title>proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#ff00ff" d="M490.65,-621C511.15,-621 531.95,-621 549.39,-621"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="549.78,-624.5 559.78,-621 549.78,-617.5 549.78,-624.5"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge83" class="edge">
+<title>proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#ff00ff" d="M453.88,-608.96C484.45,-602.38 521.74,-594.35 550.02,-588.26"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="550.96,-591.64 560,-586.11 549.49,-584.79 550.96,-591.64"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge84" class="edge">
+<title>proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#ff00ff" d="M473.9,-608.98C480.59,-606.52 487.06,-603.56 493,-600 514.09,-587.36 508.57,-571.67 529,-558 534.29,-554.46 540.23,-551.47 546.3,-548.97"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="547.72,-552.18 555.87,-545.41 545.28,-545.61 547.72,-552.18"/>
+</g>
+<!-- proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge85" class="edge">
+<title>proc~writearray_hdf5_int32_r3_serial&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#ff00ff" d="M479.36,-608.82C484.23,-606.36 488.84,-603.45 493,-600 524.28,-574.09 499.05,-543.43 529,-516 534.82,-510.67 542.02,-506.69 549.47,-503.72"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="550.63,-507.02 558.95,-500.47 548.36,-500.4 550.63,-507.02"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5pcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge87" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5pcreate_f</title>
+<path fill="none" stroke="#ff00aa" d="M493.22,-369C511.46,-369 529.8,-369 545.7,-369"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="545.77,-372.5 555.77,-369 545.77,-365.5 545.77,-372.5"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5pclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge88" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5pclose_f</title>
+<path fill="none" stroke="#ff00aa" d="M453.88,-356.96C484.05,-350.47 520.77,-342.56 548.9,-336.5"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="549.81,-339.88 558.85,-334.36 548.34,-333.04 549.81,-339.88"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5screate_simple_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge86" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5screate_simple_f</title>
+<path fill="none" stroke="#ff00aa" d="M482.19,-381.05C486.14,-383.57 489.78,-386.53 493,-390 569.92,-472.97 456.3,-555.31 529,-642 529.73,-642.87 530.5,-643.71 531.31,-644.51"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="529.3,-647.39 539.32,-650.85 533.64,-641.9 529.3,-647.39"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5sclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge89" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5sclose_f</title>
+<path fill="none" stroke="#ff00aa" d="M482.07,-381.16C486.05,-383.65 489.74,-386.58 493,-390 558.34,-458.54 467.15,-528.3 529,-600 534.6,-606.49 542.24,-610.99 550.3,-614.1"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="549.25,-617.44 559.84,-617.15 551.38,-610.77 549.25,-617.44"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5dwrite_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge93" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5dwrite_f</title>
+<path fill="none" stroke="#ff00aa" d="M481.48,-381.06C485.66,-383.57 489.55,-386.53 493,-390 546.82,-444.17 477.94,-501.22 529,-558 534.61,-564.24 542.11,-568.64 550,-571.73"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="549.12,-575.12 559.71,-574.89 551.28,-568.46 549.12,-575.12"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5dcreate_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge91" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5dcreate_f</title>
+<path fill="none" stroke="#ff00aa" d="M480.76,-381.08C485.18,-383.58 489.31,-386.53 493,-390 535.41,-429.91 488.62,-474.03 529,-516 533.79,-520.98 539.79,-524.78 546.17,-527.68"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="545.11,-531.03 555.71,-531.32 547.61,-524.49 545.11,-531.03"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5dclose_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge94" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5dclose_f</title>
+<path fill="none" stroke="#ff00aa" d="M479.36,-381.18C484.23,-383.64 488.84,-386.55 493,-390 524.28,-415.91 499.05,-446.57 529,-474 534.82,-479.33 542.02,-483.31 549.47,-486.28"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="548.36,-489.6 558.95,-489.53 550.63,-482.98 548.36,-489.6"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5pset_dxpl_mpio_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge90" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5pset_dxpl_mpio_f</title>
+<path fill="none" stroke="#ff00aa" d="M473.9,-381.02C480.59,-383.48 487.06,-386.44 493,-390 514.09,-402.64 508.57,-418.33 529,-432 531.54,-433.7 534.23,-435.27 537.02,-436.73"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="535.6,-439.93 546.15,-440.97 538.55,-433.58 535.6,-439.93"/>
+</g>
+<!-- proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5sselect_hyperslab_f -->
+<g id="proc~~write_geometry1d~~CallsGraph_edge92" class="edge">
+<title>proc~writearray_hdf5_real_r3_parallel&#45;&gt;h5sselect_hyperslab_f</title>
+<path fill="none" stroke="#ff00aa" d="M453.88,-381.04C476.73,-385.96 503.33,-391.69 527.11,-396.81"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="526.6,-400.28 537.11,-398.96 528.07,-393.44 526.6,-400.28"/>
+</g>
+</g>
+</svg>
+</div><script>var panprocwrite_geometry1dCallsGraph = svgPanZoom('#procwrite_geometry1dCallsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="597pt" height="32pt"
+ viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
+<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
+<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/write_geometry1d.html#src">Write_Geometry1D</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Write_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">fileName</span><span class="p">)</span>
+<span class="w">    </span><span class="k">implicit none</span>
+<span class="k">    class</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">myGeom</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileName</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">HID_T</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fileId</span>
+<span class="w">    </span><span class="c">! Local</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">LEN</span><span class="o">=</span><span class="n">self_FileNameLength</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pickupFile</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">      </span><span class="n">pickupFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filename</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="k">      </span><span class="n">pickupFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;mesh.h5&#39;</span>
+<span class="w">    </span><span class="k">endif</span>
+
+<span class="k">    call </span><span class="n">Open_HDF5</span><span class="p">(</span><span class="n">pickupFile</span><span class="p">,</span><span class="n">H5F_ACC_TRUNC_F</span><span class="p">,</span><span class="n">fileId</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature&#39;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/xi&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">controlPoints</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/weights&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">qWeights</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/dgmatrix&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dgMatrix</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/quadrature/dmatrix&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="w">                         </span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interp</span><span class="p">%</span><span class="n">dMatrix</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh&#39;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior&#39;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">CreateGroup_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary&#39;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior/x&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">interior</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/interior/dxds&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">dxds</span><span class="p">%</span><span class="n">interior</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary/x&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">x</span><span class="p">%</span><span class="n">boundary</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">WriteArray_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">,</span><span class="s1">&#39;/mesh/boundary/dxds&#39;</span><span class="p">,</span><span class="n">myGeom</span><span class="p">%</span><span class="n">dxds</span><span class="p">%</span><span class="n">boundary</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">Close_HDF5</span><span class="p">(</span><span class="n">fileId</span><span class="p">)</span>
+
+<span class="w">  </span><span class="k">endsubroutine </span><span class="n">Write_Geometry1D</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-07-23 16:03            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

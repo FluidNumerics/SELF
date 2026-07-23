@@ -1,0 +1,1810 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="SELF Documentation">
+      
+      
+        <meta name="author" content="Fluid Numerics">
+      
+      
+      
+        <link rel="prev" href="../linear-euler-2d-model/">
+      
+      
+        <link rel="next" href="../linear-euler-3d-model/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>Linear Euler (2D) with PML - Spectral Element Library in Fortran</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#linear-euler-2d-with-perfectly-matched-layer" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-header__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spectral Element Library in Fortran
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Linear Euler (2D) with PML
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-nav__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    Spectral Element Library in Fortran
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/dependencies/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependencies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/building-with-self/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Applications with SELF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/multi-gpu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using Multiple GPUs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Burgers Equation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Burgers Equation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/BurgersEquation1D/TravelingShock/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Traveling Shock
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Linear Euler (2D)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Linear Euler (2D)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plane wave propagation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWaveReflection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plane wave reflection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spherical sound wave
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PerfectlyMatchedLayer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Perfectly Matched Layer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Linear Euler (3D)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Linear Euler (3D)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plane wave propagation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spherical sound wave
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Linear Shallow Water (2D)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            Linear Shallow Water (2D)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/LinearShallowWater.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reflecting wave
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/KelvinWaves/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kelvin waves
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/PlanetaryRossbyWave/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Planetary Rossby wave
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../boundary-conditions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Boundary Conditions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../burgers-equation-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Viscous Burgers Equation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linear-euler-2d-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear Euler (2D)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Linear Euler (2D) with PML
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Linear Euler (2D) with PML
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definition" class="md-nav__link">
+    Definition
+  </a>
+  
+    <nav class="md-nav" aria-label="Definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    Formulation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution-vector" class="md-nav__link">
+    Solution vector
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#damping-fields-sigma_x-sigma_y" class="md-nav__link">
+    Damping fields \(\sigma_x\), \(\sigma_y\)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identifying-pml-elements" class="md-nav__link">
+    Identifying PML elements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    Implementation
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#boundary-conditions" class="md-nav__link">
+    Boundary conditions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gpu-acceleration" class="md-nav__link">
+    GPU acceleration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    Example usage
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linear-euler-3d-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear Euler (3D)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linear-shallow-water-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear Shallow Water (2D)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Mesh Generation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Mesh Generation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/Overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/StructuredMesh/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structured Mesh Generators
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Learning
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Learning
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Theory
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Theory
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/SpectralApproximations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spectral Approximations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/DifferentialGeometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Differential Geometry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/ProvableStability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Provable Stability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Code
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/SoftwareArchitecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Software Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/BoundaryConditions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Boundary Condition System
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/PointSampling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Off-Grid Point Sampling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/dependencies.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependencies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ford/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Documentation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/Documentation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#definition" class="md-nav__link">
+    Definition
+  </a>
+  
+    <nav class="md-nav" aria-label="Definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    Formulation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solution-vector" class="md-nav__link">
+    Solution vector
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#damping-fields-sigma_x-sigma_y" class="md-nav__link">
+    Damping fields \(\sigma_x\), \(\sigma_y\)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identifying-pml-elements" class="md-nav__link">
+    Identifying PML elements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    Implementation
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#boundary-conditions" class="md-nav__link">
+    Boundary conditions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gpu-acceleration" class="md-nav__link">
+    GPU acceleration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-usage" class="md-nav__link">
+    Example usage
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="linear-euler-2d-with-perfectly-matched-layer">Linear Euler (2D) with Perfectly Matched Layer<a class="headerlink" href="#linear-euler-2d-with-perfectly-matched-layer" title="Permanent link">#</a></h1>
+<h2 id="definition">Definition<a class="headerlink" href="#definition" title="Permanent link">#</a></h2>
+<p>The <a href="../../ford/module/self_lineareuler2d_pml_t.html"><code>SELF_LinearEuler2D_PML_t</code> module</a> defines the <a href="../../ford/type/lineareuler2d_pml_t.html"><code>LinearEuler2D_PML_t</code> class</a>, a type extension of <a href="../linear-euler-2d-model/"><code>LinearEuler2D_t</code></a> that adds a Perfectly Matched Layer (PML) absorbing region for open-domain acoustic simulations.</p>
+<p>The interior dynamics are identical to the parent linear Euler 2D model. Inside the PML region the governing equations are augmented with damping coefficients <span class="arithmatex">\(\sigma_x(x)\)</span>, <span class="arithmatex">\(\sigma_y(y)\)</span> and three auxiliary variables <span class="arithmatex">\(\phi_u, \phi_v, \phi_P\)</span> that together drive outgoing waves to zero with minimal reflection at the interior/PML interface.</p>
+<h3 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">#</a></h3>
+<p>We follow the unsplit auxiliary-differential-equation (ADE) form of the PML for the linearised Euler equations, after Hu (2001, <em>JCP</em> 173:455–480). The modified system is</p>
+<div class="arithmatex">\[
+    \frac{\partial \vec{q}}{\partial t}
+    + A\,\frac{\partial \vec{q}}{\partial x}
+    + B\,\frac{\partial \vec{q}}{\partial y}
+    + (\sigma_x + \sigma_y)\,\vec{q}
+    + \sigma_x\,\sigma_y\,\vec{\phi}
+    = 0,
+    \qquad
+    \frac{\partial \vec{\phi}}{\partial t} = \vec{q}
+\]</div>
+<p>where <span class="arithmatex">\(\vec{q} = (u, v, p)\)</span> is the acoustic state, <span class="arithmatex">\(\vec{\phi} = (\phi_u, \phi_v, \phi_P)\)</span> is the auxiliary "memory" vector that integrates <span class="arithmatex">\(\vec{q}\)</span> in time, and <span class="arithmatex">\(A\)</span>, <span class="arithmatex">\(B\)</span> are the linear-Euler flux Jacobians (see the <a href="../linear-euler-2d-model/">Linear Euler 2D reference</a>). As in the parent model, the density anomaly is not carried as a solution variable.</p>
+<p>In the interior we set <span class="arithmatex">\(\sigma_x = \sigma_y = 0\)</span> and the system reduces exactly to the standard linear Euler 2D model. The auxiliary <span class="arithmatex">\(\vec{\phi}\)</span> still integrates <span class="arithmatex">\(\vec{q}\)</span>, but with the coupling coefficient <span class="arithmatex">\(\sigma_x \sigma_y = 0\)</span> it never feeds back into the dynamics and starts at <span class="arithmatex">\(\vec{\phi}(t=0) = \vec{0}\)</span>.</p>
+<h3 id="solution-vector">Solution vector<a class="headerlink" href="#solution-vector" title="Permanent link">#</a></h3>
+<p>To accommodate the auxiliary <span class="arithmatex">\(\vec{\phi}\)</span>, the PML model carries <code>nvar = 7</code>:</p>
+<table>
+<thead>
+<tr>
+<th>index</th>
+<th>name</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>u</code></td>
+<td><span class="arithmatex">\(x\)</span>-velocity</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>v</code></td>
+<td><span class="arithmatex">\(y\)</span>-velocity</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>P</code></td>
+<td>pressure perturbation</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>c</code></td>
+<td>sound speed (per-node, static)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>phi_u</code></td>
+<td><span class="arithmatex">\(\int_0^t u\,dt\)</span> (PML auxiliary)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>phi_v</code></td>
+<td><span class="arithmatex">\(\int_0^t v\,dt\)</span> (PML auxiliary)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>phi_P</code></td>
+<td><span class="arithmatex">\(\int_0^t p\,dt\)</span> (PML auxiliary)</td>
+</tr>
+</tbody>
+</table>
+<p>The auxiliary variables carry <strong>identically zero flux</strong> in both spatial directions. They are evolved exclusively by the source term above. Sound speed <span class="arithmatex">\(c\)</span> remains static (zero flux, zero source), as in the parent model.</p>
+<h3 id="damping-fields-sigma_x-sigma_y">Damping fields <span class="arithmatex">\(\sigma_x\)</span>, <span class="arithmatex">\(\sigma_y\)</span><a class="headerlink" href="#damping-fields-sigma_x-sigma_y" title="Permanent link">#</a></h3>
+<p><code>LinearEuler2D_PML_t</code> stores the per-node damping coefficients in two <code>MappedScalar2D</code> fields, <code>sigma_x</code> and <code>sigma_y</code> (one variable each). They are populated once by <code>SetPMLProfile</code> from a user-supplied interior bounding box, PML thickness, peak value, and polynomial ramp exponent, and are pushed to the GPU automatically when the GPU build is in use.</p>
+<p>The default ramp is a cubic polynomial that rises from zero at the interior/PML interface up to the requested <span class="arithmatex">\(\sigma_\mathrm{max}\)</span> at the outer edge of the layer:</p>
+<div class="arithmatex">\[
+    \sigma_x(x) = \sigma_\mathrm{max}\,\left(\frac{d_x}{L}\right)^p,
+    \qquad
+    d_x = \max\bigl(0,\ x_\mathrm{min} - x,\ x - x_\mathrm{max}\bigr)
+\]</div>
+<p>and analogously for <span class="arithmatex">\(\sigma_y\)</span>, where <span class="arithmatex">\(L\)</span> is <code>pml_width</code>, <span class="arithmatex">\(p\)</span> is <code>ramp_exponent</code> (default 3), and <span class="arithmatex">\([x_\mathrm{min}, x_\mathrm{max}] \times [y_\mathrm{min}, y_\mathrm{max}]\)</span> is the interior box you want to leave undamped. Nodes outside elements tagged as PML always receive <span class="arithmatex">\(\sigma = 0\)</span>, regardless of position.</p>
+<h3 id="identifying-pml-elements">Identifying PML elements<a class="headerlink" href="#identifying-pml-elements" title="Permanent link">#</a></h3>
+<p>PML elements are picked out of the mesh by material name. <code>SetPMLProfile</code> walks <code>mesh%elemMaterial</code> and <code>mesh%materialNames</code> and applies the damping ramp only to elements whose material name <strong>starts with the configured prefix</strong> (default <code>"pml"</code>). All other elements remain at <span class="arithmatex">\(\sigma_x = \sigma_y = 0\)</span>.</p>
+<p>You can supply that tagging in two equivalent ways:</p>
+<ul>
+<li><strong>Programmatic</strong> — write directly to <code>mesh%elemMaterial</code> after calling <code>mesh%StructuredMesh</code>. This is the path used by the bundled example and test.</li>
+<li><strong>HOHQMesh ISM-MM</strong> — generate a <code>.mesh</code> file in which the outer regions are emitted with material name <code>pml</code> (or <code>pml_east</code>, <code>pml_corner_NE</code>, etc.). <code>mesh%Read_HOHQMesh</code> populates <code>elemMaterial</code>/<code>materialNames</code> from the file automatically.</li>
+</ul>
+<p>Both paths are covered step-by-step in the <a href="../../Tutorials/LinearEuler2D/PerfectlyMatchedLayer/">PML tutorial</a>.</p>
+<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">#</a></h2>
+<p><code>LinearEuler2D_PML_t</code> is implemented in <a href="https://github.com/FluidNumerics/SELF/blob/main/src/SELF_LinearEuler2D_PML_t.f90"><code>src/SELF_LinearEuler2D_PML_t.f90</code></a> as a type extension of <a href="../linear-euler-2d-model/"><code>LinearEuler2D_t</code></a>. It overrides</p>
+<ul>
+<li><code>SetNumberOfVariables</code> — declares <code>nvar = 7</code>.</li>
+<li><code>SetMetadata</code> — registers names and units for the three PML auxiliaries (plus <code>sigma_x</code>, <code>sigma_y</code>).</li>
+<li><code>AdditionalInit</code> — allocates <code>sigma_x</code> and <code>sigma_y</code> and registers PML-aware no-normal-flow and radiation boundary handlers.</li>
+<li><code>AdditionalFree</code> — releases the damping fields.</li>
+<li><code>flux2d</code>, <code>riemannflux2d</code> — use the parent linear-Euler acoustic flux form for variables 1–4 and return zero for variables 5–7 (auxiliaries carry no flux). Note the PML variant uses the <strong>scalar</strong> background density <code>rho0</code>: unlike the parent model (which carries <code>rho0</code> as a per-node solution variable in slot 5), the PML model repurposes slot 5 for the auxiliary <code>phi_u</code>.</li>
+<li><code>entropy_func</code> — acoustic energy using the scalar <code>rho0</code> and the per-node sound speed <code>s(4)</code>. This override is required because the parent's <code>entropy_func</code> reads <code>rho0</code> from <code>s(5)</code>, which the PML model uses for <code>phi_u</code>.</li>
+<li><code>sourcemethod</code> — implements the ADE source term node-by-node. We override <code>sourcemethod</code> rather than <code>source2d</code> because the pure <code>source2d(s, dsdx)</code> signature has no access to the per-node <span class="arithmatex">\(\sigma_x(i,j,iel)\)</span>, <span class="arithmatex">\(\sigma_y(i,j,iel)\)</span> lookups.</li>
+</ul>
+<p>A new procedure <code>SetPMLProfile(x_interior_min, x_interior_max, y_interior_min, y_interior_max, pml_width, sigma_max, ramp_exponent)</code> populates <code>sigma_x</code> and <code>sigma_y</code> from the per-element material tags and the geometric ramp.</p>
+<h3 id="boundary-conditions">Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permanent link">#</a></h3>
+<p><code>LinearEuler2D_PML_t</code> re-registers both the <strong>no-normal-flow</strong> and <strong>radiation</strong> boundary handlers so that the auxiliary variables 5–7 are also handled at the boundary. Variables 1–4 are treated exactly as in the parent model:</p>
+<ul>
+<li><code>SELF_BC_NONORMALFLOW</code> — reflect <span class="arithmatex">\(\vec{v}\)</span> about the boundary normal; copy <span class="arithmatex">\(p\)</span>, <span class="arithmatex">\(c\)</span>; zero <span class="arithmatex">\(\vec{\phi}\)</span> in <code>extBoundary</code>.</li>
+<li><code>SELF_BC_RADIATION</code> — set <span class="arithmatex">\(u = v = p = 0\)</span> in the exterior state; copy <span class="arithmatex">\(c\)</span> from the interior side so the Riemann solver sees a consistent sound speed; zero <span class="arithmatex">\(\vec{\phi}\)</span>.</li>
+</ul>
+<p>Because the auxiliary variables carry zero Riemann flux, their <code>extBoundary</code> value is mathematically irrelevant — we zero it purely for diagnostic cleanliness.</p>
+<p><code>SELF_BC_PRESCRIBED</code> is <em>not</em> automatically registered. If you need it (e.g. driving a planewave in from one side while absorbing on the other), follow the same pattern as the prescribed-BC examples for the parent model and remember to fill <code>extBoundary(:,:,:,5:7)</code> (zero is the natural choice).</p>
+<h2 id="gpu-acceleration">GPU acceleration<a class="headerlink" href="#gpu-acceleration" title="Permanent link">#</a></h2>
+<p>When SELF is built with GPU support, the GPU-backed <code>LinearEuler2D_PML</code> type (in <a href="https://github.com/FluidNumerics/SELF/blob/main/src/gpu/SELF_LinearEuler2D_PML.f90"><code>src/gpu/SELF_LinearEuler2D_PML.f90</code></a> and <a href="https://github.com/FluidNumerics/SELF/blob/main/src/gpu/SELF_LinearEuler2D_PML.cpp"><code>src/gpu/SELF_LinearEuler2D_PML.cpp</code></a>) overrides</p>
+<ul>
+<li><code>BoundaryFlux</code> — launches a 7-variable PML-aware Riemann kernel.</li>
+<li><code>FluxMethod</code> — launches a 7-variable PML-aware interior-flux kernel.</li>
+<li><code>SourceMethod</code> — launches the PML source kernel that reads <code>sigma_x_gpu</code>, <code>sigma_y_gpu</code>, and <code>solution_gpu</code>.</li>
+</ul>
+<p>The GPU no-normal-flow and radiation BC handlers are re-registered to point to device-resident kernels (<code>hbc2d_*_lineareuler2d_pml_gpu</code>). <code>sigma_x</code> and <code>sigma_y</code> live on the device after <code>SetPMLProfile</code> calls <code>UpdateDevice</code>, so no host/device traffic is needed during time stepping unless prescribed BCs are enabled.</p>
+<h2 id="example-usage">Example usage<a class="headerlink" href="#example-usage" title="Permanent link">#</a></h2>
+<p>A complete worked example with on-the-fly programmatic PML tagging is provided at</p>
+<ul>
+<li><a href="https://github.com/FluidNumerics/SELF/blob/main/examples/linear_euler2d_pml_planewave.f90"><code>examples/linear_euler2d_pml_planewave.f90</code></a></li>
+</ul>
+<p>and an absorption regression test (planar pulse, east-side PML, asserts &gt;95% absorption) at</p>
+<ul>
+<li><a href="https://github.com/FluidNumerics/SELF/blob/main/test/lineareuler2d_pml_absorption.f90"><code>test/lineareuler2d_pml_absorption.f90</code></a>.</li>
+</ul>
+<p>See the <a href="../../Tutorials/LinearEuler2D/PerfectlyMatchedLayer/">PML tutorial</a> for an end-to-end walkthrough including both the programmatic and HOHQMesh ISM-MM workflows for tagging PML elements.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

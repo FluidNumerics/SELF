@@ -1,0 +1,124 @@
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+
+module SELF_Constants
+
+  use iso_c_binding
+  use iso_fortran_env
+
+  implicit none
+
+#ifdef DOUBLE_PRECISION
+  integer,parameter :: prec = c_double
+  integer,parameter :: c_prec = c_double
+#else
+  integer,parameter :: prec = c_float
+  integer,parameter :: c_prec = c_float
+#endif
+
+!*************************************************************!
+! ------------------ CHARACTER LENGTHS----- ------------------!
+! ************************************************************!
+!                                                             !
+  integer,parameter :: SELF_EQN_DEFAULT_LENGTH = 100
+  integer,parameter :: SELF_FILE_DEFAULT_LENGTH = 500
+
+! ------------------------------------------------------------!
+!*************************************************************!
+! ------------------ MATHEMATICAL CONSTANTS ------------------!
+! ************************************************************!
+!                                                             !
+! ------------------------------------------------------------!
+  real(prec),parameter :: pi = 4.0_prec*atan(1.0_prec)
+  real(prec),parameter :: TOL = epsilon(1.0_prec)
+
+  real(prec),parameter :: fillValue = -9999.99_prec
+  integer,parameter    :: fillValueInt = -99999
+
+!*************************************************************!
+! ----------------- ROOT FINDER CONSTANTS --------------------!
+! ************************************************************!
+!                                                             !
+! ------------------------------------------------------------!
+  integer,parameter    :: maxInverseIters = 1000
+  ! Convergence tolerance on the reference-coordinate Newton step. This must be
+  ! precision-aware: the smallest achievable step is ~ (2/h)*|x|*epsilon, which
+  ! grows as the element size h shrinks. A fixed 1e-8 is unreachable in real32
+  ! on fine meshes, causing LocatePoints to reject interior points. Using
+  ! sqrt(epsilon) gives ~3.4e-4 (real32) / ~1.5e-8 (real64); the resulting
+  ! physical placement error ~ sqrt(epsilon)*h/2 is negligible in either case.
+  real(prec),parameter :: newtonTolerance = sqrt(epsilon(1.0_prec))
+  integer,parameter    :: newtonMax = 500
+  ! Tolerance for accepting a located reference coordinate as lying inside the
+  ! bi-unit cube [-1,1]^d. A point on an element edge/corner inverts to xi = +/-1,
+  ! but its physical coordinate carries rounding ~|x|*epsilon which the Newton
+  ! map amplifies by ~2/h, so the recovered xi can sit ~ (2/h)*|x|*epsilon beyond
+  ! +/-1 on fine meshes. The acceptance window must exceed that, hence it is
+  ! precision-aware. max(1e-6, sqrt(epsilon)) leaves real64 behavior unchanged
+  ! (1e-6 wins) and widens the window to ~3.4e-4 in real32.
+  real(prec),parameter :: locateTolerance = max(1.0e-6_prec,sqrt(epsilon(1.0_prec)))
+
+!*************************************************************!
+! ----------------- TIME STEPPING CONSTANTS ------------------!
+! ************************************************************!
+!                                                             !
+! ------------------------------------------------------------!
+
+!*************************************************************!
+! ------------------- PHYSICAL CONSTANTS ---------------------!
+! ************************************************************!
+!                                                             !
+! ------------------------------------------------------------!
+! Time conversion factors
+  real(prec),parameter   :: secondsToMinutes = 1.0_prec/60.0_prec ! conversion for seconds to minutes
+  real(prec),parameter   :: minutesToHours = 1.0_prec/60.0_prec ! conversion for minutes to hours
+  real(prec),parameter   :: hoursToDays = 1.0_prec/24.0_prec ! conversion for hours to days
+  real(prec),parameter   :: daysToMonths = 12.0_prec/365.25_prec ! conversion for days to months
+  real(prec),parameter   :: monthsToYears = 1.0_prec/12.0_prec ! conversion for months to years
+  real(prec),parameter   :: daysToSeconds = 86400.0_prec
+
+!==============================================!
+! --------------- Quadrature------------------ !
+!==============================================!
+  integer,parameter :: GAUSS = 1
+  integer,parameter :: GAUSS_LOBATTO = 2
+  integer,parameter :: CHEBYSHEV_GAUSS = 3
+  integer,parameter :: CHEBYSHEV_GAUSS_LOBATTO = 4
+  integer,parameter :: UNIFORM = 5
+  integer,parameter :: DG = 2000
+  integer,parameter :: CG = 2001
+
+! Misc. INTEGER and CHARACTER flag definitions
+  character(1),parameter :: nada = ' '
+  character(6),parameter :: MsgFmt = '(2x,A)'
+  integer,parameter :: self_FileNameLength = 500
+  integer,parameter :: self_TecplotHeaderLength = 500
+  integer,parameter :: self_EquationLength = 210
+  integer,parameter :: self_FormatLength = 30
+  integer,parameter :: self_QuadratureTypeCharLength = 50
+  integer,parameter :: self_IntegratorTypeCharLength = 50
+
+endmodule SELF_Constants

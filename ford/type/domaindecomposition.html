@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>DomainDecomposition &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>DomainDecomposition
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 1.0% of total for derived types.</p>Including implementation: 189 statements,  0.3% of total for derived types.">14 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DomainDecomposition.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_domaindecomposition.f90.html'>SELF_DomainDecomposition.f90</a></li>
+     <li><a href='../module/self_domaindecomposition.html'>SELF_DomainDecomposition</a></li>
+     <li class="active">DomainDecomposition</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-elemtorank">elemToRank</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-elemtorank_gpu">elemToRank_gpu</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_built">halo_built</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_nnbr">halo_nnbr</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_nsides">halo_nsides</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_offset">halo_offset</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_rank">halo_rank</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_sides_gpu">halo_sides_gpu</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-initialized">initialized</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-maxmsg">maxMsg</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-mpicomm">mpiComm</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-mpienabled">mpiEnabled</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-mpiprec">mpiPrec</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-msgcount">msgCount</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-nelem~3">nElem</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-nranks">nRanks</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-offsetelem">offSetElem</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-rankid">rankId</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-requests">requests</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-stats">stats</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-buildhaloexchange">BuildHaloExchange</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-finalizempiexchangeasync">FinalizeMPIExchangeAsync</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-free~46">Free</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-generatedecomposition">GenerateDecomposition</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-init~44">Init</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-setelemtorank~2">SetElemToRank</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/domaindecomposition.html#src">DomainDecomposition</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>) :: DomainDecomposition</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~domaindecomposition~~InheritsGraph Pages: 1 -->
+<svg id="typedomaindecompositionInheritsGraph" width="484pt" height="74pt"
+ viewBox="0.00 0.00 484.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~domaindecomposition~~InheritsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>type~~domaindecomposition~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 480,-70 480,4 -4,4"/>
+<!-- type~domaindecomposition -->
+<g id="type~~domaindecomposition~~InheritsGraph_node1" class="node">
+<title>type~domaindecomposition</title>
+<polygon fill="none" stroke="black" points="476,-45 341,-45 341,-21 476,-21 476,-45"/>
+<text text-anchor="middle" x="408.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">DomainDecomposition</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~domaindecomposition~~InheritsGraph_node2" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="99,-66 45,-66 45,-42 99,-42 99,-66"/>
+<text text-anchor="middle" x="72" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~domaindecomposition&#45;&gt;c_ptr -->
+<g id="type~~domaindecomposition~~InheritsGraph_edge1" class="edge">
+<title>type~domaindecomposition&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M340.61,-37.2C270.94,-41.57 164.39,-48.26 109.1,-51.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="108.83,-48.24 99.07,-52.36 109.27,-55.23 108.83,-48.24"/>
+<text text-anchor="middle" x="242.5" y="-50.4" font-family="Helvetica,sans-Serif" font-size="9.50">elemToRank_gpu, halo_sides_gpu</text>
+</g>
+<!-- type~domaindecomposition_t -->
+<g id="type~~domaindecomposition~~InheritsGraph_node3" class="node">
+<title>type~domaindecomposition_t</title>
+<g id="a_type~~domaindecomposition~~InheritsGraph_node3"><a xlink:href=".././type/domaindecomposition_t.html" xlink:title="DomainDecomposition_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="144,-24 0,-24 0,0 144,0 144,-24"/>
+<text text-anchor="middle" x="72" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- type~domaindecomposition&#45;&gt;type~domaindecomposition_t -->
+<g id="type~~domaindecomposition~~InheritsGraph_edge2" class="edge">
+<title>type~domaindecomposition&#45;&gt;type~domaindecomposition_t</title>
+<path fill="none" stroke="#ff0000" d="M340.61,-28.8C286.93,-25.43 211.34,-20.69 154.19,-17.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="154.3,-13.6 144.1,-16.46 153.87,-20.58 154.3,-13.6"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~domaindecomposition~~InheritedByGraph Pages: 1 -->
+<svg id="typedomaindecompositionInheritedByGraph" width="641pt" height="392pt"
+ viewBox="0.00 0.00 641.00 391.89" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~domaindecomposition~~InheritedByGraph" class="graph" transform="scale(0.43 0.43) rotate(0) translate(4 910)">
+<title>type~~domaindecomposition~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-910 1491,-910 1491,4 -4,4"/>
+<!-- type~domaindecomposition -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node1" class="node">
+<title>type~domaindecomposition</title>
+<polygon fill="none" stroke="black" points="135,-313 0,-313 0,-289 135,-289 135,-313"/>
+<text text-anchor="middle" x="67.5" y="-298.6" font-family="Helvetica,sans-Serif" font-size="10.50">DomainDecomposition</text>
+</g>
+<!-- type~semmesh -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node2" class="node">
+<title>type~semmesh</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node2"><a xlink:href=".././type/semmesh.html" xlink:title="SEMMesh">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="273,-313 210,-313 210,-289 273,-289 273,-313"/>
+<text text-anchor="middle" x="241.5" y="-298.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMMesh</text>
+</a>
+</g>
+</g>
+<!-- type~semmesh&#45;&gt;type~domaindecomposition -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge1" class="edge">
+<title>type~semmesh&#45;&gt;type~domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M209.75,-301C191.74,-301 168.12,-301 145.36,-301"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="145.33,-297.5 135.33,-301 145.33,-304.5 145.33,-297.5"/>
+<text text-anchor="middle" x="172.5" y="-303.4" font-family="Helvetica,sans-Serif" font-size="9.50">decomp</text>
+</g>
+<!-- type~mesh3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node3" class="node">
+<title>type~mesh3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node3"><a xlink:href=".././type/mesh3d_t.html" xlink:title="Mesh3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="374,-355 310,-355 310,-331 374,-331 374,-355"/>
+<text text-anchor="middle" x="342" y="-340.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d_t&#45;&gt;type~semmesh -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge2" class="edge">
+<title>type~mesh3d_t&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#ff0000" d="M321.39,-330.88C317.47,-328.14 313.49,-325.12 310,-322 300.83,-313.81 304.29,-300.59 292,-301"/>
+</g>
+<!-- type~mesh2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node4" class="node">
+<title>type~mesh2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node4"><a xlink:href=".././type/mesh2d_t.html" xlink:title="Mesh2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="374,-313 310,-313 310,-289 374,-289 374,-313"/>
+<text text-anchor="middle" x="342" y="-298.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d_t&#45;&gt;type~semmesh -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge3" class="edge">
+<title>type~mesh2d_t&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#ff0000" d="M309.89,-300.69C303.95,-300.72 297.78,-300.81 292,-301"/>
+</g>
+<!-- type~mesh1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node5" class="node">
+<title>type~mesh1d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node5"><a xlink:href=".././type/mesh1d.html" xlink:title="Mesh1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="369.5,-261 314.5,-261 314.5,-237 369.5,-237 369.5,-261"/>
+<text text-anchor="middle" x="342" y="-246.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh1D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh1d&#45;&gt;type~semmesh -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge4" class="edge">
+<title>type~mesh1d&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#ff0000" d="M328.41,-261.16C322.69,-266.79 315.9,-273.63 310,-280 301.65,-289.02 304.29,-300.59 292,-301"/>
+<path fill="none" stroke="#ff0000" d="M291,-301C288.46,-301.08 285.84,-301.15 283.21,-301.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="283,-297.7 273.03,-301.31 283.07,-304.7 283,-297.7"/>
+</g>
+<!-- type~mesh3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node6" class="node">
+<title>type~mesh3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node6"><a xlink:href=".././type/mesh3d.html" xlink:title="Mesh3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="507,-402 452,-402 452,-378 507,-378 507,-402"/>
+<text text-anchor="middle" x="479.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d&#45;&gt;type~mesh3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge5" class="edge">
+<title>type~mesh3d&#45;&gt;type~mesh3d_t</title>
+<path fill="none" stroke="#ff0000" d="M453.19,-377.87C447.77,-375.09 442.14,-372.05 437,-369 422.85,-360.6 422.7,-350.91 406.5,-348"/>
+</g>
+<!-- type~mesh2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node7" class="node">
+<title>type~mesh2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node7"><a xlink:href=".././type/mesh2d.html" xlink:title="Mesh2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="507,-318 452,-318 452,-294 507,-294 507,-318"/>
+<text text-anchor="middle" x="479.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d&#45;&gt;type~mesh2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge7" class="edge">
+<title>type~mesh2d&#45;&gt;type~mesh2d_t</title>
+<path fill="none" stroke="#00ff00" d="M451.79,-301.91C438.21,-300.4 421.45,-299.4 406.5,-301"/>
+</g>
+<!-- type~mesh2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node8" class="node">
+<title>type~mesh2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node8"><a xlink:href=".././type/mesh2d~2.html" xlink:title="Mesh2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="507,-276 452,-276 452,-252 507,-252 507,-276"/>
+<text text-anchor="middle" x="479.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d~2&#45;&gt;type~mesh2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge8" class="edge">
+<title>type~mesh2d~2&#45;&gt;type~mesh2d_t</title>
+<path fill="none" stroke="#00ff00" d="M454.33,-276.16C448.64,-279.04 442.6,-282.12 437,-285 423.39,-292.01 421.72,-299.37 406.5,-301"/>
+<path fill="none" stroke="#00ff00" d="M404.5,-301C398.02,-301.69 391.14,-302.05 384.41,-302.2"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="384.01,-298.71 374.04,-302.28 384.07,-305.71 384.01,-298.71"/>
+</g>
+<!-- type~mesh3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node9" class="node">
+<title>type~mesh3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node9"><a xlink:href=".././type/mesh3d~2.html" xlink:title="Mesh3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="507,-360 452,-360 452,-336 507,-336 507,-360"/>
+<text text-anchor="middle" x="479.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh3D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh3d~2&#45;&gt;type~mesh3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge6" class="edge">
+<title>type~mesh3d~2&#45;&gt;type~mesh3d_t</title>
+<path fill="none" stroke="#ff0000" d="M451.97,-350.23C438.29,-350.82 421.39,-350.67 406.5,-348"/>
+<path fill="none" stroke="#ff0000" d="M404.5,-348C398.06,-346.85 391.2,-345.96 384.48,-345.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="384.39,-341.75 374.12,-344.36 383.78,-348.73 384.39,-341.75"/>
+</g>
+<!-- type~dgmodel1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node10" class="node">
+<title>type~dgmodel1d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node10"><a xlink:href=".././type/dgmodel1d_t.html" xlink:title="DGModel1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="522,-224 437,-224 437,-200 522,-200 522,-224"/>
+<text text-anchor="middle" x="479.5" y="-209.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d_t&#45;&gt;type~mesh1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge9" class="edge">
+<title>type~dgmodel1d_t&#45;&gt;type~mesh1d</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M436.74,-223.4C418.54,-228.37 397.39,-234.15 379.79,-238.95"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="378.61,-235.65 369.89,-241.66 380.46,-242.4 378.61,-235.65"/>
+<text text-anchor="middle" x="405.5" y="-236.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~dgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node11" class="node">
+<title>type~dgmodel3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node11"><a xlink:href=".././type/dgmodel3d_t.html" xlink:title="DGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="670,-538 585,-538 585,-514 670,-514 670,-538"/>
+<text text-anchor="middle" x="627.5" y="-523.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d_t&#45;&gt;type~mesh3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge10" class="edge">
+<title>type~dgmodel3d_t&#45;&gt;type~mesh3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M613.54,-513.93C588.17,-490.3 531.76,-437.75 501.18,-409.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="503.34,-406.49 493.64,-402.24 498.57,-411.61 503.34,-406.49"/>
+<text text-anchor="middle" x="553.5" y="-472.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~dgmodel1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node12" class="node">
+<title>type~dgmodel1d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node12"><a xlink:href=".././type/dgmodel1d.html" xlink:title="DGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="665.5,-203 589.5,-203 589.5,-179 665.5,-179 665.5,-203"/>
+<text text-anchor="middle" x="627.5" y="-188.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d&#45;&gt;type~dgmodel1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge12" class="edge">
+<title>type~dgmodel1d&#45;&gt;type~dgmodel1d_t</title>
+<path fill="none" stroke="#cc00ff" d="M589.33,-187.13C577.97,-186.98 565.56,-187.86 554.5,-191"/>
+</g>
+<!-- type~dgmodel1d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node13" class="node">
+<title>type~dgmodel1d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node13"><a xlink:href=".././type/dgmodel1d~2.html" xlink:title="DGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="665.5,-161 589.5,-161 589.5,-137 665.5,-137 665.5,-161"/>
+<text text-anchor="middle" x="627.5" y="-146.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel1d~2&#45;&gt;type~dgmodel1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge13" class="edge">
+<title>type~dgmodel1d~2&#45;&gt;type~dgmodel1d_t</title>
+<path fill="none" stroke="#cc00ff" d="M601.19,-161.13C595.77,-163.91 590.14,-166.95 585,-170 570.85,-178.4 570.33,-186.51 554.5,-191"/>
+<path fill="none" stroke="#cc00ff" d="M552.5,-191C545.61,-192.96 538.36,-195.04 531.22,-197.11"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="530.22,-193.75 521.59,-199.9 532.17,-200.47 530.22,-193.75"/>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node14" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node14"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="670,-318 585,-318 585,-294 670,-294 670,-318"/>
+<text text-anchor="middle" x="627.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mesh2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge11" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mesh2d</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M584.66,-306C563.42,-306 537.85,-306 517.36,-306"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="517.16,-302.5 507.16,-306 517.16,-309.5 517.16,-302.5"/>
+<text text-anchor="middle" x="553.5" y="-308.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~dgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node15" class="node">
+<title>type~dgmodel3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node15"><a xlink:href=".././type/dgmodel3d.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="817,-580 741,-580 741,-556 817,-556 817,-580"/>
+<text text-anchor="middle" x="779" y="-565.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge14" class="edge">
+<title>type~dgmodel3d&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M740.87,-561.31C729.41,-558.15 717.14,-553.57 707,-547 696.68,-540.32 701.21,-527.4 689,-526"/>
+</g>
+<!-- type~nulldgmodel1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node16" class="node">
+<title>type~nulldgmodel1d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node16"><a xlink:href=".././type/nulldgmodel1d_t.html" xlink:title="NullDGModel1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="832,-203 726,-203 726,-179 832,-179 832,-203"/>
+<text text-anchor="middle" x="779" y="-188.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge17" class="edge">
+<title>type~nulldgmodel1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#7fff00" d="M737.36,-178.99C714.05,-172.12 689.32,-164.89 689,-165"/>
+</g>
+<!-- type~dgmodel3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node17" class="node">
+<title>type~dgmodel3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node17"><a xlink:href=".././type/dgmodel3d~2.html" xlink:title="DGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="817,-538 741,-538 741,-514 817,-514 817,-538"/>
+<text text-anchor="middle" x="779" y="-523.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel3d~2&#45;&gt;type~dgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge15" class="edge">
+<title>type~dgmodel3d~2&#45;&gt;type~dgmodel3d_t</title>
+<path fill="none" stroke="#ff0000" d="M740.65,-527.89C724.69,-528.21 705.89,-527.93 689,-526"/>
+<path fill="none" stroke="#ff0000" d="M688,-526C685.49,-525.71 682.91,-525.48 680.3,-525.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="680.34,-521.79 670.18,-524.8 680,-528.78 680.34,-521.79"/>
+</g>
+<!-- type~dgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node18" class="node">
+<title>type~dgmodel2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node18"><a xlink:href=".././type/dgmodel2d.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="817,-360 741,-360 741,-336 817,-336 817,-360"/>
+<text text-anchor="middle" x="779" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge19" class="edge">
+<title>type~dgmodel2d&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M740.87,-341.31C729.41,-338.15 717.14,-333.57 707,-327 696.68,-320.32 701.21,-307.4 689,-306"/>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node19" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node19"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="817,-318 741,-318 741,-294 817,-294 817,-318"/>
+<text text-anchor="middle" x="779" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge20" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M740.65,-307.89C724.69,-308.21 705.89,-307.93 689,-306"/>
+<path fill="none" stroke="#7f00ff" d="M688,-306C685.49,-305.71 682.91,-305.48 680.3,-305.29"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="680.34,-301.79 670.18,-304.8 680,-308.78 680.34,-301.79"/>
+</g>
+<!-- type~burgers1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node20" class="node">
+<title>type~burgers1d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node20"><a xlink:href=".././type/burgers1d_t.html" xlink:title="Burgers1D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="818.5,-161 739.5,-161 739.5,-137 818.5,-137 818.5,-161"/>
+<text text-anchor="middle" x="779" y="-146.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge16" class="edge">
+<title>type~burgers1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#7fff00" d="M739.17,-153.14C723.3,-155.56 704.97,-159.3 689,-165"/>
+</g>
+<!-- type~advection_diffusion_1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node21" class="node">
+<title>type~advection_diffusion_1d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node21"><a xlink:href=".././type/advection_diffusion_1d_t.html" xlink:title="advection_diffusion_1d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="851,-88 707,-88 707,-64 851,-64 851,-88"/>
+<text text-anchor="middle" x="779" y="-73.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d_t&#45;&gt;type~dgmodel1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge18" class="edge">
+<title>type~advection_diffusion_1d_t&#45;&gt;type~dgmodel1d</title>
+<path fill="none" stroke="#7fff00" d="M756.25,-88.04C740.94,-97.37 720.81,-111.46 707,-128 695.28,-142.04 706.22,-158.85 689,-165"/>
+<path fill="none" stroke="#7fff00" d="M688,-165C679.84,-167.92 671.21,-171.43 663.13,-174.91"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="661.7,-171.72 653.96,-178.95 664.52,-178.12 661.7,-171.72"/>
+</g>
+<!-- type~lineareuler3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node22" class="node">
+<title>type~lineareuler3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node22"><a xlink:href=".././type/lineareuler3d_t.html" xlink:title="LinearEuler3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1009,-811 911,-811 911,-787 1009,-787 1009,-811"/>
+<text text-anchor="middle" x="960" y="-796.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge23" class="edge">
+<title>type~lineareuler3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M910.94,-791.05C902.6,-788.01 894.53,-783.81 888,-778 872.82,-764.51 887.73,-745.9 870,-736"/>
+</g>
+<!-- type~nulldgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node23" class="node">
+<title>type~nulldgmodel3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node23"><a xlink:href=".././type/nulldgmodel3d_t.html" xlink:title="NullDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1013,-769 907,-769 907,-745 1013,-745 1013,-769"/>
+<text text-anchor="middle" x="960" y="-754.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge24" class="edge">
+<title>type~nulldgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M906.83,-749.77C894.26,-746.68 881.23,-742.27 870,-736"/>
+</g>
+<!-- type~nulldgmodel1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node24" class="node">
+<title>type~nulldgmodel1d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node24"><a xlink:href=".././type/nulldgmodel1d.html" xlink:title="NullDGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1008.5,-234 911.5,-234 911.5,-210 1008.5,-210 1008.5,-234"/>
+<text text-anchor="middle" x="960" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d&#45;&gt;type~nulldgmodel1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge25" class="edge">
+<title>type~nulldgmodel1d&#45;&gt;type~nulldgmodel1d_t</title>
+<path fill="none" stroke="#ffda00" d="M920.88,-209.89C905.29,-205.76 886.96,-201.93 870,-201"/>
+</g>
+<!-- type~nulldgmodel1d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node25" class="node">
+<title>type~nulldgmodel1d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node25"><a xlink:href=".././type/nulldgmodel1d~2.html" xlink:title="NullDGModel1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1008.5,-192 911.5,-192 911.5,-168 1008.5,-168 1008.5,-192"/>
+<text text-anchor="middle" x="960" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel1d~2&#45;&gt;type~nulldgmodel1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge26" class="edge">
+<title>type~nulldgmodel1d~2&#45;&gt;type~nulldgmodel1d_t</title>
+<path fill="none" stroke="#ffda00" d="M927.27,-192.11C910.46,-197.35 889.34,-202.07 870,-201"/>
+<path fill="none" stroke="#ffda00" d="M869,-201C860.31,-200.52 851.17,-199.77 842.19,-198.9"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="842.46,-195.41 832.15,-197.86 841.74,-202.37 842.46,-195.41"/>
+</g>
+<!-- type~lineareuler2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node26" class="node">
+<title>type~lineareuler2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node26"><a xlink:href=".././type/lineareuler2d_t.html" xlink:title="LinearEuler2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1009,-444 911,-444 911,-420 1009,-420 1009,-444"/>
+<text text-anchor="middle" x="960" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge27" class="edge">
+<title>type~lineareuler2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff91" d="M910.69,-424.84C902.28,-421.73 894.24,-417.3 888,-411 867.5,-390.31 899.12,-348 870,-348"/>
+</g>
+<!-- type~ecdgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node27" class="node">
+<title>type~ecdgmodel2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node27"><a xlink:href=".././type/ecdgmodel2d_t.html" xlink:title="ECDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1010,-402 910,-402 910,-378 1010,-378 1010,-402"/>
+<text text-anchor="middle" x="960" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge28" class="edge">
+<title>type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff91" d="M910,-379.56C902.3,-376.8 894.69,-373.33 888,-369 877.68,-362.32 882.29,-348 870,-348"/>
+</g>
+<!-- type~burgers1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node28" class="node">
+<title>type~burgers1d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node28"><a xlink:href=".././type/burgers1d.html" xlink:title="Burgers1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="995,-150 925,-150 925,-126 995,-126 995,-150"/>
+<text text-anchor="middle" x="960" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d&#45;&gt;type~burgers1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge32" class="edge">
+<title>type~burgers1d&#45;&gt;type~burgers1d_t</title>
+<path fill="none" stroke="#4800ff" d="M924.95,-135.24C908.27,-134.59 887.96,-134.83 870,-138"/>
+</g>
+<!-- type~burgers1d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node29" class="node">
+<title>type~burgers1d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node29"><a xlink:href=".././type/burgers1d~2.html" xlink:title="Burgers1D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="995,-108 925,-108 925,-84 995,-84 995,-108"/>
+<text text-anchor="middle" x="960" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- type~burgers1d~2&#45;&gt;type~burgers1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge33" class="edge">
+<title>type~burgers1d~2&#45;&gt;type~burgers1d_t</title>
+<path fill="none" stroke="#4800ff" d="M924.78,-101.92C912.51,-105.09 899,-109.87 888,-117 877.68,-123.68 882.11,-135.87 870,-138"/>
+<path fill="none" stroke="#4800ff" d="M869,-138C856.05,-140.28 841.97,-142.26 828.9,-143.88"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="828.19,-140.43 818.68,-145.1 829.02,-147.39 828.19,-140.43"/>
+</g>
+<!-- type~advection_diffusion_1d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node30" class="node">
+<title>type~advection_diffusion_1d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node30"><a xlink:href=".././type/advection_diffusion_1d.html" xlink:title="advection_diffusion_1d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1027.5,-66 892.5,-66 892.5,-42 1027.5,-42 1027.5,-66"/>
+<text text-anchor="middle" x="960" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d&#45;&gt;type~advection_diffusion_1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge34" class="edge">
+<title>type~advection_diffusion_1d&#45;&gt;type~advection_diffusion_1d_t</title>
+<path fill="none" stroke="#ff00da" d="M892.03,-50.64C884.54,-51.26 877.07,-52.32 870,-54"/>
+</g>
+<!-- type~advection_diffusion_1d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node31" class="node">
+<title>type~advection_diffusion_1d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node31"><a xlink:href=".././type/advection_diffusion_1d~2.html" xlink:title="advection_diffusion_1d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1027.5,-24 892.5,-24 892.5,0 1027.5,0 1027.5,-24"/>
+<text text-anchor="middle" x="960" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_1d~2&#45;&gt;type~advection_diffusion_1d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge35" class="edge">
+<title>type~advection_diffusion_1d~2&#45;&gt;type~advection_diffusion_1d_t</title>
+<path fill="none" stroke="#ff00da" d="M905.55,-24.12C899.39,-26.57 893.39,-29.51 888,-33 877.68,-39.68 881.96,-51.16 870,-54"/>
+<path fill="none" stroke="#ff00da" d="M869,-54C858.91,-56.4 848.19,-59 837.81,-61.55"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="836.87,-58.17 828,-63.97 838.55,-64.97 836.87,-58.17"/>
+</g>
+<!-- type~ecdgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node32" class="node">
+<title>type~ecdgmodel3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node32"><a xlink:href=".././type/ecdgmodel3d_t.html" xlink:title="ECDGModel3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1010,-727 910,-727 910,-703 1010,-703 1010,-727"/>
+<text text-anchor="middle" x="960" y="-712.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge21" class="edge">
+<title>type~ecdgmodel3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M918.82,-727.08C897.38,-733.06 874.5,-738.52 870,-736"/>
+</g>
+<!-- type~advection_diffusion_3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node33" class="node">
+<title>type~advection_diffusion_3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node33"><a xlink:href=".././type/advection_diffusion_3d_t.html" xlink:title="advection_diffusion_3d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1032,-664 888,-664 888,-640 1032,-640 1032,-664"/>
+<text text-anchor="middle" x="960" y="-649.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge22" class="edge">
+<title>type~advection_diffusion_3d_t&#45;&gt;type~dgmodel3d</title>
+<path fill="none" stroke="#ff0000" d="M929.78,-664.03C915.65,-671.05 899.34,-681.09 888,-694 874.6,-709.26 887.73,-745.9 870,-736"/>
+<path fill="none" stroke="#ff0000" d="M869,-736C814.71,-705.68 792.12,-628.99 783.98,-590.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="787.35,-589.58 781.98,-580.45 780.48,-590.94 787.35,-589.58"/>
+</g>
+<!-- type~nulldgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node34" class="node">
+<title>type~nulldgmodel2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node34"><a xlink:href=".././type/nulldgmodel2d_t.html" xlink:title="NullDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1013,-360 907,-360 907,-336 1013,-336 1013,-360"/>
+<text text-anchor="middle" x="960" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge29" class="edge">
+<title>type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff91" d="M906.76,-348C894.69,-348 881.9,-348 870,-348"/>
+</g>
+<!-- type~advection_diffusion_2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node35" class="node">
+<title>type~advection_diffusion_2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node35"><a xlink:href=".././type/advection_diffusion_2d_t.html" xlink:title="advection_diffusion_2d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1032,-318 888,-318 888,-294 1032,-294 1032,-318"/>
+<text text-anchor="middle" x="960" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge30" class="edge">
+<title>type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff91" d="M905.55,-318.12C899.39,-320.57 893.39,-323.51 888,-327 877.68,-333.68 882.29,-348 870,-348"/>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node36" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node36"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1031.5,-276 888.5,-276 888.5,-252 1031.5,-252 1031.5,-276"/>
+<text text-anchor="middle" x="960" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge31" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d</title>
+<path fill="none" stroke="#00ff91" d="M900.05,-276.01C895.63,-278.48 891.53,-281.44 888,-285 867.5,-305.69 899.12,-348 870,-348"/>
+<path fill="none" stroke="#00ff91" d="M869,-348C855.46,-348 840.75,-348 827.27,-348"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="827.24,-344.5 817.24,-348 827.24,-351.5 827.24,-344.5"/>
+</g>
+<!-- type~lineareuler2d_pml_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node37" class="node">
+<title>type~lineareuler2d_pml_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node37"><a xlink:href=".././type/lineareuler2d_pml_t.html" xlink:title="LinearEuler2D_PML_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1198.5,-570 1074.5,-570 1074.5,-546 1198.5,-546 1198.5,-570"/>
+<text text-anchor="middle" x="1136.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml_t&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge40" class="edge">
+<title>type~lineareuler2d_pml_t&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#65ff00" d="M1086.12,-545.86C1080.11,-543.4 1074.25,-540.47 1069,-537 1058.74,-530.22 1062.44,-520.49 1051,-516"/>
+</g>
+<!-- type~ecdgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node38" class="node">
+<title>type~ecdgmodel3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node38"><a xlink:href=".././type/ecdgmodel3d.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1182,-738 1091,-738 1091,-714 1182,-714 1182,-738"/>
+<text text-anchor="middle" x="1136.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge45" class="edge">
+<title>type~ecdgmodel3d&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#0000ff" d="M1090.88,-717.03C1078.04,-715.31 1064,-714.25 1051,-715"/>
+</g>
+<!-- type~nulldgmodel2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node39" class="node">
+<title>type~nulldgmodel2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node39"><a xlink:href=".././type/nulldgmodel2d~2.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1185,-360 1088,-360 1088,-336 1185,-336 1185,-360"/>
+<text text-anchor="middle" x="1136.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge50" class="edge">
+<title>type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M1087.56,-346.01C1075.59,-346.06 1062.8,-346.58 1051,-348"/>
+</g>
+<!-- type~lineareuler3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node40" class="node">
+<title>type~lineareuler3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node40"><a xlink:href=".././type/lineareuler3d.html" xlink:title="LinearEuler3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1181,-906 1092,-906 1092,-882 1181,-882 1181,-906"/>
+<text text-anchor="middle" x="1136.5" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d&#45;&gt;type~lineareuler3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge36" class="edge">
+<title>type~lineareuler3d&#45;&gt;type~lineareuler3d_t</title>
+<path fill="none" stroke="#ff0000" d="M1091.59,-884.84C1078.38,-881.61 1063.96,-877.62 1051,-873"/>
+</g>
+<!-- type~lineareuler2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node41" class="node">
+<title>type~lineareuler2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node41"><a xlink:href=".././type/lineareuler2d~2.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1181,-528 1092,-528 1092,-504 1181,-504 1181,-528"/>
+<text text-anchor="middle" x="1136.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge41" class="edge">
+<title>type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#65ff00" d="M1091.8,-522.06C1078.32,-522.35 1063.7,-520.99 1051,-516"/>
+</g>
+<!-- type~ecdgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node42" class="node">
+<title>type~ecdgmodel2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node42"><a xlink:href=".././type/ecdgmodel2d.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1182,-444 1091,-444 1091,-420 1182,-420 1182,-444"/>
+<text text-anchor="middle" x="1136.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge43" class="edge">
+<title>type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ff00" d="M1091,-421.75C1083.32,-418.94 1075.67,-415.41 1069,-411 1058.74,-404.22 1063.2,-391.47 1051,-390"/>
+</g>
+<!-- type~ecdgmodel3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node43" class="node">
+<title>type~ecdgmodel3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node43"><a xlink:href=".././type/ecdgmodel3d~2.html" xlink:title="ECDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1182,-696 1091,-696 1091,-672 1182,-672 1182,-696"/>
+<text text-anchor="middle" x="1136.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel3d~2&#45;&gt;type~ecdgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge46" class="edge">
+<title>type~ecdgmodel3d~2&#45;&gt;type~ecdgmodel3d_t</title>
+<path fill="none" stroke="#0000ff" d="M1092.82,-696.08C1084.8,-698.74 1076.56,-701.74 1069,-705 1060.59,-708.62 1060.14,-714.47 1051,-715"/>
+<path fill="none" stroke="#0000ff" d="M1050,-715C1040.5,-715.55 1030.42,-715.84 1020.58,-715.95"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1020.44,-712.45 1010.46,-716.02 1020.48,-719.45 1020.44,-712.45"/>
+</g>
+<!-- type~nulldgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node44" class="node">
+<title>type~nulldgmodel2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node44"><a xlink:href=".././type/nulldgmodel2d.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1185,-318 1088,-318 1088,-294 1185,-294 1185,-318"/>
+<text text-anchor="middle" x="1136.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge49" class="edge">
+<title>type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M1087.86,-317.44C1081.25,-320.04 1074.76,-323.19 1069,-327 1058.74,-333.78 1063.2,-346.53 1051,-348"/>
+<path fill="none" stroke="#cc00ff" d="M1050,-348C1041.42,-349.03 1032.34,-349.61 1023.38,-349.89"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="1023.29,-346.39 1013.36,-350.08 1023.43,-353.39 1023.29,-346.39"/>
+</g>
+<!-- type~linearshallowwater2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node45" class="node">
+<title>type~linearshallowwater2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node45"><a xlink:href=".././type/linearshallowwater2d.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1203.5,-192 1069.5,-192 1069.5,-168 1203.5,-168 1203.5,-192"/>
+<text text-anchor="middle" x="1136.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge53" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#ff0066" d="M1069.32,-173.71C1062.91,-174.93 1056.68,-176.94 1051,-180"/>
+</g>
+<!-- type~linearshallowwater2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node46" class="node">
+<title>type~linearshallowwater2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node46"><a xlink:href=".././type/linearshallowwater2d~2.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1203.5,-150 1069.5,-150 1069.5,-126 1203.5,-126 1203.5,-150"/>
+<text text-anchor="middle" x="1136.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge54" class="edge">
+<title>type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#ff0066" d="M1086.12,-150.14C1080.11,-152.6 1074.25,-155.53 1069,-159 1058.74,-165.78 1061.82,-174.17 1051,-180"/>
+<path fill="none" stroke="#ff0066" d="M1050,-180C1024.36,-193.8 1052.5,-222.31 1032,-243 1030.9,-244.11 1029.74,-245.17 1028.53,-246.17"/>
+<polygon fill="#ff0066" stroke="#ff0066" points="1026.26,-243.48 1019.95,-251.99 1030.19,-249.27 1026.26,-243.48"/>
+</g>
+<!-- type~nulldgmodel3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node47" class="node">
+<title>type~nulldgmodel3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node47"><a xlink:href=".././type/nulldgmodel3d~2.html" xlink:title="NullDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1185,-822 1088,-822 1088,-798 1185,-798 1185,-822"/>
+<text text-anchor="middle" x="1136.5" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d~2&#45;&gt;type~nulldgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge39" class="edge">
+<title>type~nulldgmodel3d~2&#45;&gt;type~nulldgmodel3d_t</title>
+<path fill="none" stroke="#ff6600" d="M1092.34,-797.97C1079.15,-794.65 1064.56,-791.33 1051,-789"/>
+</g>
+<!-- type~lineareuler2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node48" class="node">
+<title>type~lineareuler2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node48"><a xlink:href=".././type/lineareuler2d.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1181,-486 1092,-486 1092,-462 1181,-462 1181,-486"/>
+<text text-anchor="middle" x="1136.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge42" class="edge">
+<title>type~lineareuler2d&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#65ff00" d="M1091.7,-484C1083.78,-486.85 1075.87,-490.46 1069,-495 1058.74,-501.78 1062.44,-520.49 1051,-516"/>
+<path fill="none" stroke="#65ff00" d="M1050,-516C1017.81,-503.36 990.58,-472.84 975.01,-452.29"/>
+<polygon fill="#65ff00" stroke="#65ff00" points="977.8,-450.17 969.07,-444.17 972.15,-454.31 977.8,-450.17"/>
+</g>
+<!-- type~advection_diffusion_3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node49" class="node">
+<title>type~advection_diffusion_3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node49"><a xlink:href=".././type/advection_diffusion_3d~2.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1204,-654 1069,-654 1069,-630 1204,-630 1204,-654"/>
+<text text-anchor="middle" x="1136.5" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge48" class="edge">
+<title>type~advection_diffusion_3d~2&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#6500ff" d="M1068.89,-639.82C1062.81,-640.28 1056.78,-640.98 1051,-642"/>
+</g>
+<!-- type~ecdgmodel2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node50" class="node">
+<title>type~ecdgmodel2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node50"><a xlink:href=".././type/ecdgmodel2d~2.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1182,-402 1091,-402 1091,-378 1182,-378 1182,-402"/>
+<text text-anchor="middle" x="1136.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge44" class="edge">
+<title>type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#00ff00" d="M1090.65,-391.99C1077.81,-392.02 1063.82,-391.54 1051,-390"/>
+<path fill="none" stroke="#00ff00" d="M1050,-390C1040.44,-388.85 1030.25,-388.26 1020.32,-388.02"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1020.13,-384.52 1010.09,-387.9 1020.05,-391.52 1020.13,-384.52"/>
+</g>
+<!-- type~advection_diffusion_3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node51" class="node">
+<title>type~advection_diffusion_3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node51"><a xlink:href=".././type/advection_diffusion_3d.html" xlink:title="advection_diffusion_3d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1204,-612 1069,-612 1069,-588 1204,-588 1204,-612"/>
+<text text-anchor="middle" x="1136.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_3d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge47" class="edge">
+<title>type~advection_diffusion_3d&#45;&gt;type~advection_diffusion_3d_t</title>
+<path fill="none" stroke="#6500ff" d="M1086.12,-612.14C1080.11,-614.6 1074.25,-617.53 1069,-621 1058.74,-627.78 1063.11,-639.86 1051,-642"/>
+<path fill="none" stroke="#6500ff" d="M1050,-642C1047.36,-642.47 1044.68,-642.91 1041.96,-643.34"/>
+<polygon fill="#6500ff" stroke="#6500ff" points="1041.41,-639.89 1032.04,-644.83 1042.45,-646.81 1041.41,-639.89"/>
+</g>
+<!-- type~advection_diffusion_2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node52" class="node">
+<title>type~advection_diffusion_2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node52"><a xlink:href=".././type/advection_diffusion_2d~2.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1204,-276 1069,-276 1069,-252 1204,-252 1204,-276"/>
+<text text-anchor="middle" x="1136.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge52" class="edge">
+<title>type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff00cb" d="M1068.82,-259.79C1062.7,-260.66 1056.68,-262.01 1051,-264"/>
+</g>
+<!-- type~nulldgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node53" class="node">
+<title>type~nulldgmodel3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node53"><a xlink:href=".././type/nulldgmodel3d.html" xlink:title="NullDGModel3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1185,-780 1088,-780 1088,-756 1185,-756 1185,-780"/>
+<text text-anchor="middle" x="1136.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel3D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel3d&#45;&gt;type~nulldgmodel3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge38" class="edge">
+<title>type~nulldgmodel3d&#45;&gt;type~nulldgmodel3d_t</title>
+<path fill="none" stroke="#ff6600" d="M1099.08,-780.12C1080.68,-785.63 1060.31,-790.6 1051,-789"/>
+<path fill="none" stroke="#ff6600" d="M1050,-789C1040.76,-787.41 1040.57,-781.81 1032,-778 1027.54,-776.02 1022.83,-774.16 1018.06,-772.44"/>
+<polygon fill="#ff6600" stroke="#ff6600" points="1018.81,-768.99 1008.22,-769.08 1016.56,-775.62 1018.81,-768.99"/>
+</g>
+<!-- type~advection_diffusion_2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node54" class="node">
+<title>type~advection_diffusion_2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node54"><a xlink:href=".././type/advection_diffusion_2d.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1204,-234 1069,-234 1069,-210 1204,-210 1204,-234"/>
+<text text-anchor="middle" x="1136.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge51" class="edge">
+<title>type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff00cb" d="M1086.12,-234.14C1080.11,-236.6 1074.25,-239.53 1069,-243 1058.74,-249.78 1062.6,-259.94 1051,-264"/>
+<path fill="none" stroke="#ff00cb" d="M1050,-264C1038.4,-268.06 1042.32,-278.32 1032,-285 1029.39,-286.69 1026.63,-288.25 1023.79,-289.69"/>
+<polygon fill="#ff00cb" stroke="#ff00cb" points="1022.15,-286.59 1014.45,-293.88 1025.01,-292.98 1022.15,-286.59"/>
+</g>
+<!-- type~lineareuler3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node55" class="node">
+<title>type~lineareuler3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node55"><a xlink:href=".././type/lineareuler3d~2.html" xlink:title="LinearEuler3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1181,-864 1092,-864 1092,-840 1181,-840 1181,-864"/>
+<text text-anchor="middle" x="1136.5" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler3D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler3d~2&#45;&gt;type~lineareuler3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge37" class="edge">
+<title>type~lineareuler3d~2&#45;&gt;type~lineareuler3d_t</title>
+<path fill="none" stroke="#ff0000" d="M1102.72,-864.08C1083.24,-870.49 1060.54,-876.4 1051,-873"/>
+<path fill="none" stroke="#ff0000" d="M1050,-873C1020.29,-862.4 993.56,-836.98 977.32,-818.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="979.82,-816.44 970.62,-811.19 974.53,-821.03 979.82,-816.44"/>
+</g>
+<!-- type~lineareuler2d_pml -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node56" class="node">
+<title>type~lineareuler2d_pml</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node56"><a xlink:href=".././type/lineareuler2d_pml.html" xlink:title="LinearEuler2D_PML">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1356,-570 1241,-570 1241,-546 1356,-546 1356,-570"/>
+<text text-anchor="middle" x="1298.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml&#45;&gt;type~lineareuler2d_pml_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge55" class="edge">
+<title>type~lineareuler2d_pml&#45;&gt;type~lineareuler2d_pml_t</title>
+<path fill="none" stroke="#ff0000" d="M1240.85,-556.41C1234.81,-556.71 1228.77,-557.22 1223,-558"/>
+</g>
+<!-- type~ecadvection2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node57" class="node">
+<title>type~ecadvection2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node57"><a xlink:href=".././type/ecadvection2d_t.html" xlink:title="ECAdvection2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1350,-444 1247,-444 1247,-420 1350,-420 1350,-444"/>
+<text text-anchor="middle" x="1298.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge59" class="edge">
+<title>type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#6bff00" d="M1246.82,-429.76C1238.81,-430.05 1230.66,-430.73 1223,-432"/>
+</g>
+<!-- type~lineareuler2d_pml~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node58" class="node">
+<title>type~lineareuler2d_pml~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node58"><a xlink:href=".././type/lineareuler2d_pml~2.html" xlink:title="LinearEuler2D_PML">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1356,-528 1241,-528 1241,-504 1356,-504 1356,-528"/>
+<text text-anchor="middle" x="1298.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml~2&#45;&gt;type~lineareuler2d_pml_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge56" class="edge">
+<title>type~lineareuler2d_pml~2&#45;&gt;type~lineareuler2d_pml_t</title>
+<path fill="none" stroke="#ff0000" d="M1257.32,-528.02C1251.6,-530.55 1245.98,-533.53 1241,-537 1230.92,-544.03 1235.18,-556.35 1223,-558"/>
+<path fill="none" stroke="#ff0000" d="M1222,-558C1217.63,-558.59 1213.12,-559.05 1208.57,-559.38"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1208.34,-555.89 1198.56,-559.95 1208.74,-562.88 1208.34,-555.89"/>
+</g>
+<!-- type~esatmo2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node59" class="node">
+<title>type~esatmo2d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node59"><a xlink:href=".././type/esatmo2d_t.html" xlink:title="ESAtmo2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1337.5,-392 1259.5,-392 1259.5,-368 1337.5,-368 1337.5,-392"/>
+<text text-anchor="middle" x="1298.5" y="-377.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge60" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#6bff00" d="M1270.95,-392.05C1261.05,-397.17 1250.03,-403.67 1241,-411 1231.46,-418.75 1235.13,-429.98 1223,-432"/>
+<path fill="none" stroke="#6bff00" d="M1222,-432C1212.44,-433.59 1202.19,-434.36 1192.24,-434.63"/>
+<polygon fill="#6bff00" stroke="#6bff00" points="1191.98,-431.13 1182.02,-434.73 1192.06,-438.13 1191.98,-431.13"/>
+</g>
+<!-- type~ecadvection3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node60" class="node">
+<title>type~ecadvection3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node60"><a xlink:href=".././type/ecadvection3d_t.html" xlink:title="ECAdvection3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1350,-738 1247,-738 1247,-714 1350,-714 1350,-738"/>
+<text text-anchor="middle" x="1298.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge57" class="edge">
+<title>type~ecadvection3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#ff5000" d="M1246.88,-724.17C1238.87,-724.4 1230.69,-724.96 1223,-726"/>
+</g>
+<!-- type~esatmo3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node61" class="node">
+<title>type~esatmo3d_t</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node61"><a xlink:href=".././type/esatmo3d_t.html" xlink:title="ESAtmo3D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1337.5,-696 1259.5,-696 1259.5,-672 1337.5,-672 1337.5,-696"/>
+<text text-anchor="middle" x="1298.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d_t&#45;&gt;type~ecdgmodel3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge58" class="edge">
+<title>type~esatmo3d_t&#45;&gt;type~ecdgmodel3d</title>
+<path fill="none" stroke="#ff5000" d="M1259.39,-695.13C1252.97,-697.84 1246.58,-701.11 1241,-705 1230.92,-712.03 1235.18,-724.35 1223,-726"/>
+<path fill="none" stroke="#ff5000" d="M1222,-726C1212.51,-727.29 1202.36,-727.92 1192.5,-728.14"/>
+<polygon fill="#ff5000" stroke="#ff5000" points="1192.35,-724.64 1182.38,-728.24 1192.42,-731.64 1192.35,-724.64"/>
+</g>
+<!-- type~ecadvection2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node62" class="node">
+<title>type~ecadvection2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node62"><a xlink:href=".././type/ecadvection2d.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1487,-455 1393,-455 1393,-431 1487,-431 1487,-455"/>
+<text text-anchor="middle" x="1440" y="-440.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge61" class="edge">
+<title>type~ecadvection2d&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#ffff00" d="M1392.85,-437.65C1386.85,-437.46 1380.78,-437.53 1375,-438"/>
+</g>
+<!-- type~ecadvection2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node63" class="node">
+<title>type~ecadvection2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node63"><a xlink:href=".././type/ecadvection2d~2.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1487,-413 1393,-413 1393,-389 1487,-389 1487,-413"/>
+<text text-anchor="middle" x="1440" y="-398.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge62" class="edge">
+<title>type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#ffff00" d="M1409.11,-413.07C1403.59,-415.73 1398,-418.74 1393,-422 1384.03,-427.84 1385.67,-437.14 1375,-438"/>
+<path fill="none" stroke="#ffff00" d="M1374,-438C1369.59,-438.36 1365.03,-438.51 1360.44,-438.51"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1360.47,-435.01 1350.4,-438.28 1360.31,-442.01 1360.47,-435.01"/>
+</g>
+<!-- type~esatmo2d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node64" class="node">
+<title>type~esatmo2d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node64"><a xlink:href=".././type/esatmo2d~2.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1474.5,-371 1405.5,-371 1405.5,-347 1474.5,-347 1474.5,-371"/>
+<text text-anchor="middle" x="1440" y="-356.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d~2&#45;&gt;type~esatmo2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge64" class="edge">
+<title>type~esatmo2d~2&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" d="M1405.26,-355.39C1395.34,-355.29 1384.58,-356.14 1375,-359"/>
+</g>
+<!-- type~ecadvection3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node65" class="node">
+<title>type~ecadvection3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node65"><a xlink:href=".././type/ecadvection3d~2.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1487,-759 1393,-759 1393,-735 1487,-735 1487,-759"/>
+<text text-anchor="middle" x="1440" y="-744.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge66" class="edge">
+<title>type~ecadvection3d~2&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#0000ff" d="M1414.38,-734.91C1402.73,-730.24 1388.45,-726 1375,-726"/>
+</g>
+<!-- type~esatmo3d~2 -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node66" class="node">
+<title>type~esatmo3d~2</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node66"><a xlink:href=".././type/esatmo3d~2.html" xlink:title="ESAtmo3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1474.5,-675 1405.5,-675 1405.5,-651 1474.5,-651 1474.5,-675"/>
+<text text-anchor="middle" x="1440" y="-660.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d~2&#45;&gt;type~esatmo3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge68" class="edge">
+<title>type~esatmo3d~2&#45;&gt;type~esatmo3d_t</title>
+<path fill="none" stroke="#ff00ff" d="M1405.26,-659.39C1395.34,-659.29 1384.58,-660.14 1375,-663"/>
+</g>
+<!-- type~esatmo2d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node67" class="node">
+<title>type~esatmo2d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node67"><a xlink:href=".././type/esatmo2d.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1474.5,-329 1405.5,-329 1405.5,-305 1474.5,-305 1474.5,-329"/>
+<text text-anchor="middle" x="1440" y="-314.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d&#45;&gt;type~esatmo2d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge63" class="edge">
+<title>type~esatmo2d&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" d="M1407.76,-329.02C1402.61,-331.62 1397.49,-334.62 1393,-338 1383.18,-345.39 1386.78,-355.49 1375,-359"/>
+<path fill="none" stroke="#00ffff" d="M1374,-359C1365.49,-361.54 1356.4,-364.17 1347.61,-366.67"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1346.52,-363.34 1337.85,-369.43 1348.42,-370.08 1346.52,-363.34"/>
+</g>
+<!-- type~ecadvection3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node68" class="node">
+<title>type~ecadvection3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node68"><a xlink:href=".././type/ecadvection3d.html" xlink:title="ECAdvection3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1487,-717 1393,-717 1393,-693 1487,-693 1487,-717"/>
+<text text-anchor="middle" x="1440" y="-702.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection3D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection3d&#45;&gt;type~ecadvection3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge65" class="edge">
+<title>type~ecadvection3d&#45;&gt;type~ecadvection3d_t</title>
+<path fill="none" stroke="#0000ff" d="M1414.38,-717.09C1402.73,-721.76 1388.45,-726 1375,-726"/>
+<path fill="none" stroke="#0000ff" d="M1374,-726C1369.59,-726 1365.03,-726 1360.44,-726"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1360.4,-722.5 1350.4,-726 1360.4,-729.5 1360.4,-722.5"/>
+</g>
+<!-- type~esatmo3d -->
+<g id="type~~domaindecomposition~~InheritedByGraph_node69" class="node">
+<title>type~esatmo3d</title>
+<g id="a_type~~domaindecomposition~~InheritedByGraph_node69"><a xlink:href=".././type/esatmo3d.html" xlink:title="ESAtmo3D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1474.5,-633 1405.5,-633 1405.5,-609 1474.5,-609 1474.5,-633"/>
+<text text-anchor="middle" x="1440" y="-618.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo3D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo3d&#45;&gt;type~esatmo3d_t -->
+<g id="type~~domaindecomposition~~InheritedByGraph_edge67" class="edge">
+<title>type~esatmo3d&#45;&gt;type~esatmo3d_t</title>
+<path fill="none" stroke="#ff00ff" d="M1407.76,-633.02C1402.61,-635.62 1397.49,-638.62 1393,-642 1383.18,-649.39 1386.78,-659.49 1375,-663"/>
+<path fill="none" stroke="#ff00ff" d="M1374,-663C1365.49,-665.54 1356.4,-668.17 1347.61,-670.67"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="1346.52,-667.34 1337.85,-673.43 1348.42,-674.08 1346.52,-667.34"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypedomaindecompositionInheritedByGraph = svgPanZoom('#typedomaindecompositionInheritedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-elemtorank">elemToRank</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-elemtorank_gpu">elemToRank_gpu</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_built">halo_built</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_nnbr">halo_nnbr</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_nsides">halo_nsides</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_offset">halo_offset</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_rank">halo_rank</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-halo_sides_gpu">halo_sides_gpu</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-initialized">initialized</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-maxmsg">maxMsg</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-mpicomm">mpiComm</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-mpienabled">mpiEnabled</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-mpiprec">mpiPrec</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-msgcount">msgCount</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-nelem~3">nElem</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-nranks">nRanks</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-offsetelem">offSetElem</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-rankid">rankId</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-requests">requests</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#variable-stats">stats</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-buildhaloexchange">BuildHaloExchange</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-finalizempiexchangeasync">FinalizeMPIExchangeAsync</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-free~46">Free</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-generatedecomposition">GenerateDecomposition</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-init~44">Init</a>
+      <a class="list-group-item" href="../type/domaindecomposition.html#boundprocedure-setelemtorank~2">SetElemToRank</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/domaindecomposition.html#src">DomainDecomposition</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-elemtorank"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:)</td><td>::</td>
+  <td><strong>elemToRank</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elemtorank_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>elemToRank_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_built"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_built</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_nnbr"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_nnbr</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_nsides"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_nsides</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_offset"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>halo_offset</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_rank"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>halo_rank</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_sides_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_sides_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-initialized"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>initialized</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-maxmsg"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>maxMsg</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mpicomm"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mpiComm</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mpienabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mpiEnabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mpiprec"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mpiPrec</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-msgcount"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>msgCount</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~3"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nranks"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nRanks</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-offsetelem"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:)</td><td>::</td>
+  <td><strong>offSetElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rankid"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>rankId</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-requests"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>requests</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-stats"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>stats</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-buildhaloexchange"></span><h3>procedure, public :: <strong>BuildHaloExchange</strong>  => <a href='../proc/buildhaloexchange_domaindecomposition.html'>BuildHaloExchange_DomainDecomposition</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/buildhaloexchange_domaindecomposition.html'>BuildHaloExchange_DomainDecomposition</a>(this, sideInfo, nElem, nSidesPerElem)</h3>
+<p>Build the aggregated halo exchange tables for the mesh this domain
+decomposition belongs to.</p><a href="../proc/buildhaloexchange_domaindecomposition.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sideInfo</strong>(1:5,1:nSidesPerElem,1:nElem)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nSidesPerElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-finalizempiexchangeasync"></span><h3>procedure, public :: <strong>FinalizeMPIExchangeAsync</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/finalizempiexchangeasync.html'>FinalizeMPIExchangeAsync</a>(mpiHandler)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mpiHandler</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~46"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_domaindecomposition.html'>Free_DomainDecomposition</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_domaindecomposition.html'>Free_DomainDecomposition</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-generatedecomposition"></span><h3>procedure, public :: <strong>GenerateDecomposition</strong>  => <a href='../proc/generatedecomposition_domaindecomposition_t.html'>GenerateDecomposition_DomainDecomposition_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/generatedecomposition_domaindecomposition_t.html'>GenerateDecomposition_DomainDecomposition_t</a>(this, nGlobalElem, maxMsg)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition_t.html'>DomainDecomposition_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nGlobalElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>maxMsg</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~44"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_domaindecomposition.html'>Init_DomainDecomposition</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_domaindecomposition.html'>Init_DomainDecomposition</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setelemtorank~2"></span><h3>procedure, public :: <strong>SetElemToRank</strong>  => <a href='../proc/setelemtorank_domaindecomposition.html'>SetElemToRank_DomainDecomposition</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setelemtorank_domaindecomposition.html'>SetElemToRank_DomainDecomposition</a>(this, nElem)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">DomainDecomposition_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">DomainDecomposition</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elemToRank_gpu</span>
+
+<span class="w">    </span><span class="c">! Aggregated MPI halo exchange tables, shared by every field on the mesh.</span>
+<span class="w">    </span><span class="c">! All locally-owned sides with a neighbor element on another rank are</span>
+<span class="w">    </span><span class="c">! enumerated once, grouped by neighbor rank and sorted by global side id</span>
+<span class="w">    </span><span class="c">! within each group, so that the two ranks sharing an interface enumerate</span>
+<span class="w">    </span><span class="c">! its sides in the same order and packed message buffers line up without</span>
+<span class="w">    </span><span class="c">! any per-message metadata. Field classes allocate their own packed</span>
+<span class="w">    </span><span class="c">! send/receive buffers (sized by their variable count) and share these</span>
+<span class="w">    </span><span class="c">! tables for the pack/unpack kernels and message posting.</span>
+<span class="w">    </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">halo_built</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">halo_nnbr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c">! Number of neighboring ranks</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">halo_nsides</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c">! Total number of sides exchanged with other ranks</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">halo_rank</span><span class="p">(:)</span><span class="w"> </span><span class="c">! (1:halo_nnbr) neighbor rank ids</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">halo_offset</span><span class="p">(:)</span><span class="w"> </span><span class="c">! (1:halo_nnbr+1) side-list offsets per neighbor</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">halo_sides_gpu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">c_null_ptr</span><span class="w"> </span><span class="c">! (element,side,flip) triplets, device copy</span>
+
+<span class="w">  </span><span class="k">contains</span>
+
+<span class="k">    procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_DomainDecomposition</span>
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_DomainDecomposition</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SetElemToRank</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SetElemToRank_DomainDecomposition</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BuildHaloExchange</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">BuildHaloExchange_DomainDecomposition</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">DomainDecomposition</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-07-23 16:03            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
