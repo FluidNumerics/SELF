@@ -252,7 +252,7 @@ contains
     endif
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%solution%interior(i,j,k,iEl,iVar) = &
         this%solution%interior(i,j,k,iEl,iVar)+ &
@@ -270,7 +270,7 @@ contains
     integer :: i,j,k,iVar,iEl
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%workSol%interior(i,j,k,iEl,iVar) = rk2_a(m)* &
                                               this%workSol%interior(i,j,k,iEl,iVar)+ &
@@ -292,7 +292,7 @@ contains
     integer :: i,j,k,iVar,iEl
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%workSol%interior(i,j,k,iEl,iVar) = rk3_a(m)* &
                                               this%workSol%interior(i,j,k,iEl,iVar)+ &
@@ -314,7 +314,7 @@ contains
     integer :: i,j,k,iVar,iEl
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  k=1:this%solution%N+1,iel=1:this%mesh%nElem,ivar=1:this%nstepped)
 
       this%workSol%interior(i,j,k,iEl,iVar) = rk4_a(m)* &
                                               this%workSol%interior(i,j,k,iEl,iVar)+ &
