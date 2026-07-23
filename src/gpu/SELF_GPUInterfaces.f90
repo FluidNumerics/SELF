@@ -138,16 +138,6 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
-    subroutine ApplyFlip_2D_gpu(extBoundary,sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="ApplyFlip_2D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: extBoundary,sideInfo,elemToRank
-      integer(c_int),value :: rankId,offset,N,nVar,nEl
-    endsubroutine ApplyFlip_2D_gpu
-  endinterface
-
-  interface
     subroutine DG_BoundaryContribution_2D_gpu(bmatrix,qweights,bf,df,N,nvar,nel) &
       bind(c,name="DG_BoundaryContribution_2D_gpu")
       use iso_c_binding
@@ -177,13 +167,43 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
-    subroutine ApplyFlip_3D_gpu(extBoundary,sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="ApplyFlip_3D_gpu")
+    subroutine HaloPack_2D_gpu(boundary,sendbuf,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloPack_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: extBoundary,sideInfo,elemToRank
-      integer(c_int),value :: rankId,offset,N,nVar,nEl
-    endsubroutine ApplyFlip_3D_gpu
+      type(c_ptr),value :: boundary,sendbuf,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloPack_2D_gpu
+  endinterface
+
+  interface
+    subroutine HaloUnpack_2D_gpu(recvbuf,extboundary,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloUnpack_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: recvbuf,extboundary,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloUnpack_2D_gpu
+  endinterface
+
+  interface
+    subroutine HaloPack_3D_gpu(boundary,sendbuf,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloPack_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: boundary,sendbuf,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloPack_3D_gpu
+  endinterface
+
+  interface
+    subroutine HaloUnpack_3D_gpu(recvbuf,extboundary,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloUnpack_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: recvbuf,extboundary,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloUnpack_3D_gpu
   endinterface
 
   interface
