@@ -50,23 +50,36 @@ contains
     integer :: ndof
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh)
+
+    ! Post the halo exchange for the prognostic variables; the MPI messages
+    ! are in flight while the hooks, boundary conditions, source, and the
+    ! two-point volume flux and its divergence below execute.
+    call this%solution%SideExchangeStart(this%mesh,this%nstepped)
 
     call this%PreTendencyHook()
     call this%SetBoundaryCondition()
 
     if(this%gradient_enabled) then
+      ! The BR gradient consumes extBoundary (through the side averages), so
+      ! the exchange must complete before the gradient is computed.
+      call this%solution%SideExchangeFinish(this%mesh)
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition()
       call this%solutionGradient%AverageSides()
     endif
 
     call this%SourceMethod()
-    call this%BoundaryFlux()
-
     call this%TwoPointFluxMethod()
 
     call this%twoPointFlux%MappedDivergence(this%fluxDivergence%interior_gpu)
+
+    ! BoundaryFlux is the first consumer of extBoundary; the two-point volume
+    ! flux and its divergence above overlap with the halo exchange (a no-op
+    ! wait when gradients already finished it). BoundaryFlux writes only the
+    ! Riemann trace (flux boundarynormal), disjoint from the volume-term
+    ! outputs, so this reordering does not change any floating-point results.
+    call this%solution%SideExchangeFinish(this%mesh)
+    call this%BoundaryFlux()
 
     call ECDGSurfaceContribution_3D_gpu( &
       this%flux%boundarynormal_gpu, &
