@@ -153,6 +153,49 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    subroutine MortarGather_2D_gpu(buff,boundary,mortarinfo,elemToRank,rankid,offset, &
+                                   n,nl,nmortars,nel) &
+      bind(c,name="MortarGather_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: buff,boundary,mortarinfo,elemToRank
+      integer(c_int),value :: rankId,offset,N,nl,nMortars,nEl
+    endsubroutine MortarGather_2D_gpu
+  endinterface
+
+  interface
+    subroutine MortarFlip_2D_gpu(buff,mortarinfo,elemToRank,rankid,n,nl,nmortars) &
+      bind(c,name="MortarFlip_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: buff,mortarinfo,elemToRank
+      integer(c_int),value :: rankId,N,nl,nMortars
+    endsubroutine MortarFlip_2D_gpu
+  endinterface
+
+  interface
+    subroutine MortarScatter_2D_gpu(extboundary,buff,mortarR,mortarP,mortarinfo, &
+                                    elemToRank,rankid,offset,n,nl,nmortars,nel) &
+      bind(c,name="MortarScatter_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: extboundary,buff,mortarR,mortarP,mortarinfo,elemToRank
+      integer(c_int),value :: rankId,offset,N,nl,nMortars,nEl
+    endsubroutine MortarScatter_2D_gpu
+  endinterface
+
+  interface
+    subroutine MortarFluxScatter_2D_gpu(boundarynormal,buff,mortarP,mortarinfo, &
+                                        elemToRank,rankid,offset,n,nl,nmortars,nel) &
+      bind(c,name="MortarFluxScatter_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: boundarynormal,buff,mortarP,mortarinfo,elemToRank
+      integer(c_int),value :: rankId,offset,N,nl,nMortars,nEl
+    endsubroutine MortarFluxScatter_2D_gpu
+  endinterface
+
+  interface
     subroutine DG_BoundaryContribution_2D_gpu(bmatrix,qweights,bf,df,N,nvar,nel) &
       bind(c,name="DG_BoundaryContribution_2D_gpu")
       use iso_c_binding
