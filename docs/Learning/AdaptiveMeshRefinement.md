@@ -19,15 +19,19 @@ layer that adaptive refinement needs is already in place and tested.
 | Component | Status |
 | --- | --- |
 | Refinement **trigger** (Legendre modal-decay indicator, CPU + GPU) | **Implemented** |
-| `h`-refinement mesh mutation (element subdivision / coarsening) | Designed (Stage 2) |
+| `h`-refinement primitives (isoparametric subdivision + refined connectivity) | **Implemented** |
+| Uniform `h`-refinement (conforming, serial) | **Implemented** |
+| Adaptive (flagged) subdivision with hanging nodes + coarsening | Designed (Stages 2b / 4) |
 | Solution transfer (prolongation / restriction) | Designed (Stage 3) |
 | Mortar regeneration + 2:1 balancing | Designed (Stage 4) |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
-Only the trigger is wired into the library today. Everything from Stage 2 onward changes the
-statically-allocated mesh model and is intentionally deferred behind this design so it can be
-landed and reviewed in self-contained pieces.
+The trigger and the conforming (uniform) `h`-refinement path are wired into the library today
+(see §2.5). Adaptive refinement with hanging nodes reuses the same subdivision primitive but
+additionally needs the mortar regeneration and 2:1 balancing of Stage 4; dynamic MPI
+re-partitioning is Stage 5. These remain deferred behind this design so each lands as a
+self-contained, reviewable piece.
 
 ---
 
@@ -144,6 +148,52 @@ spectra, on both Gauss and Gauss–Lobatto nodes:
 
 ---
 
+## 2.5 `h`-refinement primitives and uniform refinement (implemented)
+
+The mesh-mutation core of Stage 2 is implemented as two additive modules that leave every
+existing mesh type and interface untouched:
+
+- **`SELF_RefinementPrimitives_2D`** — the element-local, dependency-light pieces:
+    - `SubdivideNodeCoords` performs **exact isoparametric subdivision** of one element's
+      geometry into its four children. The parent geometry is the degree-`nGeo` Lagrange
+      interpolant through the element's geometry nodes; each child node coordinate is that
+      interpolant evaluated at the corresponding point of the parent reference square. This is
+      exact for straight-sided and curved (isoparametric) elements alike and for any control
+      node type, so refinement never perturbs the represented domain.
+    - `RefineConnectivity` builds the refined mesh's connectivity by **pure deterministic
+      integer bookkeeping**. Sibling faces interior to a parent are same-orientation (flip 0); a
+      child face on a parent boundary inherits the parent face's neighbor, side, and flip, with
+      the sub-position pairing across the face taken from the parent flip. Because refinement is
+      orientation preserving, this reproduces exactly the flips a corner-node matching pass would
+      compute, without requiring globally consistent node ids (which structured meshes do not
+      guarantee) and without any coordinate hashing.
+
+- **`SELF_MeshRefinement_2D`** — `UniformRefineMesh(meshIn, meshOut)` assembles a fully-formed
+  `Mesh2D_t` with 4× the elements from those primitives: child geometry by isoparametric
+  subdivision, connectivity and flips inherited from the base, boundary-condition and material
+  metadata carried over, and a (serial) domain decomposition. The result is conforming (no
+  hanging nodes), so it needs neither mortars nor 2:1 balancing and is immediately usable for
+  geometry generation and time stepping. It is a genuine capability on its own (e.g. grid
+  convergence studies) and it exercises all of the subdivision, connectivity, and array
+  machinery that adaptive refinement will reuse.
+
+Uniform refinement is currently **serial** (it replicates the input mesh's single-rank MPI
+state rather than re-decomposing); multi-rank refinement is Stage 5.
+
+**Validation.** The primitives are unit-tested in isolation (exact child geometry for affine and
+curved elements; neighbor / side / flip / global-side-id reciprocity of the refined
+connectivity). The end-to-end `UniformRefineMesh` is covered by
+`test/mesh2d_uniform_refine.f90`: refining a structured mesh quadruples the element count,
+conserves the domain area (integral of the Jacobian) to roundoff, keeps every Jacobian strictly
+positive, produces reciprocal interior connectivity, and doubles the physical-boundary side
+count.
+
+The next Stage-2 sub-step (2b) adds the adaptive path: a quad-forest that subdivides only
+flagged leaves and tracks refinement levels, feeding the Stage-4 mortar regeneration and 2:1
+balancing needed once neighboring elements differ in level (hanging nodes).
+
+---
+
 ## 3. Comparison with Trixi.jl
 
 Trixi.jl offers two families of indicators that drive both shock capturing and AMR:
@@ -183,16 +233,18 @@ relies on. The following stages are each independently reviewable and testable.
 
 ### Stage 2 — `h`-refinement mesh mutation
 
-- Add an explicit **quadtree / forest-of-quadtrees** parent–child structure alongside the flat
-  element arrays: each leaf is an active element; refinement replaces one leaf with four
-  children (each spanning a reference sub-quadrant), coarsening merges four siblings back to
-  their parent.
-- Grow the mesh arrays via an amortized-capacity scheme (allocate spare capacity, reallocate in
-  chunks) so refinement does not reallocate every step. Keep the flat solver arrays contiguous
-  by compacting active leaves.
-- Generate child `nodeCoords` from the parent geometry map (isoparametric subdivision), and
-  recompute metric terms/Jacobians for children via the existing geometry routines — **no
-  change to the geometry algorithms**, only new inputs.
+- **(done)** Generate child `nodeCoords` from the parent geometry map by exact isoparametric
+  subdivision, and build refined connectivity deterministically (`SubdivideNodeCoords`,
+  `RefineConnectivity`). Metric terms/Jacobians for children come from the existing geometry
+  routines with the refined `nodeCoords` as input — **no change to the geometry algorithms**.
+- **(done)** Uniform (conforming) refinement end to end (`UniformRefineMesh`), serial.
+- **(2b, next)** Add an explicit **quadtree / forest-of-quadtrees** parent–child structure
+  alongside the flat element arrays: each leaf is an active element; adaptive refinement replaces
+  a flagged leaf with four children (each spanning a reference sub-quadrant), coarsening merges
+  four siblings back to their parent.
+- **(2b, next)** Grow the mesh arrays via an amortized-capacity scheme (allocate spare capacity,
+  reallocate in chunks) so refinement does not reallocate every step. Keep the flat solver arrays
+  contiguous by compacting active leaves.
 
 ### Stage 3 — Solution transfer (prolongation / restriction)
 
