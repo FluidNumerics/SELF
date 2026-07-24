@@ -58,16 +58,6 @@ module SELF_MappedVector_3D
 
   endtype MappedVector3D
 
-  interface
-    subroutine ContravariantProjection_3D_gpu(f,dsdx,N,nvar,nel) &
-      bind(c,name="ContravariantProjection_3D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: f,dsdx
-      integer(c_int),value :: N,nvar,nel
-    endsubroutine ContravariantProjection_3D_gpu
-  endinterface
-
 contains
 
   subroutine Free_MappedVector3D(this)
@@ -230,14 +220,11 @@ contains
     class(MappedVector3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    ! Contravariant projection
-    call ContravariantProjection_3D_gpu(this%interior_gpu, &
-                                        this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
-
-    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu, &
-                           this%interp%N,this%nvar,this%nelem)
-
-    call JacobianWeight_3D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
+    ! Fused contravariant projection + interior divergence, with the Jacobian
+    ! weight folded into the epilogue (strong form has no boundary term).
+    call MappedContravariantDivergence_3D_gpu(this%geometry%dsdx%interior_gpu,this%interp%dMatrix_gpu, &
+                                              this%interior_gpu,df,this%geometry%J%interior_gpu, &
+                                              this%interp%N,this%nvar,this%nelem)
 
   endsubroutine MappedDivergence_MappedVector3D
 
@@ -251,18 +238,16 @@ contains
     class(MappedVector3D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    ! Contravariant projection
-    call ContravariantProjection_3D_gpu(this%interior_gpu, &
-                                        this%geometry%dsdx%interior_gpu,this%interp%N,this%nvar,this%nelem)
+    ! Fused contravariant projection + interior divergence (Jacobian weight is
+    ! applied together with the boundary contribution below, so pass c_null_ptr).
+    call MappedContravariantDivergence_3D_gpu(this%geometry%dsdx%interior_gpu,this%interp%dgMatrix_gpu, &
+                                              this%interior_gpu,df,c_null_ptr, &
+                                              this%interp%N,this%nvar,this%nelem)
 
-    call Divergence_3D_gpu(this%interior_gpu,df,this%interp%dgMatrix_gpu, &
-                           this%interp%N,this%nvar,this%nelem)
-
-    ! Boundary terms
-    call DG_BoundaryContribution_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
-                                        this%boundarynormal_gpu,df,this%interp%N,this%nvar,this%nelem)
-
-    call JacobianWeight_3D_gpu(df,this%geometry%J%interior_gpu,this%interp%N,this%nVar,this%nelem)
+    ! Boundary terms with the Jacobian weight (/J) folded into the same pass
+    call DG_BoundaryContribution_JacobianWeight_3D_gpu(this%interp%bmatrix_gpu,this%interp%qweights_gpu, &
+                                                       this%boundarynormal_gpu,df,this%geometry%J%interior_gpu, &
+                                                       this%interp%N,this%nvar,this%nelem)
 
   endsubroutine MappedDGDivergence_MappedVector3D
 

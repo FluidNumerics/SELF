@@ -211,8 +211,8 @@ contains
     class(Vector2D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    call Divergence_2D_gpu(this%interior_gpu,df,this%interp%dMatrix_gpu, &
-                           this%interp%N,this%nvar,this%nelem)
+    call VectorDivergence_2D_gpu(this%interp%dMatrix_gpu,this%interior_gpu,df, &
+                                 this%interp%N,this%nvar,this%nelem)
 
   endsubroutine Divergence_Vector2D
 

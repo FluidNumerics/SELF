@@ -176,27 +176,6 @@ contains
     this%halo_inflight = 0
     this%halo_static_done = .false.
 
-    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
-    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
-    this%halo_sendbuf_gpu = c_null_ptr
-    this%halo_recvbuf_gpu = c_null_ptr
-
-    if(allocated(this%halo_reqs)) then
-      ! Persistent requests can only be released while MPI is still
-      ! initialized; if the mesh (and its MPI finalization) was freed first,
-      ! MPI has reclaimed them already.
-      call MPI_FINALIZED(mpiIsFinalized,iError)
-      if(.not. mpiIsFinalized) then
-        do n = 1,size(this%halo_reqs)
-          call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
-        enddo
-      endif
-      deallocate(this%halo_reqs)
-    endif
-    this%halo_nactive = 0
-    this%halo_inflight = 0
-    this%halo_static_done = .false.
-
   endsubroutine Free_MappedScalar3D
 
   subroutine SetInteriorFromEquation_MappedScalar3D(this,geometry,time)
