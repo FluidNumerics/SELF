@@ -69,16 +69,6 @@ module SELF_GPUInterfaces
     endsubroutine Divergence_2D_gpu
   endinterface
 
-  interface
-    subroutine Divergence_3D_gpu(f,df,dmat,N,nVar,nEl) &
-      bind(c,name="Divergence_3D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: f,df,dmat
-      integer(c_int),value :: N,nVar,nEl
-    endsubroutine Divergence_3D_gpu
-  endinterface
-
   ! MappedData
 
   ! Model
@@ -214,6 +204,18 @@ module SELF_GPUInterfaces
       type(c_ptr),value :: bmatrix,qweights,bf,df
       integer(c_int),value :: N,nvar,nel
     endsubroutine DG_BoundaryContribution_3D_gpu
+  endinterface
+
+  interface
+    ! Boundary contribution with the Jacobian weight (/jacobian) folded into the
+    ! same pass -- replaces DG_BoundaryContribution_3D_gpu + JacobianWeight_3D_gpu.
+    subroutine DG_BoundaryContribution_JacobianWeight_3D_gpu(bmatrix,qweights,bf,df,jacobian,N,nvar,nel) &
+      bind(c,name="DG_BoundaryContribution_JacobianWeight_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bmatrix,qweights,bf,df,jacobian
+      integer(c_int),value :: N,nvar,nel
+    endsubroutine DG_BoundaryContribution_JacobianWeight_3D_gpu
   endinterface
 
   interface
@@ -359,6 +361,22 @@ module SELF_GPUInterfaces
       type(c_ptr),value :: A,f,df
       integer(c_int),value :: N,nVar,nEl
     endsubroutine VectorDivergence_3D_gpu
+  endinterface
+
+  interface
+    ! Fused contravariant-projection + interior divergence for 3-D mapped
+    ! vectors. Handles the high-N LDS-overflow case internally (falls back to the
+    ! two-kernel projection + divergence path), so callers use it unconditionally.
+    ! When jacobian is non-null the /J weight is folded into the epilogue (used by
+    ! the strong-form path); pass c_null_ptr for the DG path (which applies /J in
+    ! DG_BoundaryContribution_JacobianWeight_3D_gpu after the boundary terms).
+    subroutine MappedContravariantDivergence_3D_gpu(dsdx,A,f,df,jacobian,N,nVar,nEl) &
+      bind(c,name="MappedContravariantDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: dsdx,A,f,df,jacobian
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine MappedContravariantDivergence_3D_gpu
   endinterface
 
 endmodule SELF_GPUInterfaces

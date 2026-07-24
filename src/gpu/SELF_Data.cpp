@@ -183,60 +183,16 @@ extern "C"
   } 
 }
 
-template<int blockSize, int matSize>
-__global__ void __launch_bounds__(512) Divergence_3D_gpukernel(real *f, real *df, real *dmatrix, int nq, int N, int nel, int nvar){
-
-    uint32_t iq = threadIdx.x;
-    if( iq < nq ){
-        
-        uint32_t iel = blockIdx.x;
-        uint32_t ivar = blockIdx.y;
-        uint32_t i = iq % (N+1);
-        uint32_t j = (iq/(N+1)) % (N+1);
-        uint32_t k = (iq/(N+1)/(N+1));
-
-        __shared__ real f1[blockSize];
-        __shared__ real f2[blockSize];
-        __shared__ real f3[blockSize];
-        __shared__ real dmloc[matSize];
-        f1[iq] = f[iq + nq*(iel + nel*(ivar))];
-        f2[iq] = f[iq + nq*(iel + nel*(ivar + nvar))];
-        f3[iq] = f[iq + nq*(iel + nel*(ivar + 2*nvar))];
-        if( k == 0 ){
-            dmloc[i+(N+1)*j] = dmatrix[i+(N+1)*j];
-        }
-        __syncthreads();
-
-        real dfloc = 0.0;
-
-        for(int ii = 0; ii<N+1; ii++){
-            dfloc += dmloc[ii+(N+1)*i]*f1[ii+(N+1)*(j+(N+1)*(k))]+
-                     dmloc[ii+(N+1)*j]*f2[i+(N+1)*(ii+(N+1)*(k))]+
-                     dmloc[ii+(N+1)*k]*f3[i+(N+1)*(j+(N+1)*(ii))];
-        }
-        df[iq + nq*(iel + nel*ivar)] = dfloc;
-    }
-
-}
-
-extern "C"
-{
-  void Divergence_3D_gpu(real *f, real *df, real *dmatrix, int N, int nel, int nvar){
-    int nq = (N+1)*(N+1)*(N+1);
-    if( N < 4 ){
-        Divergence_3D_gpukernel<64,16><<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(f,df,dmatrix,nq,N,nel,nvar);
-
-    } else if( N >= 4 && N < 8 ){
-        Divergence_3D_gpukernel<512,64><<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(f,df,dmatrix,nq,N,nel,nvar);
-    }
-  }
-}
+// The legacy one-thread-per-node Divergence_3D_gpukernel was removed: the 3-D
+// vector divergence now routes through the grid-strided VectorDivergence_3D_gpu
+// (src/gpu/SELF_MatrixMultiply.cpp), which is bitwise-identical at N<=7 and, unlike
+// the old kernel, supports arbitrary N (the old one silently no-op'd for N>=8).
 
 __global__ void __launch_bounds__(512) DG_BoundaryContribution_3D_gpukernel(real *bMatrix, real *qWeights, real *bf, real *df, int N, int nq){
 
-  uint32_t iq = threadIdx.x;
-
-  if( iq < nq ){
+  // Grid-strided over quadrature points so that any polynomial degree N is
+  // supported (nq = (N+1)^3 may exceed the thread-block size).
+  for(uint32_t iq = threadIdx.x; iq < nq; iq += blockDim.x){
     uint32_t i = iq % (N+1);
     uint32_t j = (iq/(N+1))%(N+1);
     uint32_t k = iq/(N+1)/(N+1);
@@ -265,11 +221,70 @@ extern "C"
   {
 
     int nq = (N+1)*(N+1)*(N+1);
+    // Preserve the original one-thread-per-node launch geometry for N<8 (the
+    // grid-strided body then runs exactly one iteration per thread, so N<8
+    // behaviour and performance are unchanged); use a grid-strided 256-thread
+    // launch for N>=8, where (N+1)^3 exceeds the block-size limit.
     if( N < 4 ){
         DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nq);
-
-    } else if( N >= 4 && N < 8 ){
+    } else if( N < 8 ){
         DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nq);
+    } else {
+        DG_BoundaryContribution_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, N, nq);
     }
-  } 
+  }
+}
+
+// Boundary contribution followed by the Jacobian weight (/J), fused into one
+// pass. Reads df once, accumulates the three boundary-face contributions in the
+// same order as DG_BoundaryContribution_3D, divides by the Jacobian, and writes
+// once -- eliminating the separate JacobianWeight kernel (a full df read+write)
+// from the 3-D DG divergence epilogue. Bitwise-identical to
+// DG_BoundaryContribution_3D followed by JacobianWeight (same operands, same
+// accumulation order, single trailing division). jacobian is indexed per node
+// per element (broadcast over variables), matching JacobianWeight.
+__global__ void __launch_bounds__(512) DG_BoundaryContribution_JacobianWeight_3D_gpukernel(real *bMatrix, real *qWeights, real *bf, real *df, real *jacobian, int N, int nq){
+
+  for(uint32_t iq = threadIdx.x; iq < nq; iq += blockDim.x){
+    uint32_t i = iq % (N+1);
+    uint32_t j = (iq/(N+1))%(N+1);
+    uint32_t k = iq/(N+1)/(N+1);
+    uint32_t iel = blockIdx.x;
+    uint32_t nel = gridDim.x;
+    uint32_t ivar = blockIdx.y;
+
+    real acc = df[iq + nq*(iel + nel*ivar)];
+
+    acc += (bf[SCB_3D_INDEX(i,j,5,iel,ivar,N,nel)]*bMatrix[k+(N+1)] + // top
+            bf[SCB_3D_INDEX(i,j,0,iel,ivar,N,nel)]*bMatrix[k])/       // bottom
+               qWeights[k];
+
+    acc += (bf[SCB_3D_INDEX(j,k,2,iel,ivar,N,nel)]*bMatrix[i+(N+1)] + // east
+            bf[SCB_3D_INDEX(j,k,4,iel,ivar,N,nel)]*bMatrix[i])/       // west
+               qWeights[i];
+
+    acc += (bf[SCB_3D_INDEX(i,k,3,iel,ivar,N,nel)]*bMatrix[j+(N+1)] + // north
+            bf[SCB_3D_INDEX(i,k,1,iel,ivar,N,nel)]*bMatrix[j])/       // south
+               qWeights[j];
+
+    df[iq + nq*(iel + nel*ivar)] = acc/jacobian[iq + nq*iel];
+  }
+
+}
+
+extern "C"
+{
+  void DG_BoundaryContribution_JacobianWeight_3D_gpu(real *bMatrix, real *qWeights, real *bf, real *df, real *jacobian, int N, int nvar, int nel)
+  {
+
+    int nq = (N+1)*(N+1)*(N+1);
+    // Same tiered launch geometry as DG_BoundaryContribution_3D_gpu.
+    if( N < 4 ){
+        DG_BoundaryContribution_JacobianWeight_3D_gpukernel<<<dim3(nel,nvar,1), dim3(64,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, jacobian, N, nq);
+    } else if( N < 8 ){
+        DG_BoundaryContribution_JacobianWeight_3D_gpukernel<<<dim3(nel,nvar,1), dim3(512,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, jacobian, N, nq);
+    } else {
+        DG_BoundaryContribution_JacobianWeight_3D_gpukernel<<<dim3(nel,nvar,1), dim3(256,1,1), 0, 0>>>(bMatrix, qWeights, bf, df, jacobian, N, nq);
+    }
+  }
 }
