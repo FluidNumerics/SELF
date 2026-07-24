@@ -84,7 +84,10 @@ contains
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateSolution_gpu(this%solution%interior_gpu,this%dsdt%interior_gpu,dtLoc,ndof)
+    ! Fused tendency + Euler update (dSdt = source - fluxDivergence formed in
+    ! registers, no separate CalculateDSDt pass).
+    call UpdateSolution_CalculateDSDt_gpu(this%solution%interior_gpu,this%fluxDivergence%interior_gpu, &
+                                          this%source%interior_gpu,dtLoc,ndof)
 
   endsubroutine UpdateSolution_DGModel3D
 
@@ -104,8 +107,10 @@ contains
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
-                       rk2_a(m),rk2_g(m),this%dt,ndof)
+    ! Fused tendency + RK stage update (no separate CalculateDSDt pass).
+    call UpdateGRK_CalculateDSDt_gpu(this%worksol%interior_gpu,this%solution%interior_gpu, &
+                                     this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                                     rk2_a(m),rk2_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK2_DGModel3D
 
@@ -125,8 +130,10 @@ contains
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
-                       rk3_a(m),rk3_g(m),this%dt,ndof)
+    ! Fused tendency + RK stage update (no separate CalculateDSDt pass).
+    call UpdateGRK_CalculateDSDt_gpu(this%worksol%interior_gpu,this%solution%interior_gpu, &
+                                     this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                                     rk3_a(m),rk3_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK3_DGModel3D
 
@@ -146,8 +153,10 @@ contains
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
-                       rk4_a(m),rk4_g(m),this%dt,ndof)
+    ! Fused tendency + RK stage update (no separate CalculateDSDt pass).
+    call UpdateGRK_CalculateDSDt_gpu(this%worksol%interior_gpu,this%solution%interior_gpu, &
+                                     this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                                     rk4_a(m),rk4_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK4_DGModel3D
 
@@ -384,8 +393,6 @@ contains
   subroutine CalculateTendency_DGModel3D(this)
     implicit none
     class(DGModel3D),intent(inout) :: this
-    ! Local
-    integer :: ndof
 
     call this%solution%BoundaryInterp()
 
@@ -427,14 +434,9 @@ contains
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)
 
-    ndof = this%solution%nvar* &
-           this%solution%nelem* &
-           (this%solution%interp%N+1)* &
-           (this%solution%interp%N+1)* &
-           (this%solution%interp%N+1)
-
-    call CalculateDSDt_gpu(this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
-                           this%dsdt%interior_gpu,ndof)
+    ! The tendency (source - fluxDivergence) is formed inside the fused RK/Euler
+    ! update kernels (UpdateGRK_CalculateDSDt_gpu / UpdateSolution_CalculateDSDt_gpu),
+    ! so there is no separate CalculateDSDt pass here.
 
   endsubroutine CalculateTendency_DGModel3D
 
