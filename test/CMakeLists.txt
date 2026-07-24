@@ -99,6 +99,7 @@ add_fortran_tests (
     "mappedvectordgdivergence_2d_linear.f90"
     "mappedvectordgdivergence_2d_linear_structuredmesh.f90"
     "mortarprojection_identity.f90"
+    "refinement_indicator_2d_spectraldecay.f90"
     "mappedscalarmortarexchange_2d_linear.f90"
     "mappedvectordgdivergence_2d_mortar.f90"
     "mappedscalargradient_3d_constant.f90"
