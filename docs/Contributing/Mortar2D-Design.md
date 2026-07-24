@@ -8,10 +8,12 @@ reading and quadtree AMR generation remains future work.
 CPU and GPU backends, MPI-parallel. p-mortars (mixed polynomial degree) are
 noted as a future extension only.
 
-Companion to the [conforming AMR design assessment](AMR2D-Design.md), which
-excluded mortars by requirement. This document answers: *what would it take to
-implement mortar elements instead*, so the two routes can be compared on equal
-footing. The one-line summary of the comparison: **mortars move the complexity
+Companion to the [AMR design assessment](AMR2D-Design.md). This document was
+written while the AMR design still excluded mortars by requirement, to answer:
+*what would it take to implement mortar elements instead*, so the two routes
+could be compared on equal footing. Mortars were subsequently implemented and
+the AMR design has been rebased on them; the comparison below is retained as
+the rationale for that decision. The one-line summary of the comparison: **mortars move the complexity
 out of mesh generation and into the core numerics and communication layer.**
 The conforming-AMR mesh machinery gets dramatically simpler (plain 2:1
 quadtree, factor-4 refinement, no transition templates), but the flux path,
@@ -245,7 +247,8 @@ sides (`sideInfo(5) = 0`).
 
 ## 4. Interaction with the AMR design
 
-If mortars are accepted, the companion AMR design changes as follows:
+This comparison motivated rebasing the companion AMR design on mortars (the
+"with mortars" column is now the adopted plan):
 
 | Aspect | Conforming (3-refinement) | With mortars (2:1 quadtree) |
 |---|---|---|
