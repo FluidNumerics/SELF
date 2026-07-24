@@ -69,16 +69,19 @@ contains
     integer :: bcids(1:4)
     real(prec) :: maxErr
 
-    call interp%Init(N=controlDegree, &
-                     controlNodeType=GAUSS, &
-                     M=targetDegree, &
-                     targetNodeType=UNIFORM)
-
+    ! The mesh is constructed before the interpolant : the mesh's domain
+    ! decomposition assigns each MPI rank its GPU device, and the interpolant's
+    ! device arrays must be allocated on that device.
     bcids(1:4) = [SELF_BC_PRESCRIBED, & ! South
                   SELF_BC_PRESCRIBED, & ! East
                   SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
     call mesh%SimpleMortarMesh(0.1_prec,bcids)
+
+    call interp%Init(N=controlDegree, &
+                     controlNodeType=GAUSS, &
+                     M=targetDegree, &
+                     targetNodeType=UNIFORM)
 
     call geometry%Init(interp,mesh%nElem)
     call geometry%GenerateFromMesh(mesh)
