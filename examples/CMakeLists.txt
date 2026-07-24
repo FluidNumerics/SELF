@@ -74,4 +74,5 @@ add_fortran_tests (
   "esatmo3d_thermal_bubble.f90"
   "esatmo3d_abc_flow.f90"
   "esatmo2d_thermal_bubble.f90"
+  "bench_lineareuler3d_scaling.f90"
     )

@@ -381,33 +381,58 @@ contains
     integer :: ndof
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh)
 
-    ! populate the solution % extBoundary attribute on nonconforming
-    ! (mortar) interfaces
-    if(this%mesh%nMortars > 0) then
-      call this%solution%MortarExchange(this%mesh)
-    endif
+    ! Post the halo exchange for the prognostic variables; static variables
+    ! (nstepped+1:nvar) are carried in full by the first exchange only, and
+    ! their boundary traces do not change thereafter. The MPI messages are
+    ! in flight while the hooks, boundary conditions, source, and interior
+    ! flux evaluations below execute.
+    call this%solution%SideExchangeStart(this%mesh,this%nstepped)
 
+    ! The hooks and methods between SideExchangeStart and SideExchangeFinish
+    ! must not read extBoundary on interior (rank-shared) faces.
+    ! SetBoundaryCondition writes extBoundary only on physical-boundary
+    ! faces, which are disjoint from the faces the exchange fills.
     call this%PreTendencyHook() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
 
     if(this%gradient_enabled) then
+      ! The BR gradient consumes extBoundary (through the side averages), so
+      ! the exchange must complete before the gradient is computed. The mortar
+      ! exchange runs after SideExchangeFinish : it posts its own messages on
+      ! mesh%decomp%requests and fills extBoundary on nonconforming sides,
+      ! which the side averages also consume.
+      call this%solution%SideExchangeFinish(this%mesh)
+      if(this%mesh%nMortars > 0) then
+        call this%solution%MortarExchange(this%mesh)
+      endif
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
+      call this%SourceMethod() ! User supplied
+      call this%BoundaryFlux() ! User supplied
+      call this%FluxMethod() ! User supplied
+    else
+      ! Interior work overlaps with the halo exchange; BoundaryFlux is the
+      ! first consumer of extBoundary and runs after the exchange completes.
+      ! FluxMethod and BoundaryFlux write disjoint outputs (flux interior
+      ! vs. boundarynormal), so this reordering does not change any
+      ! floating-point results. The mortar exchange runs after
+      ! SideExchangeFinish for the same reason.
+      call this%SourceMethod() ! User supplied
+      call this%FluxMethod() ! User supplied
+      call this%solution%SideExchangeFinish(this%mesh)
+      if(this%mesh%nMortars > 0) then
+        call this%solution%MortarExchange(this%mesh)
+      endif
+      call this%BoundaryFlux() ! User supplied
     endif
-
-    call this%SourceMethod() ! User supplied
-    call this%BoundaryFlux() ! User supplied
 
     ! On mortar interfaces, replace the big side's surface-flux integrand with the
     ! projection of the small sides' integrands so that the interface is conservative
     if(this%mesh%nMortars > 0) then
       call this%flux%MortarFluxCollect(this%mesh)
     endif
-
-    call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)
 

@@ -38,6 +38,17 @@ module SELF_MappedScalar_2D
     type(c_ptr) :: jas_gpu ! jacobian weighted scalar for gradient calculation
     type(c_ptr) :: mortarBuff_gpu = c_null_ptr ! mortar trace staging (lazy allocation)
 
+    ! Packed device buffers and persistent MPI requests for the aggregated
+    ! halo exchange. The side tables are shared across fields and live on
+    ! mesh%decomp; the buffers and requests are per-field (sized by this
+    ! field's variable count) and created lazily on the first exchange.
+    type(c_ptr) :: halo_sendbuf_gpu = c_null_ptr ! packed device send buffer
+    type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
+    integer,allocatable :: halo_reqs(:) ! persistent requests; receives in 1:nnbr, sends in nnbr+1:2*nnbr
+    integer :: halo_nactive = 0 ! variable count baked into halo_reqs
+    integer :: halo_inflight = 0 ! variable count of the exchange in flight (0 = none)
+    logical :: halo_static_done = .false. ! all variables have been exchanged at least once
+
   contains
     procedure,public :: Init => Init_MappedScalar2D
     procedure,public :: Free => Free_MappedScalar2D
@@ -45,7 +56,8 @@ module SELF_MappedScalar_2D
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar2D
 
     procedure,public :: SideExchange => SideExchange_MappedScalar2D
-    procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D
+    procedure,public :: SideExchangeStart => SideExchangeStart_MappedScalar2D
+    procedure,public :: SideExchangeFinish => SideExchangeFinish_MappedScalar2D
 
     procedure,public :: MortarExchange => MortarExchange_MappedScalar2D
     procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedScalar2D
@@ -115,12 +127,8 @@ contains
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
     call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
     call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize = int(interp%N+1,c_size_t)*(interp%M+1)*nelem*nvar*prec
-    call gpuCheck(hipMalloc(this%interpWork,workSize))
     workSize = int(interp%N+1,c_size_t)*(interp%N+1)*nelem*nvar*4*prec
     call gpuCheck(hipMalloc(this%jas_gpu,workSize))
-
-    call hipblasCheck(hipblasCreate(this%blas_handle))
 
     call this%UpdateDevice()
 
@@ -129,6 +137,9 @@ contains
   subroutine Free_MappedScalar2D(this)
     implicit none
     class(MappedScalar2D),intent(inout) :: this
+    ! Local
+    integer :: n,iError
+    logical :: mpiIsFinalized
 
     this%nVar = 0
     this%nElem = 0
@@ -145,13 +156,32 @@ contains
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
-    call gpuCheck(hipFree(this%interpWork))
     call gpuCheck(hipFree(this%jas_gpu))
     if(c_associated(this%mortarBuff_gpu)) then
       call gpuCheck(hipFree(this%mortarBuff_gpu))
       this%mortarBuff_gpu = c_null_ptr
     endif
-    call hipblasCheck(hipblasDestroy(this%blas_handle))
+
+    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
+    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
+    this%halo_sendbuf_gpu = c_null_ptr
+    this%halo_recvbuf_gpu = c_null_ptr
+
+    if(allocated(this%halo_reqs)) then
+      ! Persistent requests can only be released while MPI is still
+      ! initialized; if the mesh (and its MPI finalization) was freed first,
+      ! MPI has reclaimed them already.
+      call MPI_FINALIZED(mpiIsFinalized,iError)
+      if(.not. mpiIsFinalized) then
+        do n = 1,size(this%halo_reqs)
+          call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
+        enddo
+      endif
+      deallocate(this%halo_reqs)
+    endif
+    this%halo_nactive = 0
+    this%halo_inflight = 0
+    this%halo_static_done = .false.
 
   endsubroutine Free_MappedScalar2D
 
@@ -188,87 +218,151 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedScalar2D
 
-  subroutine MPIExchangeAsync_MappedScalar2D(this,mesh)
+  subroutine SideExchangeStart_MappedScalar2D(this,mesh,nactive)
+  !! Begin the aggregated halo exchange and launch the local (same-rank)
+  !! side exchange kernel.
+  !!
+  !! One persistent MPI_Recv_init/MPI_Send_init pair per neighboring rank is
+  !! (re)created the first time this is called (and again if the number of
+  !! exchanged variables changes), then re-armed with MPI_Startall on every
+  !! subsequent exchange; receives are always started before sends.
+  !!
+  !! When `nactive` is provided, only the leading `nactive` variables are
+  !! exchanged - the variable index is the outermost dimension of the
+  !! boundary arrays, so the leading variables form a contiguous prefix.
+  !! The first exchange always carries all variables so that the boundary
+  !! traces of static (non-stepped) variables are valid; static traces do
+  !! not change thereafter, so later exchanges may carry the prefix only.
+  !!
+  !! The matching SideExchangeFinish must be called before extBoundary is
+  !! read on interior faces. Between Start and Finish, callers may perform
+  !! any work that does not read interior-face extBoundary entries; the MPI
+  !! messages and the local exchange kernel launched here proceed
+  !! concurrently with that work.
+    implicit none
+    class(MappedScalar2D),intent(inout) :: this
+    type(Mesh2D),intent(inout) :: mesh
+    integer,intent(in),optional :: nactive
+    ! Local
+    integer :: n,nnbr,npts,cnt,disp,nact
+    integer :: iError
+    integer :: offset
+    integer(c_size_t) :: worksize
+    real(prec),pointer :: sendbuf(:)
+    real(prec),pointer :: recvbuf(:)
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(mesh%decomp%mpiEnabled) then
+
+      if(.not. mesh%decomp%halo_built) then
+        call mesh%decomp%BuildHaloExchange(mesh%sideInfo,mesh%nElem,4)
+      endif
+
+      if(mesh%decomp%halo_nsides > 0) then
+
+        nact = this%nvar
+        if(present(nactive)) then
+          if(this%halo_static_done .and. nactive >= 1 .and. nactive <= this%nvar) then
+            nact = nactive
+          endif
+        endif
+
+        if(.not. c_associated(this%halo_sendbuf_gpu)) then
+          ! Buffers are sized for a full-variable exchange; prefix exchanges
+          ! use the leading portion.
+          worksize = int(mesh%decomp%halo_nsides,c_size_t)* &
+                     int((this%interp%N+1)*this%nvar,c_size_t)*prec
+          call gpuCheck(hipMalloc(this%halo_sendbuf_gpu,worksize))
+          call gpuCheck(hipMalloc(this%halo_recvbuf_gpu,worksize))
+        endif
+
+        ! Pack the send buffer; the pack kernel synchronizes the device
+        ! before returning so the buffer is complete before the sends start.
+        call HaloPack_2D_gpu(this%boundary_gpu,this%halo_sendbuf_gpu, &
+                             mesh%decomp%halo_sides_gpu,this%interp%N,nact, &
+                             this%nelem,mesh%decomp%halo_nsides)
+
+        nnbr = mesh%decomp%halo_nnbr
+
+        if(nact /= this%halo_nactive) then
+          ! (Re)create the persistent requests for this variable count
+          if(allocated(this%halo_reqs)) then
+            do n = 1,size(this%halo_reqs)
+              call MPI_REQUEST_FREE(this%halo_reqs(n),iError)
+            enddo
+            deallocate(this%halo_reqs)
+          endif
+          allocate(this%halo_reqs(1:2*nnbr))
+          npts = (this%interp%N+1)*nact
+          call c_f_pointer(this%halo_sendbuf_gpu,sendbuf,[mesh%decomp%halo_nsides*npts])
+          call c_f_pointer(this%halo_recvbuf_gpu,recvbuf,[mesh%decomp%halo_nsides*npts])
+          do n = 1,nnbr
+            cnt = (mesh%decomp%halo_offset(n+1)-mesh%decomp%halo_offset(n))*npts
+            disp = mesh%decomp%halo_offset(n)*npts
+            call MPI_RECV_INIT(recvbuf(disp+1),cnt,mesh%decomp%mpiPrec, &
+                               mesh%decomp%halo_rank(n),0,mesh%decomp%mpiComm, &
+                               this%halo_reqs(n),iError)
+            call MPI_SEND_INIT(sendbuf(disp+1),cnt,mesh%decomp%mpiPrec, &
+                               mesh%decomp%halo_rank(n),0,mesh%decomp%mpiComm, &
+                               this%halo_reqs(nnbr+n),iError)
+          enddo
+          this%halo_nactive = nact
+        endif
+
+        ! Arm the receives before the sends
+        call MPI_STARTALL(nnbr,this%halo_reqs(1:nnbr),iError)
+        call MPI_STARTALL(nnbr,this%halo_reqs(nnbr+1:2*nnbr),iError)
+
+        this%halo_inflight = nact
+
+      endif
+    endif
+
+    ! The local (same-rank) side exchange runs on the device while the
+    ! aggregated MPI messages are in flight.
+    call SideExchange_2D_gpu(this%extboundary_gpu, &
+                             this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
+
+  endsubroutine SideExchangeStart_MappedScalar2D
+
+  subroutine SideExchangeFinish_MappedScalar2D(this,mesh)
+  !! Complete the aggregated halo exchange started by SideExchangeStart:
+  !! wait on the persistent requests and unpack the received traces into
+  !! extBoundary, applying side flips. The host blocks in MPI_Waitall (which
+  !! also drives MPI progress) while previously launched device kernels
+  !! continue to execute. No-op if no exchange is in flight.
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
     ! Local
-    integer :: e1,s1,e2,s2,ivar
-    integer :: globalSideId,r2,tag
     integer :: iError
-    integer :: msgCount
-    real(prec),pointer :: boundary(:,:,:,:)
-    real(prec),pointer :: extboundary(:,:,:,:)
 
-    msgCount = 0
-    call c_f_pointer(this%boundary_gpu,boundary,[this%interp%N+1,4,this%nelem,this%nvar])
-    call c_f_pointer(this%extboundary_gpu,extboundary,[this%interp%N+1,4,this%nelem,this%nvar])
+    if(this%halo_inflight > 0) then
 
-    do ivar = 1,this%nvar
-      do e1 = 1,this%nElem
-        do s1 = 1,4
+      call MPI_WAITALL(2*mesh%decomp%halo_nnbr,this%halo_reqs, &
+                       MPI_STATUSES_IGNORE,iError)
 
-          e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
-          if(e2 > 0) then
-            r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
+      ! Unpack the received traces into extBoundary, applying side flips
+      call HaloUnpack_2D_gpu(this%halo_recvbuf_gpu,this%extboundary_gpu, &
+                             mesh%decomp%halo_sides_gpu,this%interp%N, &
+                             this%halo_inflight,this%nelem,mesh%decomp%halo_nsides)
 
-            if(r2 /= mesh%decomp%rankId) then
+      if(this%halo_inflight == this%nvar) this%halo_static_done = .true.
+      this%halo_inflight = 0
 
-              s2 = mesh%sideInfo(4,s1,e1)/10
-              globalSideId = abs(mesh%sideInfo(2,s1,e1))
-              ! create unique tag for each side and each variable
-              tag = globalsideid+mesh%nUniqueSides*(ivar-1)
+    endif
 
-              msgCount = msgCount+1
-              call MPI_IRECV(extBoundary(:,s1,e1,ivar), &
-                             (this%interp%N+1), &
-                             mesh%decomp%mpiPrec, &
-                             r2,tag, &
-                             mesh%decomp%mpiComm, &
-                             mesh%decomp%requests(msgCount),iError)
-
-              msgCount = msgCount+1
-              call MPI_ISEND(boundary(:,s1,e1,ivar), &
-                             (this%interp%N+1), &
-                             mesh%decomp%mpiPrec, &
-                             r2,tag, &
-                             mesh%decomp%mpiComm, &
-                             mesh%decomp%requests(msgCount),iError)
-            endif
-          endif
-
-        enddo
-      enddo
-    enddo
-
-    mesh%decomp%msgCount = msgCount
-
-  endsubroutine MPIExchangeAsync_MappedScalar2D
+  endsubroutine SideExchangeFinish_MappedScalar2D
 
   subroutine SideExchange_MappedScalar2D(this,mesh)
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
-    ! Local
-    integer :: offset
 
-    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
-    if(mesh%decomp%mpiEnabled) then
-      call this%MPIExchangeAsync(mesh)
-    endif
-
-    ! Do the side exchange internal to this mpi process
-    call SideExchange_2D_gpu(this%extboundary_gpu, &
-                             this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
-                             mesh%decomp%rankid,offset,this%interp%N,this%nvar,this%nelem)
-
-    if(mesh%decomp%mpiEnabled) then
-      call mesh%decomp%FinalizeMPIExchangeAsync()
-      ! Apply side flips for data exchanged with MPI
-      call ApplyFlip_2D_gpu(this%extboundary_gpu,mesh%sideInfo_gpu, &
-                            mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
-                            offset,this%interp%N,this%nVar,this%nElem)
-    endif
+    call this%SideExchangeStart(mesh)
+    call this%SideExchangeFinish(mesh)
 
   endsubroutine SideExchange_MappedScalar2D
 
@@ -407,26 +501,14 @@ contains
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(c_ptr),intent(out) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
 
     call ContravariantWeight_2D_gpu(this%interior_gpu, &
                                     this%geometry%dsdx%interior_gpu,this%jas_gpu, &
                                     this%interp%N,this%nvar,this%nelem)
 
-    ! From Vector divergence
-    call c_f_pointer(this%jas_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,2*this%nvar,2])
-
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dMatrix_gpu,fc,df, &
-                                    1.0_c_prec,this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    f_p => null()
+    ! Strong-form divergence of the contravariant-weighted field (jas)
+    call VectorDivergence_2D_gpu(this%interp%dMatrix_gpu,this%jas_gpu,df, &
+                                 this%interp%N,2*this%nvar,this%nelem)
 
     call JacobianWeight_2D_gpu(df,this%geometry%J%interior_gpu,this%N,2*this%nVar,this%nelem)
 
@@ -437,26 +519,14 @@ contains
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(c_ptr),intent(inout) :: df
-    ! Local
-    real(prec),pointer :: f_p(:,:,:,:,:)
-    type(c_ptr) :: fc
 
     call ContravariantWeight_2D_gpu(this%interior_gpu, &
                                     this%geometry%dsdx%interior_gpu,this%jas_gpu, &
                                     this%interp%N,this%nvar,this%nelem)
 
-    ! From Vector divergence
-    call c_f_pointer(this%jas_gpu,f_p,[this%interp%N+1,this%interp%N+1,this%nelem,2*this%nvar,2])
-
-    fc = c_loc(f_p(1,1,1,1,1))
-    call self_blas_matrixop_dim1_2d(this%interp%dgMatrix_gpu,fc,df, &
-                                    this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    fc = c_loc(f_p(1,1,1,1,2))
-    call self_blas_matrixop_dim2_2d(this%interp%dgMatrix_gpu,fc,df, &
-                                    1.0_c_prec,this%interp%N,this%interp%N,2*this%nvar,this%nelem,this%blas_handle)
-
-    f_p => null()
+    ! Weak-form (DG) divergence of the contravariant-weighted field (jas)
+    call VectorDivergence_2D_gpu(this%interp%dgMatrix_gpu,this%jas_gpu,df, &
+                                 this%interp%N,2*this%nvar,this%nelem)
 
     ! Do the boundary terms
     call NormalWeight_2D_gpu(this%avgBoundary_gpu, &

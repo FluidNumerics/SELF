@@ -29,7 +29,6 @@ module SELF_Scalar_1D
   use SELF_Constants
   use SELF_Scalar_1D_t
   use SELF_GPU
-  use SELF_GPUBLAS
   use SELF_GPUInterfaces
   use iso_c_binding
 
@@ -38,7 +37,6 @@ module SELF_Scalar_1D
 ! ---------------------- Scalars ---------------------- !
   type,extends(Scalar1D_t),public :: Scalar1D
     character(3) :: backend = "gpu"
-    type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
     type(c_ptr) :: extBoundary_gpu
@@ -107,8 +105,6 @@ contains
 
     call this%UpdateDevice()
 
-    call hipblasCheck(hipblasCreate(this%blas_handle))
-
   endsubroutine Init_Scalar1D
 
   subroutine Free_Scalar1D(this)
@@ -127,7 +123,6 @@ contains
     call gpuCheck(hipFree(this%boundarynormal_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
-    call hipblasCheck(hipblasDestroy(this%blas_handle))
 
   endsubroutine Free_Scalar1D
 
@@ -167,11 +162,11 @@ contains
     implicit none
     class(Scalar1D),intent(inout) :: this
 
-    call self_blas_matrixop_1d(this%interp%bMatrix_gpu, &
-                               this%interior_gpu, &
-                               this%boundary_gpu, &
-                               2,this%N+1, &
-                               this%nvar*this%nelem,this%blas_handle)
+    call MatrixOp_1D_gpu(this%interp%bMatrix_gpu, &
+                         this%interior_gpu, &
+                         this%boundary_gpu, &
+                         2,this%N+1, &
+                         this%nvar*this%nelem)
 
   endsubroutine BoundaryInterp_Scalar1D
 
@@ -180,10 +175,10 @@ contains
     class(Scalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: f
 
-    call self_blas_matrixop_1d(this%interp%iMatrix_gpu, &
-                               this%interior_gpu, &
-                               f,this%M+1,this%N+1, &
-                               this%nvar*this%nelem,this%blas_handle)
+    call MatrixOp_1D_gpu(this%interp%iMatrix_gpu, &
+                         this%interior_gpu, &
+                         f,this%M+1,this%N+1, &
+                         this%nvar*this%nelem)
 
   endsubroutine GridInterp_Scalar1D
 
@@ -192,10 +187,10 @@ contains
     class(Scalar1D),intent(in) :: this
     type(c_ptr),intent(inout) :: df
 
-    call self_blas_matrixop_1d(this%interp%dMatrix_gpu, &
-                               this%interior_gpu, &
-                               df,this%N+1,this%N+1, &
-                               this%nvar*this%nelem,this%blas_handle)
+    call MatrixOp_1D_gpu(this%interp%dMatrix_gpu, &
+                         this%interior_gpu, &
+                         df,this%N+1,this%N+1, &
+                         this%nvar*this%nelem)
 
   endsubroutine Derivative_Scalar1D
 

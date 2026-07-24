@@ -29,7 +29,6 @@ module SELF_Tensor_2D
   use SELF_Constants
   use SELF_Tensor_2D_t
   use SELF_GPU
-  use SELF_GPUBLAS
   use iso_c_binding
   use iso_fortran_env
 
@@ -37,7 +36,6 @@ module SELF_Tensor_2D
 
   type,extends(Tensor2D_t),public :: Tensor2D
     character(3) :: backend = "gpu"
-    type(c_ptr) :: blas_handle
     type(c_ptr) :: interior_gpu
     type(c_ptr) :: boundary_gpu
     type(c_ptr) :: extBoundary_gpu
@@ -95,8 +93,6 @@ contains
     call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
     call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
 
-    call hipblasCheck(hipblasCreate(this%blas_handle))
-
     call this%UpdateDevice()
 
   endsubroutine Init_Tensor2D
@@ -119,7 +115,6 @@ contains
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
-    call hipblasCheck(hipblasDestroy(this%blas_handle))
 
   endsubroutine Free_Tensor2D
 

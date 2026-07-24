@@ -75,13 +75,19 @@ contains
     else
       dtLoc = this%dt
     endif
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateSolution_gpu(this%solution%interior_gpu,this%dsdt%interior_gpu,dtLoc,ndof)
+    ! Fused tendency + Euler update (dSdt = source - fluxDivergence formed in
+    ! registers, no separate CalculateDSDt pass).
+    call UpdateSolution_CalculateDSDt_gpu(this%solution%interior_gpu,this%fluxDivergence%interior_gpu, &
+                                          this%source%interior_gpu,dtLoc,ndof)
 
   endsubroutine UpdateSolution_DGModel3D
 
@@ -92,14 +98,19 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
-                       rk2_a(m),rk2_g(m),this%dt,ndof)
+    ! Fused tendency + RK stage update (no separate CalculateDSDt pass).
+    call UpdateGRK_CalculateDSDt_gpu(this%worksol%interior_gpu,this%solution%interior_gpu, &
+                                     this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                                     rk2_a(m),rk2_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK2_DGModel3D
 
@@ -110,14 +121,19 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
-                       rk3_a(m),rk3_g(m),this%dt,ndof)
+    ! Fused tendency + RK stage update (no separate CalculateDSDt pass).
+    call UpdateGRK_CalculateDSDt_gpu(this%worksol%interior_gpu,this%solution%interior_gpu, &
+                                     this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                                     rk3_a(m),rk3_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK3_DGModel3D
 
@@ -128,14 +144,19 @@ contains
     ! Local
     integer :: ndof
 
-    ndof = this%solution%nvar* &
+    ! The stepped variables occupy the leading nstepped entries of the
+    ! variable dimension (the slowest-varying index of the interior array),
+    ! so restricting ndof to nstepped updates exactly variables 1:nstepped.
+    ndof = this%nstepped* &
            this%solution%nelem* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)* &
            (this%solution%interp%N+1)
 
-    call UpdateGRK_gpu(this%worksol%interior_gpu,this%solution%interior_gpu,this%dsdt%interior_gpu, &
-                       rk4_a(m),rk4_g(m),this%dt,ndof)
+    ! Fused tendency + RK stage update (no separate CalculateDSDt pass).
+    call UpdateGRK_CalculateDSDt_gpu(this%worksol%interior_gpu,this%solution%interior_gpu, &
+                                     this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
+                                     rk4_a(m),rk4_g(m),this%dt,ndof)
 
   endsubroutine UpdateGRK4_DGModel3D
 
@@ -372,35 +393,50 @@ contains
   subroutine CalculateTendency_DGModel3D(this)
     implicit none
     class(DGModel3D),intent(inout) :: this
-    ! Local
-    integer :: ndof
 
     call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh)
 
+    ! Post the halo exchange for the prognostic variables; static variables
+    ! (nstepped+1:nvar) are carried in full by the first exchange only, and
+    ! their boundary traces do not change thereafter. The MPI messages are
+    ! in flight while the hooks, boundary conditions, source, and interior
+    ! flux evaluations below execute.
+    call this%solution%SideExchangeStart(this%mesh,this%nstepped)
+
+    ! The hooks and methods between SideExchangeStart and SideExchangeFinish
+    ! must not read extBoundary on interior (rank-shared) faces.
+    ! SetBoundaryCondition writes extBoundary only on physical-boundary
+    ! faces, which are disjoint from the faces the exchange fills.
     call this%PreTendencyHook() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
 
     if(this%gradient_enabled) then
+      ! The BR gradient consumes extBoundary (through the side averages), so
+      ! the exchange must complete before the gradient is computed.
+      call this%solution%SideExchangeFinish(this%mesh)
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
+      call this%SourceMethod() ! User supplied
+      call this%BoundaryFlux() ! User supplied
+      call this%FluxMethod() ! User supplied
+    else
+      ! Interior work overlaps with the halo exchange; BoundaryFlux is the
+      ! first consumer of extBoundary and runs after the exchange completes.
+      ! FluxMethod and BoundaryFlux write disjoint outputs (flux interior
+      ! vs. boundarynormal), so this reordering does not change any
+      ! floating-point results.
+      call this%SourceMethod() ! User supplied
+      call this%FluxMethod() ! User supplied
+      call this%solution%SideExchangeFinish(this%mesh)
+      call this%BoundaryFlux() ! User supplied
     endif
-
-    call this%SourceMethod() ! User supplied
-    call this%BoundaryFlux() ! User supplied
-    call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)
 
-    ndof = this%solution%nvar* &
-           this%solution%nelem* &
-           (this%solution%interp%N+1)* &
-           (this%solution%interp%N+1)* &
-           (this%solution%interp%N+1)
-
-    call CalculateDSDt_gpu(this%fluxDivergence%interior_gpu,this%source%interior_gpu, &
-                           this%dsdt%interior_gpu,ndof)
+    ! The tendency (source - fluxDivergence) is formed inside the fused RK/Euler
+    ! update kernels (UpdateGRK_CalculateDSDt_gpu / UpdateSolution_CalculateDSDt_gpu),
+    ! so there is no separate CalculateDSDt pass here.
 
   endsubroutine CalculateTendency_DGModel3D
 

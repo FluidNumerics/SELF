@@ -69,16 +69,6 @@ module SELF_GPUInterfaces
     endsubroutine Divergence_2D_gpu
   endinterface
 
-  interface
-    subroutine Divergence_3D_gpu(f,df,dmat,N,nVar,nEl) &
-      bind(c,name="Divergence_3D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: f,df,dmat
-      integer(c_int),value :: N,nVar,nEl
-    endsubroutine Divergence_3D_gpu
-  endinterface
-
   ! MappedData
 
   ! Model
@@ -112,6 +102,31 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    ! Fused tendency (source - fluxDivergence) + low-storage RK stage update,
+    ! replacing CalculateDSDt_gpu + UpdateGRK_gpu.
+    subroutine UpdateGRK_CalculateDSDt_gpu(grk,solution,fluxDivergence,source,rk_a,rk_g,dt,ndof) &
+      bind(c,name="UpdateGRK_CalculateDSDt_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: grk,solution,fluxDivergence,source
+      real(c_prec),value :: rk_a,rk_g,dt
+      integer(c_int),value :: ndof
+    endsubroutine UpdateGRK_CalculateDSDt_gpu
+  endinterface
+
+  interface
+    ! Fused tendency + Euler update, replacing CalculateDSDt_gpu + UpdateSolution_gpu.
+    subroutine UpdateSolution_CalculateDSDt_gpu(solution,fluxDivergence,source,dt,ndof) &
+      bind(c,name="UpdateSolution_CalculateDSDt_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      type(c_ptr),value :: solution,fluxDivergence,source
+      real(c_prec),value :: dt
+      integer(c_int),value :: ndof
+    endsubroutine UpdateSolution_CalculateDSDt_gpu
+  endinterface
+
+  interface
     subroutine AccumulateField_gpu(a,b,ndof) bind(c,name="AccumulateField_gpu")
       use iso_c_binding
       use SELF_Constants
@@ -135,16 +150,6 @@ module SELF_GPUInterfaces
       type(c_ptr),value :: extboundary,boundary,sideinfo,elemToRank
       integer(c_int),value :: rankId,offset,N,nVar,nEl
     endsubroutine SideExchange_2D_gpu
-  endinterface
-
-  interface
-    subroutine ApplyFlip_2D_gpu(extBoundary,sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="ApplyFlip_2D_gpu")
-      use iso_c_binding
-      implicit none
-      type(c_ptr),value :: extBoundary,sideInfo,elemToRank
-      integer(c_int),value :: rankId,offset,N,nVar,nEl
-    endsubroutine ApplyFlip_2D_gpu
   endinterface
 
   interface
@@ -220,13 +225,43 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
-    subroutine ApplyFlip_3D_gpu(extBoundary,sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
-      bind(c,name="ApplyFlip_3D_gpu")
+    subroutine HaloPack_2D_gpu(boundary,sendbuf,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloPack_2D_gpu")
       use iso_c_binding
       implicit none
-      type(c_ptr),value :: extBoundary,sideInfo,elemToRank
-      integer(c_int),value :: rankId,offset,N,nVar,nEl
-    endsubroutine ApplyFlip_3D_gpu
+      type(c_ptr),value :: boundary,sendbuf,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloPack_2D_gpu
+  endinterface
+
+  interface
+    subroutine HaloUnpack_2D_gpu(recvbuf,extboundary,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloUnpack_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: recvbuf,extboundary,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloUnpack_2D_gpu
+  endinterface
+
+  interface
+    subroutine HaloPack_3D_gpu(boundary,sendbuf,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloPack_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: boundary,sendbuf,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloPack_3D_gpu
+  endinterface
+
+  interface
+    subroutine HaloUnpack_3D_gpu(recvbuf,extboundary,halosides,n,nvar,nel,nhalo) &
+      bind(c,name="HaloUnpack_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: recvbuf,extboundary,halosides
+      integer(c_int),value :: n,nvar,nel,nhalo
+    endsubroutine HaloUnpack_3D_gpu
   endinterface
 
   interface
@@ -237,6 +272,18 @@ module SELF_GPUInterfaces
       type(c_ptr),value :: bmatrix,qweights,bf,df
       integer(c_int),value :: N,nvar,nel
     endsubroutine DG_BoundaryContribution_3D_gpu
+  endinterface
+
+  interface
+    ! Boundary contribution with the Jacobian weight (/jacobian) folded into the
+    ! same pass -- replaces DG_BoundaryContribution_3D_gpu + JacobianWeight_3D_gpu.
+    subroutine DG_BoundaryContribution_JacobianWeight_3D_gpu(bmatrix,qweights,bf,df,jacobian,N,nvar,nel) &
+      bind(c,name="DG_BoundaryContribution_JacobianWeight_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: bmatrix,qweights,bf,df,jacobian
+      integer(c_int),value :: N,nvar,nel
+    endsubroutine DG_BoundaryContribution_JacobianWeight_3D_gpu
   endinterface
 
   interface
@@ -309,6 +356,95 @@ module SELF_GPUInterfaces
       type(c_ptr),value :: fbn,jacobian,bmatrix,qweights,df
       integer(c_int),value :: N,nvar,nel
     endsubroutine ECDGSurfaceContribution_3D_gpu
+  endinterface
+
+  ! MatrixMultiply : hand-written tensor-product contraction kernels that
+  ! replace the cuBLAS/hipBLAS matrix operators (see SELF_MatrixMultiply.cpp).
+
+  interface
+    subroutine MatrixOp_1D_gpu(A,f,Af,opArows,opAcols,ncol) &
+      bind(c,name="MatrixOp_1D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,Af
+      integer(c_int),value :: opArows,opAcols,ncol
+    endsubroutine MatrixOp_1D_gpu
+  endinterface
+
+  interface
+    subroutine GridInterp_2D_gpu(A,f,fInterp,N,M,nVar,nEl) &
+      bind(c,name="GridInterp_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,fInterp
+      integer(c_int),value :: N,M,nVar,nEl
+    endsubroutine GridInterp_2D_gpu
+  endinterface
+
+  interface
+    subroutine GridInterp_3D_gpu(A,f,fInterp,N,M,nVar,nEl) &
+      bind(c,name="GridInterp_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,fInterp
+      integer(c_int),value :: N,M,nVar,nEl
+    endsubroutine GridInterp_3D_gpu
+  endinterface
+
+  interface
+    subroutine ScalarGradient_2D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="ScalarGradient_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine ScalarGradient_2D_gpu
+  endinterface
+
+  interface
+    subroutine ScalarGradient_3D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="ScalarGradient_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine ScalarGradient_3D_gpu
+  endinterface
+
+  interface
+    subroutine VectorDivergence_2D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="VectorDivergence_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine VectorDivergence_2D_gpu
+  endinterface
+
+  interface
+    subroutine VectorDivergence_3D_gpu(A,f,df,N,nVar,nEl) &
+      bind(c,name="VectorDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: A,f,df
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine VectorDivergence_3D_gpu
+  endinterface
+
+  interface
+    ! Fused contravariant-projection + interior divergence for 3-D mapped
+    ! vectors. Handles the high-N LDS-overflow case internally (falls back to the
+    ! two-kernel projection + divergence path), so callers use it unconditionally.
+    ! When jacobian is non-null the /J weight is folded into the epilogue (used by
+    ! the strong-form path); pass c_null_ptr for the DG path (which applies /J in
+    ! DG_BoundaryContribution_JacobianWeight_3D_gpu after the boundary terms).
+    subroutine MappedContravariantDivergence_3D_gpu(dsdx,A,f,df,jacobian,N,nVar,nEl) &
+      bind(c,name="MappedContravariantDivergence_3D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: dsdx,A,f,df,jacobian
+      integer(c_int),value :: N,nVar,nEl
+    endsubroutine MappedContravariantDivergence_3D_gpu
   endinterface
 
 endmodule SELF_GPUInterfaces

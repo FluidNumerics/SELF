@@ -29,7 +29,6 @@ module SELF_MappedVector_2D
   use SELF_MappedVector_2D_t
   use SELF_GPU
   use SELF_GPUInterfaces
-  use SELF_GPUBLAS
   use iso_c_binding
 
   implicit none
@@ -37,6 +36,13 @@ module SELF_MappedVector_2D
   type,extends(MappedVector2D_t),public :: MappedVector2D
 
     type(c_ptr) :: mortarBuff_gpu = c_null_ptr ! mortar trace staging (lazy allocation)
+
+    ! Packed device buffers for the aggregated MPI halo exchange. The side
+    ! tables are shared across fields and live on mesh%decomp; the buffers
+    ! are per-field (sized for 2*nvar variables, since both vector components
+    ! are exchanged) and allocated lazily on the first exchange.
+    type(c_ptr) :: halo_sendbuf_gpu = c_null_ptr ! packed device send buffer
+    type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
 
   contains
     procedure,public :: Free => Free_MappedVector2D
@@ -78,7 +84,13 @@ contains
       call gpuCheck(hipFree(this%mortarBuff_gpu))
       this%mortarBuff_gpu = c_null_ptr
     endif
+
     call Free_Vector2D(this)
+
+    if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
+    if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
+    this%halo_sendbuf_gpu = c_null_ptr
+    this%halo_recvbuf_gpu = c_null_ptr
 
   endsubroutine Free_MappedVector2D
 
@@ -119,58 +131,60 @@ contains
   endsubroutine SetInteriorFromEquation_MappedVector2D
 
   subroutine MPIExchangeAsync_MappedVector2D(this,mesh)
+  !! Post the aggregated halo exchange: one MPI_Irecv/MPI_Isend pair per
+  !! neighboring rank, carrying every (side,variable,component) boundary
+  !! trace shared with that rank in a single packed device buffer. The
+  !! boundary array is laid out with the component index outermost, so the
+  !! pack/unpack kernels treat the vector as 2*nvar scalar variables. Packed
+  !! buffers are allocated on first use; the shared side tables are built by
+  !! SideExchange before this is called.
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
     ! Local
-    integer :: e1,s1,e2,s2,ivar,idir
-    integer :: globalSideId,r2,tag
+    integer :: n,npts,cnt,disp
     integer :: iError
     integer :: msgCount
-    real(prec),pointer :: boundary(:,:,:,:,:)
-    real(prec),pointer :: extboundary(:,:,:,:,:)
+    integer(c_size_t) :: worksize
+    real(prec),pointer :: sendbuf(:)
+    real(prec),pointer :: recvbuf(:)
+
+    npts = (this%interp%N+1)*2*this%nvar
+
+    if(.not. c_associated(this%halo_sendbuf_gpu)) then
+      worksize = int(mesh%decomp%halo_nsides,c_size_t)* &
+                 int(npts,c_size_t)*prec
+      call gpuCheck(hipMalloc(this%halo_sendbuf_gpu,worksize))
+      call gpuCheck(hipMalloc(this%halo_recvbuf_gpu,worksize))
+    endif
+
+    call HaloPack_2D_gpu(this%boundary_gpu,this%halo_sendbuf_gpu, &
+                         mesh%decomp%halo_sides_gpu,this%interp%N,2*this%nvar, &
+                         this%nelem,mesh%decomp%halo_nsides)
+
+    call c_f_pointer(this%halo_sendbuf_gpu,sendbuf,[mesh%decomp%halo_nsides*npts])
+    call c_f_pointer(this%halo_recvbuf_gpu,recvbuf,[mesh%decomp%halo_nsides*npts])
 
     msgCount = 0
-    call c_f_pointer(this%boundary_gpu,boundary,[this%interp%N+1,4,this%nelem,this%nvar,2])
-    call c_f_pointer(this%extboundary_gpu,extboundary,[this%interp%N+1,4,this%nelem,this%nvar,2])
+    do n = 1,mesh%decomp%halo_nnbr
 
-    do idir = 1,2
-      do ivar = 1,this%nvar
-        do e1 = 1,this%nElem
-          do s1 = 1,4
+      cnt = (mesh%decomp%halo_offset(n+1)-mesh%decomp%halo_offset(n))*npts
+      disp = mesh%decomp%halo_offset(n)*npts
 
-            e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
-            if(e2 > 0) then
-              r2 = mesh%decomp%elemToRank(e2) ! Neighbor Rank
+      msgCount = msgCount+1
+      call MPI_IRECV(recvbuf(disp+1),cnt, &
+                     mesh%decomp%mpiPrec, &
+                     mesh%decomp%halo_rank(n),0, &
+                     mesh%decomp%mpiComm, &
+                     mesh%decomp%requests(msgCount),iError)
 
-              if(r2 /= mesh%decomp%rankId) then
+      msgCount = msgCount+1
+      call MPI_ISEND(sendbuf(disp+1),cnt, &
+                     mesh%decomp%mpiPrec, &
+                     mesh%decomp%halo_rank(n),0, &
+                     mesh%decomp%mpiComm, &
+                     mesh%decomp%requests(msgCount),iError)
 
-                s2 = mesh%sideInfo(4,s1,e1)/10
-                globalSideId = abs(mesh%sideInfo(2,s1,e1))
-                ! create unique tag for each side and each variable
-                tag = globalsideid+mesh%nUniqueSides*(ivar-1+this%nvar*(idir-1))
-
-                msgCount = msgCount+1
-                call MPI_IRECV(extBoundary(:,s1,e1,ivar,idir), &
-                               (this%interp%N+1), &
-                               mesh%decomp%mpiPrec, &
-                               r2,tag, &
-                               mesh%decomp%mpiComm, &
-                               mesh%decomp%requests(msgCount),iError)
-
-                msgCount = msgCount+1
-                call MPI_ISEND(boundary(:,s1,e1,ivar,idir), &
-                               (this%interp%N+1), &
-                               mesh%decomp%mpiPrec, &
-                               r2,tag, &
-                               mesh%decomp%mpiComm, &
-                               mesh%decomp%requests(msgCount),iError)
-              endif
-            endif
-
-          enddo
-        enddo
-      enddo
     enddo
 
     mesh%decomp%msgCount = msgCount
@@ -187,20 +201,28 @@ contains
     offset = mesh%decomp%offsetElem(mesh%decomp%rankid+1)
 
     if(mesh%decomp%mpiEnabled) then
-      call this%MPIExchangeAsync(mesh)
+      if(.not. mesh%decomp%halo_built) then
+        call mesh%decomp%BuildHaloExchange(mesh%sideInfo,mesh%nElem,4)
+      endif
+      if(mesh%decomp%halo_nsides > 0) then
+        call this%MPIExchangeAsync(mesh)
+      endif
     endif
 
-    ! Do the side exchange internal to this mpi process
+    ! The local (same-rank) side exchange runs on the device while the
+    ! aggregated MPI messages are in flight.
     call SideExchange_2D_gpu(this%extboundary_gpu, &
                              this%boundary_gpu,mesh%sideinfo_gpu,mesh%decomp%elemToRank_gpu, &
                              mesh%decomp%rankid,offset,this%interp%N,2*this%nvar,this%nelem)
 
     if(mesh%decomp%mpiEnabled) then
-      call mesh%decomp%FinalizeMPIExchangeAsync()
-      ! Apply side flips for data exchanged with MPI
-      call ApplyFlip_2D_gpu(this%extboundary_gpu,mesh%sideInfo_gpu, &
-                            mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
-                            offset,this%interp%N,2*this%nVar,this%nElem)
+      if(mesh%decomp%halo_nsides > 0) then
+        call mesh%decomp%FinalizeMPIExchangeAsync()
+        ! Unpack the received traces into extBoundary, applying side flips
+        call HaloUnpack_2D_gpu(this%halo_recvbuf_gpu,this%extboundary_gpu, &
+                               mesh%decomp%halo_sides_gpu,this%interp%N,2*this%nvar, &
+                               this%nelem,mesh%decomp%halo_nsides)
+      endif
     endif
 
   endsubroutine SideExchange_MappedVector2D
