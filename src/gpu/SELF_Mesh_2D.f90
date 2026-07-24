@@ -34,6 +34,7 @@ module SELF_Mesh_2D
 
   type,extends(Mesh2D_t) :: Mesh2D
     type(c_ptr) :: sideInfo_gpu
+    type(c_ptr) :: mortarInfo_gpu = c_null_ptr
 
   contains
     procedure,public :: Init => Init_Mesh2D
@@ -120,9 +121,16 @@ contains
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
+    if(associated(this%mortarInfo)) deallocate(this%mortarInfo)
+    this%mortarInfo => null()
+    this%nMortars = 0
     call this%decomp%Free()
 
     call gpuCheck(hipFree(this%sideInfo_gpu))
+    if(c_associated(this%mortarInfo_gpu)) then
+      call gpuCheck(hipFree(this%mortarInfo_gpu))
+      this%mortarInfo_gpu = c_null_ptr
+    endif
 
   endsubroutine Free_Mesh2D
 
@@ -131,6 +139,16 @@ contains
     class(Mesh2D),intent(inout) :: this
 
     call gpuCheck(hipMemcpy(this%sideInfo_gpu,c_loc(this%sideInfo),sizeof(this%sideInfo),hipMemcpyHostToDevice))
+
+    ! The mortar table is created by the mesh constructors after Init; allocate its
+    ! device copy on first upload.
+    if(this%nMortars > 0) then
+      if(.not. c_associated(this%mortarInfo_gpu)) then
+        call gpuCheck(hipMalloc(this%mortarInfo_gpu,sizeof(this%mortarInfo)))
+      endif
+      call gpuCheck(hipMemcpy(this%mortarInfo_gpu,c_loc(this%mortarInfo), &
+                              sizeof(this%mortarInfo),hipMemcpyHostToDevice))
+    endif
 
   endsubroutine UpdateDevice_Mesh2D
 

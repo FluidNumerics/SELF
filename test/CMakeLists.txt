@@ -98,6 +98,9 @@ add_fortran_tests (
     "mappedvectordgdivergence_2d_constant.f90"
     "mappedvectordgdivergence_2d_linear.f90"
     "mappedvectordgdivergence_2d_linear_structuredmesh.f90"
+    "mortarprojection_identity.f90"
+    "mappedscalarmortarexchange_2d_linear.f90"
+    "mappedvectordgdivergence_2d_mortar.f90"
     "mappedscalargradient_3d_constant.f90"
     "mappedscalargradient_3d_linear.f90"
     "mappedscalarbrgradient_3d_constant.f90"
@@ -135,6 +138,7 @@ add_fortran_tests (
     "advection_diffusion_2d_rk3_pickup.f90"
     "advection_diffusion_2d_rk4.f90"
     "advection_diffusion_2d_nostress.f90"
+    "advection_diffusion_2d_mortar.f90"
     "advection_diffusion_3d_euler.f90"
     "advection_diffusion_3d_rk2.f90"
     "advection_diffusion_3d_rk3.f90"
@@ -144,6 +148,7 @@ add_fortran_tests (
     "linear_shallow_water_2d_nonormalflow.f90"
     "linear_shallow_water_2d_radiation.f90"
     "lineareuler2d_pml_absorption.f90"
+    "lineareuler2d_mortar_soundwave.f90"
     "twopointvectordivergence_2d_constant.f90"
     "twopointvectordivergence_2d_linear.f90"
     "twopointvectordivergence_2d_rotational.f90"
@@ -155,6 +160,7 @@ add_fortran_tests (
     "mappedtwopointvectordivergence_3d_linear.f90"
     "ec_advection_2d_rk3.f90"
     "ec_advection_2d_entropy_conservation.f90"
+    "ec_advection_2d_mortar_guard.f90"
     "ec_advection_3d_rk3.f90"
     "ec_advection_3d_entropy_conservation.f90"
     "esatmo3d_motionless.f90"
@@ -183,6 +189,7 @@ set_tests_properties(
     points_dirac_delta_3d_ndim_mismatch
     points_dirac_delta_2d_nvar_mismatch
     points_dirac_delta_3d_nvar_mismatch
+    ec_advection_2d_mortar_guard
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
@@ -193,6 +200,10 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_3d_linear_sideexchange_mpi.f90"
                        "mappedvectordgdivergence_3d_linear_structuredmesh_mpi.f90"
                        "mappedscalarbrgradient_3d_linear_mpi.f90"
+                       "mappedscalarmortarexchange_2d_linear_mpi.f90"
+                       "mappedvectordgdivergence_2d_mortar_mpi.f90"
+                       "lineareuler2d_mortar_soundwave_mpi.f90"
+                       "advection_diffusion_2d_mortar_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"
                        "advection_diffusion_2d_rk3_pickup_mpi.f90"
                        "advection_diffusion_3d_rk3_mpi.f90"
