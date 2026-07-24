@@ -53,10 +53,13 @@ contains
 
     integer,parameter :: controlDegree = 7
     integer,parameter :: targetDegree = 15
+! The identities hold to roundoff by construction; a tight tolerance guards
+! against partial regressions (e.g. degraded conditioning in the projection
+! solve) that a looser tolerance would absorb.
 #ifdef DOUBLE_PRECISION
-    real(prec),parameter :: tolerance = 10.0_prec**(-7)
+    real(prec),parameter :: tolerance = 10.0_prec**(-12)
 #else
-    real(prec),parameter :: tolerance = 10.0_prec**(-3)
+    real(prec),parameter :: tolerance = 10.0_prec**(-4)
 #endif
     type(Lagrange),target :: interp
     integer :: nodeType,i,ii,jj,k

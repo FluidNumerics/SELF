@@ -37,12 +37,12 @@ program test
 contains
 
   integer function mappedvectordgdivergence_2d_mortar_mpi() result(r)
-    !! Computes the weak-form (DG) divergence of f = (x,y) on the three-element
-    !! SimpleMortarMesh. The surface-flux integrands on the mortar's small sides are
+    !! Computes the weak-form (DG) divergence of f = (x,y) on the six-element
+    !! DoubleMortarMesh (two mortar interfaces, one with a flip = 1 sub-edge). The surface-flux integrands on the mortar's small sides are
     !! built from side-averaged states (as in the DG models' BoundaryFlux), the big
     !! side's integrand is replaced by MortarFluxCollect, and the divergence must
     !! equal 2 to roundoff on all elements. The test also checks the discrete
-    !! conservation identity on the mortar interface : the big side's surface
+    !! conservation identity on each mortar interface : the big side's surface
     !! integral must equal minus the sum of the small sides' surface integrals.
     use SELF_Constants
     use SELF_Lagrange
@@ -81,7 +81,7 @@ contains
                   SELF_BC_PRESCRIBED, & ! East
                   SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
-    call mesh%SimpleMortarMesh(0.1_prec,bcids)
+    call mesh%DoubleMortarMesh(0.1_prec,bcids)
 
     call interp%Init(N=controlDegree, &
                      controlNodeType=GAUSS, &

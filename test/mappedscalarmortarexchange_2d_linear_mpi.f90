@@ -37,13 +37,14 @@ program test
 contains
 
   integer function mappedscalarmortarexchange_2d_linear_mpi() result(r)
-    !! Fills a MappedScalar2D with a linear function on the three-element
-    !! SimpleMortarMesh and verifies that MortarExchange reproduces the exact trace in
-    !! extBoundary on every side of the 2:1 mortar interface. Restriction of the big
-    !! side's trace to the sub-edges is exact for polynomials of the control degree,
-    !! and the L2 projection of the (globally polynomial) small-side traces recovers
-    !! the big side's trace, so extBoundary must match boundary to roundoff on all
-    !! mortar sides.
+    !! Fills a MappedScalar2D with degree-N polynomial fields (distinct per variable)
+    !! on the six-element DoubleMortarMesh and verifies that MortarExchange reproduces
+    !! the exact trace in extBoundary on every side of both 2:1 mortar interfaces,
+    !! including the interface whose second sub-edge has flip = 1. Restriction of the
+    !! big side's trace to the sub-edges is exact for polynomials of the control
+    !! degree, and the L2 projection of the (globally polynomial) small-side traces
+    !! recovers the big side's trace, so extBoundary must match boundary to roundoff
+    !! on all mortar sides.
     use SELF_Constants
     use SELF_Lagrange
     use SELF_Mesh_2D
@@ -76,7 +77,7 @@ contains
                   SELF_BC_PRESCRIBED, & ! East
                   SELF_BC_PRESCRIBED, & ! North
                   SELF_BC_PRESCRIBED] ! West
-    call mesh%SimpleMortarMesh(0.1_prec,bcids)
+    call mesh%DoubleMortarMesh(0.1_prec,bcids)
 
     call interp%Init(N=controlDegree, &
                      controlNodeType=GAUSS, &
@@ -89,9 +90,11 @@ contains
     call f%Init(interp,nvar,mesh%nelem)
     call f%AssociateGeometry(geometry)
 
-    do ivar = 1,nvar
-      call f%SetEquation(ivar,'f = 1.7 + 2.5*x - 1.1*y')
-    enddo
+    ! Distinct full-degree fields per variable guard against variable-index
+    ! cross-contamination in the exchange; both lie in the degree-N tensor space,
+    ! so the mortar operators are exact on their traces.
+    call f%SetEquation(1,'f = (1.0 + 0.8*x + 0.5*y)^7')
+    call f%SetEquation(2,'f = (1.0 - 0.6*x + 0.7*y)^7')
     call f%SetInteriorFromEquation(geometry,0.0_prec)
 
     call f%BoundaryInterp()

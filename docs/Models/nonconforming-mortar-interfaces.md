@@ -56,8 +56,12 @@ flip recovery, and boundary-condition mapping all skip them automatically;
 
 ### Building a nonconforming mesh
 
-The built-in constructor `SimpleMortarMesh` creates the smallest useful example — one
-2dx-by-2dx element joined to two dx-by-dx elements across a single mortar interface:
+Two built-in constructors create nonconforming meshes. `SimpleMortarMesh` is the
+smallest useful example — one 2dx-by-2dx element joined to two dx-by-dx elements
+across a single mortar interface — and `DoubleMortarMesh` is a six-element,
+two-mortar configuration whose second mortar includes a reversed-orientation
+(`flip = 1`) small element, used by the validation suite to exercise every trace
+reorientation and MPI message pattern:
 
 ```fortran
 type(Mesh2D),target :: mesh
@@ -105,12 +109,18 @@ template).
 
 | Test | What it checks |
 |---|---|
-| `mortarprojection_identity` | Operator identities: \(\sum_k P_k R_k = I\) and discrete conservation, Gauss and Gauss–Lobatto |
-| `mappedscalarmortarexchange_2d_linear` (+`_mpi`) | Exact trace recovery in `extBoundary` on all mortar sides for a linear field |
-| `mappedvectordgdivergence_2d_mortar` (+`_mpi`) | DG divergence of \(\vec{f}=(x,y)\) equals 2 to roundoff across the mortar; interface conservation defect at roundoff |
+| `mortarprojection_identity` | Operator identities: \(\sum_k P_k R_k = I\) and discrete conservation, Gauss and Gauss–Lobatto, to a near-roundoff tolerance |
+| `mappedscalarmortarexchange_2d_linear` (+`_mpi`) | Exact trace recovery in `extBoundary` on all sides of both mortars of the `DoubleMortarMesh` (including the `flip = 1` sub-edge), with distinct degree-N fields per variable |
+| `mappedvectordgdivergence_2d_mortar` (+`_mpi`) | DG divergence of \(\vec{f}=(x,y)\) equals 2 to roundoff across both mortars; per-interface conservation defect at roundoff |
 | `lineareuler2d_mortar_soundwave` (+`_mpi`) | Acoustic pulse crossing the interface: stability (entropy non-increase) and NaN-free evolution |
+| `advection_diffusion_2d_mortar` (+`_mpi`) | Parabolic (BR1) terms across mortars: the solution-gradient mortar exchange and project-then-average interface gradient, with entropy non-increase |
+| `ec_advection_2d_mortar_guard` | EC split-form models abort on nonconforming meshes (registered `WILL_FAIL`) |
 
-The `_mpi` variants run on two ranks with the mortar straddling the rank boundary.
+The `_mpi` variants run on two ranks. On the `DoubleMortarMesh`, mortar 1 splits
+big/small elements across the rank boundary while mortar 2 places both small
+elements remote from the big element's rank, so every mortar message pattern —
+including independent delivery of the big-side trace to each sub-edge — is
+exercised.
 
 ## References
 
