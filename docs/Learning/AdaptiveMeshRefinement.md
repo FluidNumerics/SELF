@@ -21,9 +21,9 @@ layer that adaptive refinement needs is already in place and tested.
 | Refinement **trigger** (Legendre modal-decay indicator, CPU + GPU) | **Implemented** |
 | `h`-refinement primitives (isoparametric subdivision + refined connectivity) | **Implemented** |
 | Uniform `h`-refinement (conforming, serial) | **Implemented** |
-| Adaptive (flagged) subdivision with hanging nodes + coarsening | Designed (Stages 2b / 4) |
+| Adaptive quad-forest (flagged refine / coarsen, level tracking) | **Implemented** |
 | Solution transfer (prolongation / restriction) | Designed (Stage 3) |
-| Mortar regeneration + 2:1 balancing | Designed (Stage 4) |
+| Face-neighbour queries + 2:1 balancing + hanging-node/mortar emission | Designed (Stage 4) |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
@@ -188,9 +188,34 @@ conserves the domain area (integral of the Jacobian) to roundoff, keeps every Ja
 positive, produces reciprocal interior connectivity, and doubles the physical-boundary side
 count.
 
-The next Stage-2 sub-step (2b) adds the adaptive path: a quad-forest that subdivides only
-flagged leaves and tracks refinement levels, feeding the Stage-4 mortar regeneration and 2:1
-balancing needed once neighboring elements differ in level (hanging nodes).
+## 2.6 Adaptive quad-forest (implemented)
+
+`SELF_QuadTreeMesh_2D` provides the adaptive mesh-mutation data structure of Stage 2b. Each base
+element is the root of a quadtree; `QuadTreeMesh2D` stores a growable node pool (level, parent,
+per-node child pointers, originating root) plus the base geometry, and maintains the active leaf
+set.
+
+- `Init(mesh)` seeds one root per base element (all leaves at level 0).
+- `AdaptFromFlags(flag)` consumes a per-leaf flag array **indexed exactly like the Stage-1
+  indicator's `flag(:)`** (`+1` refine, `-1` coarsen, `0` keep): flagged leaves are subdivided
+  into four children, and a family of four leaf siblings is merged back only when all four are
+  flagged coarsen (the standard de-refinement rule). Refine and coarsen are resolved against the
+  same pre-adaptation snapshot so they never interfere.
+- `LeafCoords(i, geomInterp, coords)` regenerates any leaf's physical geometry by repeated exact
+  isoparametric subdivision of its root along the quadtree path (reusing the §2.5 primitive), so
+  the forest never stores redundant coordinates.
+- Node storage grows by amortized doubling; the leaf set is always recovered by traversal from
+  the roots, which makes nodes orphaned by coarsening invisible without an explicit free list.
+
+This wires directly to the trigger: `indicator%Estimate(solution, ivar)` then
+`forest%AdaptFromFlags(indicator%flag)` performs one adaptation step. What the forest deliberately
+does **not** yet do is answer *face-neighbour* queries, enforce 2:1 balance, or emit a
+solver-ready `Mesh2D_t` with hanging-node mortars - an adaptively refined forest is generally
+nonconforming, and turning it into a runnable mesh is Stage 4.
+
+The forest is unit-tested (refine/coarsen leaf and level bookkeeping, the four-sibling coarsening
+guard, amortized capacity growth, and leaf geometry matching direct subdivision at multiple
+levels).
 
 ---
 
@@ -238,13 +263,13 @@ relies on. The following stages are each independently reviewable and testable.
   `RefineConnectivity`). Metric terms/Jacobians for children come from the existing geometry
   routines with the refined `nodeCoords` as input — **no change to the geometry algorithms**.
 - **(done)** Uniform (conforming) refinement end to end (`UniformRefineMesh`), serial.
-- **(2b, next)** Add an explicit **quadtree / forest-of-quadtrees** parent–child structure
-  alongside the flat element arrays: each leaf is an active element; adaptive refinement replaces
-  a flagged leaf with four children (each spanning a reference sub-quadrant), coarsening merges
-  four siblings back to their parent.
-- **(2b, next)** Grow the mesh arrays via an amortized-capacity scheme (allocate spare capacity,
-  reallocate in chunks) so refinement does not reallocate every step. Keep the flat solver arrays
-  contiguous by compacting active leaves.
+- **(2b, done)** An explicit **quadtree / forest-of-quadtrees** parent–child structure
+  (`SELF_QuadTreeMesh_2D`): each leaf is an active element; adaptive refinement replaces a flagged
+  leaf with four children (each spanning a reference sub-quadrant), coarsening merges four
+  siblings back to their parent, with amortized-capacity node growth and traversal-based leaf
+  enumeration. Driven directly by the Stage-1 indicator flags via `AdaptFromFlags`.
+- **(next)** Storage compaction: reclaim nodes orphaned by coarsening (currently the node pool
+  grows monotonically).
 
 ### Stage 3 — Solution transfer (prolongation / restriction)
 
@@ -261,6 +286,9 @@ relies on. The following stages are each independently reviewable and testable.
 
 ### Stage 4 — Mortar regeneration and 2:1 balancing
 
+- Add **face-neighbour navigation** on the forest (ascend/descend quadtree search across the base
+  mesh's root connectivity, honouring base side pairings and flips). This is the prerequisite for
+  both balancing and mortar detection and is the natural first piece of Stage 4.
 - After a refine/coarsen sweep, rebuild `mortarInfo` from the tree: every face between elements
   of different levels becomes a 2:1 mortar (the configuration the solver already handles).
 - Enforce **2:1 balance** (no face may separate elements differing by more than one level) by
