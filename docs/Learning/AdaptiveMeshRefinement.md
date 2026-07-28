@@ -24,15 +24,16 @@ layer that adaptive refinement needs is already in place and tested.
 | Adaptive quad-forest (flagged refine / coarsen, level tracking) | **Implemented** |
 | Solution transfer (prolongation / restriction, conservative) | **Implemented** |
 | Forest face-neighbour queries + 2:1 balancing | **Implemented** |
-| Hanging-node / mortar-table + `Mesh2D_t` emission | Designed (Stage 4b) |
+| Hanging-node / mortar-table + `Mesh2D_t` emission | **Implemented** |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
-The trigger and the conforming (uniform) `h`-refinement path are wired into the library today
-(see §2.5). Adaptive refinement with hanging nodes reuses the same subdivision primitive but
-additionally needs the mortar regeneration and 2:1 balancing of Stage 4; dynamic MPI
-re-partitioning is Stage 5. These remain deferred behind this design so each lands as a
-self-contained, reviewable piece.
+The full **serial** adaptive-refinement loop is wired into the library today: flag with the
+Stage-1 indicator, mutate the forest (Stage 2b), transfer the solution (Stage 3), balance and
+emit a runnable nonconforming `Mesh2D_t` (Stage 4). What remains is **scaling** that loop -
+dynamic MPI re-partitioning across ranks (Stage 5) and GPU device re-allocation for a changing
+element count (Stage 6) - each deferred behind this design so it lands as a self-contained,
+reviewable piece.
 
 ---
 
@@ -273,6 +274,39 @@ adaptive refinement that creates a two-level jump is reduced to one level by `Ba
 (rippling into the coarse neighbour); and equal-level leaf-neighbour reciprocity holds across the
 balanced forest.
 
+## 2.9 Mesh emission (implemented) — closing the loop
+
+`SELF_AdaptiveMesh_2D`'s `EmitMesh(forest, baseMesh, outMesh)` turns a 2:1-balanced forest into a
+solver-ready `Mesh2D_t`. Each leaf becomes an element (leaf-list order); for every leaf face the
+Stage-4a `FaceNeighbor` classification drives the emitted connectivity:
+
+- **domain boundary** → `sideInfo(3)=0`, `sideInfo(5)` = the base element's BC id on that side;
+- **same-level leaf** → a conforming interior side (`sideInfo(3)=neighbour`, `(4)=10*side+flip`,
+  a shared global side id);
+- **one-level-finer neighbour** → this leaf is the **big** side of a 2:1 mortar; the two small
+  elements are the finer neighbour node's children on the shared face, with the big edge
+  coordinate `[-1,0]`/`[0,1]` mapped to the correct child through the face flip;
+- **one-level-coarser neighbour** → a **small** side, filled when its big side is processed.
+
+Mortar sides carry `sideInfo(1)=mortar index` and `sideInfo(3)=sideInfo(5)=0`, and the emitted
+`mortarInfo(1:8, :)` follows the exact layout of the hand-built `SimpleMortarMesh` (big elem/side;
+small elem + `10*side+flip` per sub-edge; two sub-edge global side ids), so the existing mortar
+side-exchange, projection, and flux machinery consume it unchanged. Leaf geometry comes from
+`LeafCoords`; the output uses a serial decomposition (Stage 5 will re-partition).
+
+Validated at two levels. A standalone structural test confirms - on an adaptively refined,
+balanced forest - the side classification is exclusive, conforming sides are reciprocal, every
+mortar's big and small sides reference the same mortar index, and (geometrically) each big face is
+exactly tiled by its two small faces. The full-pipeline CI test `test/adaptive_mortar_2d.f90`
+refines a structured mesh, balances, emits the mesh, builds its geometry (strictly positive
+Jacobians; total area equal to the base mesh), and runs the real `SideExchange` + `MortarExchange`
+on a globally linear field: the external trace matches the interior trace to roundoff on every
+conforming **and** 2:1 mortar side - the same criterion the hand-built mortar-mesh tests use,
+now on a mesh produced entirely by the AMR pipeline.
+
+With this, the serial loop closes: `indicator → forest.AdaptFromFlags → (transfer solution) →
+forest.Balance2to1 → EmitMesh` yields a runnable adaptive mesh.
+
 ---
 
 ## 3. Comparison with Trixi.jl
@@ -345,13 +379,12 @@ Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
   quadtree search across the base root connectivity, honouring base side pairings and flips) and
   **2:1 balance** (`Balance2to1`: neighbours more than one level coarser than a leaf are refined,
   rippling to a fixed point). See §2.8.
-- **(4b, next)** After a balanced refine/coarsen sweep, rebuild `mortarInfo` from the tree: every
-  face where `FaceNeighbor` returns a one-level-coarser leaf (or an internal node) becomes a 2:1
-  mortar (the configuration the solver already handles); same-level faces reuse the existing
-  conforming-side connectivity. Emit a solver-ready `Mesh2D_t` (leaf geometry from `LeafCoords`,
-  `sideInfo` for conforming faces, `mortarInfo` for nonconforming faces).
-- Optional **neighbour smoothing** of the trigger flags (avoid isolated refined elements) also
-  belongs here, on top of the balance pass.
+- **(4b, done)** `EmitMesh` (`SELF_AdaptiveMesh_2D`) rebuilds `sideInfo` + `mortarInfo` from the
+  balanced tree and emits a solver-ready `Mesh2D_t`: every face where `FaceNeighbor` sees a
+  finer/coarser neighbour becomes a 2:1 mortar (the configuration the solver already handles);
+  same-level faces are conforming; leaf geometry comes from `LeafCoords`. See §2.9.
+- **(next)** Optional **neighbour smoothing** of the trigger flags (avoid isolated refined
+  elements), on top of the balance pass.
 
 ### Stage 5 — MPI dynamic re-partitioning
 

@@ -69,6 +69,7 @@ module SELF_QuadTreeMesh_2D
     integer,allocatable :: rootNbr(:,:) ! (4,nRoots)
     integer,allocatable :: rootNbrSide(:,:) ! (4,nRoots)
     integer,allocatable :: rootFlip(:,:) ! (4,nRoots)
+    integer,allocatable :: rootBC(:,:) ! (4,nRoots) base boundary-condition id per side
 
     ! ---- Forest node storage (roots occupy node ids 1:nRoots) ----
     integer :: nNodes = 0
@@ -121,11 +122,13 @@ contains
     allocate(this%rootNbr(1:4,1:mesh%nElem))
     allocate(this%rootNbrSide(1:4,1:mesh%nElem))
     allocate(this%rootFlip(1:4,1:mesh%nElem))
+    allocate(this%rootBC(1:4,1:mesh%nElem))
     do r = 1,mesh%nElem
       do s = 1,4
         this%rootNbr(s,r) = mesh%sideInfo(3,s,r)
         this%rootNbrSide(s,r) = mesh%sideInfo(4,s,r)/10
         this%rootFlip(s,r) = mod(mesh%sideInfo(4,s,r),10)
+        this%rootBC(s,r) = mesh%sideInfo(5,s,r)
       enddo
     enddo
 
@@ -158,6 +161,7 @@ contains
     if(allocated(this%rootNbr)) deallocate(this%rootNbr)
     if(allocated(this%rootNbrSide)) deallocate(this%rootNbrSide)
     if(allocated(this%rootFlip)) deallocate(this%rootFlip)
+    if(allocated(this%rootBC)) deallocate(this%rootBC)
     if(allocated(this%level)) deallocate(this%level)
     if(allocated(this%parent)) deallocate(this%parent)
     if(allocated(this%quadrant)) deallocate(this%quadrant)
