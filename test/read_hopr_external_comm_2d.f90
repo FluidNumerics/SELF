@@ -24,65 +24,48 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-program structuredmesh_external_comm_2d
-!! Exercises the externally-managed MPI lifecycle used by Python (mpi4py)
-!! callers: the program initializes MPI itself, hands a duplicated
-!! communicator to StructuredMesh, runs a LinearEuler2D model, frees the
-!! mesh, and verifies SELF did NOT finalize MPI before finalizing itself.
+program read_hopr_external_comm_2d
+!! Reads a HOPr mesh through an externally managed communicator.
+!!
+!! Read_HOPr takes the same optional `comm` as the structured constructors,
+!! but it is the only entry point that forwards the communicator into parallel
+!! HDF5 (h5pset_fapl_mpio_f). That makes it the highest-risk consumer of an
+!! external handle and it had no coverage: a communicator that MPI accepts can
+!! still be rejected -- or silently ignored -- by the HDF5 file access property
+!! list.
+!!
+!! The caller owns the MPI lifecycle here, exactly as mpi4py does.
 
   use self_data
-  use self_LinearEuler2D
+  use SELF_Mesh_2D
   use mpi
 
   implicit none
-  real(prec),parameter :: rho0 = 1.225_prec
-  real(prec),parameter :: rhoprime = 0.01_prec
-  real(prec),parameter :: c = 1.0_prec
-  real(prec),parameter :: Lr = 0.06_prec
-  real(prec),parameter :: x0 = 0.5_prec
-  real(prec),parameter :: y0 = 0.5_prec
-  character(SELF_INTEGRATOR_LENGTH),parameter :: integrator = 'rk3'
-  integer,parameter :: controlDegree = 7
-  integer,parameter :: targetDegree = 15
-  real(prec),parameter :: dt = 2.0_prec*10.0_prec**(-4)
-  real(prec),parameter :: endtime = 5.0_prec*10.0_prec**(-3)
-  real(prec),parameter :: iointerval = 5.0_prec*10.0_prec**(-3)
-  real(prec) :: ef
-  type(LinearEuler2D) :: modelobj
-  type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
-  type(SEMQuad),target :: geometry
-  integer :: bcids(1:4)
+  character(LEN=255) :: WORKSPACE
   integer :: dupComm,dupRank,dupSize
   integer :: cmpResult,ierror
+  integer :: nElemLocal,nElemTotal
   logical :: mpiIsFinalized
 
-  ! The caller owns the MPI lifecycle (mpi4py does exactly this on import).
   call mpi_init(ierror)
   call MPI_Comm_dup(MPI_COMM_WORLD,dupComm,ierror)
-
-  bcids(1:4) = [SELF_BC_NONORMALFLOW, & ! South
-                SELF_BC_NONORMALFLOW, & ! East
-                SELF_BC_NONORMALFLOW, & ! North
-                SELF_BC_NONORMALFLOW] ! West
-
-  call mesh%StructuredMesh(5,5,2,2,0.1_prec,0.1_prec,bcids,comm=dupComm)
-
-  ! The decomposition must be running on the communicator we handed over. A dup
-  ! of MPI_COMM_WORLD has the same size and rank ordering, so rank/size alone
-  ! cannot catch `comm` being dropped -- compare the handles instead. Note that
-  ! a dup is MPI_CONGRUENT with MPI_COMM_WORLD, so the telling check is that the
-  ! decomposition is not *identical* to MPI_COMM_WORLD.
   call MPI_Comm_rank(dupComm,dupRank,ierror)
   call MPI_Comm_size(dupComm,dupSize,ierror)
+
+  call get_environment_variable("WORKSPACE",WORKSPACE)
+  call mesh%Read_HOPr(trim(WORKSPACE)//"/share/mesh/Block2D/Block2D_mesh.h5",comm=dupComm)
+
   call MPI_Comm_compare(mesh%decomp%mpiComm,dupComm,cmpResult,ierror)
   if(cmpResult /= MPI_IDENT .and. cmpResult /= MPI_CONGRUENT) then
-    print*,"Error: mesh decomposition is not using the provided communicator"
+    print*,"Error: Read_HOPr did not use the provided communicator"
     stop 1
   endif
+  ! A dup is MPI_CONGRUENT with MPI_COMM_WORLD, so the check that actually
+  ! detects `comm` being dropped is that the handle is not MPI_COMM_WORLD itself.
   call MPI_Comm_compare(mesh%decomp%mpiComm,MPI_COMM_WORLD,cmpResult,ierror)
   if(cmpResult == MPI_IDENT) then
-    print*,"Error: mesh decomposition fell back to MPI_COMM_WORLD instead of the provided communicator"
+    print*,"Error: Read_HOPr fell back to MPI_COMM_WORLD instead of the provided communicator"
     stop 1
   endif
   if(mesh%decomp%nRanks /= dupSize .or. mesh%decomp%rankId /= dupRank) then
@@ -91,31 +74,19 @@ program structuredmesh_external_comm_2d
     stop 1
   endif
 
-  call interp%Init(N=controlDegree, &
-                   controlNodeType=GAUSS, &
-                   M=targetDegree, &
-                   targetNodeType=UNIFORM)
-
-  call geometry%Init(interp,mesh%nElem)
-  call geometry%GenerateFromMesh(mesh)
-
-  call modelobj%Init(mesh,geometry)
-  modelobj%prescribed_bcs_enabled = .false.
-  modelobj%tecplot_enabled = .false.
-  modelobj%rho0 = rho0
-
-  call modelobj%SphericalSoundWave(rhoprime,Lr,x0,y0,c)
-
-  call modelobj%SetTimeIntegrator(integrator)
-  call modelobj%ForwardStep(endtime,dt,iointerval)
-
-  ef = modelobj%entropy
-  if(ef /= ef) then
-    print*,"Error: Final entropy is inf or nan",ef
+  ! Every element of the global mesh must be owned by exactly one rank.
+  nElemLocal = mesh%nElem
+  if(nElemLocal <= 0) then
+    print*,"Error: rank",dupRank,"was assigned no elements"
+    stop 1
+  endif
+  call MPI_Allreduce(nElemLocal,nElemTotal,1,MPI_INTEGER,MPI_SUM,dupComm,ierror)
+  if(nElemTotal /= mesh%decomp%nElem) then
+    print*,"Error: local element counts do not sum to the global element count", &
+      nElemTotal,mesh%decomp%nElem
     stop 1
   endif
 
-  call modelobj%free()
   call mesh%free() ! must NOT finalize MPI: the communicator is externally managed
 
   call MPI_Finalized(mpiIsFinalized,ierror)
@@ -124,10 +95,7 @@ program structuredmesh_external_comm_2d
     stop 1
   endif
 
-  call geometry%free()
-  call interp%free()
-
   call MPI_Comm_free(dupComm,ierror)
   call mpi_finalize(ierror)
 
-endprogram structuredmesh_external_comm_2d
+endprogram read_hopr_external_comm_2d

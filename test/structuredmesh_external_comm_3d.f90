@@ -54,7 +54,8 @@ program structuredmesh_external_comm_3d
   type(Mesh3D),target :: mesh
   type(SEMHex),target :: geometry
   integer :: bcids(1:6)
-  integer :: dupComm,ierror
+  integer :: dupComm,dupRank,dupSize
+  integer :: cmpResult,ierror
   logical :: mpiIsFinalized
 
   ! The caller owns the MPI lifecycle (mpi4py does exactly this on import).
@@ -70,6 +71,29 @@ program structuredmesh_external_comm_3d
 
   call mesh%StructuredMesh(5,5,5,1,1,1, &
                            0.2_prec,0.2_prec,0.2_prec,bcids,comm=dupComm)
+
+  ! The decomposition must be running on the communicator we handed over. A dup
+  ! of MPI_COMM_WORLD has the same size and rank ordering, so rank/size alone
+  ! cannot catch `comm` being dropped -- compare the handles instead. Note that
+  ! a dup is MPI_CONGRUENT with MPI_COMM_WORLD, so the telling check is that the
+  ! decomposition is not *identical* to MPI_COMM_WORLD.
+  call MPI_Comm_rank(dupComm,dupRank,ierror)
+  call MPI_Comm_size(dupComm,dupSize,ierror)
+  call MPI_Comm_compare(mesh%decomp%mpiComm,dupComm,cmpResult,ierror)
+  if(cmpResult /= MPI_IDENT .and. cmpResult /= MPI_CONGRUENT) then
+    print*,"Error: mesh decomposition is not using the provided communicator"
+    stop 1
+  endif
+  call MPI_Comm_compare(mesh%decomp%mpiComm,MPI_COMM_WORLD,cmpResult,ierror)
+  if(cmpResult == MPI_IDENT) then
+    print*,"Error: mesh decomposition fell back to MPI_COMM_WORLD instead of the provided communicator"
+    stop 1
+  endif
+  if(mesh%decomp%nRanks /= dupSize .or. mesh%decomp%rankId /= dupRank) then
+    print*,"Error: decomposition rank/size disagree with the provided communicator", &
+      mesh%decomp%rankId,dupRank,mesh%decomp%nRanks,dupSize
+    stop 1
+  endif
 
   call interp%Init(N=controlDegree, &
                    controlNodeType=GAUSS, &

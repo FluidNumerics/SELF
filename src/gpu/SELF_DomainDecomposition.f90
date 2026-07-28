@@ -71,10 +71,9 @@ contains
     ! Local
     integer       :: ierror
     integer       :: nodeComm,localRank
-    logical       :: mpiIsInitialized
     integer(c_int) :: num_devices,hip_err,device_id
 
-    this%mpiComm = 0
+    this%mpiComm = MPI_COMM_NULL
     this%mpiPrec = prec
     this%rankId = 0
     this%nRanks = 1
@@ -82,23 +81,7 @@ contains
     this%mpiEnabled = .false.
     this%ownsMpi = .false.
 
-    call MPI_Initialized(mpiIsInitialized,ierror)
-
-    if(present(comm)) then
-      ! The caller (e.g. mpi4py) owns the MPI lifecycle and provides the communicator.
-      if(.not. mpiIsInitialized) then
-        error stop __FILE__//" : A communicator was provided but MPI is not initialized."// &
-          " Initialize MPI (e.g. via mpi4py or MPI_Init) before creating a mesh with an external communicator."
-      endif
-      this%mpiComm = comm
-    else
-      this%mpiComm = MPI_COMM_WORLD
-      if(.not. mpiIsInitialized) then
-        print*,__FILE__," : Initializing MPI"
-        call mpi_init(ierror)
-        this%ownsMpi = .true.
-      endif
-    endif
+    call AcquireMPI(this%mpiComm,this%ownsMpi,comm)
 
     call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
     call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
@@ -144,9 +127,6 @@ contains
   subroutine Free_DomainDecomposition(this)
     implicit none
     class(DomainDecomposition),intent(inout) :: this
-    ! Local
-    integer :: ierror
-    logical :: mpiIsFinalized
 
     if(associated(this%offSetElem)) then
       deallocate(this%offSetElem)
@@ -167,12 +147,12 @@ contains
     endif
     this%halo_built = .false.
 
-    call MPI_Finalized(mpiIsFinalized,ierror)
-    if(this%ownsMpi .and. .not. mpiIsFinalized) then
-      print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
-      call MPI_FINALIZE(ierror)
+    ! Guard against a second Free, and against freeing a decomposition that was
+    ! never initialized, both of which would corrupt the live-decomposition count.
+    if(this%initialized) then
+      call ReleaseMPI(this%ownsMpi,this%rankId,this%nRanks)
+      this%initialized = .false.
     endif
-    this%ownsMpi = .false.
 
   endsubroutine Free_DomainDecomposition
 

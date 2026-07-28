@@ -8,10 +8,40 @@ SELF builds come with domain-decomposition enabled by default, which allows you 
 3. **Mapping Policies**: Use `mpirun`'s mapping and binding options to control how MPI processes are distributed across nodes and resources.
 
 
-When deploying SELF on multi-GPU platforms, each MPI rank is assigned to a single GPU. The GPU assignment algorithm is simple and is implemented in the `Init_DomainDecomposition` method defined in the `src/gpu/SELF_DomainDecomposition.f90` module. Each MPI rank queries HIP or CUDA for the number of GPU devices on your server. The device id assigned to the MPI process is set as the modulo of the MPI rank id and the number of devices.
+When deploying SELF on multi-GPU platforms, each MPI rank is assigned to a single GPU. The GPU assignment algorithm is simple and is implemented in the `Init_DomainDecomposition` method defined in the `src/gpu/SELF_DomainDecomposition.f90` module. Each MPI rank queries HIP or CUDA for the number of GPU devices on your server. SELF then splits the communicator with `MPI_Comm_split_type(MPI_COMM_TYPE_SHARED)` to find where the rank sits *within its own node*, and sets the device id to the modulo of that node-local rank and the number of devices.
 
-If you are working on clusters of multi-GPU accelerated nodes, this implies that all servers have the same number of GPUs. Additionally, if you are explicitly setting your process affinity, you will want to assign MPI ranks to pack servers sequentially.
+Using the node-local rank rather than the global rank means device assignment no longer depends on how the launcher orders ranks across nodes. It does still assume that every node exposes the same number of GPUs.
 
+
+## Using an externally managed communicator
+
+By default SELF owns the MPI lifecycle: the first mesh you create calls `MPI_Init` if nobody else has, and freeing the last mesh calls `MPI_Finalize`. That is what you want for a Fortran program whose `main` is SELF's.
+
+It is *not* what you want when SELF is a library inside a host process that already runs MPI — most commonly a Python driver, where importing `mpi4py.MPI` has already initialized MPI and will finalize it at interpreter exit. For that case, every mesh constructor and reader takes an optional `comm` argument:
+
+```fortran
+  integer :: solverComm
+
+  ! The caller initializes MPI and owns the communicator.
+  call MPI_Init(ierror)
+  call MPI_Comm_dup(MPI_COMM_WORLD,solverComm,ierror)
+
+  call mesh % StructuredMesh( nxPerTile=10, nyPerTile=10, &
+                              nTileX=2, nTileY=2, &
+                              dx=0.05_prec, dy=0.05_prec, &
+                              bcids, comm=solverComm )
+```
+
+When `comm` is present:
+
+- SELF calls neither `MPI_Init` nor `MPI_Finalize`. Freeing the mesh releases SELF's decomposition data and nothing more.
+- MPI must already be initialized. SELF stops with a diagnostic if it is not.
+- The communicator need not be `MPI_COMM_WORLD` or a duplicate of it. A subset communicator works, and SELF decomposes the mesh across exactly the ranks in it — ranks outside the communicator never need to call into SELF.
+- SELF stores the handle you pass without duplicating it. Keep the communicator alive until after `mesh % free()`.
+
+From Python via `mpi4py`, the handle comes from `comm.py2f()`, which yields the Fortran integer handle SELF expects.
+
+Without `comm`, behavior is unchanged, except that `MPI_Init` and `MPI_Finalize` are guarded: SELF initializes MPI only if no one else has, and finalizes only MPI that it initialized, only once the last live mesh has been freed. Several meshes may therefore coexist in one process, and tearing one down will not disturb the others.
 
 ## `mpirun` Options for Sequential Affinity:
 Use these options when launching your application with `mpirun`:

@@ -179,6 +179,7 @@ add_fortran_tests (
     "points_dirac_delta_3d_ndim_mismatch.f90"
     "points_dirac_delta_2d_nvar_mismatch.f90"
     "points_dirac_delta_3d_nvar_mismatch.f90"
+    "domaindecomposition_two_meshes.f90"
     )
 
 # Mark the four DiracDelta guard tests as expected-to-fail: each program
@@ -209,4 +210,6 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "advection_diffusion_3d_rk3_mpi.f90"
                        "advection_diffusion_3d_rk3_pickup_mpi.f90"
                        "structuredmesh_external_comm_2d.f90"
-                       "structuredmesh_external_comm_3d.f90" )
+                       "structuredmesh_external_comm_3d.f90"
+                       "structuredmesh_subcomm_2d.f90"
+                       "read_hopr_external_comm_2d.f90" )
