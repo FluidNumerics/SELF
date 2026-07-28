@@ -23,7 +23,8 @@ layer that adaptive refinement needs is already in place and tested.
 | Uniform `h`-refinement (conforming, serial) | **Implemented** |
 | Adaptive quad-forest (flagged refine / coarsen, level tracking) | **Implemented** |
 | Solution transfer (prolongation / restriction, conservative) | **Implemented** |
-| Face-neighbour queries + 2:1 balancing + hanging-node/mortar emission | Designed (Stage 4) |
+| Forest face-neighbour queries + 2:1 balancing | **Implemented** |
+| Hanging-node / mortar-table + `Mesh2D_t` emission | Designed (Stage 4b) |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
@@ -245,6 +246,33 @@ checks the end-to-end behaviour against Stage-2 geometry - prolonging a coarse f
 `UniformRefineMesh` and back is reversible, and `int u dA` (with the geometry Jacobian) is
 identical on the coarse and refined meshes.
 
+## 2.8 Forest face-neighbours and 2:1 balancing (implemented)
+
+`SELF_QuadTreeMesh_2D` also answers *face-neighbour* queries on the forest and enforces the 2:1
+balance condition - the first part of Stage 4 and the prerequisite for mortar generation. The
+forest stores the base mesh's root face connectivity (`rootNbr` / `rootNbrSide` / `rootFlip`,
+from `sideInfo`; a conforming base is assumed).
+
+- `FaceNeighbor(node, s, nbr, ns, nf)` returns the equal-or-larger neighbour across local side s
+  by the classic quadtree ascend/descend search: cross to a sibling when the face is interior to
+  the parent, otherwise ascend to the parent's neighbour and descend one level, matching
+  sub-positions across the face through the base flip. `nbr` is either a leaf at any level
+  `<= level(node)` or an internal node at exactly `level(node)`; `ns` / `nf` are the neighbour's
+  facing side and the edge flip. Consequently a 2:1 hanging face is precisely "`nbr` is a leaf
+  with `level(nbr) = level(node)-1`" and finer neighbours are precisely "`nbr` is internal" -
+  exactly the classification Stage 4b needs to emit `mortarInfo`.
+- `Balance2to1()` iterates to a fixed point: any leaf whose equal-or-larger neighbour is a leaf
+  two or more levels coarser refines that neighbour, and the (possibly rippling) refinement
+  repeats until no face violates the condition.
+- `MaxLevelJump()` reports the largest level difference across any leaf face (0 conforming, 1 for
+  a balanced adaptive forest) - a cheap invariant for tests and drivers.
+
+Unit-tested standalone: level-0 neighbour queries on a structured base (including boundaries and
+directional reciprocity); a uniformly refined forest is conforming (`MaxLevelJump = 0`); an
+adaptive refinement that creates a two-level jump is reduced to one level by `Balance2to1`
+(rippling into the coarse neighbour); and equal-level leaf-neighbour reciprocity holds across the
+balanced forest.
+
 ---
 
 ## 3. Comparison with Trixi.jl
@@ -313,15 +341,17 @@ Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
 
 ### Stage 4 — Mortar regeneration and 2:1 balancing
 
-- Add **face-neighbour navigation** on the forest (ascend/descend quadtree search across the base
-  mesh's root connectivity, honouring base side pairings and flips). This is the prerequisite for
-  both balancing and mortar detection and is the natural first piece of Stage 4.
-- After a refine/coarsen sweep, rebuild `mortarInfo` from the tree: every face between elements
-  of different levels becomes a 2:1 mortar (the configuration the solver already handles).
-- Enforce **2:1 balance** (no face may separate elements differing by more than one level) by
-  propagating refinement: neighbors of a refined element that would violate the balance are
-  themselves refined. This is where optional **neighbor smoothing** of the trigger flags lives.
-- Reuse the existing conforming-side connectivity generation for same-level faces.
+- **(4a, done)** **Face-neighbour navigation** on the forest (`FaceNeighbor`, ascend/descend
+  quadtree search across the base root connectivity, honouring base side pairings and flips) and
+  **2:1 balance** (`Balance2to1`: neighbours more than one level coarser than a leaf are refined,
+  rippling to a fixed point). See §2.8.
+- **(4b, next)** After a balanced refine/coarsen sweep, rebuild `mortarInfo` from the tree: every
+  face where `FaceNeighbor` returns a one-level-coarser leaf (or an internal node) becomes a 2:1
+  mortar (the configuration the solver already handles); same-level faces reuse the existing
+  conforming-side connectivity. Emit a solver-ready `Mesh2D_t` (leaf geometry from `LeafCoords`,
+  `sideInfo` for conforming faces, `mortarInfo` for nonconforming faces).
+- Optional **neighbour smoothing** of the trigger flags (avoid isolated refined elements) also
+  belongs here, on top of the balance pass.
 
 ### Stage 5 — MPI dynamic re-partitioning
 

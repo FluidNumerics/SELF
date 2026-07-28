@@ -63,6 +63,12 @@ module SELF_QuadTreeMesh_2D
     integer :: quadrature = 0
     integer :: nRoots = 0
     real(prec),allocatable :: rootCoords(:,:,:,:) ! (2,nGeo+1,nGeo+1,nRoots)
+    ! Base-mesh face connectivity at the roots (conforming base assumed). rootNbr(s,r) is the
+    ! base neighbour element of root r across local side s (0 = physical boundary), which is also
+    ! that neighbour's root node id; rootNbrSide / rootFlip decode base sideInfo(4,s,r).
+    integer,allocatable :: rootNbr(:,:) ! (4,nRoots)
+    integer,allocatable :: rootNbrSide(:,:) ! (4,nRoots)
+    integer,allocatable :: rootFlip(:,:) ! (4,nRoots)
 
     ! ---- Forest node storage (roots occupy node ids 1:nRoots) ----
     integer :: nNodes = 0
@@ -85,6 +91,9 @@ module SELF_QuadTreeMesh_2D
     procedure,public :: RebuildLeaves => RebuildLeaves_QuadTreeMesh2D
     procedure,public :: LeafCoords => LeafCoords_QuadTreeMesh2D
     procedure,public :: MaxLevel => MaxLevel_QuadTreeMesh2D
+    procedure,public :: FaceNeighbor => FaceNeighbor_QuadTreeMesh2D
+    procedure,public :: Balance2to1 => Balance2to1_QuadTreeMesh2D
+    procedure,public :: MaxLevelJump => MaxLevelJump_QuadTreeMesh2D
     procedure,private :: EnsureCapacity => EnsureCapacity_QuadTreeMesh2D
   endtype QuadTreeMesh2D
 
@@ -98,7 +107,7 @@ contains
     class(QuadTreeMesh2D),intent(out) :: this
     type(Mesh2D),intent(in) :: mesh
     ! Local
-    integer :: r
+    integer :: r,s
 
     this%nGeo = mesh%nGeo
     this%quadrature = mesh%quadrature
@@ -107,6 +116,18 @@ contains
     allocate(this%rootCoords(1:2,1:mesh%nGeo+1,1:mesh%nGeo+1,1:mesh%nElem))
     this%rootCoords(1:2,1:mesh%nGeo+1,1:mesh%nGeo+1,1:mesh%nElem) = &
       mesh%nodeCoords(1:2,1:mesh%nGeo+1,1:mesh%nGeo+1,1:mesh%nElem)
+
+    ! Root face connectivity from the (conforming) base mesh sideInfo.
+    allocate(this%rootNbr(1:4,1:mesh%nElem))
+    allocate(this%rootNbrSide(1:4,1:mesh%nElem))
+    allocate(this%rootFlip(1:4,1:mesh%nElem))
+    do r = 1,mesh%nElem
+      do s = 1,4
+        this%rootNbr(s,r) = mesh%sideInfo(3,s,r)
+        this%rootNbrSide(s,r) = mesh%sideInfo(4,s,r)/10
+        this%rootFlip(s,r) = mod(mesh%sideInfo(4,s,r),10)
+      enddo
+    enddo
 
     ! Roots are the first nRoots nodes.
     this%capacity = max(4*this%nRoots,16)
@@ -134,6 +155,9 @@ contains
     class(QuadTreeMesh2D),intent(inout) :: this
 
     if(allocated(this%rootCoords)) deallocate(this%rootCoords)
+    if(allocated(this%rootNbr)) deallocate(this%rootNbr)
+    if(allocated(this%rootNbrSide)) deallocate(this%rootNbrSide)
+    if(allocated(this%rootFlip)) deallocate(this%rootFlip)
     if(allocated(this%level)) deallocate(this%level)
     if(allocated(this%parent)) deallocate(this%parent)
     if(allocated(this%quadrant)) deallocate(this%quadrant)
@@ -388,5 +412,191 @@ contains
     deallocate(cur,kids,path)
 
   endsubroutine LeafCoords_QuadTreeMesh2D
+
+  recursive subroutine FaceNeighbor_QuadTreeMesh2D(this,node,s,nbr,ns,nf)
+    !! Find the equal-or-larger face neighbour of `node` across its local side s using the
+    !! classic quadtree ascend/descend search. Returns:
+    !!   nbr - neighbour node id (0 = physical domain boundary). It is either a LEAF at any level
+    !!         <= level(node), or an INTERNAL node at exactly level(node) (meaning the shared face
+    !!         is subdivided on the neighbour side, i.e. finer neighbours exist).
+    !!   ns  - the neighbour's local side that faces `node`.
+    !!   nf  - the flip between the two shared edges (0 same direction, 1 reversed), inherited
+    !!         from the base-mesh face where the search crosses a root boundary.
+    !! With this, a 2:1 hanging face is exactly "nbr is a leaf with level(nbr) = level(node)-1",
+    !! and finer neighbours are exactly "nbr is internal".
+    implicit none
+    class(QuadTreeMesh2D),intent(in) :: this
+    integer,intent(in) :: node,s
+    integer,intent(out) :: nbr,ns,nf
+    ! Local
+    integer :: p,c,pnbr,ps,pf,t,tq
+
+    if(this%level(node) == 0) then
+      ! Cross a base-mesh face: neighbour root, its side, and the base flip.
+      nbr = this%rootNbr(s,this%rootElem(node))
+      ns = this%rootNbrSide(s,this%rootElem(node))
+      nf = this%rootFlip(s,this%rootElem(node))
+      return
+    endif
+
+    p = this%parent(node)
+    c = this%quadrant(node)
+
+    if(qt_internal(s,c)) then
+      ! Neighbour is the sibling on the other side of an interior face of the parent.
+      nbr = this%child(qt_reflect(s,c),p)
+      ns = qt_opposite(s)
+      nf = 0
+      return
+    endif
+
+    ! Otherwise ascend: find the parent's neighbour across the same side, then descend.
+    call FaceNeighbor_QuadTreeMesh2D(this,p,s,pnbr,ps,pf)
+    if(pnbr == 0) then
+      nbr = 0; ns = 0; nf = 0
+      return
+    endif
+
+    if(this%child(1,pnbr) == 0) then
+      ! Parent's neighbour is a leaf (equal or larger than the parent) -> our larger neighbour.
+      nbr = pnbr; ns = ps; nf = pf
+      return
+    endif
+
+    ! Parent's neighbour is internal (at level(node)-1): descend one level to the child that
+    ! borders `node`, matching sub-positions across the face through the flip.
+    t = qt_subpos(c,s)
+    if(pf == 0) then
+      tq = t
+    else
+      tq = 3-t
+    endif
+    nbr = this%child(childOfSide(tq,ps),pnbr)
+    ns = ps
+    nf = pf
+
+  endsubroutine FaceNeighbor_QuadTreeMesh2D
+
+  subroutine Balance2to1_QuadTreeMesh2D(this)
+    !! Enforce the 2:1 balance condition: no leaf face may separate elements differing by more
+    !! than one refinement level. Iterates to a fixed point - in each sweep, any leaf whose
+    !! equal-or-larger neighbour is a leaf two or more levels coarser triggers refinement of that
+    !! coarser neighbour; refinement can ripple, so sweeps repeat until nothing changes. The leaf
+    !! set is rebuilt on return.
+    implicit none
+    class(QuadTreeMesh2D),intent(inout) :: this
+    ! Local
+    integer :: li,s,node,nbr,ns,nf,nSnap
+    integer,allocatable :: snap(:)
+    logical :: changed
+
+    do
+      changed = .false.
+      nSnap = this%nLeaves
+      allocate(snap(1:nSnap))
+      snap(1:nSnap) = this%leaf(1:nSnap)
+
+      do li = 1,nSnap
+        node = snap(li)
+        if(this%child(1,node) /= 0) cycle ! refined earlier in this sweep
+        do s = 1,4
+          call this%FaceNeighbor(node,s,nbr,ns,nf)
+          if(nbr /= 0) then
+            if(this%child(1,nbr) == 0 .and. this%level(nbr) <= this%level(node)-2) then
+              call this%RefineNode(nbr)
+              changed = .true.
+            endif
+          endif
+        enddo
+      enddo
+
+      deallocate(snap)
+      call this%RebuildLeaves()
+      if(.not. changed) exit
+    enddo
+
+  endsubroutine Balance2to1_QuadTreeMesh2D
+
+  function MaxLevelJump_QuadTreeMesh2D(this) result(mx)
+    !! Largest refinement-level difference across any leaf face (0 on a conforming or uniformly
+    !! refined forest, 1 on a 2:1-balanced adaptive forest). Because FaceNeighbor returns the
+    !! equal-or-larger neighbour, every level difference is observed from the finer leaf as a
+    !! coarser leaf neighbour; internal (finer) neighbours contribute nothing from this side.
+    implicit none
+    class(QuadTreeMesh2D),intent(in) :: this
+    integer :: mx
+    ! Local
+    integer :: li,s,node,nbr,ns,nf
+
+    mx = 0
+    do li = 1,this%nLeaves
+      node = this%leaf(li)
+      do s = 1,4
+        call this%FaceNeighbor(node,s,nbr,ns,nf)
+        if(nbr /= 0) then
+          if(this%child(1,nbr) == 0) mx = max(mx,this%level(node)-this%level(nbr))
+        endif
+      enddo
+    enddo
+
+  endfunction MaxLevelJump_QuadTreeMesh2D
+
+  ! -------------------------------------------------------------------------------------------- !
+  ! Quadtree face-adjacency helpers (SELF child ordering 1=SW,2=SE,3=NE,4=NW; sides 1=S,2=E,3=N,
+  ! 4=W). See SELF_RefinementPrimitives_2D for the quadrant/side conventions and childOfSide.
+  ! -------------------------------------------------------------------------------------------- !
+
+  pure function qt_opposite(s) result(o)
+    !! The local side directly across an element from side s.
+    implicit none
+    integer,intent(in) :: s
+    integer :: o
+    integer,parameter :: opp(1:4) = [3,4,1,2]
+    o = opp(s)
+  endfunction qt_opposite
+
+  pure function qt_internal(s,c) result(isInternal)
+    !! .true. if child c's side s is interior to its parent (its neighbour across s is a sibling).
+    implicit none
+    integer,intent(in) :: s,c
+    logical :: isInternal
+    select case(s)
+    case(1); isInternal = (c == 3 .or. c == 4) ! South interior for the top children
+    case(2); isInternal = (c == 1 .or. c == 4) ! East interior for the left children
+    case(3); isInternal = (c == 1 .or. c == 2) ! North interior for the bottom children
+    case(4); isInternal = (c == 2 .or. c == 3) ! West interior for the right children
+    case default; isInternal = .false.
+    endselect
+  endfunction qt_internal
+
+  pure function qt_reflect(s,c) result(rc)
+    !! Sibling child index obtained by reflecting c across side s (swap the y-half for the
+    !! horizontal faces S/N, the x-half for the vertical faces E/W).
+    implicit none
+    integer,intent(in) :: s,c
+    integer :: rc
+    integer,parameter :: vref(1:4) = [4,3,2,1] ! swap ay (s = 1,3)
+    integer,parameter :: href(1:4) = [2,1,4,3] ! swap ax (s = 2,4)
+    if(s == 1 .or. s == 3) then
+      rc = vref(c)
+    else
+      rc = href(c)
+    endif
+  endfunction qt_reflect
+
+  pure function qt_subpos(c,s) result(t)
+    !! Sub-position (1 or 2, in the positive direction of side s) of child c along side s;
+    !! 0 if c does not touch side s.
+    implicit none
+    integer,intent(in) :: c,s
+    integer :: t
+    if(childOfSide(1,s) == c) then
+      t = 1
+    elseif(childOfSide(2,s) == c) then
+      t = 2
+    else
+      t = 0
+    endif
+  endfunction qt_subpos
 
 endmodule SELF_QuadTreeMesh_2D
