@@ -37,7 +37,8 @@ module SELF_DomainDecomposition_t
   type DomainDecomposition_t
     logical :: mpiEnabled = .false.
     logical :: initialized = .false.
-    integer :: mpiComm
+    logical :: ownsMpi = .false. ! true when SELF called mpi_init and is responsible for MPI_Finalize
+    integer :: mpiComm = MPI_COMM_NULL
     integer :: mpiPrec
     integer :: rankId
     integer :: nRanks
@@ -61,24 +62,104 @@ module SELF_DomainDecomposition_t
 
   endtype DomainDecomposition_t
 
+  ! Process-wide bookkeeping for the MPI lifecycle.
+  !
+  ! Several decompositions can be live at once -- a process may hold more than
+  ! one mesh, which is the normal case for a long-lived Python driver. SELF may
+  ! only finalize MPI that it initialized itself, and only once the last
+  ! decomposition has been freed; otherwise the first mesh to be torn down
+  ! pulls MPI out from under the meshes that are still in use.
+  integer,private :: nLiveDecomps = 0
+  logical,private :: selfInitializedMpi = .false.
+
 contains
 
-  subroutine Init_DomainDecomposition_t(this)
+  subroutine AcquireMPI(mpiComm,ownsMpi,comm)
+  !! Resolve the communicator a new decomposition will run on and register it
+  !! with the process-wide lifecycle bookkeeping.
+  !!
+  !! With `comm` present the caller (e.g. mpi4py) already owns MPI and SELF
+  !! calls neither MPI_Init nor MPI_Finalize. Without it SELF falls back to
+  !! MPI_COMM_WORLD, initializing MPI only if nobody else has yet.
+  !!
+  !! Shared by the CPU and GPU DomainDecomposition Init implementations so the
+  !! two cannot drift apart.
+    implicit none
+    integer,intent(out) :: mpiComm
+    logical,intent(out) :: ownsMpi
+    integer,intent(in),optional :: comm
+    ! Local
+    integer :: ierror
+    logical :: mpiIsInitialized
+
+    call MPI_Initialized(mpiIsInitialized,ierror)
+
+    if(present(comm)) then
+      ! The caller (e.g. mpi4py) owns the MPI lifecycle and provides the communicator.
+      if(.not. mpiIsInitialized) then
+        error stop __FILE__//" : A communicator was provided but MPI is not initialized."// &
+          " Initialize MPI (e.g. via mpi4py or MPI_Init) before creating a mesh with an external communicator."
+      endif
+      mpiComm = comm
+    else
+      mpiComm = MPI_COMM_WORLD
+      if(.not. mpiIsInitialized) then
+        print*,__FILE__," : Initializing MPI"
+        call mpi_init(ierror)
+        selfInitializedMpi = .true.
+      endif
+    endif
+
+    nLiveDecomps = nLiveDecomps+1
+    ownsMpi = selfInitializedMpi
+
+  endsubroutine AcquireMPI
+
+  subroutine ReleaseMPI(ownsMpi,rankId,nRanks)
+  !! Retire one decomposition from the process-wide lifecycle bookkeeping and,
+  !! if it was the last one and SELF initialized MPI, finalize.
+  !!
+  !! Shared by the CPU and GPU DomainDecomposition Free implementations.
+    implicit none
+    logical,intent(inout) :: ownsMpi
+    integer,intent(in) :: rankId
+    integer,intent(in) :: nRanks
+    ! Local
+    integer :: ierror
+    logical :: mpiIsFinalized
+
+    ownsMpi = .false.
+    nLiveDecomps = max(nLiveDecomps-1,0)
+
+    ! Other meshes are still live; they need MPI to stay up.
+    if(nLiveDecomps > 0) return
+
+    call MPI_Finalized(mpiIsFinalized,ierror)
+    if(selfInitializedMpi .and. .not. mpiIsFinalized) then
+      print*,__FILE__," : Rank ",rankId+1,"/",nRanks," checking out."
+      call MPI_FINALIZE(ierror)
+    endif
+    selfInitializedMpi = .false.
+
+  endsubroutine ReleaseMPI
+
+  subroutine Init_DomainDecomposition_t(this,comm)
     implicit none
     class(DomainDecomposition_t),intent(inout) :: this
+    integer,intent(in),optional :: comm
     ! Local
     integer       :: ierror
 
-    this%mpiComm = 0
+    this%mpiComm = MPI_COMM_NULL
     this%mpiPrec = prec
     this%rankId = 0
     this%nRanks = 1
     this%nElem = 0
     this%mpiEnabled = .false.
+    this%ownsMpi = .false.
 
-    this%mpiComm = MPI_COMM_WORLD
-    print*,__FILE__," : Initializing MPI"
-    call mpi_init(ierror)
+    call AcquireMPI(this%mpiComm,this%ownsMpi,comm)
+
     call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
     call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
     print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
@@ -99,15 +180,11 @@ contains
 
     this%initialized = .true.
 
-    this%initialized = .true.
-
   endsubroutine Init_DomainDecomposition_t
 
   subroutine Free_DomainDecomposition_t(this)
     implicit none
     class(DomainDecomposition_t),intent(inout) :: this
-    ! Local
-    integer :: ierror
 
     if(associated(this%offSetElem)) then
       deallocate(this%offSetElem)
@@ -119,10 +196,12 @@ contains
     if(allocated(this%requests)) deallocate(this%requests)
     if(allocated(this%stats)) deallocate(this%stats)
 
-    !if(this%mpiEnabled) then
-    print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
-    call MPI_FINALIZE(ierror)
-    !endif
+    ! Guard against a second Free, and against freeing a decomposition that was
+    ! never initialized, both of which would corrupt the live-decomposition count.
+    if(this%initialized) then
+      call ReleaseMPI(this%ownsMpi,this%rankId,this%nRanks)
+      this%initialized = .false.
+    endif
 
   endsubroutine Free_DomainDecomposition_t
 

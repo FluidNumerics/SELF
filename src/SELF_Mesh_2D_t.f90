@@ -274,7 +274,7 @@ contains
 
   endsubroutine ResetBoundaryConditionType_Mesh2D_t
 
-  subroutine UniformStructuredMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy,bcids)
+  subroutine UniformStructuredMesh_Mesh2D_t(this,nxPerTile,nyPerTile,nTileX,nTileY,dx,dy,bcids,comm)
   !!
   !! Create a structured mesh and store it in SELF's unstructured mesh format.
   !! The mesh is created in tiles of size (tnx,tny). Tiling is used to determine
@@ -290,7 +290,8 @@ contains
   !!    - dx : Element width in the x-direction
   !!    - dy : Element width in the y-direction
   !!    - bcids(1:4) : Boundary condition flags for the south, east, north, and west sides of the domain
-  !!    - enableDomainDecomposition : Boolean to determine if domain decomposition is used.
+  !!    - comm (optional) : Externally managed MPI communicator (Fortran integer handle). When
+  !!      provided, the caller owns MPI initialization/finalization.
   !!
   !!  Output
   !!    - this : mesh2d_t object with vertices, edges, and element information
@@ -310,6 +311,7 @@ contains
     real(prec),intent(in) :: dx
     real(prec),intent(in) :: dy
     integer,intent(in) :: bcids(1:4)
+    integer,intent(in),optional :: comm
     ! Local
     integer :: nX,nY,nGeo,nBCs
     integer :: nGlobalElem
@@ -327,7 +329,7 @@ contains
     integer :: e1,e2
     integer :: nedges
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     nX = nTileX*nxPerTile
     nY = nTileY*nyPerTile
@@ -502,7 +504,7 @@ contains
 
   endsubroutine UniformStructuredMesh_Mesh2D_t
 
-  subroutine SimpleMortarMesh_Mesh2D_t(this,dx,bcids)
+  subroutine SimpleMortarMesh_Mesh2D_t(this,dx,bcids,comm)
   !!
   !! Create the smallest 2:1 nonconforming (mortar) mesh: one "big" element of size
   !! 2*dx x 2*dx whose east edge is shared with the west edges of two "small" dx x dx
@@ -533,6 +535,7 @@ contains
     class(Mesh2D_t),intent(out) :: this
     real(prec),intent(in) :: dx
     integer,intent(in) :: bcids(1:4)
+    integer,intent(in),optional :: comm
     ! Local
     integer,parameter :: nGlobalElem = 3
     integer,parameter :: nUniqueSides = 10
@@ -543,7 +546,7 @@ contains
     integer :: nLocalElems
     integer :: nGeo,nBCs
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     nGeo = 1 ! Bilinear element geometry
     nBCs = 4
@@ -647,7 +650,7 @@ contains
 
   endsubroutine SimpleMortarMesh_Mesh2D_t
 
-  subroutine DoubleMortarMesh_Mesh2D_t(this,dx,bcids)
+  subroutine DoubleMortarMesh_Mesh2D_t(this,dx,bcids,comm)
   !!
   !! Create a six-element mesh with two 2:1 mortar interfaces, used to validate the
   !! mortar machinery in configurations the SimpleMortarMesh cannot reach:
@@ -681,6 +684,7 @@ contains
     class(Mesh2D_t),intent(out) :: this
     real(prec),intent(in) :: dx
     integer,intent(in) :: bcids(1:4)
+    integer,intent(in),optional :: comm
     ! Local
     integer,parameter :: nGlobalElem = 6
     integer,parameter :: nUniqueSides = 18
@@ -691,7 +695,7 @@ contains
     integer :: nLocalElems
     integer :: nGeo,nBCs
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     nGeo = 1 ! Bilinear element geometry
     nBCs = 4
@@ -859,12 +863,13 @@ contains
 
   endsubroutine DoubleMortarMesh_Mesh2D_t
 
-  subroutine Read_HOPr_Mesh2D_t(this,meshFile)
+  subroutine Read_HOPr_Mesh2D_t(this,meshFile,comm)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
     implicit none
     class(Mesh2D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
+    integer,intent(in),optional :: comm
     ! Local
     integer(HID_T) :: fileId
     integer(HID_T) :: offset(1:2),gOffset(1)
@@ -888,7 +893,7 @@ contains
     integer,dimension(:),allocatable :: hopr_globalNodeIDs
     integer,dimension(:,:),allocatable :: bcType
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     print*,__FILE__//' : Reading HOPr mesh from'//trim(meshfile)
     if(this%decomp%mpiEnabled) then
@@ -1029,7 +1034,7 @@ contains
 
   endsubroutine Read_HOPr_Mesh2D_t
 
-  subroutine Read_HOHQMesh_Mesh2D_t(this,meshFile)
+  subroutine Read_HOHQMesh_Mesh2D_t(this,meshFile,comm)
     !! Reader for HOHQMesh text mesh files in the ISM and ISM-MM
     !! formats. The format is auto-detected from the first line:
     !!   * Line equal to "ISM-MM" (trimmed) => ISM-MM with per-element
@@ -1055,6 +1060,7 @@ contains
     implicit none
     class(Mesh2D_t),intent(out) :: this
     character(*),intent(in) :: meshFile
+    integer,intent(in),optional :: comm
     ! Local
     integer :: iUnit
     integer :: ios
@@ -1090,7 +1096,7 @@ contains
     character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: matNamesLocal(:)
     logical :: isISM_MM
 
-    call this%decomp%init()
+    call this%decomp%init(comm)
 
     open(newunit=iUnit,file=trim(meshFile),status='old',action='read', &
          form='formatted',iostat=ios)

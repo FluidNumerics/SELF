@@ -64,23 +64,25 @@ module SELF_DomainDecomposition
 
 contains
 
-  subroutine Init_DomainDecomposition(this)
+  subroutine Init_DomainDecomposition(this,comm)
     implicit none
     class(DomainDecomposition),intent(inout) :: this
+    integer,intent(in),optional :: comm
     ! Local
     integer       :: ierror
+    integer       :: nodeComm,localRank
     integer(c_int) :: num_devices,hip_err,device_id
 
-    this%mpiComm = 0
+    this%mpiComm = MPI_COMM_NULL
     this%mpiPrec = prec
     this%rankId = 0
     this%nRanks = 1
     this%nElem = 0
     this%mpiEnabled = .false.
+    this%ownsMpi = .false.
 
-    this%mpiComm = MPI_COMM_WORLD
-    print*,__FILE__," : Initializing MPI"
-    call mpi_init(ierror)
+    call AcquireMPI(this%mpiComm,this%ownsMpi,comm)
+
     call mpi_comm_rank(this%mpiComm,this%rankId,ierror)
     call mpi_comm_size(this%mpiComm,this%nRanks,ierror)
     print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking in."
@@ -102,16 +104,21 @@ contains
     hip_err = hipGetDeviceCount(num_devices)
     if(hip_err /= 0) then
       print*,'Failed to get device count on rank',this%rankId
-      call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
+      call MPI_Abort(this%mpiComm,hip_err,ierror)
     endif
 
-    ! Assign GPU device ID based on MPI rank
-    device_id = modulo(this%rankId,num_devices) ! Assumes that mpi ranks are packed sequentially on a node until the node is filled up.
+    ! Assign GPU device ID based on node-local MPI rank so multi-node
+    ! placement is independent of the launcher's global rank ordering.
+    call MPI_Comm_split_type(this%mpiComm,MPI_COMM_TYPE_SHARED,this%rankId, &
+                             MPI_INFO_NULL,nodeComm,ierror)
+    call MPI_Comm_rank(nodeComm,localRank,ierror)
+    call MPI_Comm_free(nodeComm,ierror)
+    device_id = modulo(localRank,num_devices)
     hip_err = hipSetDevice(device_id)
     print*,__FILE__," : Rank ",this%rankId+1," assigned to device ",device_id
     if(hip_err /= 0) then
       print*,'Failed to set device for rank',this%rankId,'to device',device_id
-      call MPI_Abort(MPI_COMM_WORLD,hip_err,ierror)
+      call MPI_Abort(this%mpiComm,hip_err,ierror)
     endif
 
     this%initialized = .true.
@@ -120,8 +127,6 @@ contains
   subroutine Free_DomainDecomposition(this)
     implicit none
     class(DomainDecomposition),intent(inout) :: this
-    ! Local
-    integer :: ierror
 
     if(associated(this%offSetElem)) then
       deallocate(this%offSetElem)
@@ -142,8 +147,12 @@ contains
     endif
     this%halo_built = .false.
 
-    print*,__FILE__," : Rank ",this%rankId+1,"/",this%nRanks," checking out."
-    call MPI_FINALIZE(ierror)
+    ! Guard against a second Free, and against freeing a decomposition that was
+    ! never initialized, both of which would corrupt the live-decomposition count.
+    if(this%initialized) then
+      call ReleaseMPI(this%ownsMpi,this%rankId,this%nRanks)
+      this%initialized = .false.
+    endif
 
   endsubroutine Free_DomainDecomposition
 
