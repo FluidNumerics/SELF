@@ -22,7 +22,7 @@ layer that adaptive refinement needs is already in place and tested.
 | `h`-refinement primitives (isoparametric subdivision + refined connectivity) | **Implemented** |
 | Uniform `h`-refinement (conforming, serial) | **Implemented** |
 | Adaptive quad-forest (flagged refine / coarsen, level tracking) | **Implemented** |
-| Solution transfer (prolongation / restriction) | Designed (Stage 3) |
+| Solution transfer (prolongation / restriction, conservative) | **Implemented** |
 | Face-neighbour queries + 2:1 balancing + hanging-node/mortar emission | Designed (Stage 4) |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
@@ -217,6 +217,34 @@ The forest is unit-tested (refine/coarsen leaf and level bookkeeping, the four-s
 guard, amortized capacity growth, and leaf geometry matching direct subdivision at multiple
 levels).
 
+## 2.7 Solution transfer (implemented)
+
+`SELF_SolutionTransfer_2D` moves the prognostic solution with the mesh when an element is refined
+or coarsened, reusing the mortar operators already built on `Lagrange`:
+
+- `ProlongToChildren(interp, nVar, uParent, uChildren)` samples the parent's degree-N nodal
+  polynomial onto its four children - a tensor product of `mortarR` in each direction. Exact
+  interpolation, no loss.
+- `RestrictFromChildren(interp, nVar, uChildren, uParent)` L2-projects the four children back onto
+  the parent - a tensor product of `mortarP` (the adjoint of `mortarR`, already carrying the 1/2
+  per-direction sub-edge Jacobian for solution traces).
+
+Both are element-local and portable (host `do concurrent`); the driver maps forest parent/child
+relations onto the element index ranges. From the 1-D mortar identities they inherit exactly:
+
+- **Reversibility** - `RestrictFromChildren(ProlongToChildren(u)) = u` to roundoff (refine then
+  immediately coarsen leaves the solution unchanged), from `sum_k P_k R_k = I` per direction.
+- **Conservation** - the reference-cell integral of the restricted parent equals the sum of the
+  children's, i.e. `sum_ij w_i w_j u_parent = (1/4) sum_c sum_ij w_i w_j u_child_c`; weighted by
+  the geometry Jacobian this is conservation of the cell-integrated quantity.
+
+Validated at two levels: a unit test drives the tensor operators with the exact mortar matrices
+(prolong reproduces a degree-N polynomial at the child nodes; prolong-then-restrict is the
+identity to roundoff; discrete conservation defect is zero), and `test/solution_transfer_2d.f90`
+checks the end-to-end behaviour against Stage-2 geometry - prolonging a coarse field onto a
+`UniformRefineMesh` and back is reversible, and `int u dA` (with the geometry Jacobian) is
+identical on the coarse and refined meshes.
+
 ---
 
 ## 3. Comparison with Trixi.jl
@@ -271,18 +299,17 @@ relies on. The following stages are each independently reviewable and testable.
 - **(next)** Storage compaction: reclaim nodes orphaned by coarsening (currently the node pool
   grows monotonically).
 
-### Stage 3 — Solution transfer (prolongation / restriction)
+### Stage 3 — Solution transfer (prolongation / restriction) — **done**
 
-- **Prolongation** (parent → 4 children): interpolate the parent nodal solution onto each
-  child's nodes. Because a child occupies a reference sub-quadrant, this is exactly the
-  one-sided mortar restriction operator `Lagrange%mortarR` applied in each direction — the
-  operator is already built and tested.
-- **Restriction** (4 children → parent): the \(L^2\)-projection adjoint `Lagrange%mortarP`,
-  again already available, applied per direction. Restriction is conservative by construction
-  (the mortar operators satisfy \(\sum_k P_k R_k = I\) and discrete conservation), so coarsening
-  preserves cell-integrated quantities.
-- This stage must preserve **conservation** and **not reorder floating-point reductions** in the
-  solver; the transfer is a separate operator applied between time steps.
+Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
+
+- **Prolongation** (parent → 4 children): tensor product of the mortar restriction operator
+  `Lagrange%mortarR` — exact interpolation of the parent polynomial onto the children.
+- **Restriction** (4 children → parent): tensor product of the \(L^2\)-projection adjoint
+  `Lagrange%mortarP`; conservative by construction (\(\sum_k P_k R_k = I\) and discrete
+  conservation), so coarsening preserves cell-integrated quantities.
+- The transfer is a separate operator applied between time steps and does not touch the solver's
+  floating-point reductions.
 
 ### Stage 4 — Mortar regeneration and 2:1 balancing
 
