@@ -94,17 +94,12 @@ contains
     call RefineConnectivity(nElem,meshIn%sideInfo,baseCorner,nodeOffset,meshIn%nUniqueSides, &
                             refSideInfo,refCorner,nUniqueSidesRef)
 
-    ! Set up the (serial) decomposition for the output mesh. MPI is already initialized by the
-    ! input mesh's decomposition, so we replicate its (single-rank) MPI state and regenerate the
-    ! element-count-dependent tables via GenerateDecomposition rather than calling decomp%Init,
-    ! which would invoke mpi_init a second time. Multi-rank refinement is AMR Stage 5.
-    meshOut%decomp%mpiComm = meshIn%decomp%mpiComm
-    meshOut%decomp%mpiPrec = meshIn%decomp%mpiPrec
-    meshOut%decomp%rankId = meshIn%decomp%rankId
-    meshOut%decomp%nRanks = meshIn%decomp%nRanks
-    meshOut%decomp%mpiEnabled = meshIn%decomp%mpiEnabled
-    meshOut%decomp%initialized = .true.
-    allocate(meshOut%decomp%offsetElem(1:meshOut%decomp%nRanks+1))
+    ! Set up the (serial) decomposition for the output mesh. Initialize it on the input mesh's
+    ! communicator: MPI is already up, so AcquireMPI reuses that communicator without a second
+    ! mpi_init and registers the new decomposition with the process-wide lifecycle counter (so
+    ! freeing meshOut later will not pull MPI out from under meshIn). Multi-rank refinement is AMR
+    ! Stage 5.
+    call meshOut%decomp%Init(comm=meshIn%decomp%mpiComm)
     call meshOut%decomp%GenerateDecomposition(nElemR,nUniqueSidesRef)
     call meshOut%Init(nGeo,nElemR,4*nElemR,4*nElemR,nBCs)
     meshOut%nUniqueSides = nUniqueSidesRef

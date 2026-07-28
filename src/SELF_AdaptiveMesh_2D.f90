@@ -180,13 +180,9 @@ contains
     enddo
 
     ! ---- Allocate and populate the output mesh (serial decomposition, as UniformRefineMesh) ----
-    outMesh%decomp%mpiComm = baseMesh%decomp%mpiComm
-    outMesh%decomp%mpiPrec = baseMesh%decomp%mpiPrec
-    outMesh%decomp%rankId = baseMesh%decomp%rankId
-    outMesh%decomp%nRanks = baseMesh%decomp%nRanks
-    outMesh%decomp%mpiEnabled = baseMesh%decomp%mpiEnabled
-    outMesh%decomp%initialized = .true.
-    allocate(outMesh%decomp%offsetElem(1:outMesh%decomp%nRanks+1))
+    ! Initialize on the base mesh's communicator so MPI is reused (not re-initialized) and the
+    ! process-wide live-decomposition count stays correct across mesh lifetimes.
+    call outMesh%decomp%Init(comm=baseMesh%decomp%mpiComm)
     call outMesh%decomp%GenerateDecomposition(nEl,64*max(gid,1))
 
     call outMesh%Init(nGeo,nEl,4*nEl,4*nEl,nBCs)
