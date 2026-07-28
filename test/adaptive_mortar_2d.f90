@@ -155,6 +155,24 @@ contains
       r = 1
     endif
 
+    ! A uniformly refined forest is conforming, so EmitMesh must produce a mesh with no mortars
+    ! (exercises the no-mortar emission path).
+    block
+      type(QuadTreeMesh2D) :: cForest
+      type(Mesh2D) :: cMesh
+      integer,allocatable :: cflag(:)
+      call cForest%Init(baseMesh)
+      allocate(cflag(1:cForest%nLeaves)); cflag = QUADTREE_REFINE
+      call cForest%AdaptFromFlags(cflag); deallocate(cflag)
+      call EmitMesh(cForest,baseMesh,cMesh)
+      if(cMesh%nMortars /= 0) then
+        print*,"FAIL: conforming (uniform) emit produced mortars :",cMesh%nMortars
+        r = 1
+      endif
+      call cForest%Free()
+      call cMesh%Free()
+    endblock
+
     if(r == 0) print*,"ADAPTIVE MORTAR CHECKS PASSED"
 
     call f%DissociateGeometry()

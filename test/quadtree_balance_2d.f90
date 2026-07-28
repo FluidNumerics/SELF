@@ -83,6 +83,24 @@ contains
       print*,"FAIL: uniform refinement not conforming, jump =",forest%MaxLevelJump()
       r = 1
     endif
+
+    ! Calling RefineNode on an already-refined node is a no-op (with a warning).
+    call forest%RefineNode(1)
+    if(forest%nLeaves /= 4*mesh%nElem) then
+      print*,"FAIL: RefineNode on a non-leaf changed the leaf count"
+      r = 1
+    endif
+
+    ! Coarsening: flag every leaf COARSEN; each family of four leaf siblings merges back, so the
+    ! forest returns to the base element count.
+    allocate(flag(1:forest%nLeaves))
+    flag = QUADTREE_COARSEN
+    call forest%AdaptFromFlags(flag)
+    deallocate(flag)
+    if(forest%nLeaves /= mesh%nElem .or. forest%MaxLevel() /= 0) then
+      print*,"FAIL: coarsening did not return to the base mesh, nLeaves =",forest%nLeaves
+      r = 1
+    endif
     call forest%Free()
 
     ! ---- 2. Adaptive refinement + 2:1 balance ----

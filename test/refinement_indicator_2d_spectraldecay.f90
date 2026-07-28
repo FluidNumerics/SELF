@@ -62,7 +62,7 @@ contains
     implicit none
 
     integer,parameter :: N = 7
-    integer,parameter :: nel = 4
+    integer,parameter :: nel = 5
     integer,parameter :: nvar = 1
     real(prec),parameter :: refineThreshold = -3.0_prec
     real(prec),parameter :: coarsenThreshold = -8.0_prec
@@ -98,6 +98,8 @@ contains
               sol%interior(i,j,iel,1) = 1.0_prec+0.5_prec*x+0.25_prec*x*y-0.3_prec*y*y
             case(4) ! steep front -> under-resolved -> refine
               sol%interior(i,j,iel,1) = tanh(20.0_prec*(x-0.1_prec))
+            case(5) ! identically zero -> total energy below the floor -> coarsen
+              sol%interior(i,j,iel,1) = 0.0_prec
             endselect
           enddo
         enddo
@@ -140,11 +142,36 @@ contains
         r = 1
       endif
 
-      ! Flag tally sanity: 2 refine, 2 coarsen, 0 keep.
+      ! Case 5: identically zero field -> coarsen (total modal energy below the floor).
+      if(amr%flag(5) /= SELF_AMR_COARSEN) then
+        print*,"FAIL: zero field not flagged COARSEN"
+        r = 1
+      endif
+
+      ! Flag tally sanity: 2 refine, 3 coarsen, 0 keep.
       if(amr%CountFlagged(SELF_AMR_REFINE) /= 2 .or. &
-         amr%CountFlagged(SELF_AMR_COARSEN) /= 2 .or. &
+         amr%CountFlagged(SELF_AMR_COARSEN) /= 3 .or. &
          amr%CountFlagged(SELF_AMR_KEEP) /= 0) then
         print*,"FAIL: unexpected flag tally"
+        r = 1
+      endif
+
+      ! Reducing over all variables (SELF_AMR_ALLVARS) must agree here, since nVar = 1.
+      call amr%Estimate(sol,ivar=SELF_AMR_ALLVARS)
+      if(amr%flag(2) /= SELF_AMR_REFINE .or. amr%flag(1) /= SELF_AMR_COARSEN) then
+        print*,"FAIL: all-variable reduction disagrees with single-variable"
+        r = 1
+      endif
+
+      ! Widen the band (SetThresholds) so the pure top-mode element (sigma == 0) is neither
+      ! refined nor coarsened, exercising the threshold setter, the host/device sync entry points
+      ! (CPU no-ops), and the SELF_AMR_KEEP branch.
+      call amr%SetThresholds(refineThreshold=1.0_prec,coarsenThreshold=-8.0_prec)
+      call amr%UpdateDevice()
+      call amr%Estimate(sol,ivar=1)
+      call amr%UpdateHost()
+      if(amr%flag(2) /= SELF_AMR_KEEP) then
+        print*,"FAIL: sigma=0 element should be KEPT under the widened band"
         r = 1
       endif
 
