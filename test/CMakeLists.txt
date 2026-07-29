@@ -87,6 +87,8 @@ add_fortran_tests (
     "transfer_plan_2d_guard_badleaf.f90"
     "transfer_plan_2d_guard_snapshot.f90"
     "transfer_plan_2d_guard_unbuilt.f90"
+    "transfer_plan_2d_guard_range.f90"
+    "amr_controller_2d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
     "amr_controller_2d_guard_maxlevel.f90"
@@ -223,6 +225,8 @@ set_tests_properties(
     transfer_plan_2d_guard_badleaf
     transfer_plan_2d_guard_snapshot
     transfer_plan_2d_guard_unbuilt
+    transfer_plan_2d_guard_range
+    amr_controller_2d_guard_decomp
     dgmodel2d_regrid_guard_uninit
     amr_controller_2d_guard_maxlevel
     amr_controller_2d_guard_wrongmesh
