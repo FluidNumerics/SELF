@@ -137,7 +137,11 @@ program LinearEuler2D_AMR_BoneAndMarrow
   integer,parameter :: maxLevel = 2
   real(prec),parameter :: dtBase = 5.0e-4_prec ! stable on the (curved) base mesh
   real(prec),parameter :: epochLength = 0.05_prec ! adaptation cadence
-  integer,parameter :: defaultEpochs = 4 ! CI-sized; see SELF_AMR_BONE_EPOCHS below
+  ! CI-sized default (debug builds run every example ~5-10x slower than release, and the
+  ! curved 973-element base mesh makes geometry generation itself substantial; see issue
+  ! #157). One epoch still exercises initial static refinement to the level cap plus one
+  ! dynamic adaptation on the unstructured mesh. See SELF_AMR_BONE_EPOCHS below.
+  integer,parameter :: defaultEpochs = 1
 
   type(lineareuler2d_bone_amr) :: modelobj
   type(Lagrange),target :: interp

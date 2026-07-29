@@ -55,9 +55,9 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
 !!
 !!     python examples/linear_euler2d_amr_plot.py <output directory>
 !!
-!! By default the run is CI-sized (6 epochs = 30 us; the front reaches r ~ 4.5 cm). For a
-!! full-domain movie set SELF_AMR_ULTRASOUND_EPOCHS=60 (300 us; the front approaches the
-!! radiation boundaries) before running.
+!! By default the run is CI-sized (2 epochs = 10 us). For a full-domain movie set
+!! SELF_AMR_ULTRASOUND_EPOCHS=60 (300 us; the front approaches the radiation boundaries)
+!! before running.
 !!
 !! The run doubles as an integration check: it verifies that refinement occurred, that the
 !! acoustic energy stays finite and non-increasing (upwind flux + radiation boundaries are
@@ -83,7 +83,10 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   real(prec),parameter :: rhoprime = 1.0e-4_prec ! density-anomaly amplitude (kg/m^3), ~225 Pa
   real(prec),parameter :: dtBase = 2.5e-7_prec ! stable on the level-0 mesh (s)
   real(prec),parameter :: epochLength = 5.0e-6_prec ! adaptation cadence (s)
-  integer,parameter :: defaultEpochs = 6
+  ! CI-sized default (debug builds run every example ~5-10x slower than release; see issue
+  ! #157). Two epochs still exercise the full loop: initial static refinement to the level
+  ! cap, two dynamic adaptations, and the entropy/NaN checks.
+  integer,parameter :: defaultEpochs = 2
 
   type(LinearEuler2D) :: modelobj
   type(Lagrange),target :: interp
