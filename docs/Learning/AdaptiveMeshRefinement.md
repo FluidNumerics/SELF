@@ -27,6 +27,7 @@ layer that adaptive refinement needs is already in place and tested.
 | Hanging-node / mortar-table + `Mesh2D_t` emission | **Implemented** |
 | Adaptation-epoch transfer plan (old-leaf → new-leaf mapping) | **Implemented** |
 | Model regrid (`DGModel2D%Regrid`) + AMR controller (serial, CPU/GPU) | **Implemented** |
+| Ultrasound point-source example + AMR visualization script | **Implemented** |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
@@ -560,7 +561,13 @@ demo cadence (Stage-6 device-side transfer remains the later optimization). Back
   elements are coarse *and cheap*; LTS buys roughly `2^maxLevel×` on the coarse bulk — worth
   having, not blocking.
 
-### 5.5 Gap 4 — The example and its CI-scale test
+### 5.5 Gap 4 — The example and its CI-scale test — **implemented**
+
+*Status: implemented as `examples/linear_euler2d_amr_ultrasound_pointsource.f90` (water,
+`c₀ = 1500 m/s`, `f₀ ≈ 100 kHz`, 16×16 base at `N = 7`, level-3 cap, radiation boundaries).
+The example is registered as a CI test at a 6-epoch (30 µs) default;
+`SELF_AMR_ULTRASOUND_EPOCHS=60` extends it to a full-domain movie run. The generic AMR-loop
+mechanics are separately covered by `test/lineareuler2d_amr_soundwave.f90` (§2.11).*
 
 `examples/linear_euler2d_amr_pointsource.f90` (plus a reduced `test/` variant):
 
@@ -581,7 +588,13 @@ demo cadence (Stage-6 device-side transfer remains the later optimization). Back
   count grows) **and** coarsening occurs behind the front (leaf count later shrinks);
   Jacobian-weighted transfer conservation defect at machine precision per epoch.
 
-### 5.6 Gap 5 — Visualization: pressure field + mesh skeleton
+### 5.6 Gap 5 — Visualization: pressure field + mesh skeleton — **implemented**
+
+*Status: implemented as `examples/linear_euler2d_amr_plot.py` (h5py + numpy + matplotlib
+only). Each snapshot's field and geometry are interpolated from the Gauss control points to a
+uniform per-element grid including the element edges (barycentric Lagrange, exact for the
+polynomial data), rendered as a filled pressure field with the element-outline wireframe
+overlaid, one PNG per snapshot plus an MP4 when ffmpeg is available.*
 
 A companion `examples/linear_euler2d_amr_plot.py` (pyself + matplotlib/pyvista) that, per
 snapshot: renders the pressure field from `/controlgrid/solution` and overlays the **element

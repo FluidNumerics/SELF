@@ -67,6 +67,7 @@ add_fortran_tests (
   "linear_euler2d_planewave_propagation.f90"
   "linear_euler2d_pml_planewave.f90"
   "linear_euler2d_boneandmarrow.f90"
+  "linear_euler2d_amr_ultrasound_pointsource.f90"
   "linear_shallow_water2d_nonormalflow.f90"
   "linear_shallow_water2d_planetaryrossby_wave.f90"
   "linear_shallow_water2d_kelvinwaves.f90"
