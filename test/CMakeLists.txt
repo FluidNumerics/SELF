@@ -87,6 +87,11 @@ add_fortran_tests (
     "transfer_plan_2d_guard_badleaf.f90"
     "transfer_plan_2d_guard_snapshot.f90"
     "transfer_plan_2d_guard_unbuilt.f90"
+    "lineareuler2d_amr_soundwave.f90"
+    "dgmodel2d_regrid_guard_uninit.f90"
+    "amr_controller_2d_guard_multirank.f90"
+    "amr_controller_2d_guard_maxlevel.f90"
+    "amr_controller_2d_guard_wrongmesh.f90"
     "refinement_indicator_2d_guard_thresholds.f90"
     "refinement_indicator_2d_guard_setthresholds.f90"
     "refinement_indicator_2d_guard_degree.f90"
@@ -219,6 +224,10 @@ set_tests_properties(
     transfer_plan_2d_guard_badleaf
     transfer_plan_2d_guard_snapshot
     transfer_plan_2d_guard_unbuilt
+    dgmodel2d_regrid_guard_uninit
+    amr_controller_2d_guard_multirank
+    amr_controller_2d_guard_maxlevel
+    amr_controller_2d_guard_wrongmesh
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"

@@ -26,6 +26,7 @@ layer that adaptive refinement needs is already in place and tested.
 | Forest face-neighbour queries + 2:1 balancing | **Implemented** |
 | Hanging-node / mortar-table + `Mesh2D_t` emission | **Implemented** |
 | Adaptation-epoch transfer plan (old-leaf → new-leaf mapping) | **Implemented** |
+| Model regrid (`DGModel2D%Regrid`) + AMR controller (serial, CPU/GPU) | **Implemented** |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
@@ -339,6 +340,36 @@ a bilinear field is reproduced at the emitted new mesh's nodes to roundoff throu
 transfer kinds; the Jacobian-weighted global integral of a non-polynomial field is conserved to
 roundoff; and refine-everything/coarsen-everything across two epochs is the identity.
 
+## 2.11 Model regrid and the AMR controller (implemented)
+
+Two pieces close the loop around a *live, time-stepping model*:
+
+- **`DGModel2D%Regrid(mesh, geometry)`** rebinds a model to a new mesh/geometry pair: the
+  mesh-sized solution storage is reallocated and the boundary-condition registrations and maps
+  are rebuilt (mirroring the mesh-sized portion of `Init`/`Free`, including the GPU backend's
+  BC device arrays), while everything that is not mesh-sized is preserved — the time state
+  (`t`, `dt`, entropy, IO counter), the time-integrator selection, configuration flags, and
+  model-specific parameters, all of which a fresh `Init` (`intent(out)`) would reset. The
+  solution interior is left for the caller to fill via the §2.10 transfer.
+
+- **`SELF_AMRController_2D`** owns the forest, the indicator, and the meshes/geometries it
+  emits (double-buffered), and performs one adaptation epoch per `Adapt(model, adapted)` call:
+  estimate → cap refine flags at a configurable `maxLevel` → spread refine flags to face
+  neighbours for `nHalo` passes (so a feature moving at speed \(c\) stays inside the refined
+  band when the adaptation cadence satisfies \(k\,\Delta t\,c \le n_{halo} h_{fine}\)) →
+  `AdaptFromFlags` + `Balance2to1` (a no-op epoch leaves the model untouched) →
+  `BuildTransferPlan` + `EmitMesh` + new `SEMQuad` → `model%Regrid`, apply the transferred
+  solution, upload to device. `RecommendedTimeStep(dtBase) = dtBase / 2^{MaxLevel}` gives the
+  level-based explicit-stability bound to pass to `ForwardStep` after each epoch — exact for
+  the quadtree, whose children are exact half-scale subdivisions.
+
+`test/lineareuler2d_amr_soundwave.f90` runs the full loop on a deliberately under-resolved
+acoustic pulse (LinearEuler2D, radiation boundaries, RK3): the initial adaptation refines
+around the pulse up to the level cap; every mid-run adaptation conserves the Jacobian-weighted
+global integral of each prognostic variable to roundoff; the model's time and parameters
+survive regridding; the mesh evolves as the wave propagates; and the acoustic energy stays
+finite and non-increasing across the whole adaptive run.
+
 ---
 
 ## 3. Comparison with Trixi.jl
@@ -488,7 +519,11 @@ Deliverable: a `BuildTransferPlan` (forest + saved old-leaf list → typed plan)
 Tests: adapt→transfer conservation of `∫u dA` (Jacobian-weighted), refine-then-coarsen
 reversibility through a full plan, and a balanced two-level ripple case.
 
-### 5.3 Gap 2 — Model regrid: rebinding a live `DGModel2D` to an emitted mesh
+### 5.3 Gap 2 — Model regrid: rebinding a live `DGModel2D` to an emitted mesh — **implemented**
+
+*Status: implemented as `DGModel2D%Regrid` + `SELF_AMRController_2D` (see §2.11), validated by
+`test/lineareuler2d_amr_soundwave.f90`. The level-based time step of §5.4 ("now") is
+`RecommendedTimeStep`.*
 
 `DGModel2D` storage (7 `MappedScalar/Vector` objects) is sized by `nElem` at `Init`, and
 `Init` is `intent(out)` — it resets `t`, model parameters (`rho0`), BC registrations, and the
