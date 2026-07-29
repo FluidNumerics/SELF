@@ -89,7 +89,6 @@ add_fortran_tests (
     "transfer_plan_2d_guard_unbuilt.f90"
     "lineareuler2d_amr_soundwave.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
-    "amr_controller_2d_guard_multirank.f90"
     "amr_controller_2d_guard_maxlevel.f90"
     "amr_controller_2d_guard_wrongmesh.f90"
     "refinement_indicator_2d_guard_thresholds.f90"
@@ -99,7 +98,7 @@ add_fortran_tests (
     "refinement_indicator_2d_guard_ivar.f90"
     "adaptive_mesh_2d_guard_unbalanced.f90"
     "meshrefine_2d_guard_multirank.f90"
-    "adaptive_mesh_2d_guard_multirank.f90"
+    "quadtree_2d_guard_multirank.f90"
     "mesh2d_read_ism.f90"
     "mesh2d_read_ismmm.f90"
     "mesh3d_setup.f90"
@@ -220,12 +219,11 @@ set_tests_properties(
     refinement_indicator_2d_guard_ivar
     adaptive_mesh_2d_guard_unbalanced
     meshrefine_2d_guard_multirank
-    adaptive_mesh_2d_guard_multirank
+    quadtree_2d_guard_multirank
     transfer_plan_2d_guard_badleaf
     transfer_plan_2d_guard_snapshot
     transfer_plan_2d_guard_unbuilt
     dgmodel2d_regrid_guard_uninit
-    amr_controller_2d_guard_multirank
     amr_controller_2d_guard_maxlevel
     amr_controller_2d_guard_wrongmesh
     PROPERTIES WILL_FAIL TRUE)
@@ -241,6 +239,7 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedscalarmortarexchange_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_mortar_mpi.f90"
                        "lineareuler2d_mortar_soundwave_mpi.f90"
+                       "lineareuler2d_amr_soundwave_mpi.f90"
                        "advection_diffusion_2d_mortar_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"
                        "advection_diffusion_2d_rk3_pickup_mpi.f90"

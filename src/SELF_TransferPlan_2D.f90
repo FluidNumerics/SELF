@@ -224,13 +224,37 @@ contains
     integer,intent(in) :: nVar
     real(prec),intent(in) :: uOld(1:interp%N+1,1:interp%N+1,1:plan%nOld,1:nVar)
     real(prec),intent(out) :: uNew(1:interp%N+1,1:interp%N+1,1:plan%nNew,1:nVar)
+
+    call ApplyTransferPlanRange(plan,interp,nVar,uOld,1,plan%nNew,uNew)
+
+  endsubroutine ApplyTransferPlan
+
+  subroutine ApplyTransferPlanRange(plan,interp,nVar,uOld,eFirst,eLast,uNew)
+    !! Execute the contiguous sub-range eFirst..eLast of a transfer plan: uNew(:,:,k,:)
+    !! receives the data of new element eFirst+k-1. uOld is the full (global) old field; the
+    !! output is only the requested slice. This is the decomposed-mesh (AMR Stage 5) entry
+    !! point: each rank passes its own contiguous range of the new element ordering and a
+    !! gathered global old solution, and fills exactly its rank-local storage.
+    implicit none
+    type(TransferPlan2D),intent(in) :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: nVar
+    real(prec),intent(in) :: uOld(1:interp%N+1,1:interp%N+1,1:plan%nOld,1:nVar)
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(out) :: uNew(1:interp%N+1,1:interp%N+1,1:eLast-eFirst+1,1:nVar)
     ! Local
-    integer :: li,c,step,Np
+    integer :: li,lo,c,step,Np
     real(prec),allocatable :: buf(:,:,:),kids(:,:,:,:),fam(:,:,:,:)
 
     if(.not. allocated(plan%sourceKind)) then
       print*,__FILE__,':',__LINE__, &
         ' : Error : ApplyTransferPlan called with an unbuilt TransferPlan2D.'
+      stop 1
+    endif
+    if(eFirst < 1 .or. eLast > plan%nNew .or. eLast < eFirst) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : ApplyTransferPlanRange called with a range outside 1..nNew.'
       stop 1
     endif
 
@@ -239,10 +263,11 @@ contains
     allocate(kids(1:Np,1:Np,1:nVar,1:4))
     allocate(fam(1:Np,1:Np,1:nVar,1:4))
 
-    do li = 1,plan%nNew
+    do li = eFirst,eLast
+      lo = li-eFirst+1
 
       if(plan%sourceKind(li) == SELF_TRANSFER_COPY) then
-        uNew(1:Np,1:Np,li,1:nVar) = uOld(1:Np,1:Np,plan%sourceElem(li),1:nVar)
+        uNew(1:Np,1:Np,lo,1:nVar) = uOld(1:Np,1:Np,plan%sourceElem(li),1:nVar)
         cycle
       endif
 
@@ -260,12 +285,12 @@ contains
         buf(1:Np,1:Np,1:nVar) = kids(1:Np,1:Np,1:nVar,plan%path(step,li))
       enddo
 
-      uNew(1:Np,1:Np,li,1:nVar) = buf(1:Np,1:Np,1:nVar)
+      uNew(1:Np,1:Np,lo,1:nVar) = buf(1:Np,1:Np,1:nVar)
 
     enddo
 
     deallocate(buf,kids,fam)
 
-  endsubroutine ApplyTransferPlan
+  endsubroutine ApplyTransferPlanRange
 
 endmodule SELF_TransferPlan_2D

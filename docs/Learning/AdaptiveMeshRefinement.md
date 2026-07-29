@@ -28,8 +28,8 @@ layer that adaptive refinement needs is already in place and tested.
 | Adaptation-epoch transfer plan (old-leaf → new-leaf mapping) | **Implemented** |
 | Model regrid (`DGModel2D%Regrid`) + AMR controller (serial, CPU/GPU) | **Implemented** |
 | Ultrasound point-source example + AMR visualization script | **Implemented** |
-| MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
-| GPU device re-allocation for a changing element count | Designed (Stage 6) |
+| MPI dynamic re-partitioning / load balancing (v1: replicated forest, allgathered migration) | **Implemented** |
+| GPU device re-allocation for a changing element count | **Implemented** (exact-size; amortization/device-side transfer deferred, see Stage 6) |
 
 The full **serial** adaptive-refinement loop is wired into the library today: flag with the
 Stage-1 indicator, mutate the forest (Stage 2b), transfer the solution (Stage 3), balance and
@@ -450,7 +450,18 @@ Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
 - **(next)** Optional **neighbour smoothing** of the trigger flags (avoid isolated refined
   elements), on top of the balance pass.
 
-### Stage 5 — MPI dynamic re-partitioning (work plan)
+### Stage 5 — MPI dynamic re-partitioning — **implemented (v1)**
+
+*Status: implemented. `QuadTreeMesh2D%InitGlobal` builds the rank-replicated forest from
+allgathered global base tables; `EmitMesh` builds the global connectivity/mortar tables on
+every rank and stores only its contiguous slice of a freshly generated decomposition
+(`sideInfo(3)` global ids, global `nUniqueSides`, fully replicated `mortarInfo`, exactly the
+invariants `SideExchange`/`MortarExchange` require); the controller allgathers the indicator
+flags per epoch and migrates the solution through an allgathered global old field applied to
+the rank-local range (`ApplyTransferPlanRange`). Validated by
+`test/lineareuler2d_amr_soundwave_mpi.f90` (2 ranks): the global element trajectory and
+entropy history match the serial run, transfers conserve globally, and a leaf-list checksum
+confirms forest replication. The point-to-point migration upgrade remains open (v2).*
 
 Two observations make a correct first version tractable:
 
@@ -495,6 +506,10 @@ the solution through a host round-trip (`UpdateHost` → transfer → `UpdateDev
   structure as the host `do concurrent` version; kernel pattern follows
   `src/gpu/SELF_Refinement.cpp`). This removes the per-epoch host round-trip of the full
   solution. Requires GPU hardware for validation (GPU workflows do not run on PRs).
+  **Sequencing note:** the Stage-5 v1 migration allgathers the old solution on the host, so on
+  multi-GPU runs a device-side transfer only pays off together with the v2 (point-to-point,
+  optionally GPU-aware) migration; on single-GPU runs it stands alone. Profile the
+  UpdateHost/UpdateDevice cost at a realistic adaptation cadence before building it.
 - **(6b) Amortized capacity — measure first.** Capacity-based (high-water-mark) device
   allocation would avoid the free/realloc cycle, but it changes the allocation semantics of
   the core data classes, which every model shares. Before touching that, profile an adapting

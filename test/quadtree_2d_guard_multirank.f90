@@ -24,32 +24,22 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-! Guard test (expected to abort): the AMR controller is serial-only and must reject a
-! multi-rank mesh.
+! Guard test (expected to abort): QuadTreeMesh2D%Init(mesh) must reject a decomposed
+! (nRanks > 1) mesh - it only stores rank-local elements, so a rank-replicated forest must be
+! built through InitGlobal with gathered global tables instead (the AMR controller does this).
 program test
   use SELF_Constants
-  use self_lineareuler2d
-  use self_mesh_2d
-  use SELF_Geometry_2D
-  use SELF_AMRController_2D
+  use SELF_Mesh_2D
+  use SELF_QuadTreeMesh_2D
   implicit none
-  type(LinearEuler2D) :: modelobj
-  type(Lagrange),target :: interp
   type(Mesh2D),target :: mesh
-  type(SEMQuad),target :: geometry
-  type(AMRController2D) :: controller
+  type(QuadTreeMesh2D) :: forest
   integer :: bcids(1:4)
 
   bcids(1:4) = [SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED]
   call mesh%StructuredMesh(2,2,1,1,0.5_prec,0.5_prec,bcids)
-  call interp%Init(N=2,controlNodeType=GAUSS,M=2,targetNodeType=UNIFORM)
-  call geometry%Init(interp,mesh%nElem)
-  call geometry%GenerateFromMesh(mesh)
-  call modelobj%Init(mesh,geometry)
+  mesh%decomp%nRanks = 2 ! force the single-rank guard
+  call forest%Init(mesh)
 
-  mesh%decomp%nRanks = 2 ! force the serial-only guard
-  call controller%Init(modelobj,refineThreshold=-3.0_prec,coarsenThreshold=-8.0_prec, &
-                       ivar=3,maxLevel=2,nHalo=1)
-
-  print*,"ERROR: AMRController2D multi-rank guard did not trigger"
+  print*,"ERROR: QuadTreeMesh2D%Init multi-rank guard did not trigger"
 endprogram test

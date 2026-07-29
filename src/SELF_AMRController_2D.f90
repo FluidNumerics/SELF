@@ -49,11 +49,20 @@ module SELF_AMRController_2D
 !! (double-buffered: the previous pair is freed after the model is rebound to the new pair).
 !! The base mesh and geometry the model was initialized with belong to the caller and are
 !! never freed here, but the base mesh must outlive the controller: it supplies the
-!! boundary-condition and material metadata for every emitted mesh. After controller%Free the
-!! model's mesh/geometry pointers are dangling, so free or stop using the model first.
+!! boundary-condition metadata and the communicator for every emitted mesh. After
+!! controller%Free the model's mesh/geometry pointers are dangling, so free or stop using the
+!! model first.
 !!
-!! Serial only, matching the rest of the AMR stack (MPI repartitioning is AMR Stage 5).
-!! Adapt runs between time steps at the caller's cadence; it is not a per-step hot path.
+!! MPI (AMR Stage 5): the forest is rank-replicated. At Init the global base-mesh tables are
+!! allgathered so every rank builds an identical forest; each epoch the rank-local indicator
+!! flags are allgathered (one small collective) so every rank applies identical mutations and
+!! computes identical transfer plans and global connectivity. EmitMesh re-decomposes the new
+!! leaf list into contiguous (space-filling-curve) ranges, so repartitioning and load balance
+!! are implicit in every epoch. Solution migration gathers the old rank-local solutions into a
+!! global field and applies the plan to the new rank-local range only - simple and correct at
+!! single-node scale; a point-to-point exchange is a drop-in replacement behind the same
+!! interface. All collectives run between time steps at the adaptation cadence; nothing is
+!! added to the time-stepping loop.
 !!
 !! Because refinement halves the element scale per level, an explicit-stability time step
 !! chosen for the base mesh must shrink with the finest active level;
@@ -69,6 +78,8 @@ module SELF_AMRController_2D
   use SELF_AdaptiveMesh_2D
   use SELF_RefinementIndicator_2D
   use SELF_TransferPlan_2D
+  use SELF_DomainDecomposition
+  use mpi
 
   implicit none
 
@@ -119,11 +130,6 @@ contains
         ' : Error : AMRController2D%Init requires an initialized model.'
       stop 1
     endif
-    if(model%mesh%decomp%nRanks > 1) then
-      print*,__FILE__,':',__LINE__, &
-        ' : Error : AMRController2D is serial-only pending AMR Stage 5 (MPI repartitioning).'
-      stop 1
-    endif
     if(maxLevel < 0 .or. nHalo < 0) then
       print*,__FILE__,':',__LINE__, &
         ' : Error : AMRController2D%Init requires maxLevel >= 0 and nHalo >= 0.'
@@ -141,10 +147,106 @@ contains
     this%refineThreshold = refineThreshold
     this%coarsenThreshold = coarsenThreshold
 
-    call this%forest%Init(model%mesh)
+    ! Rank-replicated forest: on one rank, straight from the mesh; on several, from the
+    ! allgathered global base tables (every rank builds the identical forest).
+    if(model%mesh%decomp%nRanks > 1) then
+      call InitForestFromDecomposedMesh(this%forest,model%mesh)
+    else
+      call this%forest%Init(model%mesh)
+    endif
     call this%indicator%Init(this%interp,model%mesh%nElem,refineThreshold,coarsenThreshold)
 
   endsubroutine Init_AMRController2D
+
+  subroutine InitForestFromDecomposedMesh(forest,mesh)
+    !! Build a rank-replicated forest over a decomposed base mesh: allgather the global
+    !! node coordinates, side table, and material ids (by the decomposition's contiguous
+    !! element ownership) and initialize the forest from the global tables. Collective over
+    !! the mesh communicator; runs once, at controller initialization.
+    implicit none
+    type(QuadTreeMesh2D),intent(out) :: forest
+    type(Mesh2D),intent(in) :: mesh
+    ! Local
+    integer :: nG,nGeo,r,s
+    real(prec),allocatable :: coordsG(:,:,:,:)
+    integer,allocatable :: siG(:,:,:),matG(:)
+    integer,allocatable :: nbr(:,:),nbrSide(:,:),flip(:,:),bc(:,:)
+
+    nG = mesh%decomp%nElem ! global element count
+    nGeo = mesh%nGeo
+
+    allocate(coordsG(1:2,1:nGeo+1,1:nGeo+1,1:nG))
+    allocate(siG(1:5,1:4,1:nG))
+    allocate(matG(1:nG))
+    call AllgatherPerElemReals(mesh%decomp,2*(nGeo+1)*(nGeo+1), &
+                               mesh%nodeCoords,coordsG)
+    call AllgatherPerElemInts(mesh%decomp,20,mesh%sideInfo,siG)
+    call AllgatherPerElemInts(mesh%decomp,1,mesh%elemMaterial,matG)
+
+    ! Decode the global side table (sideInfo(3) already carries global element ids).
+    allocate(nbr(1:4,1:nG),nbrSide(1:4,1:nG),flip(1:4,1:nG),bc(1:4,1:nG))
+    do r = 1,nG
+      do s = 1,4
+        nbr(s,r) = siG(3,s,r)
+        nbrSide(s,r) = siG(4,s,r)/10
+        flip(s,r) = mod(siG(4,s,r),10)
+        bc(s,r) = siG(5,s,r)
+      enddo
+    enddo
+
+    call forest%InitGlobal(nG,nGeo,mesh%quadrature,coordsG,nbr,nbrSide,flip,bc,matG)
+
+    deallocate(coordsG,siG,matG,nbr,nbrSide,flip,bc)
+
+  endsubroutine InitForestFromDecomposedMesh
+
+  subroutine AllgatherPerElemInts(decomp,perElem,localArr,globalArr)
+    !! Allgather an integer array with perElem entries per element from the decomposition's
+    !! contiguous rank-local element ranges into the global element ordering.
+    implicit none
+    type(DomainDecomposition),intent(in) :: decomp
+    integer,intent(in) :: perElem
+    integer,intent(in) :: localArr(*)
+    integer,intent(out) :: globalArr(*)
+    ! Local
+    integer :: r,ierror
+    integer,allocatable :: counts(:),displs(:)
+
+    allocate(counts(1:decomp%nRanks),displs(1:decomp%nRanks))
+    do r = 1,decomp%nRanks
+      counts(r) = perElem*(decomp%offsetElem(r+1)-decomp%offsetElem(r))
+      displs(r) = perElem*decomp%offsetElem(r)
+    enddo
+    call mpi_allgatherv(localArr,counts(decomp%rankId+1),MPI_INTEGER, &
+                        globalArr,counts,displs,MPI_INTEGER, &
+                        decomp%mpiComm,ierror)
+    deallocate(counts,displs)
+
+  endsubroutine AllgatherPerElemInts
+
+  subroutine AllgatherPerElemReals(decomp,perElem,localArr,globalArr)
+    !! Allgather a real(prec) array with perElem entries per element from the decomposition's
+    !! contiguous rank-local element ranges into the global element ordering.
+    implicit none
+    type(DomainDecomposition),intent(in) :: decomp
+    integer,intent(in) :: perElem
+    real(prec),intent(in) :: localArr(*)
+    real(prec),intent(out) :: globalArr(*)
+    ! Local
+    integer :: r,ierror
+    integer,allocatable :: counts(:),displs(:)
+
+    allocate(counts(1:decomp%nRanks),displs(1:decomp%nRanks))
+    do r = 1,decomp%nRanks
+      counts(r) = perElem*(decomp%offsetElem(r+1)-decomp%offsetElem(r))
+      displs(r) = perElem*decomp%offsetElem(r)
+    enddo
+    call mpi_allgatherv(localArr,counts(decomp%rankId+1),decomp%mpiPrec, &
+                        globalArr,counts,displs,decomp%mpiPrec, &
+                        decomp%mpiComm,ierror)
+    deallocate(counts,displs)
+
+  endsubroutine AllgatherPerElemReals
 
   subroutine Free_AMRController2D(this)
     !! Release the forest, the indicator, and any controller-emitted mesh/geometry. The
@@ -180,7 +282,7 @@ contains
     class(DGModel2D_t),intent(inout) :: model
     logical,intent(out) :: adapted
     ! Local
-    integer :: li,s,pass,node,nbr,ns,nf,nOld,Np,changed
+    integer :: li,s,pass,node,nbr,ns,nf,nOld,Np,changed,eFirst,eLast,iv
     integer,allocatable :: flag(:),spread(:)
     integer,allocatable :: oldLeaf(:)
     integer,allocatable :: leafIdx(:)
@@ -198,10 +300,22 @@ contains
     endif
 
     ! ---- 1. Indicator flags from the current solution ----
+    ! The indicator is rank-local; the (replicated) forest needs the global per-leaf flags, so
+    ! on nRanks > 1 they are allgathered by the active decomposition's element ranges. From
+    ! here on every rank applies identical mutations to its identical forest copy.
     call this%indicator%Estimate(model%solution,this%ivar)
     nOld = this%forest%nLeaves
     allocate(flag(1:nOld))
-    flag(1:nOld) = this%indicator%flag(1:nOld)
+    if(model%mesh%decomp%nRanks > 1) then
+      if(model%mesh%decomp%nElem /= nOld) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : the active decomposition does not span the forest leaf list.'
+        stop 1
+      endif
+      call AllgatherPerElemInts(model%mesh%decomp,1,this%indicator%flag,flag)
+    else
+      flag(1:nOld) = this%indicator%flag(1:nOld)
+    endif
 
     ! ---- 2. Cap refinement at maxLevel ----
     do li = 1,nOld
@@ -268,17 +382,30 @@ contains
     call newGeom%Init(this%interp,newMesh%nElem)
     call newGeom%GenerateFromMesh(newMesh)
 
-    ! ---- 6. Regrid the model and transfer the solution ----
+    ! ---- 6. Regrid the model and transfer (migrate) the solution ----
+    ! uOld is the GLOBAL old field: on one rank it is a copy of the model solution; on several
+    ! it is allgathered from the rank-local solutions (v1 migration - each rank then fills
+    ! exactly its new contiguous element range from the global field, so elements that changed
+    ! ranks are migrated by construction).
     Np = this%interp%N+1
     allocate(uOld(1:Np,1:Np,1:nOld,1:model%nvar))
     call model%solution%UpdateHost()
-    uOld(1:Np,1:Np,1:nOld,1:model%nvar) = &
-      model%solution%interior(1:Np,1:Np,1:nOld,1:model%nvar)
+    if(model%mesh%decomp%nRanks > 1) then
+      do iv = 1,model%nvar
+        call AllgatherPerElemReals(model%mesh%decomp,Np*Np, &
+                                   model%solution%interior(:,:,:,iv),uOld(:,:,:,iv))
+      enddo
+    else
+      uOld(1:Np,1:Np,1:nOld,1:model%nvar) = &
+        model%solution%interior(1:Np,1:Np,1:nOld,1:model%nvar)
+    endif
 
     call model%Regrid(newMesh,newGeom)
 
-    call ApplyTransferPlan(plan,this%interp,model%nvar, &
-                           uOld,model%solution%interior)
+    eFirst = newMesh%decomp%offsetElem(newMesh%decomp%rankId+1)+1
+    eLast = newMesh%decomp%offsetElem(newMesh%decomp%rankId+2)
+    call ApplyTransferPlanRange(plan,this%interp,model%nvar, &
+                                uOld,eFirst,eLast,model%solution%interior)
     call model%solution%UpdateDevice()
     deallocate(uOld)
     call plan%Free()
