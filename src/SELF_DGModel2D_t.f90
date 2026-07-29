@@ -48,8 +48,8 @@ module SELF_DGModel2D_t
     type(MappedScalar2D)   :: fluxDivergence
     type(MappedScalar2D)   :: dSdt
     type(MappedScalar2D)   :: workSol
-    type(Mesh2D),pointer   :: mesh
-    type(SEMQuad),pointer  :: geometry
+    type(Mesh2D),pointer   :: mesh => null()
+    type(SEMQuad),pointer  :: geometry => null()
     type(BoundaryConditionList) :: hyperbolicBCs
     type(BoundaryConditionList) :: parabolicBCs
 
@@ -58,6 +58,7 @@ module SELF_DGModel2D_t
     procedure :: Init => Init_DGModel2D_t
     procedure :: SetMetadata => SetMetadata_DGModel2D_t
     procedure :: Free => Free_DGModel2D_t
+    procedure :: Regrid => Regrid_DGModel2D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel2D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel2D_t
@@ -162,6 +163,70 @@ contains
     call this%AdditionalFree()
 
   endsubroutine Free_DGModel2D_t
+
+  subroutine Regrid_DGModel2D_t(this,mesh,geometry)
+    !! Rebind a live model to a new mesh/geometry pair (AMR regrid). The mesh-sized solution
+    !! storage is reallocated and the boundary-condition registrations and maps are rebuilt
+    !! for the new mesh, while everything that is not mesh-sized is preserved: the time state
+    !! (t, dt, entropy, IO counter), the time-integrator selection, configuration flags, and
+    !! any model-specific parameters (Init is intent(out) and would reset all of these).
+    !! nvar/nstepped are unchanged - the model solves the same equations on a new mesh.
+    !!
+    !! The solution interior is left UNINITIALIZED: the caller transfers the solution from the
+    !! previous mesh (e.g. ApplyTransferPlan on a BuildTransferPlan mapping) and then calls
+    !! solution%UpdateDevice. Regrid runs once per adaptation epoch, between time steps; it is
+    !! not a per-step hot path.
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    type(Mesh2D),intent(in),target :: mesh
+    type(SEMQuad),intent(in),target :: geometry
+
+    if(.not. associated(this%mesh)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : Regrid called on a model that has not been initialized.'
+      stop 1
+    endif
+
+    ! Free everything sized by the old mesh, mirroring Free (AdditionalFree releases any
+    ! model-specific mesh-sized state so AdditionalInit can rebuild it below).
+    call this%solution%Free()
+    call this%workSol%Free()
+    call this%dSdt%Free()
+    call this%solutionGradient%Free()
+    call this%flux%Free()
+    call this%source%Free()
+    call this%fluxDivergence%Free()
+    call this%hyperbolicBCs%Free()
+    call this%parabolicBCs%Free()
+    call this%AdditionalFree()
+
+    ! Rebuild on the new mesh, mirroring the mesh-sized portion of Init.
+    this%mesh => mesh
+    this%geometry => geometry
+
+    call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+
+    call this%solution%AssociateGeometry(geometry)
+    call this%solutionGradient%AssociateGeometry(geometry)
+    call this%flux%AssociateGeometry(geometry)
+    call this%fluxDivergence%AssociateGeometry(geometry)
+
+    call this%hyperbolicBCs%Init()
+    call this%parabolicBCs%Init()
+
+    call this%AdditionalInit()
+
+    call this%MapBoundaryConditions()
+
+    call this%SetMetadata()
+
+  endsubroutine Regrid_DGModel2D_t
 
   subroutine ReportMetrics_DGModel2D_t(this)
     !! Base method for reporting the entropy of a model

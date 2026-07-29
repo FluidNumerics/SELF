@@ -39,6 +39,9 @@ function (add_fortran_tests)
         target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include)
 
         add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+        # Label example runs so slow CI configurations (debug/coverage) can opt out with
+        # `ctest -LE example` (see issue #157).
+        set_tests_properties(${TEST_NAME} PROPERTIES LABELS "example")
         install(TARGETS ${TEST_NAME} DESTINATION test)
     endforeach ()
 
@@ -54,6 +57,7 @@ function (add_mpi_fortran_tests)
         target_include_directories(${TEST_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include)
 
         add_test(NAME ${TEST_NAME} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS} ${SELF_MPIEXEC_OPTIONS} ${TEST_NAME})
+        set_tests_properties(${TEST_NAME} PROPERTIES LABELS "example;parallel")
 
         install(TARGETS ${TEST_NAME} DESTINATION test)
     endforeach ()
@@ -67,6 +71,8 @@ add_fortran_tests (
   "linear_euler2d_planewave_propagation.f90"
   "linear_euler2d_pml_planewave.f90"
   "linear_euler2d_boneandmarrow.f90"
+  "linear_euler2d_amr_ultrasound_pointsource.f90"
+  "linear_euler2d_amr_boneandmarrow.f90"
   "linear_shallow_water2d_nonormalflow.f90"
   "linear_shallow_water2d_planetaryrossby_wave.f90"
   "linear_shallow_water2d_kelvinwaves.f90"

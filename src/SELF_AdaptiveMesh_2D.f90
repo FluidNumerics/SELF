@@ -46,8 +46,15 @@ module SELF_AdaptiveMesh_2D
 !! two sub-edge global side ids), with sub-edge 1 covering the big edge coordinate [-1,0] and
 !! sub-edge 2 covering [0,1], and the small-side flips inherited from the base face flip.
 !!
-!! Serial only, matching the rest of the AMR stack (dynamic MPI re-partitioning is Stage 5): the
-!! output replicates the input mesh's single-rank decomposition rather than re-decomposing.
+!! Decomposition (AMR Stage 5): every rank builds the same GLOBAL connectivity and mortar
+!! tables deterministically from the (rank-replicated) forest, generates a fresh contiguous
+!! decomposition over the leaf list - leaf-list order is Morton order within each root tree, so
+!! contiguous ranges are space-filling-curve partitions - and stores only its local slice of
+!! the element-sized arrays, exactly as the built-in mesh constructors do. sideInfo(3) carries
+!! global element ids, nUniqueSides is the global side count, and mortarInfo/nMortars are
+!! replicated in full with global ids on every rank, which is what SideExchange/MortarExchange
+!! require. Repartitioning is implicit: each epoch's emitted mesh is re-decomposed over the new
+!! leaf list, so equal-count partitions move with the refinement.
 
   use SELF_Constants
   use SELF_Lagrange
@@ -60,9 +67,11 @@ module SELF_AdaptiveMesh_2D
 contains
 
   subroutine EmitMesh(forest,baseMesh,outMesh)
-    !! Build outMesh (a conforming-or-mortar Mesh2D_t) from a 2:1-balanced forest. baseMesh is the
-    !! mesh the forest was initialised from (supplies BC/material metadata and the serial MPI
-    !! state). The forest must already be balanced (MaxLevelJump <= 1); EmitMesh does not mutate it.
+    !! Build outMesh (a conforming-or-mortar Mesh2D_t) from a 2:1-balanced forest. baseMesh is
+    !! the mesh the forest was initialised from (supplies BC metadata and the communicator; on
+    !! nRanks > 1 the forest must be rank-replicated so every rank emits identical global
+    !! tables). The forest must already be balanced (MaxLevelJump <= 1); EmitMesh does not
+    !! mutate it.
     implicit none
     type(QuadTreeMesh2D),intent(in) :: forest
     type(Mesh2D),intent(in) :: baseMesh
@@ -70,6 +79,7 @@ contains
     ! Local
     integer :: nEl,nGeo,nBCs,li,s,node,nbr,ns,nf,e,ne,k
     integer :: m,nMortar,gid,gidA,gidB,t1,t2,c1,c2,es1,es2
+    integer :: eFirst,eLast,nLocal
     type(Lagrange) :: geomInterp
     integer,allocatable :: leafIdx(:)
     integer,allocatable :: si(:,:,:)
@@ -79,11 +89,6 @@ contains
     if(forest%MaxLevelJump() > 1) then
       print*,__FILE__,':',__LINE__, &
         ' : Error : EmitMesh requires a 2:1-balanced forest; call Balance2to1 first.'
-      stop 1
-    endif
-    if(baseMesh%decomp%nRanks > 1) then
-      print*,__FILE__,':',__LINE__, &
-        ' : Error : EmitMesh is serial-only pending AMR Stage 5 (MPI repartitioning).'
       stop 1
     endif
 
@@ -179,27 +184,35 @@ contains
       enddo
     enddo
 
-    ! ---- Allocate and populate the output mesh (serial decomposition, as UniformRefineMesh) ----
+    ! ---- Allocate and populate the output mesh (fresh contiguous decomposition) ----
     ! Initialize on the base mesh's communicator so MPI is reused (not re-initialized) and the
-    ! process-wide live-decomposition count stays correct across mesh lifetimes.
+    ! process-wide live-decomposition count stays correct across mesh lifetimes. The
+    ! decomposition is regenerated over the (global) leaf list, and this rank stores only its
+    ! contiguous slice eFirst:eLast, exactly as the built-in mesh constructors do.
     call outMesh%decomp%Init(comm=baseMesh%decomp%mpiComm)
     call outMesh%decomp%GenerateDecomposition(nEl,64*max(gid,1))
+    eFirst = outMesh%decomp%offsetElem(outMesh%decomp%rankId+1)+1
+    eLast = outMesh%decomp%offsetElem(outMesh%decomp%rankId+2)
+    nLocal = eLast-eFirst+1
 
-    call outMesh%Init(nGeo,nEl,4*nEl,4*nEl,nBCs)
-    outMesh%nUniqueSides = gid
+    call outMesh%Init(nGeo,nLocal,4*nLocal,4*nLocal,nBCs)
+    outMesh%nGlobalElem = nEl
+    outMesh%nUniqueSides = gid ! GLOBAL side count on every rank (the MPI tag stride)
     outMesh%quadrature = forest%quadrature
 
-    ! Leaf geometry.
+    ! Leaf geometry (rank-local leaves only).
     allocate(coords(1:2,1:nGeo+1,1:nGeo+1))
-    do li = 1,nEl
+    do li = eFirst,eLast
       call forest%LeafCoords(li,geomInterp,coords)
-      outMesh%nodeCoords(1:2,1:nGeo+1,1:nGeo+1,li) = coords(1:2,1:nGeo+1,1:nGeo+1)
+      outMesh%nodeCoords(1:2,1:nGeo+1,1:nGeo+1,li-eFirst+1) = coords(1:2,1:nGeo+1,1:nGeo+1)
     enddo
 
-    outMesh%sideInfo(1:5,1:4,1:nEl) = si(1:5,1:4,1:nEl)
+    ! Local slice of the global side table; sideInfo(3) keeps GLOBAL neighbour element ids,
+    ! which is what SideExchange consumes (locality decided through decomp%elemToRank).
+    outMesh%sideInfo(1:5,1:4,1:nLocal) = si(1:5,1:4,eFirst:eLast)
     outMesh%globalNodeIDs = 0 ! node ids are unused by the solver (flips are set directly)
 
-    ! Boundary-condition metadata.
+    ! Boundary-condition metadata (replicated on every rank).
     if(nBCs > 0) then
       outMesh%BCType(1:4,1:nBCs) = baseMesh%BCType(1:4,1:nBCs)
       do k = 1,nBCs
@@ -207,13 +220,14 @@ contains
       enddo
     endif
 
-    ! Material table: each leaf inherits its root element's material.
+    ! Material table: each leaf inherits its root element's material (rootMaterial is global
+    ! on the forest, so this works for any decomposition of the emitted mesh).
     outMesh%nMaterials = baseMesh%nMaterials
     if(allocated(outMesh%materialNames)) deallocate(outMesh%materialNames)
     allocate(outMesh%materialNames(1:baseMesh%nMaterials))
     outMesh%materialNames(1:baseMesh%nMaterials) = baseMesh%materialNames(1:baseMesh%nMaterials)
-    do li = 1,nEl
-      outMesh%elemMaterial(li) = baseMesh%elemMaterial(forest%rootElem(forest%leaf(li)))
+    do li = eFirst,eLast
+      outMesh%elemMaterial(li-eFirst+1) = forest%rootMaterial(forest%rootElem(forest%leaf(li)))
     enddo
 
     ! Mortar table.

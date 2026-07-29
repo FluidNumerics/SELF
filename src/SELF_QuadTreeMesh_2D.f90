@@ -70,6 +70,7 @@ module SELF_QuadTreeMesh_2D
     integer,allocatable :: rootNbrSide(:,:) ! (4,nRoots)
     integer,allocatable :: rootFlip(:,:) ! (4,nRoots)
     integer,allocatable :: rootBC(:,:) ! (4,nRoots) base boundary-condition id per side
+    integer,allocatable :: rootMaterial(:) ! (nRoots) base material id per root element
 
     ! ---- Forest node storage (roots occupy node ids 1:nRoots) ----
     integer :: nNodes = 0
@@ -86,6 +87,7 @@ module SELF_QuadTreeMesh_2D
 
   contains
     procedure,public :: Init => Init_QuadTreeMesh2D
+    procedure,public :: InitGlobal => InitGlobal_QuadTreeMesh2D
     procedure,public :: Free => Free_QuadTreeMesh2D
     procedure,public :: RefineNode => RefineNode_QuadTreeMesh2D
     procedure,public :: AdaptFromFlags => AdaptFromFlags_QuadTreeMesh2D
@@ -103,34 +105,83 @@ contains
   subroutine Init_QuadTreeMesh2D(this,mesh)
     !! Initialize the forest with one root per base-mesh element (all leaves at level 0). The
     !! base geometry (node coordinates) is copied so leaf geometry can be regenerated after any
-    !! amount of refinement without holding a reference to the mesh.
+    !! amount of refinement without holding a reference to the mesh. Requires a single-rank
+    !! mesh (a decomposed mesh only stores its local elements); a rank-replicated forest over a
+    !! decomposed base is built by gathering the global tables and calling InitGlobal.
     implicit none
     class(QuadTreeMesh2D),intent(out) :: this
     type(Mesh2D),intent(in) :: mesh
     ! Local
     integer :: r,s
+    integer,allocatable :: nbr(:,:),nbrSide(:,:),flip(:,:),bc(:,:),mat(:)
 
-    this%nGeo = mesh%nGeo
-    this%quadrature = mesh%quadrature
-    this%nRoots = mesh%nElem
+    if(mesh%decomp%nRanks > 1) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : QuadTreeMesh2D%Init requires a single-rank mesh; gather the global base'// &
+        ' tables and call InitGlobal for a decomposed base mesh.'
+      stop 1
+    endif
 
-    allocate(this%rootCoords(1:2,1:mesh%nGeo+1,1:mesh%nGeo+1,1:mesh%nElem))
-    this%rootCoords(1:2,1:mesh%nGeo+1,1:mesh%nGeo+1,1:mesh%nElem) = &
-      mesh%nodeCoords(1:2,1:mesh%nGeo+1,1:mesh%nGeo+1,1:mesh%nElem)
-
-    ! Root face connectivity from the (conforming) base mesh sideInfo.
-    allocate(this%rootNbr(1:4,1:mesh%nElem))
-    allocate(this%rootNbrSide(1:4,1:mesh%nElem))
-    allocate(this%rootFlip(1:4,1:mesh%nElem))
-    allocate(this%rootBC(1:4,1:mesh%nElem))
+    allocate(nbr(1:4,1:mesh%nElem),nbrSide(1:4,1:mesh%nElem))
+    allocate(flip(1:4,1:mesh%nElem),bc(1:4,1:mesh%nElem))
+    allocate(mat(1:mesh%nElem))
     do r = 1,mesh%nElem
       do s = 1,4
-        this%rootNbr(s,r) = mesh%sideInfo(3,s,r)
-        this%rootNbrSide(s,r) = mesh%sideInfo(4,s,r)/10
-        this%rootFlip(s,r) = mod(mesh%sideInfo(4,s,r),10)
-        this%rootBC(s,r) = mesh%sideInfo(5,s,r)
+        nbr(s,r) = mesh%sideInfo(3,s,r)
+        nbrSide(s,r) = mesh%sideInfo(4,s,r)/10
+        flip(s,r) = mod(mesh%sideInfo(4,s,r),10)
+        bc(s,r) = mesh%sideInfo(5,s,r)
       enddo
+      mat(r) = mesh%elemMaterial(r)
     enddo
+
+    call this%InitGlobal(mesh%nElem,mesh%nGeo,mesh%quadrature, &
+                         mesh%nodeCoords,nbr,nbrSide,flip,bc,mat)
+
+    deallocate(nbr,nbrSide,flip,bc,mat)
+
+  endsubroutine Init_QuadTreeMesh2D
+
+  subroutine InitGlobal_QuadTreeMesh2D(this,nRoots,nGeo,quadrature,rootCoords, &
+                                       rootNbr,rootNbrSide,rootFlip,rootBC,rootMaterial)
+    !! Initialize the forest directly from GLOBAL base-mesh tables (one root per global base
+    !! element, all leaves at level 0). This is the initialization path for a rank-replicated
+    !! forest over a decomposed base mesh (AMR Stage 5): every rank passes the same gathered
+    !! tables and holds an identical forest. rootNbr carries global element ids (0 = physical
+    !! boundary), rootNbrSide/rootFlip decode the base sideInfo(4) pairing, rootBC the base
+    !! boundary-condition id per side, and rootMaterial the base material id per element.
+    implicit none
+    class(QuadTreeMesh2D),intent(out) :: this
+    integer,intent(in) :: nRoots
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: quadrature
+    real(prec),intent(in) :: rootCoords(1:2,1:nGeo+1,1:nGeo+1,1:nRoots)
+    integer,intent(in) :: rootNbr(1:4,1:nRoots)
+    integer,intent(in) :: rootNbrSide(1:4,1:nRoots)
+    integer,intent(in) :: rootFlip(1:4,1:nRoots)
+    integer,intent(in) :: rootBC(1:4,1:nRoots)
+    integer,intent(in) :: rootMaterial(1:nRoots)
+    ! Local
+    integer :: r
+
+    this%nGeo = nGeo
+    this%quadrature = quadrature
+    this%nRoots = nRoots
+
+    allocate(this%rootCoords(1:2,1:nGeo+1,1:nGeo+1,1:nRoots))
+    this%rootCoords(1:2,1:nGeo+1,1:nGeo+1,1:nRoots) = &
+      rootCoords(1:2,1:nGeo+1,1:nGeo+1,1:nRoots)
+
+    allocate(this%rootNbr(1:4,1:nRoots))
+    allocate(this%rootNbrSide(1:4,1:nRoots))
+    allocate(this%rootFlip(1:4,1:nRoots))
+    allocate(this%rootBC(1:4,1:nRoots))
+    allocate(this%rootMaterial(1:nRoots))
+    this%rootNbr(1:4,1:nRoots) = rootNbr(1:4,1:nRoots)
+    this%rootNbrSide(1:4,1:nRoots) = rootNbrSide(1:4,1:nRoots)
+    this%rootFlip(1:4,1:nRoots) = rootFlip(1:4,1:nRoots)
+    this%rootBC(1:4,1:nRoots) = rootBC(1:4,1:nRoots)
+    this%rootMaterial(1:nRoots) = rootMaterial(1:nRoots)
 
     ! Roots are the first nRoots nodes.
     this%capacity = max(4*this%nRoots,16)
@@ -151,7 +202,7 @@ contains
 
     call this%RebuildLeaves()
 
-  endsubroutine Init_QuadTreeMesh2D
+  endsubroutine InitGlobal_QuadTreeMesh2D
 
   subroutine Free_QuadTreeMesh2D(this)
     implicit none
@@ -162,6 +213,7 @@ contains
     if(allocated(this%rootNbrSide)) deallocate(this%rootNbrSide)
     if(allocated(this%rootFlip)) deallocate(this%rootFlip)
     if(allocated(this%rootBC)) deallocate(this%rootBC)
+    if(allocated(this%rootMaterial)) deallocate(this%rootMaterial)
     if(allocated(this%level)) deallocate(this%level)
     if(allocated(this%parent)) deallocate(this%parent)
     if(allocated(this%quadrant)) deallocate(this%quadrant)

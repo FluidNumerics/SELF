@@ -24,21 +24,40 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
 
-! Guard test (expected to abort): EmitMesh is serial-only and must reject a multi-rank base mesh.
+! Guard test (expected to abort): Adapt must reject a model that is no longer running on the
+! controller's active mesh (here the model was re-initialized on a different mesh after the
+! controller attached).
 program test
   use SELF_Constants
-  use SELF_Mesh_2D
-  use SELF_QuadTreeMesh_2D
-  use SELF_AdaptiveMesh_2D
+  use self_lineareuler2d
+  use self_mesh_2d
+  use SELF_Geometry_2D
+  use SELF_AMRController_2D
   implicit none
-  type(Mesh2D),target :: baseMesh,outMesh
-  type(QuadTreeMesh2D) :: forest
+  type(LinearEuler2D) :: modelobj
+  type(Lagrange),target :: interp
+  type(Mesh2D),target :: meshA,meshB
+  type(SEMQuad),target :: geomA,geomB
+  type(AMRController2D) :: controller
   integer :: bcids(1:4)
+  logical :: adapted
 
   bcids(1:4) = [SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED,SELF_BC_PRESCRIBED]
-  call baseMesh%StructuredMesh(2,2,1,1,0.5_prec,0.5_prec,bcids)
-  call forest%Init(baseMesh) ! balanced (all level 0), so the balance guard passes
-  baseMesh%decomp%nRanks = 2 ! force the serial-only guard
-  call EmitMesh(forest,baseMesh,outMesh)
-  print*,"ERROR: EmitMesh multi-rank guard did not trigger"
+  call meshA%StructuredMesh(2,2,1,1,0.5_prec,0.5_prec,bcids)
+  call meshB%StructuredMesh(2,2,1,1,0.5_prec,0.5_prec,bcids)
+  call interp%Init(N=2,controlNodeType=GAUSS,M=2,targetNodeType=UNIFORM)
+  call geomA%Init(interp,meshA%nElem)
+  call geomA%GenerateFromMesh(meshA)
+  call geomB%Init(interp,meshB%nElem)
+  call geomB%GenerateFromMesh(meshB)
+
+  call modelobj%Init(meshA,geomA)
+  call controller%Init(modelobj,refineThreshold=-3.0_prec,coarsenThreshold=-8.0_prec, &
+                       ivar=3,maxLevel=2,nHalo=1)
+
+  call modelobj%Init(meshB,geomB) ! rebind the model behind the controller's back
+
+  call controller%Adapt(modelobj,adapted) ! must stop 1
+
+  print*,"ERROR: AMRController2D wrong-mesh guard did not trigger"
 endprogram test

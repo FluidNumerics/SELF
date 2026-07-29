@@ -25,8 +25,11 @@ layer that adaptive refinement needs is already in place and tested.
 | Solution transfer (prolongation / restriction, conservative) | **Implemented** |
 | Forest face-neighbour queries + 2:1 balancing | **Implemented** |
 | Hanging-node / mortar-table + `Mesh2D_t` emission | **Implemented** |
-| MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
-| GPU device re-allocation for a changing element count | Designed (Stage 6) |
+| Adaptation-epoch transfer plan (old-leaf → new-leaf mapping) | **Implemented** |
+| Model regrid (`DGModel2D%Regrid`) + AMR controller (serial, CPU/GPU) | **Implemented** |
+| Ultrasound point-source example + AMR visualization script | **Implemented** |
+| MPI dynamic re-partitioning / load balancing (v1: replicated forest, allgathered migration) | **Implemented** |
+| GPU device re-allocation for a changing element count | **Implemented** (exact-size; amortization/device-side transfer deferred, see Stage 6) |
 
 The full **serial** adaptive-refinement loop is wired into the library today: flag with the
 Stage-1 indicator, mutate the forest (Stage 2b), transfer the solution (Stage 3), balance and
@@ -307,6 +310,67 @@ now on a mesh produced entirely by the AMR pipeline.
 With this, the serial loop closes: `indicator → forest.AdaptFromFlags → (transfer solution) →
 forest.Balance2to1 → EmitMesh` yields a runnable adaptive mesh.
 
+## 2.10 Adaptation-epoch transfer plan (implemented)
+
+`SELF_TransferPlan_2D` is the driver layer of Stage 3: it connects the element-local transfer
+operators (§2.7) to an actual forest mutation. One *adaptation epoch* is: snapshot the leaf
+list (`nOld`, `oldLeaf`), mutate the forest (at most one `AdaptFromFlags`, then any number of
+refinements — `Balance2to1`, `RefineNode`), then `BuildTransferPlan(forest, nOld, oldLeaf,
+plan)`. The plan records, for every new leaf in leaf-list order (the element ordering `EmitMesh`
+produces), where its solution comes from in the old element ordering:
+
+- **copy** — the leaf survived unchanged;
+- **prolong** — the leaf descends from an old leaf; the old polynomial is interpolated down the
+  quadtree path, one step per level, so a fresh child re-refined by balance ripple in the same
+  epoch is handled by depth > 1;
+- **restrict** — the leaf is (an ancestor of) a coarsened family; the four old children are
+  L2-projected onto their parent, then prolonged down any further steps (depth > 0 occurs when
+  a just-coarsened parent is immediately re-refined by balancing).
+
+Reconstruction after the fact is possible because forest node ids are stable: refinement
+appends nodes and coarsening only detaches children, whose `level`/`parent`/`quadrant` entries
+persist. Each new leaf ascends its parent chain until it meets an old leaf or a complete
+old-leaf family; a snapshot that cannot explain a leaf fails loudly. `ApplyTransferPlan`
+executes the plan on nodal data in the `MappedScalar2D%interior` layout and inherits the §2.7
+identities (exact prolongation, conservative restriction, exact refine-coarsen round trips).
+
+`test/transfer_plan_2d.f90` validates one epoch that simultaneously coarsens (then re-refines)
+a family, refines a leaf whose child is refined again (depth-2 prolongation), and lets 2:1
+balancing ripple into an untouched root: the classification multiplicities are checked exactly;
+a bilinear field is reproduced at the emitted new mesh's nodes to roundoff through all three
+transfer kinds; the Jacobian-weighted global integral of a non-polynomial field is conserved to
+roundoff; and refine-everything/coarsen-everything across two epochs is the identity.
+
+## 2.11 Model regrid and the AMR controller (implemented)
+
+Two pieces close the loop around a *live, time-stepping model*:
+
+- **`DGModel2D%Regrid(mesh, geometry)`** rebinds a model to a new mesh/geometry pair: the
+  mesh-sized solution storage is reallocated and the boundary-condition registrations and maps
+  are rebuilt (mirroring the mesh-sized portion of `Init`/`Free`, including the GPU backend's
+  BC device arrays), while everything that is not mesh-sized is preserved — the time state
+  (`t`, `dt`, entropy, IO counter), the time-integrator selection, configuration flags, and
+  model-specific parameters, all of which a fresh `Init` (`intent(out)`) would reset. The
+  solution interior is left for the caller to fill via the §2.10 transfer.
+
+- **`SELF_AMRController_2D`** owns the forest, the indicator, and the meshes/geometries it
+  emits (double-buffered), and performs one adaptation epoch per `Adapt(model, adapted)` call:
+  estimate → cap refine flags at a configurable `maxLevel` → spread refine flags to face
+  neighbours for `nHalo` passes (so a feature moving at speed \(c\) stays inside the refined
+  band when the adaptation cadence satisfies \(k\,\Delta t\,c \le n_{halo} h_{fine}\)) →
+  `AdaptFromFlags` + `Balance2to1` (a no-op epoch leaves the model untouched) →
+  `BuildTransferPlan` + `EmitMesh` + new `SEMQuad` → `model%Regrid`, apply the transferred
+  solution, upload to device. `RecommendedTimeStep(dtBase) = dtBase / 2^{MaxLevel}` gives the
+  level-based explicit-stability bound to pass to `ForwardStep` after each epoch — exact for
+  the quadtree, whose children are exact half-scale subdivisions.
+
+`test/lineareuler2d_amr_soundwave.f90` runs the full loop on a deliberately under-resolved
+acoustic pulse (LinearEuler2D, radiation boundaries, RK3): the initial adaptation refines
+around the pulse up to the level cap; every mid-run adaptation conserves the Jacobian-weighted
+global integral of each prognostic variable to roundoff; the model's time and parameters
+survive regridding; the mesh evolves as the wave propagates; and the acoustic energy stays
+finite and non-increasing across the whole adaptive run.
+
 ---
 
 ## 3. Comparison with Trixi.jl
@@ -386,23 +450,72 @@ Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
 - **(next)** Optional **neighbour smoothing** of the trigger flags (avoid isolated refined
   elements), on top of the balance pass.
 
-### Stage 5 — MPI dynamic re-partitioning
+### Stage 5 — MPI dynamic re-partitioning — **implemented (v1)**
 
-- Refinement changes per-rank element counts and thus load balance. Introduce a
-  **space-filling-curve (Morton/Hilbert) ordering** of leaves and repartition by equal-weight
-  arc segments after each adaptation, matching the existing domain-decomposition ownership
-  model.
-- Migrate element data for reassigned leaves, then rebuild the halo-exchange tables. Preserve
-  the existing rank-local ownership and halo patterns — the exchange kernels are unchanged; only
-  the tables they consume are rebuilt.
+*Status: implemented. `QuadTreeMesh2D%InitGlobal` builds the rank-replicated forest from
+allgathered global base tables; `EmitMesh` builds the global connectivity/mortar tables on
+every rank and stores only its contiguous slice of a freshly generated decomposition
+(`sideInfo(3)` global ids, global `nUniqueSides`, fully replicated `mortarInfo`, exactly the
+invariants `SideExchange`/`MortarExchange` require); the controller allgathers the indicator
+flags per epoch and migrates the solution through an allgathered global old field applied to
+the rank-local range (`ApplyTransferPlanRange`). Validated by
+`test/lineareuler2d_amr_soundwave_mpi.f90` (2 ranks): the global element trajectory and
+entropy history match the serial run, transfers conserve globally, and a leaf-list checksum
+confirms forest replication. The point-to-point migration upgrade remains open (v2).*
 
-### Stage 6 — GPU device re-allocation
+Two observations make a correct first version tractable:
 
-- On adaptation, device arrays sized by `nElem` must be reallocated and re-uploaded. Reuse the
-  amortized-capacity scheme from Stage 2 so device reallocation is infrequent, and copy
-  survivor data device-to-device where possible to avoid host round-trips.
-- Keep memory access patterns identical to the static case so kernel performance is unaffected
-  between adaptation steps.
+- The forest's leaf list is **already a space-filling curve**: root-major depth-first traversal
+  is Morton order within each quadtree, so "SFC partitioning" is just contiguous ranges of the
+  existing leaf list — the same contiguous-ownership model (`offsetElem`) the domain
+  decomposition already uses.
+- The forest is cheap (a few integers per node), so it can be **replicated on every rank**.
+  If all ranks apply identical flags, they compute identical adapted/balanced forests, transfer
+  plans, and emitted global connectivity — deterministically, with no communication beyond the
+  flags themselves.
+
+Sub-stages:
+
+- **(5a) Global flags + replicated mutation.** The controller allgathers the rank-local
+  indicator flags (by the decomposition's element offsets) into a global per-leaf flag array;
+  every rank then runs the same cap/halo/`AdaptFromFlags`/`Balance2to1` sequence on its forest
+  copy. One small collective per epoch, outside the time-stepping loop.
+- **(5b) Multi-rank `EmitMesh`.** Every rank builds the same global `sideInfo`/`mortarInfo`
+  (deterministic from the forest), then decomposes it exactly the way the existing mesh
+  constructors do for `nRanks > 1`, so `SideExchange`/`MortarExchange` consume the result
+  unchanged. Repartitioning is implicit: each epoch's emitted mesh is re-decomposed over the
+  new leaf list, so equal-count SFC arcs move with the refinement.
+- **(5c) Solution migration.** v1: allgatherv the old rank-local solutions into a global old
+  field, then `ApplyTransferPlan` only for the new rank-local elements. Correct and simple;
+  memory is one global solution copy per rank (fine at single-node scale). The point-to-point
+  upgrade (send exactly the source elements each rank's plan references) is a drop-in
+  replacement behind the same interface.
+- Tests on ≥ 2 ranks: forest determinism across ranks (identical leaf checksums after an
+  epoch), global conservation of the transferred solution (mpi_allreduce), and the AMR
+  soundwave regression run distributed.
+
+### Stage 6 — GPU device re-allocation (work plan)
+
+What exists today is the *correct but unamortized* form: every adapting epoch frees and
+re-initializes the model storage (device arrays included), re-uploads mesh/geometry, and moves
+the solution through a host round-trip (`UpdateHost` → transfer → `UpdateDevice`).
+
+- **(6a) Device-side transfer.** Execute the transfer plan on the device: upload the plan's
+  integer arrays once per epoch and run an element-parallel kernel that gathers each new
+  element's source data and applies the tensor-product `mortarR`/`mortarP` operators (same
+  structure as the host `do concurrent` version; kernel pattern follows
+  `src/gpu/SELF_Refinement.cpp`). This removes the per-epoch host round-trip of the full
+  solution. Requires GPU hardware for validation (GPU workflows do not run on PRs).
+  **Sequencing note:** the Stage-5 v1 migration allgathers the old solution on the host, so on
+  multi-GPU runs a device-side transfer only pays off together with the v2 (point-to-point,
+  optionally GPU-aware) migration; on single-GPU runs it stands alone. Profile the
+  UpdateHost/UpdateDevice cost at a realistic adaptation cadence before building it.
+- **(6b) Amortized capacity — measure first.** Capacity-based (high-water-mark) device
+  allocation would avoid the free/realloc cycle, but it changes the allocation semantics of
+  the core data classes, which every model shares. Before touching that, profile an adapting
+  run on real hardware: at typical cadences (hundreds of steps between epochs) allocation cost
+  is expected to be far below the re-upload and geometry-generation cost that 6a and mesh
+  caching address. Only pursue if the profile says otherwise.
 
 ### Driver integration
 
@@ -413,7 +526,155 @@ sees only a (possibly) different, still-valid mesh at the top of the next step.
 
 ---
 
-## 5. References
+## 5. Application roadmap: `LinearEuler2D` ultrasound point source under AMR
+
+This section maps the serial AMR machinery above onto a first *running application*: a single
+point-source wavelet in the ultrasound frequency range, propagating through a ~1 m × 1 m
+domain with the 2-D linear Euler model, on a dynamically adapting mesh. Serial CPU and single
+GPU are the initial targets (Stage 5 MPI repartitioning is not required). Each gap below is an
+additive, independently testable piece; existing model/mesh interfaces stay untouched.
+
+### 5.1 What already works (no changes needed)
+
+- **Flux coupling on adaptive meshes** — `EmitMesh` produces the same `mortarInfo` layout the
+  `LinearEuler2D` mortar tests (`test/lineareuler2d_mortar_soundwave.f90`) already exercise.
+- **Per-epoch time step** — `ForwardStep(tn, dt, ioInterval)` takes `dt` on every call, so a
+  driver that re-computes `dt` after each adaptation needs no time-integrator changes.
+- **Output of a changing mesh** — every HDF5 snapshot written by `WriteModel` carries its own
+  `/controlgrid/geometry` alongside the solution, so per-snapshot meshes are already
+  representable; `pyself` reads them file-by-file.
+- **Initial condition** — `SphericalSoundWave` (Gaussian pressure pulse) generates an outgoing
+  wavelet whose spectral content is set by the pulse half-width `Lr`; choosing `Lr` of a few
+  millimetres puts the dominant wavelength in the ultrasound band with **zero model changes**.
+
+### 5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping — **implemented**
+
+*Status: implemented in `SELF_TransferPlan_2D` (see §2.10), validated by
+`test/transfer_plan_2d.f90`.*
+
+`AdaptFromFlags` + `Balance2to1` mutate the forest but record no correspondence between the
+pre- and post-adaptation leaf lists, which the Stage-3 transfer operators need. Because node
+ids are stable in the pool (coarsening only orphans nodes), the plan can be built after the
+fact from a snapshot of the old leaf array:
+
+- new leaf **is** an old leaf → copy;
+- new leaf **descends from** an old leaf → prolong along the quadtree path
+  (`Balance2to1` ripple can refine a fresh child again, so prolongation must handle **multiple
+  levels**, applying `ProlongToChildren` per step of the path);
+- new leaf **is the parent of four** old leaves → restrict (always exactly one level:
+  `AdaptFromFlags` coarsens one level per call and balancing never coarsens).
+
+Deliverable: a `BuildTransferPlan` (forest + saved old-leaf list → typed plan) and an
+`ApplyTransfer` driver mapping `solution%interior(:,:,oldIdx,:)` to the new element ordering.
+Tests: adapt→transfer conservation of `∫u dA` (Jacobian-weighted), refine-then-coarsen
+reversibility through a full plan, and a balanced two-level ripple case.
+
+### 5.3 Gap 2 — Model regrid: rebinding a live `DGModel2D` to an emitted mesh — **implemented**
+
+*Status: implemented as `DGModel2D%Regrid` + `SELF_AMRController_2D` (see §2.11), validated by
+`test/lineareuler2d_amr_soundwave.f90`. The level-based time step of §5.4 ("now") is
+`RecommendedTimeStep`.*
+
+`DGModel2D` storage (7 `MappedScalar/Vector` objects) is sized by `nElem` at `Init`, and
+`Init` is `intent(out)` — it resets `t`, model parameters (`rho0`), BC registrations, and the
+IO counter. Rather than making the model mutable, add an **external AMR controller** module
+(e.g. `SELF_AMRController_2D`) that owns the forest, the indicator, and double-buffered
+`Mesh2D`/`SEMQuad` instances, and performs one adaptation epoch:
+
+1. `indicator%Estimate` on the current solution (driving variable: pressure, `ivar=3`);
+2. **flag halo expansion** — grow refine flags to face-neighbours of flagged leaves (via
+   `FaceNeighbor`) so the moving wavefront cannot outrun the refined band between epochs;
+   this is the "neighbour smoothing" already anticipated in §4;
+3. snapshot old leaves → `AdaptFromFlags` → `Balance2to1` → `BuildTransferPlan` → `EmitMesh`;
+4. new `SEMQuad` geometry (`Init` + `GenerateFromMesh`), free the old buffer;
+5. save model scalars (`t`, `rho0`, integrator choice, flags), `Free` + `Init` the model on
+   the new mesh/geometry, restore scalars, apply the transferred solution, `UpdateDevice`.
+
+Step 5 works on GPU today because a fresh `Init` allocates correctly sized device arrays;
+host-side transfer with an `UpdateHost`/`UpdateDevice` round-trip per epoch is acceptable at
+demo cadence (Stage-6 device-side transfer remains the later optimization). Background fields
+`c` (var 4) and `rho0` (var 5) ride the same prolong/restrict — exact for uniform media.
+
+### 5.4 Gap 3 — Time-step control
+
+- **Now (required):** level-based global `dt`. For a quadtree, the fine-level element scale is
+  exactly `h_root / 2^maxLevel`, so `dt_epoch = dt_base / 2^maxLevel` with `dt_base` chosen
+  for the base mesh by the usual explicit-DG bound `dt ≈ C·h/(c·N²)`. Deterministic, free,
+  and no geometry reduction is needed.
+- **Later (optional):** local time stepping (LTS) — leaves at level ℓ subcycle with
+  `dt/2^ℓ`. This touches the RK update and requires time-interpolated interface/mortar data
+  between levels, i.e. exactly the time-integration and flux-exchange machinery that is
+  frozen by policy; it needs its own design + review round (call it Stage 7). Cost analysis
+  for this demo says it is not needed to start: with the refined band confined to the
+  wavefront annulus, a global fine `dt` costs `nElem_total × fine-step-count`, and most
+  elements are coarse *and cheap*; LTS buys roughly `2^maxLevel×` on the coarse bulk — worth
+  having, not blocking.
+
+### 5.5 Gap 4 — The example and its CI-scale test — **implemented**
+
+*Status: implemented as `examples/linear_euler2d_amr_ultrasound_pointsource.f90` (water,
+`c₀ = 1500 m/s`, `f₀ ≈ 100 kHz`, 16×16 base at `N = 7`, level-3 cap, radiation boundaries).
+The example is registered as a CI test at a 6-epoch (30 µs) default;
+`SELF_AMR_ULTRASOUND_EPOCHS=60` extends it to a full-domain movie run. The generic AMR-loop
+mechanics are separately covered by `test/lineareuler2d_amr_soundwave.f90` (§2.11).*
+
+`examples/linear_euler2d_amr_pointsource.f90` (plus a reduced `test/` variant):
+
+- Domain `[0,1]²` m via `mesh%StructuredMesh`, radiation BCs on all four sides; source at the
+  centre.
+- Medium: water (`c = 1500 m/s`, `rho0 = 1000 kg/m³`) with `f₀ ≈ 100 kHz` → `λ = 15 mm`
+  (an air / 40 kHz variant, `λ ≈ 8.6 mm`, also fits but needs one more refinement level).
+- Resolution: base 16×16 (`h₀ = 62.5 mm`), `N = 7`, max level 3 (`h = 7.8 mm`), giving
+  ≈ 15 points per wavelength on the fine level — comfortable for wave propagation; the coarse
+  bulk intentionally under-resolves the front so the indicator *must* refine to keep σ below
+  threshold.
+- `dt ≈ 3×10⁻⁸ s` at level 3; an end time of ~0.3 ms (front travels 45 cm) is ~10⁴ steps —
+  seconds-to-minutes serial CPU, trivial on one GPU.
+- Adaptation cadence: regrid every k steps with `k·dt·c ≤` one fine element (`k ≈ 100` at the
+  numbers above, with the §5.3 halo providing the safety margin).
+- CI assertions: solution NaN-free; entropy finite and non-increasing (upwind flux +
+  radiation BCs are dissipative); refinement actually occurs (`forest%MaxLevel() > 0`, leaf
+  count grows) **and** coarsening occurs behind the front (leaf count later shrinks);
+  Jacobian-weighted transfer conservation defect at machine precision per epoch.
+
+### 5.6 Gap 5 — Visualization: pressure field + mesh skeleton — **implemented**
+
+*Status: implemented as `examples/linear_euler2d_amr_plot.py` (h5py + numpy + matplotlib
+only). Each snapshot's field and geometry are interpolated from the Gauss control points to a
+uniform per-element grid including the element edges (barycentric Lagrange, exact for the
+polynomial data), rendered as a filled pressure field with the element-outline wireframe
+overlaid, one PNG per snapshot plus an MP4 when ffmpeg is available.*
+
+A companion `examples/linear_euler2d_amr_plot.py` (pyself + matplotlib/pyvista) that, per
+snapshot: renders the pressure field from `/controlgrid/solution` and overlays the **element
+wireframe** traced from each element's four edges in `/controlgrid/geometry`, then assembles
+PNG frames into a movie. Because each file carries its own geometry, frames with different
+element counts need no special handling. This is the artifact that *shows* the refinement
+band tracking the expanding wavefront.
+
+### 5.7 Deferred / follow-on
+
+- **Time-dependent transducer source.** A true point *forcing* (e.g. Ricker wavelet at `f₀`)
+  rather than an initial pulse: `source2d` currently has no access to position or time, so
+  this needs a localized-forcing hook plus per-epoch source relocation (the containing
+  element changes identity on regrid). Physically nicer (continuous-wave and pulse-train
+  experiments); not required for the first demo.
+- **LTS (Stage 7)** as scoped in §5.4, and **device-side transfer (Stage 6)**.
+- **Storage compaction** of orphaned forest nodes on long runs (§4, Stage 2 "next").
+
+### 5.8 Suggested PR sequence
+
+| PR | Content | Depends on |
+| --- | --- | --- |
+| 1 | Transfer plan (old→new leaf map, multi-level prolong) + tests | — |
+| 2 | AMR controller (halo flags, regrid orchestration, level-based dt) + adapt-epoch soundwave test | 1 |
+| 3 | Ultrasound example, CI-scale test, plotting script, docs | 2 |
+| 4 | GPU epoch test; device-side transfer if profiling justifies it | 2 |
+| 5 | (design first) LTS; time-dependent point forcing | 3 |
+
+---
+
+## 6. References
 
 - P.-O. Persson and J. Peraire, *Sub-cell shock capturing for discontinuous Galerkin methods*,
   AIAA 2006-112 (2006).
