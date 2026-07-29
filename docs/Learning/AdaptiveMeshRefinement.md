@@ -25,6 +25,7 @@ layer that adaptive refinement needs is already in place and tested.
 | Solution transfer (prolongation / restriction, conservative) | **Implemented** |
 | Forest face-neighbour queries + 2:1 balancing | **Implemented** |
 | Hanging-node / mortar-table + `Mesh2D_t` emission | **Implemented** |
+| Adaptation-epoch transfer plan (old-leaf → new-leaf mapping) | **Implemented** |
 | MPI dynamic re-partitioning / load balancing | Designed (Stage 5) |
 | GPU device re-allocation for a changing element count | Designed (Stage 6) |
 
@@ -307,6 +308,37 @@ now on a mesh produced entirely by the AMR pipeline.
 With this, the serial loop closes: `indicator → forest.AdaptFromFlags → (transfer solution) →
 forest.Balance2to1 → EmitMesh` yields a runnable adaptive mesh.
 
+## 2.10 Adaptation-epoch transfer plan (implemented)
+
+`SELF_TransferPlan_2D` is the driver layer of Stage 3: it connects the element-local transfer
+operators (§2.7) to an actual forest mutation. One *adaptation epoch* is: snapshot the leaf
+list (`nOld`, `oldLeaf`), mutate the forest (at most one `AdaptFromFlags`, then any number of
+refinements — `Balance2to1`, `RefineNode`), then `BuildTransferPlan(forest, nOld, oldLeaf,
+plan)`. The plan records, for every new leaf in leaf-list order (the element ordering `EmitMesh`
+produces), where its solution comes from in the old element ordering:
+
+- **copy** — the leaf survived unchanged;
+- **prolong** — the leaf descends from an old leaf; the old polynomial is interpolated down the
+  quadtree path, one step per level, so a fresh child re-refined by balance ripple in the same
+  epoch is handled by depth > 1;
+- **restrict** — the leaf is (an ancestor of) a coarsened family; the four old children are
+  L2-projected onto their parent, then prolonged down any further steps (depth > 0 occurs when
+  a just-coarsened parent is immediately re-refined by balancing).
+
+Reconstruction after the fact is possible because forest node ids are stable: refinement
+appends nodes and coarsening only detaches children, whose `level`/`parent`/`quadrant` entries
+persist. Each new leaf ascends its parent chain until it meets an old leaf or a complete
+old-leaf family; a snapshot that cannot explain a leaf fails loudly. `ApplyTransferPlan`
+executes the plan on nodal data in the `MappedScalar2D%interior` layout and inherits the §2.7
+identities (exact prolongation, conservative restriction, exact refine-coarsen round trips).
+
+`test/transfer_plan_2d.f90` validates one epoch that simultaneously coarsens (then re-refines)
+a family, refines a leaf whose child is refined again (depth-2 prolongation), and lets 2:1
+balancing ripple into an untouched root: the classification multiplicities are checked exactly;
+a bilinear field is reproduced at the emitted new mesh's nodes to roundoff through all three
+transfer kinds; the Jacobian-weighted global integral of a non-polynomial field is conserved to
+roundoff; and refine-everything/coarsen-everything across two epochs is the identity.
+
 ---
 
 ## 3. Comparison with Trixi.jl
@@ -434,7 +466,10 @@ additive, independently testable piece; existing model/mesh interfaces stay unto
   wavelet whose spectral content is set by the pulse half-width `Lr`; choosing `Lr` of a few
   millimetres puts the dominant wavelength in the ultrasound band with **zero model changes**.
 
-### 5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping
+### 5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping — **implemented**
+
+*Status: implemented in `SELF_TransferPlan_2D` (see §2.10), validated by
+`test/transfer_plan_2d.f90`.*
 
 `AdaptFromFlags` + `Balance2to1` mutate the forest but record no correspondence between the
 pre- and post-adaptation leaf lists, which the Stage-3 transfer operators need. Because node

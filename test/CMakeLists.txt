@@ -83,6 +83,10 @@ add_fortran_tests (
     "solution_transfer_2d.f90"
     "quadtree_balance_2d.f90"
     "adaptive_mortar_2d.f90"
+    "transfer_plan_2d.f90"
+    "transfer_plan_2d_guard_badleaf.f90"
+    "transfer_plan_2d_guard_snapshot.f90"
+    "transfer_plan_2d_guard_unbuilt.f90"
     "refinement_indicator_2d_guard_thresholds.f90"
     "refinement_indicator_2d_guard_setthresholds.f90"
     "refinement_indicator_2d_guard_degree.f90"
@@ -212,6 +216,9 @@ set_tests_properties(
     adaptive_mesh_2d_guard_unbalanced
     meshrefine_2d_guard_multirank
     adaptive_mesh_2d_guard_multirank
+    transfer_plan_2d_guard_badleaf
+    transfer_plan_2d_guard_snapshot
+    transfer_plan_2d_guard_unbuilt
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
