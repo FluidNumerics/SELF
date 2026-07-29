@@ -79,6 +79,18 @@ add_fortran_tests (
     "vectorboundaryinterp_3d_constant.f90"
     "mesh2d_setup.f90"
     "mesh2d_uniformstructured.f90"
+    "mesh2d_uniform_refine.f90"
+    "solution_transfer_2d.f90"
+    "quadtree_balance_2d.f90"
+    "adaptive_mortar_2d.f90"
+    "refinement_indicator_2d_guard_thresholds.f90"
+    "refinement_indicator_2d_guard_setthresholds.f90"
+    "refinement_indicator_2d_guard_degree.f90"
+    "refinement_indicator_2d_guard_nelem.f90"
+    "refinement_indicator_2d_guard_ivar.f90"
+    "adaptive_mesh_2d_guard_unbalanced.f90"
+    "meshrefine_2d_guard_multirank.f90"
+    "adaptive_mesh_2d_guard_multirank.f90"
     "mesh2d_read_ism.f90"
     "mesh2d_read_ismmm.f90"
     "mesh3d_setup.f90"
@@ -99,6 +111,7 @@ add_fortran_tests (
     "mappedvectordgdivergence_2d_linear.f90"
     "mappedvectordgdivergence_2d_linear_structuredmesh.f90"
     "mortarprojection_identity.f90"
+    "refinement_indicator_2d_spectraldecay.f90"
     "mappedscalarmortarexchange_2d_linear.f90"
     "mappedvectordgdivergence_2d_mortar.f90"
     "mappedscalargradient_3d_constant.f90"
@@ -191,6 +204,14 @@ set_tests_properties(
     points_dirac_delta_2d_nvar_mismatch
     points_dirac_delta_3d_nvar_mismatch
     ec_advection_2d_mortar_guard
+    refinement_indicator_2d_guard_thresholds
+    refinement_indicator_2d_guard_setthresholds
+    refinement_indicator_2d_guard_degree
+    refinement_indicator_2d_guard_nelem
+    refinement_indicator_2d_guard_ivar
+    adaptive_mesh_2d_guard_unbalanced
+    meshrefine_2d_guard_multirank
+    adaptive_mesh_2d_guard_multirank
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"

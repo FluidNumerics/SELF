@@ -69,6 +69,20 @@ module SELF_GPUInterfaces
     endsubroutine Divergence_2D_gpu
   endinterface
 
+  interface
+    subroutine RefinementIndicator_2D_gpu(Pmodal,f,indicator,flag, &
+                                          refineThreshold,coarsenThreshold, &
+                                          N,nVar,ivar,nEl) &
+      bind(c,name="RefinementIndicator_2D_gpu")
+      use iso_c_binding
+      use SELF_Constants
+      implicit none
+      type(c_ptr),value :: Pmodal,f,indicator,flag
+      real(c_prec),value :: refineThreshold,coarsenThreshold
+      integer(c_int),value :: N,nVar,ivar,nEl
+    endsubroutine RefinementIndicator_2D_gpu
+  endinterface
+
   ! MappedData
 
   ! Model
