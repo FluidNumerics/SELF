@@ -413,7 +413,136 @@ sees only a (possibly) different, still-valid mesh at the top of the next step.
 
 ---
 
-## 5. References
+## 5. Application roadmap: `LinearEuler2D` ultrasound point source under AMR
+
+This section maps the serial AMR machinery above onto a first *running application*: a single
+point-source wavelet in the ultrasound frequency range, propagating through a ~1 m × 1 m
+domain with the 2-D linear Euler model, on a dynamically adapting mesh. Serial CPU and single
+GPU are the initial targets (Stage 5 MPI repartitioning is not required). Each gap below is an
+additive, independently testable piece; existing model/mesh interfaces stay untouched.
+
+### 5.1 What already works (no changes needed)
+
+- **Flux coupling on adaptive meshes** — `EmitMesh` produces the same `mortarInfo` layout the
+  `LinearEuler2D` mortar tests (`test/lineareuler2d_mortar_soundwave.f90`) already exercise.
+- **Per-epoch time step** — `ForwardStep(tn, dt, ioInterval)` takes `dt` on every call, so a
+  driver that re-computes `dt` after each adaptation needs no time-integrator changes.
+- **Output of a changing mesh** — every HDF5 snapshot written by `WriteModel` carries its own
+  `/controlgrid/geometry` alongside the solution, so per-snapshot meshes are already
+  representable; `pyself` reads them file-by-file.
+- **Initial condition** — `SphericalSoundWave` (Gaussian pressure pulse) generates an outgoing
+  wavelet whose spectral content is set by the pulse half-width `Lr`; choosing `Lr` of a few
+  millimetres puts the dominant wavelength in the ultrasound band with **zero model changes**.
+
+### 5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping
+
+`AdaptFromFlags` + `Balance2to1` mutate the forest but record no correspondence between the
+pre- and post-adaptation leaf lists, which the Stage-3 transfer operators need. Because node
+ids are stable in the pool (coarsening only orphans nodes), the plan can be built after the
+fact from a snapshot of the old leaf array:
+
+- new leaf **is** an old leaf → copy;
+- new leaf **descends from** an old leaf → prolong along the quadtree path
+  (`Balance2to1` ripple can refine a fresh child again, so prolongation must handle **multiple
+  levels**, applying `ProlongToChildren` per step of the path);
+- new leaf **is the parent of four** old leaves → restrict (always exactly one level:
+  `AdaptFromFlags` coarsens one level per call and balancing never coarsens).
+
+Deliverable: a `BuildTransferPlan` (forest + saved old-leaf list → typed plan) and an
+`ApplyTransfer` driver mapping `solution%interior(:,:,oldIdx,:)` to the new element ordering.
+Tests: adapt→transfer conservation of `∫u dA` (Jacobian-weighted), refine-then-coarsen
+reversibility through a full plan, and a balanced two-level ripple case.
+
+### 5.3 Gap 2 — Model regrid: rebinding a live `DGModel2D` to an emitted mesh
+
+`DGModel2D` storage (7 `MappedScalar/Vector` objects) is sized by `nElem` at `Init`, and
+`Init` is `intent(out)` — it resets `t`, model parameters (`rho0`), BC registrations, and the
+IO counter. Rather than making the model mutable, add an **external AMR controller** module
+(e.g. `SELF_AMRController_2D`) that owns the forest, the indicator, and double-buffered
+`Mesh2D`/`SEMQuad` instances, and performs one adaptation epoch:
+
+1. `indicator%Estimate` on the current solution (driving variable: pressure, `ivar=3`);
+2. **flag halo expansion** — grow refine flags to face-neighbours of flagged leaves (via
+   `FaceNeighbor`) so the moving wavefront cannot outrun the refined band between epochs;
+   this is the "neighbour smoothing" already anticipated in §4;
+3. snapshot old leaves → `AdaptFromFlags` → `Balance2to1` → `BuildTransferPlan` → `EmitMesh`;
+4. new `SEMQuad` geometry (`Init` + `GenerateFromMesh`), free the old buffer;
+5. save model scalars (`t`, `rho0`, integrator choice, flags), `Free` + `Init` the model on
+   the new mesh/geometry, restore scalars, apply the transferred solution, `UpdateDevice`.
+
+Step 5 works on GPU today because a fresh `Init` allocates correctly sized device arrays;
+host-side transfer with an `UpdateHost`/`UpdateDevice` round-trip per epoch is acceptable at
+demo cadence (Stage-6 device-side transfer remains the later optimization). Background fields
+`c` (var 4) and `rho0` (var 5) ride the same prolong/restrict — exact for uniform media.
+
+### 5.4 Gap 3 — Time-step control
+
+- **Now (required):** level-based global `dt`. For a quadtree, the fine-level element scale is
+  exactly `h_root / 2^maxLevel`, so `dt_epoch = dt_base / 2^maxLevel` with `dt_base` chosen
+  for the base mesh by the usual explicit-DG bound `dt ≈ C·h/(c·N²)`. Deterministic, free,
+  and no geometry reduction is needed.
+- **Later (optional):** local time stepping (LTS) — leaves at level ℓ subcycle with
+  `dt/2^ℓ`. This touches the RK update and requires time-interpolated interface/mortar data
+  between levels, i.e. exactly the time-integration and flux-exchange machinery that is
+  frozen by policy; it needs its own design + review round (call it Stage 7). Cost analysis
+  for this demo says it is not needed to start: with the refined band confined to the
+  wavefront annulus, a global fine `dt` costs `nElem_total × fine-step-count`, and most
+  elements are coarse *and cheap*; LTS buys roughly `2^maxLevel×` on the coarse bulk — worth
+  having, not blocking.
+
+### 5.5 Gap 4 — The example and its CI-scale test
+
+`examples/linear_euler2d_amr_pointsource.f90` (plus a reduced `test/` variant):
+
+- Domain `[0,1]²` m via `mesh%StructuredMesh`, radiation BCs on all four sides; source at the
+  centre.
+- Medium: water (`c = 1500 m/s`, `rho0 = 1000 kg/m³`) with `f₀ ≈ 100 kHz` → `λ = 15 mm`
+  (an air / 40 kHz variant, `λ ≈ 8.6 mm`, also fits but needs one more refinement level).
+- Resolution: base 16×16 (`h₀ = 62.5 mm`), `N = 7`, max level 3 (`h = 7.8 mm`), giving
+  ≈ 15 points per wavelength on the fine level — comfortable for wave propagation; the coarse
+  bulk intentionally under-resolves the front so the indicator *must* refine to keep σ below
+  threshold.
+- `dt ≈ 3×10⁻⁸ s` at level 3; an end time of ~0.3 ms (front travels 45 cm) is ~10⁴ steps —
+  seconds-to-minutes serial CPU, trivial on one GPU.
+- Adaptation cadence: regrid every k steps with `k·dt·c ≤` one fine element (`k ≈ 100` at the
+  numbers above, with the §5.3 halo providing the safety margin).
+- CI assertions: solution NaN-free; entropy finite and non-increasing (upwind flux +
+  radiation BCs are dissipative); refinement actually occurs (`forest%MaxLevel() > 0`, leaf
+  count grows) **and** coarsening occurs behind the front (leaf count later shrinks);
+  Jacobian-weighted transfer conservation defect at machine precision per epoch.
+
+### 5.6 Gap 5 — Visualization: pressure field + mesh skeleton
+
+A companion `examples/linear_euler2d_amr_plot.py` (pyself + matplotlib/pyvista) that, per
+snapshot: renders the pressure field from `/controlgrid/solution` and overlays the **element
+wireframe** traced from each element's four edges in `/controlgrid/geometry`, then assembles
+PNG frames into a movie. Because each file carries its own geometry, frames with different
+element counts need no special handling. This is the artifact that *shows* the refinement
+band tracking the expanding wavefront.
+
+### 5.7 Deferred / follow-on
+
+- **Time-dependent transducer source.** A true point *forcing* (e.g. Ricker wavelet at `f₀`)
+  rather than an initial pulse: `source2d` currently has no access to position or time, so
+  this needs a localized-forcing hook plus per-epoch source relocation (the containing
+  element changes identity on regrid). Physically nicer (continuous-wave and pulse-train
+  experiments); not required for the first demo.
+- **LTS (Stage 7)** as scoped in §5.4, and **device-side transfer (Stage 6)**.
+- **Storage compaction** of orphaned forest nodes on long runs (§4, Stage 2 "next").
+
+### 5.8 Suggested PR sequence
+
+| PR | Content | Depends on |
+| --- | --- | --- |
+| 1 | Transfer plan (old→new leaf map, multi-level prolong) + tests | — |
+| 2 | AMR controller (halo flags, regrid orchestration, level-based dt) + adapt-epoch soundwave test | 1 |
+| 3 | Ultrasound example, CI-scale test, plotting script, docs | 2 |
+| 4 | GPU epoch test; device-side transfer if profiling justifies it | 2 |
+| 5 | (design first) LTS; time-dependent point forcing | 3 |
+
+---
+
+## 6. References
 
 - P.-O. Persson and J. Peraire, *Sub-cell shock capturing for discontinuous Galerkin methods*,
   AIAA 2006-112 (2006).
