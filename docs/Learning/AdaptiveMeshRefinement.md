@@ -450,23 +450,57 @@ Implemented in `SELF_SolutionTransfer_2D` (see §2.7):
 - **(next)** Optional **neighbour smoothing** of the trigger flags (avoid isolated refined
   elements), on top of the balance pass.
 
-### Stage 5 — MPI dynamic re-partitioning
+### Stage 5 — MPI dynamic re-partitioning (work plan)
 
-- Refinement changes per-rank element counts and thus load balance. Introduce a
-  **space-filling-curve (Morton/Hilbert) ordering** of leaves and repartition by equal-weight
-  arc segments after each adaptation, matching the existing domain-decomposition ownership
-  model.
-- Migrate element data for reassigned leaves, then rebuild the halo-exchange tables. Preserve
-  the existing rank-local ownership and halo patterns — the exchange kernels are unchanged; only
-  the tables they consume are rebuilt.
+Two observations make a correct first version tractable:
 
-### Stage 6 — GPU device re-allocation
+- The forest's leaf list is **already a space-filling curve**: root-major depth-first traversal
+  is Morton order within each quadtree, so "SFC partitioning" is just contiguous ranges of the
+  existing leaf list — the same contiguous-ownership model (`offsetElem`) the domain
+  decomposition already uses.
+- The forest is cheap (a few integers per node), so it can be **replicated on every rank**.
+  If all ranks apply identical flags, they compute identical adapted/balanced forests, transfer
+  plans, and emitted global connectivity — deterministically, with no communication beyond the
+  flags themselves.
 
-- On adaptation, device arrays sized by `nElem` must be reallocated and re-uploaded. Reuse the
-  amortized-capacity scheme from Stage 2 so device reallocation is infrequent, and copy
-  survivor data device-to-device where possible to avoid host round-trips.
-- Keep memory access patterns identical to the static case so kernel performance is unaffected
-  between adaptation steps.
+Sub-stages:
+
+- **(5a) Global flags + replicated mutation.** The controller allgathers the rank-local
+  indicator flags (by the decomposition's element offsets) into a global per-leaf flag array;
+  every rank then runs the same cap/halo/`AdaptFromFlags`/`Balance2to1` sequence on its forest
+  copy. One small collective per epoch, outside the time-stepping loop.
+- **(5b) Multi-rank `EmitMesh`.** Every rank builds the same global `sideInfo`/`mortarInfo`
+  (deterministic from the forest), then decomposes it exactly the way the existing mesh
+  constructors do for `nRanks > 1`, so `SideExchange`/`MortarExchange` consume the result
+  unchanged. Repartitioning is implicit: each epoch's emitted mesh is re-decomposed over the
+  new leaf list, so equal-count SFC arcs move with the refinement.
+- **(5c) Solution migration.** v1: allgatherv the old rank-local solutions into a global old
+  field, then `ApplyTransferPlan` only for the new rank-local elements. Correct and simple;
+  memory is one global solution copy per rank (fine at single-node scale). The point-to-point
+  upgrade (send exactly the source elements each rank's plan references) is a drop-in
+  replacement behind the same interface.
+- Tests on ≥ 2 ranks: forest determinism across ranks (identical leaf checksums after an
+  epoch), global conservation of the transferred solution (mpi_allreduce), and the AMR
+  soundwave regression run distributed.
+
+### Stage 6 — GPU device re-allocation (work plan)
+
+What exists today is the *correct but unamortized* form: every adapting epoch frees and
+re-initializes the model storage (device arrays included), re-uploads mesh/geometry, and moves
+the solution through a host round-trip (`UpdateHost` → transfer → `UpdateDevice`).
+
+- **(6a) Device-side transfer.** Execute the transfer plan on the device: upload the plan's
+  integer arrays once per epoch and run an element-parallel kernel that gathers each new
+  element's source data and applies the tensor-product `mortarR`/`mortarP` operators (same
+  structure as the host `do concurrent` version; kernel pattern follows
+  `src/gpu/SELF_Refinement.cpp`). This removes the per-epoch host round-trip of the full
+  solution. Requires GPU hardware for validation (GPU workflows do not run on PRs).
+- **(6b) Amortized capacity — measure first.** Capacity-based (high-water-mark) device
+  allocation would avoid the free/realloc cycle, but it changes the allocation semantics of
+  the core data classes, which every model shares. Before touching that, profile an adapting
+  run on real hardware: at typical cadences (hundreds of steps between epochs) allocation cost
+  is expected to be far below the re-upload and geometry-generation cost that 6a and mesh
+  caching address. Only pursue if the profile says otherwise.
 
 ### Driver integration
 
