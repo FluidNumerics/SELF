@@ -32,6 +32,7 @@ module SELF_Vector_2D_t
   use FEQParse
   use SELF_HDF5
   use SELF_Data
+  use SELF_DataPool
 
   use HDF5
   use iso_c_binding
@@ -46,9 +47,21 @@ module SELF_Vector_2D_t
     real(prec),pointer,contiguous,dimension(:,:,:,:,:) :: avgBoundary
     real(prec),pointer,contiguous,dimension(:,:,:,:) :: boundaryNormal
 
+    !! High-water-mark backing store for the arrays above (AMR Stage 6b; see SELF_DataPool).
+    !! The public members are pointers remapped onto the leading part of these pools at the
+    !! exact logical shape, so every extent, stride and shape() is unchanged while Resize can
+    !! reuse the storage across an adaptation epoch. Nothing should index the pools directly.
+    real(prec),pointer,contiguous :: pool_interior(:) => null()
+    real(prec),pointer,contiguous :: pool_boundary(:) => null()
+    real(prec),pointer,contiguous :: pool_extBoundary(:) => null()
+    real(prec),pointer,contiguous :: pool_avgBoundary(:) => null()
+    real(prec),pointer,contiguous :: pool_boundaryNormal(:) => null()
+
   contains
 
     procedure,public :: Init => Init_Vector2D_t
+    procedure,public :: Resize => Resize_Vector2D_t
+    procedure,public :: MapArrays => MapArrays_Vector2D_t
     procedure,public :: Free => Free_Vector2D_t
 
     procedure,public :: UpdateHost => UpdateHost_Vector2D_t
@@ -92,11 +105,7 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,1:interp%N+1,1:nelem,1:nvar,1:2), &
-             this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2), &
-             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2), &
-             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar,1:2), &
-             this%boundaryNormal(1:interp%N+1,1:4,1:nelem,1:nvar))
+    call this%MapArrays(interp%N+1,nVar,nElem)
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:2*nVar))
@@ -128,16 +137,90 @@ contains
     this%nVar = 0
     this%nElem = 0
 
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%boundaryNormal)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
+    ! The public arrays point into the pools rather than owning storage (AMR Stage 6b), so they
+    ! are nullified and the pools released.
+    this%interior => null()
+    this%boundary => null()
+    this%boundaryNormal => null()
+    this%extBoundary => null()
+    this%avgBoundary => null()
+    if(associated(this%pool_interior)) deallocate(this%pool_interior)
+    if(associated(this%pool_boundary)) deallocate(this%pool_boundary)
+    if(associated(this%pool_boundaryNormal)) deallocate(this%pool_boundaryNormal)
+    if(associated(this%pool_extBoundary)) deallocate(this%pool_extBoundary)
+    if(associated(this%pool_avgBoundary)) deallocate(this%pool_avgBoundary)
 
     deallocate(this%meta)
     deallocate(this%eqn)
 
   endsubroutine Free_Vector2D_t
+
+  subroutine MapArrays_Vector2D_t(this,Np,nVar,nElem)
+    !! Size the backing pools for (Np,nVar,nElem) and remap the public arrays onto them at the
+    !! exact logical shape. See SELF_DataPool for why this is done with pointer remapping rather
+    !! than by over-allocating the element dimension.
+    implicit none
+    class(Vector2D_t),intent(inout) :: this
+    integer,intent(in) :: Np
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: nInt,nBnd,nNrm
+
+    nInt = Np*Np*nElem*nVar*2
+    nBnd = Np*4*nElem*nVar*2
+    nNrm = Np*4*nElem*nVar
+
+    call EnsurePool(this%pool_interior,nInt)
+    call EnsurePool(this%pool_boundary,nBnd)
+    call EnsurePool(this%pool_extBoundary,nBnd)
+    call EnsurePool(this%pool_avgBoundary,nBnd)
+    call EnsurePool(this%pool_boundaryNormal,nNrm)
+
+    this%interior(1:Np,1:Np,1:nElem,1:nVar,1:2) => this%pool_interior(1:nInt)
+    this%boundary(1:Np,1:4,1:nElem,1:nVar,1:2) => this%pool_boundary(1:nBnd)
+    this%extBoundary(1:Np,1:4,1:nElem,1:nVar,1:2) => this%pool_extBoundary(1:nBnd)
+    this%avgBoundary(1:Np,1:4,1:nElem,1:nVar,1:2) => this%pool_avgBoundary(1:nBnd)
+    this%boundaryNormal(1:Np,1:4,1:nElem,1:nVar) => this%pool_boundaryNormal(1:nNrm)
+
+  endsubroutine MapArrays_Vector2D_t
+
+  subroutine Resize_Vector2D_t(this,interp,nVar,nElem)
+    !! Rebind a live object to a new element count, reusing existing storage when it fits (AMR
+    !! Stage 6b). Unlike Init - which is intent(out), so it resets the object, reallocates,
+    !! zeroes and reconstructs the equation parsers - this preserves metadata and parsers
+    !! (neither depends on nElem) and touches storage only when it must grow. Preserving the
+    !! parsers also avoids repeating the EquationParser construction that Init performs 2*nVar
+    !! times as an amdflang workaround.
+    !!
+    !! All arrays are zeroed, exactly as Init leaves them - see Resize_Scalar2D_t for why that is
+    !! required rather than merely tidy.
+    implicit none
+    class(Vector2D_t),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    if(nVar /= this%nVar) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : Resize cannot change nVar. Use Free followed by Init.'
+      stop 1
+    endif
+
+    this%interp => interp
+    this%nElem = nElem
+    this%N = interp%N
+    this%M = interp%M
+
+    call this%MapArrays(interp%N+1,nVar,nElem)
+
+    this%interior = 0.0_prec
+    this%boundary = 0.0_prec
+    this%boundarynormal = 0.0_prec
+    this%extBoundary = 0.0_prec
+    this%avgBoundary = 0.0_prec
+
+  endsubroutine Resize_Vector2D_t
 
   subroutine UpdateHost_Vector2D_t(this)
     implicit none

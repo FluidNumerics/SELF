@@ -121,6 +121,33 @@ module SELF_GPU
 
                           contains
 
+                          subroutine EnsureDeviceBuffer(ptr,allocBytes,neededBytes)
+                            !! High-water-mark device allocation (AMR Stage 6b). Grows ptr to
+                            !! hold neededBytes, reusing the existing allocation when it already
+                            !! does, and records the capacity in allocBytes. Contents are not
+                            !! preserved across a growth - every caller rewrites the buffer
+                            !! before reading it.
+                            !!
+                            !! A device pointer carries no shape, so byte capacity is the only
+                            !! thing that has to be tracked; this is what lets the adaptive loop
+                            !! stop calling hipMalloc/hipFree once the element count settles.
+                            use iso_c_binding
+                            implicit none
+                            type(c_ptr),intent(inout) :: ptr
+                            integer(c_size_t),intent(inout) :: allocBytes
+                            integer(c_size_t),intent(in) :: neededBytes
+
+                            if(c_associated(ptr) .and. allocBytes >= neededBytes) return
+
+                            if(c_associated(ptr)) then
+                              call gpuCheck(hipFree(ptr))
+                              ptr = c_null_ptr
+                            endif
+                            call gpuCheck(hipMalloc(ptr,neededBytes))
+                            allocBytes = neededBytes
+
+                          endsubroutine EnsureDeviceBuffer
+
                           subroutine gpuCheck(gpuError_t)
                             use iso_c_binding
                             implicit none

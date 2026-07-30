@@ -266,13 +266,9 @@ contains
 
     ! Free everything sized by the old mesh, mirroring Free (AdditionalFree releases any
     ! model-specific mesh-sized state so AdditionalInit can rebuild it below).
-    call this%solution%Free()
-    call this%workSol%Free()
-    call this%dSdt%Free()
-    call this%solutionGradient%Free()
-    call this%flux%Free()
-    call this%source%Free()
-    call this%fluxDivergence%Free()
+    ! Boundary-condition registrations are rebuilt because the boundary side set changes with the
+    ! mesh. The mesh-sized fields are NOT freed: they are resized in place below (AMR Stage 6b),
+    ! which reuses their host pools and device buffers whenever the new element count fits.
     call this%hyperbolicBCs%Free()
     call this%parabolicBCs%Free()
     call this%AdditionalFree()
@@ -281,13 +277,17 @@ contains
     this%mesh => mesh
     this%geometry => geometry
 
-    call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%solutionGradient%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%flux%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%source%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%fluxDivergence%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    ! Resize rather than Free + Init. Init is intent(out), so it would reset the whole object,
+    ! reallocate every array, zero it, reconstruct the equation parsers and - on GPU builds -
+    ! upload the zeros, all of which the adaptive loop then discards. Profiling attributed over
+    ! half of an adaptation to exactly that cycle.
+    call this%solution%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
 
     call this%solution%AssociateGeometry(geometry)
     call this%solutionGradient%AssociateGeometry(geometry)

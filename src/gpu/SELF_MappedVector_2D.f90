@@ -27,6 +27,7 @@
 module SELF_MappedVector_2D
 
   use SELF_MappedVector_2D_t
+  use SELF_Vector_2D
   use SELF_GPU
   use SELF_GPUInterfaces
   use iso_c_binding
@@ -45,6 +46,7 @@ module SELF_MappedVector_2D
     type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
 
   contains
+    procedure,public :: Resize => Resize_MappedVector2D
     procedure,public :: Free => Free_MappedVector2D
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
 
@@ -75,6 +77,28 @@ module SELF_MappedVector_2D
   endinterface
 
 contains
+
+  subroutine Resize_MappedVector2D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit (AMR
+    !! Stage 6b). Inherits the Vector2D resize (host pools plus the five device buffers) and adds
+    !! this class's mortar buffers, which are sized by mesh%nMortars rather than nElem: nMortars
+    !! changes with the mesh independently of the element count, so a stale buffer would silently
+    !! under-size the next mortar exchange. They are invalidated here and lazily re-created at
+    !! the correct size on next use.
+    implicit none
+    class(MappedVector2D),intent(inout) :: this
+    type(Lagrange),target,intent(in) :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_MappedVector2D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_Vector2D(this)
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
+
+  endsubroutine Resize_MappedVector2D
 
   subroutine Free_MappedVector2D(this)
     implicit none
