@@ -46,6 +46,11 @@ module SELF_Mesh
     type(DomainDecomposition) :: decomp
   endtype SEMMesh
 
+  ! Length of a material-name string stored in a mesh (2-D and 3-D).
+  ! Multi-material meshes (HOHQMesh ISM-MM format) carry a material
+  ! name for every element; this parameter bounds the stored strings.
+  integer,parameter :: SELF_MESH_MATNAME_LENGTH = 64
+
   ! Element Types - From Table 4.1 of https://www.hopr-project.org/externals/Meshformat.pdf
   integer,parameter :: selfLineLinear = 1
   integer,parameter :: selfLineNonlinear = 2

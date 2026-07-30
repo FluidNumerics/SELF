@@ -28,6 +28,7 @@ module SELF_Mesh_3D_t
 
   use SELF_Constants
   use SELF_Lagrange
+  use SELF_Quadrature
   use SELF_SupportRoutines
   use SELF_HDF5
   use SELF_Mesh
@@ -113,6 +114,14 @@ module SELF_Mesh_3D_t
     integer,pointer,dimension(:,:) :: CGNSSideMap
     integer,pointer,dimension(:,:) :: BCType
     character(LEN=255),allocatable :: BCNames(:)
+    ! Material tracking: every element has an integer material id
+    ! indexing into materialNames. Single-material constructors and
+    ! readers (HOPr, structured, periodic) leave nMaterials = 1 with
+    ! the name "default". The HOHQMesh ISM-MM reader populates the
+    ! table with the material strings from the .mesh file.
+    integer :: nMaterials = 0
+    integer,allocatable :: elemMaterial(:)
+    character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: materialNames(:)
 
   contains
 
@@ -127,6 +136,7 @@ module SELF_Mesh_3D_t
     procedure,private :: UniformPeriodicMesh_Mesh3D_t
 
     procedure,public :: Read_HOPr => Read_HOPr_Mesh3D_t
+    procedure,public :: Read_HOHQMesh => Read_HOHQMesh_Mesh3D_t
 
     procedure,public :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh3D_t
 
@@ -209,6 +219,15 @@ contains
 
     allocate(this%BCNames(1:nBCs))
 
+    ! Default material table: a single "default" material covers all
+    ! elements. Readers that carry material information overwrite
+    ! these allocations with the per-file table.
+    this%nMaterials = 1
+    allocate(this%elemMaterial(1:nElem))
+    allocate(this%materialNames(1:1))
+    this%elemMaterial = 1
+    this%materialNames(1) = "default"
+
     ! Create lookup tables to assist with connectivity generation
     this%CGNSCornerMap(1:3,1) = (/1,1,1/) ! Bottom-South-West
     this%CGNSCornerMap(1:3,2) = (/nGeo+1,1,1/) ! Bottom-South-East
@@ -264,6 +283,9 @@ contains
     deallocate(this%BCType)
 
     deallocate(this%BCNames)
+    if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
+    if(allocated(this%materialNames)) deallocate(this%materialNames)
+    this%nMaterials = 0
     call this%decomp%Free()
 
   endsubroutine Free_Mesh3D_t
@@ -1070,6 +1092,662 @@ contains
     call this%UpdateDevice()
 
   endsubroutine Read_HOPr_Mesh3D_t
+
+  subroutine Read_HOHQMesh_Mesh3D_t(this,meshFile,comm)
+    !! Reader for HOHQMesh 3-D (hexahedral) text mesh files in the ISM
+    !! and ISM-MM formats, as written by HOHQMesh's `WriteISMHexMeshFile`
+    !! (`Source/3DSource/Mesh3DOutputMethods.f90`). Unlike the 2-D
+    !! writer, the 3-D writer emits NO format header line: the first
+    !! line is always the count line "nNodes nElems polyOrder". The two
+    !! variants differ only in the per-element corner-node line:
+    !!   * ISM    : 8 corner-node ids
+    !!   * ISM-MM : 8 corner-node ids followed by a material-name string
+    !! The variant is auto-detected from the presence of the 9th token.
+    !!
+    !! Each element block contains, in order: the corner-node line, a
+    !! line of 6 boundary-face flags, a (polyOrder+1)^2 block of face
+    !! points (x,y,z per line, inner index first) for every flagged
+    !! face, and a line of 6 boundary-condition names ("---" marks an
+    !! interior face). Face points are sampled at Chebyshev-Gauss-
+    !! Lobatto points, so the resulting mesh has
+    !! `quadrature = CHEBYSHEV_GAUSS_LOBATTO`.
+    !!
+    !! HOHQMesh numbers hex corners with nodes 1-4 on the bottom face
+    !! (counter-clockwise) and 5-8 above them, which matches SELF's
+    !! CGNS corner convention exactly. HOHQMesh face numbering
+    !! (1=south, 2=north, 3=bottom, 4=east, 5=top, 6=west; see
+    !! `FaceFromVolume`) is remapped to SELF's side ordering
+    !! (1=bottom, 2=south, 3=east, 4=north, 5=west, 6=top). Face-point
+    !! grids are written with the two on-face volume axes in natural
+    !! order, which coincides with SELF's boundary index convention,
+    !! so no reorientation of the face data is required.
+    !!
+    !! Element interior nodes are reconstructed by transfinite (Coons)
+    !! interpolation of the six face grids; unflagged faces are
+    !! bilinear patches of their corner nodes. Element-face
+    !! connectivity is not present in the format, so neighbors are
+    !! reconstructed by matching the sorted corner-node ids of each
+    !! face across elements, and the side "flip" is computed by
+    !! matching the corner-node orderings of the paired faces.
+    !! Boundary names populate this%BCNames and sideInfo(5,...) carries
+    !! the 1-based index into that table (0 for interior faces).
+    !! Material names (ISM-MM) populate this%materialNames and
+    !! this%elemMaterial; plain ISM meshes keep the single "default"
+    !! material.
+    implicit none
+    class(Mesh3D_t),intent(out) :: this
+    character(*),intent(in) :: meshFile
+    integer,intent(in),optional :: comm
+    ! Local
+    integer :: iUnit
+    integer :: ios
+    integer :: nNodesFile,nElemFile,polyOrder
+    integer :: nGeo,ng1
+    integer :: i,j,k,e,f,s,iSide,l,p
+    integer :: cornerIDs(1:8)
+    integer :: hohqFlag(1:6)
+    integer :: quadA(1:4),quadB(1:4)
+    integer :: sortedA(1:4)
+    integer :: ePair,sPair,flip
+    integer :: bcIdx
+    integer :: matIdx
+    integer :: nBCsLocal
+    integer :: nMatsLocal
+    integer :: nFaceRecords
+    integer :: hashKey,bucket,probe
+    integer :: hashSize
+    integer,allocatable :: hashHead(:)
+    integer,allocatable :: hashNext(:)
+    integer,allocatable :: pairKey(:,:) ! sorted corner ids, 4 x 6*nElem
+    integer,allocatable :: pairElem(:),pairSide(:)
+    integer,allocatable :: ismCorners(:,:) ! 8 x nElem
+    integer,allocatable :: ismBCid(:,:) ! 6 x nElem (SELF side ordering)
+    integer,allocatable :: ismFlag(:,:) ! 6 x nElem (SELF side ordering)
+    integer,allocatable :: ismMat(:) ! nElem
+    real(prec),allocatable :: nodeXYZ(:,:) ! 3 x nNodesFile
+    real(prec),allocatable :: faceCurve(:,:,:,:,:) ! 3, ng1, ng1, 6, nElem
+    real(prec) :: xyz(1:3)
+    character(LEN=512) :: lineBuf
+    character(LEN=SELF_MESH_MATNAME_LENGTH) :: matName
+    character(LEN=255) :: bdyNames(1:6)
+    character(LEN=255),allocatable :: BCNamesLocal(:)
+    character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: matNamesLocal(:)
+    logical :: isISM_MM
+    ! Map from HOHQMesh hex face id (1=south, 2=north, 3=bottom,
+    ! 4=east, 5=top, 6=west) to SELF local side id
+    integer,parameter :: hohqToSelfSide(1:6) = [2,4,1,3,6,5]
+    ! Corner permutations realised by SELF's eight face flips: for a
+    ! side pair (s1,s2) with flip p, corner l of side s1 (in face-index
+    ! order, see sideMap) coincides with corner flipPerm(l,p) of side
+    ! s2. Flips 0-3 are rotations/reflections keeping the face axes,
+    ! flips 4-7 transpose them (see ApplyFlip/SideExchange kernels).
+    integer,parameter :: flipPerm(1:4,0:7) = reshape( &
+                         [1,2,3,4, &
+                          2,1,4,3, &
+                          3,4,1,2, &
+                          4,3,2,1, &
+                          1,4,3,2, &
+                          2,3,4,1, &
+                          3,2,1,4, &
+                          4,1,2,3],[4,8])
+
+    call this%decomp%init(comm)
+
+    open(newunit=iUnit,file=trim(meshFile),status='old',action='read', &
+         form='formatted',iostat=ios)
+    if(ios /= 0) then
+      print*,__FILE__//' : Failed to open '//trim(meshFile)
+      stop 1
+    endif
+
+    print*,__FILE__//' : Reading HOHQMesh mesh from '//trim(meshFile)
+
+    ! ---- 1. Count line (3-D ISM files carry no format header) ----
+    read(iUnit,*) nNodesFile,nElemFile,polyOrder
+
+    nGeo = polyOrder
+    ng1 = nGeo+1
+    print*,__FILE__//' : nNodes = ',nNodesFile,' nElem = ',nElemFile, &
+      ' polyOrder = ',polyOrder
+
+    ! ---- 2. Read all node coordinates ----
+    allocate(nodeXYZ(1:3,1:nNodesFile))
+    do i = 1,nNodesFile
+      read(iUnit,*) xyz(1:3)
+      nodeXYZ(1:3,i) = xyz(1:3)
+    enddo
+
+    ! ---- 3. Per-element block ----
+    allocate(ismCorners(1:8,1:nElemFile))
+    allocate(ismFlag(1:6,1:nElemFile))
+    allocate(ismBCid(1:6,1:nElemFile))
+    allocate(ismMat(1:nElemFile))
+    allocate(faceCurve(1:3,1:ng1,1:ng1,1:6,1:nElemFile))
+    faceCurve = 0.0_prec
+
+    ! Boundary-name table built incrementally
+    nBCsLocal = 0
+    allocate(BCNamesLocal(1:16))
+    BCNamesLocal = ""
+
+    ! Material-name table built incrementally
+    nMatsLocal = 0
+    allocate(matNamesLocal(1:8))
+    matNamesLocal = ""
+
+    isISM_MM = .false.
+    nFaceRecords = 0
+
+    do e = 1,nElemFile
+
+      ! Corner-node line; the trailing material-name token (ISM-MM)
+      ! is detected by skipping the 8 integer tokens.
+      read(iUnit,'(A)') lineBuf
+      read(lineBuf,*) cornerIDs(1:8)
+      call token_after_n(lineBuf,8,matName)
+      if(e == 1) then
+        isISM_MM = (matName /= "")
+        print*,__FILE__//' : Format = ',merge("ISM-MM","ISM   ",isISM_MM)
+      endif
+
+      if(matName /= "") then
+        ! lookup/insert material name
+        matIdx = 0
+        do k = 1,nMatsLocal
+          if(trim(matNamesLocal(k)) == trim(matName)) then
+            matIdx = k; exit
+          endif
+        enddo
+        if(matIdx == 0) then
+          nMatsLocal = nMatsLocal+1
+          if(nMatsLocal > size(matNamesLocal)) call grow_string_table(matNamesLocal)
+          matNamesLocal(nMatsLocal) = matName
+          matIdx = nMatsLocal
+        endif
+        ismMat(e) = matIdx
+      else
+        ismMat(e) = 1
+      endif
+      ismCorners(1:8,e) = cornerIDs
+
+      ! Face flags and face-point grids, in HOHQMesh face order
+      read(iUnit,*) hohqFlag(1:6)
+      do f = 1,6
+        s = hohqToSelfSide(f)
+        ismFlag(s,e) = hohqFlag(f)
+        if(hohqFlag(f) == 1) then
+          nFaceRecords = nFaceRecords+1
+          do j = 1,ng1
+            do i = 1,ng1
+              read(iUnit,*) xyz(1:3)
+              faceCurve(1:3,i,j,s,e) = xyz(1:3)
+            enddo
+          enddo
+        endif
+      enddo
+
+      ! Boundary-condition names, in HOHQMesh face order
+      read(iUnit,*) bdyNames(1:6)
+      do f = 1,6
+        s = hohqToSelfSide(f)
+        if(trim(adjustl(bdyNames(f))) == "---") then
+          ismBCid(s,e) = 0
+        else
+          ! lookup/insert bdy name
+          bcIdx = 0
+          do i = 1,nBCsLocal
+            if(trim(BCNamesLocal(i)) == trim(adjustl(bdyNames(f)))) then
+              bcIdx = i; exit
+            endif
+          enddo
+          if(bcIdx == 0) then
+            nBCsLocal = nBCsLocal+1
+            if(nBCsLocal > size(BCNamesLocal)) call grow_bc_table(BCNamesLocal)
+            BCNamesLocal(nBCsLocal) = trim(adjustl(bdyNames(f)))
+            bcIdx = nBCsLocal
+          endif
+          ismBCid(s,e) = bcIdx
+        endif
+      enddo
+    enddo
+
+    close(iUnit)
+
+    print*,__FILE__//' : n curved faces = ',nFaceRecords, &
+      ' n materials = ',nMatsLocal,' n boundary names = ',nBCsLocal
+
+    ! At least one BC slot must exist so that Init allocates BCNames/BCType
+    nBCsLocal = max(nBCsLocal,1)
+
+    ! Set up the domain decomposition arrays (elemToRank, offsetElem,
+    ! request/stat slots) using the file's element count. This is
+    ! required for SideExchange even in the serial single-rank case.
+    call this%decomp%GenerateDecomposition(nElemFile,6*nElemFile)
+
+    ! ---- 4. Allocate SELF Mesh3D_t and populate ----
+    call this%Init(nGeo,nElemFile,6*nElemFile,nElemFile*ng1**3,nBCsLocal)
+    this%nUniqueSides = 0 ! filled below after face matching
+    this%quadrature = CHEBYSHEV_GAUSS_LOBATTO ! HOHQMesh face samples are at CGL points
+    this%BCType = 0
+    do i = 1,nBCsLocal
+      if(BCNamesLocal(i) /= "") then
+        this%BCNames(i) = BCNamesLocal(i)
+      else
+        this%BCNames(i) = "unused"
+      endif
+    enddo
+
+    ! Replace the default single-material table with the parsed one
+    deallocate(this%materialNames)
+    this%nMaterials = max(nMatsLocal,1)
+    allocate(this%materialNames(1:this%nMaterials))
+    if(nMatsLocal == 0) then
+      this%materialNames(1) = "default"
+    else
+      this%materialNames(1:nMatsLocal) = matNamesLocal(1:nMatsLocal)
+    endif
+    this%elemMaterial = ismMat
+
+    ! Place corner nodes and run transfinite interpolation per element
+    do e = 1,nElemFile
+      call build_nodeCoords_for_hex(this,e,nGeo,cornerIDs=ismCorners(:,e), &
+                                    flag=ismFlag(:,e),faceCurve=faceCurve(:,:,:,:,e), &
+                                    nodeXYZ=nodeXYZ)
+      ! Synthesize globalNodeIDs: stamp the eight corners with their
+      ! file IDs and leave interior IDs as 0 (interior nodes are
+      ! private to the element under our tensor product layout).
+      this%globalNodeIDs(:,:,:,e) = 0
+      do l = 1,8
+        i = this%CGNSCornerMap(1,l)
+        j = this%CGNSCornerMap(2,l)
+        k = this%CGNSCornerMap(3,l)
+        this%globalNodeIDs(i,j,k,e) = ismCorners(l,e)
+      enddo
+
+      ! Pack elemInfo with simple placeholders; SELF's 3D path does not
+      ! depend on the HOPR-style offset fields when the mesh comes from
+      ! a non-HOPR reader.
+      this%elemInfo(1,e) = 0
+      this%elemInfo(2,e) = ismMat(e) ! Zone = material id
+      this%elemInfo(3,e) = 6*(e-1)
+      this%elemInfo(4,e) = 6*e
+      this%elemInfo(5,e) = ng1**3*(e-1)
+      this%elemInfo(6,e) = ng1**3*e
+    enddo
+
+    ! ---- 5. Build sideInfo via face corner matching ----
+    ! Each face is keyed by its four sorted corner-node ids; two local
+    ! faces with the same key are the two sides of an interior face.
+    allocate(pairKey(1:4,1:6*nElemFile))
+    allocate(pairElem(1:6*nElemFile),pairSide(1:6*nElemFile))
+    do e = 1,nElemFile
+      do iSide = 1,6
+        do l = 1,4
+          quadA(l) = ismCorners(this%sideMap(l,iSide),e)
+        enddo
+        call sort4(quadA,sortedA)
+        i = iSide+6*(e-1)
+        pairKey(1:4,i) = sortedA
+        pairElem(i) = e
+        pairSide(i) = iSide
+      enddo
+    enddo
+
+    ! Hash chain by smallest corner node id
+    hashSize = max(nNodesFile,6*nElemFile)+1
+    allocate(hashHead(0:hashSize-1),hashNext(1:6*nElemFile))
+    hashHead = 0
+    hashNext = 0
+    do i = 1,6*nElemFile
+      hashKey = pairKey(1,i)
+      bucket = modulo(hashKey,hashSize)
+      hashNext(i) = hashHead(bucket)
+      hashHead(bucket) = i
+    enddo
+
+    this%sideInfo = 0
+    this%nUniqueSides = 0
+    do e = 1,nElemFile
+      do iSide = 1,6
+        i = iSide+6*(e-1)
+        ePair = 0; sPair = 0
+        bucket = modulo(pairKey(1,i),hashSize)
+        probe = hashHead(bucket)
+        do while(probe /= 0)
+          if(probe /= i .and. &
+             pairKey(1,probe) == pairKey(1,i) .and. &
+             pairKey(2,probe) == pairKey(2,i) .and. &
+             pairKey(3,probe) == pairKey(3,i) .and. &
+             pairKey(4,probe) == pairKey(4,i)) then
+            ePair = pairElem(probe)
+            sPair = pairSide(probe)
+            exit
+          endif
+          probe = hashNext(probe)
+        enddo
+
+        flip = 0
+        if(ePair /= 0) then
+          ! Determine the flip by matching the corner-node orderings of
+          ! the paired faces (face-index corner order per sideMap).
+          do l = 1,4
+            quadA(l) = ismCorners(this%sideMap(l,iSide),e)
+            quadB(l) = ismCorners(this%sideMap(l,sPair),ePair)
+          enddo
+          flip = -1
+          do p = 0,7
+            if(quadB(flipPerm(1,p)) == quadA(1) .and. &
+               quadB(flipPerm(2,p)) == quadA(2) .and. &
+               quadB(flipPerm(3,p)) == quadA(3) .and. &
+               quadB(flipPerm(4,p)) == quadA(4)) then
+              flip = p
+              exit
+            endif
+          enddo
+          if(flip < 0) then
+            print*,__FILE__//' : Inconsistent face corner ordering between elements ', &
+              e,' and ',ePair
+            stop 1
+          endif
+        endif
+
+        this%sideInfo(3,iSide,e) = ePair
+        this%sideInfo(4,iSide,e) = 10*sPair+flip
+        this%sideInfo(5,iSide,e) = ismBCid(iSide,e)
+        ! Allocate a globalSideID (count each shared face once)
+        if(ePair == 0 .or. e < ePair) then
+          this%nUniqueSides = this%nUniqueSides+1
+          this%sideInfo(2,iSide,e) = this%nUniqueSides
+        else
+          this%sideInfo(2,iSide,e) = this%sideInfo(2,sPair,ePair)
+        endif
+      enddo
+    enddo
+
+    deallocate(hashHead,hashNext,pairKey,pairElem,pairSide)
+    deallocate(nodeXYZ,ismCorners,ismFlag,ismBCid,ismMat,faceCurve)
+    deallocate(BCNamesLocal,matNamesLocal)
+
+    call this%UpdateDevice()
+
+  contains
+
+    subroutine token_after_n(buf,n,token)
+      !! Return the (n+1)-th whitespace-delimited token of buf (or ""
+      !! if buf has n tokens or fewer). Used to detect the trailing
+      !! material-name string on an ISM-MM corner-node line.
+      character(*),intent(in) :: buf
+      integer,intent(in) :: n
+      character(*),intent(out) :: token
+      integer :: pos,tokenCount,lenBuf
+      logical :: inToken
+      integer :: tokStart
+
+      token = ""
+      lenBuf = len_trim(buf)
+      tokenCount = 0
+      inToken = .false.
+      tokStart = 0
+      do pos = 1,lenBuf
+        if(buf(pos:pos) /= " " .and. buf(pos:pos) /= char(9)) then
+          if(.not. inToken) then
+            inToken = .true.
+            tokenCount = tokenCount+1
+            tokStart = pos
+          endif
+          if(tokenCount == n+1 .and. pos == lenBuf) then
+            token = buf(tokStart:lenBuf)
+          endif
+        else
+          if(inToken .and. tokenCount == n+1) then
+            token = buf(tokStart:pos-1)
+            return
+          endif
+          inToken = .false.
+        endif
+      enddo
+    endsubroutine token_after_n
+
+    subroutine sort4(a,b)
+      !! Ascending insertion sort of four integers
+      integer,intent(in) :: a(1:4)
+      integer,intent(out) :: b(1:4)
+      integer :: m,n,tmp
+      b = a
+      do m = 2,4
+        tmp = b(m)
+        n = m-1
+        do while(n >= 1)
+          if(b(n) <= tmp) exit
+          b(n+1) = b(n)
+          n = n-1
+        enddo
+        b(n+1) = tmp
+      enddo
+    endsubroutine sort4
+
+    subroutine grow_bc_table(tbl)
+      character(LEN=255),allocatable,intent(inout) :: tbl(:)
+      character(LEN=255),allocatable :: tmp(:)
+      integer :: oldSize
+      oldSize = size(tbl)
+      allocate(tmp(1:2*oldSize))
+      tmp(1:oldSize) = tbl(1:oldSize)
+      tmp(oldSize+1:) = ""
+      call move_alloc(tmp,tbl)
+    endsubroutine grow_bc_table
+
+    subroutine grow_string_table(tbl)
+      character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable,intent(inout) :: tbl(:)
+      character(LEN=SELF_MESH_MATNAME_LENGTH),allocatable :: tmp(:)
+      integer :: oldSize
+      oldSize = size(tbl)
+      allocate(tmp(1:2*oldSize))
+      tmp(1:oldSize) = tbl(1:oldSize)
+      tmp(oldSize+1:) = ""
+      call move_alloc(tmp,tbl)
+    endsubroutine grow_string_table
+
+  endsubroutine Read_HOHQMesh_Mesh3D_t
+
+  subroutine build_nodeCoords_for_hex(mesh,e,nGeo,cornerIDs,flag,faceCurve,nodeXYZ)
+    !! Fill mesh%nodeCoords(:,:,:,:,e) for one hexahedral element by
+    !! transfinite (Coons) interpolation of its six face grids. Faces
+    !! flagged in the mesh file use the file's face-point grids; the
+    !! remaining faces are bilinear patches of their four corner nodes
+    !! evaluated at Chebyshev-Gauss-Lobatto parametric coordinates.
+    !! Edge curves are extracted from the face grids (preferring a
+    !! flagged face when an edge borders one flagged and one bilinear
+    !! face) and the standard Boolean-sum formula
+    !!   x = Pxi + Peta + Pzeta - Pxi*Peta - Pxi*Pzeta - Peta*Pzeta
+    !!       + Pxi*Peta*Pzeta
+    !! combines face, edge, and corner contributions. For an element
+    !! with all-straight faces this reduces to trilinear interpolation
+    !! of the eight corners.
+    implicit none
+    class(Mesh3D_t),intent(inout) :: mesh
+    integer,intent(in) :: e
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: cornerIDs(1:8)
+    integer,intent(in) :: flag(1:6)
+    real(prec),intent(in) :: faceCurve(1:3,1:nGeo+1,1:nGeo+1,1:6)
+    real(prec),intent(in) :: nodeXYZ(:,:)
+    ! Local
+    integer :: ng1
+    integer :: i,j,k,s,l
+    real(prec) :: P(1:3,1:8)
+    real(prec) :: face(1:3,1:nGeo+1,1:nGeo+1,1:6)
+    real(prec) :: exEdge(1:3,1:nGeo+1,1:4) ! xi-directed edges: bs, bn, ts, tn
+    real(prec) :: eyEdge(1:3,1:nGeo+1,1:4) ! eta-directed edges: bw, be, tw, te
+    real(prec) :: ezEdge(1:3,1:nGeo+1,1:4) ! zeta-directed edges: sw, se, nw, ne
+    real(prec) :: xi(0:nGeo),wts(0:nGeo)
+    real(prec) :: u(1:nGeo+1)
+    real(prec) :: a,b,c
+    real(prec) :: xfp(1:3),xep(1:3),xcp(1:3)
+
+    ng1 = nGeo+1
+
+    do l = 1,8
+      P(1:3,l) = nodeXYZ(1:3,cornerIDs(l))
+    enddo
+
+    if(nGeo == 1) then
+      ! Pure trilinear element with the 8 corners
+      do l = 1,8
+        i = mesh%CGNSCornerMap(1,l)
+        j = mesh%CGNSCornerMap(2,l)
+        k = mesh%CGNSCornerMap(3,l)
+        mesh%nodeCoords(1:3,i,j,k,e) = P(1:3,l)
+      enddo
+      return
+    endif
+
+    ! Chebyshev-Gauss-Lobatto parametric coordinates on [-1,1] and
+    ! their [0,1] image used in the blending weights. We use SELF's
+    ! quadrature routine to keep node placement consistent with the
+    ! rest of the code.
+    call ChebyshevQuadrature(nGeo,xi,wts,CHEBYSHEV_GAUSS_LOBATTO)
+    do i = 1,ng1
+      u(i) = 0.5_prec*(xi(i-1)+1.0_prec)
+    enddo
+
+    ! Face grids: curved faces from the file, straight faces as
+    ! bilinear patches of their four corners (face-index corner order
+    ! per sideMap; all faces use the natural on-face volume axes).
+    do s = 1,6
+      if(flag(s) == 1) then
+        face(1:3,1:ng1,1:ng1,s) = faceCurve(1:3,1:ng1,1:ng1,s)
+      else
+        do j = 1,ng1
+          do i = 1,ng1
+            a = u(i)
+            b = u(j)
+            face(1:3,i,j,s) = (1.0_prec-a)*(1.0_prec-b)*P(1:3,mesh%sideMap(1,s))+ &
+                              a*(1.0_prec-b)*P(1:3,mesh%sideMap(2,s))+ &
+                              a*b*P(1:3,mesh%sideMap(3,s))+ &
+                              (1.0_prec-a)*b*P(1:3,mesh%sideMap(4,s))
+          enddo
+        enddo
+      endif
+    enddo
+
+    ! Edge curves extracted from the face grids. Each edge borders two
+    ! faces; a flagged (curved) face is preferred so that straight-face
+    ! bilinear patches never override curved edge data. When both
+    ! bordering faces are straight, the two restrictions coincide (the
+    ! straight line between the edge's corner nodes). SELF side ids:
+    ! 1=bottom, 2=south, 3=east, 4=north, 5=west, 6=top.
+    do i = 1,ng1
+      ! xi-directed edges
+      if(flag(1) == 1 .or. flag(2) /= 1) then ! bottom-south: bottom or south
+        exEdge(1:3,i,1) = face(1:3,i,1,1)
+      else
+        exEdge(1:3,i,1) = face(1:3,i,1,2)
+      endif
+      if(flag(1) == 1 .or. flag(4) /= 1) then ! bottom-north: bottom or north
+        exEdge(1:3,i,2) = face(1:3,i,ng1,1)
+      else
+        exEdge(1:3,i,2) = face(1:3,i,1,4)
+      endif
+      if(flag(6) == 1 .or. flag(2) /= 1) then ! top-south: top or south
+        exEdge(1:3,i,3) = face(1:3,i,1,6)
+      else
+        exEdge(1:3,i,3) = face(1:3,i,ng1,2)
+      endif
+      if(flag(6) == 1 .or. flag(4) /= 1) then ! top-north: top or north
+        exEdge(1:3,i,4) = face(1:3,i,ng1,6)
+      else
+        exEdge(1:3,i,4) = face(1:3,i,ng1,4)
+      endif
+      ! eta-directed edges
+      if(flag(1) == 1 .or. flag(5) /= 1) then ! bottom-west: bottom or west
+        eyEdge(1:3,i,1) = face(1:3,1,i,1)
+      else
+        eyEdge(1:3,i,1) = face(1:3,i,1,5)
+      endif
+      if(flag(1) == 1 .or. flag(3) /= 1) then ! bottom-east: bottom or east
+        eyEdge(1:3,i,2) = face(1:3,ng1,i,1)
+      else
+        eyEdge(1:3,i,2) = face(1:3,i,1,3)
+      endif
+      if(flag(6) == 1 .or. flag(5) /= 1) then ! top-west: top or west
+        eyEdge(1:3,i,3) = face(1:3,1,i,6)
+      else
+        eyEdge(1:3,i,3) = face(1:3,i,ng1,5)
+      endif
+      if(flag(6) == 1 .or. flag(3) /= 1) then ! top-east: top or east
+        eyEdge(1:3,i,4) = face(1:3,ng1,i,6)
+      else
+        eyEdge(1:3,i,4) = face(1:3,i,ng1,3)
+      endif
+      ! zeta-directed edges
+      if(flag(2) == 1 .or. flag(5) /= 1) then ! south-west: south or west
+        ezEdge(1:3,i,1) = face(1:3,1,i,2)
+      else
+        ezEdge(1:3,i,1) = face(1:3,1,i,5)
+      endif
+      if(flag(2) == 1 .or. flag(3) /= 1) then ! south-east: south or east
+        ezEdge(1:3,i,2) = face(1:3,ng1,i,2)
+      else
+        ezEdge(1:3,i,2) = face(1:3,1,i,3)
+      endif
+      if(flag(4) == 1 .or. flag(5) /= 1) then ! north-west: north or west
+        ezEdge(1:3,i,3) = face(1:3,1,i,4)
+      else
+        ezEdge(1:3,i,3) = face(1:3,ng1,i,5)
+      endif
+      if(flag(4) == 1 .or. flag(3) /= 1) then ! north-east: north or east
+        ezEdge(1:3,i,4) = face(1:3,ng1,i,4)
+      else
+        ezEdge(1:3,i,4) = face(1:3,ng1,i,3)
+      endif
+    enddo
+
+    ! Boolean-sum transfinite interpolation. u,v,w in [0,1] are the
+    ! blending parameters along xi, eta, zeta.
+    do k = 1,ng1
+      c = u(k)
+      do j = 1,ng1
+        b = u(j)
+        do i = 1,ng1
+          a = u(i)
+
+          ! Face contributions (Pxi + Peta + Pzeta)
+          xfp = (1.0_prec-a)*face(1:3,j,k,5)+a*face(1:3,j,k,3)+ &
+                (1.0_prec-b)*face(1:3,i,k,2)+b*face(1:3,i,k,4)+ &
+                (1.0_prec-c)*face(1:3,i,j,1)+c*face(1:3,i,j,6)
+
+          ! Edge corrections (Pxi*Peta + Pxi*Pzeta + Peta*Pzeta)
+          xep = (1.0_prec-a)*(1.0_prec-b)*ezEdge(1:3,k,1)+ &
+                a*(1.0_prec-b)*ezEdge(1:3,k,2)+ &
+                a*b*ezEdge(1:3,k,4)+ &
+                (1.0_prec-a)*b*ezEdge(1:3,k,3)+ &
+                (1.0_prec-a)*(1.0_prec-c)*eyEdge(1:3,j,1)+ &
+                a*(1.0_prec-c)*eyEdge(1:3,j,2)+ &
+                a*c*eyEdge(1:3,j,4)+ &
+                (1.0_prec-a)*c*eyEdge(1:3,j,3)+ &
+                (1.0_prec-b)*(1.0_prec-c)*exEdge(1:3,i,1)+ &
+                b*(1.0_prec-c)*exEdge(1:3,i,2)+ &
+                b*c*exEdge(1:3,i,4)+ &
+                (1.0_prec-b)*c*exEdge(1:3,i,3)
+
+          ! Corner contributions (Pxi*Peta*Pzeta)
+          xcp = (1.0_prec-a)*(1.0_prec-b)*(1.0_prec-c)*P(1:3,1)+ &
+                a*(1.0_prec-b)*(1.0_prec-c)*P(1:3,2)+ &
+                a*b*(1.0_prec-c)*P(1:3,3)+ &
+                (1.0_prec-a)*b*(1.0_prec-c)*P(1:3,4)+ &
+                (1.0_prec-a)*(1.0_prec-b)*c*P(1:3,5)+ &
+                a*(1.0_prec-b)*c*P(1:3,6)+ &
+                a*b*c*P(1:3,7)+ &
+                (1.0_prec-a)*b*c*P(1:3,8)
+
+          mesh%nodeCoords(1:3,i,j,k,e) = xfp-xep+xcp
+
+        enddo
+      enddo
+    enddo
+
+  endsubroutine build_nodeCoords_for_hex
 
   subroutine Write_Mesh3D_t(this,meshFile)
     ! Writes mesh output in HOPR format (serial only)
