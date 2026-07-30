@@ -163,6 +163,13 @@ def main():
     ap.add_argument("--outdir", default=None,
                     help="output directory (default: <directory>/plots)")
     ap.add_argument("--no-movie", action="store_true", help="skip ffmpeg movie assembly")
+    ap.add_argument("--dpi", type=int, default=130, help="figure resolution (default: 130)")
+    ap.add_argument("--figwidth", type=float, default=8.0,
+                    help="figure width in inches (default: 8)")
+    ap.add_argument("--lw", type=float, default=0.4,
+                    help="element-outline line width (default: 0.4)")
+    ap.add_argument("--skeleton-alpha", type=float, default=0.5,
+                    help="element-outline opacity (default: 0.5)")
     args = ap.parse_args()
 
     files = sorted(glob.glob(os.path.join(args.directory, "solution.*.h5")))
@@ -190,12 +197,16 @@ def main():
         L = lagrange_matrix(xi, target)
         xu, yu, uu = upsample(L, x), upsample(L, y), upsample(L, u)
 
-        fig, ax = plt.subplots(figsize=(8, 7), dpi=130)
+        fig, ax = plt.subplots(figsize=(args.figwidth, args.figwidth*7.0/8.0), dpi=args.dpi)
         tri = element_triangulation(xu, yu)
         tpc = ax.tripcolor(tri, uu.ravel(), shading="gouraud",
                            cmap="RdBu_r", vmin=-vmax, vmax=vmax, rasterized=True)
+        # Deeply refined elements can be only a pixel or two across, at which point default
+        # outlines cover most of every cell and the field disappears under the skeleton. Keep
+        # the outlines thin and translucent so the refined band reads as texture over colour.
         ax.add_collection(LineCollection(element_outlines(xu, yu),
-                                         colors="black", linewidths=0.4, alpha=0.5))
+                                         colors="black", linewidths=args.lw,
+                                         alpha=args.skeleton_alpha))
         ax.set_aspect("equal")
         ax.set_xlabel("x (m)")
         ax.set_ylabel("y (m)")
