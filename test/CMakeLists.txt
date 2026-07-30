@@ -89,6 +89,7 @@ add_fortran_tests (
     "transfer_plan_2d_guard_unbuilt.f90"
     "lineareuler2d_amr_soundwave.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
+    "data_2d_device_memory.f90"
     "amr_controller_2d_guard_maxlevel.f90"
     "amr_controller_2d_guard_wrongmesh.f90"
     "refinement_indicator_2d_guard_thresholds.f90"

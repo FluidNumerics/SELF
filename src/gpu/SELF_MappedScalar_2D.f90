@@ -156,6 +156,12 @@ contains
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
+    ! boundarynormal_gpu is allocated in Init alongside the four above and must be released
+    ! here with them. Omitting it leaks (N+1)*4*nElem*2*nvar reals on every Free/Init cycle,
+    ! which the adaptive loop performs once per epoch for each of the model's five
+    ! MappedScalar2D fields. Compare Free_Scalar2D in src/gpu/SELF_Scalar_2D.f90 and
+    ! Free_Scalar3D in src/gpu/SELF_Scalar_3D.f90, which both free it.
+    call gpuCheck(hipFree(this%boundarynormal_gpu))
     call gpuCheck(hipFree(this%jas_gpu))
     if(c_associated(this%mortarBuff_gpu)) then
       call gpuCheck(hipFree(this%mortarBuff_gpu))

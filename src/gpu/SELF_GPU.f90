@@ -104,33 +104,48 @@ module SELF_GPU
                       endfunction hipMemcpy_
                       endinterface hipMemcpy
 
-                      contains
+                      interface hipMemGetInfo
+#ifdef HAVE_HIP
+                        function hipMemGetInfo_(freeBytes,totalBytes) bind(c,name="hipMemGetInfo")
+#elif HAVE_CUDA
+                          function hipMemGetInfo_(freeBytes,totalBytes) bind(c,name="cudaMemGetInfo")
+#endif
+                            use iso_c_binding
+                            use SELF_GPU_enums
+                            implicit none
+                            integer(c_int) :: hipMemGetInfo_
+                            integer(c_size_t) :: freeBytes
+                            integer(c_size_t) :: totalBytes
+                          endfunction hipMemGetInfo_
+                          endinterface hipMemGetInfo
 
-                      subroutine gpuCheck(gpuError_t)
-                        use iso_c_binding
-                        implicit none
-                        integer(c_int) :: gpuError_t
+                          contains
 
-                        if(gpuError_t /= hipSuccess) then
-                          write(*,*) "GPU ERROR: Error code = ",gpuError_t
-                          call exit(gpuError_t)
-                        endif
-                      endsubroutine gpuCheck
+                          subroutine gpuCheck(gpuError_t)
+                            use iso_c_binding
+                            implicit none
+                            integer(c_int) :: gpuError_t
 
-                      function GPUAvailable() result(avail)
-                        implicit none
-                        logical :: avail
-                        ! Local
-                        integer(c_int) :: gpuCount
-                        integer(kind(hipSuccess)) :: err
+                            if(gpuError_t /= hipSuccess) then
+                              write(*,*) "GPU ERROR: Error code = ",gpuError_t
+                              call exit(gpuError_t)
+                            endif
+                          endsubroutine gpuCheck
 
-                        err = hipGetDeviceCount(gpuCount)
-                        if(gpuCount > 0 .and. err == hipSuccess) then
-                          avail = .true.
-                        else
-                          avail = .false.
-                        endif
+                          function GPUAvailable() result(avail)
+                            implicit none
+                            logical :: avail
+                            ! Local
+                            integer(c_int) :: gpuCount
+                            integer(kind(hipSuccess)) :: err
 
-                      endfunction GPUAvailable
+                            err = hipGetDeviceCount(gpuCount)
+                            if(gpuCount > 0 .and. err == hipSuccess) then
+                              avail = .true.
+                            else
+                              avail = .false.
+                            endif
 
-                      endmodule SELF_GPU
+                          endfunction GPUAvailable
+
+                          endmodule SELF_GPU
