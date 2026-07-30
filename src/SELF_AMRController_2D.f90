@@ -45,8 +45,10 @@ module SELF_AMRController_2D
 !!                  new mesh, preserving its time state and parameters; the transferred
 !!                  solution is applied and uploaded to the device.
 !!
-!! The controller owns the forest, the indicator, and the meshes/geometries it emits
-!! (double-buffered: the previous pair is freed after the model is rebound to the new pair).
+!! The controller owns the forest, the indicator, and the meshes/geometries it emits. The mesh
+!! is rebuilt each epoch and the previous one freed after the model is rebound. Geometry instead
+!! lives in two long-lived buffers that alternate (AMR Stage 6c), so it is resized rather than
+!! reallocated and the previous epoch's geometry remains available while the new one is built.
 !! The base mesh and geometry the model was initialized with belong to the caller and are
 !! never freed here, but the base mesh must outlive the controller: it supplies the
 !! boundary-condition metadata and the communicator for every emitted mesh. After
@@ -90,7 +92,15 @@ module SELF_AMRController_2D
     type(Mesh2D),pointer :: activeMesh => null() !! mesh the model currently runs on
     type(SEMQuad),pointer :: activeGeom => null() !! geometry the model currently runs on
     type(Lagrange),pointer :: interp => null() !! the model's solution interpolant
-    logical :: ownsActive = .false. !! whether activeMesh/activeGeom were emitted (vs caller's)
+    logical :: ownsActive = .false. !! whether activeMesh was emitted by us (vs the caller's)
+    !! Two long-lived geometry buffers, alternated each epoch (AMR Stage 6c). Geometry is now
+    !! resized in place rather than allocated and freed per epoch, which is what lets Stage 6b's
+    !! amortization apply to it; alternating means the PREVIOUS epoch's geometry is still intact
+    !! while the new one is filled, which the incremental reuse path needs. geomSlot records
+    !! which buffer activeGeom currently is, or 0 while it is still the caller's geometry.
+    type(SEMQuad),pointer :: geomA => null()
+    type(SEMQuad),pointer :: geomB => null()
+    integer :: geomSlot = 0
     integer :: ivar = SELF_AMR_ALLVARS !! driving variable for the indicator
     integer :: maxLevel = 1 !! refinement-level cap
     integer :: nHalo = 1 !! refine-flag halo-expansion passes
@@ -102,6 +112,7 @@ module SELF_AMRController_2D
     procedure,public :: Free => Free_AMRController2D
     procedure,public :: Adapt => Adapt_AMRController2D
     procedure,public :: RecommendedTimeStep => RecommendedTimeStep_AMRController2D
+    procedure,private :: NextGeomBuffer => NextGeomBuffer_AMRController2D
 
   endtype AMRController2D
 
@@ -248,6 +259,42 @@ contains
 
   endsubroutine AllgatherPerElemReals
 
+  subroutine NextGeomBuffer_AMRController2D(this,nElem,geom,slot)
+    !! Select the geometry buffer to fill this epoch: whichever of the two is not currently
+    !! active, so the previous epoch's geometry stays intact and readable (AMR Stage 6c).
+    !!
+    !! Each buffer is Init-ed the first time it is used and Resized on every subsequent epoch, so
+    !! after the first two adaptations geometry performs no allocation at all - which is the point
+    !! of the change. On the very first adaptation activeGeom is still the caller's geometry
+    !! (geomSlot == 0); that object belongs to the caller and is never freed or reused here.
+    implicit none
+    class(AMRController2D),intent(inout) :: this
+    integer,intent(in) :: nElem
+    type(SEMQuad),pointer,intent(out) :: geom
+    integer,intent(out) :: slot
+
+    if(this%geomSlot == 1) then
+      slot = 2
+    else
+      slot = 1
+    endif
+
+    if(slot == 1) then
+      if(.not. associated(this%geomA)) allocate(this%geomA)
+      geom => this%geomA
+    else
+      if(.not. associated(this%geomB)) allocate(this%geomB)
+      geom => this%geomB
+    endif
+
+    if(geom%nElem == 0) then
+      call geom%Init(this%interp,nElem)
+    else
+      call geom%Resize(this%interp,nElem)
+    endif
+
+  endsubroutine NextGeomBuffer_AMRController2D
+
   subroutine Free_AMRController2D(this)
     !! Release the forest, the indicator, and any controller-emitted mesh/geometry. The
     !! caller-owned base mesh/geometry are untouched. A model still pointing at a
@@ -258,14 +305,23 @@ contains
     call this%forest%Free()
     call this%indicator%Free()
     if(this%ownsActive) then
-      call this%activeGeom%Free()
       call this%activeMesh%Free()
-      deallocate(this%activeGeom)
       deallocate(this%activeMesh)
+    endif
+    if(associated(this%geomA)) then
+      call this%geomA%Free()
+      deallocate(this%geomA)
+    endif
+    if(associated(this%geomB)) then
+      call this%geomB%Free()
+      deallocate(this%geomB)
     endif
     this%baseMesh => null()
     this%activeMesh => null()
     this%activeGeom => null()
+    this%geomA => null()
+    this%geomB => null()
+    this%geomSlot = 0
     this%interp => null()
     this%ownsActive = .false.
 
@@ -297,6 +353,7 @@ contains
     type(TransferPlan2D) :: plan
     type(Mesh2D),pointer :: newMesh
     type(SEMQuad),pointer :: newGeom
+    integer :: newSlot
     real(prec),allocatable :: uOld(:,:,:,:)
 
     adapted = .false.
@@ -386,8 +443,10 @@ contains
 
     allocate(newMesh)
     call EmitMesh(this%forest,this%baseMesh,newMesh)
-    allocate(newGeom)
-    call newGeom%Init(this%interp,newMesh%nElem)
+
+    ! Take the geometry buffer that is NOT currently active, so the previous epoch's geometry
+    ! stays readable (Stage 6c). Each buffer is Init-ed once and resized thereafter.
+    call this%NextGeomBuffer(newMesh%nElem,newGeom,newSlot)
     call newGeom%GenerateFromMesh(newMesh)
 
     ! ---- 6. Regrid the model and transfer (migrate) the solution ----
@@ -430,14 +489,14 @@ contains
     call plan%Free()
 
     ! ---- 7. Retire the previous mesh/geometry and re-size the indicator ----
+    ! The geometry buffers are retained and reused; only the mesh is still rebuilt per epoch.
     if(this%ownsActive) then
-      call this%activeGeom%Free()
       call this%activeMesh%Free()
-      deallocate(this%activeGeom)
       deallocate(this%activeMesh)
     endif
     this%activeMesh => newMesh
     this%activeGeom => newGeom
+    this%geomSlot = newSlot
     this%ownsActive = .true.
 
     call this%indicator%Free()
