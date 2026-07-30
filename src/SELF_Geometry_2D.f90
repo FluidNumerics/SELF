@@ -72,6 +72,9 @@ module SELF_Geometry_2D
     procedure,public :: Resize => Resize_SEMQuad
     procedure,public :: Free => Free_SEMQuad
     procedure,public :: GenerateFromMesh => GenerateFromMesh_SEMQuad
+    procedure,public :: GenerateFromNodeCoords => GenerateFromNodeCoords_SEMQuad
+    procedure,public :: CopyElements => CopyElements_SEMQuad
+    procedure,public :: UploadGeometry => UploadGeometry_SEMQuad
     procedure,private :: EnsureScratch => EnsureScratch_SEMQuad
     procedure,public :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     procedure,private :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
@@ -142,6 +145,71 @@ contains
 
   endsubroutine Resize_SEMQuad
 
+  subroutine CopyElements_SEMQuad(myGeom,src,srcIdx,dstIdx,n)
+    !! Copy whole-element geometry blocks from src into myGeom: element srcIdx(k) of src becomes
+    !! element dstIdx(k) of myGeom, for k = 1..n (AMR Stage 6c).
+    !!
+    !! This is exact, not an interpolation, and it is what lets an adaptation epoch skip
+    !! regenerating the elements it did not change. Every geometry quantity for an element depends
+    !! only on that element's own mesh node coordinates - GenerateFromMesh, CalculateMetricTerms
+    !! and CalculateContravariantBasis contain no neighbour coupling, no side pairing and no
+    !! reduction, and the ±sign convention for normals is element-local - so moving an element's
+    !! block between two geometries preserves it exactly.
+    !!
+    !! Element is dimension 3 of every array, so each element's data is contiguous within a given
+    !! set of trailing indices; the whole-slice assignments below are the natural expression of
+    !! that and let the compiler emit block copies.
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+    type(SEMQuad),intent(in) :: src
+    integer,intent(in) :: srcIdx(:)
+    integer,intent(in) :: dstIdx(:)
+    integer,intent(in) :: n
+    ! Local
+    integer :: k,s,d
+
+    do k = 1,n
+      s = srcIdx(k)
+      d = dstIdx(k)
+
+      myGeom%x%interior(:,:,d,:,:) = src%x%interior(:,:,s,:,:)
+      myGeom%x%boundary(:,:,d,:,:) = src%x%boundary(:,:,s,:,:)
+
+      myGeom%dxds%interior(:,:,d,:,:,:) = src%dxds%interior(:,:,s,:,:,:)
+
+      myGeom%dsdx%interior(:,:,d,:,:,:) = src%dsdx%interior(:,:,s,:,:,:)
+      myGeom%dsdx%boundary(:,:,d,:,:,:) = src%dsdx%boundary(:,:,s,:,:,:)
+
+      myGeom%nHat%interior(:,:,d,:,:) = src%nHat%interior(:,:,s,:,:)
+      myGeom%nHat%boundary(:,:,d,:,:) = src%nHat%boundary(:,:,s,:,:)
+
+      myGeom%nScale%interior(:,:,d,:) = src%nScale%interior(:,:,s,:)
+      myGeom%nScale%boundary(:,:,d,:) = src%nScale%boundary(:,:,s,:)
+
+      myGeom%J%interior(:,:,d,:) = src%J%interior(:,:,s,:)
+      myGeom%J%boundary(:,:,d,:) = src%J%boundary(:,:,s,:)
+    enddo
+
+  endsubroutine CopyElements_SEMQuad
+
+  subroutine UploadGeometry_SEMQuad(myGeom)
+    !! Push the geometry the solver kernels read to the device. Mirrors the uploads that
+    !! GenerateFromMesh's own path performs, for use when geometry was assembled by element copy
+    !! rather than generated (AMR Stage 6c).
+    !!
+    !! dxds is deliberately absent: nothing in 2-D reads it on the device (see
+    !! CalculateMetricTerms).
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+
+    call myGeom%x%UpdateDevice()
+    call myGeom%dsdx%UpdateDevice()
+    call myGeom%nHat%UpdateDevice()
+    call myGeom%nScale%UpdateDevice()
+    call myGeom%J%UpdateDevice()
+
+  endsubroutine UploadGeometry_SEMQuad
+
   subroutine Free_SEMQuad(myGeom)
     implicit none
     class(SEMQuad),intent(inout) :: myGeom
@@ -169,28 +237,48 @@ contains
     implicit none
     class(SEMQuad),intent(inout) :: myGeom
     type(Mesh2D),intent(in) :: mesh
-    ! Local
-    integer :: iel
-    integer :: i,j
 
-    call myGeom%EnsureScratch(mesh%nGeo,mesh%quadrature,mesh%nElem)
-
-    ! Set the element internal mesh locations
-    do iel = 1,mesh%nElem
-      do j = 1,mesh%nGeo+1
-        do i = 1,mesh%nGeo+1
-          myGeom%xMesh%interior(i,j,iel,1,1:2) = mesh%nodeCoords(1:2,i,j,iel)
-        enddo
-      enddo
-    enddo
-
-    call myGeom%xMesh%GridInterp(myGeom%x%interior)
+    call myGeom%GenerateFromNodeCoords(mesh%nodeCoords,mesh%nGeo,mesh%quadrature,mesh%nElem)
     call myGeom%x%UpdateDevice()
     call myGeom%x%BoundaryInterp() ! Boundary interp will run on GPU if enabled, hence why we close in update host/device
     call myGeom%x%UpdateHost()
     call myGeom%CalculateMetricTerms()
 
   endsubroutine GenerateFromMesh_SEMQuad
+
+  subroutine GenerateFromNodeCoords_SEMQuad(myGeom,nodeCoords,nGeo,quadrature,nElem)
+    !! Generate geometry for nElem elements directly from their mesh node coordinates (AMR Stage
+    !! 6c). GenerateFromMesh is a thin wrapper over this.
+    !!
+    !! Taking the coordinates rather than a Mesh2D is what allows the adaptive loop to generate a
+    !! COMPACTED set of elements - just the ones an epoch actually changed - without teaching the
+    !! shared data classes about element subsets. The generation loops still run over every element
+    !! they are given; the saving comes from being given fewer.
+    implicit none
+    class(SEMQuad),intent(inout) :: myGeom
+    real(prec),intent(in) :: nodeCoords(1:2,1:nGeo+1,1:nGeo+1,1:nElem)
+    integer,intent(in) :: nGeo
+    integer,intent(in) :: quadrature
+    integer,intent(in) :: nElem
+    ! Local
+    integer :: iel,i,j
+
+    if(nElem <= 0) return
+
+    call myGeom%EnsureScratch(nGeo,quadrature,nElem)
+
+    ! Set the element internal mesh locations
+    do iel = 1,nElem
+      do j = 1,nGeo+1
+        do i = 1,nGeo+1
+          myGeom%xMesh%interior(i,j,iel,1,1:2) = nodeCoords(1:2,i,j,iel)
+        enddo
+      enddo
+    enddo
+
+    call myGeom%xMesh%GridInterp(myGeom%x%interior)
+
+  endsubroutine GenerateFromNodeCoords_SEMQuad
 
   subroutine EnsureScratch_SEMQuad(myGeom,nGeo,quadrature,nElem)
     !! Prepare the cached GenerateFromMesh scratch for a mesh with nGeo/quadrature and nElem

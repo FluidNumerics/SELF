@@ -292,6 +292,15 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerSimTime = ",tFwd/tSim
   write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerSimTimeIncAMR = ",(tFwd+tAdapt)/tSim
   write(output_unit,'(A,ES16.7E3)') "BENCH_amrFraction = ",tAdapt/(tFwd+tAdapt)
+  ! Geometry reuse (AMR Stage 6c): the share of elements whose geometry was carried forward from
+  ! the previous epoch instead of being regenerated. This is what the incremental path buys.
+  write(output_unit,'(A,I0)') "BENCH_geomReused = ",controller%nGeomReused
+  write(output_unit,'(A,I0)') "BENCH_geomGenerated = ",controller%nGeomGenerated
+  if(controller%nGeomReused+controller%nGeomGenerated > 0) then
+    write(output_unit,'(A,ES16.7E3)') "BENCH_geomReuseFraction = ", &
+      real(controller%nGeomReused,real64)/ &
+      real(controller%nGeomReused+controller%nGeomGenerated,real64)
+  endif
 
   ! ---- Integration checks ----
   call modelobj%CalculateEntropy()

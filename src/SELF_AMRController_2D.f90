@@ -71,6 +71,7 @@ module SELF_AMRController_2D
 !! RecommendedTimeStep(dtBase) = dtBase / 2**MaxLevel gives the level-based bound to pass to
 !! ForwardStep after each epoch.
 
+  use iso_fortran_env,only:int64
   use SELF_Constants
   use SELF_Lagrange
   use SELF_Mesh_2D
@@ -84,6 +85,18 @@ module SELF_AMRController_2D
   use mpi
 
   implicit none
+
+  !! Debug switches for the Stage 6c incremental geometry path, resolved once from the
+  !! environment on first use. Present so that a suspected geometry problem can be split
+  !! between the reuse copy and the compacted generation without rebuilding:
+  !!
+  !!   SELF_AMR_GEOM_NO_REUSE=1  regenerate every element (the reuse predicate never fires)
+  !!   SELF_AMR_GEOM_VERIFY=1    additionally generate the full geometry the old way and compare
+  !!                             element by element, reporting the first quantity that differs
+  logical,save :: geomDebugResolved = .false.
+  logical,save :: geomNoReuse = .false.
+  logical,save :: geomVerify = .false.
+  logical,save :: geomFull = .false. !! SELF_AMR_GEOM_FULL=1: bypass the incremental path
 
   type :: AMRController2D
     type(QuadTreeMesh2D) :: forest
@@ -101,6 +114,14 @@ module SELF_AMRController_2D
     type(SEMQuad),pointer :: geomA => null()
     type(SEMQuad),pointer :: geomB => null()
     integer :: geomSlot = 0
+    !! Scratch geometry holding just the elements an epoch actually changed, generated compacted
+    !! and then scattered into place. Persistent and resized, so it allocates only when an epoch
+    !! changes more elements than any epoch before it.
+    type(SEMQuad),pointer :: genGeom => null()
+    !! Cumulative geometry-reuse accounting (AMR Stage 6c), so a run can report what fraction of
+    !! elements avoided regeneration rather than leaving the payoff to be estimated.
+    integer(int64) :: nGeomReused = 0
+    integer(int64) :: nGeomGenerated = 0
     integer :: ivar = SELF_AMR_ALLVARS !! driving variable for the indicator
     integer :: maxLevel = 1 !! refinement-level cap
     integer :: nHalo = 1 !! refine-flag halo-expansion passes
@@ -113,6 +134,7 @@ module SELF_AMRController_2D
     procedure,public :: Adapt => Adapt_AMRController2D
     procedure,public :: RecommendedTimeStep => RecommendedTimeStep_AMRController2D
     procedure,private :: NextGeomBuffer => NextGeomBuffer_AMRController2D
+    procedure,private :: BuildGeometry => BuildGeometry_AMRController2D
 
   endtype AMRController2D
 
@@ -259,6 +281,175 @@ contains
 
   endsubroutine AllgatherPerElemReals
 
+  subroutine BuildGeometry_AMRController2D(this,newMesh,plan,newGeom,nReused)
+    !! Fill newGeom for the emitted mesh, reusing the previous epoch's geometry for every element
+    !! that did not change and generating only the rest (AMR Stage 6c). nReused reports how many
+    !! elements were copied rather than computed.
+    !!
+    !! Why the reuse is exact. The transfer plan marks a new leaf SELF_TRANSFER_COPY only when the
+    !! walk depth is zero, i.e. when the new element and old element sourceElem(li) are the SAME
+    !! forest node (see BuildTransferPlan). A leaf's mesh node coordinates come from LeafCoords,
+    !! which is a pure function of the root element's coordinates, the leaf's level and its
+    !! quadrant path, evaluated in a fixed order; root coordinates are never mutated and node ids,
+    !! levels and quadrants are stable across forest mutations. So an unchanged leaf's coordinates
+    !! are bit-identical between epochs, and because per-element geometry generation touches only
+    !! that element's own coordinates, its whole geometry block is too.
+    !!
+    !! Multi-rank: sourceElem indexes the GLOBAL old element list while each rank holds only its
+    !! own slice, so reuse additionally requires the source to be locally owned. That is a range
+    !! test against the OLD decomposition, which is still valid here because Regrid has not run
+    !! yet. On one rank every COPY element qualifies and the test is always true; on several ranks
+    !! whatever migrated is simply regenerated. No communication is added either way.
+    implicit none
+    class(AMRController2D),intent(inout) :: this
+    type(Mesh2D),intent(in) :: newMesh
+    type(TransferPlan2D),intent(in) :: plan
+    type(SEMQuad),intent(inout) :: newGeom
+    integer,intent(out) :: nReused
+    ! Local
+    integer :: li,gi,src,nLocal,nGen,oldFirst,oldLast,eFirst,nGeo,k
+    integer,allocatable :: srcIdx(:),dstIdx(:),genIdx(:)
+    real(prec),allocatable :: genCoords(:,:,:,:)
+
+    nLocal = newMesh%nElem
+    nGeo = newMesh%nGeo
+    eFirst = newMesh%decomp%offsetElem(newMesh%decomp%rankId+1)+1
+
+    ! Rank-local range of the OLD element list, i.e. what activeGeom actually holds.
+    oldFirst = this%activeMesh%decomp%offsetElem(this%activeMesh%decomp%rankId+1)+1
+    oldLast = this%activeMesh%decomp%offsetElem(this%activeMesh%decomp%rankId+2)
+
+    allocate(srcIdx(1:nLocal),dstIdx(1:nLocal),genIdx(1:nLocal))
+
+    call ResolveGeomDebug()
+
+    ! Diagnostic bypass: reproduce the pre-6c behaviour exactly (full regeneration on the target
+    ! buffer) while keeping the persistent alternating buffers, to tell a defect in the
+    ! incremental assembly apart from one in the buffer reuse itself.
+    if(geomFull) then
+      call newGeom%GenerateFromMesh(newMesh)
+      nReused = 0
+      deallocate(srcIdx,dstIdx,genIdx)
+      return
+    endif
+
+    nReused = 0
+    nGen = 0
+    do li = 1,nLocal
+      gi = eFirst+li-1 ! this element's index in the plan's global new-leaf arrays
+      src = plan%sourceElem(gi)
+      if(.not. geomNoReuse .and. plan%sourceKind(gi) == SELF_TRANSFER_COPY .and. &
+         src >= oldFirst .and. src <= oldLast) then
+        nReused = nReused+1
+        srcIdx(nReused) = src-oldFirst+1 ! rank-local index into activeGeom
+        dstIdx(nReused) = li
+      else
+        nGen = nGen+1
+        genIdx(nGen) = li
+      endif
+    enddo
+
+    ! Generate the changed elements, compacted, so the generation loops run over nGen elements
+    ! instead of all of them. Their geometry is then scattered into place.
+    if(nGen > 0) then
+      allocate(genCoords(1:2,1:nGeo+1,1:nGeo+1,1:nGen))
+      do k = 1,nGen
+        genCoords(1:2,:,:,k) = newMesh%nodeCoords(1:2,:,:,genIdx(k))
+      enddo
+
+      if(.not. associated(this%genGeom)) allocate(this%genGeom)
+      if(this%genGeom%nElem == 0) then
+        call this%genGeom%Init(this%interp,nGen)
+      else
+        call this%genGeom%Resize(this%interp,nGen)
+      endif
+      call this%genGeom%GenerateFromNodeCoords(genCoords,nGeo,newMesh%quadrature,nGen)
+      call this%genGeom%x%UpdateDevice()
+      call this%genGeom%x%BoundaryInterp()
+      call this%genGeom%x%UpdateHost()
+      call this%genGeom%CalculateMetricTerms()
+
+      do k = 1,nGen
+        srcIdx(nReused+k) = k
+        dstIdx(nReused+k) = genIdx(k)
+      enddo
+      call newGeom%CopyElements(this%genGeom,srcIdx(nReused+1:),dstIdx(nReused+1:),nGen)
+      deallocate(genCoords)
+    endif
+
+    ! Carry the unchanged elements across from the previous epoch's geometry.
+    if(nReused > 0) then
+      call newGeom%CopyElements(this%activeGeom,srcIdx,dstIdx,nReused)
+    endif
+
+    call newGeom%UploadGeometry()
+
+    if(geomVerify) call VerifyGeometry(this,newMesh,newGeom)
+
+    deallocate(srcIdx,dstIdx,genIdx)
+
+  endsubroutine BuildGeometry_AMRController2D
+
+  subroutine ResolveGeomDebug()
+    !! Read the Stage 6c geometry debug switches once.
+    implicit none
+    character(8) :: envstr
+    integer :: envstat
+
+    if(geomDebugResolved) return
+    geomDebugResolved = .true.
+
+    call get_environment_variable("SELF_AMR_GEOM_NO_REUSE",envstr,status=envstat)
+    if(envstat == 0) geomNoReuse = (trim(envstr) == "1")
+    call get_environment_variable("SELF_AMR_GEOM_VERIFY",envstr,status=envstat)
+    if(envstat == 0) geomVerify = (trim(envstr) == "1")
+    call get_environment_variable("SELF_AMR_GEOM_FULL",envstr,status=envstat)
+    if(envstat == 0) geomFull = (trim(envstr) == "1")
+
+    if(geomNoReuse) print*,"SELF_AMR_GEOM_NO_REUSE: geometry reuse disabled"
+    if(geomVerify) print*,"SELF_AMR_GEOM_VERIFY: cross-checking incremental geometry"
+    if(geomFull) print*,"SELF_AMR_GEOM_FULL: incremental geometry bypassed"
+
+  endsubroutine ResolveGeomDebug
+
+  subroutine VerifyGeometry(this,newMesh,newGeom)
+    !! Generate the geometry the original way and report, per quantity, the largest discrepancy
+    !! against the incrementally built one. Diagnostic only; gated by SELF_AMR_GEOM_VERIFY.
+    !!
+    !! Whole-array maxima rather than per-element reporting: naming the quantity that diverges is
+    !! what localizes the defect, and it keeps this to F2008 array intrinsics.
+    implicit none
+    class(AMRController2D),intent(inout) :: this
+    type(Mesh2D),intent(in) :: newMesh
+    type(SEMQuad),intent(in) :: newGeom
+    ! Local
+    type(SEMQuad) :: ref
+
+    call ref%Init(this%interp,newMesh%nElem)
+    call ref%GenerateFromMesh(newMesh)
+
+    print*,"GEOM_VERIFY nElem            =",newMesh%nElem
+    print*,"GEOM_VERIFY max|d x%interior|     =", &
+      maxval(abs(newGeom%x%interior-ref%x%interior))
+    print*,"GEOM_VERIFY max|d x%boundary|     =", &
+      maxval(abs(newGeom%x%boundary-ref%x%boundary))
+    print*,"GEOM_VERIFY max|d J%interior|     =", &
+      maxval(abs(newGeom%J%interior-ref%J%interior))
+    print*,"GEOM_VERIFY max|d J%boundary|     =", &
+      maxval(abs(newGeom%J%boundary-ref%J%boundary))
+    print*,"GEOM_VERIFY max|d dsdx%interior|  =", &
+      maxval(abs(newGeom%dsdx%interior-ref%dsdx%interior))
+    print*,"GEOM_VERIFY max|d dsdx%boundary|  =", &
+      maxval(abs(newGeom%dsdx%boundary-ref%dsdx%boundary))
+    print*,"GEOM_VERIFY max|d nHat%boundary|  =", &
+      maxval(abs(newGeom%nHat%boundary-ref%nHat%boundary))
+    print*,"GEOM_VERIFY max|d nScale%boundary|=", &
+      maxval(abs(newGeom%nScale%boundary-ref%nScale%boundary))
+
+    call ref%Free()
+
+  endsubroutine VerifyGeometry
+
   subroutine NextGeomBuffer_AMRController2D(this,nElem,geom,slot)
     !! Select the geometry buffer to fill this epoch: whichever of the two is not currently
     !! active, so the previous epoch's geometry stays intact and readable (AMR Stage 6c).
@@ -316,12 +507,19 @@ contains
       call this%geomB%Free()
       deallocate(this%geomB)
     endif
+    if(associated(this%genGeom)) then
+      call this%genGeom%Free()
+      deallocate(this%genGeom)
+    endif
     this%baseMesh => null()
     this%activeMesh => null()
     this%activeGeom => null()
     this%geomA => null()
     this%geomB => null()
+    this%genGeom => null()
     this%geomSlot = 0
+    this%nGeomReused = 0
+    this%nGeomGenerated = 0
     this%interp => null()
     this%ownsActive = .false.
 
@@ -354,6 +552,7 @@ contains
     type(Mesh2D),pointer :: newMesh
     type(SEMQuad),pointer :: newGeom
     integer :: newSlot
+    integer :: nReused
     real(prec),allocatable :: uOld(:,:,:,:)
 
     adapted = .false.
@@ -447,7 +646,9 @@ contains
     ! Take the geometry buffer that is NOT currently active, so the previous epoch's geometry
     ! stays readable (Stage 6c). Each buffer is Init-ed once and resized thereafter.
     call this%NextGeomBuffer(newMesh%nElem,newGeom,newSlot)
-    call newGeom%GenerateFromMesh(newMesh)
+    call this%BuildGeometry(newMesh,plan,newGeom,nReused)
+    this%nGeomReused = this%nGeomReused+int(nReused,int64)
+    this%nGeomGenerated = this%nGeomGenerated+int(newMesh%nElem-nReused,int64)
 
     ! ---- 6. Regrid the model and transfer (migrate) the solution ----
     ! The solution is staged before Regrid (which releases the storage it lives in) and
