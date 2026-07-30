@@ -29,7 +29,8 @@ layer that adaptive refinement needs is already in place and tested.
 | Model regrid (`DGModel2D%Regrid`) + AMR controller (serial, CPU/GPU) | **Implemented** |
 | Ultrasound point-source example + AMR visualization script | **Implemented** |
 | MPI dynamic re-partitioning / load balancing (v1: replicated forest, allgathered migration) | **Implemented** |
-| GPU device re-allocation for a changing element count | **Implemented** (exact-size; amortization/device-side transfer deferred, see Stage 6) |
+| GPU device re-allocation for a changing element count | **Implemented** (amortized high-water-mark storage, Stage 6b) |
+| Device-side solution transfer (no host round trip on one GPU) | **Implemented** (Stage 6a) |
 
 The full **serial** adaptive-refinement loop is wired into the library today: flag with the
 Stage-1 indicator, mutate the forest (Stage 2b), transfer the solution (Stage 3), balance and
@@ -494,28 +495,73 @@ Sub-stages:
   epoch), global conservation of the transferred solution (mpi_allreduce), and the AMR
   soundwave regression run distributed.
 
-### Stage 6 — GPU device re-allocation (work plan)
+### Stage 6 — GPU device re-allocation (implemented)
 
-What exists today is the *correct but unamortized* form: every adapting epoch frees and
-re-initializes the model storage (device arrays included), re-uploads mesh/geometry, and moves
-the solution through a host round-trip (`UpdateHost` → transfer → `UpdateDevice`).
+Both parts are implemented and measured on one MI300X (gfx942, ROCm 6.4.3, exclusive node),
+ultrasound example, 20 epochs, mean of three runs. The starting point was the "correct but
+unamortized" form: every adapting epoch freed and re-initialized all model storage, re-uploaded
+mesh/geometry, and moved the solution through a host round trip.
 
-- **(6a) Device-side transfer.** Execute the transfer plan on the device: upload the plan's
-  integer arrays once per epoch and run an element-parallel kernel that gathers each new
-  element's source data and applies the tensor-product `mortarR`/`mortarP` operators (same
-  structure as the host `do concurrent` version; kernel pattern follows
-  `src/gpu/SELF_Refinement.cpp`). This removes the per-epoch host round-trip of the full
-  solution. Requires GPU hardware for validation (GPU workflows do not run on PRs).
-  **Sequencing note:** the Stage-5 v1 migration allgathers the old solution on the host, so on
-  multi-GPU runs a device-side transfer only pays off together with the v2 (point-to-point,
-  optionally GPU-aware) migration; on single-GPU runs it stands alone. Profile the
-  UpdateHost/UpdateDevice cost at a realistic adaptation cadence before building it.
-- **(6b) Amortized capacity — measure first.** Capacity-based (high-water-mark) device
-  allocation would avoid the free/realloc cycle, but it changes the allocation semantics of
-  the core data classes, which every model shares. Before touching that, profile an adapting
-  run on real hardware: at typical cadences (hundreds of steps between epochs) allocation cost
-  is expected to be far below the re-upload and geometry-generation cost that 6a and mesh
-  caching address. Only pursue if the profile says otherwise.
+| | adaptation total | AMR share of epoch loop |
+| --- | --- | --- |
+| before | 0.998 s | 51.7% |
+| + 6a device-side transfer | 0.830 s | 47.0% |
+| + 6b amortized capacity | **0.616 s** | **39.4%** |
+
+Time integration is unchanged throughout (0.93-0.95 s), so the whole gain is in adaptation:
+**38% off the cost of an epoch**. On the curved multi-material bone-and-marrow case the AMR
+share falls from 19.7% to 14.2%.
+
+- **(6a) Device-side transfer — implemented.** `StageSolutionForTransfer` and
+  `ApplyTransferPlan` are type-bound on the model, using the same backend split as `Regrid`.
+  The GPU override stages the pre-regrid solution device-to-device and applies the plan in
+  `TransferSolution_2D_gpu` (`src/gpu/SELF_SolutionTransfer.cpp`), so a single-GPU adapting run
+  moves no solution data across the host link. The kernel applies only the mortar operator pair
+  of the child on the recorded path rather than prolonging to all four and discarding three, so
+  device and host agree to round-off while conservation stays exact. Multi-rank runs keep the
+  host allgather path, as the sequencing note below anticipated.
+- **(6b) Amortized capacity — implemented.** The prediction recorded here previously was that
+  "at typical cadences allocation cost is expected to be far below the re-upload and
+  geometry-generation cost". **The measurement contradicted it:** the free/re-initialize cycle
+  was the single largest component of an adaptation at 51.5%, ahead of both the transfer and
+  geometry regeneration. The cost was not the device allocator (`hipMalloc` + `hipFree` were
+  only ~8% of an adaptation) but the host-side work a fresh allocation drags along - allocating,
+  zeroing, rebuilding metadata and equation parsers, and uploading the zeros. `Resize` on the
+  data classes now reuses storage via rank-1 pools with pointer remapping (see
+  `src/SELF_DataPool.f90` for why this avoids changing any kernel stride).
+
+**Behaviour change to be aware of.** On a GPU build the transferred solution is left on the
+device, so `solution%interior` (the host mirror) is stale after `Adapt`. This matches the rest
+of the time loop, where the device is authoritative and a caller wanting host data calls
+`UpdateHost()` first, as `Write_DGModel2D_t` does. It used to be incidentally fresh because the
+transfer ran on the host.
+
+**How this scales with refinement depth.** Depth is the knob that reaches ultrasound length
+scales (the base mesh stays 16x16; `Lr` and the epoch length track `maxLevel`). Adaptation cost
+grows faster than time integration, so the AMR share rises with depth - but it rises from a
+lower base and more slowly than before:
+
+| maxLevel | f0 | elements | AMR share before | AMR share after |
+| --- | --- | --- | --- | --- |
+| 3 | 0.10 MHz | 2,092 | 51.7% | 40.1% |
+| 5 | 0.40 MHz | 7,528 | 58.9% | 45.9% |
+| 7 | 1.60 MHz | 30,760 | 62.9% | 50.6% |
+| 8 | 3.20 MHz | 66,616 | *out of memory* | 51.8% |
+
+maxLevel 8 could not run at all before this work: it exhausted the device after ~555
+adaptations (see the leak below). It now completes, which is the first datapoint at a
+production-relevant frequency.
+
+**A leak this work exposed.** `boundarynormal_gpu` was allocated in `Init_MappedScalar2D` and
+never freed, leaking 12.8 kB per element per adaptation at N=7, nvar=5 across the model's five
+`MappedScalar2D` fields. It aborted a 640-epoch maxLevel-8 run with an out-of-memory error
+after ~555 adaptations on a 192 GiB device. Fixed, with a device-memory regression test
+(`test/data_2d_device_memory.f90`) since nothing in the suite had been watching device memory.
+
+**Still open.** Geometry regeneration (`Init_SEMQuad` + `GenerateFromMesh_SEMQuad`, together
+~30% of what remains of an adaptation) is untouched: the controller allocates a fresh `SEMQuad`
+each epoch, so reusing that storage needs a controller change, and the generation cost itself is
+a mesh-caching problem rather than an allocation one. That is the obvious next target.
 
 ### Driver integration
 
@@ -669,7 +715,7 @@ band tracking the expanding wavefront.
 | 1 | Transfer plan (old→new leaf map, multi-level prolong) + tests | — |
 | 2 | AMR controller (halo flags, regrid orchestration, level-based dt) + adapt-epoch soundwave test | 1 |
 | 3 | Ultrasound example, CI-scale test, plotting script, docs | 2 |
-| 4 | GPU epoch test; device-side transfer if profiling justifies it | 2 |
+| 4 | GPU epoch test; device-side transfer (Stage 6a) and amortized capacity (Stage 6b) - both done, profiling justified them | 2 |
 | 5 | (design first) LTS; time-dependent point forcing | 3 |
 
 ---
