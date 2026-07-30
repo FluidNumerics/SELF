@@ -31,6 +31,7 @@ layer that adaptive refinement needs is already in place and tested.
 | MPI dynamic re-partitioning / load balancing (v1: replicated forest, allgathered migration) | **Implemented** |
 | GPU device re-allocation for a changing element count | **Implemented** (amortized high-water-mark storage, Stage 6b) |
 | Device-side solution transfer (no host round trip on one GPU) | **Implemented** (Stage 6a) |
+| Geometry reuse for unchanged elements across an epoch | **Implemented** (Stage 6c) |
 
 The full **serial** adaptive-refinement loop is wired into the library today: flag with the
 Stage-1 indicator, mutate the forest (Stage 2b), transfer the solution (Stage 3), balance and
@@ -541,16 +542,21 @@ scales (the base mesh stays 16x16; `Lr` and the epoch length track `maxLevel`). 
 grows faster than time integration, so the AMR share rises with depth - but it rises from a
 lower base and more slowly than before:
 
-| maxLevel | f0 | elements | AMR share before | AMR share after |
-| --- | --- | --- | --- | --- |
-| 3 | 0.10 MHz | 2,092 | 51.7% | 40.1% |
-| 5 | 0.40 MHz | 7,528 | 58.9% | 45.9% |
-| 7 | 1.60 MHz | 30,760 | 62.9% | 50.6% |
-| 8 | 3.20 MHz | 66,616 | *out of memory* | 51.8% |
+| maxLevel | f0 | elements | baseline | + 6a/6b | + 6c | geometry reused |
+| --- | --- | --- | --- | --- | --- | --- |
+| 3 | 0.10 MHz | 2,092 | 51.7% | 40.1% | **38.1%** | 72.8% |
+| 4 | 0.20 MHz | 4,156 | 56.8% | 43.1% | **42.1%** | 73.0% |
+| 5 | 0.40 MHz | 7,528 | 58.9% | 45.9% | **45.1%** | 73.9% |
+| 6 | 0.80 MHz | 14,896 | 61.6% | 48.4% | **47.6%** | 74.6% |
+| 7 | 1.60 MHz | 30,760 | 62.9% | 50.6% | **49.9%** | 75.4% |
+| 8 | 3.20 MHz | 66,616 | *out of memory* | 51.8% | **51.0%** | 76.5% |
 
 maxLevel 8 could not run at all before this work: it exhausted the device after ~555
 adaptations (see the leak below). It now completes, which is the first datapoint at a
-production-relevant frequency.
+production-relevant frequency. The reused fraction rises with depth, as expected - the refined
+annulus is a thinner shell relative to the whole mesh - so geometry reuse pays off more, not
+less, at production resolution. Per-epoch element counts are identical at every depth before and
+after 6c, which is the check that the incremental geometry changed no physics.
 
 **A leak this work exposed.** `boundarynormal_gpu` was allocated in `Init_MappedScalar2D` and
 never freed, leaking 12.8 kB per element per adaptation at N=7, nvar=5 across the model's five
@@ -558,10 +564,73 @@ never freed, leaking 12.8 kB per element per adaptation at N=7, nvar=5 across th
 after ~555 adaptations on a 192 GiB device. Fixed, with a device-memory regression test
 (`test/data_2d_device_memory.f90`) since nothing in the suite had been watching device memory.
 
-**Still open.** Geometry regeneration (`Init_SEMQuad` + `GenerateFromMesh_SEMQuad`, together
-~30% of what remains of an adaptation) is untouched: the controller allocates a fresh `SEMQuad`
-each epoch, so reusing that storage needs a controller change, and the generation cost itself is
-a mesh-caching problem rather than an allocation one. That is the obvious next target.
+### Stage 6c - geometry (implemented)
+
+Re-profiling after 6a/6b put geometry at the top of an adaptation: 46.8%, ahead of `Regrid`, split
+between allocate/zero/free churn (`Init_SEMQuad` + `Free_SEMQuad`, 21.6%) and real computation
+(`GenerateFromMesh_SEMQuad`, 25.2%). Both are addressed:
+
+- **Persistent geometry.** `Tensor2D` joins the amortized-storage scheme (it was the last class on
+  plain `allocate`/`hipMalloc`, and `dxds`/`dsdx` are the largest arrays in `SEMQuad`), `SEMQuad`
+  gains `Resize`, and the controller owns two long-lived geometry buffers instead of allocating one
+  per epoch. The `nGeo -> N` interpolant and node-coordinate staging that `GenerateFromMesh` used to
+  rebuild on every call are cached, since only the element count varies between epochs.
+- **Incremental generation.** Most elements do not change in an epoch, and the transfer plan already
+  names them: `SELF_TRANSFER_COPY` is set only when the new and old element are the *same forest
+  node*. Because `LeafCoords` is a pure function of root coordinates, level and quadrant path, and
+  per-element geometry generation is strictly element-local, such an element's whole geometry block
+  is reproducible **bit for bit** - so it is copied forward rather than recomputed. The changed
+  elements are generated compacted into a scratch geometry and scattered into place, which keeps the
+  existing generation loops untouched. The two buffers alternate so the previous epoch's geometry is
+  readable while the new one is assembled.
+- **Multi-rank.** `sourceElem` indexes the global old element list while a rank holds only its slice,
+  so reuse additionally requires the source to be locally owned - a range test against the previous
+  decomposition. On one rank that is always true; on several, migrated elements are regenerated. No
+  communication is added.
+
+Measured: 72.8% of elements reused per epoch at maxLevel 3, rising to 76.5% at maxLevel 8. Adaptation
+cost 0.616 s -> 0.585 s, and the bone-and-marrow case 14.2% -> 10.7% AMR share.
+
+Correctness is checked numerically rather than argued. `test/geometry_2d_reuse.f90` requires every
+kept element to match its previous-epoch source bit for bit, and adds a positive-Jacobian check plus
+the discrete metric identity `sum_i d(J dsdx(i,j))/dxi_i = 0`, which the suite did not previously
+test. `test/geometry_2d_reuse_mpi.f90` covers the multi-rank branch, asserting both that reuse and
+regeneration actually fire and that the resulting mixed assembly equals a from-scratch generation
+exactly. Three env-gated switches (`SELF_AMR_GEOM_NO_REUSE`, `SELF_AMR_GEOM_FULL`,
+`SELF_AMR_GEOM_VERIFY`) allow a suspected geometry problem to be localized in one run without a
+rebuild.
+
+### A correctness bug the amortized scheme introduced
+
+Worth recording, because the reasoning error is easy to repeat. Stage 6b removed the `UpdateDevice`
+from `Resize` on the grounds that uploading freshly zeroed arrays is waste when the caller
+overwrites them. That is true of the solution but not of every field, and it silently dropped an
+invariant `Init` had provided: after `Init` a field's *device* buffer was defined, because the zeros
+had been uploaded. After `Resize` it held whatever was previously in that memory, and a fresh
+`hipMalloc` is uninitialized.
+
+The low-storage Runge-Kutta update reads its accumulator before writing it -
+`grk = rk_a*grk + dSdt` with `rk3_a(1) = 0`, where `grk` is `workSol%interior_gpu`. Multiplying by
+zero annihilates any finite leftover, which is why this survived initial testing, but `0*NaN` and
+`0*Inf` are NaN. A resized `workSol` buffer that happened to contain a NaN bit pattern poisoned the
+solution on the next step; the wave died, the indicator found nothing to refine, and the mesh
+coarsened back to the base mesh. It presented as an intermittent, allocation-history-dependent
+failure - the same source on the same node passing at one time and failing at another - and no test
+caught it, because none runs enough GPU adaptation epochs for a stale buffer to land on such a
+pattern. `EnsureDeviceBuffer` now zeroes on resize, restoring the invariant unconditionally; a
+device-side fill costs HBM bandwidth rather than a PCIe transfer, so the point of skipping
+`UpdateDevice` is preserved.
+
+The general lesson: "the caller overwrites it before reading" is a per-field claim, not a property
+of an amortized-storage scheme.
+
+**Still open.** The geometry copies and the device upload are both still done the simple way: element
+blocks are copied on the host (roughly eleven array-slice copies per element), and the whole geometry
+is re-uploaded each epoch regardless of how little changed. That is why 6c yields ~5% rather than the
+~35% a naive reading of the 46.8% attribution would predict. The fix is a device-side indexed-copy
+kernel - structurally the 6a transfer kernel without the operator - plus uploading only the compacted
+changed elements. There is now a measurement justifying it rather than an estimate. Mesh emission
+(`EmitMesh`, ~5% of an adaptation) is also still a full rebuild per epoch.
 
 ### Driver integration
 
