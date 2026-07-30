@@ -274,9 +274,17 @@ contains
   subroutine Adapt_AMRController2D(this,model,adapted)
     !! Perform one adaptation epoch on the model (see the module documentation). On return,
     !! adapted reports whether the mesh changed; when it did, the model is already rebound to
-    !! the new mesh with the solution transferred (conservatively) and uploaded to the device,
-    !! and the caller should re-evaluate its time step (RecommendedTimeStep) before the next
-    !! ForwardStep. When the leaf set is unchanged the model is untouched.
+    !! the new mesh with the solution transferred (conservatively), and the caller should
+    !! re-evaluate its time step (RecommendedTimeStep) before the next ForwardStep. When the
+    !! leaf set is unchanged the model is untouched.
+    !!
+    !! Where the transferred solution lives on return: on a GPU build the transfer is performed
+    !! on the device (Stage 6a) and the result is left there, so solution%interior (the host
+    !! mirror) is STALE afterwards. This matches the rest of the time loop, where the device is
+    !! authoritative and a caller that wants host data calls solution%UpdateHost() first - as
+    !! Write_DGModel2D_t does before writing a snapshot. Before the device transfer existed the
+    !! mirror happened to be fresh here because the transfer ran on the host; do not rely on
+    !! that. On CPU builds host and device are the same storage and the question does not arise.
     implicit none
     class(AMRController2D),intent(inout) :: this
     class(DGModel2D_t),intent(inout) :: model
@@ -383,31 +391,42 @@ contains
     call newGeom%GenerateFromMesh(newMesh)
 
     ! ---- 6. Regrid the model and transfer (migrate) the solution ----
-    ! uOld is the GLOBAL old field: on one rank it is a copy of the model solution; on several
-    ! it is allgathered from the rank-local solutions (v1 migration - each rank then fills
-    ! exactly its new contiguous element range from the global field, so elements that changed
-    ! ranks are migrated by construction).
-    Np = this%interp%N+1
-    allocate(uOld(1:Np,1:Np,1:nOld,1:model%nvar))
-    call model%solution%UpdateHost()
+    ! The solution is staged before Regrid (which releases the storage it lives in) and
+    ! transferred onto the new mesh afterwards. Both steps are type-bound and backend-specific:
+    ! the portable implementation stages on the host and runs ApplyTransferPlanRange, while the
+    ! GPU backend stages device-to-device and applies the plan in a kernel, so an adapting run
+    ! on one GPU moves no solution data across the host link at all (Stage 6a).
+    !
+    ! On several ranks the old field must first be assembled globally, because each rank then
+    ! fills exactly its new contiguous element range and elements that changed ranks are
+    ! migrated by construction (Stage-5 v1 migration). That allgather is a host operation, so
+    ! the multi-rank path stays on the portable host transfer: a device transfer only pays off
+    ! there once migration is point-to-point (Stage-5 v2).
+    eFirst = -1 ! set below, once newMesh's decomposition is known
     if(model%mesh%decomp%nRanks > 1) then
+      Np = this%interp%N+1
+      allocate(uOld(1:Np,1:Np,1:nOld,1:model%nvar))
+      call model%solution%UpdateHost()
       do iv = 1,model%nvar
         call AllgatherPerElemReals(model%mesh%decomp,Np*Np, &
                                    model%solution%interior(:,:,:,iv),uOld(:,:,:,iv))
       enddo
+
+      call model%Regrid(newMesh,newGeom)
+
+      eFirst = newMesh%decomp%offsetElem(newMesh%decomp%rankId+1)+1
+      eLast = newMesh%decomp%offsetElem(newMesh%decomp%rankId+2)
+      call model%ApplyTransferPlan(plan,this%interp,eFirst,eLast,uOld)
+      deallocate(uOld)
     else
-      uOld(1:Np,1:Np,1:nOld,1:model%nvar) = &
-        model%solution%interior(1:Np,1:Np,1:nOld,1:model%nvar)
+      call model%StageSolutionForTransfer()
+
+      call model%Regrid(newMesh,newGeom)
+
+      eFirst = newMesh%decomp%offsetElem(newMesh%decomp%rankId+1)+1
+      eLast = newMesh%decomp%offsetElem(newMesh%decomp%rankId+2)
+      call model%ApplyTransferPlan(plan,this%interp,eFirst,eLast)
     endif
-
-    call model%Regrid(newMesh,newGeom)
-
-    eFirst = newMesh%decomp%offsetElem(newMesh%decomp%rankId+1)+1
-    eLast = newMesh%decomp%offsetElem(newMesh%decomp%rankId+2)
-    call ApplyTransferPlanRange(plan,this%interp,model%nvar, &
-                                uOld,eFirst,eLast,model%solution%interior)
-    call model%solution%UpdateDevice()
-    deallocate(uOld)
     call plan%Free()
 
     ! ---- 7. Retire the previous mesh/geometry and re-size the indicator ----

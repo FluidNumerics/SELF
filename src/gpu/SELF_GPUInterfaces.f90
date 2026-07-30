@@ -188,6 +188,19 @@ module SELF_GPUInterfaces
   endinterface
 
   interface
+    subroutine TransferSolution_2D_gpu(uold,unew,sourcekind,sourceelem,family,depth,path, &
+                                       mortarR,mortarP,pathstride,efirst0,n,nvar,nold,nnew, &
+                                       nlocal) &
+      bind(c,name="TransferSolution_2D_gpu")
+      use iso_c_binding
+      implicit none
+      type(c_ptr),value :: uold,unew,sourcekind,sourceelem,family,depth,path
+      type(c_ptr),value :: mortarR,mortarP
+      integer(c_int),value :: pathStride,eFirst0,N,nvar,nOld,nNew,nLocal
+    endsubroutine TransferSolution_2D_gpu
+  endinterface
+
+  interface
     subroutine MortarScatter_2D_gpu(extboundary,buff,mortarR,mortarP,mortarinfo, &
                                     elemToRank,rankid,offset,n,nl,nmortars,nel) &
       bind(c,name="MortarScatter_2D_gpu")

@@ -242,6 +242,11 @@ contains
     integer :: iEl,ii,jj,ierror
     real(prec) :: intLocal
 
+    ! Synchronize the host mirror before reading it. The multi-rank path still transfers on the
+    ! host (Stage-5 v1 migration allgathers there), so this is currently redundant, but a caller
+    ! reading solution%interior must not depend on where the last write happened to land.
+    call modelobj%solution%UpdateHost()
+
     intLocal = 0.0_prec
     do iEl = 1,modelobj%mesh%nElem
       do jj = 1,controlDegree+1

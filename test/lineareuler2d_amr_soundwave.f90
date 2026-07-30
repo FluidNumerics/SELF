@@ -242,6 +242,14 @@ contains
     integer :: iEl,ii,jj,ierror
     real(prec) :: intLocal
 
+    ! This reads the host-side solution mirror, so it must be synchronized first. On a GPU
+    ! build the device is authoritative through the time loop and across an adaptation epoch:
+    ! Adapt now transfers the solution on the device (Stage 6a) and deliberately does not pull
+    ! the result back. Previously this happened to be unnecessary because the transfer ran on
+    ! the host and left the mirror fresh; relying on that was incidental, and a caller that
+    ! reads solution%interior must synchronize explicitly - as Write_DGModel2D_t does.
+    call modelobj%solution%UpdateHost()
+
     intLocal = 0.0_prec
     do iEl = 1,modelobj%mesh%nElem
       do jj = 1,controlDegree+1
