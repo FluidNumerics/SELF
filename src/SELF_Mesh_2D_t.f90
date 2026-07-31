@@ -96,8 +96,8 @@ module SELF_Mesh_2D_t
   ! Mesh format is set up similar to the HOPr format
   ! See https://hopr-project.org/externals/MeshFormat.pdf
 
-  ! Length of a material-name string stored in the mesh
-  integer,parameter :: SELF_MESH_MATNAME_LENGTH = 64
+  ! SELF_MESH_MATNAME_LENGTH (material-name string length) is defined in
+  ! SELF_Mesh and re-exported here for backward compatibility.
 
   type,extends(SEMMesh) :: Mesh2D_t
     integer,pointer,dimension(:,:,:) :: sideInfo

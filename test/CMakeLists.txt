@@ -103,6 +103,12 @@ add_fortran_tests (
     "quadtree_2d_guard_multirank.f90"
     "mesh2d_read_ism.f90"
     "mesh2d_read_ismmm.f90"
+    "mesh3d_read_ism.f90"
+    "mesh3d_read_ismmm.f90"
+    "mesh3d_read_manymaterials.f90"
+    "mesh3d_read_rotatedstack.f90"
+    "mesh3d_read_guard_missingfile.f90"
+    "mesh3d_read_guard_badconnectivity.f90"
     "mesh3d_setup.f90"
     "mesh3d_uniformstructured.f90"
     "mappedscalarderivative_1d_constant.f90"
@@ -230,6 +236,8 @@ set_tests_properties(
     dgmodel2d_regrid_guard_uninit
     amr_controller_2d_guard_maxlevel
     amr_controller_2d_guard_wrongmesh
+    mesh3d_read_guard_missingfile
+    mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
