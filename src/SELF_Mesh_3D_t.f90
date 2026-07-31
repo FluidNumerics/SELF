@@ -1145,6 +1145,7 @@ contains
     integer :: nGeo,ng1
     integer :: i,j,k,e,f,s,iSide,l,p
     integer :: cornerIDs(1:8)
+    integer :: probe8(1:8)
     integer :: hohqFlag(1:6)
     integer :: quadA(1:4),quadB(1:4)
     integer :: sortedA(1:4)
@@ -1241,10 +1242,12 @@ contains
     do e = 1,nElemFile
 
       ! Corner-node line; the trailing material-name token (ISM-MM)
-      ! is detected by skipping the 8 integer tokens.
+      ! is detected by probing for a 9th list item after the 8
+      ! integer tokens.
       read(iUnit,'(A)') lineBuf
       read(lineBuf,*) cornerIDs(1:8)
-      call token_after_n(lineBuf,8,matName)
+      read(lineBuf,*,iostat=ios) probe8,matName
+      if(ios /= 0) matName = ""
       if(e == 1) then
         isISM_MM = (matName /= "")
         print*,__FILE__//' : Format = ',merge("ISM-MM","ISM   ",isISM_MM)
@@ -1350,9 +1353,7 @@ contains
 
     ! Place corner nodes and run transfinite interpolation per element
     do e = 1,nElemFile
-      call build_nodeCoords_for_hex(this,e,nGeo,cornerIDs=ismCorners(:,e), &
-                                    flag=ismFlag(:,e),faceCurve=faceCurve(:,:,:,:,e), &
-                                    nodeXYZ=nodeXYZ)
+      call build_nodeCoords_for_hex(this,e,nGeo,ismCorners,ismFlag,faceCurve,nodeXYZ)
       ! Synthesize globalNodeIDs: stamp the eight corners with their
       ! file IDs and leave interior IDs as 0 (interior nodes are
       ! private to the element under our tensor product layout).
@@ -1414,14 +1415,12 @@ contains
         bucket = modulo(pairKey(1,i),hashSize)
         probe = hashHead(bucket)
         do while(probe /= 0)
-          if(probe /= i .and. &
-             pairKey(1,probe) == pairKey(1,i) .and. &
-             pairKey(2,probe) == pairKey(2,i) .and. &
-             pairKey(3,probe) == pairKey(3,i) .and. &
-             pairKey(4,probe) == pairKey(4,i)) then
-            ePair = pairElem(probe)
-            sPair = pairSide(probe)
-            exit
+          if(probe /= i) then
+            if(all(pairKey(1:4,probe) == pairKey(1:4,i))) then
+              ePair = pairElem(probe)
+              sPair = pairSide(probe)
+              exit
+            endif
           endif
           probe = hashNext(probe)
         enddo
@@ -1472,42 +1471,6 @@ contains
 
   contains
 
-    subroutine token_after_n(buf,n,token)
-      !! Return the (n+1)-th whitespace-delimited token of buf (or ""
-      !! if buf has n tokens or fewer). Used to detect the trailing
-      !! material-name string on an ISM-MM corner-node line.
-      character(*),intent(in) :: buf
-      integer,intent(in) :: n
-      character(*),intent(out) :: token
-      integer :: pos,tokenCount,lenBuf
-      logical :: inToken
-      integer :: tokStart
-
-      token = ""
-      lenBuf = len_trim(buf)
-      tokenCount = 0
-      inToken = .false.
-      tokStart = 0
-      do pos = 1,lenBuf
-        if(buf(pos:pos) /= " " .and. buf(pos:pos) /= char(9)) then
-          if(.not. inToken) then
-            inToken = .true.
-            tokenCount = tokenCount+1
-            tokStart = pos
-          endif
-          if(tokenCount == n+1 .and. pos == lenBuf) then
-            token = buf(tokStart:lenBuf)
-          endif
-        else
-          if(inToken .and. tokenCount == n+1) then
-            token = buf(tokStart:pos-1)
-            return
-          endif
-          inToken = .false.
-        endif
-      enddo
-    endsubroutine token_after_n
-
     subroutine sort4(a,b)
       !! Ascending insertion sort of four integers
       integer,intent(in) :: a(1:4)
@@ -1550,7 +1513,7 @@ contains
 
   endsubroutine Read_HOHQMesh_Mesh3D_t
 
-  subroutine build_nodeCoords_for_hex(mesh,e,nGeo,cornerIDs,flag,faceCurve,nodeXYZ)
+  subroutine build_nodeCoords_for_hex(mesh,e,nGeo,allCorners,allFlags,allFaces,nodeXYZ)
     !! Fill mesh%nodeCoords(:,:,:,:,e) for one hexahedral element by
     !! transfinite (Coons) interpolation of its six face grids. Faces
     !! flagged in the mesh file use the file's face-point grids; the
@@ -1568,13 +1531,15 @@ contains
     class(Mesh3D_t),intent(inout) :: mesh
     integer,intent(in) :: e
     integer,intent(in) :: nGeo
-    integer,intent(in) :: cornerIDs(1:8)
-    integer,intent(in) :: flag(1:6)
-    real(prec),intent(in) :: faceCurve(1:3,1:nGeo+1,1:nGeo+1,1:6)
+    integer,intent(in) :: allCorners(:,:) ! 8 x nElem corner-node ids
+    integer,intent(in) :: allFlags(:,:) ! 6 x nElem face flags (SELF side order)
+    real(prec),intent(in) :: allFaces(:,:,:,:,:) ! 3 x nGeo+1 x nGeo+1 x 6 x nElem
     real(prec),intent(in) :: nodeXYZ(:,:)
     ! Local
     integer :: ng1
     integer :: i,j,k,s,l
+    integer :: cornerIDs(1:8)
+    integer :: flag(1:6)
     real(prec) :: P(1:3,1:8)
     real(prec) :: face(1:3,1:nGeo+1,1:nGeo+1,1:6)
     real(prec) :: exEdge(1:3,1:nGeo+1,1:4) ! xi-directed edges: bs, bn, ts, tn
@@ -1586,6 +1551,8 @@ contains
     real(prec) :: xfp(1:3),xep(1:3),xcp(1:3)
 
     ng1 = nGeo+1
+    cornerIDs = allCorners(1:8,e)
+    flag = allFlags(1:6,e)
 
     do l = 1,8
       P(1:3,l) = nodeXYZ(1:3,cornerIDs(l))
@@ -1616,7 +1583,7 @@ contains
     ! per sideMap; all faces use the natural on-face volume axes).
     do s = 1,6
       if(flag(s) == 1) then
-        face(1:3,1:ng1,1:ng1,s) = faceCurve(1:3,1:ng1,1:ng1,s)
+        face(1:3,1:ng1,1:ng1,s) = allFaces(1:3,1:ng1,1:ng1,s,e)
       else
         do j = 1,ng1
           do i = 1,ng1
