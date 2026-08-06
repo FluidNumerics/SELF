@@ -87,6 +87,8 @@ add_fortran_tests (
     "transfer_plan_2d_guard_badleaf.f90"
     "transfer_plan_2d_guard_snapshot.f90"
     "transfer_plan_2d_guard_unbuilt.f90"
+    "transfer_plan_2d_guard_range.f90"
+    "amr_controller_2d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
     "data_2d_device_memory.f90"
@@ -107,6 +109,12 @@ add_fortran_tests (
     "quadtree_2d_guard_multirank.f90"
     "mesh2d_read_ism.f90"
     "mesh2d_read_ismmm.f90"
+    "mesh3d_read_ism.f90"
+    "mesh3d_read_ismmm.f90"
+    "mesh3d_read_manymaterials.f90"
+    "mesh3d_read_rotatedstack.f90"
+    "mesh3d_read_guard_missingfile.f90"
+    "mesh3d_read_guard_badconnectivity.f90"
     "mesh3d_setup.f90"
     "mesh3d_uniformstructured.f90"
     "mappedscalarderivative_1d_constant.f90"
@@ -229,6 +237,8 @@ set_tests_properties(
     transfer_plan_2d_guard_badleaf
     transfer_plan_2d_guard_snapshot
     transfer_plan_2d_guard_unbuilt
+    transfer_plan_2d_guard_range
+    amr_controller_2d_guard_decomp
     dgmodel2d_regrid_guard_uninit
     amr_controller_2d_guard_maxlevel
     amr_controller_2d_guard_wrongmesh
@@ -236,6 +246,8 @@ set_tests_properties(
     vector_2d_guard_resize_nvar
     tensor_2d_guard_resize_nvar
     dgmodel2d_guard_transfer_unstaged
+    mesh3d_read_guard_missingfile
+    mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
