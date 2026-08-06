@@ -1,0 +1,3727 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="SELF Documentation">
+      
+      
+        <meta name="author" content="Fluid Numerics">
+      
+      
+      
+        <link rel="prev" href="../ProvableStability/">
+      
+      
+        <link rel="next" href="../SoftwareArchitecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Adaptive Mesh Refinement - Spectral Element Library in Fortran</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adaptive-mesh-refinement-amr" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-header__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spectral Element Library in Fortran
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Adaptive Mesh Refinement
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-nav__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    Spectral Element Library in Fortran
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/building-with-self/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Applications with SELF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/multi-gpu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Multiple GPUs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Burgers Equation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Burgers Equation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/BurgersEquation1D/TravelingShock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traveling Shock
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Euler (2D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWaveReflection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave reflection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spherical sound wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PerfectlyMatchedLayer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perfectly Matched Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (3D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Euler (3D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spherical sound wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Shallow Water (2D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Shallow Water (2D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/LinearShallowWater.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reflecting wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/KelvinWaves/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kelvin waves
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/PlanetaryRossbyWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Planetary Rossby wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/boundary-conditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Boundary Conditions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/burgers-equation-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Viscous Burgers Equation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-pml-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D) with PML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-3d-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (3D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-shallow-water-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Shallow Water (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/model-hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Hooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/nonconforming-mortar-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nonconforming (Mortar) Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Generation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Mesh Generation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/StructuredMesh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Structured Mesh Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learning
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SpectralApproximations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spectral Approximations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DifferentialGeometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Differential Geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ProvableStability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provable Stability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adaptive Mesh Refinement
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adaptive Mesh Refinement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-scope-and-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Scope and status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-refinement-trigger-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The refinement trigger (implemented)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. The refinement trigger (implemented)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-legendre-modal-decay-spectral-indicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Legendre modal-decay (spectral) indicator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-refine-keep-coarsen-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Refine / keep / coarsen semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25-h-refinement-primitives-and-uniform-refinement-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 h-refinement primitives and uniform refinement (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26-adaptive-quad-forest-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Adaptive quad-forest (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27-solution-transfer-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Solution transfer (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28-forest-face-neighbours-and-21-balancing-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Forest face-neighbours and 2:1 balancing (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-mesh-emission-implemented-closing-the-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Mesh emission (implemented) — closing the loop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#210-adaptation-epoch-transfer-plan-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.10 Adaptation-epoch transfer plan (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#211-model-regrid-and-the-amr-controller-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.11 Model regrid and the AMR controller (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-comparison-with-trixijl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Comparison with Trixi.jl
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-staged-plan-for-the-remaining-machinery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Staged plan for the remaining machinery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Staged plan for the remaining machinery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-h-refinement-mesh-mutation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2 — h-refinement mesh mutation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-solution-transfer-prolongation-restriction-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3 — Solution transfer (prolongation / restriction) — done
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-4-mortar-regeneration-and-21-balancing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 4 — Mortar regeneration and 2:1 balancing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-5-mpi-dynamic-re-partitioning-implemented-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 5 — MPI dynamic re-partitioning — implemented (v1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-6-gpu-device-re-allocation-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 6 — GPU device re-allocation (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-6c-geometry-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 6c - geometry (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-correctness-bug-the-amortized-scheme-introduced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A correctness bug the amortized scheme introduced
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#driver-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-application-roadmap-lineareuler2d-ultrasound-point-source-under-amr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Application roadmap: LinearEuler2D ultrasound point source under AMR
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Application roadmap: LinearEuler2D ultrasound point source under AMR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-what-already-works-no-changes-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 What already works (no changes needed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-gap-1-transfer-plan-old-leaf-new-leaf-solution-mapping-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-gap-2-model-regrid-rebinding-a-live-dgmodel2d-to-an-emitted-mesh-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Gap 2 — Model regrid: rebinding a live DGModel2D to an emitted mesh — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-gap-3-time-step-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Gap 3 — Time-step control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-gap-4-the-example-and-its-ci-scale-test-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Gap 4 — The example and its CI-scale test — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-gap-5-visualization-pressure-field-mesh-skeleton-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Gap 5 — Visualization: pressure field + mesh skeleton — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-deferred-follow-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 Deferred / follow-on
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#58-suggested-pr-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.8 Suggested PR sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Code
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SoftwareArchitecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BoundaryConditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Boundary Condition System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PointSampling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Off-Grid Point Sampling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dependencies.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ford/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/Documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/AMR2D-Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Contributing/Mortar2D-Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mortar (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-scope-and-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Scope and status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-refinement-trigger-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The refinement trigger (implemented)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. The refinement trigger (implemented)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-legendre-modal-decay-spectral-indicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Legendre modal-decay (spectral) indicator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-refine-keep-coarsen-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Refine / keep / coarsen semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25-h-refinement-primitives-and-uniform-refinement-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 h-refinement primitives and uniform refinement (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26-adaptive-quad-forest-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Adaptive quad-forest (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27-solution-transfer-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Solution transfer (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28-forest-face-neighbours-and-21-balancing-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Forest face-neighbours and 2:1 balancing (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-mesh-emission-implemented-closing-the-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Mesh emission (implemented) — closing the loop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#210-adaptation-epoch-transfer-plan-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.10 Adaptation-epoch transfer plan (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#211-model-regrid-and-the-amr-controller-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.11 Model regrid and the AMR controller (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-comparison-with-trixijl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Comparison with Trixi.jl
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-staged-plan-for-the-remaining-machinery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Staged plan for the remaining machinery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Staged plan for the remaining machinery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-h-refinement-mesh-mutation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2 — h-refinement mesh mutation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-solution-transfer-prolongation-restriction-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3 — Solution transfer (prolongation / restriction) — done
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-4-mortar-regeneration-and-21-balancing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 4 — Mortar regeneration and 2:1 balancing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-5-mpi-dynamic-re-partitioning-implemented-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 5 — MPI dynamic re-partitioning — implemented (v1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-6-gpu-device-re-allocation-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 6 — GPU device re-allocation (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-6c-geometry-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 6c - geometry (implemented)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-correctness-bug-the-amortized-scheme-introduced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A correctness bug the amortized scheme introduced
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#driver-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-application-roadmap-lineareuler2d-ultrasound-point-source-under-amr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Application roadmap: LinearEuler2D ultrasound point source under AMR
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Application roadmap: LinearEuler2D ultrasound point source under AMR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-what-already-works-no-changes-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 What already works (no changes needed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-gap-1-transfer-plan-old-leaf-new-leaf-solution-mapping-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-gap-2-model-regrid-rebinding-a-live-dgmodel2d-to-an-emitted-mesh-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Gap 2 — Model regrid: rebinding a live DGModel2D to an emitted mesh — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-gap-3-time-step-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Gap 3 — Time-step control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-gap-4-the-example-and-its-ci-scale-test-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Gap 4 — The example and its CI-scale test — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-gap-5-visualization-pressure-field-mesh-skeleton-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Gap 5 — Visualization: pressure field + mesh skeleton — implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-deferred-follow-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 Deferred / follow-on
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#58-suggested-pr-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.8 Suggested PR sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adaptive-mesh-refinement-amr">Adaptive Mesh Refinement (AMR)<a class="headerlink" href="#adaptive-mesh-refinement-amr" title="Permanent link">#</a></h1>
+<p>This page describes SELF's approach to adaptive mesh refinement for 2-D discontinuous
+Galerkin spectral element models. It documents the <strong>refinement trigger</strong> that is
+implemented today and lays out a <strong>staged design</strong> for the remaining mesh-adaptation
+machinery so that the invasive parts (dynamic mesh mutation, solution transfer, MPI
+re-partitioning, and GPU re-allocation) can be reviewed and landed incrementally.</p>
+<p>AMR in SELF builds directly on the 2:1 nonconforming (mortar) interface support
+(see <a href="../../Models/nonconforming-mortar-interfaces/">Nonconforming (Mortar) Interfaces</a>).
+Refining a quadrilateral element into four children produces exactly the 2:1 hanging-node
+configurations that the mortar operators already couple correctly, so the flux-coupling
+layer that adaptive refinement needs is already in place and tested.</p>
+<hr />
+<h2 id="1-scope-and-status">1. Scope and status<a class="headerlink" href="#1-scope-and-status" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Refinement <strong>trigger</strong> (Legendre modal-decay indicator, CPU + GPU)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td><code>h</code>-refinement primitives (isoparametric subdivision + refined connectivity)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Uniform <code>h</code>-refinement (conforming, serial)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Adaptive quad-forest (flagged refine / coarsen, level tracking)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Solution transfer (prolongation / restriction, conservative)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Forest face-neighbour queries + 2:1 balancing</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Hanging-node / mortar-table + <code>Mesh2D_t</code> emission</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Adaptation-epoch transfer plan (old-leaf → new-leaf mapping)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Model regrid (<code>DGModel2D%Regrid</code>) + AMR controller (serial, CPU/GPU)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Ultrasound point-source example + AMR visualization script</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>MPI dynamic re-partitioning / load balancing (v1: replicated forest, allgathered migration)</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>GPU device re-allocation for a changing element count</td>
+<td><strong>Implemented</strong> (amortized high-water-mark storage, Stage 6b)</td>
+</tr>
+<tr>
+<td>Device-side solution transfer (no host round trip on one GPU)</td>
+<td><strong>Implemented</strong> (Stage 6a)</td>
+</tr>
+<tr>
+<td>Geometry reuse for unchanged elements across an epoch</td>
+<td><strong>Implemented</strong> (Stage 6c)</td>
+</tr>
+</tbody>
+</table>
+<p>The full <strong>serial</strong> adaptive-refinement loop is wired into the library today: flag with the
+Stage-1 indicator, mutate the forest (Stage 2b), transfer the solution (Stage 3), balance and
+emit a runnable nonconforming <code>Mesh2D_t</code> (Stage 4). What remains is <strong>scaling</strong> that loop -
+dynamic MPI re-partitioning across ranks (Stage 5) and GPU device re-allocation for a changing
+element count (Stage 6) - each deferred behind this design so it lands as a self-contained,
+reviewable piece.</p>
+<hr />
+<h2 id="2-the-refinement-trigger-implemented">2. The refinement trigger (implemented)<a class="headerlink" href="#2-the-refinement-trigger-implemented" title="Permanent link">#</a></h2>
+<p>The trigger answers a single, element-local question: <em>is the solution on this element
+well-resolved by the current polynomial degree, or does it need more resolution?</em> It never
+mutates the mesh; it only produces a per-element flag. This makes it cheap, embarrassingly
+parallel, free of MPI communication, and identical in structure on CPU and GPU.</p>
+<h3 id="21-legendre-modal-decay-spectral-indicator">2.1 Legendre modal-decay (spectral) indicator<a class="headerlink" href="#21-legendre-modal-decay-spectral-indicator" title="Permanent link">#</a></h3>
+<p>For a nodal solution field <span class="arithmatex">\(u_{ij}\)</span> on an element, we form its tensor-product Legendre
+modal expansion</p>
+<div class="arithmatex">\[
+u(\xi,\eta) = \sum_{p=0}^{N}\sum_{q=0}^{N} \hat u_{pq}\,
+\tilde L_p(\xi)\,\tilde L_q(\eta),
+\]</div>
+<p>where <span class="arithmatex">\(\tilde L_p\)</span> are the <span class="arithmatex">\(L^2\)</span>-normalized Legendre polynomials on <span class="arithmatex">\([-1,1]\)</span>
+(<span class="arithmatex">\(\int_{-1}^1 \tilde L_p \tilde L_q\,d\xi = \delta_{pq}\)</span>). The nodal-to-modal transform is the
+exact inverse of the Legendre Vandermonde <span class="arithmatex">\(V_{ip} = \tilde L_p(\xi_i)\)</span> built from the
+interpolant control points, so the indicator is <strong>independent of the control-node type</strong>
+(Legendre–Gauss or Legendre–Gauss–Lobatto) and is exact for polynomial data. With the
+normalized basis the total modal energy equals the exact <span class="arithmatex">\(L^2\)</span> energy on the reference
+element,</p>
+<div class="arithmatex">\[
+E_{\text{tot}} = \sum_{p,q}\hat u_{pq}^2 = \lVert u\rVert_{L^2([-1,1]^2)}^2 .
+\]</div>
+<p>The smoothness of the field is measured by how much of that energy sits in the highest modes.
+Defining the clipped energies that drop the highest one and two modes in each direction,</p>
+<div class="arithmatex">\[
+E_{\text{clip1}} = \sum_{p,q\le N-1}\hat u_{pq}^2, \qquad
+E_{\text{clip2}} = \sum_{p,q\le N-2}\hat u_{pq}^2,
+\]</div>
+<p>the smoothness ratio is the larger of the top-shell and next-shell energy fractions,</p>
+<div class="arithmatex">\[
+S_e = \max\!\left(\frac{E_{\text{tot}}-E_{\text{clip1}}}{E_{\text{tot}}},\;
+                  \frac{E_{\text{clip1}}-E_{\text{clip2}}}{E_{\text{clip1}}}\right),
+\qquad \sigma_e = \log_{10} S_e .
+\]</div>
+<p>A smooth, well-resolved field has energy concentrated in the low modes, so <span class="arithmatex">\(S_e\)</span> is tiny and
+<span class="arithmatex">\(\sigma_e\)</span> is very negative; an under-resolved field (a steep front or a discontinuity)
+leaves energy in the top modes, driving <span class="arithmatex">\(\sigma_e\)</span> toward 0.</p>
+<p>This is the modal-energy indicator of <strong>Persson &amp; Peraire (2006)</strong>. The second (next-shell)
+term is the robustification introduced by <strong>Hennemann, Rueda-Ramírez, Hindenlang &amp; Gassner
+(2021)</strong> — the shock indicator used in Trixi.jl — which guards against the odd/even parity
+dropouts a single-mode measure suffers for symmetric data. It is only active for <span class="arithmatex">\(N\ge 2\)</span>.</p>
+<h3 id="22-refine-keep-coarsen-semantics">2.2 Refine / keep / coarsen semantics<a class="headerlink" href="#22-refine-keep-coarsen-semantics" title="Permanent link">#</a></h3>
+<p>With user-supplied thresholds <span class="arithmatex">\(\sigma_{\text{refine}} &gt; \sigma_{\text{coarsen}}\)</span>, each element
+is flagged</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Flag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(\sigma_e &gt; \sigma_{\text{refine}}\)</span></td>
+<td><code>SELF_AMR_REFINE</code> (+1)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\sigma_e &lt; \sigma_{\text{coarsen}}\)</span></td>
+<td><code>SELF_AMR_COARSEN</code> (−1)</td>
+</tr>
+<tr>
+<td>otherwise</td>
+<td><code>SELF_AMR_KEEP</code> (0)</td>
+</tr>
+</tbody>
+</table>
+<p>Two thresholds (rather than one) give a hysteresis band that prevents elements from thrashing
+between refine and coarsen on successive checks. Recommended starting values for double
+precision are <span class="arithmatex">\(\sigma_{\text{refine}}\approx-3\)</span> and <span class="arithmatex">\(\sigma_{\text{coarsen}}\approx-8\)</span>; the
+best values are problem-dependent and are deliberately required arguments rather than hidden
+defaults.</p>
+<h3 id="23-api">2.3 API<a class="headerlink" href="#23-api" title="Permanent link">#</a></h3>
+<p>The indicator lives in <code>SELF_RefinementIndicator_2D</code> and follows the standard SELF backend
+pattern: a portable base type with a <code>do concurrent</code> implementation
+(<code>SELF_RefinementIndicator_2D_t</code>), a thin CPU extension, and a GPU extension that runs a
+device kernel (<code>SELF_Refinement.cpp</code>) and copies the resulting flags back to the host, where
+the mesh-adaptation logic runs.</p>
+<div class="language-fortran highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">use </span><span class="n">SELF_RefinementIndicator_2D</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">type</span><span class="p">(</span><span class="n">RefinementIndicator2D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">amr</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c">! interp : the model interpolant (Lagrange); nElem : rank-local element count</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">call </span><span class="n">amr</span><span class="p">%</span><span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="w"> </span><span class="n">nElem</span><span class="p">,</span><span class="w"> </span><span class="n">refineThreshold</span><span class="o">=-</span><span class="mf">3.0_prec</span><span class="p">,</span><span class="w"> </span><span class="n">coarsenThreshold</span><span class="o">=-</span><span class="mf">8.0_prec</span><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c">! solution : the model&#39;s MappedScalar2D (or any Scalar2D); ivar selects the driving</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c">! variable, or SELF_AMR_ALLVARS (=0) reduces over all variables (most conservative).</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">call </span><span class="n">amr</span><span class="p">%</span><span class="n">Estimate</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span><span class="w"> </span><span class="n">ivar</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c">! amr%indicator(1:nElem)  -- per-element sigma_e (host)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c">! amr%flag(1:nElem)       -- per-element SELF_AMR_REFINE / KEEP / COARSEN (host)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">amr</span><span class="p">%</span><span class="n">CountFlagged</span><span class="p">(</span><span class="n">SELF_AMR_REFINE</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The GPU device kernel uses per-thread scratch bounded to <span class="arithmatex">\(N \le 15\)</span>; higher degrees fail
+loudly at <code>Init</code> with a pointer to the bound (<code>AMR2D_MAXNP</code> in <code>SELF_Refinement.cpp</code>).</p>
+<h3 id="24-validation">2.4 Validation<a class="headerlink" href="#24-validation" title="Permanent link">#</a></h3>
+<p><code>test/refinement_indicator_2d_spectraldecay.f90</code> checks the indicator against fields with known
+spectra, on both Gauss and Gauss–Lobatto nodes:</p>
+<ul>
+<li>a <strong>constant</strong> field (energy only in mode 0) floors out → <code>COARSEN</code>;</li>
+<li>a <strong>pure highest tensor mode</strong> <span class="arithmatex">\(\tilde L_N(\xi)\tilde L_N(\eta)\)</span> has <span class="arithmatex">\(S_e=1\)</span> so
+  <span class="arithmatex">\(\sigma_e = 0\)</span> to roundoff → <code>REFINE</code> (this also verifies the transform recovers a single
+  mode exactly);</li>
+<li>a <strong>low-degree polynomial</strong> (degree <span class="arithmatex">\(\le N-2\)</span>) has no top-shell energy → <code>COARSEN</code>;</li>
+<li>a <strong>steep tanh front</strong> is under-resolved → <code>REFINE</code>.</li>
+</ul>
+<hr />
+<h2 id="25-h-refinement-primitives-and-uniform-refinement-implemented">2.5 <code>h</code>-refinement primitives and uniform refinement (implemented)<a class="headerlink" href="#25-h-refinement-primitives-and-uniform-refinement-implemented" title="Permanent link">#</a></h2>
+<p>The mesh-mutation core of Stage 2 is implemented as two additive modules that leave every
+existing mesh type and interface untouched:</p>
+<ul>
+<li>
+<p><strong><code>SELF_RefinementPrimitives_2D</code></strong> — the element-local, dependency-light pieces:</p>
+<ul>
+<li><code>SubdivideNodeCoords</code> performs <strong>exact isoparametric subdivision</strong> of one element's
+  geometry into its four children. The parent geometry is the degree-<code>nGeo</code> Lagrange
+  interpolant through the element's geometry nodes; each child node coordinate is that
+  interpolant evaluated at the corresponding point of the parent reference square. This is
+  exact for straight-sided and curved (isoparametric) elements alike and for any control
+  node type, so refinement never perturbs the represented domain.</li>
+<li><code>RefineConnectivity</code> builds the refined mesh's connectivity by <strong>pure deterministic
+  integer bookkeeping</strong>. Sibling faces interior to a parent are same-orientation (flip 0); a
+  child face on a parent boundary inherits the parent face's neighbor, side, and flip, with
+  the sub-position pairing across the face taken from the parent flip. Because refinement is
+  orientation preserving, this reproduces exactly the flips a corner-node matching pass would
+  compute, without requiring globally consistent node ids (which structured meshes do not
+  guarantee) and without any coordinate hashing.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>SELF_MeshRefinement_2D</code></strong> — <code>UniformRefineMesh(meshIn, meshOut)</code> assembles a fully-formed
+  <code>Mesh2D_t</code> with 4× the elements from those primitives: child geometry by isoparametric
+  subdivision, connectivity and flips inherited from the base, boundary-condition and material
+  metadata carried over, and a (serial) domain decomposition. The result is conforming (no
+  hanging nodes), so it needs neither mortars nor 2:1 balancing and is immediately usable for
+  geometry generation and time stepping. It is a genuine capability on its own (e.g. grid
+  convergence studies) and it exercises all of the subdivision, connectivity, and array
+  machinery that adaptive refinement will reuse.</p>
+</li>
+</ul>
+<p>Uniform refinement is currently <strong>serial</strong> (it replicates the input mesh's single-rank MPI
+state rather than re-decomposing); multi-rank refinement is Stage 5.</p>
+<p><strong>Validation.</strong> The primitives are unit-tested in isolation (exact child geometry for affine and
+curved elements; neighbor / side / flip / global-side-id reciprocity of the refined
+connectivity). The end-to-end <code>UniformRefineMesh</code> is covered by
+<code>test/mesh2d_uniform_refine.f90</code>: refining a structured mesh quadruples the element count,
+conserves the domain area (integral of the Jacobian) to roundoff, keeps every Jacobian strictly
+positive, produces reciprocal interior connectivity, and doubles the physical-boundary side
+count.</p>
+<h2 id="26-adaptive-quad-forest-implemented">2.6 Adaptive quad-forest (implemented)<a class="headerlink" href="#26-adaptive-quad-forest-implemented" title="Permanent link">#</a></h2>
+<p><code>SELF_QuadTreeMesh_2D</code> provides the adaptive mesh-mutation data structure of Stage 2b. Each base
+element is the root of a quadtree; <code>QuadTreeMesh2D</code> stores a growable node pool (level, parent,
+per-node child pointers, originating root) plus the base geometry, and maintains the active leaf
+set.</p>
+<ul>
+<li><code>Init(mesh)</code> seeds one root per base element (all leaves at level 0).</li>
+<li><code>AdaptFromFlags(flag)</code> consumes a per-leaf flag array <strong>indexed exactly like the Stage-1
+  indicator's <code>flag(:)</code></strong> (<code>+1</code> refine, <code>-1</code> coarsen, <code>0</code> keep): flagged leaves are subdivided
+  into four children, and a family of four leaf siblings is merged back only when all four are
+  flagged coarsen (the standard de-refinement rule). Refine and coarsen are resolved against the
+  same pre-adaptation snapshot so they never interfere.</li>
+<li><code>LeafCoords(i, geomInterp, coords)</code> regenerates any leaf's physical geometry by repeated exact
+  isoparametric subdivision of its root along the quadtree path (reusing the §2.5 primitive), so
+  the forest never stores redundant coordinates.</li>
+<li>Node storage grows by amortized doubling; the leaf set is always recovered by traversal from
+  the roots, which makes nodes orphaned by coarsening invisible without an explicit free list.</li>
+</ul>
+<p>This wires directly to the trigger: <code>indicator%Estimate(solution, ivar)</code> then
+<code>forest%AdaptFromFlags(indicator%flag)</code> performs one adaptation step. What the forest deliberately
+does <strong>not</strong> yet do is answer <em>face-neighbour</em> queries, enforce 2:1 balance, or emit a
+solver-ready <code>Mesh2D_t</code> with hanging-node mortars - an adaptively refined forest is generally
+nonconforming, and turning it into a runnable mesh is Stage 4.</p>
+<p>The forest is unit-tested (refine/coarsen leaf and level bookkeeping, the four-sibling coarsening
+guard, amortized capacity growth, and leaf geometry matching direct subdivision at multiple
+levels).</p>
+<h2 id="27-solution-transfer-implemented">2.7 Solution transfer (implemented)<a class="headerlink" href="#27-solution-transfer-implemented" title="Permanent link">#</a></h2>
+<p><code>SELF_SolutionTransfer_2D</code> moves the prognostic solution with the mesh when an element is refined
+or coarsened, reusing the mortar operators already built on <code>Lagrange</code>:</p>
+<ul>
+<li><code>ProlongToChildren(interp, nVar, uParent, uChildren)</code> samples the parent's degree-N nodal
+  polynomial onto its four children - a tensor product of <code>mortarR</code> in each direction. Exact
+  interpolation, no loss.</li>
+<li><code>RestrictFromChildren(interp, nVar, uChildren, uParent)</code> L2-projects the four children back onto
+  the parent - a tensor product of <code>mortarP</code> (the adjoint of <code>mortarR</code>, already carrying the 1/2
+  per-direction sub-edge Jacobian for solution traces).</li>
+</ul>
+<p>Both are element-local and portable (host <code>do concurrent</code>); the driver maps forest parent/child
+relations onto the element index ranges. From the 1-D mortar identities they inherit exactly:</p>
+<ul>
+<li><strong>Reversibility</strong> - <code>RestrictFromChildren(ProlongToChildren(u)) = u</code> to roundoff (refine then
+  immediately coarsen leaves the solution unchanged), from <code>sum_k P_k R_k = I</code> per direction.</li>
+<li><strong>Conservation</strong> - the reference-cell integral of the restricted parent equals the sum of the
+  children's, i.e. <code>sum_ij w_i w_j u_parent = (1/4) sum_c sum_ij w_i w_j u_child_c</code>; weighted by
+  the geometry Jacobian this is conservation of the cell-integrated quantity.</li>
+</ul>
+<p>Validated at two levels: a unit test drives the tensor operators with the exact mortar matrices
+(prolong reproduces a degree-N polynomial at the child nodes; prolong-then-restrict is the
+identity to roundoff; discrete conservation defect is zero), and <code>test/solution_transfer_2d.f90</code>
+checks the end-to-end behaviour against Stage-2 geometry - prolonging a coarse field onto a
+<code>UniformRefineMesh</code> and back is reversible, and <code>int u dA</code> (with the geometry Jacobian) is
+identical on the coarse and refined meshes.</p>
+<h2 id="28-forest-face-neighbours-and-21-balancing-implemented">2.8 Forest face-neighbours and 2:1 balancing (implemented)<a class="headerlink" href="#28-forest-face-neighbours-and-21-balancing-implemented" title="Permanent link">#</a></h2>
+<p><code>SELF_QuadTreeMesh_2D</code> also answers <em>face-neighbour</em> queries on the forest and enforces the 2:1
+balance condition - the first part of Stage 4 and the prerequisite for mortar generation. The
+forest stores the base mesh's root face connectivity (<code>rootNbr</code> / <code>rootNbrSide</code> / <code>rootFlip</code>,
+from <code>sideInfo</code>; a conforming base is assumed).</p>
+<ul>
+<li><code>FaceNeighbor(node, s, nbr, ns, nf)</code> returns the equal-or-larger neighbour across local side s
+  by the classic quadtree ascend/descend search: cross to a sibling when the face is interior to
+  the parent, otherwise ascend to the parent's neighbour and descend one level, matching
+  sub-positions across the face through the base flip. <code>nbr</code> is either a leaf at any level
+  <code>&lt;= level(node)</code> or an internal node at exactly <code>level(node)</code>; <code>ns</code> / <code>nf</code> are the neighbour's
+  facing side and the edge flip. Consequently a 2:1 hanging face is precisely "<code>nbr</code> is a leaf
+  with <code>level(nbr) = level(node)-1</code>" and finer neighbours are precisely "<code>nbr</code> is internal" -
+  exactly the classification Stage 4b needs to emit <code>mortarInfo</code>.</li>
+<li><code>Balance2to1()</code> iterates to a fixed point: any leaf whose equal-or-larger neighbour is a leaf
+  two or more levels coarser refines that neighbour, and the (possibly rippling) refinement
+  repeats until no face violates the condition.</li>
+<li><code>MaxLevelJump()</code> reports the largest level difference across any leaf face (0 conforming, 1 for
+  a balanced adaptive forest) - a cheap invariant for tests and drivers.</li>
+</ul>
+<p>Unit-tested standalone: level-0 neighbour queries on a structured base (including boundaries and
+directional reciprocity); a uniformly refined forest is conforming (<code>MaxLevelJump = 0</code>); an
+adaptive refinement that creates a two-level jump is reduced to one level by <code>Balance2to1</code>
+(rippling into the coarse neighbour); and equal-level leaf-neighbour reciprocity holds across the
+balanced forest.</p>
+<h2 id="29-mesh-emission-implemented-closing-the-loop">2.9 Mesh emission (implemented) — closing the loop<a class="headerlink" href="#29-mesh-emission-implemented-closing-the-loop" title="Permanent link">#</a></h2>
+<p><code>SELF_AdaptiveMesh_2D</code>'s <code>EmitMesh(forest, baseMesh, outMesh)</code> turns a 2:1-balanced forest into a
+solver-ready <code>Mesh2D_t</code>. Each leaf becomes an element (leaf-list order); for every leaf face the
+Stage-4a <code>FaceNeighbor</code> classification drives the emitted connectivity:</p>
+<ul>
+<li><strong>domain boundary</strong> → <code>sideInfo(3)=0</code>, <code>sideInfo(5)</code> = the base element's BC id on that side;</li>
+<li><strong>same-level leaf</strong> → a conforming interior side (<code>sideInfo(3)=neighbour</code>, <code>(4)=10*side+flip</code>,
+  a shared global side id);</li>
+<li><strong>one-level-finer neighbour</strong> → this leaf is the <strong>big</strong> side of a 2:1 mortar; the two small
+  elements are the finer neighbour node's children on the shared face, with the big edge
+  coordinate <code>[-1,0]</code>/<code>[0,1]</code> mapped to the correct child through the face flip;</li>
+<li><strong>one-level-coarser neighbour</strong> → a <strong>small</strong> side, filled when its big side is processed.</li>
+</ul>
+<p>Mortar sides carry <code>sideInfo(1)=mortar index</code> and <code>sideInfo(3)=sideInfo(5)=0</code>, and the emitted
+<code>mortarInfo(1:8, :)</code> follows the exact layout of the hand-built <code>SimpleMortarMesh</code> (big elem/side;
+small elem + <code>10*side+flip</code> per sub-edge; two sub-edge global side ids), so the existing mortar
+side-exchange, projection, and flux machinery consume it unchanged. Leaf geometry comes from
+<code>LeafCoords</code>; the output uses a serial decomposition (Stage 5 will re-partition).</p>
+<p>Validated at two levels. A standalone structural test confirms - on an adaptively refined,
+balanced forest - the side classification is exclusive, conforming sides are reciprocal, every
+mortar's big and small sides reference the same mortar index, and (geometrically) each big face is
+exactly tiled by its two small faces. The full-pipeline CI test <code>test/adaptive_mortar_2d.f90</code>
+refines a structured mesh, balances, emits the mesh, builds its geometry (strictly positive
+Jacobians; total area equal to the base mesh), and runs the real <code>SideExchange</code> + <code>MortarExchange</code>
+on a globally linear field: the external trace matches the interior trace to roundoff on every
+conforming <strong>and</strong> 2:1 mortar side - the same criterion the hand-built mortar-mesh tests use,
+now on a mesh produced entirely by the AMR pipeline.</p>
+<p>With this, the serial loop closes: <code>indicator → forest.AdaptFromFlags → (transfer solution) →
+forest.Balance2to1 → EmitMesh</code> yields a runnable adaptive mesh.</p>
+<h2 id="210-adaptation-epoch-transfer-plan-implemented">2.10 Adaptation-epoch transfer plan (implemented)<a class="headerlink" href="#210-adaptation-epoch-transfer-plan-implemented" title="Permanent link">#</a></h2>
+<p><code>SELF_TransferPlan_2D</code> is the driver layer of Stage 3: it connects the element-local transfer
+operators (§2.7) to an actual forest mutation. One <em>adaptation epoch</em> is: snapshot the leaf
+list (<code>nOld</code>, <code>oldLeaf</code>), mutate the forest (at most one <code>AdaptFromFlags</code>, then any number of
+refinements — <code>Balance2to1</code>, <code>RefineNode</code>), then <code>BuildTransferPlan(forest, nOld, oldLeaf,
+plan)</code>. The plan records, for every new leaf in leaf-list order (the element ordering <code>EmitMesh</code>
+produces), where its solution comes from in the old element ordering:</p>
+<ul>
+<li><strong>copy</strong> — the leaf survived unchanged;</li>
+<li><strong>prolong</strong> — the leaf descends from an old leaf; the old polynomial is interpolated down the
+  quadtree path, one step per level, so a fresh child re-refined by balance ripple in the same
+  epoch is handled by depth &gt; 1;</li>
+<li><strong>restrict</strong> — the leaf is (an ancestor of) a coarsened family; the four old children are
+  L2-projected onto their parent, then prolonged down any further steps (depth &gt; 0 occurs when
+  a just-coarsened parent is immediately re-refined by balancing).</li>
+</ul>
+<p>Reconstruction after the fact is possible because forest node ids are stable: refinement
+appends nodes and coarsening only detaches children, whose <code>level</code>/<code>parent</code>/<code>quadrant</code> entries
+persist. Each new leaf ascends its parent chain until it meets an old leaf or a complete
+old-leaf family; a snapshot that cannot explain a leaf fails loudly. <code>ApplyTransferPlan</code>
+executes the plan on nodal data in the <code>MappedScalar2D%interior</code> layout and inherits the §2.7
+identities (exact prolongation, conservative restriction, exact refine-coarsen round trips).</p>
+<p><code>test/transfer_plan_2d.f90</code> validates one epoch that simultaneously coarsens (then re-refines)
+a family, refines a leaf whose child is refined again (depth-2 prolongation), and lets 2:1
+balancing ripple into an untouched root: the classification multiplicities are checked exactly;
+a bilinear field is reproduced at the emitted new mesh's nodes to roundoff through all three
+transfer kinds; the Jacobian-weighted global integral of a non-polynomial field is conserved to
+roundoff; and refine-everything/coarsen-everything across two epochs is the identity.</p>
+<h2 id="211-model-regrid-and-the-amr-controller-implemented">2.11 Model regrid and the AMR controller (implemented)<a class="headerlink" href="#211-model-regrid-and-the-amr-controller-implemented" title="Permanent link">#</a></h2>
+<p>Two pieces close the loop around a <em>live, time-stepping model</em>:</p>
+<ul>
+<li>
+<p><strong><code>DGModel2D%Regrid(mesh, geometry)</code></strong> rebinds a model to a new mesh/geometry pair: the
+  mesh-sized solution storage is reallocated and the boundary-condition registrations and maps
+  are rebuilt (mirroring the mesh-sized portion of <code>Init</code>/<code>Free</code>, including the GPU backend's
+  BC device arrays), while everything that is not mesh-sized is preserved — the time state
+  (<code>t</code>, <code>dt</code>, entropy, IO counter), the time-integrator selection, configuration flags, and
+  model-specific parameters, all of which a fresh <code>Init</code> (<code>intent(out)</code>) would reset. The
+  solution interior is left for the caller to fill via the §2.10 transfer.</p>
+</li>
+<li>
+<p><strong><code>SELF_AMRController_2D</code></strong> owns the forest, the indicator, and the meshes/geometries it
+  emits (double-buffered), and performs one adaptation epoch per <code>Adapt(model, adapted)</code> call:
+  estimate → cap refine flags at a configurable <code>maxLevel</code> → spread refine flags to face
+  neighbours for <code>nHalo</code> passes (so a feature moving at speed <span class="arithmatex">\(c\)</span> stays inside the refined
+  band when the adaptation cadence satisfies <span class="arithmatex">\(k\,\Delta t\,c \le n_{halo} h_{fine}\)</span>) →
+  <code>AdaptFromFlags</code> + <code>Balance2to1</code> (a no-op epoch leaves the model untouched) →
+  <code>BuildTransferPlan</code> + <code>EmitMesh</code> + new <code>SEMQuad</code> → <code>model%Regrid</code>, apply the transferred
+  solution, upload to device. <code>RecommendedTimeStep(dtBase) = dtBase / 2^{MaxLevel}</code> gives the
+  level-based explicit-stability bound to pass to <code>ForwardStep</code> after each epoch — exact for
+  the quadtree, whose children are exact half-scale subdivisions.</p>
+</li>
+</ul>
+<p><code>test/lineareuler2d_amr_soundwave.f90</code> runs the full loop on a deliberately under-resolved
+acoustic pulse (LinearEuler2D, radiation boundaries, RK3): the initial adaptation refines
+around the pulse up to the level cap; every mid-run adaptation conserves the Jacobian-weighted
+global integral of each prognostic variable to roundoff; the model's time and parameters
+survive regridding; the mesh evolves as the wave propagates; and the acoustic energy stays
+finite and non-increasing across the whole adaptive run.</p>
+<hr />
+<h2 id="3-comparison-with-trixijl">3. Comparison with Trixi.jl<a class="headerlink" href="#3-comparison-with-trixijl" title="Permanent link">#</a></h2>
+<p>Trixi.jl offers two families of indicators that drive both shock capturing and AMR:</p>
+<ul>
+<li><strong><code>IndicatorHennemannGassner</code></strong> — the Persson–Peraire modal-energy indicator with the
+  next-shell robustification, mapped through a logistic function to a blending coefficient
+  <span class="arithmatex">\(\alpha\in[0,1]\)</span>. SELF's indicator uses the <strong>same modal-energy quantity</strong> (§2.1); it stops
+  at <span class="arithmatex">\(\sigma_e = \log_{10} S_e\)</span> and thresholds directly rather than forming <span class="arithmatex">\(\alpha\)</span>,
+  because AMR needs a discrete refine/keep/coarsen decision, not a continuous blend.</li>
+<li><strong><code>IndicatorLöhner</code></strong> — a normalized second-difference (curvature) estimate of a nodal
+  quantity. It is cheaper (no modal transform) but noisier and less tightly coupled to spectral
+  resolution. It is a natural future alternative behind the same <code>flag</code> interface.</li>
+</ul>
+<p>Two design points worth noting for anyone extending this:</p>
+<ul>
+<li>Trixi additionally offers a <strong><code>IndicatorMax</code></strong>-style controller and clip/smoothing passes
+  across element neighbors. SELF's indicator is strictly element-local; neighbor smoothing (to
+  avoid isolated refined elements) belongs in the Stage-4 balancing step, not the trigger.</li>
+<li>Trixi's <code>ControllerThreeLevel</code> maps indicator values to target refinement <strong>levels</strong> with
+  hysteresis. SELF's two-threshold refine/keep/coarsen flag is the minimal equivalent; a
+  level-target controller can be layered on top once the tree (Stage 2) exists.</li>
+</ul>
+<p>An alternative spectral trigger is the <strong>Mavriplis (1994)</strong> decay-rate estimator, which
+least-squares-fits <span class="arithmatex">\(\lvert\hat u_p\rvert \sim c\,e^{-\sigma p}\)</span> to the modal coefficients and
+estimates the truncation error from the fitted decay rate and tail. It is more informative for
+<code>p</code>-adaptivity (choosing <em>how much</em> to refine) but more fragile than the energy-fraction
+measure; it is a candidate for a future <code>p</code>/<code>hp</code>-adaptive extension.</p>
+<hr />
+<h2 id="4-staged-plan-for-the-remaining-machinery">4. Staged plan for the remaining machinery<a class="headerlink" href="#4-staged-plan-for-the-remaining-machinery" title="Permanent link">#</a></h2>
+<p>The current mesh (<code>Mesh2D_t</code>) is <strong>statically allocated</strong>: <code>elemInfo(1:6,1:nElem)</code>,
+<code>sideInfo(1:5,1:4,1:nElem)</code>, <code>nodeCoords(...,1:nElem)</code>, and a hand-built <code>mortarInfo</code> table.
+Dynamic AMR requires making the element set mutable while preserving every invariant the solver
+relies on. The following stages are each independently reviewable and testable.</p>
+<h3 id="stage-2-h-refinement-mesh-mutation">Stage 2 — <code>h</code>-refinement mesh mutation<a class="headerlink" href="#stage-2-h-refinement-mesh-mutation" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>(done)</strong> Generate child <code>nodeCoords</code> from the parent geometry map by exact isoparametric
+  subdivision, and build refined connectivity deterministically (<code>SubdivideNodeCoords</code>,
+  <code>RefineConnectivity</code>). Metric terms/Jacobians for children come from the existing geometry
+  routines with the refined <code>nodeCoords</code> as input — <strong>no change to the geometry algorithms</strong>.</li>
+<li><strong>(done)</strong> Uniform (conforming) refinement end to end (<code>UniformRefineMesh</code>), serial.</li>
+<li><strong>(2b, done)</strong> An explicit <strong>quadtree / forest-of-quadtrees</strong> parent–child structure
+  (<code>SELF_QuadTreeMesh_2D</code>): each leaf is an active element; adaptive refinement replaces a flagged
+  leaf with four children (each spanning a reference sub-quadrant), coarsening merges four
+  siblings back to their parent, with amortized-capacity node growth and traversal-based leaf
+  enumeration. Driven directly by the Stage-1 indicator flags via <code>AdaptFromFlags</code>.</li>
+<li><strong>(next)</strong> Storage compaction: reclaim nodes orphaned by coarsening (currently the node pool
+  grows monotonically).</li>
+</ul>
+<h3 id="stage-3-solution-transfer-prolongation-restriction-done">Stage 3 — Solution transfer (prolongation / restriction) — <strong>done</strong><a class="headerlink" href="#stage-3-solution-transfer-prolongation-restriction-done" title="Permanent link">#</a></h3>
+<p>Implemented in <code>SELF_SolutionTransfer_2D</code> (see §2.7):</p>
+<ul>
+<li><strong>Prolongation</strong> (parent → 4 children): tensor product of the mortar restriction operator
+  <code>Lagrange%mortarR</code> — exact interpolation of the parent polynomial onto the children.</li>
+<li><strong>Restriction</strong> (4 children → parent): tensor product of the <span class="arithmatex">\(L^2\)</span>-projection adjoint
+  <code>Lagrange%mortarP</code>; conservative by construction (<span class="arithmatex">\(\sum_k P_k R_k = I\)</span> and discrete
+  conservation), so coarsening preserves cell-integrated quantities.</li>
+<li>The transfer is a separate operator applied between time steps and does not touch the solver's
+  floating-point reductions.</li>
+</ul>
+<h3 id="stage-4-mortar-regeneration-and-21-balancing">Stage 4 — Mortar regeneration and 2:1 balancing<a class="headerlink" href="#stage-4-mortar-regeneration-and-21-balancing" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>(4a, done)</strong> <strong>Face-neighbour navigation</strong> on the forest (<code>FaceNeighbor</code>, ascend/descend
+  quadtree search across the base root connectivity, honouring base side pairings and flips) and
+  <strong>2:1 balance</strong> (<code>Balance2to1</code>: neighbours more than one level coarser than a leaf are refined,
+  rippling to a fixed point). See §2.8.</li>
+<li><strong>(4b, done)</strong> <code>EmitMesh</code> (<code>SELF_AdaptiveMesh_2D</code>) rebuilds <code>sideInfo</code> + <code>mortarInfo</code> from the
+  balanced tree and emits a solver-ready <code>Mesh2D_t</code>: every face where <code>FaceNeighbor</code> sees a
+  finer/coarser neighbour becomes a 2:1 mortar (the configuration the solver already handles);
+  same-level faces are conforming; leaf geometry comes from <code>LeafCoords</code>. See §2.9.</li>
+<li><strong>(next)</strong> Optional <strong>neighbour smoothing</strong> of the trigger flags (avoid isolated refined
+  elements), on top of the balance pass.</li>
+</ul>
+<h3 id="stage-5-mpi-dynamic-re-partitioning-implemented-v1">Stage 5 — MPI dynamic re-partitioning — <strong>implemented (v1)</strong><a class="headerlink" href="#stage-5-mpi-dynamic-re-partitioning-implemented-v1" title="Permanent link">#</a></h3>
+<p><em>Status: implemented. <code>QuadTreeMesh2D%InitGlobal</code> builds the rank-replicated forest from
+allgathered global base tables; <code>EmitMesh</code> builds the global connectivity/mortar tables on
+every rank and stores only its contiguous slice of a freshly generated decomposition
+(<code>sideInfo(3)</code> global ids, global <code>nUniqueSides</code>, fully replicated <code>mortarInfo</code>, exactly the
+invariants <code>SideExchange</code>/<code>MortarExchange</code> require); the controller allgathers the indicator
+flags per epoch and migrates the solution through an allgathered global old field applied to
+the rank-local range (<code>ApplyTransferPlanRange</code>). Validated by
+<code>test/lineareuler2d_amr_soundwave_mpi.f90</code> (2 ranks): the global element trajectory and
+entropy history match the serial run, transfers conserve globally, and a leaf-list checksum
+confirms forest replication. The point-to-point migration upgrade remains open (v2).</em></p>
+<p>Two observations make a correct first version tractable:</p>
+<ul>
+<li>The forest's leaf list is <strong>already a space-filling curve</strong>: root-major depth-first traversal
+  is Morton order within each quadtree, so "SFC partitioning" is just contiguous ranges of the
+  existing leaf list — the same contiguous-ownership model (<code>offsetElem</code>) the domain
+  decomposition already uses.</li>
+<li>The forest is cheap (a few integers per node), so it can be <strong>replicated on every rank</strong>.
+  If all ranks apply identical flags, they compute identical adapted/balanced forests, transfer
+  plans, and emitted global connectivity — deterministically, with no communication beyond the
+  flags themselves.</li>
+</ul>
+<p>Sub-stages:</p>
+<ul>
+<li><strong>(5a) Global flags + replicated mutation.</strong> The controller allgathers the rank-local
+  indicator flags (by the decomposition's element offsets) into a global per-leaf flag array;
+  every rank then runs the same cap/halo/<code>AdaptFromFlags</code>/<code>Balance2to1</code> sequence on its forest
+  copy. One small collective per epoch, outside the time-stepping loop.</li>
+<li><strong>(5b) Multi-rank <code>EmitMesh</code>.</strong> Every rank builds the same global <code>sideInfo</code>/<code>mortarInfo</code>
+  (deterministic from the forest), then decomposes it exactly the way the existing mesh
+  constructors do for <code>nRanks &gt; 1</code>, so <code>SideExchange</code>/<code>MortarExchange</code> consume the result
+  unchanged. Repartitioning is implicit: each epoch's emitted mesh is re-decomposed over the
+  new leaf list, so equal-count SFC arcs move with the refinement.</li>
+<li><strong>(5c) Solution migration.</strong> v1: allgatherv the old rank-local solutions into a global old
+  field, then <code>ApplyTransferPlan</code> only for the new rank-local elements. Correct and simple;
+  memory is one global solution copy per rank (fine at single-node scale). The point-to-point
+  upgrade (send exactly the source elements each rank's plan references) is a drop-in
+  replacement behind the same interface.</li>
+<li>Tests on ≥ 2 ranks: forest determinism across ranks (identical leaf checksums after an
+  epoch), global conservation of the transferred solution (mpi_allreduce), and the AMR
+  soundwave regression run distributed.</li>
+</ul>
+<h3 id="stage-6-gpu-device-re-allocation-implemented">Stage 6 — GPU device re-allocation (implemented)<a class="headerlink" href="#stage-6-gpu-device-re-allocation-implemented" title="Permanent link">#</a></h3>
+<p>Both parts are implemented and measured on one MI300X (gfx942, ROCm 6.4.3, exclusive node),
+ultrasound example, 20 epochs, mean of three runs. The starting point was the "correct but
+unamortized" form: every adapting epoch freed and re-initialized all model storage, re-uploaded
+mesh/geometry, and moved the solution through a host round trip.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>adaptation total</th>
+<th>AMR share of epoch loop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>before</td>
+<td>0.998 s</td>
+<td>51.7%</td>
+</tr>
+<tr>
+<td>+ 6a device-side transfer</td>
+<td>0.830 s</td>
+<td>47.0%</td>
+</tr>
+<tr>
+<td>+ 6b amortized capacity</td>
+<td><strong>0.616 s</strong></td>
+<td><strong>39.4%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Time integration is unchanged throughout (0.93-0.95 s), so the whole gain is in adaptation:
+<strong>38% off the cost of an epoch</strong>. On the curved multi-material bone-and-marrow case the AMR
+share falls from 19.7% to 14.2%.</p>
+<ul>
+<li><strong>(6a) Device-side transfer — implemented.</strong> <code>StageSolutionForTransfer</code> and
+  <code>ApplyTransferPlan</code> are type-bound on the model, using the same backend split as <code>Regrid</code>.
+  The GPU override stages the pre-regrid solution device-to-device and applies the plan in
+  <code>TransferSolution_2D_gpu</code> (<code>src/gpu/SELF_SolutionTransfer.cpp</code>), so a single-GPU adapting run
+  moves no solution data across the host link. The kernel applies only the mortar operator pair
+  of the child on the recorded path rather than prolonging to all four and discarding three, so
+  device and host agree to round-off while conservation stays exact. Multi-rank runs keep the
+  host allgather path, as the sequencing note below anticipated.</li>
+<li><strong>(6b) Amortized capacity — implemented.</strong> The prediction recorded here previously was that
+  "at typical cadences allocation cost is expected to be far below the re-upload and
+  geometry-generation cost". <strong>The measurement contradicted it:</strong> the free/re-initialize cycle
+  was the single largest component of an adaptation at 51.5%, ahead of both the transfer and
+  geometry regeneration. The cost was not the device allocator (<code>hipMalloc</code> + <code>hipFree</code> were
+  only ~8% of an adaptation) but the host-side work a fresh allocation drags along - allocating,
+  zeroing, rebuilding metadata and equation parsers, and uploading the zeros. <code>Resize</code> on the
+  data classes now reuses storage via rank-1 pools with pointer remapping (see
+  <code>src/SELF_DataPool.f90</code> for why this avoids changing any kernel stride).</li>
+</ul>
+<p><strong>Behaviour change to be aware of.</strong> On a GPU build the transferred solution is left on the
+device, so <code>solution%interior</code> (the host mirror) is stale after <code>Adapt</code>. This matches the rest
+of the time loop, where the device is authoritative and a caller wanting host data calls
+<code>UpdateHost()</code> first, as <code>Write_DGModel2D_t</code> does. It used to be incidentally fresh because the
+transfer ran on the host.</p>
+<p><strong>How this scales with refinement depth.</strong> Depth is the knob that reaches ultrasound length
+scales (the base mesh stays 16x16; <code>Lr</code> and the epoch length track <code>maxLevel</code>). Adaptation cost
+grows faster than time integration, so the AMR share rises with depth - but it rises from a
+lower base and more slowly than before:</p>
+<table>
+<thead>
+<tr>
+<th>maxLevel</th>
+<th>f0</th>
+<th>elements</th>
+<th>baseline</th>
+<th>+ 6a/6b</th>
+<th>+ 6c</th>
+<th>geometry reused</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>0.10 MHz</td>
+<td>2,092</td>
+<td>51.7%</td>
+<td>40.1%</td>
+<td><strong>38.1%</strong></td>
+<td>72.8%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.20 MHz</td>
+<td>4,156</td>
+<td>56.8%</td>
+<td>43.1%</td>
+<td><strong>42.1%</strong></td>
+<td>73.0%</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.40 MHz</td>
+<td>7,528</td>
+<td>58.9%</td>
+<td>45.9%</td>
+<td><strong>45.1%</strong></td>
+<td>73.9%</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0.80 MHz</td>
+<td>14,896</td>
+<td>61.6%</td>
+<td>48.4%</td>
+<td><strong>47.6%</strong></td>
+<td>74.6%</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1.60 MHz</td>
+<td>30,760</td>
+<td>62.9%</td>
+<td>50.6%</td>
+<td><strong>49.9%</strong></td>
+<td>75.4%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3.20 MHz</td>
+<td>66,616</td>
+<td><em>out of memory</em></td>
+<td>51.8%</td>
+<td><strong>51.0%</strong></td>
+<td>76.5%</td>
+</tr>
+</tbody>
+</table>
+<p>maxLevel 8 could not run at all before this work: it exhausted the device after ~555
+adaptations (see the leak below). It now completes, which is the first datapoint at a
+production-relevant frequency. The reused fraction rises with depth, as expected - the refined
+annulus is a thinner shell relative to the whole mesh - so geometry reuse pays off more, not
+less, at production resolution. Per-epoch element counts are identical at every depth before and
+after 6c, which is the check that the incremental geometry changed no physics.</p>
+<p><strong>A leak this work exposed.</strong> <code>boundarynormal_gpu</code> was allocated in <code>Init_MappedScalar2D</code> and
+never freed, leaking 12.8 kB per element per adaptation at N=7, nvar=5 across the model's five
+<code>MappedScalar2D</code> fields. It aborted a 640-epoch maxLevel-8 run with an out-of-memory error
+after ~555 adaptations on a 192 GiB device. Fixed, with a device-memory regression test
+(<code>test/data_2d_device_memory.f90</code>) since nothing in the suite had been watching device memory.</p>
+<h3 id="stage-6c-geometry-implemented">Stage 6c - geometry (implemented)<a class="headerlink" href="#stage-6c-geometry-implemented" title="Permanent link">#</a></h3>
+<p>Re-profiling after 6a/6b put geometry at the top of an adaptation: 46.8%, ahead of <code>Regrid</code>, split
+between allocate/zero/free churn (<code>Init_SEMQuad</code> + <code>Free_SEMQuad</code>, 21.6%) and real computation
+(<code>GenerateFromMesh_SEMQuad</code>, 25.2%). Both are addressed:</p>
+<ul>
+<li><strong>Persistent geometry.</strong> <code>Tensor2D</code> joins the amortized-storage scheme (it was the last class on
+  plain <code>allocate</code>/<code>hipMalloc</code>, and <code>dxds</code>/<code>dsdx</code> are the largest arrays in <code>SEMQuad</code>), <code>SEMQuad</code>
+  gains <code>Resize</code>, and the controller owns two long-lived geometry buffers instead of allocating one
+  per epoch. The <code>nGeo -&gt; N</code> interpolant and node-coordinate staging that <code>GenerateFromMesh</code> used to
+  rebuild on every call are cached, since only the element count varies between epochs.</li>
+<li><strong>Incremental generation.</strong> Most elements do not change in an epoch, and the transfer plan already
+  names them: <code>SELF_TRANSFER_COPY</code> is set only when the new and old element are the <em>same forest
+  node</em>. Because <code>LeafCoords</code> is a pure function of root coordinates, level and quadrant path, and
+  per-element geometry generation is strictly element-local, such an element's whole geometry block
+  is reproducible <strong>bit for bit</strong> - so it is copied forward rather than recomputed. The changed
+  elements are generated compacted into a scratch geometry and scattered into place, which keeps the
+  existing generation loops untouched. The two buffers alternate so the previous epoch's geometry is
+  readable while the new one is assembled.</li>
+<li><strong>Multi-rank.</strong> <code>sourceElem</code> indexes the global old element list while a rank holds only its slice,
+  so reuse additionally requires the source to be locally owned - a range test against the previous
+  decomposition. On one rank that is always true; on several, migrated elements are regenerated. No
+  communication is added.</li>
+</ul>
+<p>Measured: 72.8% of elements reused per epoch at maxLevel 3, rising to 76.5% at maxLevel 8. Adaptation
+cost 0.616 s -&gt; 0.585 s, and the bone-and-marrow case 14.2% -&gt; 10.7% AMR share.</p>
+<p>Correctness is checked numerically rather than argued. <code>test/geometry_2d_reuse.f90</code> requires every
+kept element to match its previous-epoch source bit for bit, and adds a positive-Jacobian check plus
+the discrete metric identity <code>sum_i d(J dsdx(i,j))/dxi_i = 0</code>, which the suite did not previously
+test. <code>test/geometry_2d_reuse_mpi.f90</code> covers the multi-rank branch, asserting both that reuse and
+regeneration actually fire and that the resulting mixed assembly equals a from-scratch generation
+exactly. Three env-gated switches (<code>SELF_AMR_GEOM_NO_REUSE</code>, <code>SELF_AMR_GEOM_FULL</code>,
+<code>SELF_AMR_GEOM_VERIFY</code>) allow a suspected geometry problem to be localized in one run without a
+rebuild.</p>
+<h3 id="a-correctness-bug-the-amortized-scheme-introduced">A correctness bug the amortized scheme introduced<a class="headerlink" href="#a-correctness-bug-the-amortized-scheme-introduced" title="Permanent link">#</a></h3>
+<p>Worth recording, because the reasoning error is easy to repeat. Stage 6b removed the <code>UpdateDevice</code>
+from <code>Resize</code> on the grounds that uploading freshly zeroed arrays is waste when the caller
+overwrites them. That is true of the solution but not of every field, and it silently dropped an
+invariant <code>Init</code> had provided: after <code>Init</code> a field's <em>device</em> buffer was defined, because the zeros
+had been uploaded. After <code>Resize</code> it held whatever was previously in that memory, and a fresh
+<code>hipMalloc</code> is uninitialized.</p>
+<p>The low-storage Runge-Kutta update reads its accumulator before writing it -
+<code>grk = rk_a*grk + dSdt</code> with <code>rk3_a(1) = 0</code>, where <code>grk</code> is <code>workSol%interior_gpu</code>. Multiplying by
+zero annihilates any finite leftover, which is why this survived initial testing, but <code>0*NaN</code> and
+<code>0*Inf</code> are NaN. A resized <code>workSol</code> buffer that happened to contain a NaN bit pattern poisoned the
+solution on the next step; the wave died, the indicator found nothing to refine, and the mesh
+coarsened back to the base mesh. It presented as an intermittent, allocation-history-dependent
+failure - the same source on the same node passing at one time and failing at another - and no test
+caught it, because none runs enough GPU adaptation epochs for a stale buffer to land on such a
+pattern. <code>EnsureDeviceBuffer</code> now zeroes on resize, restoring the invariant unconditionally; a
+device-side fill costs HBM bandwidth rather than a PCIe transfer, so the point of skipping
+<code>UpdateDevice</code> is preserved.</p>
+<p>The general lesson: "the caller overwrites it before reading" is a per-field claim, not a property
+of an amortized-storage scheme.</p>
+<p><strong>Still open.</strong> The geometry copies and the device upload are both still done the simple way: element
+blocks are copied on the host (roughly eleven array-slice copies per element), and the whole geometry
+is re-uploaded each epoch regardless of how little changed. That is why 6c yields ~5% rather than the
+~35% a naive reading of the 46.8% attribution would predict. The fix is a device-side indexed-copy
+kernel - structurally the 6a transfer kernel without the operator - plus uploading only the compacted
+changed elements. There is now a measurement justifying it rather than an estimate. Mesh emission
+(<code>EmitMesh</code>, ~5% of an adaptation) is also still a full rebuild per epoch.</p>
+<h3 id="driver-integration">Driver integration<a class="headerlink" href="#driver-integration" title="Permanent link">#</a></h3>
+<p>Adaptation runs <strong>between</strong> time steps (e.g. every <em>k</em> steps): estimate → flag → (optional
+neighbor smoothing) → refine/coarsen tree → transfer solution → regenerate mortars/balance →
+repartition (MPI) → re-upload (GPU). The time-integration loop itself is unchanged; the solver
+sees only a (possibly) different, still-valid mesh at the top of the next step.</p>
+<hr />
+<h2 id="5-application-roadmap-lineareuler2d-ultrasound-point-source-under-amr">5. Application roadmap: <code>LinearEuler2D</code> ultrasound point source under AMR<a class="headerlink" href="#5-application-roadmap-lineareuler2d-ultrasound-point-source-under-amr" title="Permanent link">#</a></h2>
+<p>This section maps the serial AMR machinery above onto a first <em>running application</em>: a single
+point-source wavelet in the ultrasound frequency range, propagating through a ~1 m × 1 m
+domain with the 2-D linear Euler model, on a dynamically adapting mesh. Serial CPU and single
+GPU are the initial targets (Stage 5 MPI repartitioning is not required). Each gap below is an
+additive, independently testable piece; existing model/mesh interfaces stay untouched.</p>
+<h3 id="51-what-already-works-no-changes-needed">5.1 What already works (no changes needed)<a class="headerlink" href="#51-what-already-works-no-changes-needed" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Flux coupling on adaptive meshes</strong> — <code>EmitMesh</code> produces the same <code>mortarInfo</code> layout the
+  <code>LinearEuler2D</code> mortar tests (<code>test/lineareuler2d_mortar_soundwave.f90</code>) already exercise.</li>
+<li><strong>Per-epoch time step</strong> — <code>ForwardStep(tn, dt, ioInterval)</code> takes <code>dt</code> on every call, so a
+  driver that re-computes <code>dt</code> after each adaptation needs no time-integrator changes.</li>
+<li><strong>Output of a changing mesh</strong> — every HDF5 snapshot written by <code>WriteModel</code> carries its own
+  <code>/controlgrid/geometry</code> alongside the solution, so per-snapshot meshes are already
+  representable; <code>pyself</code> reads them file-by-file.</li>
+<li><strong>Initial condition</strong> — <code>SphericalSoundWave</code> (Gaussian pressure pulse) generates an outgoing
+  wavelet whose spectral content is set by the pulse half-width <code>Lr</code>; choosing <code>Lr</code> of a few
+  millimetres puts the dominant wavelength in the ultrasound band with <strong>zero model changes</strong>.</li>
+</ul>
+<h3 id="52-gap-1-transfer-plan-old-leaf-new-leaf-solution-mapping-implemented">5.2 Gap 1 — Transfer plan: old-leaf → new-leaf solution mapping — <strong>implemented</strong><a class="headerlink" href="#52-gap-1-transfer-plan-old-leaf-new-leaf-solution-mapping-implemented" title="Permanent link">#</a></h3>
+<p><em>Status: implemented in <code>SELF_TransferPlan_2D</code> (see §2.10), validated by
+<code>test/transfer_plan_2d.f90</code>.</em></p>
+<p><code>AdaptFromFlags</code> + <code>Balance2to1</code> mutate the forest but record no correspondence between the
+pre- and post-adaptation leaf lists, which the Stage-3 transfer operators need. Because node
+ids are stable in the pool (coarsening only orphans nodes), the plan can be built after the
+fact from a snapshot of the old leaf array:</p>
+<ul>
+<li>new leaf <strong>is</strong> an old leaf → copy;</li>
+<li>new leaf <strong>descends from</strong> an old leaf → prolong along the quadtree path
+  (<code>Balance2to1</code> ripple can refine a fresh child again, so prolongation must handle <strong>multiple
+  levels</strong>, applying <code>ProlongToChildren</code> per step of the path);</li>
+<li>new leaf <strong>is the parent of four</strong> old leaves → restrict (always exactly one level:
+  <code>AdaptFromFlags</code> coarsens one level per call and balancing never coarsens).</li>
+</ul>
+<p>Deliverable: a <code>BuildTransferPlan</code> (forest + saved old-leaf list → typed plan) and an
+<code>ApplyTransfer</code> driver mapping <code>solution%interior(:,:,oldIdx,:)</code> to the new element ordering.
+Tests: adapt→transfer conservation of <code>∫u dA</code> (Jacobian-weighted), refine-then-coarsen
+reversibility through a full plan, and a balanced two-level ripple case.</p>
+<h3 id="53-gap-2-model-regrid-rebinding-a-live-dgmodel2d-to-an-emitted-mesh-implemented">5.3 Gap 2 — Model regrid: rebinding a live <code>DGModel2D</code> to an emitted mesh — <strong>implemented</strong><a class="headerlink" href="#53-gap-2-model-regrid-rebinding-a-live-dgmodel2d-to-an-emitted-mesh-implemented" title="Permanent link">#</a></h3>
+<p><em>Status: implemented as <code>DGModel2D%Regrid</code> + <code>SELF_AMRController_2D</code> (see §2.11), validated by
+<code>test/lineareuler2d_amr_soundwave.f90</code>. The level-based time step of §5.4 ("now") is
+<code>RecommendedTimeStep</code>.</em></p>
+<p><code>DGModel2D</code> storage (7 <code>MappedScalar/Vector</code> objects) is sized by <code>nElem</code> at <code>Init</code>, and
+<code>Init</code> is <code>intent(out)</code> — it resets <code>t</code>, model parameters (<code>rho0</code>), BC registrations, and the
+IO counter. Rather than making the model mutable, add an <strong>external AMR controller</strong> module
+(e.g. <code>SELF_AMRController_2D</code>) that owns the forest, the indicator, and double-buffered
+<code>Mesh2D</code>/<code>SEMQuad</code> instances, and performs one adaptation epoch:</p>
+<ol>
+<li><code>indicator%Estimate</code> on the current solution (driving variable: pressure, <code>ivar=3</code>);</li>
+<li><strong>flag halo expansion</strong> — grow refine flags to face-neighbours of flagged leaves (via
+   <code>FaceNeighbor</code>) so the moving wavefront cannot outrun the refined band between epochs;
+   this is the "neighbour smoothing" already anticipated in §4;</li>
+<li>snapshot old leaves → <code>AdaptFromFlags</code> → <code>Balance2to1</code> → <code>BuildTransferPlan</code> → <code>EmitMesh</code>;</li>
+<li>new <code>SEMQuad</code> geometry (<code>Init</code> + <code>GenerateFromMesh</code>), free the old buffer;</li>
+<li>save model scalars (<code>t</code>, <code>rho0</code>, integrator choice, flags), <code>Free</code> + <code>Init</code> the model on
+   the new mesh/geometry, restore scalars, apply the transferred solution, <code>UpdateDevice</code>.</li>
+</ol>
+<p>Step 5 works on GPU today because a fresh <code>Init</code> allocates correctly sized device arrays;
+host-side transfer with an <code>UpdateHost</code>/<code>UpdateDevice</code> round-trip per epoch is acceptable at
+demo cadence (Stage-6 device-side transfer remains the later optimization). Background fields
+<code>c</code> (var 4) and <code>rho0</code> (var 5) ride the same prolong/restrict — exact for uniform media.</p>
+<h3 id="54-gap-3-time-step-control">5.4 Gap 3 — Time-step control<a class="headerlink" href="#54-gap-3-time-step-control" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Now (required):</strong> level-based global <code>dt</code>. For a quadtree, the fine-level element scale is
+  exactly <code>h_root / 2^maxLevel</code>, so <code>dt_epoch = dt_base / 2^maxLevel</code> with <code>dt_base</code> chosen
+  for the base mesh by the usual explicit-DG bound <code>dt ≈ C·h/(c·N²)</code>. Deterministic, free,
+  and no geometry reduction is needed.</li>
+<li><strong>Later (optional):</strong> local time stepping (LTS) — leaves at level ℓ subcycle with
+  <code>dt/2^ℓ</code>. This touches the RK update and requires time-interpolated interface/mortar data
+  between levels, i.e. exactly the time-integration and flux-exchange machinery that is
+  frozen by policy; it needs its own design + review round (call it Stage 7). Cost analysis
+  for this demo says it is not needed to start: with the refined band confined to the
+  wavefront annulus, a global fine <code>dt</code> costs <code>nElem_total × fine-step-count</code>, and most
+  elements are coarse <em>and cheap</em>; LTS buys roughly <code>2^maxLevel×</code> on the coarse bulk — worth
+  having, not blocking.</li>
+</ul>
+<h3 id="55-gap-4-the-example-and-its-ci-scale-test-implemented">5.5 Gap 4 — The example and its CI-scale test — <strong>implemented</strong><a class="headerlink" href="#55-gap-4-the-example-and-its-ci-scale-test-implemented" title="Permanent link">#</a></h3>
+<p><em>Status: implemented as <code>examples/linear_euler2d_amr_ultrasound_pointsource.f90</code> (water,
+<code>c₀ = 1500 m/s</code>, <code>f₀ ≈ 100 kHz</code>, 16×16 base at <code>N = 7</code>, level-3 cap, radiation boundaries).
+The example is registered as a CI test at a 6-epoch (30 µs) default;
+<code>SELF_AMR_ULTRASOUND_EPOCHS=60</code> extends it to a full-domain movie run. The generic AMR-loop
+mechanics are separately covered by <code>test/lineareuler2d_amr_soundwave.f90</code> (§2.11).</em></p>
+<p><code>examples/linear_euler2d_amr_pointsource.f90</code> (plus a reduced <code>test/</code> variant):</p>
+<ul>
+<li>Domain <code>[0,1]²</code> m via <code>mesh%StructuredMesh</code>, radiation BCs on all four sides; source at the
+  centre.</li>
+<li>Medium: water (<code>c = 1500 m/s</code>, <code>rho0 = 1000 kg/m³</code>) with <code>f₀ ≈ 100 kHz</code> → <code>λ = 15 mm</code>
+  (an air / 40 kHz variant, <code>λ ≈ 8.6 mm</code>, also fits but needs one more refinement level).</li>
+<li>Resolution: base 16×16 (<code>h₀ = 62.5 mm</code>), <code>N = 7</code>, max level 3 (<code>h = 7.8 mm</code>), giving
+  ≈ 15 points per wavelength on the fine level — comfortable for wave propagation; the coarse
+  bulk intentionally under-resolves the front so the indicator <em>must</em> refine to keep σ below
+  threshold.</li>
+<li><code>dt ≈ 3×10⁻⁸ s</code> at level 3; an end time of ~0.3 ms (front travels 45 cm) is ~10⁴ steps —
+  seconds-to-minutes serial CPU, trivial on one GPU.</li>
+<li>Adaptation cadence: regrid every k steps with <code>k·dt·c ≤</code> one fine element (<code>k ≈ 100</code> at the
+  numbers above, with the §5.3 halo providing the safety margin).</li>
+<li>CI assertions: solution NaN-free; entropy finite and non-increasing (upwind flux +
+  radiation BCs are dissipative); refinement actually occurs (<code>forest%MaxLevel() &gt; 0</code>, leaf
+  count grows) <strong>and</strong> coarsening occurs behind the front (leaf count later shrinks);
+  Jacobian-weighted transfer conservation defect at machine precision per epoch.</li>
+</ul>
+<h3 id="56-gap-5-visualization-pressure-field-mesh-skeleton-implemented">5.6 Gap 5 — Visualization: pressure field + mesh skeleton — <strong>implemented</strong><a class="headerlink" href="#56-gap-5-visualization-pressure-field-mesh-skeleton-implemented" title="Permanent link">#</a></h3>
+<p><em>Status: implemented as <code>examples/linear_euler2d_amr_plot.py</code> (h5py + numpy + matplotlib
+only). Each snapshot's field and geometry are interpolated from the Gauss control points to a
+uniform per-element grid including the element edges (barycentric Lagrange, exact for the
+polynomial data), rendered as a filled pressure field with the element-outline wireframe
+overlaid, one PNG per snapshot plus an MP4 when ffmpeg is available.</em></p>
+<p>A companion <code>examples/linear_euler2d_amr_plot.py</code> (pyself + matplotlib/pyvista) that, per
+snapshot: renders the pressure field from <code>/controlgrid/solution</code> and overlays the <strong>element
+wireframe</strong> traced from each element's four edges in <code>/controlgrid/geometry</code>, then assembles
+PNG frames into a movie. Because each file carries its own geometry, frames with different
+element counts need no special handling. This is the artifact that <em>shows</em> the refinement
+band tracking the expanding wavefront.</p>
+<h3 id="57-deferred-follow-on">5.7 Deferred / follow-on<a class="headerlink" href="#57-deferred-follow-on" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Time-dependent transducer source.</strong> A true point <em>forcing</em> (e.g. Ricker wavelet at <code>f₀</code>)
+  rather than an initial pulse: <code>source2d</code> currently has no access to position or time, so
+  this needs a localized-forcing hook plus per-epoch source relocation (the containing
+  element changes identity on regrid). Physically nicer (continuous-wave and pulse-train
+  experiments); not required for the first demo.</li>
+<li><strong>LTS (Stage 7)</strong> as scoped in §5.4, and <strong>device-side transfer (Stage 6)</strong>.</li>
+<li><strong>Storage compaction</strong> of orphaned forest nodes on long runs (§4, Stage 2 "next").</li>
+</ul>
+<h3 id="58-suggested-pr-sequence">5.8 Suggested PR sequence<a class="headerlink" href="#58-suggested-pr-sequence" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>PR</th>
+<th>Content</th>
+<th>Depends on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Transfer plan (old→new leaf map, multi-level prolong) + tests</td>
+<td>—</td>
+</tr>
+<tr>
+<td>2</td>
+<td>AMR controller (halo flags, regrid orchestration, level-based dt) + adapt-epoch soundwave test</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Ultrasound example, CI-scale test, plotting script, docs</td>
+<td>2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>GPU epoch test; device-side transfer (Stage 6a) and amortized capacity (Stage 6b) - both done, profiling justified them</td>
+<td>2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>(design first) LTS; time-dependent point forcing</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-references">6. References<a class="headerlink" href="#6-references" title="Permanent link">#</a></h2>
+<ul>
+<li>P.-O. Persson and J. Peraire, <em>Sub-cell shock capturing for discontinuous Galerkin methods</em>,
+  AIAA 2006-112 (2006).</li>
+<li>S. Hennemann, A. M. Rueda-Ramírez, F. J. Hindenlang, and G. J. Gassner, <em>A provably entropy
+  stable subcell shock capturing approach for high order split form DG for the compressible
+  Euler equations</em>, J. Comput. Phys. 426, 109935 (2021).</li>
+<li>C. Mavriplis, <em>Adaptive mesh strategies for the spectral element method</em>, Comput. Methods
+  Appl. Mech. Engrg. 116 (1994) 77–86.</li>
+<li>M. Schlottke-Lakemper et al., <em>Trixi.jl: Adaptive high-order numerical simulations of
+  hyperbolic PDEs in Julia</em>, and the Trixi.jl <code>IndicatorHennemannGassner</code> / <code>IndicatorLöhner</code>
+  documentation.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

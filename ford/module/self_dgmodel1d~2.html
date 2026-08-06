@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_DGModel1D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_DGModel1D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for modules and submodules.">6 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_DGModel1D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_dgmodel1d.f90.html'>SELF_DGModel1D.f90</a></li>
+     <li class="active">SELF_DGModel1D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_dgmodel1d~2.html#type-dgmodel1d">DGModel1D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_dgmodel1d_t.html'>SELF_DGModel1D_t</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_dgmodel1d~2~~UsesGraph Pages: 1 -->
+<svg id="moduleself_dgmodel1d2UsesGraph" width="641pt" height="284pt"
+ viewBox="0.00 0.00 641.00 283.75" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_dgmodel1d~2~~UsesGraph" class="graph" transform="scale(0.3 0.3) rotate(0) translate(4 948.63)">
+<title>module~~self_dgmodel1d~2~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-948.63 2148,-948.63 2148,4 -4,4"/>
+<!-- module~self_dgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node1" class="node">
+<title>module~self_dgmodel1d~2</title>
+<polygon fill="none" stroke="black" points="2144,-379.63 2037,-379.63 2037,-355.63 2144,-355.63 2144,-379.63"/>
+<text text-anchor="middle" x="2090.5" y="-365.23" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_DGModel1D</text>
+</g>
+<!-- module~self_dgmodel1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node2" class="node">
+<title>module~self_dgmodel1d_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node2"><a xlink:href=".././module/self_dgmodel1d_t.html" xlink:title="SELF_DGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2001,-379.63 1885,-379.63 1885,-355.63 2001,-355.63 2001,-379.63"/>
+<text text-anchor="middle" x="1943" y="-365.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge1" class="edge">
+<title>module~self_dgmodel1d~2&#45;&gt;module~self_dgmodel1d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2036.97,-367.63C2028.66,-367.63 2019.97,-367.63 2011.38,-367.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2011.37,-364.13 2001.37,-367.63 2011.37,-371.13 2011.37,-364.13"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node3" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-275.63 151,-275.63 151,-251.63 205,-251.63 205,-275.63"/>
+<text text-anchor="middle" x="178" y="-261.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge2" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1927.37,-355.41C1881.89,-318.73 1737.71,-212.13 1599.5,-213.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1597.5,-213.63C1516.66,-202.9 1506.67,-166.75 1430.5,-137.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1428.5,-137.63C1312.86,-93.42 1283.6,-74.89 1160.5,-61.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1158.5,-61.63C901.23,-8.87 814.82,6.11 568,-83.63 429.29,-134.06 393.25,-145.13 262,-212.63 242.64,-222.59 221.76,-235.43 205.79,-245.73"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="203.46,-243.07 197,-251.47 207.29,-248.93 203.46,-243.07"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node4" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="646.5,-532.63 583.5,-532.63 583.5,-508.63 646.5,-508.63 646.5,-532.63"/>
+<text text-anchor="middle" x="615" y="-518.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;FEQParse -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge3" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1936.29,-379.74C1894.13,-467.23 1623.48,-996.82 1290.5,-906.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.5,-906.63C1150.02,-870.18 928.61,-485.04 786.5,-502.63"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node5" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node5"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-306.63 291,-306.63 291,-282.63 364,-282.63 364,-306.63"/>
+<text text-anchor="middle" x="327.5" y="-292.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge4" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.5,-213.63C1251.35,-217.31 1243.79,-227.02 1208,-237.63 1186.9,-243.89 1181.56,-245.22 1160.5,-251.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1158.5,-251.63C1136.75,-258.25 1131.68,-261.18 1111,-270.63 1057.31,-295.18 1050.7,-319.16 993,-331.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M991,-331.63C945.74,-341.41 832.78,-370.07 786.5,-371.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M784.5,-371.63C648.91,-376.19 613.18,-367.26 481.5,-334.63"/>
+</g>
+<!-- module~self_mappedscalar_1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node6" class="node">
+<title>module~self_mappedscalar_1d~2</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node6"><a xlink:href=".././module/self_mappedscalar_1d~2.html" xlink:title="SELF_MappedScalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1849,-379.63 1709,-379.63 1709,-355.63 1849,-355.63 1849,-379.63"/>
+<text text-anchor="middle" x="1779" y="-365.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_mappedscalar_1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge5" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_mappedscalar_1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1884.88,-367.63C1876.57,-367.63 1867.89,-367.63 1859.23,-367.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1859.1,-364.13 1849.1,-367.63 1859.1,-371.13 1859.1,-364.13"/>
+</g>
+<!-- module~self_model -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node7" class="node">
+<title>module~self_model</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node7"><a xlink:href=".././module/self_model.html" xlink:title="SELF_Model">
+<polygon fill="#337ab7" stroke="#337ab7" points="823.5,-341.63 747.5,-341.63 747.5,-317.63 823.5,-317.63 823.5,-341.63"/>
+<text text-anchor="middle" x="785.5" y="-327.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_model -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge6" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1597.5,-213.63C1461.06,-215.11 1426.94,-213.63 1290.5,-213.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.5,-213.63C1208.89,-213.63 1188.93,-221.4 1111,-237.63 1083.63,-243.33 916.49,-291.73 833.36,-315.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="832.28,-312.62 823.65,-318.77 834.23,-319.34 832.28,-312.62"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node8" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node8"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-300.63 568,-300.63 568,-276.63 662,-276.63 662,-300.63"/>
+<text text-anchor="middle" x="615" y="-286.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge7" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1428.5,-137.63C1316.36,-97.48 1279.61,-137.63 1160.5,-137.63 1160.5,-137.63 1160.5,-137.63 991,-137.63 919.82,-137.63 726.04,-232.42 648.6,-271.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="646.64,-268.86 639.33,-276.53 649.82,-275.1 646.64,-268.86"/>
+</g>
+<!-- module~self_mesh_1d -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node9" class="node">
+<title>module~self_mesh_1d</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node9"><a xlink:href=".././module/self_mesh_1d.html" xlink:title="SELF_Mesh_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1335,-419.63 1244,-419.63 1244,-395.63 1335,-395.63 1335,-419.63"/>
+<text text-anchor="middle" x="1289.5" y="-405.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge8" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1597.5,-213.63C1479.16,-213.63 1468.18,-286.09 1371,-353.63 1354.36,-365.2 1351.79,-370.27 1335,-381.63 1330.66,-384.56 1325.99,-387.51 1321.35,-390.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1319.41,-387.4 1312.58,-395.5 1322.97,-393.43 1319.41,-387.4"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node10" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node10"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-808.63 262,-808.63 262,-784.63 393,-784.63 393,-808.63"/>
+<text text-anchor="middle" x="327.5" y="-794.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge9" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.5,-906.63C1210.48,-893.4 1189.74,-900.56 1111,-892.63 850.44,-866.38 542.25,-825.74 403.18,-806.89"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="403.44,-803.39 393.06,-805.51 402.5,-810.33 403.44,-803.39"/>
+</g>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node11" class="node">
+<title>module~self_boundaryconditions</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node11"><a xlink:href=".././module/self_boundaryconditions.html" xlink:title="SELF_BoundaryConditions">
+<polygon fill="#337ab7" stroke="#337ab7" points="861,-109.63 710,-109.63 710,-85.63 861,-85.63 861,-109.63"/>
+<text text-anchor="middle" x="785.5" y="-95.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel1d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge10" class="edge">
+<title>module~self_dgmodel1d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1158.5,-61.63C1049.96,-49.47 923.32,-68.87 849.31,-83.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="848.33,-80.21 839.22,-85.62 849.72,-87.07 848.33,-80.21"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge13" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M290.79,-287.13C267.87,-282.31 238.2,-276.07 215.19,-271.24"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="215.64,-267.75 205.13,-269.12 214.2,-274.6 215.64,-267.75"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node12" class="node">
+<title>mpi</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node12"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-402.63 151,-402.63 151,-378.63 205,-378.63 205,-402.63"/>
+<text text-anchor="middle" x="178" y="-388.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge11" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M307.82,-306.79C282.11,-323.52 235.65,-353.76 206.11,-372.99"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="204,-370.18 197.53,-378.57 207.82,-376.05 204,-370.18"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node13" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node13"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-670.63 130,-670.63 130,-646.63 226,-646.63 226,-670.63"/>
+<text text-anchor="middle" x="178" y="-656.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge12" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M320.48,-306.85C308.68,-331 281.9,-386.68 262,-434.63 231.65,-507.77 200.4,-596.42 186.48,-636.75"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="183.12,-635.77 183.17,-646.36 189.73,-638.04 183.12,-635.77"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node14" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node14"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-670.63 0,-670.63 0,-646.63 94,-646.63 94,-670.63"/>
+<text text-anchor="middle" x="47" y="-656.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge14" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M291,-298.53C246.97,-305.27 172.53,-323.17 130,-369.63 111.44,-389.9 67.84,-572.75 53.03,-636.68"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="49.6,-636 50.76,-646.53 56.42,-637.57 49.6,-636"/>
+</g>
+<!-- module~self_mappedscalar_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node15" class="node">
+<title>module~self_mappedscalar_1d_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node15"><a xlink:href=".././module/self_mappedscalar_1d_t.html" xlink:title="SELF_MappedScalar_1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1673,-379.63 1524,-379.63 1524,-355.63 1673,-355.63 1673,-379.63"/>
+<text text-anchor="middle" x="1598.5" y="-365.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d~2&#45;&gt;module~self_mappedscalar_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge15" class="edge">
+<title>module~self_mappedscalar_1d~2&#45;&gt;module~self_mappedscalar_1d_t</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1708.99,-367.63C1700.53,-367.63 1691.81,-367.63 1683.16,-367.63"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1683.06,-364.13 1673.06,-367.63 1683.06,-371.13 1683.06,-364.13"/>
+</g>
+<!-- module~self_model&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge16" class="edge">
+<title>module~self_model&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M747.31,-330.68C713.14,-331.35 661.1,-331.6 616,-328.63"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M614,-328.63C552.62,-324.59 542.65,-295.34 481.5,-288.63"/>
+</g>
+<!-- module~self_model&#45;&gt;FEQParse -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge17" class="edge">
+<title>module~self_model&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M766.77,-341.86C747.61,-355.85 717.24,-380.37 698,-407.63 673.87,-441.82 689.73,-463.29 662,-494.63 659.34,-497.64 656.25,-500.37 652.94,-502.85"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="650.86,-500.03 644.44,-508.45 654.71,-505.87 650.86,-500.03"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge18" class="edge">
+<title>module~self_model&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M614,-328.63C555.18,-324.75 538.72,-348.81 481.5,-334.63"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_metadata -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge19" class="edge">
+<title>module~self_model&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M747.1,-320.53C725.03,-315.16 696.67,-308.26 671.98,-302.25"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="672.55,-298.79 662.01,-299.82 670.89,-305.59 672.55,-298.79"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge20" class="edge">
+<title>module~self_model&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M752.69,-341.77C713.82,-358.34 649.15,-391.92 616,-442.63"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M614,-442.63C601.38,-461.93 581.72,-448.09 568,-466.63 516.09,-536.77 588.06,-592.76 532,-659.63 516.59,-678.01 498.86,-662.09 481.5,-678.63"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M479.5,-678.63C438.72,-717.48 385.85,-756.55 354.7,-778.56"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="352.32,-775.95 346.15,-784.56 356.34,-781.68 352.32,-775.95"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge21" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M567.87,-291.09C542.34,-291.84 510.08,-291.77 481.5,-288.63"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge22" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M589.64,-300.68C557.44,-315.97 502.36,-339.8 481.5,-334.63"/>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M479.5,-334.63C443.91,-325.81 403.79,-315.15 373.85,-307.05"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="374.68,-303.65 364.11,-304.41 372.85,-310.4 374.68,-303.65"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge25" class="edge">
+<title>module~self_mesh_1d&#45;&gt;HDF5</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1267.65,-395.51C1260.18,-391.15 1251.7,-386.19 1244,-381.63 1206.77,-359.61 1202.01,-343.81 1160.5,-331.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1158.5,-331.63C1136.68,-325.23 1129.34,-326.08 1111,-312.63 1090.63,-297.69 1093.69,-285.63 1075,-268.63 1042.53,-239.11 1032.59,-232.56 993,-213.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M991,-213.63C915.49,-177.53 699.43,-241.91 616,-248.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M614,-248.63C552.98,-256.42 542.65,-295.34 481.5,-288.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M479.5,-288.63C440.71,-284.37 431.79,-277.88 393,-273.63 330.8,-266.81 257.93,-264.64 215.27,-263.95"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="215.15,-260.44 205.11,-263.8 215.05,-267.44 215.15,-260.44"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge24" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1158.5,-331.63C1087.92,-310.92 1064.9,-316.09 993,-331.63"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge31" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1288.46,-419.84C1287.63,-460.02 1279.29,-589.23 1208,-654.63 1158.23,-700.29 682.13,-778.9 616,-792.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M614,-792.63C555.86,-802.02 540.29,-795.99 481.5,-792.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M479.5,-792.63C454.76,-791.22 427.71,-791.39 403.42,-792.17"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="403.07,-788.68 393.2,-792.54 403.32,-795.68 403.07,-788.68"/>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge30" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M614,-792.63C487.25,-813.1 438.67,-902.55 328.5,-836.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M326.5,-836.63C301.02,-821.01 284.81,-836.93 262,-817.63 234.08,-794.01 242.85,-776.09 226,-743.63 214.63,-721.74 200.91,-697.11 191.23,-680.02"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="194.04,-677.87 186.05,-670.91 187.95,-681.33 194.04,-677.87"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node16" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node16"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-460.63 5,-460.63 5,-436.63 89,-436.63 89,-460.63"/>
+<text text-anchor="middle" x="47" y="-446.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge23" class="edge">
+<title>module~self_mesh_1d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M991,-213.63C919.76,-176.45 942.01,-117.81 873,-76.63 839.2,-56.46 822.36,-73.86 786.5,-57.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M784.5,-57.63C692.18,-15.85 423.35,-21.98 328.5,-57.63"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node17" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node17"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1195,-459.63 1124,-459.63 1124,-435.63 1195,-435.63 1195,-459.63"/>
+<text text-anchor="middle" x="1159.5" y="-445.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_mesh -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge26" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1250.1,-419.63C1235.98,-424.04 1219.87,-429.08 1205.24,-433.65"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1203.89,-430.4 1195.39,-436.73 1205.98,-437.09 1203.89,-430.4"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node18" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node18"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-650.63 568,-650.63 568,-626.63 662,-626.63 662,-650.63"/>
+<text text-anchor="middle" x="615" y="-636.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge27" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1273.77,-419.67C1257.93,-432.4 1231.8,-452.81 1208,-468.63 1039.64,-580.54 984.64,-599.5 786.5,-639.63"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node19" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node19"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="820,-440.63 751,-440.63 751,-416.63 820,-416.63 820,-440.63"/>
+<text text-anchor="middle" x="785.5" y="-426.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_data -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge28" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1158.5,-331.63C1114.4,-318.69 1114.83,-369.7 1075,-392.63 1040.5,-412.49 1032.26,-435.18 993,-428.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M991,-428.63C936.12,-419.47 871.79,-421.53 830.15,-424.5"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="829.78,-421.02 820.07,-425.27 830.31,-428 829.78,-421.02"/>
+</g>
+<!-- module~self_scalar_1d~3 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node20" class="node">
+<title>module~self_scalar_1d~3</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node20"><a xlink:href=".././module/self_scalar_1d~3.html" xlink:title="SELF_Scalar_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1208,-303.63 1111,-303.63 1111,-279.63 1208,-279.63 1208,-303.63"/>
+<text text-anchor="middle" x="1159.5" y="-289.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_1d&#45;&gt;module~self_scalar_1d~3 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge29" class="edge">
+<title>module~self_mesh_1d&#45;&gt;module~self_scalar_1d~3</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1262.37,-395.45C1255.87,-391.63 1249.27,-386.99 1244,-381.63 1221.11,-358.36 1231.21,-340.57 1208,-317.63 1204.92,-314.58 1201.4,-311.79 1197.71,-309.26"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1199.25,-306.09 1188.9,-303.83 1195.58,-312.05 1199.25,-306.09"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge32" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M286.78,-784.61C278.12,-780.93 269.36,-776.32 262,-770.63 229.55,-745.54 203.68,-704.58 189.91,-679.76"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="192.91,-677.94 185.08,-670.8 186.74,-681.26 192.91,-677.94"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge33" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M270.73,-784.58C242.79,-777.87 208.68,-768.64 179,-757.63"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_metadata -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge34" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M718.03,-109.65C710.58,-113.19 703.65,-117.75 698,-123.63 653.75,-169.62 700.87,-212.02 662,-262.63 659.81,-265.48 657.21,-268.07 654.38,-270.41"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="652.11,-267.73 645.95,-276.34 656.14,-273.45 652.11,-267.73"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge36" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M778.6,-109.76C749.07,-170.47 618.59,-438.67 616,-442.63"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge35" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M709.83,-93.09C567.48,-85.89 263.9,-77.92 179,-134.63"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge38" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M129.7,-658.63C121.42,-658.63 112.73,-658.63 104.23,-658.63"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="104.01,-655.13 94.01,-658.63 104.01,-662.13 104.01,-655.13"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge37" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M169.51,-646.43C148.27,-611.85 87.48,-512.89 60.8,-469.47"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="63.73,-467.55 55.51,-460.86 57.77,-471.21 63.73,-467.55"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge42" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1577.61,-355.44C1530.07,-327.37 1405.29,-259.97 1290.5,-251.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1288.5,-251.63C1192.69,-232.7 1171.85,-212.21 1075,-199.63 851.52,-170.61 792.42,-171.04 568,-191.63 436.59,-203.69 283.31,-238.2 215.01,-254.67"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="214.07,-251.3 205.18,-257.06 215.73,-258.1 214.07,-251.3"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;FEQParse -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge40" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1597.53,-379.87C1596.93,-440.44 1585.4,-709.43 1430.5,-816.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1428.5,-816.63C1363.37,-861.71 1159.97,-716.89 1111,-654.63 1068.35,-600.4 1129.07,-546.48 1075,-503.63 974.5,-423.99 913.76,-486.98 786.5,-502.63"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge41" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1288.5,-251.63C1231.76,-247.51 1214.93,-235.07 1160.5,-251.63"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge44" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1428.5,-367.63C1393.71,-370.1 1355.75,-381.81 1328.47,-391.92"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1327.03,-388.73 1318.93,-395.56 1329.52,-395.27 1327.03,-388.73"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge46" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1288.5,-868.63C1161.09,-915.07 1128.61,-944.63 993,-944.63 993,-944.63 993,-944.63 479.5,-944.63 374.19,-944.63 333.3,-928.13 262,-850.63 228.03,-813.7 246.22,-789.55 226,-743.63 216.06,-721.05 202.13,-696.52 192.02,-679.64"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="194.75,-677.39 186.57,-670.66 188.76,-681.03 194.75,-677.39"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge39" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1587.45,-355.55C1569.41,-334.49 1529.51,-290.7 1488,-263.63 1426.26,-223.36 1403.96,-225.66 1335,-199.63 1132.24,-123.1 1084.58,-90.57 873,-43.63 724.13,-10.6 684.26,-14.09 532,-5.63 486.29,-3.09 473.48,5.2 429,-5.63 380.13,-17.52 374.9,-38.24 328.5,-57.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M326.5,-57.63C297.9,-68.48 289.38,-67.99 262,-81.63 222.83,-101.15 212.55,-106.52 179,-134.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M177,-134.63C84.04,-212.52 57.18,-368.08 50.21,-426.11"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="46.7,-426.04 49.07,-436.37 53.66,-426.82 46.7,-426.04"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge43" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1428.5,-816.63C1376.18,-856.11 1352.72,-848.01 1290.5,-868.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1288.5,-868.63C1032.58,-953.44 723.62,-725.93 638.59,-657.45"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="640.6,-654.58 630.64,-650.98 636.18,-660.01 640.6,-654.58"/>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_scalar_1d~3 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge45" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_scalar_1d~3</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1523.85,-365.38C1494.74,-365.08 1461.01,-365.46 1430.5,-367.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1428.5,-367.63C1367.32,-371.98 1348.41,-387.82 1290.5,-367.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1288.5,-367.63C1248.73,-353.76 1244.38,-338.86 1208,-317.63 1203.03,-314.73 1197.71,-311.73 1192.51,-308.84"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1193.8,-305.56 1183.35,-303.81 1190.43,-311.69 1193.8,-305.56"/>
+</g>
+<!-- module~self_geometry_1d -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node21" class="node">
+<title>module~self_geometry_1d</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node21"><a xlink:href=".././module/self_geometry_1d.html" xlink:title="SELF_Geometry_1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1488,-419.63 1371,-419.63 1371,-395.63 1488,-395.63 1488,-419.63"/>
+<text text-anchor="middle" x="1429.5" y="-405.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_1d_t&#45;&gt;module~self_geometry_1d -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge47" class="edge">
+<title>module~self_mappedscalar_1d_t&#45;&gt;module~self_geometry_1d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1547.39,-379.63C1529.56,-383.9 1509.29,-388.76 1490.7,-393.21"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1489.77,-389.83 1480.86,-395.57 1491.4,-396.64 1489.77,-389.83"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge49" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1150.45,-459.75C1136.79,-479.63 1107.38,-519.55 1075,-545.63 995.72,-609.49 970.46,-624.2 873,-653.63 667.84,-715.58 607.07,-689.4 393,-699.63 334.84,-702.41 318.7,-712.87 262,-699.63 242.11,-694.99 221.52,-684.85 205.82,-675.82"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="207.57,-672.79 197.19,-670.68 203.99,-678.8 207.57,-672.79"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge48" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1154.32,-435.27C1144.78,-409.03 1118.76,-347.73 1075,-317.63 1051.6,-301.54 219.55,-105.13 179,-134.63"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node22" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node22"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1075,-536.63 909,-536.63 909,-512.63 1075,-512.63 1075,-536.63"/>
+<text text-anchor="middle" x="992" y="-522.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge50" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00a9ff" stroke-dasharray="5,2" d="M1132.64,-459.66C1104.55,-472.73 1059.49,-493.69 1028.19,-508.26"/>
+<polygon fill="#00a9ff" stroke="#00a9ff" points="1026.54,-505.16 1018.95,-512.56 1029.49,-511.51 1026.54,-505.16"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge52" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M479.5,-598.63C411.46,-584.85 397.33,-629.53 328.5,-638.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M326.5,-638.63C296.74,-642.57 263.62,-647.05 236.31,-650.77"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="235.59,-647.34 226.15,-652.16 236.53,-654.27 235.59,-647.34"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge53" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M606.46,-650.72C581.68,-689.12 498.32,-808.28 393,-850.63 338.98,-872.35 315.14,-874.43 262,-850.63 211.44,-827.99 230.71,-777.51 179,-757.63"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge51" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M580.4,-626.59C553.88,-617.54 515.77,-605.57 481.5,-598.63"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M479.5,-598.63C433.64,-589.34 434.01,-561.15 393,-538.63 302.56,-488.96 281.64,-459.16 179,-448.63"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node24" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node24"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-650.63 429,-650.63 429,-626.63 532,-626.63 532,-650.63"/>
+<text text-anchor="middle" x="480.5" y="-636.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge54" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M567.66,-638.63C559.49,-638.63 550.87,-638.63 542.37,-638.63"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="542.11,-635.13 532.11,-638.63 542.11,-642.13 542.11,-635.13"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge57" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M750.87,-422.93C650.24,-405.62 352.91,-352.61 262,-315.63 240.74,-306.98 218.82,-292.99 202.85,-281.7"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="204.78,-278.78 194.63,-275.76 200.68,-284.45 204.78,-278.78"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge56" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M762.47,-440.66C732.95,-456.77 680.41,-485.46 646.94,-503.74"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="645.13,-500.74 638.03,-508.6 648.49,-506.88 645.13,-500.74"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge61" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M763.79,-440.71C732.56,-457.62 671.18,-485.72 616,-480.63"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M614,-480.63C526.74,-472.59 566.55,-355.7 481.5,-334.63"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge58" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M770.52,-416.42C753.25,-401.24 723.07,-374.44 698,-350.63 681.59,-335.05 680.01,-328.32 662,-314.63 657.91,-311.52 653.4,-308.52 648.86,-305.74"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="650.58,-302.69 640.17,-300.68 647.05,-308.74 650.58,-302.69"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge60" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M614,-480.63C455.34,-466 397.2,-464.31 262,-548.63 227.41,-570.2 202.1,-611.78 189.04,-637.19"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="185.79,-635.85 184.49,-646.36 192.06,-638.96 185.79,-635.85"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge55" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M614,-480.63C514.21,-470.27 492.8,-444.91 393,-434.63 335.08,-428.67 320.02,-429.77 262,-434.63 224.72,-437.75 216.28,-451.79 179,-448.63"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M177,-448.63C151.57,-445.27 123.07,-444.91 99.34,-445.55"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="99.02,-442.06 89.14,-445.89 99.25,-449.05 99.02,-442.06"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge59" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M778.93,-440.79C763.94,-472.46 719.9,-558.8 662,-612.63 658.66,-615.74 654.88,-618.62 650.96,-621.24"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="648.97,-618.36 642.27,-626.57 652.62,-624.33 648.97,-618.36"/>
+</g>
+<!-- module~self_scalar_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node23" class="node">
+<title>module~self_scalar_1d_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node23"><a xlink:href=".././module/self_scalar_1d_t.html" xlink:title="SELF_Scalar_1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045,-383.63 939,-383.63 939,-359.63 1045,-359.63 1045,-383.63"/>
+<text text-anchor="middle" x="992" y="-369.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_1d~3&#45;&gt;module~self_scalar_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge62" class="edge">
+<title>module~self_scalar_1d~3&#45;&gt;module~self_scalar_1d_t</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M1134.38,-303.86C1126.75,-307.99 1118.39,-312.78 1111,-317.63 1094.06,-328.75 1092.94,-336.2 1075,-345.63 1067.32,-349.67 1058.89,-353.22 1050.47,-356.28"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="1049.3,-352.98 1040.99,-359.54 1051.58,-359.6 1049.3,-352.98"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_mesh_1d -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge64" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_mesh_1d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1370.78,-407.63C1362.47,-407.63 1353.93,-407.63 1345.67,-407.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1345.4,-404.13 1335.4,-407.63 1345.4,-411.13 1345.4,-404.13"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge68" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.5,-669.63C1073,-856.17 946.27,-785.86 662,-806.63 620.33,-809.67 609.64,-809.98 568,-806.63 529.18,-803.51 520.38,-794.85 481.5,-792.63"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge67" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1427.2,-419.67C1422.24,-460.67 1401.31,-597.09 1335,-683.63 1293.69,-737.54 1269.32,-739.43 1208,-768.63 1031.01,-852.91 495.61,-939.11 328.5,-836.63"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge63" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1158.5,-640.63C1003.15,-584.05 948.04,-604.41 786.5,-639.63"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_data -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge66" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1425.52,-419.78C1414.79,-461.03 1374.27,-597.12 1290.5,-669.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1288.5,-669.63C1244.4,-707.81 1215.31,-660.59 1160.5,-640.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1158.5,-640.63C1079.4,-611.82 1134.02,-530.65 1075,-470.63 1046.29,-441.43 1033.39,-435.37 993,-428.63"/>
+</g>
+<!-- module~self_geometry_1d&#45;&gt;module~self_scalar_1d~3 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge65" class="edge">
+<title>module~self_geometry_1d&#45;&gt;module~self_scalar_1d~3</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1382.43,-395.6C1355.42,-388.22 1320.77,-378.18 1290.5,-367.63"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node25" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node25"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="873,-611.63 698,-611.63 698,-587.63 873,-587.63 873,-611.63"/>
+<text text-anchor="middle" x="785.5" y="-597.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge69" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M964.12,-536.71C940.4,-547.15 904.76,-562.3 873,-573.63 862.26,-577.46 850.65,-581.21 839.52,-584.62"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="838.46,-581.29 829.9,-587.52 840.48,-587.99 838.46,-581.29"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge72" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M972.14,-359.45C949.45,-345.32 909.82,-322.21 873,-308.63 836.07,-295.01 824.63,-299.38 786.5,-289.63"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M784.5,-289.63C765.83,-284.86 635.21,-247.08 616,-248.63"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;FEQParse -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge71" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M980.1,-383.9C951.82,-414.42 872.29,-492.08 786.5,-502.63"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M784.5,-502.63C740.97,-507.98 691,-513.21 656.85,-516.63"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="656.38,-513.16 646.78,-517.64 657.08,-520.13 656.38,-513.16"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge77" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M938.87,-370.66C897.54,-370.13 838.31,-369.89 786.5,-371.63"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge75" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M784.5,-289.63C747.9,-280.27 705.35,-280.1 672.16,-282.23"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="671.9,-278.74 662.18,-282.96 672.41,-285.72 671.9,-278.74"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge76" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M985.13,-384.05C970.7,-413.02 930.45,-485.04 873,-516.63 719.58,-601.01 656.24,-571.76 481.5,-560.63"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M479.5,-560.63C374.77,-552.05 258.57,-611.14 206.67,-641.47"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="204.84,-638.48 198.03,-646.6 208.42,-644.5 204.84,-638.48"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge70" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M982.51,-359.52C966.01,-335.47 929.49,-279.55 909,-227.63 883.68,-163.45 922.22,-124.98 873,-76.63 844.92,-49.05 822.36,-73.86 786.5,-57.63"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge74" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M981.95,-383.77C965.49,-406.34 930.35,-456.73 909,-503.63 886.46,-553.15 913.02,-583.77 873,-620.63 844.05,-647.29 825.08,-631.82 786.5,-639.63"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M784.5,-639.63C747.76,-647.07 705.59,-646.81 672.62,-644.7"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="672.49,-641.18 662.26,-643.95 671.99,-648.16 672.49,-641.18"/>
+</g>
+<!-- module~self_scalar_1d_t&#45;&gt;module~self_data -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge73" class="edge">
+<title>module~self_scalar_1d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M947.63,-383.72C912.95,-393.38 864.56,-406.87 829.88,-416.54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="828.73,-413.23 820.03,-419.28 830.61,-419.97 828.73,-413.23"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge82" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M445.63,-626.57C439.31,-622.95 433.34,-618.37 429,-612.63 380.32,-548.25 438.22,-501.48 393,-434.63 353.98,-376.94 315.75,-392.92 262,-348.63 237.29,-328.27 212.03,-301.35 195.97,-283.31"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="198.51,-280.9 189.28,-275.7 193.25,-285.52 198.51,-280.9"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge79" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M445.22,-626.53C439.01,-622.93 433.18,-618.37 429,-612.63 371.64,-534 427.7,-487.56 393,-396.63 381.22,-365.77 359.49,-334.23 344.53,-314.56"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="347.28,-312.39 338.38,-306.64 341.75,-316.69 347.28,-312.39"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge84" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M448.67,-650.74C441.65,-654.46 434.61,-659.08 429,-664.63 404.68,-688.67 413.37,-705.16 393,-732.63 380.71,-749.21 364.13,-765.56 350.86,-777.58"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="348.25,-775.22 343.09,-784.48 352.9,-780.46 348.25,-775.22"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge83" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M428.95,-635.33C399.52,-634.23 361.77,-634.23 328.5,-638.63"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge80" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M452.43,-650.71C444.59,-654.7 436.21,-659.45 429,-664.63 410.88,-677.66 412.39,-688.58 393,-699.63 307.38,-748.42 271.39,-791.91 179,-757.63"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge78" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M442.1,-626.56C396.77,-610.81 319.32,-580.28 262,-538.63 217.98,-506.64 232.99,-455.38 179,-448.63"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_node26" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_dgmodel1d~2~~UsesGraph_node26"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-690.63 275.5,-690.63 275.5,-666.63 379.5,-666.63 379.5,-690.63"/>
+<text text-anchor="middle" x="327.5" y="-676.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge81" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M434.2,-650.63C418.44,-654.8 400.59,-659.53 384.09,-663.9"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="382.8,-660.62 374.03,-666.57 384.6,-667.39 382.8,-660.62"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge88" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-598.63C592.08,-595.68 585.91,-604.65 568,-617.63 548.09,-632.05 552.14,-645.53 532,-659.63 512.36,-673.39 498.86,-662.09 481.5,-678.63"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge87" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M697.62,-603.34C671.3,-603.33 642.38,-602.18 616,-598.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-598.63C571.23,-592.88 568.69,-569.35 532,-546.63 470.63,-508.63 460.07,-489.31 393,-462.63 365.74,-451.79 357.7,-451.44 328.5,-448.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-448.63C287.46,-436.81 244.17,-419.23 214.65,-406.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="215.76,-403.19 205.19,-402.42 212.97,-409.61 215.76,-403.19"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge86" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-598.63C553.28,-590.46 542.64,-564.53 481.5,-560.63"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge85" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-448.63C263.76,-429.64 243.99,-457.23 179,-448.63"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge89" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M732.57,-611.65C713.38,-616.09 691.56,-621.14 672.03,-625.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="671,-622.31 662.05,-627.97 672.58,-629.13 671,-622.31"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge90" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M275.33,-671.69C262.72,-669.98 249.14,-668.14 236.27,-666.39"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="236.51,-662.9 226.13,-665.02 235.57,-669.83 236.51,-662.9"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_dgmodel1d~2~~UsesGraph_edge91" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M293.16,-690.71C282.98,-694.75 271.87,-699.54 262,-704.63 223.09,-724.68 220.03,-772.86 179,-757.63"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M177,-757.63C131.58,-740.78 89.09,-702.03 66.01,-678.32"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="68.38,-675.74 58.95,-670.91 63.31,-680.56 68.38,-675.74"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_dgmodel1d2UsesGraph = svgPanZoom('#moduleself_dgmodel1d2UsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_dgmodel1d~2~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_dgmodel1d2UsedByGraph" width="514pt" height="242pt"
+ viewBox="0.00 0.00 514.00 242.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_dgmodel1d~2~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 238)">
+<title>module~~self_dgmodel1d~2~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-238 510,-238 510,4 -4,4"/>
+<!-- module~self_dgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node1" class="node">
+<title>module~self_dgmodel1d~2</title>
+<polygon fill="none" stroke="black" points="107,-130 0,-130 0,-106 107,-106 107,-130"/>
+<text text-anchor="middle" x="53.5" y="-115.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_DGModel1D</text>
+</g>
+<!-- module~self_burgers1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node2" class="node">
+<title>module~self_burgers1d_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node2"><a xlink:href=".././module/self_burgers1d_t.html" xlink:title="self_Burgers1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="278.5,-192 175.5,-192 175.5,-168 278.5,-168 278.5,-192"/>
+<text text-anchor="middle" x="227" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge1" class="edge">
+<title>module~self_burgers1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M189.11,-167.92C174.68,-163.1 158.02,-157.42 143,-152 127.12,-146.28 109.77,-139.68 94.66,-133.83"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="95.69,-130.48 85.1,-130.12 93.15,-137 95.69,-130.48"/>
+</g>
+<!-- module~self_advection_diffusion_1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node3" class="node">
+<title>module~self_advection_diffusion_1d~2</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node3"><a xlink:href=".././module/self_advection_diffusion_1d~2.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="506,-150 347,-150 347,-126 506,-126 506,-150"/>
+<text text-anchor="middle" x="426.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d~2&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge2" class="edge">
+<title>module~self_advection_diffusion_1d~2&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M346.82,-133.76C278.42,-130.07 180.61,-124.8 117.33,-121.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="117.27,-117.88 107.1,-120.84 116.89,-124.87 117.27,-117.88"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node5" class="node">
+<title>module~self_advection_diffusion_1d_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node5"><a xlink:href=".././module/self_advection_diffusion_1d_t.html" xlink:title="self_advection_diffusion_1d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="311,-110 143,-110 143,-86 311,-86 311,-110"/>
+<text text-anchor="middle" x="227" y="-95.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge10" class="edge">
+<title>module~self_advection_diffusion_1d~2&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M366.24,-126C344.57,-121.61 319.85,-116.6 297.37,-112.05"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="298.05,-108.62 287.56,-110.06 296.66,-115.48 298.05,-108.62"/>
+</g>
+<!-- module~self_nulldgmodel1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node4" class="node">
+<title>module~self_nulldgmodel1d_t</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node4"><a xlink:href=".././module/self_nulldgmodel1d_t.html" xlink:title="self_NullDGModel1D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="292,-66 162,-66 162,-42 292,-42 292,-66"/>
+<text text-anchor="middle" x="227" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge3" class="edge">
+<title>module~self_nulldgmodel1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M177.3,-66.06C165.93,-69.27 153.95,-72.98 143,-77 124,-83.98 103.45,-93.38 86.93,-101.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="85.14,-98.4 77.72,-105.97 88.24,-104.68 85.14,-98.4"/>
+</g>
+<!-- module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge4" class="edge">
+<title>module~self_advection_diffusion_1d_t&#45;&gt;module~self_dgmodel1d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M142.76,-107.71C134.15,-108.71 125.5,-109.72 117.16,-110.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="116.7,-107.22 107.17,-111.86 117.51,-114.18 116.7,-107.22"/>
+</g>
+<!-- module~self_burgers1d -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node6" class="node">
+<title>module~self_burgers1d</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node6"><a xlink:href=".././module/self_burgers1d.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="473.5,-234 379.5,-234 379.5,-210 473.5,-210 473.5,-234"/>
+<text text-anchor="middle" x="426.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge5" class="edge">
+<title>module~self_burgers1d&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M379.2,-212.15C352.17,-206.41 317.76,-199.09 288.59,-192.89"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="289.03,-189.4 278.52,-190.74 287.57,-196.25 289.03,-189.4"/>
+</g>
+<!-- module~self_burgers1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node7" class="node">
+<title>module~self_burgers1d~2</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node7"><a xlink:href=".././module/self_burgers1d~2.html" xlink:title="self_Burgers1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="473.5,-192 379.5,-192 379.5,-168 473.5,-168 473.5,-192"/>
+<text text-anchor="middle" x="426.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_Burgers1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge6" class="edge">
+<title>module~self_burgers1d~2&#45;&gt;module~self_burgers1d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M379.2,-180C352.17,-180 317.76,-180 288.59,-180"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="288.52,-176.5 278.52,-180 288.52,-183.5 288.52,-176.5"/>
+</g>
+<!-- module~self_advection_diffusion_1d -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node8" class="node">
+<title>module~self_advection_diffusion_1d</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node8"><a xlink:href=".././module/self_advection_diffusion_1d.html" xlink:title="self_advection_diffusion_1d">
+<polygon fill="#337ab7" stroke="#337ab7" points="506,-108 347,-108 347,-84 506,-84 506,-108"/>
+<text text-anchor="middle" x="426.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_1d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge9" class="edge">
+<title>module~self_advection_diffusion_1d&#45;&gt;module~self_advection_diffusion_1d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M346.88,-96.8C338.45,-96.88 329.82,-96.97 321.24,-97.06"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="321.18,-93.56 311.21,-97.16 321.25,-100.56 321.18,-93.56"/>
+</g>
+<!-- module~self_nulldgmodel1d~2 -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node9" class="node">
+<title>module~self_nulldgmodel1d~2</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node9"><a xlink:href=".././module/self_nulldgmodel1d~2.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="487,-66 366,-66 366,-42 487,-42 487,-66"/>
+<text text-anchor="middle" x="426.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge7" class="edge">
+<title>module~self_nulldgmodel1d~2&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M365.98,-54C345.97,-54 323.39,-54 302.38,-54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="302.22,-50.5 292.22,-54 302.22,-57.5 302.22,-50.5"/>
+</g>
+<!-- module~self_nulldgmodel1d -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_node10" class="node">
+<title>module~self_nulldgmodel1d</title>
+<g id="a_module~~self_dgmodel1d~2~~UsedByGraph_node10"><a xlink:href=".././module/self_nulldgmodel1d.html" xlink:title="self_NullDGModel1D">
+<polygon fill="#337ab7" stroke="#337ab7" points="487,-24 366,-24 366,0 487,0 487,-24"/>
+<text text-anchor="middle" x="426.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel1D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t -->
+<g id="module~~self_dgmodel1d~2~~UsedByGraph_edge8" class="edge">
+<title>module~self_nulldgmodel1d&#45;&gt;module~self_nulldgmodel1d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M368.9,-24.04C345.66,-28.98 318.58,-34.74 294.41,-39.88"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="293.66,-36.46 284.6,-41.96 295.11,-43.31 293.66,-36.46"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_dgmodel1d~2.html#type-dgmodel1d">DGModel1D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-dgmodel1d"></span><h3>type, public, extends(<a href='../type/dgmodel1d_t.html'>DGModel1D_t</a>) :: <a href='../type/dgmodel1d.html'>DGModel1D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-dsdt"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry"></span>type(<a href='../type/geometry1d.html'>Geometry1D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh"></span>type(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nstepped"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nstepped</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs~2"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol"></span>type(<a href='../type/mappedscalar1d.html'>MappedScalar1D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalfree'>AdditionalFree</a></strong>  => AdditionalFree_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalinit'>AdditionalInit</a></strong>  => AdditionalInit_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionaloutput'>AdditionalOutput</a></strong>  => AdditionalOutput_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-boundaryflux'>BoundaryFlux</a></strong>  => BoundaryFlux_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-calculateentropy'>CalculateEntropy</a></strong>  => CalculateEntropy_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-calculatesolutiongradient'>CalculateSolutionGradient</a></strong>  => CalculateSolutionGradient_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-calculatetendency'>CalculateTendency</a></strong>  => CalculateTendency_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-euler_timeintegrator'>Euler_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-fluxmethod'>FluxMethod</a></strong>  => fluxmethod_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-forwardstep'>ForwardStep</a></strong>  => ForwardStep_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-free~2'>Free</a></strong>  => Free_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-getsimulationtime'>GetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-incrementiocounter'>IncrementIOCounter</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-init~2'>Init</a></strong>  => Init_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk2_timeintegrator'>LowStorageRK2_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk3_timeintegrator'>LowStorageRK3_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk4_timeintegrator'>LowStorageRK4_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-mapboundaryconditions'>MapBoundaryConditions</a></strong>  => MapBoundaryConditions_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-poststephook'>PostStepHook</a></strong>  => PostStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-prestephook'>PreStepHook</a></strong>  => PreStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pretendencyhook'>PreTendencyHook</a></strong>  => PreTendencyHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-printtype'>PrintType</a></strong>  => PrintType_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-readmodel'>ReadModel</a></strong>  => Read_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportentropy'>ReportEntropy</a></strong>  => ReportEntropy_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportmetrics'>ReportMetrics</a></strong>  => ReportMetrics_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportusermetrics'>ReportUserMetrics</a></strong>  => ReportUserMetrics_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-setboundarycondition'>SetBoundaryCondition</a></strong>  => setboundarycondition_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-setgradientboundarycondition'>SetGradientBoundaryCondition</a></strong>  => setgradientboundarycondition_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-setmetadata~2'>SetMetadata</a></strong>  => SetMetadata_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setnumberofvariables'>SetNumberOfVariables</a></strong>  => SetNumberOfVariables_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setsimulationtime'>SetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/dgmodel1d.html#boundprocedure-setsolution~21'>SetSolution</a></strong>  => SetSolutionFromChar_DGModel1D_t, SetSolutionFromEqn_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/dgmodel1d.html#boundprocedure-settimeintegrator~22'>SetTimeIntegrator</a></strong>  => SetTimeIntegrator_withChar </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-sourcemethod'>SourceMethod</a></strong>  => sourcemethod_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-updategrk2'>UpdateGRK2</a></strong>  => UpdateGRK2_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-updategrk3'>UpdateGRK3</a></strong>  => UpdateGRK3_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-updategrk4'>UpdateGRK4</a></strong>  => UpdateGRK4_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-updatesolution'>UpdateSolution</a></strong>  => UpdateSolution_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-writemodel'>WriteModel</a></strong>  => Write_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel1d_t.html#boundprocedure-writetecplot'>WriteTecplot</a></strong>  => WriteTecplot_DGModel1D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-entropy_func~6'>entropy_func</a></strong>  => entropy_func_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux1d'>flux1D</a></strong>  => flux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux2d'>flux2D</a></strong>  => flux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux3d'>flux3D</a></strong>  => flux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux1d~3'>riemannflux1d</a></strong>  => riemannflux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux2d'>riemannflux2d</a></strong>  => riemannflux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux3d'>riemannflux3d</a></strong>  => riemannflux3d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source1d'>source1d</a></strong>  => source1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source2d'>source2d</a></strong>  => source2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source3d'>source3d</a></strong>  => source3d_Model </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

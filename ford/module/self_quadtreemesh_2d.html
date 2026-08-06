@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_QuadTreeMesh_2D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_QuadTreeMesh_2D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 2.2% of total for modules and submodules.">451 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_QuadTreeMesh_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_quadtreemesh_2d.f90.html'>SELF_QuadTreeMesh_2D.f90</a></li>
+     <li class="active">SELF_QuadTreeMesh_2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#variable-quadtree_coarsen">QUADTREE_COARSEN</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#variable-quadtree_keep">QUADTREE_KEEP</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#variable-quadtree_refine">QUADTREE_REFINE</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#type-quadtreemesh2d">QuadTreeMesh2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-maxleveljump_quadtreemesh2d">MaxLevelJump_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-maxlevel_quadtreemesh2d">MaxLevel_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_internal">qt_internal</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_opposite">qt_opposite</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_reflect">qt_reflect</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_subpos">qt_subpos</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-adaptfromflags_quadtreemesh2d">AdaptFromFlags_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-balance2to1_quadtreemesh2d">Balance2to1_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-ensurecapacity_quadtreemesh2d">EnsureCapacity_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-faceneighbor_quadtreemesh2d">FaceNeighbor_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-free_quadtreemesh2d">Free_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-initglobal_quadtreemesh2d">InitGlobal_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-init_quadtreemesh2d">Init_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-leafcoords_quadtreemesh2d">LeafCoords_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-rebuildleaves_quadtreemesh2d">RebuildLeaves_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-refinenode_quadtreemesh2d">RefineNode_QuadTreeMesh2D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>Forest-of-quadtrees data structure for adaptive h-refinement of 2-D quadrilateral meshes
+(AMR Stage 2b). Each base-mesh element is the root of a quadtree; refinement replaces a leaf
+with four children (one per reference sub-quadrant, SELF child ordering 1=SW,2=SE,3=NE,4=NW),
+and coarsening merges a family of four leaf siblings back into their parent. The forest tracks
+refinement levels and the active leaf set; the physical geometry of any leaf is produced by
+repeated exact isoparametric subdivision of its root (SELF_RefinementPrimitives_2D).</p>
+<p>This module owns the adaptive <em>mesh mutation</em> only. Turning an adaptively refined (and hence
+generally nonconforming) forest into a solver-ready Mesh2D_t - face-neighbour queries, 2:1
+balancing, hanging-node/mortar generation - is AMR Stage 4, and dynamic MPI re-partitioning is
+Stage 5. The intended driver loop each adaptation step is:</p>
+<p>indicator%Estimate(solution,ivar)      ! AMR Stage 1 : per-leaf refine/keep/coarsen flags
+  forest%AdaptFromFlags(indicator%flag)  ! AMR Stage 2b : mutate the forest (this module)
+  ... Stage 4 : balance + emit Mesh2D_t + mortars ; Stage 3 : transfer the solution ...</p>
+<p>Coarsening does not currently reclaim the storage of removed child nodes (the node arrays grow
+monotonically); the active leaf set is always recovered by traversal from the roots, so
+orphaned nodes are simply never revisited. Storage compaction is a future optimisation.</p>
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_mesh_2d.html'>SELF_Mesh_2D</a></li>
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    <li><a href='../module/self_refinementprimitives_2d.html'>SELF_RefinementPrimitives_2D</a></li>
+    <li><a href='../module/self_lagrange.html'>SELF_Lagrange</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_quadtreemesh_2d~~UsesGraph Pages: 1 -->
+<svg id="moduleself_quadtreemesh_2dUsesGraph" width="641pt" height="196pt"
+ viewBox="0.00 0.00 641.00 195.65" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_quadtreemesh_2d~~UsesGraph" class="graph" transform="scale(0.39 0.39) rotate(0) translate(4 494.43)">
+<title>module~~self_quadtreemesh_2d~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-494.43 1629,-494.43 1629,4 -4,4"/>
+<!-- module~self_quadtreemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node1" class="node">
+<title>module~self_quadtreemesh_2d</title>
+<polygon fill="none" stroke="black" points="1625,-384.36 1483,-384.36 1483,-360.36 1625,-360.36 1625,-384.36"/>
+<text text-anchor="middle" x="1554" y="-369.96" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_QuadTreeMesh_2D</text>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node2" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node2"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1447,-384.36 1356,-384.36 1356,-360.36 1447,-360.36 1447,-384.36"/>
+<text text-anchor="middle" x="1401.5" y="-369.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge1" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1482.6,-372.36C1474.1,-372.36 1465.52,-372.36 1457.29,-372.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1457.09,-368.86 1447.09,-372.36 1457.09,-375.86 1457.09,-368.86"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node3" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node3"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-310.36 130,-310.36 130,-286.36 226,-286.36 226,-310.36"/>
+<text text-anchor="middle" x="178" y="-295.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge2" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1497.05,-384.4C1480.95,-387.61 1463.32,-390.87 1447,-393.36 1369.23,-405.24 1349.63,-409.61 1271,-412.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1269,-412.36C1216.08,-416.83 1202.43,-408.03 1149.5,-412.36"/>
+</g>
+<!-- module~self_refinementprimitives_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node4" class="node">
+<title>module~self_refinementprimitives_2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node4"><a xlink:href=".././module/self_refinementprimitives_2d.html" xlink:title="SELF_RefinementPrimitives_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="875,-464.36 698,-464.36 698,-440.36 875,-440.36 875,-464.36"/>
+<text text-anchor="middle" x="786.5" y="-449.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementPrimitives_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge3" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_refinementprimitives_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1269,-412.36C1231.15,-418.14 1222.04,-421.99 1184,-426.36 1082.46,-438.02 965.64,-444.9 885.24,-448.62"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="884.96,-445.12 875.13,-449.08 885.28,-452.12 884.96,-445.12"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node5" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node5"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-346.36 568,-346.36 568,-322.36 662,-322.36 662,-346.36"/>
+<text text-anchor="middle" x="615" y="-331.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge4" class="edge">
+<title>module~self_quadtreemesh_2d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1527.6,-360.34C1478.96,-338.46 1368.78,-294.36 1271,-294.36 1271,-294.36 1271,-294.36 1147.5,-294.36 1041.85,-294.36 1016.05,-307.08 911,-318.36 856.08,-324.26 842.67,-329.52 787.5,-332.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M785.5,-332.36C747.81,-333.67 705.39,-334.17 672.41,-334.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="672.04,-330.84 662.06,-334.39 672.07,-337.84 672.04,-330.84"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node6" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node6"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1320,-384.36 1220,-384.36 1220,-360.36 1320,-360.36 1320,-384.36"/>
+<text text-anchor="middle" x="1270" y="-369.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge5" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1355.93,-372.36C1347.62,-372.36 1338.82,-372.36 1330.16,-372.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1330.08,-368.86 1320.08,-372.36 1330.08,-375.86 1330.08,-368.86"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node7" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node7"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-348.36 5,-348.36 5,-324.36 89,-324.36 89,-348.36"/>
+<text text-anchor="middle" x="47" y="-333.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge6" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M136.18,-310.38C124.3,-313.88 111.17,-317.75 98.76,-321.41"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="97.6,-318.1 88.99,-324.28 99.58,-324.82 97.6,-318.1"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node8" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node8"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-231.36 0,-231.36 0,-207.36 94,-207.36 94,-231.36"/>
+<text text-anchor="middle" x="47" y="-216.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge7" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M154.35,-286.24C146.57,-281.97 137.84,-277.06 130,-272.36 111.28,-261.15 90.65,-247.81 74.77,-237.32"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="76.28,-234.12 66.01,-231.51 72.41,-239.96 76.28,-234.12"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge8" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M697.91,-450.42C671.56,-450.36 642.59,-450.82 616,-452.36"/>
+</g>
+<!-- module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge9" class="edge">
+<title>module~self_refinementprimitives_2d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M765.8,-440.27C747.67,-428.86 720.3,-410.94 698,-393.36 680.95,-379.92 679.56,-373.12 662,-360.36 657.84,-357.34 653.29,-354.39 648.73,-351.63"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="650.45,-348.58 640.04,-346.59 646.93,-354.64 650.45,-348.58"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge11" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M587.81,-346.4C561.57,-357.56 519.72,-372.93 481.5,-376.36"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M479.5,-376.36C454.56,-378.6 307.53,-336.5 228.77,-313.24"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="229.63,-309.85 219.05,-310.37 227.65,-316.56 229.63,-309.85"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge10" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M479.5,-376.36C412.69,-382.69 392.44,-355.98 328.5,-376.36"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge12" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M603.69,-322.07C588.19,-303.62 557.94,-267.69 532,-237.36 486.53,-184.21 468.16,-176.32 429,-118.36 409.41,-89.37 422.7,-66.85 393,-48.36 293.77,13.42 228.72,17.25 130,-45.36 76.61,-79.22 57.34,-158.16 50.93,-196.98"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="47.41,-196.82 49.38,-207.23 54.33,-197.86 47.41,-196.82"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node9" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node9"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-270.36 429,-270.36 429,-246.36 532,-246.36 532,-270.36"/>
+<text text-anchor="middle" x="480.5" y="-255.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge13" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M593,-322.32C571.13,-309.77 536.66,-290 511.83,-275.76"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="513.25,-272.54 502.84,-270.6 509.77,-278.61 513.25,-272.54"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge21" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1244.57,-384.42C1220.92,-395.15 1183.73,-409.56 1149.5,-412.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-412.36C1079.95,-417.88 1062.5,-406.21 995,-412.36"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge18" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M993,-332.36C901.76,-328.19 878.71,-327.66 787.5,-332.36"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge14" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1244.35,-384.38C1236.41,-388.53 1227.68,-393.39 1220,-398.36 1202.98,-409.37 1202.72,-418.59 1184,-426.36 1105.8,-458.84 1078.02,-433.72 995,-450.36"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node10" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-78.36 151,-78.36 151,-54.36 205,-54.36 205,-78.36"/>
+<text text-anchor="middle" x="178" y="-63.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge15" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1244.1,-360.29C1220.42,-349.73 1183.48,-335.59 1149.5,-332.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-332.36C1080.03,-325.95 1062.71,-335.45 995,-332.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M993,-332.36C900.22,-328.12 878.88,-310.99 787.5,-294.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M785.5,-294.36C704.27,-279.58 690.66,-253.61 616,-218.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-218.36C543.75,-185.19 548.42,-143.81 481.5,-104.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-104.36C440.05,-81.1 436.92,-61.34 393,-48.36 337.16,-31.86 319.89,-42.16 262,-48.36 246.55,-50.02 229.75,-53.36 215.33,-56.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="214.2,-53.39 205.3,-59.15 215.85,-60.2 214.2,-53.39"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node11" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node11"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1077,-384.36 911,-384.36 911,-360.36 1077,-360.36 1077,-384.36"/>
+<text text-anchor="middle" x="994" y="-369.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge19" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1147.5,-332.36C1137.15,-331.38 1085.35,-345.66 1044.95,-357.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1043.84,-354.11 1035.22,-360.28 1045.81,-360.82 1043.84,-354.11"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node12" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node12"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-116.36 291,-116.36 291,-92.36 364,-92.36 364,-116.36"/>
+<text text-anchor="middle" x="327.5" y="-101.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge20" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-104.36C447.92,-85.74 405.77,-87.46 374.03,-92.86"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="373.3,-89.44 364.12,-94.72 374.59,-96.32 373.3,-89.44"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node13" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node13"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-230.36 275.5,-230.36 275.5,-206.36 379.5,-206.36 379.5,-230.36"/>
+<text text-anchor="middle" x="327.5" y="-215.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge16" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-218.36C541.88,-187.1 449.56,-194.57 389.74,-204.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="388.92,-201.37 379.69,-206.57 390.15,-208.26 388.92,-201.37"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node14" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node14"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1184,-384.36 1113,-384.36 1113,-360.36 1184,-360.36 1184,-384.36"/>
+<text text-anchor="middle" x="1148.5" y="-369.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge17" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1219.7,-372.36C1211.3,-372.36 1202.6,-372.36 1194.32,-372.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1194.1,-368.86 1184.1,-372.36 1194.1,-375.86 1194.1,-368.86"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node15" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node15"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-310.36 262,-310.36 262,-286.36 393,-286.36 393,-310.36"/>
+<text text-anchor="middle" x="327.5" y="-295.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge22" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M785.5,-294.36C752.29,-287.64 515.12,-322.56 481.5,-318.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-318.36C454.79,-314.63 427.75,-310.93 403.46,-307.75"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="403.6,-304.24 393.24,-306.41 402.7,-311.18 403.6,-304.24"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge28" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-258.36C289.16,-260.85 248.19,-272.74 218.92,-282.91"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="217.71,-279.63 209.47,-286.28 220.06,-286.22 217.71,-279.63"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge23" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M469.42,-270.71C447.27,-296.71 391.27,-356.36 328.5,-376.36"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-376.36C262,-396.91 244.27,-432.32 179,-414.36"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M177,-414.36C135.47,-402.93 94.02,-373.96 69.71,-354.72"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="71.83,-351.93 61.85,-348.37 67.43,-357.38 71.83,-351.93"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge25" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M428.77,-256.68C399.44,-256.13 361.85,-256.14 328.5,-258.36"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M326.5,-258.36C261.09,-262.72 243.87,-267.81 179,-258.36"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge27" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M467.6,-246.07C456.31,-233.84 439.54,-214.08 429,-194.36 404.55,-148.62 433.71,-115.49 393,-83.36 342.14,-43.21 261.67,-49.75 215.25,-58.09"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="214.5,-54.67 205.34,-59.99 215.82,-61.54 214.5,-54.67"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge24" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M467.65,-246.28C441.63,-219.74 379.29,-156.16 347.64,-123.88"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="349.79,-121.08 340.29,-116.39 344.8,-125.98 349.79,-121.08"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge26" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M434.2,-246.36C418.44,-242.19 400.59,-237.46 384.09,-233.09"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="384.6,-229.6 374.03,-230.42 382.8,-236.37 384.6,-229.6"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge29" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M434.2,-270.36C418.44,-274.54 400.59,-279.26 384.09,-283.63"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="382.8,-280.35 374.03,-286.3 384.6,-287.12 382.8,-280.35"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node16" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node16"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="874,-384.36 699,-384.36 699,-360.36 874,-360.36 874,-384.36"/>
+<text text-anchor="middle" x="786.5" y="-369.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge30" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M910.9,-372.36C902.12,-372.36 893.14,-372.36 884.22,-372.36"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="884.19,-368.86 874.19,-372.36 884.19,-375.86 884.19,-368.86"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge32" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M317.08,-116.58C303.9,-133.98 279.59,-167.13 262,-197.36 243.41,-229.32 251.38,-245.47 226,-272.36 223.12,-275.41 219.8,-278.19 216.28,-280.71"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="214.39,-277.76 207.84,-286.08 218.15,-283.67 214.39,-277.76"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge34" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M290.93,-100.66C249.77,-98.02 181.13,-98.75 130,-125.36 98.23,-141.9 73.29,-176.3 59.61,-198.58"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="56.53,-196.91 54.45,-207.3 62.55,-200.47 56.53,-196.91"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge33" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M290.79,-95.16C267.77,-89.23 237.94,-81.54 214.88,-75.6"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="215.69,-72.2 205.13,-73.09 213.94,-78.98 215.69,-72.2"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_node17" class="node">
+<title>mpi</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsesGraph_node17"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-158.36 151,-158.36 151,-134.36 205,-134.36 205,-158.36"/>
+<text text-anchor="middle" x="178" y="-143.96" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge31" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M290.79,-114.53C267.77,-121.08 237.94,-129.58 214.88,-136.14"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="213.79,-132.81 205.13,-138.92 215.71,-139.55 213.79,-132.81"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge35" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M291.52,-230.41C281.71,-234.33 271.21,-239.06 262,-244.36 244.43,-254.47 242.92,-261.2 226,-272.36 221.54,-275.3 216.72,-278.23 211.93,-281"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="209.86,-278.15 202.85,-286.1 213.29,-284.25 209.86,-278.15"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge36" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M294.01,-230.43C257.69,-243.34 201.05,-261.57 179,-258.36"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M177,-258.36C146.44,-253.91 113.11,-243.68 87.98,-234.82"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="89.02,-231.47 78.43,-231.37 86.65,-238.06 89.02,-231.47"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge38" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1115.96,-384.44C1085.53,-395.18 1037.88,-409.6 995,-412.36"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M993,-412.36C861.89,-420.81 827.76,-410.75 698,-431.36 660.85,-437.26 653.56,-450.18 616,-452.36"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M614,-452.36C486.11,-457.76 446.81,-463.23 328.5,-414.36"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge37" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1134.48,-384.74C1121.04,-396.9 1099,-415.21 1077,-426.36 1043.13,-443.53 1032.03,-441.94 995,-450.36"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M993,-450.36C705.01,-515.82 621.55,-489.02 328.5,-452.36"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge39" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1112.9,-372.36C1105.04,-372.36 1096.34,-372.36 1087.32,-372.36"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="1087.03,-368.86 1077.03,-372.36 1087.03,-375.86 1087.03,-368.86"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge40" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M261.8,-298.36C253.42,-298.36 244.88,-298.36 236.63,-298.36"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="236.35,-294.86 226.35,-298.36 236.35,-301.86 236.35,-294.86"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge41" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M291.54,-286.32C261.96,-276.76 218.25,-264.08 179,-258.36"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge43" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-374.36C552.5,-372.89 541.71,-401.76 481.5,-414.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-414.36C413.81,-428.11 390.53,-439.98 328.5,-414.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-414.36C272.79,-392.17 222.31,-344.58 196.64,-317.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="199.18,-315.36 189.78,-310.47 194.08,-320.15 199.18,-315.36"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge46" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M731.87,-360.34C712.79,-356.06 691.27,-351.23 672,-346.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="672.67,-343.48 662.15,-344.71 671.14,-350.31 672.67,-343.48"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge42" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M479.5,-414.36C411.76,-428.54 397.17,-460.95 328.5,-452.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-452.36C259.33,-443.96 244.27,-432.32 179,-414.36"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge45" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M698.83,-374.57C672.25,-374.93 642.92,-375 616,-374.36"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M614,-374.36C550.09,-372.83 544.94,-326.28 481.5,-318.36"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_quadtreemesh_2d~~UsesGraph_edge44" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M766.14,-360.22C724.6,-334.6 623.28,-274.32 532,-237.36 472.42,-213.23 455.17,-213.7 393,-197.36 330.72,-180.99 257.66,-164.06 215.02,-154.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="215.65,-150.96 205.12,-152.18 214.11,-157.79 215.65,-150.96"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_quadtreemesh_2dUsesGraph = svgPanZoom('#moduleself_quadtreemesh_2dUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_quadtreemesh_2d~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_quadtreemesh_2dUsedByGraph" width="641pt" height="264pt"
+ viewBox="0.00 0.00 641.00 263.61" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph" class="graph" transform="scale(0.46 0.46) rotate(0) translate(4 566)">
+<title>module~~self_quadtreemesh_2d~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-566 1382,-566 1382,4 -4,4"/>
+<!-- module~self_quadtreemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node1" class="node">
+<title>module~self_quadtreemesh_2d</title>
+<polygon fill="none" stroke="black" points="142,-295 0,-295 0,-271 142,-271 142,-295"/>
+<text text-anchor="middle" x="71" y="-280.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_QuadTreeMesh_2D</text>
+</g>
+<!-- module~self_transferplan_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node2" class="node">
+<title>module~self_transferplan_2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node2"><a xlink:href=".././module/self_transferplan_2d.html" xlink:title="SELF_TransferPlan_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="311.5,-255 182.5,-255 182.5,-231 311.5,-231 311.5,-255"/>
+<text text-anchor="middle" x="247" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_TransferPlan_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_transferplan_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge1" class="edge">
+<title>module~self_transferplan_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M193.79,-255C175.13,-259.29 153.9,-264.17 134.45,-268.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="133.43,-265.29 124.47,-270.94 135,-272.11 133.43,-265.29"/>
+</g>
+<!-- module~self_adaptivemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node3" class="node">
+<title>module~self_adaptivemesh_2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node3"><a xlink:href=".././module/self_adaptivemesh_2d.html" xlink:title="SELF_AdaptiveMesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="316,-335 178,-335 178,-311 316,-311 316,-335"/>
+<text text-anchor="middle" x="247" y="-320.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_AdaptiveMesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_adaptivemesh_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge2" class="edge">
+<title>module~self_adaptivemesh_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M193.79,-311C175.13,-306.71 153.9,-301.83 134.45,-297.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="135,-293.89 124.47,-295.06 133.43,-300.71 135,-293.89"/>
+</g>
+<!-- module~self_amrcontroller_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node4" class="node">
+<title>module~self_amrcontroller_2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node4"><a xlink:href=".././module/self_amrcontroller_2d.html" xlink:title="SELF_AMRController_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="643,-297 504,-297 504,-273 643,-273 643,-297"/>
+<text text-anchor="middle" x="573.5" y="-282.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_AMRController_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_quadtreemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge3" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_quadtreemesh_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M409,-283C321.21,-282.46 220.56,-282.56 152.28,-282.72"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="152.02,-279.22 142.03,-282.75 152.04,-286.22 152.02,-279.22"/>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_transferplan_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge5" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_transferplan_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M503.74,-283.96C475.07,-283.57 441.42,-283.19 411,-283"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M409,-283C366.72,-282.74 319.98,-269.62 287.81,-258.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="288.9,-255.16 278.31,-255.1 286.56,-261.75 288.9,-255.16"/>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_adaptivemesh_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge7" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_adaptivemesh_2d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M409,-283C366.33,-282.74 319.11,-296.18 286.92,-307.55"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="285.63,-304.29 277.43,-310.99 288.02,-310.87 285.63,-304.29"/>
+</g>
+<!-- module~self_dgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node5" class="node">
+<title>module~self_dgmodel2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node5"><a xlink:href=".././module/self_dgmodel2d_t.html" xlink:title="SELF_DGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="468,-255 352,-255 352,-231 468,-231 468,-255"/>
+<text text-anchor="middle" x="410" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge9" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M526.22,-272.96C507.81,-268.18 486.45,-262.62 467.16,-257.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="467.85,-254.17 457.29,-255.04 466.08,-260.94 467.85,-254.17"/>
+</g>
+<!-- module~self_dgmodel2d_t&#45;&gt;module~self_transferplan_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge4" class="edge">
+<title>module~self_dgmodel2d_t&#45;&gt;module~self_transferplan_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M351.78,-243C342.02,-243 331.76,-243 321.65,-243"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="321.6,-239.5 311.6,-243 321.6,-246.5 321.6,-239.5"/>
+</g>
+<!-- module~self_dgmodel2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node6" class="node">
+<title>module~self_dgmodel2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node6"><a xlink:href=".././module/self_dgmodel2d~2.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="627,-213 520,-213 520,-189 627,-189 627,-213"/>
+<text text-anchor="middle" x="573.5" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d~2&#45;&gt;module~self_transferplan_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge6" class="edge">
+<title>module~self_dgmodel2d~2&#45;&gt;module~self_transferplan_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M519.74,-204.47C474.95,-207.79 409.06,-213.55 352,-222 339,-223.93 325.18,-226.41 311.99,-228.99"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="311.18,-225.58 302.06,-230.97 312.55,-232.45 311.18,-225.58"/>
+</g>
+<!-- module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge10" class="edge">
+<title>module~self_dgmodel2d~2&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M526.22,-213.04C507.81,-217.82 486.45,-223.38 467.16,-228.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="466.08,-225.06 457.29,-230.96 467.85,-231.83 466.08,-225.06"/>
+</g>
+<!-- module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node7" class="node">
+<title>module~self_dgmodel2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node7"><a xlink:href=".././module/self_dgmodel2d.html" xlink:title="SELF_DGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="627,-255 520,-255 520,-231 627,-231 627,-255"/>
+<text text-anchor="middle" x="573.5" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge8" class="edge">
+<title>module~self_dgmodel2d&#45;&gt;module~self_dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M519.62,-243C506.5,-243 492.26,-243 478.54,-243"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="478.18,-239.5 468.18,-243 478.18,-246.5 478.18,-239.5"/>
+</g>
+<!-- module~self_ecdgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node8" class="node">
+<title>module~self_ecdgmodel2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node8"><a xlink:href=".././module/self_ecdgmodel2d_t.html" xlink:title="SELF_ECDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="828,-461 698,-461 698,-437 828,-437 828,-461"/>
+<text text-anchor="middle" x="763" y="-446.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge11" class="edge">
+<title>module~self_ecdgmodel2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M753.48,-436.96C738.12,-415.14 704.99,-367.47 679,-326 662.08,-299 667.95,-283.81 643,-264 640.91,-262.34 638.69,-260.81 636.38,-259.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="637.55,-256.07 627.07,-254.55 634.32,-262.28 637.55,-256.07"/>
+</g>
+<!-- module~self_lineareuler2d_pml_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node9" class="node">
+<title>module~self_lineareuler2d_pml_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node9"><a xlink:href=".././module/self_lineareuler2d_pml_t.html" xlink:title="self_LinearEuler2D_PML_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1036.5,-276 888.5,-276 888.5,-252 1036.5,-252 1036.5,-276"/>
+<text text-anchor="middle" x="962.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_PML_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_pml_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge12" class="edge">
+<title>module~self_lineareuler2d_pml_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M888.25,-260.03C815.82,-256.1 706.15,-250.14 637.51,-246.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="637.44,-242.91 627.27,-245.86 637.07,-249.9 637.44,-242.91"/>
+</g>
+<!-- module~self_lineareuler2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node12" class="node">
+<title>module~self_lineareuler2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node12"><a xlink:href=".././module/self_lineareuler2d_t.html" xlink:title="self_LinearEuler2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="824,-317 702,-317 702,-293 824,-293 824,-317"/>
+<text text-anchor="middle" x="763" y="-302.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_pml_t&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge27" class="edge">
+<title>module~self_lineareuler2d_pml_t&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M903.58,-276.02C881.07,-280.7 855.13,-286.08 831.76,-290.93"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="831,-287.52 821.92,-292.98 832.42,-294.37 831,-287.52"/>
+</g>
+<!-- module~self_nulldgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node10" class="node">
+<title>module~self_nulldgmodel2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node10"><a xlink:href=".././module/self_nulldgmodel2d_t.html" xlink:title="self_NullDGModel2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="828,-234 698,-234 698,-210 828,-210 828,-234"/>
+<text text-anchor="middle" x="763" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge14" class="edge">
+<title>module~self_nulldgmodel2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M698,-229.17C678.3,-231.37 656.65,-233.8 637.06,-235.99"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="636.57,-232.53 627.02,-237.12 637.35,-239.48 636.57,-232.53"/>
+</g>
+<!-- module~self_linearshallowwater2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node11" class="node">
+<title>module~self_linearshallowwater2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node11"><a xlink:href=".././module/self_linearshallowwater2d_t.html" xlink:title="self_LinearShallowWater2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="846.5,-150 679.5,-150 679.5,-126 846.5,-126 846.5,-150"/>
+<text text-anchor="middle" x="763" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge15" class="edge">
+<title>module~self_linearshallowwater2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M746.22,-150.09C719.09,-170.71 664.45,-211.48 643,-222 639,-223.96 634.77,-225.79 630.47,-227.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="629.15,-224.23 620.96,-230.95 631.56,-230.8 629.15,-224.23"/>
+</g>
+<!-- module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge13" class="edge">
+<title>module~self_lineareuler2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M725.58,-292.9C711.06,-288.03 694.22,-282.31 679,-277 662.94,-271.39 659.14,-269.38 643,-264 637.12,-262.04 630.92,-260.04 624.77,-258.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="625.76,-254.74 615.17,-255.11 623.68,-261.43 625.76,-254.74"/>
+</g>
+<!-- module~self_advection_diffusion_2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node13" class="node">
+<title>module~self_advection_diffusion_2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node13"><a xlink:href=".././module/self_advection_diffusion_2d_t.html" xlink:title="self_advection_diffusion_2d_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="847,-66 679,-66 679,-42 847,-42 847,-66"/>
+<text text-anchor="middle" x="763" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge16" class="edge">
+<title>module~self_advection_diffusion_2d_t&#45;&gt;module~self_dgmodel2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M739.27,-66.15C720.66,-77.16 694.9,-95.01 679,-117 650.1,-156.98 678.45,-187.69 643,-222 640.86,-224.07 638.53,-225.93 636.05,-227.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="634.13,-224.68 627.16,-232.65 637.58,-230.77 634.13,-224.68"/>
+</g>
+<!-- module~self_advection_diffusion_2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node14" class="node">
+<title>module~self_advection_diffusion_2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node14"><a xlink:href=".././module/self_advection_diffusion_2d~2.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1042,-24 883,-24 883,0 1042,0 1042,-24"/>
+<text text-anchor="middle" x="962.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge31" class="edge">
+<title>module~self_advection_diffusion_2d~2&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M904.9,-24.04C881.66,-28.98 854.58,-34.74 830.41,-39.88"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="829.66,-36.46 820.6,-41.96 831.11,-43.31 829.66,-36.46"/>
+</g>
+<!-- module~self_lineareuler2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node15" class="node">
+<title>module~self_lineareuler2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node15"><a xlink:href=".././module/self_lineareuler2d.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1019,-318 906,-318 906,-294 1019,-294 1019,-318"/>
+<text text-anchor="middle" x="962.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge29" class="edge">
+<title>module~self_lineareuler2d&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M905.96,-305.72C883.8,-305.61 858.02,-305.48 834.55,-305.36"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="834.33,-301.86 824.31,-305.31 834.29,-308.86 834.33,-301.86"/>
+</g>
+<!-- module~self_ecdgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node16" class="node">
+<title>module~self_ecdgmodel2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node16"><a xlink:href=".././module/self_ecdgmodel2d.html" xlink:title="SELF_ECDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1023,-461 902,-461 902,-437 1023,-437 1023,-461"/>
+<text text-anchor="middle" x="962.5" y="-446.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge17" class="edge">
+<title>module~self_ecdgmodel2d&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M901.98,-449C881.97,-449 859.39,-449 838.38,-449"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="838.22,-445.5 828.22,-449 838.22,-452.5 838.22,-445.5"/>
+</g>
+<!-- module~self_ecdgmodel2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node17" class="node">
+<title>module~self_ecdgmodel2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node17"><a xlink:href=".././module/self_ecdgmodel2d~2.html" xlink:title="SELF_ECDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1023,-562 902,-562 902,-538 1023,-538 1023,-562"/>
+<text text-anchor="middle" x="962.5" y="-547.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecdgmodel2d~2&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge19" class="edge">
+<title>module~self_ecdgmodel2d~2&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M918.8,-537.94C906.98,-534.04 894.29,-529.33 883,-524 848.54,-507.73 811.87,-483.42 788.49,-466.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="790.39,-463.98 780.21,-461.02 786.32,-469.68 790.39,-463.98"/>
+</g>
+<!-- module~self_lineareuler2d_pml -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node18" class="node">
+<title>module~self_lineareuler2d_pml</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node18"><a xlink:href=".././module/self_lineareuler2d_pml.html" xlink:title="self_LinearEuler2D_PML">
+<polygon fill="#337ab7" stroke="#337ab7" points="1217,-297 1078,-297 1078,-273 1217,-273 1217,-297"/>
+<text text-anchor="middle" x="1147.5" y="-282.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_pml&#45;&gt;module~self_lineareuler2d_pml_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge21" class="edge">
+<title>module~self_lineareuler2d_pml&#45;&gt;module~self_lineareuler2d_pml_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1077.84,-277.12C1067.61,-275.95 1056.99,-274.73 1046.51,-273.53"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1046.86,-270.04 1036.53,-272.38 1046.06,-277 1046.86,-270.04"/>
+</g>
+<!-- module~self_ecadvection2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node19" class="node">
+<title>module~self_ecadvection2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node19"><a xlink:href=".././module/self_ecadvection2d~2.html" xlink:title="SELF_ECAdvection2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1378,-398 1253,-398 1253,-374 1378,-374 1378,-398"/>
+<text text-anchor="middle" x="1315.5" y="-383.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d~2&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge18" class="edge">
+<title>module~self_ecadvection2d~2&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1252.85,-390.29C1168.92,-396.52 1014.16,-409.39 883,-428 868.32,-430.08 852.67,-432.62 837.71,-435.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="836.73,-431.81 827.48,-436.98 837.94,-438.71 836.73,-431.81"/>
+</g>
+<!-- module~self_ecadvection2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node28" class="node">
+<title>module~self_ecadvection2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node28"><a xlink:href=".././module/self_ecadvection2d_t.html" xlink:title="SELF_ECAdvection2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1214.5,-440 1080.5,-440 1080.5,-416 1214.5,-416 1214.5,-440"/>
+<text text-anchor="middle" x="1147.5" y="-425.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d~2&#45;&gt;module~self_ecadvection2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge35" class="edge">
+<title>module~self_ecadvection2d~2&#45;&gt;module~self_ecadvection2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1266.93,-398.04C1247.92,-402.85 1225.85,-408.43 1205.95,-413.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1204.91,-410.12 1196.08,-415.96 1206.63,-416.9 1204.91,-410.12"/>
+</g>
+<!-- module~self_esatmo2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node20" class="node">
+<title>module~self_esatmo2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node20"><a xlink:href=".././module/self_esatmo2d.html" xlink:title="SELF_ESAtmo2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1365.5,-524 1265.5,-524 1265.5,-500 1365.5,-500 1365.5,-524"/>
+<text text-anchor="middle" x="1315.5" y="-509.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d&#45;&gt;module~self_ecdgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge20" class="edge">
+<title>module~self_esatmo2d&#45;&gt;module~self_ecdgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1265.48,-508.64C1185.26,-502.82 1021.05,-489.59 883,-470 868.32,-467.92 852.67,-465.38 837.71,-462.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="837.94,-459.29 827.48,-461.02 836.73,-466.19 837.94,-459.29"/>
+</g>
+<!-- module~self_esatmo2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node29" class="node">
+<title>module~self_esatmo2d_t</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node29"><a xlink:href=".././module/self_esatmo2d_t.html" xlink:title="SELF_ESAtmo2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1202,-482 1093,-482 1093,-458 1202,-458 1202,-482"/>
+<text text-anchor="middle" x="1147.5" y="-467.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d&#45;&gt;module~self_esatmo2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge37" class="edge">
+<title>module~self_esatmo2d&#45;&gt;module~self_esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1266.93,-499.96C1247.92,-495.15 1225.85,-489.57 1205.95,-484.54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1206.63,-481.1 1196.08,-482.04 1204.91,-487.88 1206.63,-481.1"/>
+</g>
+<!-- module~self_lineareuler2d_pml~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node21" class="node">
+<title>module~self_lineareuler2d_pml~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node21"><a xlink:href=".././module/self_lineareuler2d_pml~2.html" xlink:title="self_LinearEuler2D_PML">
+<polygon fill="#337ab7" stroke="#337ab7" points="1217,-255 1078,-255 1078,-231 1217,-231 1217,-255"/>
+<text text-anchor="middle" x="1147.5" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d_pml~2&#45;&gt;module~self_lineareuler2d_pml_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge22" class="edge">
+<title>module~self_lineareuler2d_pml~2&#45;&gt;module~self_lineareuler2d_pml_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1077.84,-250.88C1067.61,-252.05 1056.99,-253.27 1046.51,-254.47"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1046.06,-251 1036.53,-255.62 1046.86,-257.96 1046.06,-251"/>
+</g>
+<!-- module~self_nulldgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node22" class="node">
+<title>module~self_nulldgmodel2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node22"><a xlink:href=".././module/self_nulldgmodel2d.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1023,-192 902,-192 902,-168 1023,-168 1023,-192"/>
+<text text-anchor="middle" x="962.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge23" class="edge">
+<title>module~self_nulldgmodel2d&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M904.9,-192.04C881.66,-196.98 854.58,-202.74 830.41,-207.88"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="829.66,-204.46 820.6,-209.96 831.11,-211.31 829.66,-204.46"/>
+</g>
+<!-- module~self_nulldgmodel2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node23" class="node">
+<title>module~self_nulldgmodel2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node23"><a xlink:href=".././module/self_nulldgmodel2d~2.html" xlink:title="self_NullDGModel2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1023,-234 902,-234 902,-210 1023,-210 1023,-234"/>
+<text text-anchor="middle" x="962.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge24" class="edge">
+<title>module~self_nulldgmodel2d~2&#45;&gt;module~self_nulldgmodel2d_t</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M901.98,-222C881.97,-222 859.39,-222 838.38,-222"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="838.22,-218.5 828.22,-222 838.22,-225.5 838.22,-218.5"/>
+</g>
+<!-- module~self_linearshallowwater2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node24" class="node">
+<title>module~self_linearshallowwater2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node24"><a xlink:href=".././module/self_linearshallowwater2d.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1041.5,-108 883.5,-108 883.5,-84 1041.5,-84 1041.5,-108"/>
+<text text-anchor="middle" x="962.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge25" class="edge">
+<title>module~self_linearshallowwater2d&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M904.9,-108.04C881.66,-112.98 854.58,-118.74 830.41,-123.88"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="829.66,-120.46 820.6,-125.96 831.11,-127.31 829.66,-120.46"/>
+</g>
+<!-- module~self_linearshallowwater2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node25" class="node">
+<title>module~self_linearshallowwater2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node25"><a xlink:href=".././module/self_linearshallowwater2d~2.html" xlink:title="self_LinearShallowWater2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1041.5,-150 883.5,-150 883.5,-126 1041.5,-126 1041.5,-150"/>
+<text text-anchor="middle" x="962.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge26" class="edge">
+<title>module~self_linearshallowwater2d~2&#45;&gt;module~self_linearshallowwater2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M883.44,-138C874.67,-138 865.67,-138 856.73,-138"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="856.68,-134.5 846.68,-138 856.68,-141.5 856.68,-134.5"/>
+</g>
+<!-- module~self_lineareuler2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node26" class="node">
+<title>module~self_lineareuler2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node26"><a xlink:href=".././module/self_lineareuler2d~2.html" xlink:title="self_LinearEuler2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1019,-360 906,-360 906,-336 1019,-336 1019,-360"/>
+<text text-anchor="middle" x="962.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge28" class="edge">
+<title>module~self_lineareuler2d~2&#45;&gt;module~self_lineareuler2d_t</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M906.22,-335.96C882.35,-330.77 854.25,-324.65 829.35,-319.23"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="829.78,-315.74 819.26,-317.03 828.29,-322.58 829.78,-315.74"/>
+</g>
+<!-- module~self_advection_diffusion_2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node27" class="node">
+<title>module~self_advection_diffusion_2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node27"><a xlink:href=".././module/self_advection_diffusion_2d.html" xlink:title="self_advection_diffusion_2d">
+<polygon fill="#337ab7" stroke="#337ab7" points="1042,-66 883,-66 883,-42 1042,-42 1042,-66"/>
+<text text-anchor="middle" x="962.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge30" class="edge">
+<title>module~self_advection_diffusion_2d&#45;&gt;module~self_advection_diffusion_2d_t</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M882.88,-54C874.45,-54 865.82,-54 857.24,-54"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="857.21,-50.5 847.21,-54 857.21,-57.5 857.21,-50.5"/>
+</g>
+<!-- module~self_ecadvection2d_t&#45;&gt;module~self_ecdgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge32" class="edge">
+<title>module~self_ecadvection2d_t&#45;&gt;module~self_ecdgmodel2d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1080.43,-435.58C1065.06,-437.35 1048.66,-439.23 1033.14,-441.01"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1032.62,-437.54 1023.09,-442.16 1033.42,-444.5 1032.62,-437.54"/>
+</g>
+<!-- module~self_esatmo2d_t&#45;&gt;module~self_ecdgmodel2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge33" class="edge">
+<title>module~self_esatmo2d_t&#45;&gt;module~self_ecdgmodel2d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M1092.58,-463.81C1074,-461.68 1052.91,-459.26 1033.25,-457"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="1033.45,-453.5 1023.11,-455.84 1032.65,-460.46 1033.45,-453.5"/>
+</g>
+<!-- module~self_ecadvection2d -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node30" class="node">
+<title>module~self_ecadvection2d</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node30"><a xlink:href=".././module/self_ecadvection2d.html" xlink:title="SELF_ECAdvection2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1378,-440 1253,-440 1253,-416 1378,-416 1378,-440"/>
+<text text-anchor="middle" x="1315.5" y="-425.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_ecadvection2d&#45;&gt;module~self_ecadvection2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge34" class="edge">
+<title>module~self_ecadvection2d&#45;&gt;module~self_ecadvection2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1252.69,-428C1243.55,-428 1234.04,-428 1224.65,-428"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1224.54,-424.5 1214.54,-428 1224.54,-431.5 1224.54,-424.5"/>
+</g>
+<!-- module~self_esatmo2d~2 -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_node31" class="node">
+<title>module~self_esatmo2d~2</title>
+<g id="a_module~~self_quadtreemesh_2d~~UsedByGraph_node31"><a xlink:href=".././module/self_esatmo2d~2.html" xlink:title="SELF_ESAtmo2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1365.5,-482 1265.5,-482 1265.5,-458 1365.5,-458 1365.5,-482"/>
+<text text-anchor="middle" x="1315.5" y="-467.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_esatmo2d~2&#45;&gt;module~self_esatmo2d_t -->
+<g id="module~~self_quadtreemesh_2d~~UsedByGraph_edge36" class="edge">
+<title>module~self_esatmo2d~2&#45;&gt;module~self_esatmo2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1265.14,-470C1248.53,-470 1229.74,-470 1212.18,-470"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1212.01,-466.5 1202.01,-470 1212.01,-473.5 1212.01,-466.5"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_quadtreemesh_2dUsedByGraph = svgPanZoom('#moduleself_quadtreemesh_2dUsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#variable-quadtree_coarsen">QUADTREE_COARSEN</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#variable-quadtree_keep">QUADTREE_KEEP</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#variable-quadtree_refine">QUADTREE_REFINE</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#type-quadtreemesh2d">QuadTreeMesh2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-maxleveljump_quadtreemesh2d">MaxLevelJump_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-maxlevel_quadtreemesh2d">MaxLevel_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_internal">qt_internal</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_opposite">qt_opposite</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_reflect">qt_reflect</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-qt_subpos">qt_subpos</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-adaptfromflags_quadtreemesh2d">AdaptFromFlags_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-balance2to1_quadtreemesh2d">Balance2to1_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-ensurecapacity_quadtreemesh2d">EnsureCapacity_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-faceneighbor_quadtreemesh2d">FaceNeighbor_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-free_quadtreemesh2d">Free_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-initglobal_quadtreemesh2d">InitGlobal_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-init_quadtreemesh2d">Init_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-leafcoords_quadtreemesh2d">LeafCoords_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-rebuildleaves_quadtreemesh2d">RebuildLeaves_QuadTreeMesh2D</a>
+      <a class="list-group-item" href="../module/self_quadtreemesh_2d.html#proc-refinenode_quadtreemesh2d">RefineNode_QuadTreeMesh2D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    <section>
+    <h2>Variables</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-quadtree_coarsen"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>QUADTREE_COARSEN</strong></td><td> =</td><td>-1</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-quadtree_keep"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>QUADTREE_KEEP</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-quadtree_refine"></span>integer,</td>
+<td>public,</td>  <td>parameter</td><td>::</td>
+  <td><strong>QUADTREE_REFINE</strong></td><td> =</td><td>1</td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-quadtreemesh2d"></span><h3>type, public :: <a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-capacity"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>capacity</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-child"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>child</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-leaf"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>leaf</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-level"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>level</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ngeo~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nGeo</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nleaves"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nLeaves</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nnodes~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nNodes</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nroots"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nRoots</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parent"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>parent</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-quadrant"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>quadrant</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-quadrature~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>quadrature</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootbc"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootBC</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootcoords"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootCoords</strong>(:,:,:,:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootelem"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootElem</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootflip"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootFlip</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootmaterial"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootMaterial</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootnbr"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootNbr</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rootnbrside"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>rootNbrSide</strong>(:,:)</td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-adaptfromflags'>AdaptFromFlags</a></strong>  => AdaptFromFlags_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-balance2to1'>Balance2to1</a></strong>  => Balance2to1_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-ensurecapacity'>EnsureCapacity</a></strong>  => EnsureCapacity_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-faceneighbor'>FaceNeighbor</a></strong>  => FaceNeighbor_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-free~21'>Free</a></strong>  => Free_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-init~21'>Init</a></strong>  => Init_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-initglobal'>InitGlobal</a></strong>  => InitGlobal_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-leafcoords'>LeafCoords</a></strong>  => LeafCoords_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-maxlevel'>MaxLevel</a></strong>  => MaxLevel_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-maxleveljump'>MaxLevelJump</a></strong>  => MaxLevelJump_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-rebuildleaves'>RebuildLeaves</a></strong>  => RebuildLeaves_QuadTreeMesh2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/quadtreemesh2d.html#boundprocedure-refinenode'>RefineNode</a></strong>  => RefineNode_QuadTreeMesh2D </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+ 
+    <section>
+    <h2>Functions</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-maxleveljump_quadtreemesh2d"></span><h3>public function <a href='../proc/maxleveljump_quadtreemesh2d.html'>MaxLevelJump_QuadTreeMesh2D</a>(this) result(mx)</h3></div>
+  <div class="panel-body">
+       
+<p>Largest refinement-level difference across any leaf face (0 on a conforming or uniformly
+refined forest, 1 on a 2:1-balanced adaptive forest). Because FaceNeighbor returns the
+equal-or-larger neighbour, every level difference is observed from the finer leaf as a
+coarser leaf neighbour; internal (finer) neighbours contribute nothing from this side.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-maxlevel_quadtreemesh2d"></span><h3>public function <a href='../proc/maxlevel_quadtreemesh2d.html'>MaxLevel_QuadTreeMesh2D</a>(this) result(mx)</h3></div>
+  <div class="panel-body">
+       
+<p>Highest refinement level among the active leaves.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-qt_internal"></span><h3>public pure function <a href='../proc/qt_internal.html'>qt_internal</a>(s, c) result(isInternal)</h3></div>
+  <div class="panel-body">
+       
+<p>.true. if child c's side s is interior to its parent (its neighbour across s is a sibling).</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>c</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>logical</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-qt_opposite"></span><h3>public pure function <a href='../proc/qt_opposite.html'>qt_opposite</a>(s) result(o)</h3></div>
+  <div class="panel-body">
+       
+<p>The local side directly across an element from side s.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-qt_reflect"></span><h3>public pure function <a href='../proc/qt_reflect.html'>qt_reflect</a>(s, c) result(rc)</h3></div>
+  <div class="panel-body">
+       
+<p>Sibling child index obtained by reflecting c across side s (swap the y-half for the
+horizontal faces S/N, the x-half for the vertical faces E/W).</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>c</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer</small></h4>  
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-qt_subpos"></span><h3>public pure function <a href='../proc/qt_subpos.html'>qt_subpos</a>(c, s) result(t)</h3></div>
+  <div class="panel-body">
+       
+<p>Sub-position (1 or 2, in the positive direction of side s) of child c along side s;
+0 if c does not touch side s.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>c</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>integer</small></h4>  
+
+  </div>
+  </div>
+
+    </section>
+    <br>
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-adaptfromflags_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/adaptfromflags_quadtreemesh2d.html'>AdaptFromFlags_QuadTreeMesh2D</a>(this, flag)</h3></div>
+  <div class="panel-body">
+       
+<p>Mutate the forest from a per-leaf flag array (indexed over the current leaves in this%leaf
+order, e.g. the flag array produced by SELF_RefinementIndicator_2D):</p><a href="../proc/adaptfromflags_quadtreemesh2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>flag</strong>(1:this%nLeaves)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-balance2to1_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/balance2to1_quadtreemesh2d.html'>Balance2to1_QuadTreeMesh2D</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Enforce the 2:1 balance condition: no leaf face may separate elements differing by more
+than one refinement level. Iterates to a fixed point - in each sweep, any leaf whose
+equal-or-larger neighbour is a leaf two or more levels coarser triggers refinement of that
+coarser neighbour; refinement can ripple, so sweeps repeat until nothing changes. The leaf
+set is rebuilt on return.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-ensurecapacity_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/ensurecapacity_quadtreemesh2d.html'>EnsureCapacity_QuadTreeMesh2D</a>(this, need)</h3></div>
+  <div class="panel-body">
+       
+<p>Grow the node arrays (amortized doubling) so at least <code>need</code> nodes fit.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>need</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-faceneighbor_quadtreemesh2d"></span><h3>public recursive subroutine <a href='../proc/faceneighbor_quadtreemesh2d.html'>FaceNeighbor_QuadTreeMesh2D</a>(this, node, s, nbr, ns, nf)</h3></div>
+  <div class="panel-body">
+       
+<p>Find the equal-or-larger face neighbour of <code>node</code> across its local side s using the
+classic quadtree ascend/descend search. Returns:
+  nbr - neighbour node id (0 = physical domain boundary). It is either a LEAF at any level
+        &lt;= level(node), or an INTERNAL node at exactly level(node) (meaning the shared face
+        is subdivided on the neighbour side, i.e. finer neighbours exist).
+  ns  - the neighbour's local side that faces <code>node</code>.
+  nf  - the flip between the two shared edges (0 same direction, 1 reversed), inherited
+        from the base-mesh face where the search crosses a root boundary.
+With this, a 2:1 hanging face is exactly "nbr is a leaf with level(nbr) = level(node)-1",
+and finer neighbours are exactly "nbr is internal".</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>node</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nbr</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ns</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nf</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/free_quadtreemesh2d.html'>Free_QuadTreeMesh2D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-initglobal_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/initglobal_quadtreemesh2d.html'>InitGlobal_QuadTreeMesh2D</a>(this, nRoots, nGeo, quadrature, rootCoords, rootNbr, rootNbrSide, rootFlip, rootBC, rootMaterial)</h3></div>
+  <div class="panel-body">
+       
+<p>Initialize the forest directly from GLOBAL base-mesh tables (one root per global base
+element, all leaves at level 0). This is the initialization path for a rank-replicated
+forest over a decomposed base mesh (AMR Stage 5): every rank passes the same gathered
+tables and holds an identical forest. rootNbr carries global element ids (0 = physical
+boundary), rootNbrSide/rootFlip decode the base sideInfo(4) pairing, rootBC the base
+boundary-condition id per side, and rootMaterial the base material id per element.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nRoots</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nGeo</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>quadrature</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rootCoords</strong>(1:2,1:nGeo+1,1:nGeo+1,1:nRoots)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rootNbr</strong>(1:4,1:nRoots)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rootNbrSide</strong>(1:4,1:nRoots)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rootFlip</strong>(1:4,1:nRoots)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rootBC</strong>(1:4,1:nRoots)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>rootMaterial</strong>(1:nRoots)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/init_quadtreemesh2d.html'>Init_QuadTreeMesh2D</a>(this, mesh)</h3></div>
+  <div class="panel-body">
+       
+<p>Initialize the forest with one root per base-mesh element (all leaves at level 0). The
+base geometry (node coordinates) is copied so leaf geometry can be regenerated after any
+amount of refinement without holding a reference to the mesh. Requires a single-rank
+mesh (a decomposed mesh only stores its local elements); a rank-replicated forest over a
+decomposed base is built by gathering the global tables and calling InitGlobal.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-leafcoords_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/leafcoords_quadtreemesh2d.html'>LeafCoords_QuadTreeMesh2D</a>(this, leafIndex, geomInterp, coords)</h3></div>
+  <div class="panel-body">
+       
+<p>Physical geometry-node coordinates of leaf <code>leafIndex</code>, produced by repeated exact
+isoparametric subdivision of its root element along the quadtree path. geomInterp must be a
+degree-nGeo Lagrange interpolant on the mesh's geometry (quadrature) nodes - the same
+interpolant SELF_MeshRefinement_2D builds. Level 0 leaves return the root geometry directly.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>leafIndex</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>geomInterp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>coords</strong>(1:2,1:this%nGeo+1,1:this%nGeo+1)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-rebuildleaves_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/rebuildleaves_quadtreemesh2d.html'>RebuildLeaves_QuadTreeMesh2D</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Recompute the active leaf set by depth-first traversal from the roots. Traversal (rather
+than a scan of all nodes) is what makes orphaned nodes left behind by coarsening invisible.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-refinenode_quadtreemesh2d"></span><h3>public subroutine <a href='../proc/refinenode_quadtreemesh2d.html'>RefineNode_QuadTreeMesh2D</a>(this, node)</h3></div>
+  <div class="panel-body">
+       
+<p>Subdivide one leaf node into four children. Does nothing (with a warning) if the node is
+already refined. The caller is responsible for rebuilding the leaf list afterwards (or
+calling AdaptFromFlags, which does so).</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/quadtreemesh2d.html'>QuadTreeMesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>node</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

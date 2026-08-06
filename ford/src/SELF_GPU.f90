@@ -1,0 +1,212 @@
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+!
+! Maintainers : support@fluidnumerics.com
+! Official Repository : https://github.com/FluidNumerics/self/
+!
+! Copyright © 2024 Fluid Numerics LLC
+!
+! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+!
+! 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+!
+! 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in
+!    the documentation and/or other materials provided with the distribution.
+!
+! 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from
+!    this software without specific prior written permission.
+!
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+! LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+! HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+! LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+! THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+! THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// !
+
+module SELF_GPU
+
+  use iso_c_binding
+  use SELF_GPU_enums
+
+  implicit none
+
+  interface hipGetDeviceCount
+#ifdef HAVE_HIP
+    function hipGetDeviceCount_(count) bind(c,name="hipGetDeviceCount")
+#elif HAVE_CUDA
+      function hipGetDeviceCount_(count) bind(c,name="cudaGetDeviceCount")
+#endif
+        use iso_c_binding
+        use SELF_GPU_enums
+        implicit none
+        integer(c_int) :: hipGetDeviceCount_
+        integer(c_int) :: count
+      endfunction
+      endinterface
+
+      interface hipSetDevice
+#ifdef HAVE_HIP
+        function hipSetDevice_(device_id) bind(c,name="hipSetDevice")
+#elif HAVE_CUDA
+          function hipSetDevice_(device_id) bind(c,name="cudaSetDevice")
+#endif
+            use iso_c_binding
+            use SELF_GPU_enums
+            implicit none
+            integer(c_int) :: hipSetDevice_
+            integer(c_int),value :: device_id
+          endfunction
+          endinterface
+          interface hipMalloc
+#ifdef HAVE_HIP
+            function hipMalloc_(ptr,mySize) bind(c,name="hipMalloc")
+#elif HAVE_CUDA
+              function hipMalloc_(ptr,mySize) bind(c,name="cudaMalloc")
+#endif
+                use iso_c_binding
+                use SELF_GPU_enums
+                implicit none
+                integer(c_int) :: hipMalloc_
+                type(c_ptr) :: ptr
+                integer(c_size_t),value :: mySize
+              endfunction
+              endinterface hipMalloc
+
+              interface hipFree
+#ifdef HAVE_HIP
+                function hipFree_(ptr) bind(c,name="hipFree")
+#elif HAVE_CUDA
+                  function hipFree_(ptr) bind(c,name="cudaFree")
+#endif
+                    use iso_c_binding
+                    use SELF_GPU_enums
+                    implicit none
+                    integer(c_int) :: hipFree_
+                    type(c_ptr),value :: ptr
+                  endfunction
+                  endinterface hipFree
+
+                  interface hipMemcpy
+#ifdef HAVE_HIP
+                    function hipMemcpy_(dest,src,sizeBytes,myKind) bind(c,name="hipMemcpy")
+#elif HAVE_CUDA
+                      function hipMemcpy_(dest,src,sizeBytes,myKind) bind(c,name="cudaMemcpy")
+#endif
+                        use iso_c_binding
+                        use SELF_GPU_enums
+                        implicit none
+                        integer(c_int) :: hipMemcpy_
+                        type(c_ptr),value :: dest
+                        type(c_ptr),value :: src
+                        integer(c_size_t),value :: sizeBytes
+                        integer(c_int),value :: myKind
+                      endfunction hipMemcpy_
+                      endinterface hipMemcpy
+
+                      interface hipMemset
+#ifdef HAVE_HIP
+                        function hipMemset_(ptr,value,sizeBytes) bind(c,name="hipMemset")
+#elif HAVE_CUDA
+                          function hipMemset_(ptr,value,sizeBytes) bind(c,name="cudaMemset")
+#endif
+                            use iso_c_binding
+                            use SELF_GPU_enums
+                            implicit none
+                            integer(c_int) :: hipMemset_
+                            type(c_ptr),value :: ptr
+                            integer(c_int),value :: value
+                            integer(c_size_t),value :: sizeBytes
+                          endfunction hipMemset_
+                          endinterface hipMemset
+
+                          interface hipMemGetInfo
+#ifdef HAVE_HIP
+                            function hipMemGetInfo_(freeBytes,totalBytes) bind(c,name="hipMemGetInfo")
+#elif HAVE_CUDA
+                              function hipMemGetInfo_(freeBytes,totalBytes) bind(c,name="cudaMemGetInfo")
+#endif
+                                use iso_c_binding
+                                use SELF_GPU_enums
+                                implicit none
+                                integer(c_int) :: hipMemGetInfo_
+                                integer(c_size_t) :: freeBytes
+                                integer(c_size_t) :: totalBytes
+                              endfunction hipMemGetInfo_
+                              endinterface hipMemGetInfo
+
+                              contains
+
+                              subroutine EnsureDeviceBuffer(ptr,allocBytes,neededBytes)
+                            !! High-water-mark device allocation (AMR Stage 6b). Grows ptr to
+                            !! hold neededBytes, reusing the existing allocation when it already
+                            !! does, and records the capacity in allocBytes. Contents are not
+                            !! preserved across a growth - every caller rewrites the buffer
+                            !! before reading it.
+                            !!
+                            !! A device pointer carries no shape, so byte capacity is the only
+                            !! thing that has to be tracked; this is what lets the adaptive loop
+                            !! stop calling hipMalloc/hipFree once the element count settles.
+                                use iso_c_binding
+                                implicit none
+                                type(c_ptr),intent(inout) :: ptr
+                                integer(c_size_t),intent(inout) :: allocBytes
+                                integer(c_size_t),intent(in) :: neededBytes
+
+                                if(.not.(c_associated(ptr) .and. allocBytes >= neededBytes)) then
+                                  if(c_associated(ptr)) then
+                                    call gpuCheck(hipFree(ptr))
+                                    ptr = c_null_ptr
+                                  endif
+                                  call gpuCheck(hipMalloc(ptr,neededBytes))
+                                  allocBytes = neededBytes
+                                endif
+
+                                ! Leave the buffer DEFINED (zeroed), which Init used to guarantee by
+                                ! uploading its zeroed host arrays. Resize deliberately performs no
+                                ! host-to-device copy, so without this the device buffer would keep
+                                ! whatever was previously in that memory - and freshly hipMalloc'd
+                                ! memory is uninitialized. That matters because the low-storage RK
+                                ! update reads its accumulator before writing it
+                                ! (UpdateGRK_Model: grk = rk_a*grk + dSdt, with rk_a = 0 on the first
+                                ! stage). Multiplying by zero annihilates any finite leftover, but
+                                ! 0*NaN and 0*Inf are NaN, so a stale bit pattern that happens to be
+                                ! NaN or Inf silently poisons the solution. The observed symptom was
+                                ! an intermittent, allocation-history-dependent NaN several adaptation
+                                ! epochs into a GPU run, with the CPU build unaffected because there
+                                ! the host array IS the storage and Resize zeroes it.
+                                !
+                                ! A device-side fill costs HBM bandwidth rather than a PCIe transfer,
+                                ! so this keeps the point of skipping UpdateDevice.
+                                call gpuCheck(hipMemset(ptr,0,neededBytes))
+
+                              endsubroutine EnsureDeviceBuffer
+
+                              subroutine gpuCheck(gpuError_t)
+                                use iso_c_binding
+                                implicit none
+                                integer(c_int) :: gpuError_t
+
+                                if(gpuError_t /= hipSuccess) then
+                                  write(*,*) "GPU ERROR: Error code = ",gpuError_t
+                                  call exit(gpuError_t)
+                                endif
+                              endsubroutine gpuCheck
+
+                              function GPUAvailable() result(avail)
+                                implicit none
+                                logical :: avail
+                                ! Local
+                                integer(c_int) :: gpuCount
+                                integer(kind(hipSuccess)) :: err
+
+                                err = hipGetDeviceCount(gpuCount)
+                                if(gpuCount > 0 .and. err == hipSuccess) then
+                                  avail = .true.
+                                else
+                                  avail = .false.
+                                endif
+
+                              endfunction GPUAvailable
+
+                              endmodule SELF_GPU

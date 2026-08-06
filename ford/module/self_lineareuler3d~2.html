@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>self_LinearEuler3D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>self_LinearEuler3D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.3% of total for modules and submodules.">64 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_LinearEuler3D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_lineareuler3d.f90~2.html'>SELF_LinearEuler3D.f90</a></li>
+     <li class="active">self_LinearEuler3D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
+  <div id="inters-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#interface-boundaryflux_lineareuler3d_gpu">boundaryflux_LinearEuler3D_gpu</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#interface-fluxmethod_lineareuler3d_gpu">fluxmethod_LinearEuler3D_gpu</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#interface-hbc3d_radiation_lineareuler3d_gpu">hbc3d_radiation_lineareuler3d_gpu</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#type-lineareuler3d~2">LinearEuler3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-additionalinit_lineareuler3d">AdditionalInit_LinearEuler3D</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-boundaryflux_lineareuler3d">boundaryflux_LinearEuler3D</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-fluxmethod_lineareuler3d">fluxmethod_LinearEuler3D</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-hbc3d_radiation_lineareuler3d_gpu_wrapper">hbc3d_Radiation_LinearEuler3D_GPU_wrapper</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_gpu~2.html'>SELF_GPU</a></li>
+    <li><a href='../module/self_lineareuler3d_t.html'>self_LinearEuler3D_t</a></li>
+    <li><a href='../module/self_boundaryconditions.html'>SELF_BoundaryConditions</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_lineareuler3d~2~~UsesGraph Pages: 1 -->
+<svg id="moduleself_lineareuler3d2UsesGraph" width="641pt" height="385pt"
+ viewBox="0.00 0.00 641.00 385.21" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_lineareuler3d~2~~UsesGraph" class="graph" transform="scale(0.24 0.24) rotate(0) translate(4 1586.13)">
+<title>module~~self_lineareuler3d~2~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1586.13 2642,-1586.13 2642,4 -4,4"/>
+<!-- module~self_lineareuler3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node1" class="node">
+<title>module~self_lineareuler3d~2</title>
+<polygon fill="none" stroke="black" points="2638,-146 2525,-146 2525,-122 2638,-122 2638,-146"/>
+<text text-anchor="middle" x="2581.5" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50">self_LinearEuler3D</text>
+</g>
+<!-- module~self_gpu~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node2" class="node">
+<title>module~self_gpu~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node2"><a xlink:href=".././module/self_gpu~2.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="370,-124 305,-124 305,-100 370,-100 370,-124"/>
+<text text-anchor="middle" x="337.5" y="-109.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge1" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2524.82,-130.42C2439.92,-125.21 2272.96,-115.95 2131,-114"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2129,-114C1759.46,-102.67 1674.71,0 1305,0 1305,0 1305,0 624,0 522.21,0 413.23,-62.46 364.57,-94.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="362.34,-91.37 355.93,-99.8 366.2,-97.21 362.34,-91.37"/>
+</g>
+<!-- module~self_lineareuler3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node3" class="node">
+<title>module~self_lineareuler3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node3"><a xlink:href=".././module/self_lineareuler3d_t.html" xlink:title="self_LinearEuler3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2489,-701 2367,-701 2367,-677 2489,-677 2489,-701"/>
+<text text-anchor="middle" x="2428" y="-686.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">self_LinearEuler3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge3" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_lineareuler3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2577.19,-146.11C2557.96,-216.56 2460.47,-573.72 2435.06,-666.79"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2431.65,-666.01 2432.39,-676.57 2438.4,-667.85 2431.65,-666.01"/>
+</g>
+<!-- module~self_boundaryconditions -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node4" class="node">
+<title>module~self_boundaryconditions</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node4"><a xlink:href=".././module/self_boundaryconditions.html" xlink:title="SELF_BoundaryConditions">
+<polygon fill="#337ab7" stroke="#337ab7" points="1675,-241 1524,-241 1524,-217 1675,-217 1675,-241"/>
+<text text-anchor="middle" x="1599.5" y="-226.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_BoundaryConditions</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d~2&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge2" class="edge">
+<title>module~self_lineareuler3d~2&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2129,-114C2055.05,-112.99 2040.83,-147.74 1967,-152"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1965,-152C1849.45,-158.67 1717.34,-193.64 1648.28,-214.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1647.14,-210.77 1638.56,-216.99 1649.14,-217.48 1647.14,-210.77"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node5" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node5"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-778 5,-778 5,-754 89,-754 89,-778"/>
+<text text-anchor="middle" x="47" y="-763.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge4" class="edge">
+<title>module~self_gpu~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M304.82,-122.05C293.98,-126.18 282.05,-131.53 272,-138 198.76,-185.11 170.81,-196.07 130,-273 85.44,-356.99 57.08,-658.49 49.84,-743.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="46.34,-743.38 48.99,-753.63 53.31,-743.96 46.34,-743.38"/>
+</g>
+<!-- module~self_gpu_enums~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node9" class="node">
+<title>module~self_gpu_enums~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node9"><a xlink:href=".././module/self_gpu_enums~2.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="236,-306 130,-306 130,-282 236,-282 236,-306"/>
+<text text-anchor="middle" x="183" y="-291.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge5" class="edge">
+<title>module~self_gpu~2&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M304.94,-119.97C293.61,-123.99 281.35,-129.8 272,-138 229.4,-175.38 202.85,-238.62 191.09,-271.94"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="187.7,-271.04 187.79,-281.63 194.33,-273.29 187.7,-271.04"/>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge8" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2129,-152C2057.12,-147.85 2038.88,-147.85 1967,-152"/>
+</g>
+<!-- module~self_dgmodel3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node6" class="node">
+<title>module~self_dgmodel3d~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node6"><a xlink:href=".././module/self_dgmodel3d~2.html" xlink:title="SELF_DGModel3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2331,-914 2224,-914 2224,-890 2331,-890 2331,-914"/>
+<text text-anchor="middle" x="2277.5" y="-899.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge7" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_dgmodel3d~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2418.59,-701.06C2394.25,-735.98 2323.5,-837.45 2292.89,-881.36"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="2289.85,-879.6 2287,-889.81 2295.59,-883.6 2289.85,-879.6"/>
+</g>
+<!-- module~self_model -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node7" class="node">
+<title>module~self_model</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node7"><a xlink:href=".././module/self_model.html" xlink:title="SELF_Model">
+<polygon fill="#337ab7" stroke="#337ab7" points="833.5,-242 757.5,-242 757.5,-218 833.5,-218 833.5,-242"/>
+<text text-anchor="middle" x="795.5" y="-227.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Model</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_model -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge9" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2426.24,-676.87C2420.61,-598.48 2378.36,-166.28 2131,-152"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2129,-152C2063.74,-130.26 1862.38,-114 1786.5,-114 1786.5,-114 1786.5,-114 1168.5,-114 1054.55,-114 1020.51,-121.24 919,-173 900.19,-182.59 901.52,-193.85 883,-204 870.84,-210.67 856.75,-215.83 843.53,-219.73"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="842.33,-216.44 833.63,-222.48 844.2,-223.18 842.33,-216.44"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node8" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node8"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1205,-1470 1134,-1470 1134,-1446 1205,-1446 1205,-1470"/>
+<text text-anchor="middle" x="1169.5" y="-1455.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_lineareuler3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge6" class="edge">
+<title>module~self_lineareuler3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M2425.15,-701.06C2409.83,-798.77 2300.33,-1457 2131,-1457 2131,-1457 2131,-1457 1438,-1457 1359.63,-1457 1268.35,-1457.43 1215.23,-1457.73"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1215.11,-1454.23 1205.13,-1457.79 1215.15,-1461.23 1215.11,-1454.23"/>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge11" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1589.09,-216.76C1555.53,-174.61 1436.62,-38 1305,-38 1305,-38 1305,-38 1168.5,-38 1057.1,-38 1023.07,-22.26 919,-62 855.89,-86.1 863.5,-160.69 796.5,-152"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M794.5,-152C679.33,-136.33 362.26,-102.77 272,-176 222.44,-216.21 264.35,-257.83 236,-315 219.41,-348.46 206,-350.83 184,-381"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M182,-381C94.37,-500.13 60.52,-681.28 51.04,-743.84"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="47.56,-743.39 49.58,-753.79 54.49,-744.4 47.56,-743.39"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node10" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node10"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="672,-433 578,-433 578,-409 672,-409 672,-433"/>
+<text text-anchor="middle" x="625" y="-418.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge10" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1168.5,-304C1093.03,-304 1078.3,-337.01 1003,-342"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1001,-342C870.47,-350.65 830.83,-325 708,-370 689.71,-376.7 688.5,-384.64 672,-395 667.24,-397.99 662.13,-401.03 657.1,-403.94"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="655.2,-400.99 648.24,-408.98 658.66,-407.08 655.2,-400.99"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node11" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node11"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="403,-1310 272,-1310 272,-1286 403,-1286 403,-1310"/>
+<text text-anchor="middle" x="337.5" y="-1295.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_boundaryconditions&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge12" class="edge">
+<title>module~self_boundaryconditions&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1557.6,-241.05C1481.92,-262.25 1314.59,-304 1170.5,-304"/>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M1168.5,-304C925.14,-313.03 754.72,-174.27 626,-381"/>
+</g>
+<!-- module~self_dgmodel3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node12" class="node">
+<title>module~self_dgmodel3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node12"><a xlink:href=".././module/self_dgmodel3d_t.html" xlink:title="SELF_DGModel3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="2188,-1126 2072,-1126 2072,-1102 2188,-1102 2188,-1126"/>
+<text text-anchor="middle" x="2130" y="-1111.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DGModel3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge13" class="edge">
+<title>module~self_dgmodel3d~2&#45;&gt;module~self_dgmodel3d_t</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M2268.26,-914.01C2244.41,-948.76 2175.09,-1049.76 2145.1,-1093.45"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="2142.1,-1091.64 2139.33,-1101.86 2147.87,-1095.6 2142.1,-1091.64"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge17" class="edge">
+<title>module~self_model&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M782.79,-242.27C765.37,-260.85 732.12,-297.58 708,-332 689.49,-358.41 694.86,-372.25 672,-395 668.93,-398.06 665.42,-400.87 661.75,-403.43"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="659.61,-400.64 653,-408.92 663.33,-406.57 659.61,-400.64"/>
+</g>
+<!-- module~self_model&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge18" class="edge">
+<title>module~self_model&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M757.41,-235.26C741.05,-238.98 722.33,-245.31 708,-256 654.75,-295.74 662.39,-325.41 626,-381"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M624,-381C611.88,-399.51 591,-382.1 578,-400 517.09,-483.86 562.73,-763.45 542,-865 503.36,-1054.35 540.37,-1141.08 403,-1277 401.76,-1278.22 400.45,-1279.38 399.08,-1280.46"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="397.12,-1277.57 390.68,-1285.98 400.96,-1283.42 397.12,-1277.57"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node13" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="656.5,-513 593.5,-513 593.5,-489 656.5,-489 656.5,-513"/>
+<text text-anchor="middle" x="625" y="-498.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_model&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge15" class="edge">
+<title>module~self_model&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M785.65,-242.21C768.77,-265.89 731.58,-320.15 708,-370 686.9,-414.6 703.53,-437.06 672,-475 669.57,-477.92 666.72,-480.58 663.65,-482.98"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="661.47,-480.24 655.16,-488.75 665.4,-486.03 661.47,-480.24"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node14" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node14"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="374,-662 301,-662 301,-638 374,-638 374,-662"/>
+<text text-anchor="middle" x="337.5" y="-647.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_model&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge16" class="edge">
+<title>module~self_model&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M624,-267C603.32,-277.2 594.46,-274.85 578,-291 554.16,-314.41 560.76,-329.35 542,-357 501.77,-416.28 480.33,-422.48 439,-481 403.13,-531.79 367.43,-595.87 349.81,-628.61"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="346.57,-627.24 344.94,-637.71 352.74,-630.54 346.57,-627.24"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node15" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-662 156,-662 156,-638 210,-638 210,-662"/>
+<text text-anchor="middle" x="183" y="-647.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_model&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge14" class="edge">
+<title>module~self_model&#45;&gt;HDF5</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M757.31,-232.99C721.99,-236.99 668.17,-246.19 626,-267"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M624,-267C603.32,-277.2 598.11,-279.72 578,-291 538.88,-312.94 531.74,-323.17 491.5,-343"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M489.5,-343C468.61,-353.3 459.13,-345.29 439,-357 384.53,-388.67 393.07,-425.5 338.5,-457"/>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M336.5,-457C264.75,-498.42 214.17,-587.9 193.88,-628.81"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="190.69,-627.36 189.48,-637.89 196.99,-630.41 190.69,-627.36"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge19" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M624,-1566C400.34,-1553.57 250.75,-1654.68 130,-1466 57.16,-1352.19 128.65,-989.61 94,-859 87,-832.61 72.16,-804.87 61.22,-786.62"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="64.14,-784.69 55.92,-778.01 58.18,-788.36 64.14,-784.69"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node16" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node16"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="231,-1350 135,-1350 135,-1326 231,-1326 231,-1350"/>
+<text text-anchor="middle" x="183" y="-1335.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge20" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1141.31,-1470.01C1062.28,-1503.49 825.52,-1593.64 626,-1566"/>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M624,-1566C540.62,-1555.69 342.04,-1474.4 272,-1428 242.67,-1408.57 215.43,-1377.98 199.24,-1357.96"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="201.96,-1355.75 193.01,-1350.08 196.47,-1360.1 201.96,-1355.75"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node17" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node17"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1085,-1390 919,-1390 919,-1366 1085,-1366 1085,-1390"/>
+<text text-anchor="middle" x="1002" y="-1375.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge21" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1143.36,-1445.85C1115.01,-1432.14 1068.74,-1409.78 1037.13,-1394.5"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1038.36,-1391.2 1027.83,-1390 1035.31,-1397.51 1038.36,-1391.2"/>
+</g>
+<!-- module~self_gpu_enums~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge22" class="edge">
+<title>module~self_gpu_enums~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M170.63,-306.44C158.67,-320.23 140.19,-343.6 130,-367 71.24,-501.89 53.83,-681.06 49.37,-743.45"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="45.86,-743.49 48.68,-753.7 52.84,-743.96 45.86,-743.49"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge24" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M594.84,-433.25C588.63,-436.93 582.57,-441.5 578,-447 546.47,-484.94 574.85,-515.2 542,-552 525.45,-570.54 511.74,-561.58 491.5,-576"/>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M489.5,-576C469.26,-590.42 461.35,-589.13 439,-600 416.41,-610.99 391.09,-623.59 371.51,-633.39"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="369.77,-630.35 362.4,-637.96 372.91,-636.6 369.77,-630.35"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge23" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M577.81,-417.23C518.79,-414.49 415.12,-416.74 338.5,-457"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge25" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M290.74,-1310C274.68,-1314.21 256.46,-1318.99 239.68,-1323.4"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="238.77,-1320.02 229.99,-1325.94 240.55,-1326.79 238.77,-1320.02"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node18" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node18"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-892 0,-892 0,-868 94,-868 94,-892"/>
+<text text-anchor="middle" x="47" y="-877.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge26" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00da" stroke-dasharray="5,2" d="M320.66,-1310.13C306.18,-1321.96 285.1,-1341.17 272,-1362 245.97,-1403.41 275.84,-1437.63 236,-1466 197.62,-1493.33 165.55,-1496.92 130,-1466 86.44,-1428.11 56.15,-1004.81 49.41,-902.27"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="52.9,-901.88 48.76,-892.13 45.91,-902.34 52.9,-901.88"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_boundaryconditions -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge27" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_boundaryconditions</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2129.1,-1102C2129.22,-1008.83 2117.23,-404.13 1786.5,-382"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1784.5,-382C1710.55,-355.63 1645.51,-284.82 1616.52,-249.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1618.95,-246.98 1609.95,-241.39 1613.5,-251.37 1618.95,-246.98"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_model -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge35" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_model</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1303,-190C1230.3,-137.8 954.63,-193.48 843.43,-218.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="842.47,-215.45 833.5,-221.1 844.03,-222.27 842.47,-215.45"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge36" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1168.5,-342C1095.01,-345.07 1076.26,-335.37 1003,-342"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge37" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2125.11,-1126.29C2114.94,-1156.69 2084.95,-1236.46 2036,-1285 1946.77,-1373.48 1912.16,-1418 1786.5,-1418 1786.5,-1418 1786.5,-1418 1168.5,-1418 1057.29,-1418 1018.2,-1449.28 919,-1399 897.07,-1387.89 904.08,-1369.64 883,-1357 870.46,-1349.48 640.62,-1300.01 626,-1300"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge33" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1168.5,-342C1144.66,-342.99 1140.21,-352.85 1121,-367 1102.78,-380.42 1104.79,-392.02 1085,-403 1052.29,-421.15 1039.87,-415.7 1003,-422"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-422C878.74,-442.9 735.67,-475.26 666.94,-491.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="665.9,-487.95 656.96,-493.64 667.49,-494.76 665.9,-487.95"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge34" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-342C1327.53,-298.07 1289.29,-337.04 1170.5,-342"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1168.5,-342C1131.06,-345.79 1122.5,-331.12 1085,-328 917.96,-314.09 874.12,-315.7 708,-338 649.33,-345.87 625.29,-331.39 578,-367 551.31,-387.1 561.59,-405.93 542,-433 484.06,-513.08 399.01,-594.71 359.77,-630.81"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="357.14,-628.48 352.12,-637.81 361.86,-633.64 357.14,-628.48"/>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge32" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1784.5,-382C1639.31,-330.24 1581.95,-402.08 1440,-342"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-342C1353.57,-311.52 1376.36,-244.46 1305,-190"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1303,-190C1238.09,-140.47 1202.63,-163.38 1121,-165 1031.17,-166.78 1008.74,-168.62 919,-173 788.71,-179.36 756.44,-190 626,-190 626,-190 626,-190 489.5,-190 276.69,-190 203.24,-535.85 187.48,-627.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="184.02,-627.26 185.84,-637.7 190.92,-628.4 184.02,-627.26"/>
+</g>
+<!-- module~self_mappedscalar_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node19" class="node">
+<title>module~self_mappedscalar_3d</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node19"><a xlink:href=".././module/self_mappedscalar_3d.html" xlink:title="SELF_MappedScalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2036,-1015 1896,-1015 1896,-991 2036,-991 2036,-1015"/>
+<text text-anchor="middle" x="1966" y="-1000.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge28" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedscalar_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2111.35,-1101.91C2082.75,-1082.31 2026.12,-1043.51 1992.92,-1020.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1994.85,-1017.84 1984.62,-1015.08 1990.89,-1023.61 1994.85,-1017.84"/>
+</g>
+<!-- module~self_mappedvector_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node20" class="node">
+<title>module~self_mappedvector_3d~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node20"><a xlink:href=".././module/self_mappedvector_3d~2.html" xlink:title="SELF_MappedVector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="2036,-1276 1896,-1276 1896,-1252 2036,-1252 2036,-1276"/>
+<text text-anchor="middle" x="1966" y="-1261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge29" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mappedvector_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2123.02,-1126.02C2110.29,-1150.47 2078.18,-1206.34 2036,-1238 2031.03,-1241.73 2025.46,-1244.98 2019.7,-1247.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2018.26,-1244.61 2010.55,-1251.88 2021.11,-1251.01 2018.26,-1244.61"/>
+</g>
+<!-- module~self_geometry_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node21" class="node">
+<title>module~self_geometry_3d</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node21"><a xlink:href=".././module/self_geometry_3d.html" xlink:title="SELF_Geometry_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1658,-472 1541,-472 1541,-448 1658,-448 1658,-472"/>
+<text text-anchor="middle" x="1599.5" y="-457.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge30" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1784.5,-382C1730.74,-378.4 1724.84,-413.54 1675,-434 1666.06,-437.67 1656.4,-441.29 1647.09,-444.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1645.83,-441.34 1637.55,-447.95 1648.15,-447.95 1645.83,-441.34"/>
+</g>
+<!-- module~self_mesh_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node22" class="node">
+<title>module~self_mesh_3d</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node22"><a xlink:href=".././module/self_mesh_3d.html" xlink:title="SELF_Mesh_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1484.5,-1238 1393.5,-1238 1393.5,-1214 1484.5,-1214 1484.5,-1238"/>
+<text text-anchor="middle" x="1439" y="-1223.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge31" class="edge">
+<title>module~self_dgmodel3d_t&#45;&gt;module~self_mesh_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M2072.97,-1126.06C1987.48,-1144.12 1819.19,-1178.4 1675,-1200 1613.54,-1209.21 1542.59,-1216.62 1494.86,-1221.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1494.38,-1217.67 1484.75,-1222.08 1495.03,-1224.64 1494.38,-1217.67"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge40" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M300.75,-650C276.67,-650 245,-650 220.72,-650"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="220.47,-646.5 210.47,-650 220.47,-653.5 220.47,-646.5"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge39" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M300.73,-657.04C289.95,-660.9 279.11,-666.84 272,-676 270.73,-677.63 201.97,-1201.05 186.9,-1315.9"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="183.41,-1315.61 185.58,-1325.98 190.35,-1316.52 183.41,-1315.61"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge41" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M300.91,-661.73C291.19,-665.62 280.89,-670.41 272,-676 249.17,-690.34 119.23,-812.57 68.39,-860.67"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="65.79,-858.3 60.94,-867.72 70.6,-863.39 65.79,-858.3"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node23" class="node">
+<title>mpi</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node23"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-932 156,-932 156,-908 210,-908 210,-932"/>
+<text text-anchor="middle" x="183" y="-917.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge38" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M300.9,-657.17C290.13,-661.04 279.25,-666.96 272,-676 210.59,-752.63 294.28,-814.96 236,-894 231.73,-899.79 225.82,-904.36 219.5,-907.96"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="217.55,-905.02 210.1,-912.55 220.62,-911.31 217.55,-905.02"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge42" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M181.02,-1325.84C176.29,-1270.67 153.67,-1038.75 94,-859 85.4,-833.09 70.86,-805.26 60.42,-786.86"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="63.43,-785.07 55.4,-778.16 57.37,-788.57 63.43,-785.07"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge43" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M178.42,-1325.75C160.21,-1263.53 77.94,-982.35 54.35,-901.69"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="57.7,-900.69 51.53,-892.08 50.98,-902.66 57.7,-900.69"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node24" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node24"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="883,-1390 708,-1390 708,-1366 883,-1366 883,-1390"/>
+<text text-anchor="middle" x="795.5" y="-1375.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge44" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#4800ff" stroke-dasharray="5,2" d="M918.71,-1378C910.42,-1378 901.95,-1378 893.53,-1378"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="893.3,-1374.5 883.3,-1378 893.3,-1381.5 893.3,-1374.5"/>
+</g>
+<!-- module~self_mappedscalar_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node25" class="node">
+<title>module~self_mappedscalar_3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node25"><a xlink:href=".././module/self_mappedscalar_3d_t.html" xlink:title="SELF_MappedScalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1860,-834 1711,-834 1711,-810 1860,-810 1860,-834"/>
+<text text-anchor="middle" x="1785.5" y="-819.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_3d&#45;&gt;module~self_mappedscalar_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge45" class="edge">
+<title>module~self_mappedscalar_3d&#45;&gt;module~self_mappedscalar_3d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1953.01,-990.84C1922.65,-960.06 1842.54,-878.83 1805.63,-841.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1807.95,-838.77 1798.44,-834.1 1802.97,-843.68 1807.95,-838.77"/>
+</g>
+<!-- module~self_mappedvector_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node29" class="node">
+<title>module~self_mappedvector_3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node29"><a xlink:href=".././module/self_mappedvector_3d_t.html" xlink:title="SELF_MappedVector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1860,-1276 1711,-1276 1711,-1252 1860,-1252 1860,-1276"/>
+<text text-anchor="middle" x="1785.5" y="-1261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedVector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge46" class="edge">
+<title>module~self_mappedvector_3d~2&#45;&gt;module~self_mappedvector_3d_t</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1895.99,-1264C1887.53,-1264 1878.81,-1264 1870.16,-1264"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1870.06,-1260.5 1860.06,-1264 1870.06,-1267.5 1870.06,-1260.5"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge50" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1438,-1034C1355.03,-1080.15 720.94,-1300 626,-1300"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M624,-1300C552.46,-1300.21 470.83,-1299.55 413.24,-1298.93"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="413.17,-1295.43 403.13,-1298.82 413.09,-1302.43 413.17,-1295.43"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge52" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1303,-1034C1147.74,-1016.34 778.84,-1191.48 626,-1224"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M624,-1224C565.29,-1228.62 549.53,-1213.96 491.5,-1224"/>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_mesh_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge47" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_mesh_3d</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1598.14,-472.14C1595.4,-558.13 1575.41,-1075.28 1488,-1200 1485.92,-1202.96 1483.4,-1205.62 1480.61,-1207.99"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1478.32,-1205.33 1472.18,-1213.97 1482.36,-1211.04 1478.32,-1205.33"/>
+</g>
+<!-- module~self_tensor_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node26" class="node">
+<title>module~self_tensor_3d~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node26"><a xlink:href=".././module/self_tensor_3d~2.html" xlink:title="SELF_Tensor_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1488,-432 1390,-432 1390,-408 1488,-408 1488,-432"/>
+<text text-anchor="middle" x="1439" y="-417.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_tensor_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge48" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_tensor_3d~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1550.94,-448C1534.25,-443.79 1515.31,-439.01 1497.87,-434.6"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1498.35,-431.12 1487.8,-432.06 1496.63,-437.9 1498.35,-431.12"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node27" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node27"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="672,-972 578,-972 578,-948 672,-948 672,-972"/>
+<text text-anchor="middle" x="625" y="-957.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge51" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1438,-1034C1386.34,-1062.73 1363.55,-1042.11 1305,-1034"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1303,-1034C1279.86,-1030.79 1273.84,-1027.33 1254,-1015 1235.56,-1003.55 1238.08,-990.24 1218,-982 1122.24,-942.69 811.04,-951.6 682.42,-957.2"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="682.22,-953.7 672.38,-957.65 682.53,-960.7 682.22,-953.7"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node28" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node28"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="830,-702 761,-702 761,-678 830,-678 830,-702"/>
+<text text-anchor="middle" x="795.5" y="-687.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_data -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge49" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1303,-841C1233.24,-777.82 950.06,-718.94 840.28,-698.03"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="840.69,-694.55 830.21,-696.13 839.39,-701.43 840.69,-694.55"/>
+</g>
+<!-- module~self_vector_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node30" class="node">
+<title>module~self_vector_3d~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node30"><a xlink:href=".././module/self_vector_3d~2.html" xlink:title="SELF_Vector_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1352.5,-1006 1255.5,-1006 1255.5,-982 1352.5,-982 1352.5,-1006"/>
+<text text-anchor="middle" x="1304" y="-991.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_vector_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge53" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_vector_3d~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1438,-1034C1421.03,-1043.44 1372.75,-1025.16 1339.28,-1010.31"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1340.41,-1006.97 1329.85,-1006.04 1337.52,-1013.35 1340.41,-1006.97"/>
+</g>
+<!-- module~self_scalar_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node31" class="node">
+<title>module~self_scalar_3d~2</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node31"><a xlink:href=".././module/self_scalar_3d~2.html" xlink:title="SELF_Scalar_3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1218,-702 1121,-702 1121,-678 1218,-678 1218,-702"/>
+<text text-anchor="middle" x="1169.5" y="-687.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_3d&#45;&gt;module~self_scalar_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge54" class="edge">
+<title>module~self_geometry_3d&#45;&gt;module~self_scalar_3d~2</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1597.39,-472.15C1590.02,-549.82 1545.03,-975.58 1440,-1034"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1438,-1034C1346.96,-1084.64 1382.21,-910.93 1305,-841"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1303,-841C1256.18,-798.59 1209.29,-740.61 1185.86,-710.31"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1188.49,-708 1179.63,-702.19 1182.94,-712.26 1188.49,-708"/>
+</g>
+<!-- module~self_mesh_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node32" class="node">
+<title>module~self_mesh_3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node32"><a xlink:href=".././module/self_mesh_3d_t.html" xlink:title="SELF_Mesh_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1354,-1276 1254,-1276 1254,-1252 1354,-1252 1354,-1276"/>
+<text text-anchor="middle" x="1304" y="-1261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge55" class="edge">
+<title>module~self_mesh_3d&#45;&gt;module~self_mesh_3d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1395.92,-1238.02C1383.55,-1241.56 1369.87,-1245.47 1356.95,-1249.16"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1355.92,-1245.81 1347.26,-1251.92 1357.84,-1252.54 1355.92,-1245.81"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge56" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M489.5,-1376C414.37,-1375.84 413.08,-1442.88 338.5,-1452"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M336.5,-1452C269.22,-1460.23 230.82,-1501 184,-1452"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M182,-1452C149.28,-1417.76 143.58,-1404.37 130,-1359 66.11,-1145.56 152.48,-1073.98 94,-859 86.83,-832.65 72.03,-804.9 61.14,-786.65"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="64.07,-784.73 55.86,-778.02 58.1,-788.38 64.07,-784.73"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge59" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M707.97,-1377.23C647.37,-1376.73 564.49,-1376.16 491.5,-1376"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M489.5,-1376C438.16,-1375.89 386.85,-1339.89 359.25,-1316.85"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="361.34,-1314.03 351.47,-1310.16 356.78,-1319.34 361.34,-1314.03"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge57" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M336.5,-1376C320.08,-1366.91 277.27,-1356.61 241.18,-1349.03"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="241.7,-1345.57 231.2,-1346.97 240.29,-1352.42 241.7,-1345.57"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge58" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M489.5,-1376C422.39,-1375.85 397.2,-1408.52 338.5,-1376"/>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M336.5,-1376C303.04,-1357.46 291.41,-1351.97 272,-1319 196.64,-1190.98 185.68,-1005.39 184.19,-942.1"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="187.69,-942 184.02,-932.06 180.69,-942.12 187.69,-942"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge60" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M769.4,-1365.78C749.71,-1354.89 723.17,-1337.12 708,-1314 689.4,-1285.65 644.22,-1055.31 630.21,-982.19"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="633.62,-981.38 628.31,-972.22 626.75,-982.7 633.62,-981.38"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge61" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1785.02,-809.91C1786.61,-757.33 1785.61,-546.47 1675,-439 1650.49,-415.19 1629.78,-437.62 1600.5,-420"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1598.5,-420C1536.25,-382.54 1507.74,-406.27 1440,-380"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-380C1268.85,-314.4 1257.91,-229.93 1085,-175 962.41,-136.06 923,-175.28 796.5,-152"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge66" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-380C1254.72,-315.7 1195.9,-399.29 1003,-422"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge68" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-1186C1077.97,-1216.02 986.17,-1195.66 626,-1224"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge62" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-1186C1415.06,-1186.11 1406.59,-1189.15 1390,-1205 1361.8,-1231.93 1383.45,-1259.45 1354,-1285 1289.88,-1340.63 1251.39,-1312.26 1170.5,-1338"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge63" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1778.38,-809.96C1751.75,-757.56 1645.78,-549.08 1611.36,-481.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1614.3,-479.42 1606.65,-472.09 1608.06,-482.59 1614.3,-479.42"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge64" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_mesh_3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1598.5,-1186C1589.79,-1192.11 1536.88,-1204.79 1494.56,-1214.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1493.61,-1210.87 1484.61,-1216.45 1495.13,-1217.7 1493.61,-1210.87"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_tensor_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge67" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_tensor_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1598.5,-420C1567.93,-400.46 1526.8,-401.05 1494.1,-406.21"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1493.49,-402.77 1484.24,-407.95 1494.7,-409.66 1493.49,-402.77"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge65" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1782.56,-834.07C1773.46,-886.43 1729.82,-1095.39 1600.5,-1186"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1598.5,-1186C1569.65,-1206.21 1475.22,-1185.83 1440,-1186"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1438,-1186C1331.32,-1186.53 1318.82,-1124.89 1218,-1090 1124.68,-1057.71 1101.08,-1045.41 1003,-1034"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1001,-1034C888.22,-1009.03 755.44,-983.8 682,-970.22"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="682.51,-966.75 672.04,-968.38 681.23,-973.63 682.51,-966.75"/>
+</g>
+<!-- module~self_mappedscalar_3d_t&#45;&gt;module~self_scalar_3d~2 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge69" class="edge">
+<title>module~self_mappedscalar_3d_t&#45;&gt;module~self_scalar_3d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1598.5,-420C1569.71,-401.6 1555.01,-424.64 1524,-439 1384.6,-503.53 1242.8,-624.69 1191.02,-671.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1188.57,-668.68 1183.5,-677.98 1193.26,-673.87 1188.57,-668.68"/>
+</g>
+<!-- module~self_tensor_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node33" class="node">
+<title>module~self_tensor_3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node33"><a xlink:href=".././module/self_tensor_3d_t.html" xlink:title="SELF_Tensor_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1055.5,-394 948.5,-394 948.5,-370 1055.5,-370 1055.5,-394"/>
+<text text-anchor="middle" x="1002" y="-379.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_3d~2&#45;&gt;module~self_tensor_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge70" class="edge">
+<title>module~self_tensor_3d~2&#45;&gt;module~self_tensor_3d_t</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1389.79,-415.79C1310.74,-408.88 1153.62,-395.16 1065.91,-387.5"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1066.1,-384 1055.83,-386.61 1065.49,-390.97 1066.1,-384"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge71" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M618.38,-947.69C604.09,-916.99 565.87,-838.41 542,-823 402.73,-733.11 194.48,-745.99 99.07,-758.05"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="98.56,-754.59 89.1,-759.36 99.47,-761.53 98.56,-754.59"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge72" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M577.85,-951.53C551.57,-948.74 518.6,-948.79 491.5,-960"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge73" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M577.77,-950.8C566.14,-948.85 553.65,-947.06 542,-946 519.2,-943.93 151.69,-948.33 130,-941 105.38,-932.68 82.09,-913.91 66.67,-899.38"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="68.95,-896.72 59.35,-892.24 64.06,-901.73 68.95,-896.72"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node37" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node37"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="542,-856 439,-856 439,-832 542,-832 542,-856"/>
+<text text-anchor="middle" x="490.5" y="-841.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge74" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M615.29,-947.96C601.42,-929.41 572.71,-893.52 542,-870 537.8,-866.78 533.15,-863.78 528.41,-861.03"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="529.76,-857.78 519.3,-856.08 526.42,-863.93 529.76,-857.78"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge75" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M624,-617C565.31,-621.99 550.35,-611.59 491.5,-614"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M489.5,-614C392.68,-617.97 358.59,-585.51 272,-629 250.03,-640.04 256.2,-656.99 236,-671 215.78,-685.02 206.84,-680.84 184,-690"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M182,-690C159.69,-698.67 151.5,-693.48 130,-704 106.93,-715.29 83.88,-733.48 68.13,-747.25"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="65.71,-744.71 60.59,-753.98 70.38,-749.93 65.71,-744.71"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge78" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M780.91,-677.89C761.76,-660.08 727.07,-624.93 708,-588 678.32,-530.53 711.3,-498.36 672,-447 669.82,-444.15 667.22,-441.55 664.4,-439.22"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="666.15,-436.17 655.96,-433.27 662.12,-441.89 666.15,-436.17"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge76" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M760.68,-686.28C743.32,-682.89 722.77,-676.4 708,-664 696.15,-654.05 654.62,-564.34 635.62,-522.41"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="638.71,-520.76 631.41,-513.09 632.34,-523.64 638.71,-520.76"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge81" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M489.5,-614C452.61,-615.51 411.95,-625.72 382.13,-634.88"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="380.94,-631.58 372.45,-637.93 383.04,-638.26 380.94,-631.58"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge77" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M773.59,-677.94C735.62,-656.55 656.42,-614.41 626,-617"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M624,-617C601.02,-618.95 597.09,-605.94 578,-593 560.52,-581.15 559.69,-573.52 542,-562 521.18,-548.44 513.84,-548.88 491.5,-538"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge80" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M624,-617C473.85,-629.76 646.36,-837.29 542,-946 525.87,-962.8 513.02,-951.1 491.5,-960"/>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M489.5,-960C322.63,-1029.03 221.26,-1246.82 192.49,-1316.4"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="189.15,-1315.32 188.64,-1325.91 195.64,-1317.96 189.15,-1315.32"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge79" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M771.47,-702.19C752.21,-713.4 725.21,-731.65 708,-754 663.25,-812.1 639.69,-897.83 630.57,-937.87"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="627.14,-937.16 628.41,-947.68 633.98,-938.66 627.14,-937.16"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge82" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1438,-1380C1380.91,-1364.69 1363.49,-1388.51 1305,-1380"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1303,-1380C1258.23,-1373.48 1261.33,-1336.99 1218,-1324 1176.7,-1311.62 1163.97,-1320.51 1121,-1324 1030.33,-1331.36 998.3,-1312.43 919,-1357 897.57,-1369.05 904.81,-1387.66 883,-1399 667.29,-1511.19 579.84,-1422.48 338.5,-1452"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge85" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1598.5,-1380C1528.16,-1383.88 1508.04,-1398.24 1440,-1380"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1438,-1380C1369.01,-1361.5 1408.84,-1288.76 1354,-1243 1336.07,-1228.04 1321.51,-1240.52 1305,-1224"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1303,-1224C1209.32,-1130.28 1166.03,-773.84 1085,-669 1017.1,-581.15 987.1,-560.63 883,-522 810.56,-495.12 718.97,-494.94 666.98,-497.68"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="666.6,-494.19 656.82,-498.28 667.01,-501.18 666.6,-494.19"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge87" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1168.5,-1380C1130.66,-1384.13 1122.82,-1394.75 1085,-1399 725.9,-1439.34 619.56,-1488.88 272,-1390 248.02,-1383.18 223.85,-1368.18 206.93,-1356.04"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="208.9,-1353.14 198.78,-1350 204.73,-1358.77 208.9,-1353.14"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge83" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1303,-1380C1244.73,-1371.52 1229.04,-1373.61 1170.5,-1380"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1168.5,-1380C1144.88,-1382.58 1119.25,-1383.28 1095.38,-1383.05"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1095.32,-1379.55 1085.26,-1382.9 1095.21,-1386.55 1095.32,-1379.55"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge88" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_geometry_3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1781.68,-1251.69C1761.01,-1161.36 1632.76,-600.94 1605.56,-482.12"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1608.9,-481 1603.25,-472.03 1602.07,-482.56 1608.9,-481"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge84" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_mesh_3d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1773.95,-1276.31C1747.89,-1305.31 1677.04,-1375.77 1600.5,-1380"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1598.5,-1380C1522.98,-1384.17 1469.78,-1290.59 1449.31,-1247.34"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1452.47,-1245.85 1445.12,-1238.22 1446.11,-1248.77 1452.47,-1245.85"/>
+</g>
+<!-- module~self_mappedvector_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge86" class="edge">
+<title>module~self_mappedvector_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1303,-1224C1084.94,-1045.53 954.36,-1141.79 708,-1005 690.28,-995.16 689.71,-986.85 672,-977 671.8,-976.89 671.61,-976.78 671.41,-976.68"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="672.66,-973.39 662.14,-972.13 669.58,-979.68 672.66,-973.39"/>
+</g>
+<!-- module~self_vector_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node34" class="node">
+<title>module~self_vector_3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node34"><a xlink:href=".././module/self_vector_3d_t.html" xlink:title="SELF_Vector_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1055,-893 949,-893 949,-869 1055,-869 1055,-893"/>
+<text text-anchor="middle" x="1002" y="-878.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_3d~2&#45;&gt;module~self_vector_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge89" class="edge">
+<title>module~self_vector_3d~2&#45;&gt;module~self_vector_3d_t</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M1285.44,-981.93C1268.71,-970.85 1242.51,-954.61 1218,-944 1168.16,-922.43 1108.73,-905.65 1065,-894.85"/>
+<polygon fill="#003fff" stroke="#003fff" points="1065.62,-891.4 1055.07,-892.44 1063.96,-898.2 1065.62,-891.4"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge90" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1168.93,-677.7C1170.02,-628.55 1168.19,-443.34 1085,-328 997.14,-206.18 945.72,-169.11 796.5,-152"/>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge91" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1167.06,-702.08C1162.21,-737.55 1143.37,-842.62 1085,-902 957.88,-1031.32 865.07,-967.39 708,-1058 602.97,-1118.59 608.85,-1193.49 491.5,-1224"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M489.5,-1224C393.68,-1237.7 358.85,-1192.28 272,-1235 236.04,-1252.69 208.97,-1292.46 194.88,-1317.08"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="191.73,-1315.55 189.96,-1326 197.86,-1318.93 191.73,-1315.55"/>
+</g>
+<!-- module~self_scalar_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node35" class="node">
+<title>module~self_scalar_3d_t</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node35"><a xlink:href=".././module/self_scalar_3d_t.html" xlink:title="SELF_Scalar_3D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1055,-702 949,-702 949,-678 1055,-678 1055,-702"/>
+<text text-anchor="middle" x="1002" y="-687.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_3D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_3d~2&#45;&gt;module~self_scalar_3d_t -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge92" class="edge">
+<title>module~self_scalar_3d~2&#45;&gt;module~self_scalar_3d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1120.63,-690C1103.31,-690 1083.5,-690 1065.13,-690"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1065.1,-686.5 1055.1,-690 1065.1,-693.5 1065.1,-686.5"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge93" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1168.5,-1262C1109.18,-1263.21 967.53,-1322.87 919,-1357 898.89,-1371.14 903.5,-1385.43 883,-1399 800.96,-1453.32 769.23,-1450.93 672,-1466 496.32,-1493.22 449.22,-1480.01 272,-1466 252.26,-1464.44 197.68,-1466.32 184,-1452"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge96" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1295.27,-1276.35C1280.62,-1299.64 1247.61,-1351.53 1218,-1394 1207.68,-1408.8 1195.56,-1425.12 1186.14,-1437.58"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1183.09,-1435.81 1179.82,-1445.89 1188.66,-1440.04 1183.09,-1435.81"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge101" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M794.5,-1300C720.06,-1308.19 700.89,-1300 626,-1300"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge99" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1253.92,-1263.08C1228.95,-1262.66 1198.11,-1262.21 1170.5,-1262"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1168.5,-1262C1101.98,-1261.51 946.81,-1190.8 883,-1172 805.64,-1149.21 776.74,-1166.18 708,-1124 634.79,-1079.08 617.73,-1057.15 578,-981 544.68,-917.15 575.94,-886.52 542,-823 520.81,-783.35 440.15,-701.32 403,-676 396.96,-671.89 390.18,-668.26 383.34,-665.13"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="384.6,-661.87 374.03,-661.16 381.86,-668.31 384.6,-661.87"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge94" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1168.5,-1262C1094.96,-1263.5 1076.48,-1265.37 1003,-1262"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1001,-1262C819.72,-1253.68 373.21,-1044.62 272,-894 217.23,-812.49 294.28,-755.04 236,-676 231.73,-670.21 225.82,-665.64 219.5,-662.04"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="220.62,-658.69 210.1,-657.45 217.55,-664.98 220.62,-658.69"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge100" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M794.5,-1300C740.03,-1305.99 726.62,-1309.54 672,-1314 516.51,-1326.69 332.57,-1333.54 241.31,-1336.38"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="241.06,-1332.89 231.18,-1336.69 241.28,-1339.88 241.06,-1332.89"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge98" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1279.98,-1276.01C1271.75,-1280.36 1262.43,-1285.34 1254,-1290 1216.53,-1310.7 1211.29,-1325.02 1170.5,-1338"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1168.5,-1338C1137.12,-1347.99 1101.71,-1356.86 1071.72,-1363.69"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="1070.76,-1360.32 1061.77,-1365.93 1072.29,-1367.15 1070.76,-1360.32"/>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge97" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1278.03,-1251.95C1270.16,-1247.83 1261.55,-1243 1254,-1238 1134.16,-1158.6 1145.86,-1050 1003,-1034"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_node36" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_lineareuler3d~2~~UsesGraph_node36"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="389.5,-1268 285.5,-1268 285.5,-1244 389.5,-1244 389.5,-1268"/>
+<text text-anchor="middle" x="337.5" y="-1253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_3d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge95" class="edge">
+<title>module~self_mesh_3d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M1001,-1262C908.65,-1257.76 888.56,-1291.6 796.5,-1300"/>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M794.5,-1300C739.93,-1304.98 726.52,-1291.57 672,-1286 577.17,-1276.32 466.99,-1266.73 400.04,-1261.09"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="399.93,-1257.57 389.67,-1260.22 399.34,-1264.54 399.93,-1257.57"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge102" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M994.91,-369.93C979.41,-339.99 935.86,-261.02 883,-209 850.19,-176.7 842.24,-157.25 796.5,-152"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge107" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-384C756.47,-389.39 714.26,-398.66 681.6,-406.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="680.67,-403.2 671.79,-408.98 682.33,-410 680.67,-403.2"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge103" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-384C755,-389.59 739.17,-383.09 708,-408 681.59,-429.1 695.65,-450.84 672,-475 669.04,-478.02 665.65,-480.8 662.09,-483.32"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="660.13,-480.42 653.57,-488.74 663.89,-486.33 660.13,-480.42"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge109" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-384C755,-389.59 742.75,-388.39 708,-408 688.83,-418.82 690.48,-430.04 672,-442 653.43,-454.02 642.45,-446.22 626,-461"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-461C607.55,-475.78 594.19,-464.93 578,-480 551.81,-504.37 567.55,-526.96 542,-552 524.25,-569.4 511.74,-561.58 491.5,-576"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge104" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M948.18,-378.75C906.72,-377.1 847.65,-376.76 796.5,-384"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M794.5,-384C659.95,-403.06 613.4,-282.93 491.5,-343"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge108" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M624,-461C607.55,-475.78 591.72,-462.65 578,-480 515.45,-559.08 598.51,-620.49 542,-704 463.58,-819.9 351.86,-751.08 272,-866 219.92,-940.93 192.56,-1232.92 185.72,-1315.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="182.23,-1315.72 184.91,-1325.97 189.2,-1316.29 182.23,-1315.72"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge106" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M999.6,-394.19C993.73,-440.54 967.32,-608.29 883,-711 825.45,-781.11 771.4,-751.14 708,-816 672.2,-852.62 646.54,-907.94 634.23,-938.25"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="630.85,-937.26 630.43,-947.85 637.36,-939.84 630.85,-937.26"/>
+</g>
+<!-- module~self_tensor_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge105" class="edge">
+<title>module~self_tensor_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M992.98,-394.07C962,-440.74 849.86,-609.63 810.37,-669.11"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="807.3,-667.41 804.68,-677.67 813.13,-671.28 807.3,-667.41"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge110" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M336.5,-690C268.86,-685.64 247.17,-665.44 184,-690"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge115" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M994.32,-868.94C979.34,-841.52 942.52,-772.17 919,-711 898.56,-657.83 924.68,-626.82 883,-588 824.76,-533.75 767.62,-602.73 708,-550 671.68,-517.87 703.1,-484.21 672,-447 669.56,-444.08 666.71,-441.43 663.64,-439.03"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="665.38,-435.98 655.13,-433.27 661.45,-441.78 665.38,-435.98"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge111" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M995.44,-868.8C976.86,-828.4 916.19,-699.81 883,-669 820.19,-610.69 777.54,-638.09 708,-588 681.42,-568.85 656.45,-540.25 641.2,-521.12"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="643.83,-518.8 634.91,-513.07 638.31,-523.11 643.83,-518.8"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge117" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M961.21,-868.92C947.75,-864.69 932.67,-859.8 919,-855 870.96,-838.13 536.39,-714.03 491.5,-690"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M489.5,-690C454.05,-680.61 413.93,-669.98 383.95,-662.04"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="384.76,-658.63 374.2,-659.45 382.97,-665.4 384.76,-658.63"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge112" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M489.5,-690C424.63,-672.81 405.47,-694.32 338.5,-690"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M336.5,-690C295.64,-687.37 250.46,-674.15 219.96,-663.62"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="220.8,-660.21 210.21,-660.17 218.47,-666.81 220.8,-660.21"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge116" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M948.64,-892.08C907.44,-900.54 848.48,-912.05 796.5,-920"/>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M794.5,-920C699.02,-934.6 673.31,-923.34 578,-939 573.12,-939.8 495.16,-956.68 491.5,-960"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge114" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M794.5,-920C755.04,-926.03 711.19,-936.57 678.12,-945.31"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="676.97,-941.99 668.21,-947.96 678.78,-948.76 676.97,-941.99"/>
+</g>
+<!-- module~self_vector_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge113" class="edge">
+<title>module~self_vector_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M948.81,-869.84C938.36,-866.17 927.88,-861.33 919,-855 865.07,-816.53 824.93,-747.07 806.95,-711.81"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="809.87,-709.82 802.28,-702.43 803.6,-712.94 809.87,-709.82"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge118" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M794.5,-536C704.4,-501.65 671.56,-545.32 578,-522 397.54,-477.01 294.52,-231.41 184,-381"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge123" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M995.45,-677.58C981.15,-646.94 940.15,-566.95 883,-522 822.87,-474.71 737.85,-447.13 682.33,-433.07"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="682.87,-429.59 672.32,-430.6 681.19,-436.39 682.87,-429.59"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;FEQParse -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge119" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M991.31,-677.68C968.1,-648.46 909.34,-576.23 883,-560 849.03,-539.07 833.78,-550.21 796.5,-536"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M794.5,-536C752.5,-519.99 701.68,-510.71 666.9,-505.78"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="667.03,-502.26 656.65,-504.38 666.09,-509.2 667.03,-502.26"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge125" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M948.98,-701.29C928.53,-705.2 904.76,-709.08 883,-711 805.52,-717.84 785.36,-719.07 708,-711 633.01,-703.18 616.35,-688.57 542,-676 488.1,-666.89 425.67,-659.36 384.33,-654.79"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="384.61,-651.3 374.29,-653.69 383.85,-658.25 384.61,-651.3"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge120" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M953.33,-677.91C843.42,-649.69 575.21,-578.77 491.5,-538"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M489.5,-538C421.39,-503.92 404.46,-418.93 338.5,-457"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge124" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M967.25,-702.04C911.41,-722.59 797.13,-767.37 708,-820 668.12,-843.55 583.5,-925.45 542,-946 521.13,-956.34 508.85,-944.47 491.5,-960"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge122" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M992.46,-702.16C974.54,-726.95 930.73,-784.07 883,-820 813.76,-872.12 783.23,-862.97 708,-906 688.4,-917.21 667.13,-931.28 651.16,-942.24"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="649.11,-939.41 642.88,-947.98 653.1,-945.16 649.11,-939.41"/>
+</g>
+<!-- module~self_scalar_3d_t&#45;&gt;module~self_data -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge121" class="edge">
+<title>module~self_scalar_3d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M948.87,-690C915.38,-690 872.36,-690 840.57,-690"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="840.26,-686.5 830.26,-690 840.26,-693.5 840.26,-686.5"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge126" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M293.47,-1268.07C286.16,-1270.66 278.75,-1273.65 272,-1277 248.46,-1288.68 224.08,-1306.06 206.97,-1319.28"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="204.43,-1316.83 198.73,-1325.77 208.75,-1322.33 204.43,-1316.83"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge127" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M285.28,-1268.03C280.47,-1270.49 275.93,-1273.44 272,-1277 242.5,-1303.72 269.32,-1337.24 236,-1359 196.56,-1384.76 166.01,-1389.37 130,-1359 59.1,-1299.21 49.5,-988.81 48.2,-902.37"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="51.7,-902.28 48.07,-892.33 44.7,-902.37 51.7,-902.28"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge128" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M438.79,-852.04C401.53,-858.69 354.69,-868.82 338.5,-880"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M336.5,-880C280.72,-918.5 250.45,-893.36 184,-880"/>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M182,-880C127.73,-869.09 83.13,-816.48 61.72,-786.69"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="64.42,-784.45 55.83,-778.25 58.68,-788.45 64.42,-784.45"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge134" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M476.18,-856.29C464.19,-868.23 447.24,-887.52 439,-908 408.24,-984.43 454.59,-1212.76 403,-1277 402.39,-1277.76 401.75,-1278.5 401.08,-1279.21"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="398.54,-1276.77 393.06,-1285.84 403,-1282.16 398.54,-1276.77"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge129" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M483.54,-831.87C465.05,-794.28 409.45,-681.88 403,-676 397.42,-670.91 390.71,-666.76 383.77,-663.38"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="384.79,-660.01 374.23,-659.25 382.01,-666.44 384.79,-660.01"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge132" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M469.31,-831.84C430.43,-808.24 342.72,-754.11 272,-704 255.46,-692.28 253.15,-686.81 236,-676 230.8,-672.72 225.14,-669.54 219.52,-666.58"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="220.71,-663.26 210.21,-661.85 217.54,-669.5 220.71,-663.26"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge133" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M336.5,-880C302.75,-903.3 291.57,-909.95 272,-946 202.61,-1073.82 187.88,-1253.49 184.8,-1315.74"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="181.29,-1315.81 184.35,-1325.96 188.28,-1316.12 181.29,-1315.81"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge130" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M182,-880C156.76,-874.92 128.29,-874.24 104.11,-875.09"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="103.86,-871.6 94.03,-875.55 104.18,-878.59 103.86,-871.6"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_lineareuler3d~2~~UsesGraph_edge131" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M477.46,-856.21C466.06,-868.39 449.22,-888.11 439,-908 380,-1022.84 350.99,-1177.31 341.82,-1233.98"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="338.35,-1233.55 340.25,-1243.97 345.26,-1234.64 338.35,-1233.55"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_lineareuler3d2UsesGraph = svgPanZoom('#moduleself_lineareuler3d2UsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+    
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
+  <div id="inters-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#interface-boundaryflux_lineareuler3d_gpu">boundaryflux_LinearEuler3D_gpu</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#interface-fluxmethod_lineareuler3d_gpu">fluxmethod_LinearEuler3D_gpu</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#interface-hbc3d_radiation_lineareuler3d_gpu">hbc3d_radiation_lineareuler3d_gpu</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#type-lineareuler3d~2">LinearEuler3D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-additionalinit_lineareuler3d">AdditionalInit_LinearEuler3D</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-boundaryflux_lineareuler3d">boundaryflux_LinearEuler3D</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-fluxmethod_lineareuler3d">fluxmethod_LinearEuler3D</a>
+      <a class="list-group-item" href="../module/self_lineareuler3d~2.html#proc-hbc3d_radiation_lineareuler3d_gpu_wrapper">hbc3d_Radiation_LinearEuler3D_GPU_wrapper</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+    <section>
+   <h2>Interfaces</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-boundaryflux_lineareuler3d_gpu"></span><h3>interface   </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public subroutine boundaryflux_LinearEuler3D_gpu(fb, fextb, nhat, nscale, flux, N, nel, nvar) bind(c,name="0")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>fb</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>fextb</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nhat</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nscale</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>flux</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nel</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+    </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-fluxmethod_lineareuler3d_gpu"></span><h3>interface   </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public subroutine fluxmethod_LinearEuler3D_gpu(solution, flux, N, nel, nvar) bind(c,name="0")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>solution</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>flux</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nel</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+    </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-hbc3d_radiation_lineareuler3d_gpu"></span><h3>interface   </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public subroutine hbc3d_radiation_lineareuler3d_gpu(extboundary, boundary, elements, sides, nBoundaries, N, nel) bind(c,name="0")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>extboundary</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>boundary</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>elements</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>sides</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nBoundaries</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+    </li>
+  </ul>
+</div>
+
+    </section>
+  <br>
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-lineareuler3d~2"></span><h3>type, public, extends(<a href='../type/lineareuler3d_t.html'>LinearEuler3D_t</a>) :: <a href='../type/lineareuler3d~2.html'>LinearEuler3D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-c"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>c</strong></td><td> =</td><td>1.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dsdt~3"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux~3"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence~3"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-g~5"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>g</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~3"></span>type(<a href='../type/semhex.html'>SEMHex</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs~3"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh~3"></span>type(<a href='../type/mesh3d.html'>Mesh3D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nstepped"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nstepped</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs~3"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-rho0~2"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>rho0</strong></td><td> =</td><td>1.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution~3"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient~3"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source~3"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol~3"></span>type(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionalfree'>AdditionalFree</a></strong>  => AdditionalFree_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d~2.html#boundprocedure-additionalinit~18'>AdditionalInit</a></strong>  => AdditionalInit_LinearEuler3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-additionaloutput'>AdditionalOutput</a></strong>  => AdditionalOutput_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-calculateentropy~3'>CalculateEntropy</a></strong>  => CalculateEntropy_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-calculatesolutiongradient~3'>CalculateSolutionGradient</a></strong>  => CalculateSolutionGradient_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-calculatetendency~5'>CalculateTendency</a></strong>  => CalculateTendency_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-euler_timeintegrator'>Euler_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-forwardstep'>ForwardStep</a></strong>  => ForwardStep_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-free~13'>Free</a></strong>  => Free_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-getsimulationtime'>GetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-incrementiocounter'>IncrementIOCounter</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-init~13'>Init</a></strong>  => Init_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk2_timeintegrator'>LowStorageRK2_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk3_timeintegrator'>LowStorageRK3_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-lowstoragerk4_timeintegrator'>LowStorageRK4_timeIntegrator</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-mapboundaryconditions~3'>MapBoundaryConditions</a></strong>  => MapBoundaryConditions_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-poststephook'>PostStepHook</a></strong>  => PostStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-prestephook'>PreStepHook</a></strong>  => PreStepHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-pretendencyhook'>PreTendencyHook</a></strong>  => PreTendencyHook_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-printtype'>PrintType</a></strong>  => PrintType_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-readmodel~3'>ReadModel</a></strong>  => Read_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportentropy'>ReportEntropy</a></strong>  => ReportEntropy_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-reportmetrics~3'>ReportMetrics</a></strong>  => ReportMetrics_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-reportusermetrics'>ReportUserMetrics</a></strong>  => ReportUserMetrics_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-setboundarycondition~3'>SetBoundaryCondition</a></strong>  => setboundarycondition_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-setgradientboundarycondition~3'>SetGradientBoundaryCondition</a></strong>  => setgradientboundarycondition_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-setmetadata~10'>SetMetadata</a></strong>  => SetMetadata_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-setnumberofvariables~7'>SetNumberOfVariables</a></strong>  => SetNumberOfVariables_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-setsimulationtime'>SetSimulationTime</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/lineareuler3d~2.html#boundprocedure-setsolution~58'>SetSolution</a></strong>  => SetSolutionFromChar_DGModel3D_t, SetSolutionFromEqn_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/lineareuler3d~2.html#boundprocedure-settimeintegrator~59'>SetTimeIntegrator</a></strong>  => SetTimeIntegrator_withChar </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-sourcemethod~6'>SourceMethod</a></strong>  => sourcemethod_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-sphericalsoundwave~2'>SphericalSoundWave</a></strong>  => SphericalSoundWave_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-updategrk2~3'>UpdateGRK2</a></strong>  => UpdateGRK2_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-updategrk3~3'>UpdateGRK3</a></strong>  => UpdateGRK3_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-updategrk4~3'>UpdateGRK4</a></strong>  => UpdateGRK4_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-updatesolution~3'>UpdateSolution</a></strong>  => UpdateSolution_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-writemodel~3'>WriteModel</a></strong>  => Write_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/dgmodel3d_t.html#boundprocedure-writetecplot~3'>WriteTecplot</a></strong>  => WriteTecplot_DGModel3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d~2.html#boundprocedure-boundaryflux~6'>boundaryflux</a></strong>  => boundaryflux_LinearEuler3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-entropy_func~12'>entropy_func</a></strong>  => entropy_func_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux1d'>flux1D</a></strong>  => flux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-flux2d'>flux2D</a></strong>  => flux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-flux3d~2'>flux3D</a></strong>  => flux3D_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d~2.html#boundprocedure-fluxmethod~6'>fluxmethod</a></strong>  => fluxmethod_LinearEuler3D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux1d~3'>riemannflux1d</a></strong>  => riemannflux1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-riemannflux2d'>riemannflux2d</a></strong>  => riemannflux2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/lineareuler3d_t.html#boundprocedure-riemannflux3d'>riemannflux3D</a></strong>  => riemannflux3D_LinearEuler3D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source1d'>source1d</a></strong>  => source1d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source2d'>source2d</a></strong>  => source2d_Model </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/model.html#boundprocedure-source3d'>source3d</a></strong>  => source3d_Model </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-additionalinit_lineareuler3d"></span><h3>public subroutine <a href='../proc/additionalinit_lineareuler3d.html'>AdditionalInit_LinearEuler3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/lineareuler3d~2.html'>LinearEuler3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-boundaryflux_lineareuler3d"></span><h3>public subroutine <a href='../proc/boundaryflux_lineareuler3d.html'>boundaryflux_LinearEuler3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/lineareuler3d~2.html'>LinearEuler3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fluxmethod_lineareuler3d"></span><h3>public subroutine <a href='../proc/fluxmethod_lineareuler3d.html'>fluxmethod_LinearEuler3D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/lineareuler3d~2.html'>LinearEuler3D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-hbc3d_radiation_lineareuler3d_gpu_wrapper"></span><h3>public subroutine <a href='../proc/hbc3d_radiation_lineareuler3d_gpu_wrapper.html'>hbc3d_Radiation_LinearEuler3D_GPU_wrapper</a>(bc, mymodel)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/boundarycondition.html'>BoundaryCondition</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bc</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mymodel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

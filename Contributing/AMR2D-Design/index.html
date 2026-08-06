@@ -1,0 +1,2915 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="SELF Documentation">
+      
+      
+        <meta name="author" content="Fluid Numerics">
+      
+      
+      
+        <link rel="prev" href="../Documentation/">
+      
+      
+        <link rel="next" href="../Mortar2D-Design/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AMR (2D) Design Proposal - Spectral Element Library in Fortran</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#design-assessment-adaptive-mesh-refinement-amr-for-2d-models" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-header__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spectral Element Library in Fortran
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AMR (2D) Design Proposal
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-nav__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    Spectral Element Library in Fortran
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/building-with-self/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Applications with SELF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GettingStarted/multi-gpu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Multiple GPUs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Burgers Equation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Burgers Equation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/BurgersEquation1D/TravelingShock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Traveling Shock
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Euler (2D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PlaneWaveReflection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave reflection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spherical sound wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler2D/PerfectlyMatchedLayer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Perfectly Matched Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (3D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Euler (3D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/PlaneWavePropagation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plane wave propagation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearEuler3D/SphericalSoundWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spherical sound wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Shallow Water (2D)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Linear Shallow Water (2D)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/LinearShallowWater.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reflecting wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/KelvinWaves/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kelvin waves
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/LinearShallowWater/PlanetaryRossbyWave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Planetary Rossby wave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/boundary-conditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Boundary Conditions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/burgers-equation-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Viscous Burgers Equation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-2d-pml-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (2D) with PML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-euler-3d-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Euler (3D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/linear-shallow-water-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linear Shallow Water (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/model-hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Hooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Models/nonconforming-mortar-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nonconforming (Mortar) Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Generation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Mesh Generation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../MeshGeneration/StructuredMesh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Structured Mesh Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learning
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/SpectralApproximations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spectral Approximations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/DifferentialGeometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Differential Geometry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/ProvableStability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provable Stability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/AdaptiveMeshRefinement/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adaptive Mesh Refinement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Code
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/SoftwareArchitecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/BoundaryConditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Boundary Condition System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/PointSampling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Off-Grid Point Sampling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Learning/dependencies.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ford/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Requirements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-current-state-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Current-state audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-mesh-design-forest-of-quadtrees-over-a-base-mesh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Mesh design: forest of quadtrees over a base mesh
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-spectral-refinement-indicator-legendre-modal-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Spectral refinement indicator (Legendre modal analysis)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Spectral refinement indicator (Legendre modal analysis)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-nodal-modal-transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Nodal → modal transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-element-indicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Element indicator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Backends
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-solution-transfer-between-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Solution transfer between meshes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-model-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Model integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-mpi-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. MPI strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-gpu-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. GPU strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-testing-validation-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Testing &amp; validation plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-work-breakdown-phasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Work breakdown &amp; phasing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-compliance-with-repository-constraints-claudemd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Compliance with repository constraints (CLAUDE.md)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-open-questions-for-maintainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Open questions for maintainers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Mortar2D-Design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mortar (2D) Design Proposal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Requirements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-current-state-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Current-state audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-mesh-design-forest-of-quadtrees-over-a-base-mesh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Mesh design: forest of quadtrees over a base mesh
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-spectral-refinement-indicator-legendre-modal-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Spectral refinement indicator (Legendre modal analysis)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Spectral refinement indicator (Legendre modal analysis)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-nodal-modal-transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Nodal → modal transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-element-indicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Element indicator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Backends
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-solution-transfer-between-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Solution transfer between meshes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-model-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Model integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-mpi-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. MPI strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-gpu-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. GPU strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-testing-validation-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Testing &amp; validation plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-work-breakdown-phasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Work breakdown &amp; phasing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-compliance-with-repository-constraints-claudemd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Compliance with repository constraints (CLAUDE.md)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-open-questions-for-maintainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Open questions for maintainers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="design-assessment-adaptive-mesh-refinement-amr-for-2d-models">Design Assessment: Adaptive Mesh Refinement (AMR) for 2D Models<a class="headerlink" href="#design-assessment-adaptive-mesh-refinement-amr-for-2d-models" title="Permanent link">#</a></h1>
+<p><strong>Status:</strong> Proposal / scoping document — no implementation yet.
+<strong>Scope:</strong> 2D quadrilateral meshes, quadtree (2:1) h-refinement built on the
+implemented mortar interface support, spectral (Legendre modal) refinement
+indicator, CPU and GPU backends, MPI-parallel.</p>
+<p><strong>Revision note:</strong> the original version of this document scoped AMR under a
+"conforming elements only, no mortars" requirement, which forced a
+template-based 3-refinement design (9 children per level, transition-element
+closures). That constraint has since been dropped: 2:1 nonconforming mortar
+interfaces are now implemented in SELF (see
+<a href="../../Models/nonconforming-mortar-interfaces/">Nonconforming (Mortar) Interfaces</a>
+and the companion <a href="../Mortar2D-Design/">mortar design document</a>). This document
+has been rewritten around the mortar-based quadtree design, which is the
+industry-standard AMR structure (FLEXI, Trixi.jl, Nektar++). The retired
+conforming-template analysis is preserved in the git history of this file for
+reference.</p>
+<hr />
+<h2 id="1-requirements">1. Requirements<a class="headerlink" href="#1-requirements" title="Permanent link">#</a></h2>
+<ol>
+<li>A new mesh type supporting adaptive refinement/coarsening of 2D quad meshes,
+   built on the existing 2:1 mortar interface machinery.</li>
+<li>New model type(s) that leverage the AMR mesh (starting from <code>DGModel2D</code>).</li>
+<li>Refinement indicator built from <strong>Legendre polynomial projection
+   coefficients</strong> of the element-local solution: refine when the modal spectrum
+   is "too shallow" (slow decay) or when high-order modes carry too much
+   energy.</li>
+<li>CPU and GPU backends.</li>
+</ol>
+<hr />
+<h2 id="2-current-state-audit">2. Current-state audit<a class="headerlink" href="#2-current-state-audit" title="Permanent link">#</a></h2>
+<p>What exists today:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Status</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conforming quad mesh, side pairing, geometry, halo exchange</td>
+<td>✅</td>
+<td><code>Mesh2D_t</code>, <code>SEMQuad</code>, mapped data classes</td>
+</tr>
+<tr>
+<td><strong>2:1 mortar interfaces</strong> (restriction/L2-projection operators, <code>mortarInfo</code> connectivity, <code>MortarExchange</code>/<code>MortarFluxCollect</code>, CPU + GPU + MPI)</td>
+<td>✅</td>
+<td><code>Lagrange_t%mortarR/mortarP</code>, <code>src/SELF_Mesh_2D_t.f90</code>, mapped 2-D data classes, <code>src/gpu/SELF_Mortar.cpp</code></td>
+</tr>
+<tr>
+<td>Nonconforming test mesh constructor</td>
+<td>✅</td>
+<td><code>SimpleMortarMesh</code></td>
+</tr>
+<tr>
+<td>Mortar validation tests (operators, exchange, conservation, dynamics; serial + MPI)</td>
+<td>✅</td>
+<td><code>test/mortar*</code>, <code>test/*mortar*</code></td>
+</tr>
+<tr>
+<td>Aggregated GPU halo exchange with per-field packed buffers and persistent requests</td>
+<td>✅</td>
+<td><code>SideExchangeStart/Finish</code>, <code>decomp%halo_*</code> tables</td>
+</tr>
+<tr>
+<td>Legendre polynomial evaluation</td>
+<td>✅</td>
+<td><code>LegendrePolynomial</code>, <code>src/SELF_Quadrature.f90</code></td>
+</tr>
+<tr>
+<td>Nodal→modal (Legendre) transform, spectral indicator</td>
+<td>❌ none</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Quadtree/forest structures, refine/coarsen operators</td>
+<td>❌ none</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Dynamic <code>nElem</code> (reallocatable fields, resizable GPU mirrors)</td>
+<td>❌ none</td>
+<td>all data objects sized at <code>Init</code></td>
+</tr>
+</tbody>
+</table>
+<p>Load-bearing consequences:</p>
+<ul>
+<li><strong>The hard interface problem is solved.</strong> With mortars in place, an adapted
+  quadtree mesh is directly representable: coarse/fine element interfaces
+  become <code>mortarInfo</code> entries, and the entire solver stack (side exchange,
+  mortar exchange, flux collect, DG operators) already runs on such meshes on
+  both backends with MPI. AMR reduces to <em>mesh management + indicator +
+  solution transfer</em>.</li>
+<li><strong>Nothing is sized dynamically.</strong> <code>Mesh2D</code>, <code>SEMQuad</code>, and all field objects
+  (host arrays and <code>c_ptr</code> device mirrors) are allocated once for a fixed
+  <code>nElem</code>. Adaptation implies free/re-init of mesh, geometry, and model
+  storage — acceptable when adaptation is infrequent relative to time steps.</li>
+<li><strong>Per-field exchange caches must be invalidated on adaptation.</strong> The
+  aggregated halo exchange lazily builds packed device buffers, persistent MPI
+  requests (<code>halo_reqs</code>), and shared side tables (<code>decomp%halo_*</code>); the mortar
+  exchange lazily allocates <code>mortarBuff</code>. All of these are sized by the
+  current mesh/partition and must be torn down and rebuilt when the mesh
+  changes.</li>
+<li><strong>BC bookkeeping is element-indexed.</strong> <code>MapBoundaryConditions</code> caches
+  <code>(element, side)</code> lists per BC with device copies; these must be rebuilt
+  after every adaptation.</li>
+</ul>
+<hr />
+<h2 id="3-mesh-design-forest-of-quadtrees-over-a-base-mesh">3. Mesh design: forest of quadtrees over a base mesh<a class="headerlink" href="#3-mesh-design-forest-of-quadtrees-over-a-base-mesh" title="Permanent link">#</a></h2>
+<p>The authoritative adaptive structure is a <strong>forest of binary-refinement
+quadtrees</strong>, one tree per element of the user-supplied base mesh ("root
+elements"). A refined element splits into 4 congruent children (2×2 in
+reference space); each level halves h.</p>
+<p>Each adaptation cycle produces an ordinary <code>Mesh2D</code> (the "leaf mesh") plus its
+mortar table:</p>
+<ol>
+<li>Evaluate the spectral indicator per element → refine/coarsen flags.</li>
+<li>Smooth flags: enforce <strong>2:1 balance</strong> (edge-neighbor tree levels differ by
+   at most 1); coarsen only complete 4-sibling groups whose removal keeps the
+   balance valid.</li>
+<li>Update the trees (split/merge nodes).</li>
+<li>Emit leaves: assign global corner-node IDs (hash on quantized parametric
+   position within the root) and a deterministic global ordering (roots in
+   base-mesh order, Z-order/depth-first within each tree — locality-preserving
+   for the block partition).</li>
+<li>Build connectivity: equal-level edge pairings become conforming <code>sideInfo</code>
+   entries (reusing the corner-pair hash matching already in
+   <code>src/SELF_Mesh_2D_t.f90</code>, lifted into a shared helper, plus
+   <code>RecalculateFlip</code>); level-differing edge pairings become <code>mortarInfo</code>
+   entries, with sub-edge order and flips fixed by the tree geometry.</li>
+<li>Regenerate <code>SEMQuad</code> geometry via the existing <code>GenerateFromMesh</code> path.</li>
+</ol>
+<p>Design points:</p>
+<ul>
+<li><strong>Regeneration over incremental surgery.</strong> Rebuilding the leaf mesh wholesale
+  reuses the existing, MPI-correct construction path and is far easier to
+  verify; adaptation cost is amortized over many steps. Incremental updates
+  are a later optimization if profiling demands it.</li>
+<li><strong>No transition elements, no promotion passes.</strong> Unlike the retired
+  conforming design, tree leaves <em>are</em> the mesh; closure is the 2:1 balance
+  constraint alone. Coarsening is a local 4-sibling merge.</li>
+<li><strong>Geometry of children.</strong> Every leaf carries its affine map (corner points)
+  in the root element's reference square plus <code>(rootElem, level)</code>. For
+  <code>nGeo = 1</code> base meshes, child corners are the bilinear image of the dyadic
+  sub-squares — exact, and the mortar interface's watertightness requirement
+  is satisfied by construction. For curved elements (<code>nGeo &gt; 1</code>), child
+  geometry nodes are sampled from the parent's isoparametric map, preserving
+  boundary geometry to the parent's order (both sides of a mortar then derive
+  their metrics from the same parent map, which keeps the discrete
+  free-stream property).</li>
+<li><strong>Boundary conditions.</strong> A leaf edge on a root-element boundary edge
+  inherits that edge's <code>sideInfo(5)</code> BC id; interior leaf edges get 0.
+  <code>BCType</code>/<code>BCNames</code> copy from the base mesh unchanged.</li>
+<li><strong>Containment, not inheritance:</strong></li>
+</ul>
+<div class="language-fortran highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">type</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AMRMesh2D_t</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh2D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">base</span><span class="w">       </span><span class="c">! user-supplied root mesh (never modified)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="k">type</span><span class="p">(</span><span class="n">Mesh2D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">leaf</span><span class="w">       </span><span class="c">! regenerated mesh (+ mortarInfo); models point here</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="c">! forest state</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nRoots</span><span class="p">,</span><span class="w"> </span><span class="n">nLeaves</span><span class="p">,</span><span class="w"> </span><span class="n">maxLevel</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">leafRoot</span><span class="p">(:)</span><span class="w">      </span><span class="c">! root element of each leaf</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">leafLevel</span><span class="p">(:)</span><span class="w">     </span><span class="c">! tree level of each leaf</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">leafMap</span><span class="p">(:,:)</span><span class="w">  </span><span class="c">! (2,nLeaves) dyadic offset in root ref square</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="k">type</span><span class="p">(...),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">trees</span><span class="p">(:)</span><span class="w">       </span><span class="c">! per-root quadtree (packed arrays)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">contains</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="k">  procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w">      </span><span class="c">! from an existing Mesh2D (structured or file-read)</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Adapt</span><span class="w">     </span><span class="c">! flags in -&gt; new leaf mesh + transfer maps out</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="k">endtype</span>
+</span></code></pre></div>
+<p>Models only need a <code>type(Mesh2D), pointer</code> at <code>amrMesh%leaf</code>, keeping
+<code>DGModel2D</code>, the exchanges, geometry, and I/O unaware of AMR.</p>
+<hr />
+<h2 id="4-spectral-refinement-indicator-legendre-modal-analysis">4. Spectral refinement indicator (Legendre modal analysis)<a class="headerlink" href="#4-spectral-refinement-indicator-legendre-modal-analysis" title="Permanent link">#</a></h2>
+<h3 id="41-nodal-modal-transform">4.1 Nodal → modal transform<a class="headerlink" href="#41-nodal-modal-transform" title="Permanent link">#</a></h3>
+<p>New machinery (currently absent — only <code>LegendrePolynomial</code> exists as a
+building block). For control points <code>ξ_i</code> with quadrature weights <code>w_i</code> (Gauss
+or Gauss–Lobatto, degree N), define the discrete Legendre coefficients of a
+nodal field <code>u_i = u(ξ_i)</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>â_k = (1/γ_k) Σ_i w_i u_i L_k(ξ_i),   γ_k = Σ_i w_i L_k(ξ_i)²
+</span></code></pre></div>
+<p>Using the <em>discrete</em> norms <code>γ_k</code> makes the transform exactly invertible on the
+nodal space for both node families (for Gauss, <code>γ_k = 2/(2k+1)</code> exactly for
+k ≤ N; for GLL, <code>γ_N = 2/N</code>). In matrix form <code>â = P u</code> with <code>P = Γ⁻¹ Lᵀ W</code>;
+the 2D transform is the tensor application <code>Â = P U Pᵀ</code> per element and
+variable — the same two-pass batched shape as the existing derivative and
+interpolation operators, so the GPU implementation follows the established
+kernel pattern.</p>
+<p>Implementation home: add <code>pMatrix(0:N,0:N)</code> (nodal→modal) and its inverse to
+<code>Lagrange_t</code>, built in <code>Init_Lagrange_t</code> next to the mortar matrices, with
+device mirrors following the <code>mortarR_gpu</code>/<code>mortarP_gpu</code> pattern. This also
+unlocks future modal filtering/de-aliasing work.</p>
+<h3 id="42-element-indicator">4.2 Element indicator<a class="headerlink" href="#42-element-indicator" title="Permanent link">#</a></h3>
+<p>Per element and indicator variable, form directional spectra from the 2D modal
+matrix <code>Â_{mn}</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>qξ_m = sqrt( Σ_n Â_{mn}² ),    qη_n = sqrt( Σ_m Â_{mn}² )
+</span></code></pre></div>
+<p>Two criteria, matching the stated requirement:</p>
+<ol>
+<li><strong>Spectral decay rate ("too shallow")</strong> — Mavriplis-style least-squares fit
+   <code>q_m ≈ C e^(−σ m)</code> over the upper half of the spectrum
+   (<code>m = max(1, N/2) … N</code>, skipping near-zero modes below a floor to avoid
+   log-of-noise). Small σ ⇒ under-resolved.</li>
+<li><strong>Tail energy ("too much energy in high modes")</strong> — Persson–Peraire-style
+   ratio using the top two modes (two, to be robust to odd/even cancellation):
+   <code>η = (q_N² + q_{N−1}²) / Σ_m q_m²</code>.</li>
+</ol>
+<p>Decision logic with hysteresis (two threshold pairs, so elements don't flip
+refine/coarsen every cycle):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>refine  if  min(σξ, ση) &lt; σ_refine   or  max(ηξ, ηη) &gt; η_refine
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>coarsen if  min(σξ, ση) &gt; σ_coarsen  and max(ηξ, ηη) &lt; η_coarsen
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>          (and level &gt; 0, and all 3 siblings also vote coarsen)
+</span></code></pre></div>
+<p>Defaults to be calibrated against manufactured cases (smooth Gaussian: no
+flags; near-discontinuity: flags). All thresholds, the adapt cadence, the max
+refinement level, and the indicator-variable set are user-facing parameters;
+the variable set defaults to the <code>nstepped</code> prognostic variables (max over
+variables), overridable per model (e.g. pressure only for <code>LinearEuler2D</code>).</p>
+<p>The indicator is computed in reference space, so element size and mapping do
+not bias it.</p>
+<h3 id="43-backends">4.3 Backends<a class="headerlink" href="#43-backends" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>CPU:</strong> <code>do concurrent</code> over elements; two small matmuls + O(N²) reduction
+  per element. Negligible cost relative to one RHS evaluation.</li>
+<li><strong>GPU:</strong> modal transform with <code>pMatrix_gpu</code> kernels; one custom kernel
+  (<code>SpectralIndicator_2D_gpu</code>, following the <code>SELF_Mortar.cpp</code> file pattern)
+  computes <code>q</code>, the decay fit, tail ratio, and writes per-element <code>int</code> flags;
+  a single small D2H copy brings flags to the host, where all adaptation
+  logic runs. The indicator runs only at adaptation checkpoints — no new
+  host↔device traffic inside time stepping.</li>
+</ul>
+<hr />
+<h2 id="5-solution-transfer-between-meshes">5. Solution transfer between meshes<a class="headerlink" href="#5-solution-transfer-between-meshes" title="Permanent link">#</a></h2>
+<p>Dyadic refinement makes the transfer operators tensor products of <strong>the 1-D
+mortar matrices that already exist</strong>:</p>
+<ul>
+<li><strong>Refinement (parent → 4 children):</strong> each child's nodal values are the
+  parent polynomial evaluated on a half-interval in each direction — exactly
+  the sub-edge restriction <code>mortarR(:,:,k)</code> applied per direction:
+  <code>U_child(kx,ky) = R_kx U_parent R_kyᵀ</code>. Exact for polynomial data, hence
+  conservative.</li>
+<li><strong>Coarsening (4 children → parent):</strong> the volume L2 projection is the tensor
+  product of the 1-D trace projections:
+  <code>U_parent = Σ_{kx,ky} P_kx U_child(kx,ky) P_kyᵀ</code>, where <code>mortarP</code> already
+  carries the 1/2 sub-interval Jacobian per direction (1/4 per child in 2-D,
+  as required). The same exactness argument as the mortar operators gives
+  <code>Σ P R = I</code> (refine-then-coarsen is the identity) and preservation of the
+  element mean to roundoff on affine children.</li>
+<li><strong>Unchanged leaf:</strong> direct copy (element index remap only).</li>
+</ul>
+<p>Because refinement level changes by one per adaptation cycle (2:1 balance is
+enforced before splitting), transfer never needs to traverse more than one
+tree level per cycle.</p>
+<p>A <code>MeshTransfer2D</code> object encapsulates old→new leaf correspondence; it is
+built on the host during adaptation and applied as batched tensor-product
+operations (host first; device application is a Phase-5 optimization, and the
+operator matrices are already resident on the GPU).</p>
+<p><strong>Numerical-correctness note (CLAUDE.md §3):</strong> transfer is an
+approximation-theoretic operation (interpolation/L2 projection), not a change
+to the discretization. Entropy may increase slightly at coarsening (L2
+projection is not entropy-stable); this is standard for AMR and will be
+measured in validation. The same caveat already applies to the mortar flux
+projection, and the same v1 policy is adopted: standard <code>DGModel2D</code> models
+only — the EC split-form models reject nonconforming meshes at init and are
+likewise out of scope for AMR v1.</p>
+<hr />
+<h2 id="6-model-integration">6. Model integration<a class="headerlink" href="#6-model-integration" title="Permanent link">#</a></h2>
+<p>Adaptation is model-agnostic given <code>class(DGModel2D_t)</code>; physics lives in
+overridden <code>flux2d</code>/<code>riemannflux2d</code>/BCs and is untouched. An
+<code>AMRController2D</code> holds the <code>AMRMesh2D</code>, thresholds, cadence, and performs:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>AdaptModel(model):
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  1. indicator (device or host)             -&gt; flags
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  2. amrMesh%Adapt(flags)                   -&gt; new leaf Mesh2D (+ mortarInfo) + MeshTransfer2D
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  3. regenerate SEMQuad geometry            (existing GenerateFromMesh)
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  4. capture old solution; Free + re-Init model fields; re-AssociateGeometry;
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>     rebuild BC lists (MapBoundaryConditions + device copies);
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>     drop per-field exchange caches (packed halo buffers, persistent halo
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>     requests, mortarBuff) so they rebuild lazily against the new mesh
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  5. apply MeshTransfer2D to fill solution  (+ UpdateDevice on GPU builds)
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>  6. refresh decomposition (MPI: repartition + redistribute; §7)
+</span></code></pre></div>
+<p>New model types are thin wrappers that own a controller and trigger it from
+the existing hook system (<code>PostStepHook</code>, every <code>nStepsPerAdapt</code> steps —
+between complete steps, never inside an RK stage):</p>
+<div class="language-fortran highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">type</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">LinearEuler2D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">AMRLinearEuler2D</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="k">type</span><span class="p">(</span><span class="n">AMRController2D</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">amr</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">contains</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">  procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">PostStepHook</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">AdaptHook_AMRLinearEuler2D</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">endtype</span>
+</span></code></pre></div>
+<p>Pilot models: <code>amr_advection_diffusion_2d</code> and <code>AMRLinearEuler2D</code> (CPU + GPU
+variants following the existing backend file pattern). Metadata, equation
+parsers, and integrator state carry over; <code>workSol</code> is rebuilt (zeroed) at
+adaptation, which is correct because adaptation happens between complete
+steps.</p>
+<p><strong>Time step:</strong> explicit CFL shrinks with the smallest h (factor 2 per level).
+v1 keeps the user-controlled global <code>dt</code> contract: the controller exposes
+<code>hMin()</code> and the examples rescale <code>dt</code> on adaptation. Local time stepping is
+out of scope.</p>
+<p><strong>I/O:</strong> <code>Write_DGModel2D_t</code> already handles arbitrary meshes, but element
+counts change between files. Add the leaf metadata
+(<code>leafRoot</code>/<code>leafLevel</code>/<code>leafMap</code>) to the output so post-processing (pyself)
+can reconstruct geometry per snapshot. Static-mesh outputs are untouched.</p>
+<hr />
+<h2 id="7-mpi-strategy">7. MPI strategy<a class="headerlink" href="#7-mpi-strategy" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Ordering &amp; partition:</strong> global leaf order = base-mesh root order, Z-order
+  within each tree (deterministic, locality-preserving). Reuse the contiguous
+  block partition (<code>GenerateDecomposition</code>) on the new <code>nLeaves</code>; equal
+  element count is a valid balance measure because all elements share one
+  polynomial degree.</li>
+<li><strong>Consistent flags:</strong> refine/coarsen flags for ghost-adjacent elements must
+  agree across ranks before 2:1 balancing. v1: <code>MPI_Allgatherv</code> of flags (one
+  int per element) so every rank runs identical balancing — deterministic and
+  simple; tree metadata is tiny compared to field data. Rank-local balancing
+  with ghost-layer exchange is a scalability follow-up.</li>
+<li><strong>Redistribution:</strong> old and new partitions are both contiguous over the same
+  deterministic ordering, so each rank computes exact send/recv ranges
+  (<code>MPI_Alltoallv</code> on packed solution payloads). Coarsening groups are applied
+  on the receiving side after redistribution so all four siblings are
+  resident.</li>
+<li><strong>Exchange table rebuild:</strong> the aggregated halo tables (<code>decomp%halo_*</code>) and
+  every field's persistent halo requests are partition-specific and are
+  rebuilt lazily after step 4/6 above. The mortar sub-edge global side ids in
+  the regenerated <code>mortarInfo</code> keep the MPI tag convention valid without any
+  new machinery.</li>
+<li><strong>Constraint compliance:</strong> all collectives happen inside the adaptation
+  checkpoint (between time steps), never inside <code>CalculateTendency</code> or RK
+  stages, per CLAUDE.md §5.</li>
+</ul>
+<hr />
+<h2 id="8-gpu-strategy">8. GPU strategy<a class="headerlink" href="#8-gpu-strategy" title="Permanent link">#</a></h2>
+<p>Division of labor: <strong>numerics on device, adaptation logic on host</strong> — the same
+split the mortar implementation uses.</p>
+<p>Runs on device:
+- Spectral indicator (<code>pMatrix_gpu</code> transforms + <code>SpectralIndicator_2D_gpu</code>
+  reduction → per-element flags, one small D2H copy).
+- All existing solver machinery on the adapted mesh (RHS, conforming and
+  mortar exchanges, RK updates) — unchanged; this is already exercised by the
+  mortar GPU tests.
+- Solution transfer apply (Phase 5): batched tensor-product kernels using the
+  device-resident <code>mortarR_gpu</code>/<code>mortarP_gpu</code>.</p>
+<p>Runs on host:
+- Tree updates, flag balancing, leaf emission, corner hashing,
+  <code>RecalculateFlip</code>, mortar-table emission, partition computation.</p>
+<p><strong>Memory churn:</strong> each adaptation frees and re-allocates every field's device
+mirrors plus the lazily-built exchange buffers (existing <code>Init</code>/<code>Free</code>/
+<code>UpdateDevice</code> machinery). v1 accepts this (adaptation is infrequent). Phase-5
+optimization: capacity-based allocation (<code>nElemCapacity = growthFactor*nElem</code>)
+inside the data-object <code>Init</code>s so most adaptations skip reallocation.</p>
+<p>One environment constraint to respect (and a reason to land issue #151
+first if convenient): device selection currently happens in the mesh's
+domain-decomposition init, so the AMR controller must never allocate device
+resources before the base mesh exists — the same ordering rule the mortar
+tests document.</p>
+<hr />
+<h2 id="9-testing-validation-plan">9. Testing &amp; validation plan<a class="headerlink" href="#9-testing-validation-plan" title="Permanent link">#</a></h2>
+<p>Unit (serial, both precisions, precision-aware tolerances):
+- <code>modaltransform_roundtrip</code>: <code>P⁻¹ P u = u</code> to roundoff; Gauss and GL nodes.
+- <code>spectralindicator_smooth</code> / <code>spectralindicator_front</code>: manufactured fields
+  (low-degree polynomial ⇒ no refine flags; <code>tanh</code> front ⇒ flags exactly in
+  front-crossing elements).
+- <code>amrmesh2d_adapt</code>: randomized refine/coarsen cycles preserve mesh validity —
+  every interior side is either a matched conforming pair or a well-formed
+  <code>mortarInfo</code> entry; 2:1 balance holds; corner hashing watertight;
+  <code>RecalculateFlip</code> idempotent.
+- <code>meshtransfer_exactness</code>: refine transfer exact for polynomial data of
+  degree ≤ N; refine-then-coarsen is the identity; coarsen preserves
+  <code>∫ u dA</code> to roundoff (affine geometry).</p>
+<p>Integration:
+- <code>amr_advection_2d_gaussian</code>: advected Gaussian tracked by the indicator;
+  error vs. a uniform-fine reference within tolerance; conservation error at
+  roundoff.
+- <code>amr_lineareuler2d_wave</code>: acoustic pulse; entropy non-increase across
+  multiple adaptation cycles; refinement follows the wavefront.
+- <code>amr_*_mpi</code> variants on 2 ranks, including at least one adaptation that
+  changes the partition (elements migrate between ranks).
+- GPU CI: the same integration tests on the Buildkite MI210/V100 pipelines;
+  CPU/GPU agreement of indicator flags and post-adapt solutions to tolerance.</p>
+<p>The mortar interface itself is already covered by the existing mortar test
+suite and needs no re-validation here — AMR tests target the tree logic,
+indicator, transfer, and re-initialization plumbing.</p>
+<hr />
+<h2 id="10-work-breakdown-phasing">10. Work breakdown &amp; phasing<a class="headerlink" href="#10-work-breakdown-phasing" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Content</th>
+<th>New/changed code (est.)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0. Modal infrastructure</td>
+<td><code>pMatrix</code> in <code>Lagrange_t</code> + device mirrors, indicator math + unit tests</td>
+<td>~600 LOC</td>
+</tr>
+<tr>
+<td>1. Quadtree mesh core</td>
+<td>forest, 2:1 balancing, leaf + <code>sideInfo</code>/<code>mortarInfo</code> emission, <code>AMRMesh2D_t</code>, transfer operators (tensor products of mortar matrices), validity/transfer tests</td>
+<td>~1,500 LOC</td>
+</tr>
+<tr>
+<td>2. Model integration (CPU)</td>
+<td><code>AMRController2D</code>, field re-init + BC/cache rebuild path, <code>amr_advection_diffusion_2d</code>, <code>AMRLinearEuler2D</code>, integration tests, examples</td>
+<td>~1,200 LOC</td>
+</tr>
+<tr>
+<td>3. MPI</td>
+<td>flag allgather, repartition + <code>Alltoallv</code> redistribution, halo/persistent-request invalidation, 2-rank tests</td>
+<td>~800 LOC</td>
+</tr>
+<tr>
+<td>4. GPU</td>
+<td>indicator kernels + interfaces, device transfer apply, GPU CI tests</td>
+<td>~800 LOC</td>
+</tr>
+<tr>
+<td>5. Hardening/perf</td>
+<td>capacity-based device allocation, adaptation-cost profiling, threshold calibration docs, user docs</td>
+<td>~500 LOC</td>
+</tr>
+</tbody>
+</table>
+<p>Rough total ~5–5.5k LOC plus tests — meaningfully smaller than the retired
+conforming-template design (~6–7k), because the interface treatment, its GPU
+kernels, its MPI paths, and its tests already exist. Phases 0–2 deliver a
+usable serial CPU capability; 3 and 4 are independent once 2 lands.</p>
+<hr />
+<h2 id="11-compliance-with-repository-constraints-claudemd">11. Compliance with repository constraints (CLAUDE.md)<a class="headerlink" href="#11-compliance-with-repository-constraints-claudemd" title="Permanent link">#</a></h2>
+<ul>
+<li>No change to formulation, discretization order, basis, quadrature, nodal
+  ordering, flux routines, or time integrators — AMR acts <em>between</em> steps; the
+  interface discretization it relies on (mortars) is already merged and
+  validated.</li>
+<li>No renamed/moved modules; all existing public interfaces preserved; new
+  functionality is additive.</li>
+<li>No collectives inside time-stepping loops; halo and mortar exchange patterns
+  unchanged — adaptation rebuilds their tables between steps.</li>
+<li>No external dependencies (forest is home-grown; no p4est).</li>
+<li>EC split-form models excluded (consistent with the existing mortar guard).</li>
+<li>Fortran 2008 only; formatting via <code>fprettify</code>.</li>
+</ul>
+<hr />
+<h2 id="12-open-questions-for-maintainers">12. Open questions for maintainers<a class="headerlink" href="#12-open-questions-for-maintainers" title="Permanent link">#</a></h2>
+<ol>
+<li><strong>Adaptation cadence &amp; placement:</strong> <code>PostStepHook</code> every <code>nStepsPerAdapt</code>
+   steps — acceptable, or should adaptation align with IO intervals in
+   <code>ForwardStep</code>?</li>
+<li><strong><code>dt</code> policy on adaptation:</strong> keep user-controlled global <code>dt</code> (examples
+   rescale via <code>hMin()</code>), or auto-rescale inside the controller?</li>
+<li><strong>Indicator variables:</strong> default to all prognostic (<code>nstepped</code>) variables
+   with max-combining — confirm, and confirm the per-model override hook.</li>
+<li><strong>Curved base meshes (<code>nGeo &gt; 1</code>) in v1</strong>, or restrict v1 to <code>nGeo = 1</code>
+   and defer curved-element child geometry?</li>
+<li><strong>Coarsening policy:</strong> strict 4-sibling groups only (proposed), or a more
+   aggressive region-based merge?</li>
+<li><strong>Output format for time-varying meshes:</strong> embed leaf metadata per snapshot
+   (proposed) vs. separate mesh-series files — coordinate with pyself.</li>
+<li><strong>Sequencing with issue #151</strong> (library-level MPI/device init): not a hard
+   dependency, but landing it first removes the initialization-order
+   constraint the AMR controller would otherwise have to respect.</li>
+</ol>
+<hr />
+<h2 id="13-references">13. References<a class="headerlink" href="#13-references" title="Permanent link">#</a></h2>
+<ul>
+<li>Y. Maday, C. Mavriplis, A. Patera, "Nonconforming mortar element methods:
+  application to spectral discretizations," <em>Domain Decomposition Methods</em>,
+  1989.</li>
+<li>D. A. Kopriva, "A conservative staggered-grid Chebyshev multidomain method
+  for compressible flows. II. A semi-structured method," <em>JCP</em> 128 (1996)
+  (the DGSEM 2:1 mortar algorithm underlying the implemented interfaces).</li>
+<li>P.-O. Persson, J. Peraire, "Sub-Cell Shock Capturing for Discontinuous
+  Galerkin Methods," AIAA 2006-112 (modal tail-energy sensor).</li>
+<li>C. Mavriplis, "Adaptive mesh strategies for the spectral element method,"
+  <em>CMAME</em> 116 (1994) (spectral decay-rate estimator).</li>
+<li>D. A. Kopriva, <em>Implementing Spectral Methods for Partial Differential
+  Equations</em> (algorithms referenced throughout <code>SELF_Lagrange_t.f90</code> /
+  <code>SELF_Quadrature.f90</code>).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

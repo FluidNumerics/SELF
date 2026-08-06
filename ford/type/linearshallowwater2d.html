@@ -1,0 +1,2750 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>LinearShallowWater2D &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>LinearShallowWater2D
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.1% of total for derived types.</p>Including implementation: 935 statements,  1.2% of total for derived types.">2 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_LinearShallowWater2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_linearshallowwater2d.f90.html'>SELF_LinearShallowWater2D.f90</a></li>
+     <li><a href='../module/self_linearshallowwater2d.html'>self_LinearShallowWater2D</a></li>
+     <li class="active">LinearShallowWater2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-cd">Cd</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-h">H</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-dsdt~2">dSdt</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-fcori">fCori</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-flux~2">flux</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-fluxdivergence~2">fluxDivergence</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-g~3">g</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-geometry~2">geometry</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-hyperbolicbcs~2">hyperbolicBCs</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-mesh~2">mesh</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-nstepped">nstepped</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-parabolicbcs">parabolicBCs</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-solution~2">solution</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-solutiongradient~2">solutionGradient</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-source~2">source</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-timeintegrator">timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-transferstage">transferStage</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-worksol~2">workSol</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-additionalfree~2">AdditionalFree</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-additionalinit~3">AdditionalInit</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-applytransferplan">ApplyTransferPlan</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-boundaryflux~2">BoundaryFlux</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-calculateentropy~2">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-calculatesolutiongradient~2">CalculateSolutionGradient</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-calculatetendency~3">CalculateTendency</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-diagnosegeostrophicvelocity">DiagnoseGeostrophicVelocity</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-fluxmethod~2">FluxMethod</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-free~7">Free</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-init~7">Init</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-mapboundaryconditions~2">MapBoundaryConditions</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-poststephook">PostStepHook</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-prestephook">PreStepHook</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-pretendencyhook">PreTendencyHook</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-readmodel~2">ReadModel</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-regrid">Regrid</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-reportmetrics~2">ReportMetrics</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setboundarycondition~2">SetBoundaryCondition</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setcoriolis~2">SetCoriolis</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setgradientboundarycondition~2">SetGradientBoundaryCondition</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setmetadata~4">SetMetadata</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setnumberofvariables~2">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setsolution~40">SetSolution</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-settimeintegrator~41">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-stagesolutionfortransfer">StageSolutionForTransfer</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updategrk2~2">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updategrk3~2">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updategrk4~2">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updatesolution~2">UpdateSolution</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-writemodel~2">WriteModel</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-writetecplot~2">WriteTecplot</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-entropy_func~4">entropy_func</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-flux2d">flux2d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-flux3d">flux3D</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-riemannflux1d~3">riemannflux1d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-riemannflux2d~3">riemannflux2d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-riemannflux3d">riemannflux3d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-source3d">source3d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-sourcemethod">sourcemethod</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/linearshallowwater2d.html#src">LinearShallowWater2D</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>) :: LinearShallowWater2D</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~linearshallowwater2d~~InheritsGraph Pages: 1 -->
+<svg id="typelinearshallowwater2dInheritsGraph" width="641pt" height="80pt"
+ viewBox="0.00 0.00 641.00 80.27" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~linearshallowwater2d~~InheritsGraph" class="graph" transform="scale(0.28 0.28) rotate(0) translate(4 278)">
+<title>type~~linearshallowwater2d~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-278 2248,-278 2248,4 -4,4"/>
+<!-- type~linearshallowwater2d -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node1" class="node">
+<title>type~linearshallowwater2d</title>
+<polygon fill="none" stroke="black" points="2244,-51 2110,-51 2110,-27 2244,-27 2244,-51"/>
+<text text-anchor="middle" x="2177" y="-36.6" font-family="Helvetica,sans-Serif" font-size="10.50">LinearShallowWater2D</text>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node2" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node2"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="2073,-51 1930,-51 1930,-27 2073,-27 2073,-51"/>
+<text text-anchor="middle" x="2001.5" y="-36.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge1" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#ff0000" d="M2109.91,-39C2101.15,-39 2092.08,-39 2083.1,-39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="2083.02,-35.5 2073.02,-39 2083.02,-42.5 2083.02,-35.5"/>
+</g>
+<!-- type~mappedscalar2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node3" class="node">
+<title>type~mappedscalar2d~2</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node3"><a xlink:href=".././type/mappedscalar2d~2.html" xlink:title="MappedScalar2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1395.5,-40 1291.5,-40 1291.5,-16 1395.5,-16 1395.5,-40"/>
+<text text-anchor="middle" x="1343.5" y="-25.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~mappedscalar2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge2" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~mappedscalar2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1929.79,-36.85C1923.75,-37.32 1917.75,-38.01 1912,-39"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1911,-39C1815.52,-55.4 1531.62,-40.05 1405.75,-32.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1405.72,-28.59 1395.52,-31.45 1405.28,-35.58 1405.72,-28.59"/>
+<text text-anchor="middle" x="1787.5" y="-48.4" font-family="Helvetica,sans-Serif" font-size="9.50">fCori</text>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node4" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node4"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1893,-91 1817,-91 1817,-67 1893,-67 1893,-91"/>
+<text text-anchor="middle" x="1855" y="-76.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge3" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d~2</title>
+<path fill="none" stroke="#ff0000" d="M1911,-39C1901.01,-40.72 1901.15,-46.97 1893,-53 1889.52,-55.57 1885.82,-58.24 1882.16,-60.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1879.97,-58.12 1873.82,-66.74 1884,-63.84 1879.97,-58.12"/>
+</g>
+<!-- type~mappedscalar2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node5" class="node">
+<title>type~mappedscalar2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node5"><a xlink:href=".././type/mappedscalar2d_t.html" xlink:title="MappedScalar2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1153,-40 1040,-40 1040,-16 1153,-16 1153,-40"/>
+<text text-anchor="middle" x="1096.5" y="-25.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedScalar2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d~2&#45;&gt;type~mappedscalar2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge4" class="edge">
+<title>type~mappedscalar2d~2&#45;&gt;type~mappedscalar2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1291.44,-28C1254.28,-28 1203.65,-28 1163.44,-28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1163.19,-24.5 1153.19,-28 1163.19,-31.5 1163.19,-24.5"/>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node6" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node6"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1758,-133 1673,-133 1673,-109 1758,-109 1758,-133"/>
+<text text-anchor="middle" x="1715.5" y="-118.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge5" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#00ffff" d="M1816.79,-90.37C1801.1,-95.16 1782.61,-100.81 1765.81,-105.94"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1764.69,-102.62 1756.15,-108.89 1766.73,-109.32 1764.69,-102.62"/>
+</g>
+<!-- type~semquad -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node7" class="node">
+<title>type~semquad</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node7"><a xlink:href=".././type/semquad.html" xlink:title="SEMQuad">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="881,-80 817,-80 817,-56 881,-56 881,-80"/>
+<text text-anchor="middle" x="849" y="-65.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMQuad</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d_t&#45;&gt;type~semquad -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge6" class="edge">
+<title>type~mappedscalar2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1039.91,-27.05C1000.03,-27.68 945.37,-31.25 899,-44 892.53,-45.78 885.88,-48.41 879.66,-51.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="877.71,-48.35 870.3,-55.93 880.82,-54.62 877.71,-48.35"/>
+<text text-anchor="middle" x="960" y="-46.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~scalar2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node11" class="node">
+<title>type~scalar2d~2</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node11"><a xlink:href=".././type/scalar2d~2.html" xlink:title="Scalar2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="672,-24 611,-24 611,0 672,0 672,-24"/>
+<text text-anchor="middle" x="641.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar2D</text>
+</a>
+</g>
+</g>
+<!-- type~mappedscalar2d_t&#45;&gt;type~scalar2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge7" class="edge">
+<title>type~mappedscalar2d_t&#45;&gt;type~scalar2d~2</title>
+<path fill="none" stroke="#ff0000" d="M1039.78,-24.04C1033.45,-23.66 1027.09,-23.3 1021,-23 897.65,-16.92 751.52,-13.84 682.46,-12.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="682.51,-9.13 672.45,-12.46 682.39,-16.13 682.51,-9.13"/>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mappedscalar2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge8" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mappedscalar2d~2</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1700.41,-108.71C1688.98,-99.47 1672.03,-87.36 1655,-81 1559.77,-45.45 1527.49,-73.87 1428,-53 1415.38,-50.35 1401.91,-46.7 1389.55,-43"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1390.5,-39.63 1379.92,-40.04 1388.45,-46.32 1390.5,-39.63"/>
+<text text-anchor="middle" x="1541.5" y="-83.4" font-family="Helvetica,sans-Serif" font-size="9.50">solution, source, fluxDivergence, dSdt, workSol</text>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~semquad -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge11" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1672.8,-117.03C1637.97,-113.73 1587.01,-108.96 1542.5,-105"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1540.5,-105C1490.31,-100.54 1477.65,-99.59 1428,-91 1419.92,-89.6 1418.13,-88.03 1410,-87 1217.19,-62.52 984.23,-64.68 891.24,-66.81"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="891.03,-63.31 881.12,-67.05 891.2,-70.31 891.03,-63.31"/>
+<text text-anchor="middle" x="1215.5" y="-74.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~boundaryconditionlist -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node8" class="node">
+<title>type~boundaryconditionlist</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node8"><a xlink:href=".././type/boundaryconditionlist.html" xlink:title="BoundaryConditionList">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1410,-246 1277,-246 1277,-222 1410,-222 1410,-246"/>
+<text text-anchor="middle" x="1343.5" y="-231.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryConditionList</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~boundaryconditionlist -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge12" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~boundaryconditionlist</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1709.55,-133.29C1701.32,-151.96 1682.91,-186.97 1655,-203 1583.32,-244.17 1486.78,-247.27 1420.48,-243.06"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1420.33,-239.54 1410.1,-242.33 1419.83,-246.53 1420.33,-239.54"/>
+<text text-anchor="middle" x="1541.5" y="-246.4" font-family="Helvetica,sans-Serif" font-size="9.50">hyperbolicBCs, parabolicBCs</text>
+</g>
+<!-- type~mappedvector2d -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node9" class="node">
+<title>type~mappedvector2d</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node9"><a xlink:href=".././type/mappedvector2d.html" xlink:title="MappedVector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1395.5,-162 1291.5,-162 1291.5,-138 1395.5,-138 1395.5,-162"/>
+<text text-anchor="middle" x="1343.5" y="-147.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mappedvector2d -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge9" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mappedvector2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1672.78,-124.27C1607.61,-129.38 1481.35,-139.27 1405.82,-145.19"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1405.21,-141.73 1395.51,-146 1405.76,-148.71 1405.21,-141.73"/>
+<text text-anchor="middle" x="1541.5" y="-144.4" font-family="Helvetica,sans-Serif" font-size="9.50">solutionGradient, flux</text>
+</g>
+<!-- type~mesh2d -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node10" class="node">
+<title>type~mesh2d</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node10"><a xlink:href=".././type/mesh2d.html" xlink:title="Mesh2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1371,-204 1316,-204 1316,-180 1371,-180 1371,-204"/>
+<text text-anchor="middle" x="1343.5" y="-189.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mesh2d -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge10" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mesh2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1698.22,-133.1C1686.75,-140.98 1670.68,-150.74 1655,-156 1560.06,-187.84 1440.68,-192.48 1381.4,-192.59"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1381.06,-189.09 1371.06,-192.57 1381.05,-196.09 1381.06,-189.09"/>
+<text text-anchor="middle" x="1541.5" y="-193.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~model -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node12" class="node">
+<title>type~model</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node12"><a xlink:href=".././type/model.html" xlink:title="Model">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1370.5,-120 1316.5,-120 1316.5,-96 1370.5,-96 1370.5,-120"/>
+<text text-anchor="middle" x="1343.5" y="-105.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Model</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~model -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge13" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~model</title>
+<path fill="none" stroke="#00ffff" d="M1540.5,-105C1484.92,-100.06 1420.13,-102.68 1380.73,-105.2"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1380.3,-101.72 1370.56,-105.88 1380.77,-108.7 1380.3,-101.72"/>
+</g>
+<!-- type~semquad&#45;&gt;type~scalar2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge16" class="edge">
+<title>type~semquad&#45;&gt;type~scalar2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M833.04,-55.8C823.78,-48.9 811.34,-40.72 799,-36 760.89,-21.42 714.36,-15.68 681.99,-13.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="682.2,-9.94 672,-12.81 681.77,-16.92 682.2,-9.94"/>
+<text text-anchor="middle" x="763" y="-38.4" font-family="Helvetica,sans-Serif" font-size="9.50">nScale, J</text>
+</g>
+<!-- type~vector2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node13" class="node">
+<title>type~vector2d~2</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node13"><a xlink:href=".././type/vector2d~2.html" xlink:title="Vector2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="672,-112 611,-112 611,-88 672,-88 672,-112"/>
+<text text-anchor="middle" x="641.5" y="-97.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Vector2D</text>
+</a>
+</g>
+</g>
+<!-- type~semquad&#45;&gt;type~vector2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge14" class="edge">
+<title>type~semquad&#45;&gt;type~vector2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M816.79,-72.86C780.71,-78.48 721.28,-87.73 682.01,-93.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="681.34,-90.41 672,-95.41 682.42,-97.33 681.34,-90.41"/>
+<text text-anchor="middle" x="763" y="-87.4" font-family="Helvetica,sans-Serif" font-size="9.50">x, nHat, xMesh</text>
+</g>
+<!-- type~lagrange -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node14" class="node">
+<title>type~lagrange</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node14"><a xlink:href=".././type/lagrange.html" xlink:title="Lagrange">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="189,-84 125,-84 125,-60 189,-60 189,-84"/>
+<text text-anchor="middle" x="157" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange</text>
+</a>
+</g>
+</g>
+<!-- type~semquad&#45;&gt;type~lagrange -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge17" class="edge">
+<title>type~semquad&#45;&gt;type~lagrange</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M816.68,-66.02C776.4,-63.65 704.27,-60 642.5,-60 642.5,-60 642.5,-60 311.5,-60 273.31,-60 229.95,-63.74 199.07,-67.04"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="198.66,-63.56 189.11,-68.14 199.43,-70.52 198.66,-63.56"/>
+<text text-anchor="middle" x="465" y="-62.4" font-family="Helvetica,sans-Serif" font-size="9.50">meshToModel</text>
+</g>
+<!-- type~tensor2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node17" class="node">
+<title>type~tensor2d~2</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node17"><a xlink:href=".././type/tensor2d~2.html" xlink:title="Tensor2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="672.5,-154 610.5,-154 610.5,-130 672.5,-130 672.5,-154"/>
+<text text-anchor="middle" x="641.5" y="-139.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor2D</text>
+</a>
+</g>
+</g>
+<!-- type~semquad&#45;&gt;type~tensor2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge15" class="edge">
+<title>type~semquad&#45;&gt;type~tensor2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M831.46,-80.2C822.27,-86.52 810.42,-93.95 799,-99 760.98,-115.8 714.8,-127.52 682.5,-134.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="681.6,-131.04 672.53,-136.51 683.03,-137.9 681.6,-131.04"/>
+<text text-anchor="middle" x="763" y="-125.4" font-family="Helvetica,sans-Serif" font-size="9.50">dxds, dsdx</text>
+</g>
+<!-- type~boundarycondition -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node16" class="node">
+<title>type~boundarycondition</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node16"><a xlink:href=".././type/boundarycondition.html" xlink:title="BoundaryCondition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1154,-246 1039,-246 1039,-222 1154,-222 1154,-246"/>
+<text text-anchor="middle" x="1096.5" y="-231.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">BoundaryCondition</text>
+</a>
+</g>
+</g>
+<!-- type~boundaryconditionlist&#45;&gt;type~boundarycondition -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge18" class="edge">
+<title>type~boundaryconditionlist&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1276.84,-234C1242.01,-234 1199.3,-234 1164.3,-234"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1164.17,-230.5 1154.17,-234 1164.17,-237.5 1164.17,-230.5"/>
+<text text-anchor="middle" x="1215.5" y="-236.4" font-family="Helvetica,sans-Serif" font-size="9.50">current, head, tail</text>
+</g>
+<!-- type~mappedvector2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node15" class="node">
+<title>type~mappedvector2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node15"><a xlink:href=".././type/mappedvector2d_t.html" xlink:title="MappedVector2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1153,-162 1040,-162 1040,-138 1153,-138 1153,-162"/>
+<text text-anchor="middle" x="1096.5" y="-147.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">MappedVector2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mappedvector2d&#45;&gt;type~mappedvector2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge19" class="edge">
+<title>type~mappedvector2d&#45;&gt;type~mappedvector2d_t</title>
+<path fill="none" stroke="#00ff00" d="M1291.44,-150C1254.28,-150 1203.65,-150 1163.44,-150"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1163.19,-146.5 1153.19,-150 1163.19,-153.5 1163.19,-146.5"/>
+</g>
+<!-- type~mesh2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node18" class="node">
+<title>type~mesh2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node18"><a xlink:href=".././type/mesh2d_t.html" xlink:title="Mesh2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1128.5,-204 1064.5,-204 1064.5,-180 1128.5,-180 1128.5,-204"/>
+<text text-anchor="middle" x="1096.5" y="-189.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d&#45;&gt;type~mesh2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge20" class="edge">
+<title>type~mesh2d&#45;&gt;type~mesh2d_t</title>
+<path fill="none" stroke="#00ffff" d="M1315.81,-192C1273.21,-192 1189.48,-192 1139,-192"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1138.76,-188.5 1128.76,-192 1138.76,-195.5 1138.76,-188.5"/>
+</g>
+<!-- type~scalar2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node19" class="node">
+<title>type~scalar2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node19"><a xlink:href=".././type/scalar2d_t.html" xlink:title="Scalar2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="500,-24 430,-24 430,0 500,0 500,-24"/>
+<text text-anchor="middle" x="465" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Scalar2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~scalar2d~2&#45;&gt;type~scalar2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge21" class="edge">
+<title>type~scalar2d~2&#45;&gt;type~scalar2d_t</title>
+<path fill="none" stroke="#0000ff" d="M610.9,-12C583.38,-12 542.01,-12 510.51,-12"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="510.24,-8.5 500.24,-12 510.24,-15.5 510.24,-8.5"/>
+</g>
+<!-- type~vector2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node20" class="node">
+<title>type~vector2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node20"><a xlink:href=".././type/vector2d_t.html" xlink:title="Vector2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="500,-112 430,-112 430,-88 500,-88 500,-112"/>
+<text text-anchor="middle" x="465" y="-97.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Vector2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~vector2d~2&#45;&gt;type~vector2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge22" class="edge">
+<title>type~vector2d~2&#45;&gt;type~vector2d_t</title>
+<path fill="none" stroke="#ff0000" d="M610.9,-100C583.38,-100 542.01,-100 510.51,-100"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="510.24,-96.5 500.24,-100 510.24,-103.5 510.24,-96.5"/>
+</g>
+<!-- type~lagrange_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node22" class="node">
+<title>type~lagrange_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node22"><a xlink:href=".././type/lagrange_t.html" xlink:title="Lagrange_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="73,-84 0,-84 0,-60 73,-60 73,-84"/>
+<text text-anchor="middle" x="36.5" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- type~lagrange&#45;&gt;type~lagrange_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge23" class="edge">
+<title>type~lagrange&#45;&gt;type~lagrange_t</title>
+<path fill="none" stroke="#ffda00" d="M124.87,-72C112.19,-72 97.27,-72 83.39,-72"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="83.03,-68.5 73.03,-72 83.03,-75.5 83.03,-68.5"/>
+</g>
+<!-- type~mappedvector2d_t&#45;&gt;type~semquad -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge24" class="edge">
+<title>type~mappedvector2d_t&#45;&gt;type~semquad</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M1059.54,-137.99C1014.53,-122.95 937.64,-97.27 890.57,-81.55"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="891.6,-78.2 881,-78.36 889.38,-84.84 891.6,-78.2"/>
+<text text-anchor="middle" x="960" y="-125.4" font-family="Helvetica,sans-Serif" font-size="9.50">geometry</text>
+</g>
+<!-- type~mappedvector2d_t&#45;&gt;type~vector2d~2 -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge25" class="edge">
+<title>type~mappedvector2d_t&#45;&gt;type~vector2d~2</title>
+<path fill="none" stroke="#48ff00" d="M1039.72,-159.39C965.39,-169.41 831.14,-178.71 727,-137 717.06,-133.02 718.31,-126.28 709,-121 700.65,-116.26 691.09,-112.44 681.87,-109.43"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="682.66,-106.01 672.08,-106.47 680.64,-112.71 682.66,-106.01"/>
+</g>
+<!-- type~boundarycondition&#45;&gt;type~boundarycondition -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge27" class="edge">
+<title>type~boundarycondition&#45;&gt;type~boundarycondition</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1116.01,-246.01C1122.82,-254.97 1116.32,-264 1096.5,-264 1084.42,-264 1077.29,-260.65 1075.1,-256"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="1078.57,-256.49 1076.99,-246.01 1071.69,-255.19 1078.57,-256.49"/>
+<text text-anchor="middle" x="1096.5" y="-266.4" font-family="Helvetica,sans-Serif" font-size="9.50">next, prev</text>
+</g>
+<!-- c_ptr -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node23" class="node">
+<title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="876,-246 822,-246 822,-222 876,-222 876,-246"/>
+<text text-anchor="middle" x="849" y="-231.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~boundarycondition&#45;&gt;c_ptr -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge26" class="edge">
+<title>type~boundarycondition&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M1038.87,-234C991.94,-234 926.64,-234 886.41,-234"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="886.25,-230.5 876.25,-234 886.25,-237.5 886.25,-230.5"/>
+<text text-anchor="middle" x="960" y="-236.4" font-family="Helvetica,sans-Serif" font-size="9.50">elements_gpu, sides_gpu</text>
+</g>
+<!-- type~tensor2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node21" class="node">
+<title>type~tensor2d_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node21"><a xlink:href=".././type/tensor2d_t.html" xlink:title="Tensor2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="500.5,-154 429.5,-154 429.5,-130 500.5,-130 500.5,-154"/>
+<text text-anchor="middle" x="465" y="-139.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Tensor2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~tensor2d~2&#45;&gt;type~tensor2d_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge28" class="edge">
+<title>type~tensor2d~2&#45;&gt;type~tensor2d_t</title>
+<path fill="none" stroke="#0091ff" d="M610.1,-142C582.64,-142 541.88,-142 510.71,-142"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="510.53,-138.5 500.53,-142 510.53,-145.5 510.53,-138.5"/>
+</g>
+<!-- type~semmesh -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node24" class="node">
+<title>type~semmesh</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node24"><a xlink:href=".././type/semmesh.html" xlink:title="SEMMesh">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="880.5,-204 817.5,-204 817.5,-180 880.5,-180 880.5,-204"/>
+<text text-anchor="middle" x="849" y="-189.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMMesh</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d_t&#45;&gt;type~semmesh -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge29" class="edge">
+<title>type~mesh2d_t&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#4800ff" d="M1064.41,-192C1020.41,-192 939.92,-192 891.06,-192"/>
+<polygon fill="#4800ff" stroke="#4800ff" points="890.84,-188.5 880.84,-192 890.84,-195.5 890.84,-188.5"/>
+</g>
+<!-- type~self_dataobj -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node25" class="node">
+<title>type~self_dataobj</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node25"><a xlink:href=".././type/self_dataobj.html" xlink:title="SELF_DataObj">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="356,-138 269,-138 269,-114 356,-114 356,-138"/>
+<text text-anchor="middle" x="312.5" y="-123.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataObj</text>
+</a>
+</g>
+</g>
+<!-- type~scalar2d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge30" class="edge">
+<title>type~scalar2d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#ff00da" d="M429.88,-20.78C417.63,-24.86 404.1,-30.51 393,-38 365.91,-56.28 341.86,-85.71 327.49,-105.44"/>
+<polygon fill="#ff00da" stroke="#ff00da" points="324.52,-103.57 321.59,-113.75 330.23,-107.63 324.52,-103.57"/>
+</g>
+<!-- type~vector2d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge31" class="edge">
+<title>type~vector2d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#ff0000" d="M429.89,-107.58C417.9,-110.89 404.54,-115.33 393,-121 384.14,-125.35 384.87,-133.93 375,-134"/>
+<path fill="none" stroke="#ff0000" d="M374,-134C371.45,-134.02 368.85,-133.96 366.22,-133.85"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="366.27,-130.34 356.05,-133.13 365.77,-137.32 366.27,-130.34"/>
+</g>
+<!-- type~tensor2d_t&#45;&gt;type~self_dataobj -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge32" class="edge">
+<title>type~tensor2d_t&#45;&gt;type~self_dataobj</title>
+<path fill="none" stroke="#ffff00" d="M429.41,-137.32C412.96,-135.5 393,-133.87 375,-134"/>
+</g>
+<!-- type~domaindecomposition -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node26" class="node">
+<title>type~domaindecomposition</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node26"><a xlink:href=".././type/domaindecomposition.html" xlink:title="DomainDecomposition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="709,-204 574,-204 574,-180 709,-180 709,-204"/>
+<text text-anchor="middle" x="641.5" y="-189.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- type~semmesh&#45;&gt;type~domaindecomposition -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge33" class="edge">
+<title>type~semmesh&#45;&gt;type~domaindecomposition</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M817.23,-192C791.46,-192 753.54,-192 719.61,-192"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="719.23,-188.5 709.23,-192 719.23,-195.5 719.23,-188.5"/>
+<text text-anchor="middle" x="763" y="-194.4" font-family="Helvetica,sans-Serif" font-size="9.50">decomp</text>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~lagrange -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge34" class="edge">
+<title>type~self_dataobj&#45;&gt;type~lagrange</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M277.05,-113.88C253.9,-105.74 223.28,-94.97 198.89,-86.39"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="199.8,-82.99 189.2,-82.98 197.47,-89.6 199.8,-82.99"/>
+<text text-anchor="middle" x="236.5" y="-105.4" font-family="Helvetica,sans-Serif" font-size="9.50">interp</text>
+</g>
+<!-- type~metadata -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node27" class="node">
+<title>type~metadata</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node27"><a xlink:href=".././type/metadata.html" xlink:title="Metadata">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="188.5,-180 125.5,-180 125.5,-156 188.5,-156 188.5,-180"/>
+<text text-anchor="middle" x="157" y="-165.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Metadata</text>
+</a>
+</g>
+</g>
+<!-- type~self_dataobj&#45;&gt;type~metadata -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge35" class="edge">
+<title>type~self_dataobj&#45;&gt;type~metadata</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M268.74,-137.7C246.84,-143.69 220.31,-150.95 198.71,-156.86"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="197.57,-153.54 188.85,-159.56 199.42,-160.29 197.57,-153.54"/>
+<text text-anchor="middle" x="236.5" y="-151.4" font-family="Helvetica,sans-Serif" font-size="9.50">meta</text>
+</g>
+<!-- EquationParser -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node28" class="node">
+<title>EquationParser</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="204,-138 110,-138 110,-114 204,-114 204,-138"/>
+<text text-anchor="middle" x="157" y="-123.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">EquationParser</text>
+</g>
+<!-- type~self_dataobj&#45;&gt;EquationParser -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge36" class="edge">
+<title>type~self_dataobj&#45;&gt;EquationParser</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M268.74,-126C251.83,-126 232.16,-126 214.13,-126"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="214.02,-122.5 204.02,-126 214.02,-129.5 214.02,-122.5"/>
+<text text-anchor="middle" x="236.5" y="-128.4" font-family="Helvetica,sans-Serif" font-size="9.50">eqn</text>
+</g>
+<!-- type~domaindecomposition_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_node29" class="node">
+<title>type~domaindecomposition_t</title>
+<g id="a_type~~linearshallowwater2d~~InheritsGraph_node29"><a xlink:href=".././type/domaindecomposition_t.html" xlink:title="DomainDecomposition_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="537,-204 393,-204 393,-180 537,-180 537,-204"/>
+<text text-anchor="middle" x="465" y="-189.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- type~domaindecomposition&#45;&gt;type~domaindecomposition_t -->
+<g id="type~~linearshallowwater2d~~InheritsGraph_edge37" class="edge">
+<title>type~domaindecomposition&#45;&gt;type~domaindecomposition_t</title>
+<path fill="none" stroke="#ff0000" d="M573.53,-192C564.97,-192 556.12,-192 547.36,-192"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="547.13,-188.5 537.13,-192 547.13,-195.5 547.13,-188.5"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypelinearshallowwater2dInheritsGraph = svgPanZoom('#typelinearshallowwater2dInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-cd">Cd</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-h">H</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-dsdt~2">dSdt</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-dt">dt</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-entropy">entropy</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-fcori">fCori</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-flux~2">flux</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-fluxdivergence~2">fluxDivergence</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-g~3">g</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-geometry~2">geometry</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-gradient_enabled">gradient_enabled</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-hyperbolicbcs~2">hyperbolicBCs</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-ioiterate">ioIterate</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-mesh~2">mesh</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-nstepped">nstepped</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-nvar">nvar</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-parabolicbcs">parabolicBCs</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-prescribed_bcs_enabled">prescribed_bcs_enabled</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-solution~2">solution</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-solutiongradient~2">solutionGradient</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-source~2">source</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-t">t</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-tecplot_enabled">tecplot_enabled</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-timeintegrator">timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-transferstage">transferStage</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#variable-worksol~2">workSol</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-additionalfree~2">AdditionalFree</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-additionalinit~3">AdditionalInit</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-additionaloutput">AdditionalOutput</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-applytransferplan">ApplyTransferPlan</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-boundaryflux~2">BoundaryFlux</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-calculateentropy~2">CalculateEntropy</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-calculatesolutiongradient~2">CalculateSolutionGradient</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-calculatetendency~3">CalculateTendency</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-diagnosegeostrophicvelocity">DiagnoseGeostrophicVelocity</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-euler_timeintegrator">Euler_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-fluxmethod~2">FluxMethod</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-forwardstep">ForwardStep</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-free~7">Free</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-getsimulationtime">GetSimulationTime</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-incrementiocounter">IncrementIOCounter</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-init~7">Init</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-lowstoragerk2_timeintegrator">LowStorageRK2_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-lowstoragerk3_timeintegrator">LowStorageRK3_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-lowstoragerk4_timeintegrator">LowStorageRK4_timeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-mapboundaryconditions~2">MapBoundaryConditions</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-poststephook">PostStepHook</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-prestephook">PreStepHook</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-pretendencyhook">PreTendencyHook</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-printtype">PrintType</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-readmodel~2">ReadModel</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-regrid">Regrid</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-reportentropy">ReportEntropy</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-reportmetrics~2">ReportMetrics</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-reportusermetrics">ReportUserMetrics</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setboundarycondition~2">SetBoundaryCondition</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setcoriolis~2">SetCoriolis</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setgradientboundarycondition~2">SetGradientBoundaryCondition</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setmetadata~4">SetMetadata</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setnumberofvariables~2">SetNumberOfVariables</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setsimulationtime">SetSimulationTime</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-setsolution~40">SetSolution</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-settimeintegrator~41">SetTimeIntegrator</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-stagesolutionfortransfer">StageSolutionForTransfer</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updategrk2~2">UpdateGRK2</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updategrk3~2">UpdateGRK3</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updategrk4~2">UpdateGRK4</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-updatesolution~2">UpdateSolution</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-writemodel~2">WriteModel</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-writetecplot~2">WriteTecplot</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-entropy_func~4">entropy_func</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-flux1d">flux1D</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-flux2d">flux2d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-flux3d">flux3D</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-riemannflux1d~3">riemannflux1d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-riemannflux2d~3">riemannflux2d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-riemannflux3d">riemannflux3d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-source1d">source1d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-source2d">source2d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-source3d">source3d</a>
+      <a class="list-group-item" href="../type/linearshallowwater2d.html#boundprocedure-sourcemethod">sourcemethod</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/linearshallowwater2d.html#src">LinearShallowWater2D</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-cd"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>Cd</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-h"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>H</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dsdt~2"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-entropy"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>entropy</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fcori"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fCori</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flux~2"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-fluxdivergence~2"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>fluxDivergence</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-g~3"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>g</strong></td><td> =</td><td>0.0_prec</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~2"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-gradient_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>gradient_enabled</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-hyperbolicbcs~2"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>hyperbolicBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ioiterate"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>ioIterate</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mesh~2"></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>mesh</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nstepped"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nstepped</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-parabolicbcs"></span>type(<a href='../type/boundaryconditionlist.html'>BoundaryConditionList</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>parabolicBCs</strong></td><td></td><td></td><td><p>Pre-regrid copy of the solution, held between StageSolutionForTransfer and
+ApplyTransferPlan so that Regrid is free to release the storage it was read from. The
+base implementation stages on the host; the GPU backend overrides both procedures and
+stages device-side instead, leaving this unallocated.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-prescribed_bcs_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>prescribed_bcs_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solution~2"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-solutiongradient~2"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-source~2"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>source</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-t"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-tecplot_enabled"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>tecplot_enabled</strong></td><td> =</td><td>.true.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-timeintegrator"></span>procedure(<a href='../interface/self_timeintegrator.html'>SELF_timeIntegrator</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>timeIntegrator</strong></td><td>=> </td><td>Euler_timeIntegrator</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-transferstage"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>transferStage</strong>(:,:,:,:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-worksol~2"></span>type(<a href='../type/mappedscalar2d~2.html'>MappedScalar2D</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>workSol</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalfree~2"></span><h3>procedure, public :: <strong>AdditionalFree</strong>  => <a href='../proc/additionalfree_linearshallowwater2d_t.html'>AdditionalFree_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalfree_linearshallowwater2d_t.html'>AdditionalFree_LinearShallowWater2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionalinit~3"></span><h3>procedure, public :: <strong>AdditionalInit</strong>  => <a href='../proc/additionalinit_linearshallowwater2d_t.html'>AdditionalInit_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionalinit_linearshallowwater2d_t.html'>AdditionalInit_LinearShallowWater2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-additionaloutput"></span><h3>procedure, public :: <strong>AdditionalOutput</strong>  => <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/additionaloutput_model.html'>AdditionalOutput_Model</a>(this, fileid)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=HID_T),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileid</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-applytransferplan"></span><h3>procedure, public :: <strong>ApplyTransferPlan</strong>  => <a href='../proc/applytransferplan_dgmodel2d_t.html'>ApplyTransferPlan_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/applytransferplan_dgmodel2d_t.html'>ApplyTransferPlan_DGModel2D_t</a>(this, plan, interp, eFirst, eLast, uGlobal)</h3>
+<p>Transfer the staged pre-regrid solution onto the regridded mesh through plan, filling the
+rank-local element range [eFirst,eLast] of the new solution.</p><a href="../proc/applytransferplan_dgmodel2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/transferplan2d.html'>TransferPlan2D</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>plan</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eFirst</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eLast</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>uGlobal</strong>(:,:,:,:)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-boundaryflux~2"></span><h3>procedure, public :: <strong>BoundaryFlux</strong>  => <a href='../proc/boundaryflux_dgmodel2d_t.html'>BoundaryFlux_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/boundaryflux_dgmodel2d_t.html'>BoundaryFlux_DGModel2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculateentropy~2"></span><h3>procedure, public :: <strong>CalculateEntropy</strong>  => <a href='../proc/calculateentropy_dgmodel2d_t.html'>CalculateEntropy_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculateentropy_dgmodel2d_t.html'>CalculateEntropy_DGModel2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatesolutiongradient~2"></span><h3>procedure, public :: <strong>CalculateSolutionGradient</strong>  => <a href='../proc/calculatesolutiongradient_dgmodel2d_t.html'>CalculateSolutionGradient_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculatesolutiongradient_dgmodel2d_t.html'>CalculateSolutionGradient_DGModel2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-calculatetendency~3"></span><h3>procedure, public :: <strong>CalculateTendency</strong>  => <a href='../proc/calculatetendency_dgmodel2d_t.html'>CalculateTendency_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/calculatetendency_dgmodel2d_t.html'>CalculateTendency_DGModel2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-diagnosegeostrophicvelocity"></span><h3>procedure, public :: <strong>DiagnoseGeostrophicVelocity</strong>  => <a href='../proc/diagnosegeostrophicvelocity_linearshallowwater2d_t.html'>DiagnoseGeostrophicVelocity_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/diagnosegeostrophicvelocity_linearshallowwater2d_t.html'>DiagnoseGeostrophicVelocity_LinearShallowWater2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-euler_timeintegrator"></span><h3>procedure, public :: <strong>Euler_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/euler_timeintegrator.html'>Euler_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-fluxmethod~2"></span><h3>procedure, public :: <strong>FluxMethod</strong>  => <a href='../proc/fluxmethod_dgmodel2d_t.html'>fluxmethod_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/fluxmethod_dgmodel2d_t.html'>fluxmethod_DGModel2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-forwardstep"></span><h3>procedure, public :: <strong>ForwardStep</strong>  => <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/forwardstep_model.html'>ForwardStep_Model</a>(this, tn, dt, ioInterval)</h3>
+<p>Forward steps the model using the associated tendency procedure and time integrator</p><a href="../proc/forwardstep_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>ioInterval</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~7"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_dgmodel2d_t.html'>Free_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_dgmodel2d_t.html'>Free_DGModel2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-getsimulationtime"></span><h3>procedure, public :: <strong>GetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/getsimulationtime.html'>GetSimulationTime</a>(this, t)</h3>
+<p>Returns the current simulation time stored in the model % t attribute</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-incrementiocounter"></span><h3>procedure, public :: <strong>IncrementIOCounter</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/incrementiocounter.html'>IncrementIOCounter</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~7"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_dgmodel2d_t.html'>Init_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_dgmodel2d_t.html'>Init_DGModel2D_t</a>(this, mesh, geometry)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk2_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK2_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk2_timeintegrator.html'>LowStorageRK2_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk3_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK3_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk3_timeintegrator.html'>LowStorageRK3_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-lowstoragerk4_timeintegrator"></span><h3>procedure, public :: <strong>LowStorageRK4_timeIntegrator</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/lowstoragerk4_timeintegrator.html'>LowStorageRK4_timeIntegrator</a>(this, tn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>tn</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-mapboundaryconditions~2"></span><h3>procedure, public :: <strong>MapBoundaryConditions</strong>  => <a href='../proc/mapboundaryconditions_dgmodel2d_t.html'>MapBoundaryConditions_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/mapboundaryconditions_dgmodel2d_t.html'>MapBoundaryConditions_DGModel2D_t</a>(this)</h3>
+<p>Scan the mesh sideInfo and populate the elements/sides
+arrays for each registered boundary condition.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-poststephook"></span><h3>procedure, public :: <strong>PostStepHook</strong>  => <a href='../proc/poststephook_model.html'>PostStepHook_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/poststephook_model.html'>PostStepHook_Model</a>(this)</h3>
+<p>PostStepHook is a template routine invoked by the time integrators once
+immediately after each completed time step (after this%t has advanced by
+this%dt). The default implementation is a no-op.</p><a href="../proc/poststephook_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-prestephook"></span><h3>procedure, public :: <strong>PreStepHook</strong>  => <a href='../proc/prestephook_model.html'>PreStepHook_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/prestephook_model.html'>PreStepHook_Model</a>(this)</h3>
+<p>PreStepHook is a template routine invoked by the time integrators once
+immediately before each time step is taken (before any Runge-Kutta
+stages of that step). The default implementation is a no-op.</p><a href="../proc/prestephook_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-pretendencyhook"></span><h3>procedure, public :: <strong>PreTendencyHook</strong>  => <a href='../proc/pretendencyhook_model.html'>PreTendencyHook_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/pretendencyhook_model.html'>PreTendencyHook_Model</a>(this)</h3>
+<p>PreTendencyHook is a template routine that is used to house any additional calculations
+that you want to execute at the beginning of the tendency calculation routine.
+This default PreTendencyHook simply returns back to the caller without executing any instructions</p><a href="../proc/pretendencyhook_model.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-printtype"></span><h3>procedure, public :: <strong>PrintType</strong>  => <a href='../proc/printtype_model.html'>PrintType_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/printtype_model.html'>PrintType_Model</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-readmodel~2"></span><h3>procedure, public :: <strong>ReadModel</strong>  => <a href='../proc/read_dgmodel2d_t.html'>Read_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/read_dgmodel2d_t.html'>Read_DGModel2D_t</a>(this, fileName)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-regrid"></span><h3>procedure, public :: <strong>Regrid</strong>  => <a href='../proc/regrid_dgmodel2d_t.html'>Regrid_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/regrid_dgmodel2d_t.html'>Regrid_DGModel2D_t</a>(this, mesh, geometry)</h3>
+<p>Rebind a live model to a new mesh/geometry pair (AMR regrid). The mesh-sized solution
+storage is reallocated and the boundary-condition registrations and maps are rebuilt
+for the new mesh, while everything that is not mesh-sized is preserved: the time state
+(t, dt, entropy, IO counter), the time-integrator selection, configuration flags, and
+any model-specific parameters (Init is intent(out) and would reset all of these).
+nvar/nstepped are unchanged - the model solves the same equations on a new mesh.</p><a href="../proc/regrid_dgmodel2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportentropy"></span><h3>procedure, public :: <strong>ReportEntropy</strong>  => <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportentropy_model.html'>ReportEntropy_Model</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportmetrics~2"></span><h3>procedure, public :: <strong>ReportMetrics</strong>  => <a href='../proc/reportmetrics_dgmodel2d_t.html'>ReportMetrics_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportmetrics_dgmodel2d_t.html'>ReportMetrics_DGModel2D_t</a>(this)</h3>
+<p>Base method for reporting the entropy of a model
+to stdout. Only override this procedure if additional
+reporting is needed. Alternatively, if you think
+additional reporting would be valuable for all models,
+open a pull request with modifications to this base
+method.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-reportusermetrics"></span><h3>procedure, public :: <strong>ReportUserMetrics</strong>  => <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/reportusermetrics_model.html'>ReportUserMetrics_Model</a>(this)</h3>
+<p>Method that can be overridden by users to
+report their own custom metrics after file io</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setboundarycondition~2"></span><h3>procedure, public :: <strong>SetBoundaryCondition</strong>  => <a href='../proc/setboundarycondition_dgmodel2d_t.html'>setboundarycondition_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setboundarycondition_dgmodel2d_t.html'>setboundarycondition_DGModel2D_t</a>(this)</h3>
+<p>Apply registered boundary conditions for the solution.
+Each boundary condition method loops over its own
+boundary faces.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setcoriolis~2"></span><h3>generic, public :: <strong>SetCoriolis</strong>  => <a href='../type/linearshallowwater2d_t.html#boundprocedure-setcoriolis_fplane_linearshallowwater2d_t'>SetCoriolis_fplane_LinearShallowWater2D_t</a>, <a href='../type/linearshallowwater2d_t.html#boundprocedure-setcoriolis_betaplane_linearshallowwater2d_t'>SetCoriolis_betaplane_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setcoriolis_fplane_linearshallowwater2d_t.html'>SetCoriolis_fplane_LinearShallowWater2D_t</a>(this, f0)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>f0</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setcoriolis_betaplane_linearshallowwater2d_t.html'>SetCoriolis_betaplane_LinearShallowWater2D_t</a>(this, f0, beta)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>f0</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>beta</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setgradientboundarycondition~2"></span><h3>procedure, public :: <strong>SetGradientBoundaryCondition</strong>  => <a href='../proc/setgradientboundarycondition_dgmodel2d_t.html'>setgradientboundarycondition_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setgradientboundarycondition_dgmodel2d_t.html'>setgradientboundarycondition_DGModel2D_t</a>(this)</h3>
+<p>Apply registered boundary conditions for the solution gradient.
+Each boundary condition method loops over its own
+boundary faces.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setmetadata~4"></span><h3>procedure, public :: <strong>SetMetadata</strong>  => <a href='../proc/setmetadata_linearshallowwater2d_t.html'>SetMetadata_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setmetadata_linearshallowwater2d_t.html'>SetMetadata_LinearShallowWater2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setnumberofvariables~2"></span><h3>procedure, public :: <strong>SetNumberOfVariables</strong>  => <a href='../proc/setnumberofvariables_linearshallowwater2d_t.html'>SetNumberOfVariables_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setnumberofvariables_linearshallowwater2d_t.html'>SetNumberOfVariables_LinearShallowWater2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsimulationtime"></span><h3>procedure, public :: <strong>SetSimulationTime</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/setsimulationtime.html'>SetSimulationTime</a>(this, t)</h3>
+<p>Sets the model % t attribute with the provided simulation time</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setsolution~40"></span><h3>generic, public :: <strong>SetSolution</strong>  => <a href='../type/dgmodel2d_t.html#boundprocedure-setsolutionfromchar_dgmodel2d_t'>SetSolutionFromChar_DGModel2D_t</a>, <a href='../type/dgmodel2d_t.html#boundprocedure-setsolutionfromeqn_dgmodel2d_t'>SetSolutionFromEqn_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setsolutionfromchar_dgmodel2d_t.html'>SetSolutionFromChar_DGModel2D_t</a>(this, eqnChar)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqnChar</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/setsolutionfromeqn_dgmodel2d_t.html'>SetSolutionFromEqn_DGModel2D_t</a>(this, eqn)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-settimeintegrator~41"></span><h3>generic, public :: <strong>SetTimeIntegrator</strong>  => <a href='../type/model.html#boundprocedure-settimeintegrator_withchar'>SetTimeIntegrator_withChar</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/settimeintegrator_withchar.html'>SetTimeIntegrator_withChar</a>(this, integrator)</h3>
+<p>Sets the time integrator method, using a character input</p><a href="../proc/settimeintegrator_withchar.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>integrator</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-stagesolutionfortransfer"></span><h3>procedure, public :: <strong>StageSolutionForTransfer</strong>  => <a href='../proc/stagesolutionfortransfer_dgmodel2d_t.html'>StageSolutionForTransfer_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/stagesolutionfortransfer_dgmodel2d_t.html'>StageSolutionForTransfer_DGModel2D_t</a>(this)</h3>
+<p>Preserve the current solution ahead of a regrid, so that Regrid may release the storage
+it lives in. Pair with ApplyTransferPlan, which consumes the staged copy:</p><a href="../proc/stagesolutionfortransfer_dgmodel2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk2~2"></span><h3>procedure, public :: <strong>UpdateGRK2</strong>  => <a href='../proc/updategrk2_dgmodel2d_t.html'>UpdateGRK2_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk2_dgmodel2d_t.html'>UpdateGRK2_DGModel2D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk3~2"></span><h3>procedure, public :: <strong>UpdateGRK3</strong>  => <a href='../proc/updategrk3_dgmodel2d_t.html'>UpdateGRK3_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk3_dgmodel2d_t.html'>UpdateGRK3_DGModel2D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updategrk4~2"></span><h3>procedure, public :: <strong>UpdateGRK4</strong>  => <a href='../proc/updategrk4_dgmodel2d_t.html'>UpdateGRK4_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updategrk4_dgmodel2d_t.html'>UpdateGRK4_DGModel2D_t</a>(this, m)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>m</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatesolution~2"></span><h3>procedure, public :: <strong>UpdateSolution</strong>  => <a href='../proc/updatesolution_dgmodel2d_t.html'>UpdateSolution_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatesolution_dgmodel2d_t.html'>UpdateSolution_DGModel2D_t</a>(this, dt)</h3>
+<p>Computes a solution update as , where dt is either provided through the interface
+or taken as the Model's stored time step size (model % dt)</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writemodel~2"></span><h3>procedure, public :: <strong>WriteModel</strong>  => <a href='../proc/write_dgmodel2d_t.html'>Write_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/write_dgmodel2d_t.html'>Write_DGModel2D_t</a>(this, fileName)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>fileName</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-writetecplot~2"></span><h3>procedure, public :: <strong>WriteTecplot</strong>  => <a href='../proc/writetecplot_dgmodel2d_t.html'>WriteTecplot_DGModel2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/writetecplot_dgmodel2d_t.html'>WriteTecplot_DGModel2D_t</a>(this, filename)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/dgmodel2d_t.html'>DGModel2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-entropy_func~4"></span><h3>procedure, public :: <strong>entropy_func</strong>  => <a href='../proc/entropy_func_linearshallowwater2d_t.html'>entropy_func_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/entropy_func_linearshallowwater2d_t.html'>entropy_func_LinearShallowWater2D_t</a>(this, s) result(e)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%solution%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux1d"></span><h3>procedure, public :: <strong>flux1D</strong>  => <a href='../proc/flux1d_model.html'>flux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux1d_model.html'>flux1d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux2d"></span><h3>procedure, public :: <strong>flux2d</strong>  => <a href='../proc/flux2d_linearshallowwater2d_t.html'>flux2d_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux2d_linearshallowwater2d_t.html'>flux2d_LinearShallowWater2D_t</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%solution%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%solution%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%solution%nvar,1:2)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-flux3d"></span><h3>procedure, public :: <strong>flux3D</strong>  => <a href='../proc/flux3d_model.html'>flux3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/flux3d_model.html'>flux3d_Model</a>(this, s, dsdx) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar,1:3)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux1d~3"></span><h3>procedure, public :: <strong>riemannflux1d</strong>  => <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux1d_model.html'>riemannflux1d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux2d~3"></span><h3>procedure, public :: <strong>riemannflux2d</strong>  => <a href='../proc/riemannflux2d_linearshallowwater2d_t.html'>riemannflux2d_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux2d_linearshallowwater2d_t.html'>riemannflux2d_LinearShallowWater2D_t</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%solution%nVar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%solution%nVar,1:2)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%solution%nVar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-riemannflux3d"></span><h3>procedure, public :: <strong>riemannflux3d</strong>  => <a href='../proc/riemannflux3d_model.html'>riemannflux3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/riemannflux3d_model.html'>riemannflux3d_Model</a>(this, sL, sR, dsdx, nhat) result(flux)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sL</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>sR</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nhat</strong>(1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source1d"></span><h3>procedure, public :: <strong>source1d</strong>  => <a href='../proc/source1d_model.html'>source1d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source1d_model.html'>source1d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source2d"></span><h3>procedure, public :: <strong>source2d</strong>  => <a href='../proc/source2d_model.html'>source2d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source2d_model.html'>source2d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:2)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-source3d"></span><h3>procedure, public :: <strong>source3d</strong>  => <a href='../proc/source3d_model.html'>source3d_Model</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public pure function <a href='../proc/source3d_model.html'>source3d_Model</a>(this, s, dsdx) result(source)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/model.html'>Model</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>s</strong>(1:this%nvar)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dsdx</strong>(1:this%nvar,1:3)</td><td></td>
+</tr>
+</tbody>
+</table>
+
+<h4>Return Value <small>real(kind=prec)(1:this%nvar)</small></h4>  
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-sourcemethod"></span><h3>procedure, public :: <strong>sourcemethod</strong>  => <a href='../proc/sourcemethod_linearshallowwater2d_t.html'>sourcemethod_LinearShallowWater2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/sourcemethod_linearshallowwater2d_t.html'>sourcemethod_LinearShallowWater2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/linearshallowwater2d_t.html'>LinearShallowWater2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">LinearShallowWater2D_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">LinearShallowWater2D</span>
+<span class="w">  </span><span class="k">endtype </span><span class="n">LinearShallowWater2D</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_MappedScalar_2D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_MappedScalar_2D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.5% of total for modules and submodules.">305 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_MappedScalar_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_mappedscalar_2d.f90~2.html'>SELF_MappedScalar_2D.f90</a></li>
+     <li class="active">SELF_MappedScalar_2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
+  <div id="inters-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#interface-contravariantweight_2d_gpu">ContravariantWeight_2D_gpu</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#interface-normalweight_2d_gpu">NormalWeight_2D_gpu</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#type-mappedscalar2d">MappedScalar2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-ensuredevicebuffers_mappedscalar2d">EnsureDeviceBuffers_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-free_mappedscalar2d">Free_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-init_mappedscalar2d">Init_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mpimortarexchangeasync_mappedscalar2d">MPIMortarExchangeAsync_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mappeddggradient_mappedscalar2d">MappedDGGradient_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mappedgradient_mappedscalar2d">MappedGradient_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mortarexchange_mappedscalar2d">MortarExchange_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-resize_mappedscalar2d">Resize_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-setinteriorfromequation_mappedscalar2d">SetInteriorFromEquation_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-sideexchangefinish_mappedscalar2d">SideExchangeFinish_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-sideexchangestart_mappedscalar2d">SideExchangeStart_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-sideexchange_mappedscalar2d">SideExchange_MappedScalar2D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+    <li><a href='../module/self_scalar_2d.html'>SELF_Scalar_2D</a></li>
+    <li><a href='../module/self_gpu~2.html'>SELF_GPU</a></li>
+    <li><a href='../module/self_mappedscalar_2d_t.html'>SELF_MappedScalar_2D_t</a></li>
+    <li><a href='../module/self_gpuinterfaces.html'>SELF_GPUInterfaces</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_mappedscalar_2d~2~~UsesGraph Pages: 1 -->
+<svg id="moduleself_mappedscalar_2d2UsesGraph" width="641pt" height="346pt"
+ viewBox="0.00 0.00 641.00 345.72" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph" class="graph" transform="scale(0.32 0.32) rotate(0) translate(4 1074.14)">
+<title>module~~self_mappedscalar_2d~2~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-1074.14 1995,-1074.14 1995,4 -4,4"/>
+<!-- module~self_mappedscalar_2d~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node1" class="node">
+<title>module~self_mappedscalar_2d~2</title>
+<polygon fill="none" stroke="black" points="1991,-153.63 1851,-153.63 1851,-129.63 1991,-129.63 1991,-153.63"/>
+<text text-anchor="middle" x="1921" y="-139.23" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_MappedScalar_2D</text>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node2" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node2"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-603.63 5,-603.63 5,-579.63 89,-579.63 89,-603.63"/>
+<text text-anchor="middle" x="47" y="-589.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge1" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1850.72,-134.06C1780.55,-126.3 1668.91,-113.7 1572.5,-101.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1570.5,-101.63C1527.15,-93.71 1519.29,-81.02 1477,-68.63 1396.82,-45.13 1377.55,-25.63 1294,-25.63 1294,-25.63 1294,-25.63 1016,-25.63 849.33,-25.63 807.65,-28.17 641,-25.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M639,-25.63C601.38,-25.05 594.33,-9.33 557,-4.63 504.97,1.93 491.17,0.77 439,-4.63 393.61,-9.32 384.04,-22.8 338.5,-25.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M336.5,-25.63C268.77,-28.05 239.82,12.82 184,-25.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M182,-25.63C89.2,-89.54 56.37,-472.14 49.47,-569.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="45.96,-569.17 48.77,-579.39 52.95,-569.65 45.96,-569.17"/>
+</g>
+<!-- module~self_gpuinterfaces -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node3" class="node">
+<title>module~self_gpuinterfaces</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node3"><a xlink:href=".././module/self_gpuinterfaces.html" xlink:title="SELF_GPUInterfaces">
+<polygon fill="#337ab7" stroke="#337ab7" points="557,-37.63 439,-37.63 439,-13.63 557,-13.63 557,-37.63"/>
+<text text-anchor="middle" x="498" y="-23.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPUInterfaces</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;module~self_gpuinterfaces -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge2" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;module~self_gpuinterfaces</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M639,-25.63C615.71,-25.63 590.24,-25.63 567.48,-25.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="567.24,-22.13 557.24,-25.63 567.24,-29.13 567.24,-22.13"/>
+</g>
+<!-- module~self_mappedscalar_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node4" class="node">
+<title>module~self_mappedscalar_2d_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node4"><a xlink:href=".././module/self_mappedscalar_2d_t.html" xlink:title="SELF_MappedScalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1815,-327.63 1666,-327.63 1666,-303.63 1815,-303.63 1815,-327.63"/>
+<text text-anchor="middle" x="1740.5" y="-313.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedScalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;module~self_mappedscalar_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge4" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;module~self_mappedscalar_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1907.45,-153.86C1876.92,-183.62 1798.61,-259.96 1761.53,-296.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1758.99,-293.69 1754.28,-303.17 1763.88,-298.7 1758.99,-293.69"/>
+</g>
+<!-- module~self_scalar_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node5" class="node">
+<title>module~self_scalar_2d</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node5"><a xlink:href=".././module/self_scalar_2d.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1341.5,-307.63 1244.5,-307.63 1244.5,-283.63 1341.5,-283.63 1341.5,-307.63"/>
+<text text-anchor="middle" x="1293" y="-293.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge5" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1570.5,-101.63C1485.69,-90.59 1449.16,-71.72 1379,-120.63 1326.8,-157.02 1305.39,-234.63 1297.73,-273.08"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1294.23,-272.77 1295.85,-283.24 1301.11,-274.05 1294.23,-272.77"/>
+</g>
+<!-- module~self_gpu~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node6" class="node">
+<title>module~self_gpu~2</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node6"><a xlink:href=".././module/self_gpu~2.html" xlink:title="SELF_GPU">
+<polygon fill="#337ab7" stroke="#337ab7" points="370,-77.63 305,-77.63 305,-53.63 370,-53.63 370,-77.63"/>
+<text text-anchor="middle" x="337.5" y="-63.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d~2&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge3" class="edge">
+<title>module~self_mappedscalar_2d~2&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M639,-25.63C601.38,-25.63 594.09,-40.31 557,-46.63 496.01,-57.02 424.43,-61.87 380.26,-64.03"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="380.01,-60.54 370.19,-64.5 380.34,-67.53 380.01,-60.54"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge6" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M438.98,-23.91C408.96,-23.45 371.73,-23.56 338.5,-25.63"/>
+</g>
+<!-- module~self_gpuinterfaces&#45;&gt;module~self_gpu~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge7" class="edge">
+<title>module~self_gpuinterfaces&#45;&gt;module~self_gpu~2</title>
+<path fill="none" stroke="#cbff00" stroke-dasharray="5,2" d="M449.44,-37.63C427.4,-43.19 401.45,-49.74 380.18,-55.11"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="379.31,-51.72 370.47,-57.56 381.02,-58.51 379.31,-51.72"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge8" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1730.58,-303.51C1707.93,-273.74 1644.82,-196.87 1572.5,-161.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1570.5,-161.63C1406.74,-81.82 1352.28,-34.18 1172.5,-63.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1170.5,-63.63C1101.87,-76.61 1083.36,-126.25 1018,-101.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1016,-101.63C859.24,-42.56 797.06,-78.74 641,-139.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M639,-139.63C572.18,-163.04 569.2,-206.4 499,-215.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M497,-215.63C350.21,-234.93 290.63,-226.91 184,-329.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M182,-329.63C105.46,-397.91 66.55,-520.23 53.33,-569.84"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="49.94,-568.97 50.83,-579.53 56.72,-570.72 49.94,-568.97"/>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge12" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1570.5,-161.63C1522.49,-136.55 1376.66,-235.58 1318.41,-277.6"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1316.19,-274.88 1310.16,-283.59 1320.31,-280.55 1316.19,-274.88"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node7" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node7"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="687,-805.63 593,-805.63 593,-781.63 687,-781.63 687,-805.63"/>
+<text text-anchor="middle" x="640" y="-791.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge9" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1292,-1061.63C1128.75,-1081 1060.92,-1073.11 934,-968.63 905.45,-945.13 921.77,-921.95 898,-893.63 867.59,-857.4 855.08,-850.01 811.5,-831.63"/>
+</g>
+<!-- module~self_domaindecomposition -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node8" class="node">
+<title>module~self_domaindecomposition</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node8"><a xlink:href=".././module/self_domaindecomposition.html" xlink:title="SELF_DomainDecomposition">
+<polygon fill="#337ab7" stroke="#337ab7" points="1100,-959.63 934,-959.63 934,-935.63 1100,-935.63 1100,-959.63"/>
+<text text-anchor="middle" x="1017" y="-945.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge14" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1570.5,-869.63C1450.26,-958.66 1438.16,-1021.62 1294,-1061.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1292,-1061.63C1247.93,-1066.01 1247.2,-1028.21 1207,-1009.63 1163.98,-989.74 1112.77,-973.36 1074.51,-962.44"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1075.16,-958.98 1064.58,-959.64 1073.26,-965.72 1075.16,-958.98"/>
+</g>
+<!-- module~self_tensor_2d~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node9" class="node">
+<title>module~self_tensor_2d~2</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node9"><a xlink:href=".././module/self_tensor_2d~2.html" xlink:title="SELF_Tensor_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1477,-153.63 1379,-153.63 1379,-129.63 1477,-129.63 1477,-153.63"/>
+<text text-anchor="middle" x="1428" y="-139.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge13" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_tensor_2d~2</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1570.5,-161.63C1545.26,-148.44 1514.22,-143.06 1487.64,-141.13"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1487.5,-137.62 1477.32,-140.54 1487.1,-144.61 1487.5,-137.62"/>
+</g>
+<!-- module~self_mesh_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node10" class="node">
+<title>module~self_mesh_2d</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node10"><a xlink:href=".././module/self_mesh_2d.html" xlink:title="SELF_Mesh_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1473.5,-881.63 1382.5,-881.63 1382.5,-857.63 1473.5,-857.63 1473.5,-881.63"/>
+<text text-anchor="middle" x="1428" y="-867.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge10" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1570.5,-869.63C1544.98,-888.52 1509.16,-888.34 1479.94,-883.52"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1480.38,-880.04 1469.91,-881.65 1479.1,-886.92 1480.38,-880.04"/>
+</g>
+<!-- module~self_geometry_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node11" class="node">
+<title>module~self_geometry_2d</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node11"><a xlink:href=".././module/self_geometry_2d.html" xlink:title="SELF_Geometry_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1630,-501.63 1513,-501.63 1513,-477.63 1630,-477.63 1630,-501.63"/>
+<text text-anchor="middle" x="1571.5" y="-487.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge11" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_geometry_2d</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1727.76,-327.86C1699.32,-357.49 1626.54,-433.32 1591.68,-469.65"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="1588.85,-467.53 1584.45,-477.17 1593.9,-472.38 1588.85,-467.53"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node12" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="671.5,-343.63 608.5,-343.63 608.5,-319.63 671.5,-319.63 671.5,-343.63"/>
+<text text-anchor="middle" x="640" y="-329.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge15" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1170.5,-63.63C1132.17,-70.47 1135.39,-99.4 1100,-115.63 943.78,-187.25 850.96,-86.9 723,-201.63 686.58,-234.28 718.32,-268.05 687,-305.63 684.57,-308.55 681.72,-311.2 678.65,-313.6"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="676.46,-310.86 670.15,-319.37 680.39,-316.65 676.46,-310.86"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node13" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node13"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="231,-775.63 135,-775.63 135,-751.63 231,-751.63 231,-775.63"/>
+<text text-anchor="middle" x="183" y="-761.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappedscalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge16" class="edge">
+<title>module~self_mappedscalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1737.59,-327.75C1725.69,-401.8 1659.38,-792.35 1572.5,-869.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M1570.5,-869.63C1538.68,-897.93 1519.33,-853.32 1477,-848.63 1373.63,-837.16 1346.99,-847.45 1243,-848.63 1105.64,-850.18 1068.29,-826.72 934,-855.63 876.18,-868.07 869.59,-896.49 811.5,-907.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M809.5,-907.63C734.21,-920.59 714.61,-962.09 641,-941.63"/>
+<path fill="none" stroke="#00ff66" stroke-dasharray="5,2" d="M639,-941.63C595.24,-929.46 596.06,-903.82 557,-880.63 492.19,-842.15 474.55,-833.3 403,-809.63 349.45,-791.91 286.2,-779.49 241.47,-772.06"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="241.81,-768.57 231.37,-770.42 240.68,-775.48 241.81,-768.57"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge19" class="edge">
+<title>module~self_scalar_2d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1281,-283.52C1246.63,-246.75 1136.47,-136.76 1018,-101.63"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge18" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1284.21,-307.8C1260.18,-344.68 1183.78,-457.16 1100,-530.63 929.48,-680.17 866.55,-729.87 641,-753.63"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M639,-753.63C575.55,-760.59 561.81,-796.99 499,-785.63"/>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M497,-785.63C469.2,-780.6 462.26,-775.66 439,-759.63 420.37,-746.79 422.86,-734.47 403,-723.63 377.25,-709.57 367.79,-708.11 338.5,-709.63"/>
+</g>
+<!-- module~self_scalar_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node14" class="node">
+<title>module~self_scalar_2d_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node14"><a xlink:href=".././module/self_scalar_2d_t.html" xlink:title="SELF_Scalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1070,-422.63 964,-422.63 964,-398.63 1070,-398.63 1070,-422.63"/>
+<text text-anchor="middle" x="1017" y="-408.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge17" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#0066ff" stroke-dasharray="5,2" d="M1271.03,-307.67C1236.39,-327.16 1164.6,-365.83 1100,-389.63 1093.61,-391.98 1086.84,-394.17 1080.05,-396.18"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="1078.78,-392.9 1070.11,-398.99 1080.68,-399.64 1078.78,-392.9"/>
+</g>
+<!-- module~self_gpu~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge20" class="edge">
+<title>module~self_gpu~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M304.75,-54.59C263.06,-40.51 193.97,-18.76 184,-25.63"/>
+</g>
+<!-- module~self_gpu_enums~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node15" class="node">
+<title>module~self_gpu_enums~2</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node15"><a xlink:href=".././module/self_gpu_enums~2.html" xlink:title="SELF_GPU_enums">
+<polygon fill="#337ab7" stroke="#337ab7" points="236,-189.63 130,-189.63 130,-165.63 236,-165.63 236,-189.63"/>
+<text text-anchor="middle" x="183" y="-175.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_GPU_enums</text>
+</a>
+</g>
+</g>
+<!-- module~self_gpu~2&#45;&gt;module~self_gpu_enums~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge21" class="edge">
+<title>module~self_gpu~2&#45;&gt;module~self_gpu_enums~2</title>
+<path fill="none" stroke="#cc00ff" stroke-dasharray="5,2" d="M319.89,-77.83C293.08,-97.52 240.1,-136.42 208.8,-159.41"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="206.58,-156.7 200.59,-165.44 210.72,-162.34 206.58,-156.7"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge22" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M598.74,-781.62C543.73,-764.9 450.55,-735.35 439,-723.63 403.49,-687.58 438.16,-652.01 403,-615.63 381.75,-593.63 367.93,-599.97 338.5,-591.63"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge23" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M592.96,-793.81C565.49,-793.22 530.02,-791.24 499,-785.63"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node17" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node17"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-833.63 0,-833.63 0,-809.63 94,-809.63 94,-833.63"/>
+<text text-anchor="middle" x="47" y="-819.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge24" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M634.95,-805.91C625.68,-831.98 600.32,-892.89 557,-922.63 487.93,-970.05 257.88,-1017.15 184,-977.63"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M182,-977.63C159.69,-965.37 149.07,-970.48 130,-953.63 94.53,-922.28 69.16,-871.9 56.71,-843.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="59.82,-841.67 52.71,-833.82 53.37,-844.4 59.82,-841.67"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node21" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node21"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="549.5,-913.63 446.5,-913.63 446.5,-889.63 549.5,-889.63 549.5,-913.63"/>
+<text text-anchor="middle" x="498" y="-899.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge25" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M623.21,-805.81C598.85,-824.6 551.89,-860.82 523.21,-882.95"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="520.72,-880.45 514.94,-889.33 525,-885.99 520.72,-880.45"/>
+</g>
+<!-- module~self_domaindecomposition_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node20" class="node">
+<title>module~self_domaindecomposition_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node20"><a xlink:href=".././module/self_domaindecomposition_t.html" xlink:title="SELF_DomainDecomposition_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="898,-997.63 723,-997.63 723,-973.63 898,-973.63 898,-997.63"/>
+<text text-anchor="middle" x="810.5" y="-983.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge26" class="edge">
+<title>module~self_domaindecomposition&#45;&gt;module~self_domaindecomposition_t</title>
+<path fill="none" stroke="#ffaa00" stroke-dasharray="5,2" d="M951.29,-959.65C930.59,-963.5 907.49,-967.79 886.13,-971.76"/>
+<polygon fill="#ffaa00" stroke="#ffaa00" points="885.33,-968.35 876.13,-973.62 886.61,-975.23 885.33,-968.35"/>
+</g>
+<!-- module~self_tensor_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node19" class="node">
+<title>module~self_tensor_2d_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node19"><a xlink:href=".././module/self_tensor_2d_t.html" xlink:title="SELF_Tensor_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1070.5,-380.63 963.5,-380.63 963.5,-356.63 1070.5,-356.63 1070.5,-380.63"/>
+<text text-anchor="middle" x="1017" y="-366.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Tensor_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_tensor_2d~2&#45;&gt;module~self_tensor_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge27" class="edge">
+<title>module~self_tensor_2d~2&#45;&gt;module~self_tensor_2d_t</title>
+<path fill="none" stroke="#aaff00" stroke-dasharray="5,2" d="M1405.3,-153.67C1337.22,-191.46 1127.69,-307.75 1048.63,-351.63"/>
+<polygon fill="#aaff00" stroke="#aaff00" points="1046.69,-348.7 1039.65,-356.61 1050.09,-354.82 1046.69,-348.7"/>
+</g>
+<!-- module~self_mesh_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node18" class="node">
+<title>module~self_mesh_2d_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node18"><a xlink:href=".././module/self_mesh_2d_t.html" xlink:title="SELF_Mesh_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1343,-881.63 1243,-881.63 1243,-857.63 1343,-857.63 1343,-881.63"/>
+<text text-anchor="middle" x="1293" y="-867.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge28" class="edge">
+<title>module~self_mesh_2d&#45;&gt;module~self_mesh_2d_t</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M1382.34,-869.63C1373.05,-869.63 1363.11,-869.63 1353.37,-869.63"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="1353.34,-866.13 1343.34,-869.63 1353.34,-873.13 1353.34,-866.13"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge29" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1512.66,-487.08C1486.48,-484.51 1455.52,-479.47 1429,-469.63"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1427,-469.63C1358.14,-444.06 1317.47,-358 1301.66,-317.3"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="1304.87,-315.91 1298.09,-307.77 1298.32,-318.36 1304.87,-315.91"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge33" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M809.5,-793.63C772.15,-793.16 730.14,-793.16 697.41,-793.27"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="697.12,-789.78 687.13,-793.32 697.14,-796.78 697.12,-789.78"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_tensor_2d~2 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge30" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_tensor_2d~2</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1565.46,-477.24C1544.57,-425.87 1464.59,-229.15 1437.8,-163.27"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="1440.98,-161.81 1433.98,-153.86 1434.5,-164.45 1440.98,-161.81"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_mesh_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge31" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_mesh_2d</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1567.68,-501.86C1557.95,-543.07 1523.82,-680.25 1477,-786.63 1467.3,-808.66 1453.24,-832.29 1442.84,-848.68"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="1439.68,-847.12 1437.21,-857.42 1445.57,-850.91 1439.68,-847.12"/>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge35" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1567.17,-501.87C1555.15,-544.16 1510.34,-686.24 1429,-772.63"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1427,-772.63C1380.09,-822.45 879.92,-794.48 811.5,-793.63"/>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M809.5,-793.63C732.73,-788.02 717.51,-745.23 641,-753.63"/>
+</g>
+<!-- module~self_vector_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node22" class="node">
+<title>module~self_vector_2d</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node22"><a xlink:href=".././module/self_vector_2d.html" xlink:title="SELF_Vector_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1476.5,-521.63 1379.5,-521.63 1379.5,-497.63 1476.5,-497.63 1476.5,-521.63"/>
+<text text-anchor="middle" x="1428" y="-507.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_vector_2d -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge32" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_vector_2d</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1512.95,-497.76C1504.26,-498.99 1495.29,-500.26 1486.6,-501.48"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="1485.97,-498.04 1476.56,-502.9 1486.95,-504.97 1485.97,-498.04"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node23" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node23"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="845,-499.63 776,-499.63 776,-475.63 845,-475.63 845,-499.63"/>
+<text text-anchor="middle" x="810.5" y="-485.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_data -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge34" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1427,-469.63C1224.53,-394.46 958.31,-449.14 855.05,-475.54"/>
+<polygon fill="#00ffa9" stroke="#00ffa9" points="854.08,-472.17 845.28,-478.08 855.84,-478.95 854.08,-472.17"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node24" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node24"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="403,-1029.63 272,-1029.63 272,-1005.63 403,-1005.63 403,-1029.63"/>
+<text text-anchor="middle" x="337.5" y="-1015.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry_2d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge36" class="edge">
+<title>module~self_geometry_2d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffa9" stroke-dasharray="5,2" d="M1427,-772.63C1330.27,-898.65 1320.13,-964.95 1172.5,-1023.63"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge37" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M172.58,-751.53C149.86,-722.37 91.85,-647.91 63.74,-611.83"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="66.5,-609.68 57.59,-603.94 60.98,-613.98 66.5,-609.68"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge38" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M154.24,-775.64C134.2,-784.32 106.94,-796.11 85.05,-805.59"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="83.52,-802.44 75.73,-809.62 86.3,-808.86 83.52,-802.44"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge39" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M963.79,-402.25C953.45,-399.24 943.02,-395.16 934,-389.63 913.33,-376.94 914.16,-366.7 898,-348.63 859.94,-306.06 866.28,-269.74 811.5,-253.63"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M809.5,-253.63C772.67,-242.8 679.33,-217.76 641,-215.63"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge43" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M997.95,-422.72C978.99,-436.42 949.77,-460.53 934,-488.63 896.84,-554.84 951.65,-601.9 898,-655.63 841.76,-711.95 785.59,-644.46 723,-693.63 694.24,-716.22 712.05,-740.98 687,-767.63 684.1,-770.71 680.75,-773.53 677.21,-776.07"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="675.25,-773.17 668.72,-781.52 679.03,-779.06 675.25,-773.17"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge40" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M809.5,-253.63C795.46,-249.5 716.56,-290.47 671.88,-314.64"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="670.01,-311.67 662.9,-319.52 673.36,-317.82 670.01,-311.67"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge46" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M963.71,-407.08C922.29,-405.06 863.02,-403.94 811.5,-409.63"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M809.5,-409.63C713.27,-420.26 683.97,-400.5 593,-433.63 574.93,-440.21 573.89,-448.44 557,-457.63 506.81,-484.92 478.32,-467.18 439,-508.63 407.35,-541.99 435.5,-573.1 403,-605.63 381.38,-627.26 363.01,-611.33 338.5,-629.63"/>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M336.5,-629.63C312.53,-647.48 296.63,-631.7 272,-648.63 236.36,-673.12 208.88,-716.62 194.69,-742.53"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="191.51,-741.05 189.91,-751.52 197.69,-744.33 191.51,-741.05"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node16" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node16"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="374,-681.63 301,-681.63 301,-657.63 374,-657.63 374,-681.63"/>
+<text text-anchor="middle" x="337.5" y="-667.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge47" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M1004.3,-422.72C984.21,-442.92 941.13,-483.73 898,-508.63 758.07,-589.4 713.29,-593.65 557,-634.63 498.22,-650.04 428.66,-659.77 384.08,-664.95"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="383.68,-661.47 374.14,-666.08 384.47,-668.43 383.68,-661.47"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge42" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M984.05,-422.66C948.73,-435.95 891.74,-457.41 853,-472"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="851.69,-468.75 843.57,-475.55 854.16,-475.3 851.69,-468.75"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node25" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-455.63 156,-455.63 156,-431.63 210,-431.63 210,-455.63"/>
+<text text-anchor="middle" x="183" y="-441.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge41" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M809.5,-253.63C737.65,-232.5 715.77,-249.47 641,-253.63"/>
+</g>
+<!-- module~self_datapool -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node26" class="node">
+<title>module~self_datapool</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node26"><a xlink:href=".././module/self_datapool.html" xlink:title="SELF_DataPool">
+<polygon fill="#337ab7" stroke="#337ab7" points="856,-381.63 765,-381.63 765,-357.63 856,-357.63 856,-381.63"/>
+<text text-anchor="middle" x="810.5" y="-367.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataPool</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge44" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M963.87,-400.17C933.99,-394.18 896.53,-386.67 866.23,-380.6"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="866.75,-377.13 856.25,-378.6 865.37,-384 866.75,-377.13"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node27" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node27"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="687,-499.63 593,-499.63 593,-475.63 687,-475.63 687,-499.63"/>
+<text text-anchor="middle" x="640" y="-485.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge45" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#aa00ff" stroke-dasharray="5,2" d="M809.5,-409.63C781.19,-412.75 711.66,-448.74 671.32,-470.72"/>
+<polygon fill="#aa00ff" stroke="#aa00ff" points="669.54,-467.71 662.45,-475.58 672.9,-473.84 669.54,-467.71"/>
+</g>
+<!-- module~self_gpu_enums~2&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge48" class="edge">
+<title>module~self_gpu_enums~2&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff00aa" stroke-dasharray="5,2" d="M177.11,-189.71C167.54,-213.57 145.84,-268.55 130,-315.63 98.5,-409.25 66.77,-522.79 53.94,-569.71"/>
+<polygon fill="#ff00aa" stroke="#ff00aa" points="50.54,-568.85 51.29,-579.42 57.3,-570.69 50.54,-568.85"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge50" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M301.53,-681.69C291.72,-685.62 281.22,-690.34 272,-695.63 247.38,-709.74 222.03,-730.06 204.9,-744.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="202.41,-742.33 197.19,-751.55 207.02,-747.6 202.41,-742.33"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge52" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M300.86,-677.31C258.01,-687.61 185,-708.66 130,-742.63 104.13,-758.61 79.74,-783.91 64.4,-801.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="61.43,-799.64 57.62,-809.53 66.76,-804.17 61.43,-799.64"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge51" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M328.3,-657.48C303.48,-620.69 228.94,-510.22 197.85,-464.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="200.73,-462.17 192.24,-455.84 194.93,-466.08 200.73,-462.17"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node28" class="node">
+<title>mpi</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node28"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="210,-873.63 156,-873.63 156,-849.63 210,-849.63 210,-873.63"/>
+<text text-anchor="middle" x="183" y="-859.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge49" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M331.82,-682.06C320.01,-712.05 286.27,-789.26 236,-835.63 231.13,-840.12 225.34,-844.01 219.42,-847.33"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="217.46,-844.4 210.13,-852.05 220.63,-850.64 217.46,-844.4"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge53" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1291.3,-857.62C1287.82,-803.16 1269.98,-574.37 1207,-399.63 1174.14,-308.45 1153.2,-290.63 1100,-209.63 1066.91,-159.25 1077.74,-109.55 1018,-101.63"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge57" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1242.98,-870.79C1188.14,-871.82 1096.67,-872.73 1018,-869.63"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1016,-869.63C969.83,-867.36 854.09,-849.59 811.5,-831.63"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M809.5,-831.63C789.46,-823.17 738.04,-812.1 697.23,-804.09"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="697.86,-800.65 687.38,-802.18 696.52,-807.52 697.86,-800.65"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge58" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1170.5,-947.63C1151.48,-953.21 1130.55,-955.52 1110.45,-956.01"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1110.31,-952.51 1100.34,-956.1 1110.37,-959.51 1110.31,-952.51"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge60" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1279.39,-881.81C1258.97,-900.57 1216.47,-935.6 1172.5,-947.63"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1170.5,-947.63C1138.96,-956.25 1131.61,-934.99 1100,-926.63 1063.83,-917.06 1055.33,-910.03 1018,-907.63"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge59" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1016,-869.63C755.25,-856.81 638.55,-927.95 439,-759.63 414.05,-738.58 427.52,-717.17 403,-695.63 397.33,-690.64 390.57,-686.54 383.61,-683.19"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="384.63,-679.82 374.06,-679.07 381.85,-686.24 384.63,-679.82"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge61" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1288.09,-881.72C1276.69,-914.44 1239.97,-1003.57 1172.5,-1023.63"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1170.5,-1023.63C898.21,-1104.56 553.29,-1057.61 408,-1031.49"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="408.36,-1028 397.89,-1029.65 407.1,-1034.89 408.36,-1028"/>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge54" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1290.2,-857.37C1280.75,-796.42 1232.13,-521.91 1100,-347.63 1033.08,-259.36 1003.39,-235.73 898,-201.63 727.85,-146.57 676.31,-230.31 499,-253.63"/>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M497,-253.63C367.76,-261.79 246.01,-377.27 201.66,-424.11"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="199.02,-421.81 194.76,-431.51 204.14,-426.59 199.02,-421.81"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node29" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node29"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="389.5,-911.63 285.5,-911.63 285.5,-887.63 389.5,-887.63 389.5,-911.63"/>
+<text text-anchor="middle" x="337.5" y="-897.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge55" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1170.5,-947.63C1139.13,-956.83 1132.35,-963.91 1100,-968.63 1026.99,-979.27 1007.66,-972.71 934,-968.63 917.93,-967.74 914.06,-965.75 898,-964.63 762.72,-955.13 727.63,-971.9 593,-955.63 522.26,-947.08 442.23,-927.85 391.12,-914.32"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="391.86,-910.9 381.29,-911.7 390.05,-917.66 391.86,-910.9"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node30" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node30"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="1207,-919.63 1136,-919.63 1136,-895.63 1207,-895.63 1207,-919.63"/>
+<text text-anchor="middle" x="1171.5" y="-905.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh_2d_t&#45;&gt;module~self_mesh -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge56" class="edge">
+<title>module~self_mesh_2d_t&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ffff00" stroke-dasharray="5,2" d="M1254.19,-881.65C1242.32,-885.42 1229.11,-889.63 1216.83,-893.53"/>
+<polygon fill="#ffff00" stroke="#ffff00" points="1215.69,-890.22 1207.22,-896.58 1217.82,-896.89 1215.69,-890.22"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge62" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1008.46,-356.6C991.8,-331.04 949.23,-271.05 898,-239.63 863.99,-218.76 851.34,-217.73 811.5,-215.63"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M809.5,-215.63C734.72,-211.68 715.77,-219.78 641,-215.63"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M639,-215.63C576.87,-212.18 560.69,-207.51 499,-215.63"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge66" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M963.35,-373.71C952.57,-376.91 942.07,-381.9 934,-389.63 894.1,-427.85 930.72,-464.1 898,-508.63 842.31,-584.42 777.09,-550.68 723,-627.63 686.06,-680.19 726.09,-716.64 687,-767.63 684.81,-770.48 682.22,-773.07 679.39,-775.41"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="677.12,-772.73 670.95,-781.35 681.15,-778.45 677.12,-772.73"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge63" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M809.5,-215.63C769.66,-213.52 754.25,-214.82 723,-239.63 696.83,-260.4 710.45,-281.82 687,-305.63 683.96,-308.71 680.47,-311.55 676.81,-314.12"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="674.67,-311.33 668.07,-319.62 678.4,-317.25 674.67,-311.33"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge69" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M809.5,-215.63C769.66,-213.52 758.65,-221.71 723,-239.63 704.89,-248.73 704.05,-256.67 687,-267.63 667.6,-280.09 661.97,-282.04 641,-291.63"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M639,-291.63C582.41,-317.49 560.16,-280.2 499,-291.63"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M497,-291.63C283.82,-331.44 205.63,-653.03 188.08,-741.29"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="184.6,-740.81 186.15,-751.29 191.48,-742.14 184.6,-740.81"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge70" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M639,-291.63C618.15,-299.01 610.6,-297.23 593,-310.63 504.3,-378.16 488.58,-408.77 439,-508.63 411.39,-564.25 444.14,-597.11 403,-643.63 397.71,-649.6 390.86,-654.23 383.59,-657.8"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="382.09,-654.64 374.27,-661.78 384.84,-661.07 382.09,-654.64"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge65" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M963.31,-377.91C953.22,-380.84 943.01,-384.66 934,-389.63 914.73,-400.25 914.88,-409.5 898,-423.63 878.48,-439.96 855.24,-457.04 837.76,-469.44"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="835.36,-466.85 829.2,-475.47 839.39,-472.57 835.36,-466.85"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge64" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M809.5,-215.63C732.84,-211.58 717.65,-249.37 641,-253.63"/>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M639,-253.63C576.87,-257.08 560.69,-245.51 499,-253.63"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge67" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M963.34,-368.88C933.59,-369.03 896.45,-369.21 866.35,-369.36"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="866.01,-365.86 856.03,-369.41 866.04,-372.86 866.01,-365.86"/>
+</g>
+<!-- module~self_tensor_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge68" class="edge">
+<title>module~self_tensor_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M809.5,-215.63C769.66,-213.52 749.62,-209.91 723,-239.63 656.31,-314.08 744.14,-379.62 687,-461.63 684.94,-464.58 682.44,-467.23 679.67,-469.61"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="677.4,-466.94 671.33,-475.62 681.49,-472.62 677.4,-466.94"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge71" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M336.5,-939.63C247.06,-907 197.5,-949.77 130,-882.63 110.39,-863.12 67.47,-678.42 52.93,-613.81"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="56.3,-612.85 50.7,-603.86 49.47,-614.38 56.3,-612.85"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge75" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M798.96,-973.62C770.71,-941.43 693.08,-852.97 658.28,-813.32"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="660.76,-810.84 651.54,-805.63 655.5,-815.46 660.76,-810.84"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge72" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M761.82,-973.6C728.02,-964.97 681.64,-952.92 641,-941.63"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge74" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M497,-1017.63C469.86,-1014.38 439.93,-1013.65 413.45,-1013.97"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="413.04,-1010.48 403.1,-1014.16 413.16,-1017.48 413.04,-1010.48"/>
+</g>
+<!-- module~self_domaindecomposition_t&#45;&gt;mpi -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge73" class="edge">
+<title>module~self_domaindecomposition_t&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M759.43,-997.63C698.01,-1010.77 590.74,-1028.61 499,-1017.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M497,-1017.63C461.94,-1013.8 341.92,-940.87 338.5,-939.63"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M336.5,-939.63C308.43,-929.38 299.06,-933.32 272,-920.63 248.6,-909.65 224.38,-892.95 207.28,-880.12"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="209.11,-877.1 199.04,-873.81 204.85,-882.66 209.11,-877.1"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge76" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M336.5,-823.63C272.27,-801.97 247.5,-845.34 184,-821.63"/>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M182,-821.63C94.68,-789.01 61.77,-665.01 51.74,-613.88"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="55.15,-613.06 49.89,-603.86 48.27,-614.33 55.15,-613.06"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge81" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M469.12,-889.51C459.52,-885.24 448.74,-880.32 439,-875.63 393.7,-853.78 386.16,-839.69 338.5,-823.63"/>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M336.5,-823.63C296.73,-810.22 252.15,-792.33 221.51,-779.59"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="222.65,-776.27 212.08,-775.64 219.95,-782.73 222.65,-776.27"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge77" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M482.68,-889.62C469.42,-877.74 450.13,-858.37 439,-837.63 408.23,-780.25 445.83,-744.66 403,-695.63 397.75,-689.62 390.91,-684.98 383.66,-681.4"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="384.9,-678.13 374.33,-677.42 382.15,-684.56 384.9,-678.13"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge78" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M182,-821.63C157.59,-812.51 128.89,-811.37 104.33,-812.97"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="103.76,-809.51 94.08,-813.81 104.33,-816.48 103.76,-809.51"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge82" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M480.34,-913.82C452.32,-934.33 395.65,-975.8 363.06,-999.65"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="360.94,-996.86 354.94,-1005.6 365.08,-1002.51 360.94,-996.86"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge80" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M484.97,-889.57C467.23,-871.85 432.9,-837.82 403,-809.63 345.77,-755.66 315.62,-756.08 272,-690.63 222.56,-616.43 197.26,-511.2 188.1,-465.84"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="191.51,-465.04 186.16,-455.89 184.64,-466.38 191.51,-465.04"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge79" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#00ff7f" stroke-dasharray="5,2" d="M446.41,-900.99C431.69,-900.8 415.44,-900.6 400.12,-900.4"/>
+<polygon fill="#00ff7f" stroke="#00ff7f" points="399.74,-896.9 389.69,-900.27 399.65,-903.9 399.74,-896.9"/>
+</g>
+<!-- module~self_vector_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_node31" class="node">
+<title>module~self_vector_2d_t</title>
+<g id="a_module~~self_mappedscalar_2d~2~~UsesGraph_node31"><a xlink:href=".././module/self_vector_2d_t.html" xlink:title="SELF_Vector_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1070,-521.63 964,-521.63 964,-497.63 1070,-497.63 1070,-521.63"/>
+<text text-anchor="middle" x="1017" y="-507.23" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Vector_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_vector_2d&#45;&gt;module~self_vector_2d_t -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge83" class="edge">
+<title>module~self_vector_2d&#45;&gt;module~self_vector_2d_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1379.28,-509.63C1305.22,-509.63 1162.59,-509.63 1080.44,-509.63"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1080.24,-506.13 1070.24,-509.63 1080.24,-513.13 1080.24,-506.13"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge84" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M775.78,-481.38C741.43,-474.61 686.84,-462.72 641,-447.63"/>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M639,-447.63C440.57,-382.29 340.69,-191.45 184,-329.63"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge88" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M795.32,-499.91C775.81,-517.65 741.03,-552.44 723,-589.63 687.79,-662.25 734.42,-702.31 687,-767.63 684.89,-770.54 682.34,-773.16 679.55,-775.53"/>
+<polygon fill="#007fff" stroke="#007fff" points="677.28,-772.85 671.17,-781.51 681.34,-778.55 677.28,-772.85"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge85" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M775.73,-483.23C758.59,-479.65 738.23,-473.2 723,-461.63 685.54,-433.15 660.78,-382.22 649,-353.28"/>
+<polygon fill="#007fff" stroke="#007fff" points="652.15,-351.73 645.24,-343.7 645.63,-354.29 652.15,-351.73"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge89" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M775.67,-493.6C759.64,-496.6 740.26,-500.48 723,-504.63 664.59,-518.65 650.3,-523.58 593,-541.63 585.87,-543.87 344.42,-625.05 338.5,-629.63"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge90" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M775.94,-494.64C759.44,-498.85 739.58,-505.07 723,-513.63 704.99,-522.92 704.72,-531.79 687,-541.63 584.87,-598.29 452.72,-638.86 384.22,-657.74"/>
+<polygon fill="#007fff" stroke="#007fff" points="382.91,-654.47 374.18,-660.47 384.75,-661.22 382.91,-654.47"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge86" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M639,-447.63C579.88,-428.16 561.03,-448.83 499,-443.63"/>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M497,-443.63C397.08,-435.24 278.6,-438.94 220.21,-441.67"/>
+<polygon fill="#007fff" stroke="#007fff" points="219.85,-438.18 210.03,-442.16 220.19,-445.17 219.85,-438.18"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge87" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#007fff" stroke-dasharray="5,2" d="M775.81,-487.63C753.34,-487.63 723.26,-487.63 697.21,-487.63"/>
+<polygon fill="#007fff" stroke="#007fff" points="697.08,-484.13 687.08,-487.63 697.08,-491.13 697.08,-484.13"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge91" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M319.93,-1005.54C305.16,-993.87 284.05,-974.9 272,-953.63 239.05,-895.48 271.23,-864.42 236,-807.63 229.84,-797.7 220.7,-788.88 211.79,-781.8"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="213.86,-778.98 203.76,-775.8 209.67,-784.59 213.86,-778.98"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge92" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#0000ff" stroke-dasharray="5,2" d="M271.69,-1007.62C243.6,-1001.55 211.03,-992.09 184,-977.63"/>
+</g>
+<!-- module~self_datapool&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge93" class="edge">
+<title>module~self_datapool&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M764.89,-374.99C719.42,-378.49 647.95,-378.41 593,-352.63 572.23,-342.88 575.99,-328.5 557,-315.63 533.91,-299.97 526.49,-286.87 499,-291.63"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge95" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M595.22,-499.74C551.48,-513.63 484.39,-540.01 439,-581.63 415.51,-603.16 427.08,-622.76 403,-643.63 397.35,-648.52 390.67,-652.56 383.78,-655.89"/>
+<polygon fill="#ff007f" stroke="#ff007f" points="382.11,-652.79 374.33,-659.98 384.9,-659.22 382.11,-652.79"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge94" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff007f" stroke-dasharray="5,2" d="M612.87,-475.58C585.27,-463.78 540.13,-447.08 499,-443.63"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge96" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M323.64,-887.55C304.66,-869.81 267.96,-835.76 236,-807.63 226.48,-799.25 215.82,-790.18 206.64,-782.45"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="208.61,-779.54 198.7,-775.8 204.12,-784.91 208.61,-779.54"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge97" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M285.14,-903.11C242.29,-904.22 180.31,-901.61 130,-882.63 105.83,-873.5 82.62,-855.02 67.11,-840.78"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="69.4,-838.13 59.73,-833.79 64.58,-843.21 69.4,-838.13"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge98" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1165.23,-895.34C1157.39,-876.45 1142.84,-838.96 1136,-805.63 1115.49,-705.62 1149.99,-436.64 1100,-347.63 990.33,-152.34 854.89,-73.18 641,-139.63"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_domaindecomposition -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge100" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_domaindecomposition</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1135.9,-916.7C1117.46,-921.54 1094.34,-927.6 1073.47,-933.08"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1072.53,-929.7 1063.75,-935.63 1074.31,-936.47 1072.53,-929.7"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge99" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1135.94,-908.89C1105,-909.72 1058.42,-910.23 1018,-907.63"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1016,-907.63C925.3,-901.78 900.76,-890.51 811.5,-907.63"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge101" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M809.5,-641.63C770.99,-647.44 759.77,-642.79 723,-655.63 683.55,-669.4 682.7,-698.91 641,-701.63"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M639,-701.63C630.13,-702.2 347.06,-594.03 338.5,-591.63"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M336.5,-591.63C256.46,-567.39 158.09,-574.77 99.36,-582.83"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="98.63,-579.4 89.22,-584.29 99.62,-586.33 98.63,-579.4"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge105" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1011.37,-521.8C998.42,-554.28 958.79,-643.88 898,-693.63 838.7,-742.15 753.11,-769.09 697.27,-782.46"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="696.15,-779.13 687.2,-784.8 697.73,-785.95 696.15,-779.13"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge102" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M985.75,-497.57C962.09,-488.4 928.25,-475.82 898,-466.63 821.37,-443.33 791.62,-464.93 723,-423.63 693.3,-405.75 668.35,-373.65 654.03,-352.49"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="656.8,-350.34 648.39,-343.9 650.95,-354.18 656.8,-350.34"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge108" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M497,-709.63C426.6,-707.24 408.85,-705.97 338.5,-709.63"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M336.5,-709.63C292.21,-711.93 244.53,-731.94 214.5,-746.93"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="212.7,-743.92 205.4,-751.59 215.89,-750.15 212.7,-743.92"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge109" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M639,-701.63C576.81,-705.68 561.29,-711.74 499,-709.63"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M497,-709.63C456.05,-708.24 410.88,-695.7 379.27,-685.02"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="380.1,-681.6 369.5,-681.63 377.81,-688.22 380.1,-681.6"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge104" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M963.87,-504.02C930.38,-500.42 887.36,-495.79 855.57,-492.37"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="855.57,-488.85 845.26,-491.26 854.83,-495.81 855.57,-488.85"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge103" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M979.52,-521.63C901.41,-544.93 715.2,-587.43 593,-508.63 560.57,-487.71 589.45,-450.5 557,-429.63 512.89,-401.25 491.44,-429 439,-429.63 364.76,-430.52 346.07,-428.54 272,-433.63 254.89,-434.8 235.98,-436.85 220.09,-438.79"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="219.62,-435.32 210.13,-440.04 220.49,-442.27 219.62,-435.32"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge106" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1003.12,-497.57C986.89,-482.32 958.19,-455.22 934,-431.63 917.8,-415.83 917.42,-407.23 898,-395.63 888.21,-389.78 877.01,-385.15 865.98,-381.53"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="866.96,-378.17 856.38,-378.6 864.92,-384.87 866.96,-378.17"/>
+</g>
+<!-- module~self_vector_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_mappedscalar_2d~2~~UsesGraph_edge107" class="edge">
+<title>module~self_vector_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M1006.31,-521.66C987.7,-543.96 944.64,-591.79 898,-617.63 863.1,-636.96 850.95,-635.67 811.5,-641.63"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M809.5,-641.63C731.54,-653.4 672.98,-553.86 650.76,-508.91"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="653.83,-507.22 646.35,-499.72 647.52,-510.25 653.83,-507.22"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_mappedscalar_2d2UsesGraph = svgPanZoom('#moduleself_mappedscalar_2d2UsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+    
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
+  <div id="inters-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#interface-contravariantweight_2d_gpu">ContravariantWeight_2D_gpu</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#interface-normalweight_2d_gpu">NormalWeight_2D_gpu</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#type-mappedscalar2d">MappedScalar2D</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-ensuredevicebuffers_mappedscalar2d">EnsureDeviceBuffers_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-free_mappedscalar2d">Free_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-init_mappedscalar2d">Init_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mpimortarexchangeasync_mappedscalar2d">MPIMortarExchangeAsync_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mappeddggradient_mappedscalar2d">MappedDGGradient_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mappedgradient_mappedscalar2d">MappedGradient_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-mortarexchange_mappedscalar2d">MortarExchange_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-resize_mappedscalar2d">Resize_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-setinteriorfromequation_mappedscalar2d">SetInteriorFromEquation_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-sideexchangefinish_mappedscalar2d">SideExchangeFinish_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-sideexchangestart_mappedscalar2d">SideExchangeStart_MappedScalar2D</a>
+      <a class="list-group-item" href="../module/self_mappedscalar_2d~2.html#proc-sideexchange_mappedscalar2d">SideExchange_MappedScalar2D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+    <section>
+   <h2>Interfaces</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-contravariantweight_2d_gpu"></span><h3>interface   </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public subroutine ContravariantWeight_2D_gpu(f, dsdx, jaf, N, nvar, nel) bind(c,name="0")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>f</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>dsdx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>jaf</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+    </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-normalweight_2d_gpu"></span><h3>interface   </h3></div>
+  <ul class="list-group">
+    <li class="list-group-item">
+    <h3>public subroutine NormalWeight_2D_gpu(fb, nhat, nscale, fbn, N, nvar, nel) bind(c,name="0")</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>fb</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nhat</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nscale</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>fbn</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer(kind=c_int),</td>
+<td></td>
+  <td></td>  <td>value</td><td>::</td>
+  <td><strong>nel</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+    </li>
+  </ul>
+</div>
+
+    </section>
+  <br>
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-mappedscalar2d"></span><h3>type, public, extends(<a href='../type/mappedscalar2d_t.html'>MappedScalar2D_t</a>) :: <a href='../type/mappedscalar2d.html'>MappedScalar2D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-m~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>M</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-n~3"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-alloc_jas"></span>integer(kind=c_size_t),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>alloc_jas</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-avgboundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>avgBoundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-backend"></span>character(len=3),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>backend</strong></td><td> =</td><td>"cpu"</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundary~2"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>boundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-boundarynormal"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>boundarynormal</strong></td><td></td><td></td><td><p>High-water-mark backing store for the arrays above (AMR Stage 6b; see SELF_DataPool).
+The public members are pointers remapped onto the leading part of these pools at the
+exact logical shape, so every extent, stride and shape() stays exactly as before while
+Resize can reuse the storage across an adaptation epoch. Nothing should index the pools.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-eqn"></span>type(EquationParser),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>eqn</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-extboundary~3"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>extBoundary</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry~4"></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>geometry</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-geometry_associated"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>geometry_associated</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_inflight"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_inflight</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_nactive"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_nactive</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_recvbuf_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_recvbuf_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_reqs"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>halo_reqs</strong>(:)</td><td></td><td></td><td><p>Bytes currently allocated for jas_gpu, so Resize can reuse it (Stage 6b). The capacity
+counters for the five arrays inherited from Scalar2D are declared there.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_sendbuf_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_sendbuf_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-halo_static_done"></span>logical,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>halo_static_done</strong></td><td> =</td><td>.false.</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interior~4"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>interior</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-interp~2"></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>public,</td>  <td>pointer</td><td>::</td>
+  <td><strong>interp</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-jas_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>jas_gpu</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-meta"></span>type(<a href='../type/metadata.html'>Metadata</a>),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>meta</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mortarbuff"></span>real(kind=prec),</td>
+<td>public,</td>  <td>allocatable, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>mortarBuff</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mortarbuff_gpu"></span>type(c_ptr),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>mortarBuff_gpu</strong></td><td> =</td><td>c_null_ptr</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~3"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_avgboundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_avgBoundary</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_boundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_boundary</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_boundarynormal"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_boundarynormal</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_extboundary"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_extBoundary</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pool_interior"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous</td><td>::</td>
+  <td><strong>pool_interior</strong>(:)</td><td>=> </td><td>null()</td><td></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d_t.html#boundprocedure-associategeometry'>AssociateGeometry</a></strong>  => AssociateGeometry_MappedScalar2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/scalar2d_t.html#boundprocedure-averagesides'>AverageSides</a></strong>  => AverageSides_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/scalar2d_t.html#boundprocedure-boundaryinterp~2'>BoundaryInterp</a></strong>  => BoundaryInterp_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d_t.html#boundprocedure-dissociategeometry'>DissociateGeometry</a></strong>  => DissociateGeometry_MappedScalar2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-free~32'>Free</a></strong>  => Free_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-gradient~17'>Gradient</a></strong>  => Gradient_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-gridinterp~22'>GridInterp</a></strong>  => GridInterp_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-init~31'>Init</a></strong>  => Init_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-mpimortarexchangeasync~3'>MPIMortarExchangeAsync</a></strong>  => MPIMortarExchangeAsync_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/scalar2d_t.html#boundprocedure-maparrays'>MapArrays</a></strong>  => MapArrays_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-mappeddggradient~5'>MappedDGGradient</a></strong>  => MappedDGGradient_MappedScalar2D_t, MappedDGGradient_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-mappeddggradient_mappedscalar2d'>MappedDGGradient_MappedScalar2D</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-mappedgradient~5'>MappedGradient</a></strong>  => MappedGradient_MappedScalar2D_t, MappedGradient_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, private :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-mappedgradient_mappedscalar2d'>MappedGradient_MappedScalar2D</a></strong>  </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-mortarexchange~3'>MortarExchange</a></strong>  => MortarExchange_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-resize~7'>Resize</a></strong>  => Resize_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/self_dataobj.html#boundprocedure-setdescription'>SetDescription</a></strong>  => SetDescription_DataObj </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-setequation~35'>SetEquation</a></strong>  => SetEquation_DataObj </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-setinteriorfromequation~6'>SetInteriorFromEquation</a></strong>  => SetInteriorFromEquation_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/self_dataobj.html#boundprocedure-setname'>SetName</a></strong>  => SetName_DataObj </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/self_dataobj.html#boundprocedure-setunits'>SetUnits</a></strong>  => SetUnits_DataObj </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-sideexchange~6'>SideExchange</a></strong>  => SideExchange_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-sideexchangefinish'>SideExchangeFinish</a></strong>  => SideExchangeFinish_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-sideexchangestart'>SideExchangeStart</a></strong>  => SideExchangeStart_MappedScalar2D </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/scalar2d_t.html#boundprocedure-updatedevice~6'>UpdateDevice</a></strong>  => UpdateDevice_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/scalar2d_t.html#boundprocedure-updatehost~4'>UpdateHost</a></strong>  => UpdateHost_Scalar2D_t </td>
+       <td></td></tr>
+       <tr><td>generic, public :: <strong><a href='../type/mappedscalar2d.html#boundprocedure-writehdf5~24'>WriteHDF5</a></strong>  => WriteHDF5_MPI_Scalar2D_t, WriteHDF5_Scalar2D_t </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    <section>
+    <h2>Subroutines</h2>
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-ensuredevicebuffers_mappedscalar2d"></span><h3>public subroutine <a href='../proc/ensuredevicebuffers_mappedscalar2d.html'>EnsureDeviceBuffers_MappedScalar2D</a>(this)</h3></div>
+  <div class="panel-body">
+       
+<p>Grow the device buffers to hold the current logical arrays, reusing existing allocations
+when the bytes already fit (AMR Stage 6b).</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_mappedscalar2d"></span><h3>public subroutine <a href='../proc/free_mappedscalar2d.html'>Free_MappedScalar2D</a>(this)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_mappedscalar2d"></span><h3>public subroutine <a href='../proc/init_mappedscalar2d.html'>Init_MappedScalar2D</a>(this, interp, nVar, nElem)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-mpimortarexchangeasync_mappedscalar2d"></span><h3>public subroutine <a href='../proc/mpimortarexchangeasync_mappedscalar2d.html'>MPIMortarExchangeAsync_MappedScalar2D</a>(this, mesh)</h3></div>
+  <div class="panel-body">
+       
+<p>GPU-resident analogue of the base-class mortar message posting; messages are
+posted on device memory (GPU-aware MPI), following MPIExchangeAsync.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-mappeddggradient_mappedscalar2d"></span><h3>public subroutine <a href='../proc/mappeddggradient_mappedscalar2d.html'>MappedDGGradient_MappedScalar2D</a>(this, df)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>df</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-mappedgradient_mappedscalar2d"></span><h3>public subroutine <a href='../proc/mappedgradient_mappedscalar2d.html'>MappedGradient_MappedScalar2D</a>(this, df)</h3></div>
+  <div class="panel-body">
+       
+<p>Calculates the gradient of a function using the strong form of the gradient
+in mapped coordinates.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(c_ptr),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>df</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-mortarexchange_mappedscalar2d"></span><h3>public subroutine <a href='../proc/mortarexchange_mappedscalar2d.html'>MortarExchange_MappedScalar2D</a>(this, mesh)</h3></div>
+  <div class="panel-body">
+       
+<p>GPU implementation of the mortar exchange (see the base class for the
+algorithm) : traces are staged, reoriented, restricted, and projected in
+device memory with the SELF_Mortar kernels.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-resize_mappedscalar2d"></span><h3>public subroutine <a href='../proc/resize_mappedscalar2d.html'>Resize_MappedScalar2D</a>(this, interp, nVar, nElem)</h3></div>
+  <div class="panel-body">
+       
+<p>Rebind to a new element count, reusing host pools and device buffers where they fit
+(AMR Stage 6b), and without uploading zeros the way Init does.</p><a href="../proc/resize_mappedscalar2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+<td>intent(in),</td>
+  <td></td>  <td>target</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setinteriorfromequation_mappedscalar2d"></span><h3>public subroutine <a href='../proc/setinteriorfromequation_mappedscalar2d.html'>SetInteriorFromEquation_MappedScalar2D</a>(this, geometry, time)</h3></div>
+  <div class="panel-body">
+       
+<p>Sets the this % interior attribute using the eqn attribute,
+geometry (for physical positions), and provided simulation time.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>time</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sideexchangefinish_mappedscalar2d"></span><h3>public subroutine <a href='../proc/sideexchangefinish_mappedscalar2d.html'>SideExchangeFinish_MappedScalar2D</a>(this, mesh)</h3></div>
+  <div class="panel-body">
+       
+<p>Complete the aggregated halo exchange started by SideExchangeStart:
+wait on the persistent requests and unpack the received traces into
+extBoundary, applying side flips. The host blocks in MPI_Waitall (which
+also drives MPI progress) while previously launched device kernels
+continue to execute. No-op if no exchange is in flight.</p>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sideexchangestart_mappedscalar2d"></span><h3>public subroutine <a href='../proc/sideexchangestart_mappedscalar2d.html'>SideExchangeStart_MappedScalar2D</a>(this, mesh, nactive)</h3></div>
+  <div class="panel-body">
+       
+<p>Begin the aggregated halo exchange and launch the local (same-rank)
+side exchange kernel.</p><a href="../proc/sideexchangestart_mappedscalar2d.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>nactive</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+      <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sideexchange_mappedscalar2d"></span><h3>public subroutine <a href='../proc/sideexchange_mappedscalar2d.html'>SideExchange_MappedScalar2D</a>(this, mesh)</h3></div>
+  <div class="panel-body">
+           
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>type(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>mesh</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+  </div>
+  </div>
+
+    </section>    
+    <br>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

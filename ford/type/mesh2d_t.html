@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Mesh2D_t &ndash; SELF </title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>Mesh2D_t
+    <small>Derived Type</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 1.7% of total for derived types.</p>Including implementation: 1116 statements,  1.4% of total for derived types.">28 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Mesh_2D_t.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_mesh_2d_t.f90.html'>SELF_Mesh_2D_t.f90</a></li>
+     <li><a href='../module/self_mesh_2d_t.html'>SELF_Mesh_2D_t</a></li>
+     <li class="active">Mesh2D_t</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-bcnames~3">BCNames</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-bctype~3">BCType</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-cgnscornermap~2">CGNSCornerMap</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-cgnssidemap~2">CGNSSideMap</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-decomp">decomp</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-eleminfo~3">elemInfo</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-elemmaterial~2">elemMaterial</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-globalnodeids~3">globalNodeIDs</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-materialnames~2">materialNames</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-mortarinfo">mortarInfo</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nbcs">nBCs</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-ncornernodes">nCornerNodes</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nelem~4">nElem</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-ngeo">nGeo</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nglobalelem">nGlobalElem</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nmaterials~2">nMaterials</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nmortars">nMortars</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nnodes">nNodes</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nsides">nSides</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nuniquenodes">nUniqueNodes</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nuniquesides">nUniqueSides</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nodecoords~3">nodeCoords</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-quadrature">quadrature</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-sideinfo~2">sideInfo</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-doublemortarmesh">DoubleMortarMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-free~9">Free</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-init~9">Init</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-read_hohqmesh~2">Read_HOHQMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-read_hopr~2">Read_HOPr</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-recalculateflip~2">RecalculateFlip</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-resetboundaryconditiontype~3">ResetBoundaryConditionType</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-simplemortarmesh">SimpleMortarMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-structuredmesh~3">StructuredMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-uniformstructuredmesh_mesh2d_t">UniformStructuredMesh_Mesh2D_t</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-updatedevice~4">UpdateDevice</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-write_mesh~3">Write_Mesh</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/mesh2d_t.html#src">Mesh2D_t</a>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>type, public, extends(<a href='../type/semmesh.html'>SEMMesh</a>) :: Mesh2D_t</h2>
+    
+<br>    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherits</h3>
+      </div>
+      <div class="panel-body">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~mesh2d_t~~InheritsGraph Pages: 1 -->
+<svg id="typemesh2d_tInheritsGraph" width="563pt" height="32pt"
+ viewBox="0.00 0.00 563.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~mesh2d_t~~InheritsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>type~~mesh2d_t~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 559,-28 559,4 -4,4"/>
+<!-- type~mesh2d_t -->
+<g id="type~~mesh2d_t~~InheritsGraph_node1" class="node">
+<title>type~mesh2d_t</title>
+<polygon fill="none" stroke="black" points="555,-24 491,-24 491,0 555,0 555,-24"/>
+<text text-anchor="middle" x="523" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">Mesh2D_t</text>
+</g>
+<!-- type~semmesh -->
+<g id="type~~mesh2d_t~~InheritsGraph_node2" class="node">
+<title>type~semmesh</title>
+<g id="a_type~~mesh2d_t~~InheritsGraph_node2"><a xlink:href=".././type/semmesh.html" xlink:title="SEMMesh">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="454,-24 391,-24 391,0 454,0 454,-24"/>
+<text text-anchor="middle" x="422.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SEMMesh</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d_t&#45;&gt;type~semmesh -->
+<g id="type~~mesh2d_t~~InheritsGraph_edge1" class="edge">
+<title>type~mesh2d_t&#45;&gt;type~semmesh</title>
+<path fill="none" stroke="#ff0000" d="M490.83,-12C482.41,-12 473.16,-12 464.29,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="464.13,-8.5 454.13,-12 464.13,-15.5 464.13,-8.5"/>
+</g>
+<!-- type~domaindecomposition -->
+<g id="type~~mesh2d_t~~InheritsGraph_node3" class="node">
+<title>type~domaindecomposition</title>
+<g id="a_type~~mesh2d_t~~InheritsGraph_node3"><a xlink:href=".././type/domaindecomposition.html" xlink:title="DomainDecomposition">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="316,-24 181,-24 181,0 316,0 316,-24"/>
+<text text-anchor="middle" x="248.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition</text>
+</a>
+</g>
+</g>
+<!-- type~semmesh&#45;&gt;type~domaindecomposition -->
+<g id="type~~mesh2d_t~~InheritsGraph_edge2" class="edge">
+<title>type~semmesh&#45;&gt;type~domaindecomposition</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M390.75,-12C372.74,-12 349.12,-12 326.36,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="326.33,-8.5 316.33,-12 326.33,-15.5 326.33,-8.5"/>
+<text text-anchor="middle" x="353.5" y="-14.4" font-family="Helvetica,sans-Serif" font-size="9.50">decomp</text>
+</g>
+<!-- type~domaindecomposition_t -->
+<g id="type~~mesh2d_t~~InheritsGraph_node4" class="node">
+<title>type~domaindecomposition_t</title>
+<g id="a_type~~mesh2d_t~~InheritsGraph_node4"><a xlink:href=".././type/domaindecomposition_t.html" xlink:title="DomainDecomposition_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="144,-24 0,-24 0,0 144,0 144,-24"/>
+<text text-anchor="middle" x="72" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DomainDecomposition_t</text>
+</a>
+</g>
+</g>
+<!-- type~domaindecomposition&#45;&gt;type~domaindecomposition_t -->
+<g id="type~~mesh2d_t~~InheritsGraph_edge3" class="edge">
+<title>type~domaindecomposition&#45;&gt;type~domaindecomposition_t</title>
+<path fill="none" stroke="#ff0000" d="M180.53,-12C171.97,-12 163.12,-12 154.36,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="154.13,-8.5 144.13,-12 154.13,-15.5 154.13,-8.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Inherited by</h3>
+      </div>
+      <div class="panel-body">
+     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~mesh2d_t~~InheritedByGraph Pages: 1 -->
+<svg id="typemesh2d_tInheritedByGraph" width="641pt" height="267pt"
+ viewBox="0.00 0.00 641.00 266.99" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~mesh2d_t~~InheritedByGraph" class="graph" transform="scale(0.55 0.55) rotate(0) translate(4 480)">
+<title>type~~mesh2d_t~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-480 1158,-480 1158,4 -4,4"/>
+<!-- type~mesh2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node1" class="node">
+<title>type~mesh2d_t</title>
+<polygon fill="none" stroke="black" points="64,-169 0,-169 0,-145 64,-145 64,-169"/>
+<text text-anchor="middle" x="32" y="-154.6" font-family="Helvetica,sans-Serif" font-size="10.50">Mesh2D_t</text>
+</g>
+<!-- type~mesh2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node2" class="node">
+<title>type~mesh2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node2"><a xlink:href=".././type/mesh2d.html" xlink:title="Mesh2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="156,-190 101,-190 101,-166 156,-166 156,-190"/>
+<text text-anchor="middle" x="128.5" y="-175.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d&#45;&gt;type~mesh2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge1" class="edge">
+<title>type~mesh2d&#45;&gt;type~mesh2d_t</title>
+<path fill="none" stroke="#ff0000" d="M110.6,-165.78C102.63,-161.16 92.74,-157 83,-157"/>
+</g>
+<!-- type~mesh2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node3" class="node">
+<title>type~mesh2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node3"><a xlink:href=".././type/mesh2d~2.html" xlink:title="Mesh2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="156,-148 101,-148 101,-124 156,-124 156,-148"/>
+<text text-anchor="middle" x="128.5" y="-133.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Mesh2D</text>
+</a>
+</g>
+</g>
+<!-- type~mesh2d~2&#45;&gt;type~mesh2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge2" class="edge">
+<title>type~mesh2d~2&#45;&gt;type~mesh2d_t</title>
+<path fill="none" stroke="#ff0000" d="M110.6,-148.22C102.63,-152.84 92.74,-157 83,-157"/>
+<path fill="none" stroke="#ff0000" d="M82,-157C79.47,-157 76.86,-157 74.24,-157"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="74.11,-153.5 64.11,-157 74.11,-160.5 74.11,-153.5"/>
+</g>
+<!-- type~dgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node4" class="node">
+<title>type~dgmodel2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node4"><a xlink:href=".././type/dgmodel2d_t.html" xlink:title="DGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="396,-213 311,-213 311,-189 396,-189 396,-213"/>
+<text text-anchor="middle" x="353.5" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d_t&#45;&gt;type~mesh2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge3" class="edge">
+<title>type~dgmodel2d_t&#45;&gt;type~mesh2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M310.82,-196.7C269.27,-192.42 206.09,-185.9 166.34,-181.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="166.58,-178.31 156.27,-180.76 165.86,-185.27 166.58,-178.31"/>
+<text text-anchor="middle" x="229" y="-195.4" font-family="Helvetica,sans-Serif" font-size="9.50">mesh</text>
+</g>
+<!-- type~amrcontroller2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node5" class="node">
+<title>type~amrcontroller2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node5"><a xlink:href=".././type/amrcontroller2d.html" xlink:title="AMRController2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="405,-171 302,-171 302,-147 405,-147 405,-171"/>
+<text text-anchor="middle" x="353.5" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">AMRController2D</text>
+</a>
+</g>
+</g>
+<!-- type~amrcontroller2d&#45;&gt;type~mesh2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge4" class="edge">
+<title>type~amrcontroller2d&#45;&gt;type~mesh2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M301.74,-156.71C265.82,-156 216.65,-156.84 174,-164 171.32,-164.45 168.58,-165.02 165.84,-165.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="164.77,-162.34 156.03,-168.34 166.6,-169.1 164.77,-162.34"/>
+<text text-anchor="middle" x="229" y="-166.4" font-family="Helvetica,sans-Serif" font-size="9.50">baseMesh, activeMesh</text>
+</g>
+<!-- type~dgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node6" class="node">
+<title>type~dgmodel2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node6"><a xlink:href=".././type/dgmodel2d~2.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="518,-234 442,-234 442,-210 518,-210 518,-234"/>
+<text text-anchor="middle" x="480" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge5" class="edge">
+<title>type~dgmodel2d~2&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M458.02,-209.91C448.05,-205.24 435.75,-201 424,-201"/>
+</g>
+<!-- type~dgmodel2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node7" class="node">
+<title>type~dgmodel2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node7"><a xlink:href=".././type/dgmodel2d.html" xlink:title="DGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="518,-192 442,-192 442,-168 518,-168 518,-192"/>
+<text text-anchor="middle" x="480" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">DGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~dgmodel2d&#45;&gt;type~dgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge6" class="edge">
+<title>type~dgmodel2d&#45;&gt;type~dgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M458.02,-192.09C448.05,-196.76 435.75,-201 424,-201"/>
+<path fill="none" stroke="#ff0000" d="M423,-201C417.57,-201 411.91,-201 406.26,-201"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="406.16,-197.5 396.16,-201 406.16,-204.5 406.16,-197.5"/>
+</g>
+<!-- type~ecdgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node8" class="node">
+<title>type~ecdgmodel2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node8"><a xlink:href=".././type/ecdgmodel2d_t.html" xlink:title="ECDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="677,-318 577,-318 577,-294 677,-294 677,-318"/>
+<text text-anchor="middle" x="627" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge7" class="edge">
+<title>type~ecdgmodel2d_t&#45;&gt;type~dgmodel2d~2</title>
+<path fill="none" stroke="#ff0000" d="M576.96,-298.57C568.81,-295.47 561.06,-291.12 555,-285 534.5,-264.31 566.09,-220.65 537,-222"/>
+</g>
+<!-- type~linearshallowwater2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node9" class="node">
+<title>type~linearshallowwater2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node9"><a xlink:href=".././type/linearshallowwater2d_t.html" xlink:title="LinearShallowWater2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="698.5,-276 555.5,-276 555.5,-252 698.5,-252 698.5,-276"/>
+<text text-anchor="middle" x="627" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge8" class="edge">
+<title>type~linearshallowwater2d_t&#45;&gt;type~dgmodel2d~2</title>
+<path fill="none" stroke="#ff0000" d="M572.55,-251.88C566.39,-249.43 560.39,-246.49 555,-243 544.68,-236.32 549.28,-221.43 537,-222"/>
+</g>
+<!-- type~lineareuler2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node10" class="node">
+<title>type~lineareuler2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node10"><a xlink:href=".././type/lineareuler2d_t.html" xlink:title="LinearEuler2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="676,-234 578,-234 578,-210 676,-210 676,-234"/>
+<text text-anchor="middle" x="627" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_t&#45;&gt;type~dgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge11" class="edge">
+<title>type~lineareuler2d_t&#45;&gt;type~dgmodel2d~2</title>
+<path fill="none" stroke="#ff0000" d="M577.94,-221.19C564.67,-221.18 550.27,-221.39 537,-222"/>
+</g>
+<!-- type~advection_diffusion_2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node11" class="node">
+<title>type~advection_diffusion_2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node11"><a xlink:href=".././type/advection_diffusion_2d_t.html" xlink:title="advection_diffusion_2d_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="699,-192 555,-192 555,-168 699,-168 699,-192"/>
+<text text-anchor="middle" x="627" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d_t</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge9" class="edge">
+<title>type~advection_diffusion_2d_t&#45;&gt;type~dgmodel2d~2</title>
+<path fill="none" stroke="#ff0000" d="M572.55,-192.12C566.39,-194.57 560.39,-197.51 555,-201 544.68,-207.68 549.28,-221.43 537,-222"/>
+</g>
+<!-- type~nulldgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node12" class="node">
+<title>type~nulldgmodel2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node12"><a xlink:href=".././type/nulldgmodel2d_t.html" xlink:title="NullDGModel2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="680,-108 574,-108 574,-84 680,-84 680,-108"/>
+<text text-anchor="middle" x="627" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge10" class="edge">
+<title>type~nulldgmodel2d_t&#45;&gt;type~dgmodel2d~2</title>
+<path fill="none" stroke="#ff0000" d="M607.29,-108.03C591.17,-119.32 568.43,-137.66 555,-159 539.49,-183.65 566.09,-220.65 537,-222"/>
+<path fill="none" stroke="#ff0000" d="M536,-222C533.5,-222.12 530.93,-222.21 528.33,-222.28"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="528.22,-218.78 518.29,-222.47 528.35,-225.78 528.22,-218.78"/>
+</g>
+<!-- type~ecdgmodel2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node13" class="node">
+<title>type~ecdgmodel2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node13"><a xlink:href=".././type/ecdgmodel2d.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="849,-444 758,-444 758,-420 849,-420 849,-444"/>
+<text text-anchor="middle" x="803.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge12" class="edge">
+<title>type~ecdgmodel2d&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M758,-421.75C750.32,-418.94 742.67,-415.41 736,-411 725.74,-404.22 728.82,-395.83 718,-390"/>
+</g>
+<!-- type~linearshallowwater2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node14" class="node">
+<title>type~linearshallowwater2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node14"><a xlink:href=".././type/linearshallowwater2d~2.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="870.5,-360 736.5,-360 736.5,-336 870.5,-336 870.5,-360"/>
+<text text-anchor="middle" x="803.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge15" class="edge">
+<title>type~linearshallowwater2d~2&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#cbff00" d="M749.94,-335.98C739.3,-333.26 728.24,-330.21 718,-327"/>
+</g>
+<!-- type~lineareuler2d_pml_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node15" class="node">
+<title>type~lineareuler2d_pml_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node15"><a xlink:href=".././type/lineareuler2d_pml_t.html" xlink:title="LinearEuler2D_PML_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="865.5,-276 741.5,-276 741.5,-252 865.5,-252 865.5,-276"/>
+<text text-anchor="middle" x="803.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML_t</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml_t&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge16" class="edge">
+<title>type~lineareuler2d_pml_t&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#00ff66" d="M753.12,-251.86C747.11,-249.4 741.25,-246.47 736,-243 725.74,-236.22 730.29,-222 718,-222"/>
+</g>
+<!-- type~ecdgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node16" class="node">
+<title>type~ecdgmodel2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node16"><a xlink:href=".././type/ecdgmodel2d~2.html" xlink:title="ECDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="849,-402 758,-402 758,-378 849,-378 849,-402"/>
+<text text-anchor="middle" x="803.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge13" class="edge">
+<title>type~ecdgmodel2d~2&#45;&gt;type~ecdgmodel2d_t</title>
+<path fill="none" stroke="#ff0000" d="M757.96,-397.87C744.45,-398.24 730.01,-396.47 718,-390"/>
+<path fill="none" stroke="#ff0000" d="M717,-390C687.18,-373.95 659.99,-345.31 643.71,-325.99"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="646.28,-323.61 637.23,-318.1 640.87,-328.05 646.28,-323.61"/>
+</g>
+<!-- type~linearshallowwater2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node17" class="node">
+<title>type~linearshallowwater2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node17"><a xlink:href=".././type/linearshallowwater2d.html" xlink:title="LinearShallowWater2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="870.5,-318 736.5,-318 736.5,-294 870.5,-294 870.5,-318"/>
+<text text-anchor="middle" x="803.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearShallowWater2D</text>
+</a>
+</g>
+</g>
+<!-- type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge14" class="edge">
+<title>type~linearshallowwater2d&#45;&gt;type~linearshallowwater2d_t</title>
+<path fill="none" stroke="#cbff00" d="M768.93,-318.11C749.69,-324.31 727.52,-329.99 718,-327"/>
+<path fill="none" stroke="#cbff00" d="M717,-327C697.62,-320.92 714.18,-298.49 699,-285 697.65,-283.8 696.23,-282.66 694.75,-281.59"/>
+<polygon fill="#cbff00" stroke="#cbff00" points="696.15,-278.35 685.79,-276.15 692.52,-284.33 696.15,-278.35"/>
+</g>
+<!-- type~lineareuler2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node18" class="node">
+<title>type~lineareuler2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node18"><a xlink:href=".././type/lineareuler2d~2.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="848,-234 759,-234 759,-210 848,-210 848,-234"/>
+<text text-anchor="middle" x="803.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge17" class="edge">
+<title>type~lineareuler2d~2&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#00ff66" d="M758.64,-222C745.57,-222 731.2,-222 718,-222"/>
+</g>
+<!-- type~lineareuler2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node19" class="node">
+<title>type~lineareuler2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node19"><a xlink:href=".././type/lineareuler2d.html" xlink:title="LinearEuler2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="848,-192 759,-192 759,-168 848,-168 848,-192"/>
+<text text-anchor="middle" x="803.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d&#45;&gt;type~lineareuler2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge18" class="edge">
+<title>type~lineareuler2d&#45;&gt;type~lineareuler2d_t</title>
+<path fill="none" stroke="#00ff66" d="M758.7,-190C750.78,-192.85 742.87,-196.46 736,-201 725.74,-207.78 730.29,-222 718,-222"/>
+<path fill="none" stroke="#00ff66" d="M717,-222C707.03,-222 696.44,-222 686.17,-222"/>
+<polygon fill="#00ff66" stroke="#00ff66" points="686.04,-218.5 676.04,-222 686.04,-225.5 686.04,-218.5"/>
+</g>
+<!-- type~advection_diffusion_2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node20" class="node">
+<title>type~advection_diffusion_2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node20"><a xlink:href=".././type/advection_diffusion_2d.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="871,-150 736,-150 736,-126 871,-126 871,-150"/>
+<text text-anchor="middle" x="803.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge19" class="edge">
+<title>type~advection_diffusion_2d&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#0066ff" d="M735.82,-133.79C729.7,-134.66 723.68,-136.01 718,-138"/>
+</g>
+<!-- type~advection_diffusion_2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node21" class="node">
+<title>type~advection_diffusion_2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node21"><a xlink:href=".././type/advection_diffusion_2d~2.html" xlink:title="advection_diffusion_2d">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="871,-108 736,-108 736,-84 871,-84 871,-108"/>
+<text text-anchor="middle" x="803.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">advection_diffusion_2d</text>
+</a>
+</g>
+</g>
+<!-- type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge20" class="edge">
+<title>type~advection_diffusion_2d~2&#45;&gt;type~advection_diffusion_2d_t</title>
+<path fill="none" stroke="#0066ff" d="M753.12,-108.14C747.11,-110.6 741.25,-113.53 736,-117 725.74,-123.78 729.6,-133.94 718,-138"/>
+<path fill="none" stroke="#0066ff" d="M717,-138C697.32,-144.9 676.18,-154.76 659.44,-163.2"/>
+<polygon fill="#0066ff" stroke="#0066ff" points="657.44,-160.29 650.14,-167.97 660.63,-166.52 657.44,-160.29"/>
+</g>
+<!-- type~nulldgmodel2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node22" class="node">
+<title>type~nulldgmodel2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node22"><a xlink:href=".././type/nulldgmodel2d.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="852,-66 755,-66 755,-42 852,-42 852,-66"/>
+<text text-anchor="middle" x="803.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge21" class="edge">
+<title>type~nulldgmodel2d&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M754.63,-48.48C742.41,-48.56 729.49,-49.97 718,-54"/>
+</g>
+<!-- type~nulldgmodel2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node23" class="node">
+<title>type~nulldgmodel2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node23"><a xlink:href=".././type/nulldgmodel2d~2.html" xlink:title="NullDGModel2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="852,-24 755,-24 755,0 852,0 852,-24"/>
+<text text-anchor="middle" x="803.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">NullDGModel2D</text>
+</a>
+</g>
+</g>
+<!-- type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge22" class="edge">
+<title>type~nulldgmodel2d~2&#45;&gt;type~nulldgmodel2d_t</title>
+<path fill="none" stroke="#cc00ff" d="M754.86,-23.44C748.25,-26.04 741.76,-29.19 736,-33 725.74,-39.78 729.6,-49.94 718,-54"/>
+<path fill="none" stroke="#cc00ff" d="M717,-54C697.32,-60.9 676.18,-70.76 659.44,-79.2"/>
+<polygon fill="#cc00ff" stroke="#cc00ff" points="657.44,-76.29 650.14,-83.97 660.63,-82.52 657.44,-76.29"/>
+</g>
+<!-- type~ecadvection2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node24" class="node">
+<title>type~ecadvection2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node24"><a xlink:href=".././type/ecadvection2d_t.html" xlink:title="ECAdvection2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1017,-444 914,-444 914,-420 1017,-420 1017,-444"/>
+<text text-anchor="middle" x="965.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge23" class="edge">
+<title>type~ecadvection2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#ff0000" d="M913.88,-430.17C905.87,-430.4 897.69,-430.96 890,-432"/>
+</g>
+<!-- type~lineareuler2d_pml -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node25" class="node">
+<title>type~lineareuler2d_pml</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node25"><a xlink:href=".././type/lineareuler2d_pml.html" xlink:title="LinearEuler2D_PML">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1023,-276 908,-276 908,-252 1023,-252 1023,-276"/>
+<text text-anchor="middle" x="965.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml&#45;&gt;type~lineareuler2d_pml_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge25" class="edge">
+<title>type~lineareuler2d_pml&#45;&gt;type~lineareuler2d_pml_t</title>
+<path fill="none" stroke="#e7ff00" d="M907.85,-262.41C901.81,-262.71 895.77,-263.22 890,-264"/>
+</g>
+<!-- type~lineareuler2d_pml~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node26" class="node">
+<title>type~lineareuler2d_pml~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node26"><a xlink:href=".././type/lineareuler2d_pml~2.html" xlink:title="LinearEuler2D_PML">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1023,-234 908,-234 908,-210 1023,-210 1023,-234"/>
+<text text-anchor="middle" x="965.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LinearEuler2D_PML</text>
+</a>
+</g>
+</g>
+<!-- type~lineareuler2d_pml~2&#45;&gt;type~lineareuler2d_pml_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge26" class="edge">
+<title>type~lineareuler2d_pml~2&#45;&gt;type~lineareuler2d_pml_t</title>
+<path fill="none" stroke="#e7ff00" d="M924.32,-234.02C918.6,-236.55 912.98,-239.53 908,-243 897.92,-250.03 902.18,-262.35 890,-264"/>
+<path fill="none" stroke="#e7ff00" d="M889,-264C884.63,-264.59 880.12,-265.05 875.57,-265.38"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="875.34,-261.89 865.56,-265.95 875.74,-268.88 875.34,-261.89"/>
+</g>
+<!-- type~esatmo2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node27" class="node">
+<title>type~esatmo2d_t</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node27"><a xlink:href=".././type/esatmo2d_t.html" xlink:title="ESAtmo2D_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1004.5,-402 926.5,-402 926.5,-378 1004.5,-378 1004.5,-402"/>
+<text text-anchor="middle" x="965.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D_t</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d_t&#45;&gt;type~ecdgmodel2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge24" class="edge">
+<title>type~esatmo2d_t&#45;&gt;type~ecdgmodel2d</title>
+<path fill="none" stroke="#ff0000" d="M926.39,-401.13C919.97,-403.84 913.58,-407.11 908,-411 897.92,-418.03 902.18,-430.35 890,-432"/>
+<path fill="none" stroke="#ff0000" d="M889,-432C879.51,-433.29 869.36,-433.92 859.5,-434.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="859.35,-430.64 849.38,-434.24 859.42,-437.64 859.35,-430.64"/>
+</g>
+<!-- type~ecadvection2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node28" class="node">
+<title>type~ecadvection2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node28"><a xlink:href=".././type/ecadvection2d.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1154,-476 1060,-476 1060,-452 1154,-452 1154,-476"/>
+<text text-anchor="middle" x="1107" y="-461.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge27" class="edge">
+<title>type~ecadvection2d&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1079.19,-451.97C1067.96,-447.79 1054.6,-443.91 1042,-443"/>
+</g>
+<!-- type~esatmo2d -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node29" class="node">
+<title>type~esatmo2d</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node29"><a xlink:href=".././type/esatmo2d.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1141.5,-392 1072.5,-392 1072.5,-368 1141.5,-368 1141.5,-392"/>
+<text text-anchor="middle" x="1107" y="-377.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d&#45;&gt;type~esatmo2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge29" class="edge">
+<title>type~esatmo2d&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M1072.48,-377.24C1062.56,-377.16 1051.76,-377.81 1042,-380"/>
+</g>
+<!-- type~esatmo2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node30" class="node">
+<title>type~esatmo2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node30"><a xlink:href=".././type/esatmo2d~2.html" xlink:title="ESAtmo2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1141.5,-350 1072.5,-350 1072.5,-326 1141.5,-326 1141.5,-350"/>
+<text text-anchor="middle" x="1107" y="-335.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ESAtmo2D</text>
+</a>
+</g>
+</g>
+<!-- type~esatmo2d~2&#45;&gt;type~esatmo2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge30" class="edge">
+<title>type~esatmo2d~2&#45;&gt;type~esatmo2d_t</title>
+<path fill="none" stroke="#7f00ff" d="M1074.76,-350.02C1069.61,-352.62 1064.49,-355.62 1060,-359 1050.18,-366.39 1053.99,-377.31 1042,-380"/>
+<path fill="none" stroke="#7f00ff" d="M1041,-380C1032.58,-381.89 1023.54,-383.47 1014.76,-384.77"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="1014.05,-381.34 1004.63,-386.18 1015.01,-388.27 1014.05,-381.34"/>
+</g>
+<!-- type~ecadvection2d~2 -->
+<g id="type~~mesh2d_t~~InheritedByGraph_node31" class="node">
+<title>type~ecadvection2d~2</title>
+<g id="a_type~~mesh2d_t~~InheritedByGraph_node31"><a xlink:href=".././type/ecadvection2d~2.html" xlink:title="ECAdvection2D">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="1154,-434 1060,-434 1060,-410 1154,-410 1154,-434"/>
+<text text-anchor="middle" x="1107" y="-419.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ECAdvection2D</text>
+</a>
+</g>
+</g>
+<!-- type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t -->
+<g id="type~~mesh2d_t~~InheritedByGraph_edge28" class="edge">
+<title>type~ecadvection2d~2&#45;&gt;type~ecadvection2d_t</title>
+<path fill="none" stroke="#ff0000" d="M1083.45,-434.08C1071.43,-439.3 1056.23,-444.02 1042,-443"/>
+<path fill="none" stroke="#ff0000" d="M1041,-443C1036.55,-442.68 1031.97,-442.25 1027.36,-441.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1027.63,-438.25 1017.28,-440.53 1026.79,-445.2 1027.63,-438.25"/>
+</g>
+</g>
+</svg>
+</div><script>var pantypemesh2d_tInheritedByGraph = svgPanZoom('#typemesh2d_tInheritedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s). Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-bcnames~3">BCNames</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-bctype~3">BCType</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-cgnscornermap~2">CGNSCornerMap</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-cgnssidemap~2">CGNSSideMap</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-decomp">decomp</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-eleminfo~3">elemInfo</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-elemmaterial~2">elemMaterial</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-globalnodeids~3">globalNodeIDs</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-materialnames~2">materialNames</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-mortarinfo">mortarInfo</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nbcs">nBCs</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-ncornernodes">nCornerNodes</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nelem~4">nElem</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-ngeo">nGeo</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nglobalelem">nGlobalElem</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nmaterials~2">nMaterials</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nmortars">nMortars</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nnodes">nNodes</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nsides">nSides</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nuniquenodes">nUniqueNodes</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nuniquesides">nUniqueSides</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-nodecoords~3">nodeCoords</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-quadrature">quadrature</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#variable-sideinfo~2">sideInfo</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a></h3></div>
+  <div id="boundprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-doublemortarmesh">DoubleMortarMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-free~9">Free</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-init~9">Init</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-read_hohqmesh~2">Read_HOHQMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-read_hopr~2">Read_HOPr</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-recalculateflip~2">RecalculateFlip</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-resetboundaryconditiontype~3">ResetBoundaryConditionType</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-simplemortarmesh">SimpleMortarMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-structuredmesh~3">StructuredMesh</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-uniformstructuredmesh_mesh2d_t">UniformStructuredMesh_Mesh2D_t</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-updatedevice~4">UpdateDevice</a>
+      <a class="list-group-item" href="../type/mesh2d_t.html#boundprocedure-write_mesh~3">Write_Mesh</a>
+    </div>
+  </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/mesh2d_t.html#src">Mesh2D_t</a>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+    <h2>Components</h2>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-bcnames~3"></span>character(len=255),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>BCNames</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-bctype~3"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
+  <td><strong>BCType</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-cgnscornermap~2"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
+  <td><strong>CGNSCornerMap</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-cgnssidemap~2"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
+  <td><strong>CGNSSideMap</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-decomp"></span>type(<a href='../type/domaindecomposition.html'>DomainDecomposition</a>),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-eleminfo~3"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
+  <td><strong>elemInfo</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-elemmaterial~2"></span>integer,</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>elemMaterial</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-globalnodeids~3"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:,:)</td><td>::</td>
+  <td><strong>globalNodeIDs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-materialnames~2"></span>character(len=SELF_MESH_MATNAME_LENGTH),</td>
+<td>public,</td>  <td>allocatable</td><td>::</td>
+  <td><strong>materialNames</strong>(:)</td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-mortarinfo"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:)</td><td>::</td>
+  <td><strong>mortarInfo</strong></td><td>=> </td><td>null()</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nbcs"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nBCs</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ncornernodes"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nCornerNodes</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem~4"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-ngeo"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nGeo</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nglobalelem"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nGlobalElem</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nmaterials~2"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nMaterials</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nmortars"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nMortars</strong></td><td> =</td><td>0</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nnodes"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nNodes</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nsides"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nSides</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nuniquenodes"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nUniqueNodes</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nuniquesides"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nUniqueSides</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nodecoords~3"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, dimension(:,:,:,:)</td><td>::</td>
+  <td><strong>nodeCoords</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-quadrature"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>quadrature</strong></td><td></td><td></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-sideinfo~2"></span>integer,</td>
+<td>public,</td>  <td>pointer, dimension(:,:,:)</td><td>::</td>
+  <td><strong>sideInfo</strong></td><td></td><td></td><td></td>
+</tr>
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+ 
+    <section>
+    <h2>Type-Bound Procedures</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-doublemortarmesh"></span><h3>procedure, public :: <strong>DoubleMortarMesh</strong>  => <a href='../proc/doublemortarmesh_mesh2d_t.html'>DoubleMortarMesh_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/doublemortarmesh_mesh2d_t.html'>DoubleMortarMesh_Mesh2D_t</a>(this, dx, bcids, comm)</h3>
+<p>Create a six-element mesh with two 2:1 mortar interfaces, used to validate the
+mortar machinery in configurations the SimpleMortarMesh cannot reach:</p><a href="../proc/doublemortarmesh_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:4)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~9"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_mesh2d_t.html'>Free_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/free_mesh2d_t.html'>Free_Mesh2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~9"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_mesh2d_t.html'>Init_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/init_mesh2d_t.html'>Init_Mesh2D_t</a>(this, nGeo, nElem, nSides, nNodes, nBCs)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nGeo</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nSides</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nNodes</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nBCs</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-read_hohqmesh~2"></span><h3>procedure, public :: <strong>Read_HOHQMesh</strong>  => <a href='../proc/read_hohqmesh_mesh2d_t.html'>Read_HOHQMesh_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/read_hohqmesh_mesh2d_t.html'>Read_HOHQMesh_Mesh2D_t</a>(this, meshFile, comm)</h3>
+<p>Reader for HOHQMesh text mesh files in the ISM and ISM-MM
+formats. The format is auto-detected from the first line:
+  * Line equal to "ISM-MM" (trimmed) =&gt; ISM-MM with per-element
+    material name strings and a 4-int count line that includes
+    an unused nEdges field (the ISM-MM writer in HOHQMesh does
+    NOT emit an edge block).
+  * Anything else is treated as plain ISM: the first line is
+    itself the count line "nNodes nElems polyOrder" and there
+    are no per-element material names.</p><a href="../proc/read_hohqmesh_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-read_hopr~2"></span><h3>procedure, public :: <strong>Read_HOPr</strong>  => <a href='../proc/read_hopr_mesh2d_t.html'>Read_HOPr_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/read_hopr_mesh2d_t.html'>Read_HOPr_Mesh2D_t</a>(this, meshFile, comm)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-recalculateflip~2"></span><h3>procedure, public :: <strong>RecalculateFlip</strong>  => <a href='../proc/recalculateflip_mesh2d_t.html'>RecalculateFlip_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/recalculateflip_mesh2d_t.html'>RecalculateFlip_Mesh2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-resetboundaryconditiontype~3"></span><h3>procedure, public :: <strong>ResetBoundaryConditionType</strong>  => <a href='../proc/resetboundaryconditiontype_mesh2d_t.html'>ResetBoundaryConditionType_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/resetboundaryconditiontype_mesh2d_t.html'>ResetBoundaryConditionType_Mesh2D_t</a>(this, bcid)</h3>
+<p>This method can be used to reset all of the boundary elements
+boundary condition type to the desired value.</p><a href="../proc/resetboundaryconditiontype_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcid</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-simplemortarmesh"></span><h3>procedure, public :: <strong>SimpleMortarMesh</strong>  => <a href='../proc/simplemortarmesh_mesh2d_t.html'>SimpleMortarMesh_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/simplemortarmesh_mesh2d_t.html'>SimpleMortarMesh_Mesh2D_t</a>(this, dx, bcids, comm)</h3>
+<p>Create the smallest 2:1 nonconforming (mortar) mesh: one "big" element of size
+2<em>dx x 2</em>dx whose east edge is shared with the west edges of two "small" dx x dx
+elements. The mesh is conforming everywhere except at the single mortar interface.</p><a href="../proc/simplemortarmesh_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:4)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-structuredmesh~3"></span><h3>generic, public :: <strong>StructuredMesh</strong>  => <a href='../type/mesh2d_t.html#boundprocedure-uniformstructuredmesh_mesh2d_t'>UniformStructuredMesh_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+            <h3>public subroutine <a href='../proc/uniformstructuredmesh_mesh2d_t.html'>UniformStructuredMesh_Mesh2D_t</a>(this, nxPerTile, nyPerTile, nTileX, nTileY, dx, dy, bcids, comm)</h3>
+<p>Create a structured mesh and store it in SELF's unstructured mesh format.
+The mesh is created in tiles of size (tnx,tny). Tiling is used to determine
+the element ordering.</p><a href="../proc/uniformstructuredmesh_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nxPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nyPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileX</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileY</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dy</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:4)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-uniformstructuredmesh_mesh2d_t"></span><h3>procedure, private :: <strong>UniformStructuredMesh_Mesh2D_t</strong>    </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/uniformstructuredmesh_mesh2d_t.html'>UniformStructuredMesh_Mesh2D_t</a>(this, nxPerTile, nyPerTile, nTileX, nTileY, dx, dy, bcids, comm)</h3>
+<p>Create a structured mesh and store it in SELF's unstructured mesh format.
+The mesh is created in tiles of size (tnx,tny). Tiling is used to determine
+the element ordering.</p><a href="../proc/uniformstructuredmesh_mesh2d_t.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(out)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nxPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nyPerTile</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileX</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>nTileY</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dx</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>dy</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>bcids</strong>(1:4)</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>integer,</td>
+<td>intent(in),</td>
+  <td>optional</td>  <td></td><td>::</td>
+  <td><strong>comm</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice~4"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_mesh2d_t.html'>UpdateDevice_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/updatedevice_mesh2d_t.html'>UpdateDevice_Mesh2D_t</a>(this)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-write_mesh~3"></span><h3>procedure, public :: <strong>Write_Mesh</strong>  => <a href='../proc/write_mesh2d_t.html'>Write_Mesh2D_t</a>   </h3></div>
+  <ul class="list-group">
+      <li class="list-group-item">
+          <h3>public subroutine <a href='../proc/write_mesh2d_t.html'>Write_Mesh2D_t</a>(this, meshFile)</h3>    
+<h4>Arguments</h4>      <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" ></span>class(<a href='../type/mesh2d_t.html'>Mesh2D_t</a>),</td>
+<td>intent(inout)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" ></span>character,</td>
+<td>intent(in)</td>
+  <td></td>  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+</tr>
+</tbody>
+</table>
+
+
+      </li>
+  </ul>
+</div>
+
+    </section>
+    
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">SEMMesh</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Mesh2D_t</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sideInfo</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:,:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nodeCoords</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elemInfo</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">globalNodeIDs</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CGNSCornerMap</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">CGNSSideMap</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BCType</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">LEN</span><span class="o">=</span><span class="mi">255</span><span class="p">),</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">BCNames</span><span class="p">(:)</span>
+<span class="w">    </span><span class="c">! 2:1 nonconforming (mortar) interface bookkeeping.</span>
+<span class="w">    </span><span class="c">!</span>
+<span class="w">    </span><span class="c">! A mortar interface joins one &quot;big&quot; element edge to the two half-edges of its 2:1</span>
+<span class="w">    </span><span class="c">! refined neighbors (&quot;small&quot; sides). Sides that participate in a mortar carry</span>
+<span class="w">    </span><span class="c">! sideInfo(3) = 0 (no conforming neighbor) and sideInfo(5) = 0 (no boundary condition),</span>
+<span class="w">    </span><span class="c">! so all conforming-side machinery (SideExchange, RecalculateFlip, boundary-condition</span>
+<span class="w">    </span><span class="c">! mapping) skips them; sideInfo(1) is set to the mortar index for reference.</span>
+<span class="w">    </span><span class="c">!</span>
+<span class="w">    </span><span class="c">! mortarInfo(1:8,1:nMortars) is replicated on all ranks (element ids are global):</span>
+<span class="w">    </span><span class="c">!   1 - big element id ; 2 - big local side id</span>
+<span class="w">    </span><span class="c">!   3 - small element id on the sub-edge covering big-edge coordinate [-1,0]</span>
+<span class="w">    </span><span class="c">!   4 - 10*(small local side) + flip for that sub-edge</span>
+<span class="w">    </span><span class="c">!   5 - small element id on the sub-edge covering big-edge coordinate [0,1]</span>
+<span class="w">    </span><span class="c">!   6 - 10*(small local side) + flip for that sub-edge</span>
+<span class="w">    </span><span class="c">!   7 - global side id of sub-edge 1 (used as an MPI message tag)</span>
+<span class="w">    </span><span class="c">!   8 - global side id of sub-edge 2 (used as an MPI message tag)</span>
+<span class="w">    </span><span class="c">! flip = 0 when the small side&#39;s edge coordinate runs in the same direction as the big</span>
+<span class="w">    </span><span class="c">! side&#39;s edge coordinate, flip = 1 when reversed (same convention as sideInfo(4)).</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nMortars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">pointer</span><span class="p">,</span><span class="k">dimension</span><span class="p">(:,:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mortarInfo</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">null</span><span class="p">()</span>
+<span class="w">    </span><span class="c">! Material tracking: every element has an integer material id</span>
+<span class="w">    </span><span class="c">! indexing into materialNames. Single-material readers (HOPr,</span>
+<span class="w">    </span><span class="c">! structured, ISM, ISM-v2) leave nMaterials = 1 with the name</span>
+<span class="w">    </span><span class="c">! &quot;default&quot;. The ISM-MM reader populates the table with the</span>
+<span class="w">    </span><span class="c">! material strings from the .mesh file.</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nMaterials</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">elemMaterial</span><span class="p">(:)</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">LEN</span><span class="o">=</span><span class="n">SELF_MESH_MATNAME_LENGTH</span><span class="p">),</span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">materialNames</span><span class="p">(:)</span>
+
+<span class="w">  </span><span class="k">contains</span>
+<span class="k">    procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Init</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Init_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Free</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Free_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UpdateDevice</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UpdateDevice_Mesh2D_t</span>
+
+<span class="w">    </span><span class="k">generic</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">StructuredMesh</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UniformStructuredMesh_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">UniformStructuredMesh_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">SimpleMortarMesh</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">SimpleMortarMesh_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">DoubleMortarMesh</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">DoubleMortarMesh_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">ResetBoundaryConditionType</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ResetBoundaryConditionType_Mesh2D_t</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Read_HOPr</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Read_HOPr_Mesh2D_t</span>
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Read_HOHQMesh</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Read_HOHQMesh_Mesh2D_t</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Write_Mesh</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Write_Mesh2D_t</span>
+
+<span class="w">    </span><span class="k">procedure</span><span class="p">,</span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RecalculateFlip</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">RecalculateFlip_Mesh2D_t</span>
+
+<span class="w">  </span><span class="k">endtype </span><span class="n">Mesh2D_t</span>
+</pre></div>
+
+    </section>
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>

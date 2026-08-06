@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="description" content="Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    <meta name="author" content="Fluid Numerics" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_RefinementIndicator_2D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="../lists/files.html">Source Files</a></li>
+            <li><a href="../lists/modules.html">Modules</a></li>
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../lists/types.html">Derived Types</a></li>
+       
+            </ul>
+        
+            </li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+          </ul>
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+  <div class="row">
+    <h1>SELF_RefinementIndicator_2D 
+    <small>Module</small>
+    </h1>
+    <div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+    <li><i class="fa fa-legal"></i> 3-Clause BSD with attribution</li> 
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.0% of total for modules and submodules.">8 statements</a>
+     </li> 
+    <li><i class="fa fa-code"></i><a href="../src/SELF_RefinementIndicator_2D.f90"> Source File</a></li>
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+     <li><a href='../sourcefile/self_refinementindicator_2d.f90.html'>SELF_RefinementIndicator_2D.f90</a></li>
+     <li class="active">SELF_RefinementIndicator_2D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    <div id="sidebar">
+  <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_refinementindicator_2d~2.html#type-refinementindicator2d">RefinementIndicator2D</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+<br>        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      <li class="list-group-item">
+  <ul class="list-inline">
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    <li><a href='../module/self_refinementindicator_2d_t.html'>SELF_RefinementIndicator_2D_t</a></li>
+  </ul>
+      </li>
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_refinementindicator_2d~2~~UsesGraph Pages: 1 -->
+<svg id="moduleself_refinementindicator_2d2UsesGraph" width="641pt" height="246pt"
+ viewBox="0.00 0.00 641.00 246.18" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph" class="graph" transform="scale(0.43 0.43) rotate(0) translate(4 562.49)">
+<title>module~~self_refinementindicator_2d~2~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-562.49 1471,-562.49 1471,4 -4,4"/>
+<!-- module~self_refinementindicator_2d~2 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node1" class="node">
+<title>module~self_refinementindicator_2d~2</title>
+<polygon fill="none" stroke="black" points="1467,-463.93 1295,-463.93 1295,-439.93 1467,-439.93 1467,-463.93"/>
+<text text-anchor="middle" x="1381" y="-449.53" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_RefinementIndicator_2D</text>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node2" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node2"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-254.93 130,-254.93 130,-230.93 226,-230.93 226,-254.93"/>
+<text text-anchor="middle" x="178" y="-240.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_refinementindicator_2d~2&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge1" class="edge">
+<title>module~self_refinementindicator_2d~2&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1305.6,-463.95C1228.13,-475.41 1103.14,-490.93 994.5,-490.93 994.5,-490.93 994.5,-490.93 479.5,-490.93 369.31,-490.93 342.64,-447.03 262,-371.93 227.98,-340.25 201.76,-291.79 188.53,-264.17"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="191.65,-262.58 184.25,-255 185.31,-265.55 191.65,-262.58"/>
+</g>
+<!-- module~self_refinementindicator_2d_t -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node3" class="node">
+<title>module~self_refinementindicator_2d_t</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node3"><a xlink:href=".././module/self_refinementindicator_2d_t.html" xlink:title="SELF_RefinementIndicator_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="1259,-443.93 1078,-443.93 1078,-419.93 1259,-419.93 1259,-443.93"/>
+<text text-anchor="middle" x="1168.5" y="-429.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_RefinementIndicator_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_refinementindicator_2d~2&#45;&gt;module~self_refinementindicator_2d_t -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge2" class="edge">
+<title>module~self_refinementindicator_2d~2&#45;&gt;module~self_refinementindicator_2d_t</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1294.99,-443.85C1286.54,-443.05 1277.91,-442.23 1269.33,-441.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1269.58,-437.92 1259.3,-440.46 1268.92,-444.89 1269.58,-437.92"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node4" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node4"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-254.93 5,-254.93 5,-230.93 89,-230.93 89,-254.93"/>
+<text text-anchor="middle" x="47" y="-240.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge3" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M129.7,-242.93C119.88,-242.93 109.48,-242.93 99.52,-242.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="99.34,-239.43 89.34,-242.93 99.34,-246.43 99.34,-239.43"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node5" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node5"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-152.93 0,-152.93 0,-128.93 94,-128.93 94,-152.93"/>
+<text text-anchor="middle" x="47" y="-138.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge4" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M161.7,-230.83C139.29,-213.11 97.4,-179.99 71.2,-159.27"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="73.3,-156.47 63.28,-153.01 68.96,-161.96 73.3,-156.47"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge6" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1077.93,-435.9C1051.03,-437.7 1021.5,-440.27 994.5,-443.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M992.5,-443.93C767.08,-474.47 702.69,-468.05 481.5,-414.93"/>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge5" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M992.5,-443.93C950.17,-452.82 949.36,-478.36 909,-493.93 834.79,-522.56 812.06,-516.48 733.5,-528.93"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node6" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node6"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="662,-231.93 568,-231.93 568,-207.93 662,-207.93 662,-231.93"/>
+<text text-anchor="middle" x="615" y="-217.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge8" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1148.62,-419.71C1089.99,-382.83 904.72,-274.31 733.5,-259.93"/>
+</g>
+<!-- module~self_scalar_2d -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node7" class="node">
+<title>module~self_scalar_2d</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node7"><a xlink:href=".././module/self_scalar_2d.html" xlink:title="SELF_Scalar_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="1042,-397.93 945,-397.93 945,-373.93 1042,-373.93 1042,-397.93"/>
+<text text-anchor="middle" x="993.5" y="-383.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_refinementindicator_2d_t&#45;&gt;module~self_scalar_2d -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge7" class="edge">
+<title>module~self_refinementindicator_2d_t&#45;&gt;module~self_scalar_2d</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M1122.05,-419.84C1099.8,-413.93 1072.83,-406.76 1049.43,-400.54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="1050.21,-397.12 1039.65,-397.93 1048.41,-403.89 1050.21,-397.12"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge10" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M578.08,-232C551.63,-240.52 514.64,-251.67 481.5,-258.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M479.5,-258.93C413.92,-273.3 395.63,-262.28 328.5,-262.93"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge9" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M479.5,-258.93C374.83,-281.86 355.89,-311.29 262,-362.93 223.86,-383.91 218.01,-434.25 179,-414.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M177,-414.93C114.05,-382.16 73.45,-303.19 56.73,-264.73"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="59.75,-262.88 52.64,-255.02 53.29,-265.6 59.75,-262.88"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge11" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M600.86,-207.69C585.49,-194.05 558.75,-172.27 532,-159.93 422.23,-109.27 382.47,-116.84 262,-126.93 224.72,-130.05 216.32,-143.54 179,-140.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M177,-140.93C153.2,-138.88 126.84,-138.53 104.18,-138.83"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="103.99,-135.34 94.05,-139.01 104.11,-142.33 103.99,-135.34"/>
+</g>
+<!-- module~self_lagrange_t -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node8" class="node">
+<title>module~self_lagrange_t</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node8"><a xlink:href=".././module/self_lagrange_t.html" xlink:title="SELF_Lagrange_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="532,-192.93 429,-192.93 429,-168.93 532,-168.93 532,-192.93"/>
+<text text-anchor="middle" x="480.5" y="-178.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_lagrange_t -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge12" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_lagrange_t</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M573.16,-207.91C560.19,-204.09 545.69,-199.82 532.11,-195.83"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="533.01,-192.44 522.43,-192.98 531.03,-199.16 533.01,-192.44"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge14" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M944.65,-389.3C835.55,-396.87 570.91,-414.6 481.5,-414.93"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M479.5,-414.93C438.44,-412.57 362.2,-389.95 262,-322.93 236.55,-305.91 211.88,-280.66 196.15,-263.1"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="198.4,-260.37 189.17,-255.17 193.15,-264.99 198.4,-260.37"/>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge15" class="edge">
+<title>module~self_scalar_2d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M978.96,-398.13C942.58,-429.78 838.39,-513.16 733.5,-528.93"/>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M731.5,-528.93C523.56,-549.36 451.18,-593.63 262,-504.93 212.73,-481.83 226.9,-440.74 179,-414.93"/>
+</g>
+<!-- module~self_scalar_2d_t -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node9" class="node">
+<title>module~self_scalar_2d_t</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node9"><a xlink:href=".././module/self_scalar_2d_t.html" xlink:title="SELF_Scalar_2D_t">
+<polygon fill="#337ab7" stroke="#337ab7" points="909,-231.93 803,-231.93 803,-207.93 909,-207.93 909,-231.93"/>
+<text text-anchor="middle" x="856" y="-217.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Scalar_2D_t</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge13" class="edge">
+<title>module~self_scalar_2d&#45;&gt;module~self_scalar_2d_t</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M982.54,-373.72C959.44,-345.42 902.03,-275.09 873.56,-240.21"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="876.01,-237.69 866.98,-232.15 870.59,-242.11 876.01,-237.69"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge21" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M452.07,-193.02C444.31,-196.97 436.05,-201.71 429,-206.93 410.56,-220.58 412.65,-232.08 393,-243.93 367.41,-259.37 358.38,-262.64 328.5,-262.93"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-262.93C296.6,-263.22 263.59,-259.16 236.4,-254.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="236.73,-251.13 226.28,-252.87 235.53,-258.03 236.73,-251.13"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge16" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-140.93C277.61,-130.08 142.23,-194.61 80.02,-226.23"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="78.35,-223.15 71.04,-230.82 81.53,-229.38 78.35,-223.15"/>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge18" class="edge">
+<title>module~self_lagrange_t&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-140.93C262.5,-126.73 244.4,-145.5 179,-140.93"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node10" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node10"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="364,-74.93 291,-74.93 291,-50.93 364,-50.93 364,-74.93"/>
+<text text-anchor="middle" x="327.5" y="-60.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge17" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M463.91,-168.75C437.46,-148.08 383.64,-106.02 352.4,-81.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="354.27,-78.62 344.23,-75.22 349.96,-84.14 354.27,-78.62"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node12" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-32.93 151,-32.93 151,-8.93 205,-8.93 205,-32.93"/>
+<text text-anchor="middle" x="178" y="-18.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;HDF5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge20" class="edge">
+<title>module~self_lagrange_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M437.74,-168.89C407.55,-160.42 365.7,-149.18 328.5,-140.93"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326.5,-140.93C267.54,-127.85 217.52,-72.18 193.78,-41.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="196.34,-39.06 187.53,-33.18 190.75,-43.27 196.34,-39.06"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node13" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node13"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379.5,-234.93 275.5,-234.93 275.5,-210.93 379.5,-210.93 379.5,-234.93"/>
+<text text-anchor="middle" x="327.5" y="-220.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_quadrature -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge19" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M436.23,-192.96C419.17,-197.71 399.41,-203.21 381.5,-208.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="380.47,-204.84 371.78,-210.89 382.35,-211.58 380.47,-204.84"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node14" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node14"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-192.93 262,-192.93 262,-168.93 393,-168.93 393,-192.93"/>
+<text text-anchor="middle" x="327.5" y="-178.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange_t&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge22" class="edge">
+<title>module~self_lagrange_t&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M428.8,-180.93C420.55,-180.93 411.85,-180.93 403.17,-180.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="403.01,-177.43 393.01,-180.93 403.01,-184.43 403.01,-177.43"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge30" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M845.69,-232.2C827.01,-256.01 782.49,-308.71 733.5,-337.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M731.5,-337.93C687.41,-364.22 667.33,-338.31 616,-337.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-337.93C482.81,-336.95 459.69,-261.76 328.5,-262.93"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge23" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M731.5,-337.93C518.56,-464.91 398.34,-530.52 179,-414.93"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_lagrange -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge27" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M827.05,-231.97C797.23,-244.3 751.81,-261.47 733.5,-259.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M731.5,-259.93C702.45,-257.49 671.32,-246.15 648.7,-236.16"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="650.12,-232.96 639.56,-232 647.21,-239.33 650.12,-232.96"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge31" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-24.93C545.74,-28.14 549.83,-102.26 481.5,-102.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M479.5,-102.93C439.66,-103.32 395.83,-90.09 365.7,-78.75"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="366.62,-75.35 356.03,-74.99 364.09,-81.88 366.62,-75.35"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node11" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="646.5,-76.93 583.5,-76.93 583.5,-52.93 646.5,-52.93 646.5,-76.93"/>
+<text text-anchor="middle" x="615" y="-62.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;FEQParse -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge24" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M731.5,-24.93C716.43,-18.22 677.09,-34.4 648.5,-48.15"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="646.7,-45.14 639.26,-52.69 649.78,-51.42 646.7,-45.14"/>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;HDF5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge25" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;HDF5</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M852.31,-207.68C843.38,-170.48 810.75,-59.32 733.5,-24.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M731.5,-24.93C684.6,-4.05 667.28,-22.52 616,-24.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-24.93C576.42,-26.69 569.33,-8.63 532,-3.93 486.58,1.79 474.58,0.34 429,-3.93 383.74,-8.17 373.96,-23.38 328.5,-22.93"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M326.5,-22.93C288.65,-21.81 245.33,-21.32 215.47,-21.1"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="215.14,-17.6 205.12,-21.03 215.09,-24.6 215.14,-17.6"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node15" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node15"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="767,-231.93 698,-231.93 698,-207.93 767,-207.93 767,-231.93"/>
+<text text-anchor="middle" x="732.5" y="-217.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_data -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge26" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M802.77,-219.93C794.27,-219.93 785.54,-219.93 777.26,-219.93"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="777.08,-216.43 767.08,-219.93 777.08,-223.43 777.08,-216.43"/>
+</g>
+<!-- module~self_datapool -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node16" class="node">
+<title>module~self_datapool</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node16"><a xlink:href=".././module/self_datapool.html" xlink:title="SELF_DataPool">
+<polygon fill="#337ab7" stroke="#337ab7" points="526,-386.93 435,-386.93 435,-362.93 526,-362.93 526,-386.93"/>
+<text text-anchor="middle" x="480.5" y="-372.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DataPool</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_datapool -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge28" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_datapool</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-337.93C580.33,-337.68 543.56,-348.93 517.31,-359.08"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="515.78,-355.93 507.8,-362.9 518.38,-362.43 515.78,-355.93"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node17" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node17"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="527.5,-36.93 433.5,-36.93 433.5,-12.93 527.5,-12.93 527.5,-36.93"/>
+<text text-anchor="middle" x="480.5" y="-22.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_scalar_2d_t&#45;&gt;module~self_metadata -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge29" class="edge">
+<title>module~self_scalar_2d_t&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M614,-24.93C588.98,-26.1 561.27,-26.28 537.69,-26.09"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="537.55,-22.59 527.52,-25.99 537.48,-29.59 537.55,-22.59"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge33" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M312.99,-75.07C299.47,-87.51 278.36,-107.71 262,-126.93 235.08,-158.56 207.8,-198.54 192.2,-222.35"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="189.14,-220.63 186.62,-230.92 195.01,-224.44 189.14,-220.63"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge35" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M290.78,-60.29C250.39,-58.59 183.3,-59.69 130,-79.93 105.85,-89.1 82.64,-107.58 67.12,-121.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="64.6,-119.37 59.74,-128.78 69.41,-124.45 64.6,-119.37"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge34" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M290.79,-52.76C267.77,-46.21 237.94,-37.71 214.88,-31.15"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="215.71,-27.74 205.13,-28.37 213.79,-34.47 215.71,-27.74"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_node18" class="node">
+<title>mpi</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsesGraph_node18"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-112.93 151,-112.93 151,-88.93 205,-88.93 205,-112.93"/>
+<text text-anchor="middle" x="178" y="-98.53" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_hdf5&#45;&gt;mpi -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge32" class="edge">
+<title>module~self_hdf5&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M290.79,-72.13C267.77,-78.06 237.94,-85.75 214.88,-91.69"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="213.94,-88.31 205.13,-94.2 215.69,-95.09 213.94,-88.31"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge36" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M275.33,-229.87C262.72,-231.58 249.14,-233.42 236.27,-235.16"/>
+<polygon fill="#00ff3f" stroke="#00ff3f" points="235.57,-231.73 226.13,-236.54 236.51,-238.66 235.57,-231.73"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge37" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff3f" stroke-dasharray="5,2" d="M283.05,-210.9C275.86,-208.31 268.6,-205.32 262,-201.93 221.27,-181.02 224.67,-144.12 179,-140.93"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge38" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M286.26,-193.04C278.15,-195.76 269.74,-198.78 262,-201.93 244.5,-209.06 225.56,-218.29 210.2,-226.19"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="208.4,-223.18 201.14,-230.9 211.63,-229.39 208.4,-223.18"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge39" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M296.03,-168.91C266.62,-158.22 220.55,-143.83 179,-140.93"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge45" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M614,-104.93C561.85,-83.32 579.18,-170.94 532,-201.93 492.54,-227.85 375.71,-262.47 328.5,-262.93"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge40" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M704.74,-231.95C600.99,-278.18 228.62,-440.76 179,-414.93"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge44" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M697.78,-219.93C689.84,-219.93 681.15,-219.93 672.51,-219.93"/>
+<polygon fill="#003fff" stroke="#003fff" points="672.42,-216.43 662.42,-219.93 672.42,-223.43 672.42,-216.43"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge46" class="edge">
+<title>module~self_data&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M614,-104.93C559.59,-82.38 540.39,-102.35 481.5,-102.93"/>
+</g>
+<!-- module~self_data&#45;&gt;FEQParse -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge41" class="edge">
+<title>module~self_data&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M727.59,-207.86C719.1,-183.24 696.9,-126.54 662,-90.93 659.04,-87.91 655.65,-85.13 652.09,-82.61"/>
+<polygon fill="#003fff" stroke="#003fff" points="653.88,-79.6 643.57,-77.19 650.13,-85.51 653.88,-79.6"/>
+</g>
+<!-- module~self_data&#45;&gt;HDF5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge42" class="edge">
+<title>module~self_data&#45;&gt;HDF5</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M614,-104.93C583.5,-92.32 361.5,-23.37 328.5,-22.93"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_metadata -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge43" class="edge">
+<title>module~self_data&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M724.13,-207.82C708.13,-182.87 667.5,-126.27 616,-104.93"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M614,-104.93C593.57,-96.46 586.48,-98.08 568,-85.93 549.35,-73.67 550.12,-63.96 532,-50.93 527.5,-47.69 522.53,-44.62 517.53,-41.8"/>
+<polygon fill="#003fff" stroke="#003fff" points="519.04,-38.64 508.57,-37.01 515.74,-44.81 519.04,-38.64"/>
+</g>
+<!-- module~self_datapool&#45;&gt;module~self_constants -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge47" class="edge">
+<title>module~self_datapool&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7f00ff" stroke-dasharray="5,2" d="M452.04,-362.87C397.85,-339.06 277.14,-286.04 216.01,-259.19"/>
+<polygon fill="#7f00ff" stroke="#7f00ff" points="217.29,-255.93 206.73,-255.11 214.47,-262.33 217.29,-255.93"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge49" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M433.37,-36.54C414.55,-41.27 392.85,-46.74 374.08,-51.46"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="373.13,-48.09 364.28,-53.92 374.84,-54.88 373.13,-48.09"/>
+</g>
+<!-- module~self_metadata&#45;&gt;HDF5 -->
+<g id="module~~self_refinementindicator_2d~2~~UsesGraph_edge48" class="edge">
+<title>module~self_metadata&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M433.24,-24.32C403.35,-23.92 363.63,-23.39 328.5,-22.93"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_refinementindicator_2d2UsesGraph = svgPanZoom('#moduleself_refinementindicator_2d2UsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      </ul>
+    </div>
+
+        <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_refinementindicator_2d~2~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_refinementindicator_2d2UsedByGraph" width="355pt" height="32pt"
+ viewBox="0.00 0.00 355.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_refinementindicator_2d~2~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>module~~self_refinementindicator_2d~2~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 351,-28 351,4 -4,4"/>
+<!-- module~self_refinementindicator_2d~2 -->
+<g id="module~~self_refinementindicator_2d~2~~UsedByGraph_node1" class="node">
+<title>module~self_refinementindicator_2d~2</title>
+<polygon fill="none" stroke="black" points="172,-24 0,-24 0,0 172,0 172,-24"/>
+<text text-anchor="middle" x="86" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_RefinementIndicator_2D</text>
+</g>
+<!-- module~self_amrcontroller_2d -->
+<g id="module~~self_refinementindicator_2d~2~~UsedByGraph_node2" class="node">
+<title>module~self_amrcontroller_2d</title>
+<g id="a_module~~self_refinementindicator_2d~2~~UsedByGraph_node2"><a xlink:href=".././module/self_amrcontroller_2d.html" xlink:title="SELF_AMRController_2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="347,-24 208,-24 208,0 347,0 347,-24"/>
+<text text-anchor="middle" x="277.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_AMRController_2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_amrcontroller_2d&#45;&gt;module~self_refinementindicator_2d~2 -->
+<g id="module~~self_refinementindicator_2d~2~~UsedByGraph_edge1" class="edge">
+<title>module~self_amrcontroller_2d&#45;&gt;module~self_refinementindicator_2d~2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M207.82,-12C199.52,-12 190.93,-12 182.34,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="182.26,-8.5 172.26,-12 182.26,-15.5 182.26,-8.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="518pt" height="32pt"
+ viewBox="0.00 0.00 517.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 513.5,-28 513.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="386,-24 328,-24 328,0 386,0 386,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="509.5,-24 404.5,-24 404.5,0 509.5,0 509.5,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+      </ul>
+    </div>
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      <h3>Contents</h3>
+ 
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      <a class="list-group-item" href="../module/self_refinementindicator_2d~2.html#type-refinementindicator2d">RefinementIndicator2D</a>
+    </div>
+  </div>
+</div>
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+
+    
+    
+
+    
+    <section>
+     <h2>Derived Types</h2>
+     <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-refinementindicator2d"></span><h3>type, public, extends(<a href='../type/refinementindicator2d_t.html'>RefinementIndicator2D_t</a>) :: <a href='../type/refinementindicator2d.html'>RefinementIndicator2D</a>  </h3></div>
+  <div class="panel-body">
+     <h4>Components</h4>
+    <table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+<tbody>
+<tr>
+  <td><span class="anchor" id="variable-n"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>N</strong></td><td> =</td><td>0</td><td><p>Polynomial degree of the interpolant the indicator is built for.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-pmodal"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:,:)</td><td>::</td>
+  <td><strong>Pmodal</strong></td><td>=> </td><td>null()</td><td><p>Nodal-to-modal transform. Pmodal(ii,p) is the (p,ii) entry of the inverse Legendre
+Vandermonde in the L2-normalized basis, so the 1-D modal coefficients are
+uhat(p) = sum_ii Pmodal(ii,p) * u(ii) (first index summed, SELF matrix convention).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-backend~11"></span>character(len=3),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>backend</strong></td><td> =</td><td>"cpu"</td><td></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-coarsenthreshold"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>coarsenThreshold</strong></td><td> =</td><td>0.0_prec</td><td><p>Elements with sigma_e below this value are flagged SELF_AMR_COARSEN.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-flag"></span>integer,</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
+  <td><strong>flag</strong></td><td>=> </td><td>null()</td><td><p>Per-element refinement flag: SELF_AMR_REFINE / SELF_AMR_KEEP / SELF_AMR_COARSEN.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-indicator"></span>real(kind=prec),</td>
+<td>public,</td>  <td>pointer, contiguous, dimension(:)</td><td>::</td>
+  <td><strong>indicator</strong></td><td>=> </td><td>null()</td><td><p>Per-element indicator value sigma_e = log10(S_e).</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-nelem"></span>integer,</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>nElem</strong></td><td> =</td><td>0</td><td><p>Number of (rank-local) elements the indicator arrays are sized for.</p></td>
+</tr>
+<tr>
+  <td><span class="anchor" id="variable-refinethreshold"></span>real(kind=prec),</td>
+<td>public</td>  <td></td><td>::</td>
+  <td><strong>refineThreshold</strong></td><td> =</td><td>0.0_prec</td><td><p>Elements with sigma_e above this value are flagged SELF_AMR_REFINE.</p></td>
+</tr>
+</tbody>
+</table>
+
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-countflagged'>CountFlagged</a></strong>  => CountFlagged_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-estimate'>Estimate</a></strong>  => Estimate_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-free~17'>Free</a></strong>  => Free_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-init~17'>Init</a></strong>  => Init_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-setthresholds'>SetThresholds</a></strong>  => SetThresholds_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-updatedevice~8'>UpdateDevice</a></strong>  => UpdateDevice_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       <tr><td>procedure, public :: <strong><a href='../type/refinementindicator2d_t.html#boundprocedure-updatehost~6'>UpdateHost</a></strong>  => UpdateHost_RefinementIndicator2D_t </td>
+       <td></td></tr>
+       </tbody>
+       </table>
+  </div>
+</div>
+
+    </section>
+  <br>
+    
+
+    
+    </div>
+  </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Fluid Numerics<br>&copy; 2026 3-Clause BSD with attribution
+</p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2026-08-06 23:38            </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+  </body>
+</html>
