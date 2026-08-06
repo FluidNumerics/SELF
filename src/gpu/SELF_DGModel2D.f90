@@ -28,20 +28,37 @@ module SELF_DGModel2D
 
   use SELF_DGModel2D_t
   use SELF_GPU
+  use SELF_GPU_enums
   use SELF_GPUInterfaces
   use SELF_BoundaryConditions
   use SELF_Geometry_2D
   use SELF_Mesh_2D
+  use SELF_TransferPlan_2D
 
   implicit none
 
   type,extends(DGModel2D_t) :: DGModel2D
+    !! Device-resident staging for the AMR solution transfer (Stage 6a). These buffers persist
+    !! across adaptation epochs and grow monotonically, so a settled run performs no allocation
+    !! here at all; xferAllocBytes / planAllocElem record the current capacity.
+    type(c_ptr) :: xferOld_gpu = c_null_ptr !! pre-regrid solution, staged device-side
+    integer(c_size_t) :: xferAllocBytes = 0
+    type(c_ptr) :: xferKind_gpu = c_null_ptr !! plan%sourceKind
+    type(c_ptr) :: xferElem_gpu = c_null_ptr !! plan%sourceElem
+    type(c_ptr) :: xferFamily_gpu = c_null_ptr !! plan%family
+    type(c_ptr) :: xferDepth_gpu = c_null_ptr !! plan%depth
+    type(c_ptr) :: xferPath_gpu = c_null_ptr !! plan%path
+    integer :: planAllocElem = 0 !! new-element count the plan buffers are sized for
+    integer :: planAllocStride = 0 !! plan%path leading dimension they are sized for
+    integer :: xferNOld = 0 !! element count of the staged field (its device stride)
 
   contains
 
     procedure :: Init => Init_DGModel2D
     procedure :: Free => Free_DGModel2D
     procedure :: Regrid => Regrid_DGModel2D
+    procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel2D
+    procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel2D
 
     procedure :: UpdateSolution => UpdateSolution_DGModel2D
 
@@ -371,6 +388,26 @@ contains
       bc => bc%next
     enddo
 
+    ! Release the AMR transfer staging buffers (Stage 6a). These are lazily created by
+    ! StageSolutionForTransfer / ApplyTransferPlan and survive across adaptation epochs, so
+    ! they are owned by the model and released only here.
+    if(c_associated(this%xferOld_gpu)) call gpuCheck(hipFree(this%xferOld_gpu))
+    if(c_associated(this%xferKind_gpu)) call gpuCheck(hipFree(this%xferKind_gpu))
+    if(c_associated(this%xferElem_gpu)) call gpuCheck(hipFree(this%xferElem_gpu))
+    if(c_associated(this%xferFamily_gpu)) call gpuCheck(hipFree(this%xferFamily_gpu))
+    if(c_associated(this%xferDepth_gpu)) call gpuCheck(hipFree(this%xferDepth_gpu))
+    if(c_associated(this%xferPath_gpu)) call gpuCheck(hipFree(this%xferPath_gpu))
+    this%xferOld_gpu = c_null_ptr
+    this%xferKind_gpu = c_null_ptr
+    this%xferElem_gpu = c_null_ptr
+    this%xferFamily_gpu = c_null_ptr
+    this%xferDepth_gpu = c_null_ptr
+    this%xferPath_gpu = c_null_ptr
+    this%xferAllocBytes = 0
+    this%planAllocElem = 0
+    this%planAllocStride = 0
+    this%xferNOld = 0
+
     call Free_DGModel2D_t(this)
 
   endsubroutine Free_DGModel2D
@@ -438,6 +475,119 @@ contains
     enddo
 
   endsubroutine Regrid_DGModel2D
+
+  subroutine StageSolutionForTransfer_DGModel2D(this)
+    !! Stage the pre-regrid solution on the DEVICE (Stage 6a), replacing the base
+    !! implementation's device-to-host copy of the whole field. Regrid subsequently releases
+    !! solution%interior_gpu, so the field is copied device-to-device into a buffer this model
+    !! owns; ApplyTransferPlan then reads it from there.
+    !!
+    !! The staging buffer is grown monotonically and reused, so an adapting run allocates here
+    !! only when the element count exceeds every previous epoch's.
+    implicit none
+    class(DGModel2D),intent(inout) :: this
+    ! Local
+    integer(c_size_t) :: nbytes
+
+    nbytes = int(this%solution%interp%N+1,c_size_t)*(this%solution%interp%N+1)* &
+             this%solution%nElem*this%nvar*prec
+
+    if(nbytes > this%xferAllocBytes) then
+      if(c_associated(this%xferOld_gpu)) call gpuCheck(hipFree(this%xferOld_gpu))
+      call gpuCheck(hipMalloc(this%xferOld_gpu,nbytes))
+      this%xferAllocBytes = nbytes
+    endif
+
+    call gpuCheck(hipMemcpy(this%xferOld_gpu,this%solution%interior_gpu,nbytes, &
+                            hipMemcpyDeviceToDevice))
+
+    ! Remember the staged field's element count: it is the stride the transfer kernel must use
+    ! to index the staged buffer, and it is no longer recoverable from the model after Regrid.
+    this%xferNOld = this%solution%nElem
+
+  endsubroutine StageSolutionForTransfer_DGModel2D
+
+  subroutine ApplyTransferPlan_DGModel2D(this,plan,interp,eFirst,eLast,uGlobal)
+    !! Apply the transfer plan on the device (Stage 6a), writing solution%interior_gpu directly
+    !! and moving no solution data across the PCIe/xGMI link.
+    !!
+    !! uGlobal is the multi-rank escape hatch: when the caller has assembled a global old field
+    !! on the host (the Stage-5 v1 allgather migration), this falls back to the portable host
+    !! path. A device transfer only pays off on several ranks together with a point-to-point
+    !! (Stage-5 v2) migration; on a single rank it stands alone, which is the case optimized
+    !! here.
+    implicit none
+    class(DGModel2D),intent(inout) :: this
+    type(TransferPlan2D),intent(in),target :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(in),optional :: uGlobal(:,:,:,:)
+    ! Local
+    integer :: nLocal,pathStride
+    integer(c_size_t) :: nb
+
+    if(present(uGlobal)) then
+      call ApplyTransferPlan_DGModel2D_t(this,plan,interp,eFirst,eLast,uGlobal)
+      return
+    endif
+
+    if(.not. c_associated(this%xferOld_gpu)) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : ApplyTransferPlan called without a staged solution.'
+      stop 1
+    endif
+
+    ! The device kernel holds two Np x Np working buffers in shared memory, sized to a compile
+    ! time bound; guard the degree here rather than overrunning them.
+    if(interp%N+1 > 16) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : the device solution transfer supports N+1 <= AMR2D_MAXNP (16).'
+      stop 1
+    endif
+
+    nLocal = eLast-eFirst+1
+    pathStride = size(plan%path,1)
+
+    ! (Re)size the device copies of the plan's integer arrays, reusing them across epochs.
+    if(plan%nNew > this%planAllocElem .or. pathStride > this%planAllocStride) then
+      if(c_associated(this%xferKind_gpu)) call gpuCheck(hipFree(this%xferKind_gpu))
+      if(c_associated(this%xferElem_gpu)) call gpuCheck(hipFree(this%xferElem_gpu))
+      if(c_associated(this%xferFamily_gpu)) call gpuCheck(hipFree(this%xferFamily_gpu))
+      if(c_associated(this%xferDepth_gpu)) call gpuCheck(hipFree(this%xferDepth_gpu))
+      if(c_associated(this%xferPath_gpu)) call gpuCheck(hipFree(this%xferPath_gpu))
+
+      nb = int(plan%nNew,c_size_t)*c_int
+      call gpuCheck(hipMalloc(this%xferKind_gpu,nb))
+      call gpuCheck(hipMalloc(this%xferElem_gpu,nb))
+      call gpuCheck(hipMalloc(this%xferDepth_gpu,nb))
+      call gpuCheck(hipMalloc(this%xferFamily_gpu,4_c_size_t*nb))
+      call gpuCheck(hipMalloc(this%xferPath_gpu,int(pathStride,c_size_t)*nb))
+
+      this%planAllocElem = plan%nNew
+      this%planAllocStride = pathStride
+    endif
+
+    nb = int(plan%nNew,c_size_t)*c_int
+    call gpuCheck(hipMemcpy(this%xferKind_gpu,c_loc(plan%sourceKind), &
+                            nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferElem_gpu,c_loc(plan%sourceElem), &
+                            nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferDepth_gpu,c_loc(plan%depth), &
+                            nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferFamily_gpu,c_loc(plan%family), &
+                            4_c_size_t*nb,hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%xferPath_gpu,c_loc(plan%path), &
+                            int(pathStride,c_size_t)*nb,hipMemcpyHostToDevice))
+
+    call TransferSolution_2D_gpu(this%xferOld_gpu,this%solution%interior_gpu, &
+                                 this%xferKind_gpu,this%xferElem_gpu,this%xferFamily_gpu, &
+                                 this%xferDepth_gpu,this%xferPath_gpu, &
+                                 interp%mortarR_gpu,interp%mortarP_gpu, &
+                                 pathStride,eFirst-1,interp%N,this%nvar, &
+                                 this%xferNOld,this%solution%nElem,nLocal)
+
+  endsubroutine ApplyTransferPlan_DGModel2D
 
   subroutine CalculateTendency_DGModel2D(this)
     implicit none

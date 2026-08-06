@@ -124,6 +124,7 @@ endmodule lineareuler2d_amr_boneandmarrow_model
 
 program LinearEuler2D_AMR_BoneAndMarrow
 
+  use iso_fortran_env,only:int64,real64,output_unit
   use self_data
   use lineareuler2d_amr_boneandmarrow_model
   use SELF_Geometry_2D
@@ -153,6 +154,12 @@ program LinearEuler2D_AMR_BoneAndMarrow
   real(prec) :: e0,ef,dt
   character(32) :: envstr
   character(LEN=255) :: WORKSPACE
+  ! Wall-clock instrumentation of the epoch loop. system_clock with an integer(int64) count
+  ! is a monotonic wall clock; ForwardStep's own TIMER macro (src/SELF_Macros.h) expands to
+  ! cpu_time in non-multithreaded builds and so cannot be used for GPU timing.
+  integer(int64) :: c0clk,c1clk,c2clk,crate
+  integer(int64) :: nStepsTotal
+  real(real64) :: tFwd,tAdapt,tSim
 
   ! Number of adaptation epochs (each epochLength = 0.05 time units). The default is
   ! CI-sized: the pulse refines and begins to propagate, exercising the full AMR loop on the
@@ -209,16 +216,45 @@ program LinearEuler2D_AMR_BoneAndMarrow
   call modelobj%IncrementIOCounter()
 
   ! ---- Time-step through adaptation epochs ----
+  ! The epoch loop is timed in two buckets: time integration (ForwardStep, which also writes
+  ! one snapshot per epoch) and adaptation (Adapt). Adapt opens with solution%UpdateHost(), a
+  ! blocking device-to-host copy, so the c1clk boundary lands after the GPU has drained.
+  call system_clock(count_rate=crate)
+  tFwd = 0.0_real64
+  tAdapt = 0.0_real64
+  nStepsTotal = 0
   do epoch = 1,nEpochs
     dt = controller%RecommendedTimeStep(dtBase)
+    call system_clock(c0clk)
     ! ioInterval = (tn - t) exactly, so ForwardStep's io count is exactly 1 per epoch
     ! regardless of accumulated floating-point drift in t.
     call modelobj%ForwardStep(tn=modelobj%t+epochLength,dt=dt, &
                               ioInterval=(modelobj%t+epochLength)-modelobj%t)
+    call system_clock(c1clk)
     call controller%Adapt(modelobj,adapted)
+    call system_clock(c2clk)
+    tFwd = tFwd+real(c1clk-c0clk,real64)/real(crate,real64)
+    tAdapt = tAdapt+real(c2clk-c1clk,real64)/real(crate,real64)
+    nStepsTotal = nStepsTotal+int(epochLength/dt,int64)
     print*,"epoch",epoch,": t =",modelobj%t,", dt =",dt, &
       ", nElem =",modelobj%mesh%nElem,", adapted =",adapted
   enddo
+
+  ! ---- Wall-clock summary (fixed BENCH_ keys for machine parsing) ----
+  tSim = real(nEpochs,real64)*real(epochLength,real64)
+  write(output_unit,'(A)') "BENCH_case = boneandmarrow"
+  write(output_unit,'(A,I0)') "BENCH_nEpochs = ",nEpochs
+  write(output_unit,'(A,I0)') "BENCH_nSteps = ",nStepsTotal
+  write(output_unit,'(A,I0)') "BENCH_nElemBase = ",nElemBase
+  write(output_unit,'(A,I0)') "BENCH_nElemFinal = ",modelobj%mesh%nElem
+  write(output_unit,'(A,ES16.7E3)') "BENCH_simTime_s = ",tSim
+  write(output_unit,'(A,ES16.7E3)') "BENCH_tForwardStep_s = ",tFwd
+  write(output_unit,'(A,ES16.7E3)') "BENCH_tAdapt_s = ",tAdapt
+  write(output_unit,'(A,ES16.7E3)') "BENCH_tEpochLoop_s = ",tFwd+tAdapt
+  write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerStep_s = ",tFwd/real(nStepsTotal,real64)
+  write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerSimTime = ",tFwd/tSim
+  write(output_unit,'(A,ES16.7E3)') "BENCH_wallPerSimTimeIncAMR = ",(tFwd+tAdapt)/tSim
+  write(output_unit,'(A,ES16.7E3)') "BENCH_amrFraction = ",tAdapt/(tFwd+tAdapt)
 
   ! ---- Integration checks ----
   call modelobj%CalculateEntropy()

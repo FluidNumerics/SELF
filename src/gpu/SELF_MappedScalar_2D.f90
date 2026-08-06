@@ -27,6 +27,7 @@
 module SELF_MappedScalar_2D
 
   use SELF_MappedScalar_2D_t
+  use SELF_Scalar_2D
   use SELF_GPU
   use SELF_GPUInterfaces
   use iso_c_binding
@@ -45,12 +46,16 @@ module SELF_MappedScalar_2D
     type(c_ptr) :: halo_sendbuf_gpu = c_null_ptr ! packed device send buffer
     type(c_ptr) :: halo_recvbuf_gpu = c_null_ptr ! packed device receive buffer
     integer,allocatable :: halo_reqs(:) ! persistent requests; receives in 1:nnbr, sends in nnbr+1:2*nnbr
+    !! Bytes currently allocated for jas_gpu, so Resize can reuse it (Stage 6b). The capacity
+    !! counters for the five arrays inherited from Scalar2D are declared there.
+    integer(c_size_t) :: alloc_jas = 0
     integer :: halo_nactive = 0 ! variable count baked into halo_reqs
     integer :: halo_inflight = 0 ! variable count of the exchange in flight (0 = none)
     logical :: halo_static_done = .false. ! all variables have been exchanged at least once
 
   contains
     procedure,public :: Init => Init_MappedScalar2D
+    procedure,public :: Resize => Resize_MappedScalar2D
     procedure,public :: Free => Free_MappedScalar2D
 
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar2D
@@ -107,11 +112,7 @@ contains
     this%N = interp%N
     this%M = interp%M
 
-    allocate(this%interior(1:interp%N+1,interp%N+1,nelem,nvar), &
-             this%boundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%extBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%avgBoundary(1:interp%N+1,1:4,1:nelem,1:nvar), &
-             this%boundarynormal(1:interp%N+1,1:4,1:nelem,1:2*nvar))
+    call this%MapArrays(interp%N+1,nVar,nElem)
 
     allocate(this%meta(1:nVar))
     allocate(this%eqn(1:nVar))
@@ -122,17 +123,49 @@ contains
     this%avgBoundary = 0.0_prec
     this%boundarynormal = 0.0_prec
 
-    call gpuCheck(hipMalloc(this%interior_gpu,sizeof(this%interior)))
-    call gpuCheck(hipMalloc(this%boundary_gpu,sizeof(this%boundary)))
-    call gpuCheck(hipMalloc(this%extBoundary_gpu,sizeof(this%extBoundary)))
-    call gpuCheck(hipMalloc(this%avgBoundary_gpu,sizeof(this%avgBoundary)))
-    call gpuCheck(hipMalloc(this%boundarynormal_gpu,sizeof(this%boundarynormal)))
-    workSize = int(interp%N+1,c_size_t)*(interp%N+1)*nelem*nvar*4*prec
-    call gpuCheck(hipMalloc(this%jas_gpu,workSize))
+    call EnsureDeviceBuffers_MappedScalar2D(this)
 
     call this%UpdateDevice()
 
   endsubroutine Init_MappedScalar2D
+
+  subroutine EnsureDeviceBuffers_MappedScalar2D(this)
+    !! Grow the device buffers to hold the current logical arrays, reusing existing allocations
+    !! when the bytes already fit (AMR Stage 6b).
+    implicit none
+    class(MappedScalar2D),intent(inout) :: this
+    ! Local
+    integer(c_size_t) :: workSize
+
+    call EnsureDeviceBuffers_Scalar2D(this)
+
+    workSize = int(this%interp%N+1,c_size_t)*(this%interp%N+1)*this%nElem*this%nVar*4*prec
+    call EnsureDeviceBuffer(this%jas_gpu,this%alloc_jas,workSize)
+
+  endsubroutine EnsureDeviceBuffers_MappedScalar2D
+
+  subroutine Resize_MappedScalar2D(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing host pools and device buffers where they fit
+    !! (AMR Stage 6b), and without uploading zeros the way Init does.
+    !!
+    !! The mortar buffers are sized by mesh%nMortars, not nElem, and nMortars changes with the
+    !! mesh independently of the element count, so they are invalidated here and lazily
+    !! re-created at the right size by the next mortar exchange. Leaving a stale buffer in place
+    !! would silently under-size that exchange.
+    implicit none
+    class(MappedScalar2D),intent(inout) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_MappedScalar2D_t(this,interp,nVar,nElem)
+    call EnsureDeviceBuffers_MappedScalar2D(this)
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
+
+  endsubroutine Resize_MappedScalar2D
 
   subroutine Free_MappedScalar2D(this)
     implicit none
@@ -141,21 +174,20 @@ contains
     integer :: n,iError
     logical :: mpiIsFinalized
 
-    this%nVar = 0
-    this%nElem = 0
-    this%interp => null()
-    deallocate(this%interior)
-    deallocate(this%boundary)
-    deallocate(this%extBoundary)
-    deallocate(this%avgBoundary)
-    deallocate(this%boundarynormal)
-    deallocate(this%meta)
-    deallocate(this%eqn)
+    ! Host storage is owned by the pools in the parent type (Stage 6b), so the parent Free
+    ! releases it rather than deallocating these pointers.
+    call Free_Scalar2D_t(this)
 
     call gpuCheck(hipFree(this%interior_gpu))
     call gpuCheck(hipFree(this%boundary_gpu))
     call gpuCheck(hipFree(this%extBoundary_gpu))
     call gpuCheck(hipFree(this%avgBoundary_gpu))
+    ! boundarynormal_gpu is allocated in Init alongside the four above and must be released
+    ! here with them. Omitting it leaks (N+1)*4*nElem*2*nvar reals on every Free/Init cycle,
+    ! which the adaptive loop performs once per epoch for each of the model's five
+    ! MappedScalar2D fields. Compare Free_Scalar2D in src/gpu/SELF_Scalar_2D.f90 and
+    ! Free_Scalar3D in src/gpu/SELF_Scalar_3D.f90, which both free it.
+    call gpuCheck(hipFree(this%boundarynormal_gpu))
     call gpuCheck(hipFree(this%jas_gpu))
     if(c_associated(this%mortarBuff_gpu)) then
       call gpuCheck(hipFree(this%mortarBuff_gpu))

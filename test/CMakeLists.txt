@@ -91,6 +91,12 @@ add_fortran_tests (
     "amr_controller_2d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
+    "data_2d_device_memory.f90"
+    "geometry_2d_reuse.f90"
+    "scalar_2d_guard_resize_nvar.f90"
+    "vector_2d_guard_resize_nvar.f90"
+    "tensor_2d_guard_resize_nvar.f90"
+    "dgmodel2d_guard_transfer_unstaged.f90"
     "amr_controller_2d_guard_maxlevel.f90"
     "amr_controller_2d_guard_wrongmesh.f90"
     "refinement_indicator_2d_guard_thresholds.f90"
@@ -236,6 +242,10 @@ set_tests_properties(
     dgmodel2d_regrid_guard_uninit
     amr_controller_2d_guard_maxlevel
     amr_controller_2d_guard_wrongmesh
+    scalar_2d_guard_resize_nvar
+    vector_2d_guard_resize_nvar
+    tensor_2d_guard_resize_nvar
+    dgmodel2d_guard_transfer_unstaged
     mesh3d_read_guard_missingfile
     mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
@@ -252,6 +262,7 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_mortar_mpi.f90"
                        "lineareuler2d_mortar_soundwave_mpi.f90"
                        "lineareuler2d_amr_soundwave_mpi.f90"
+                       "geometry_2d_reuse_mpi.f90"
                        "advection_diffusion_2d_mortar_mpi.f90"
                        "advection_diffusion_2d_rk3_mpi.f90"
                        "advection_diffusion_2d_rk3_pickup_mpi.f90"
@@ -261,3 +272,28 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "structuredmesh_external_comm_3d.f90"
                        "structuredmesh_subcomm_2d.f90"
                        "read_hopr_external_comm_2d.f90" )
+
+# The Stage 6c geometry diagnostics (SELF_AMR_GEOM_*) are env-gated, so ordinary runs never enter
+# them. Re-run existing AMR tests with each switch set: this exercises the verification and bypass
+# paths for real rather than leaving them as untested code, and it costs no new sources because the
+# executables are already built above.
+#
+#  - GEOM_VERIFY   cross-checks the incrementally assembled geometry against full regeneration
+#  - GEOM_FULL     bypasses the incremental assembly (must reproduce the same physics)
+#  - GEOM_NO_REUSE regenerates every element (the reuse predicate never fires)
+#
+# lineareuler2d_amr_soundwave asserts per-epoch conservation and non-increasing entropy, so it is a
+# real check under each switch and not merely a coverage exercise.
+add_test(NAME geometry_2d_reuse_mpi_verify
+         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SELF_MPIEXEC_NUMPROCS}
+                 ${SELF_MPIEXEC_OPTIONS} geometry_2d_reuse_mpi)
+set_tests_properties(geometry_2d_reuse_mpi_verify PROPERTIES
+                     LABELS "parallel" ENVIRONMENT "SELF_AMR_GEOM_VERIFY=1")
+
+add_test(NAME lineareuler2d_amr_soundwave_geom_full COMMAND lineareuler2d_amr_soundwave)
+set_tests_properties(lineareuler2d_amr_soundwave_geom_full PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_FULL=1")
+
+add_test(NAME lineareuler2d_amr_soundwave_geom_noreuse COMMAND lineareuler2d_amr_soundwave)
+set_tests_properties(lineareuler2d_amr_soundwave_geom_noreuse PROPERTIES
+                     LABELS "serial" ENVIRONMENT "SELF_AMR_GEOM_NO_REUSE=1")

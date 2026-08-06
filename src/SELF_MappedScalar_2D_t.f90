@@ -72,11 +72,37 @@ module SELF_MappedScalar_2D_t
     procedure,private :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D_t
     procedure,private :: ApplyFlip => ApplyFlip_MappedScalar2D_t
 
+    procedure,public :: Resize => Resize_MappedScalar2D_t
+
     procedure,public :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar2D_t
 
   endtype MappedScalar2D_t
 
 contains
+
+  subroutine Resize_MappedScalar2D_t(this,interp,nVar,nElem)
+    !! Rebind to a new element count, reusing storage where it fits (AMR Stage 6b). The mortar
+    !! staging buffer is sized by mesh%nMortars rather than nElem, and nMortars changes with the
+    !! mesh independently of the element count, so it is invalidated here and lazily re-created
+    !! at the correct size by the next mortar exchange.
+    implicit none
+    class(MappedScalar2D_t),intent(inout) :: this
+    type(Lagrange),intent(in),target :: interp
+    integer,intent(in) :: nVar
+    integer,intent(in) :: nElem
+
+    call Resize_Scalar2D_t(this,interp,nVar,nElem)
+    if(allocated(this%mortarBuff)) deallocate(this%mortarBuff)
+
+    ! The geometry binding refers to the PREVIOUS mesh's geometry, which the caller is
+    ! about to destroy. It must be dropped here so the AssociateGeometry that follows a
+    ! regrid actually rebinds: AssociateGeometry is a no-op when a geometry is already
+    ! associated, so leaving the stale one in place silently kept every mapped operation
+    ! reading freed metric terms - observed as NaN entropy on the first step after an
+    ! adaptation. Free + Init used to hide this by nulling the pointer.
+    call this%DissociateGeometry()
+
+  endsubroutine Resize_MappedScalar2D_t
 
   subroutine AssociateGeometry_MappedScalar2D_t(this,geometry)
     implicit none

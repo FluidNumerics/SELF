@@ -37,6 +37,7 @@ module SELF_DGModel2D_t
   use FEQParse
   use SELF_Model
   use SELF_BoundaryConditions
+  use SELF_TransferPlan_2D
 
   implicit none
 
@@ -52,6 +53,11 @@ module SELF_DGModel2D_t
     type(SEMQuad),pointer  :: geometry => null()
     type(BoundaryConditionList) :: hyperbolicBCs
     type(BoundaryConditionList) :: parabolicBCs
+    !! Pre-regrid copy of the solution, held between StageSolutionForTransfer and
+    !! ApplyTransferPlan so that Regrid is free to release the storage it was read from. The
+    !! base implementation stages on the host; the GPU backend overrides both procedures and
+    !! stages device-side instead, leaving this unallocated.
+    real(prec),allocatable :: transferStage(:,:,:,:)
 
   contains
 
@@ -60,6 +66,9 @@ module SELF_DGModel2D_t
     procedure :: Free => Free_DGModel2D_t
     procedure :: Regrid => Regrid_DGModel2D_t
     procedure :: MapBoundaryConditions => MapBoundaryConditions_DGModel2D_t
+
+    procedure :: StageSolutionForTransfer => StageSolutionForTransfer_DGModel2D_t
+    procedure :: ApplyTransferPlan => ApplyTransferPlan_DGModel2D_t
 
     procedure :: CalculateEntropy => CalculateEntropy_DGModel2D_t
     procedure :: BoundaryFlux => BoundaryFlux_DGModel2D_t
@@ -161,8 +170,76 @@ contains
     call this%hyperbolicBCs%Free()
     call this%parabolicBCs%Free()
     call this%AdditionalFree()
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
 
   endsubroutine Free_DGModel2D_t
+
+  subroutine StageSolutionForTransfer_DGModel2D_t(this)
+    !! Preserve the current solution ahead of a regrid, so that Regrid may release the storage
+    !! it lives in. Pair with ApplyTransferPlan, which consumes the staged copy:
+    !!
+    !!     call model%StageSolutionForTransfer()
+    !!     call model%Regrid(newMesh,newGeom)
+    !!     call model%ApplyTransferPlan(plan,interp,eFirst,eLast)
+    !!
+    !! This base implementation stages on the host, which on a GPU build means a
+    !! device-to-host copy of the whole field; the GPU backend overrides it with a
+    !! device-to-device copy and no host traffic (Stage 6a).
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! Local
+    integer :: Np,nEl
+
+    Np = this%solution%interp%N+1
+    nEl = this%solution%nElem
+
+    call this%solution%UpdateHost()
+
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+    allocate(this%transferStage(1:Np,1:Np,1:nEl,1:this%nvar))
+    this%transferStage(1:Np,1:Np,1:nEl,1:this%nvar) = &
+      this%solution%interior(1:Np,1:Np,1:nEl,1:this%nvar)
+
+  endsubroutine StageSolutionForTransfer_DGModel2D_t
+
+  subroutine ApplyTransferPlan_DGModel2D_t(this,plan,interp,eFirst,eLast,uGlobal)
+    !! Transfer the staged pre-regrid solution onto the regridded mesh through plan, filling the
+    !! rank-local element range [eFirst,eLast] of the new solution.
+    !!
+    !! uGlobal is optional and supplies the GLOBAL old field when the caller has already
+    !! assembled one (the multi-rank allgather path); when absent the locally staged copy from
+    !! StageSolutionForTransfer is used, which is the whole field on a single rank.
+    !!
+    !! This base implementation runs the portable host transfer and uploads the result; the GPU
+    !! backend overrides it to run the transfer on the device with no host traffic.
+    implicit none
+    class(DGModel2D_t),intent(inout) :: this
+    ! target: the GPU override takes c_loc of the plan's arrays to upload them, which requires
+    ! the POINTER or TARGET attribute. Declared here too so the override's characteristics match.
+    type(TransferPlan2D),intent(in),target :: plan
+    type(Lagrange),intent(in) :: interp
+    integer,intent(in) :: eFirst
+    integer,intent(in) :: eLast
+    real(prec),intent(in),optional :: uGlobal(:,:,:,:)
+
+    if(present(uGlobal)) then
+      call ApplyTransferPlanRange(plan,interp,this%nvar,uGlobal,eFirst,eLast, &
+                                  this%solution%interior)
+    else
+      if(.not. allocated(this%transferStage)) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : ApplyTransferPlan called without a staged solution.'
+        stop 1
+      endif
+      call ApplyTransferPlanRange(plan,interp,this%nvar,this%transferStage,eFirst,eLast, &
+                                  this%solution%interior)
+    endif
+
+    call this%solution%UpdateDevice()
+
+    if(allocated(this%transferStage)) deallocate(this%transferStage)
+
+  endsubroutine ApplyTransferPlan_DGModel2D_t
 
   subroutine Regrid_DGModel2D_t(this,mesh,geometry)
     !! Rebind a live model to a new mesh/geometry pair (AMR regrid). The mesh-sized solution
@@ -189,13 +266,9 @@ contains
 
     ! Free everything sized by the old mesh, mirroring Free (AdditionalFree releases any
     ! model-specific mesh-sized state so AdditionalInit can rebuild it below).
-    call this%solution%Free()
-    call this%workSol%Free()
-    call this%dSdt%Free()
-    call this%solutionGradient%Free()
-    call this%flux%Free()
-    call this%source%Free()
-    call this%fluxDivergence%Free()
+    ! Boundary-condition registrations are rebuilt because the boundary side set changes with the
+    ! mesh. The mesh-sized fields are NOT freed: they are resized in place below (AMR Stage 6b),
+    ! which reuses their host pools and device buffers whenever the new element count fits.
     call this%hyperbolicBCs%Free()
     call this%parabolicBCs%Free()
     call this%AdditionalFree()
@@ -204,13 +277,17 @@ contains
     this%mesh => mesh
     this%geometry => geometry
 
-    call this%solution%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%workSol%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%dSdt%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%solutionGradient%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%flux%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%source%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
-    call this%fluxDivergence%Init(geometry%x%interp,this%nvar,this%mesh%nElem)
+    ! Resize rather than Free + Init. Init is intent(out), so it would reset the whole object,
+    ! reallocate every array, zero it, reconstruct the equation parsers and - on GPU builds -
+    ! upload the zeros, all of which the adaptive loop then discards. Profiling attributed over
+    ! half of an adaptation to exactly that cycle.
+    call this%solution%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%workSol%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%dSdt%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%solutionGradient%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%flux%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%source%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
+    call this%fluxDivergence%Resize(geometry%x%interp,this%nvar,this%mesh%nElem)
 
     call this%solution%AssociateGeometry(geometry)
     call this%solutionGradient%AssociateGeometry(geometry)
