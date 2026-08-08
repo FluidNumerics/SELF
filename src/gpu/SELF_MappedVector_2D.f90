@@ -154,7 +154,7 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedVector2D
 
-  subroutine MPIExchangeAsync_MappedVector2D(this,mesh)
+  subroutine MPIExchangeAsync_MappedVector2D(this,mesh,elems)
   !! Post the aggregated halo exchange: one MPI_Irecv/MPI_Isend pair per
   !! neighboring rank, carrying every (side,variable,component) boundary
   !! trace shared with that rank in a single packed device buffer. The
@@ -165,6 +165,7 @@ contains
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
     integer :: n,npts,cnt,disp
     integer :: iError
@@ -172,6 +173,8 @@ contains
     integer(c_size_t) :: worksize
     real(prec),pointer :: sendbuf(:)
     real(prec),pointer :: recvbuf(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     npts = (this%interp%N+1)*2*this%nvar
 
@@ -215,12 +218,15 @@ contains
 
   endsubroutine MPIExchangeAsync_MappedVector2D
 
-  subroutine SideExchange_MappedVector2D(this,mesh)
+  subroutine SideExchange_MappedVector2D(this,mesh,elems)
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
     integer :: offset
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     offset = mesh%decomp%offsetElem(mesh%decomp%rankid+1)
 
@@ -251,12 +257,13 @@ contains
 
   endsubroutine SideExchange_MappedVector2D
 
-  subroutine MPIMortarExchangeAsync_MappedVector2D(this,mesh)
+  subroutine MPIMortarExchangeAsync_MappedVector2D(this,mesh,mortars)
     !! GPU-resident mortar message posting for vector data; messages are posted on
     !! device memory (GPU-aware MPI), one per variable and physical direction.
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
     integer :: m,k,ivar,idir
     integer :: eB,sB,rB,eS,sS,rS
@@ -266,6 +273,8 @@ contains
     integer :: msgCount
     real(prec),pointer :: boundary(:,:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:,:)
+
+    call RejectSubset(mortars,__FILE__,__LINE__)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
@@ -336,15 +345,18 @@ contains
 
   endsubroutine MPIMortarExchangeAsync_MappedVector2D
 
-  subroutine MortarExchange_MappedVector2D(this,mesh)
+  subroutine MortarExchange_MappedVector2D(this,mesh,mortars)
     !! GPU implementation of the vector mortar exchange; the kernels treat the
     !! (variable, direction) pairs as 2*nvar independent trace lines.
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
     integer :: offset
     integer(c_size_t) :: buffSize
+
+    call RejectSubset(mortars,__FILE__,__LINE__)
 
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
@@ -377,12 +389,13 @@ contains
 
   endsubroutine MortarExchange_MappedVector2D
 
-  subroutine MPIMortarFluxAsync_MappedVector2D(this,mesh)
+  subroutine MPIMortarFluxAsync_MappedVector2D(this,mesh,mortars)
     !! One-directional messages for MortarFluxCollect on device memory : each remote
     !! small side sends its boundaryNormal trace to the big side's rank.
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
     integer :: m,k,ivar
     integer :: eB,rB,eS,sS,rS
@@ -392,6 +405,8 @@ contains
     integer :: msgCount
     real(prec),pointer :: boundaryNormal(:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:)
+
+    call RejectSubset(mortars,__FILE__,__LINE__)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
@@ -444,16 +459,19 @@ contains
 
   endsubroutine MPIMortarFluxAsync_MappedVector2D
 
-  subroutine MortarFluxCollect_MappedVector2D(this,mesh)
+  subroutine MortarFluxCollect_MappedVector2D(this,mesh,mortars)
     !! GPU implementation of MortarFluxCollect (see the base class for the algorithm
     !! and conservation statement). Stages the small sides' boundaryNormal traces in
     !! the mortar buffer, then overwrites the big side's integrand on device.
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
     integer :: offset
     integer(c_size_t) :: buffSize
+
+    call RejectSubset(mortars,__FILE__,__LINE__)
 
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
@@ -503,10 +521,13 @@ contains
 
   endsubroutine MappedDivergence_MappedVector2D
 
-  subroutine MappedDGDivergence_MappedVector2D(this,df)
+  subroutine MappedDGDivergence_MappedVector2D(this,df,elems)
     implicit none
     class(MappedVector2D),intent(inout) :: this
     type(c_ptr),intent(out) :: df
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     ! Contravariant projection
     call ContravariantProjection_2D_gpu(this%interior_gpu, &

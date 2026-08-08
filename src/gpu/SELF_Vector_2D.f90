@@ -209,17 +209,23 @@ contains
 
   endsubroutine GridInterp_Vector2D
 
-  subroutine AverageSides_Vector2D(this)
+  subroutine AverageSides_Vector2D(this,elems)
     implicit none
     class(Vector2D),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     call Average_gpu(this%avgBoundary_gpu,this%boundary_gpu,this%extBoundary_gpu,size(this%boundary))
 
   endsubroutine AverageSides_Vector2D
 
-  subroutine BoundaryInterp_Vector2D(this)
+  subroutine BoundaryInterp_Vector2D(this,elems)
     implicit none
     class(Vector2D),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     call BoundaryInterp_2D_gpu(this%interp%bMatrix_gpu,this%interior_gpu,this%boundary_gpu, &
                                this%interp%N,2*this%nvar,this%nelem)

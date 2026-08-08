@@ -250,6 +250,16 @@ set_tests_properties(
     mesh3d_read_guard_badconnectivity
     PROPERTIES WILL_FAIL TRUE)
 
+# Local time stepping (AMR Stage 7) is CPU-only for now: the GPU operators flatten the
+# element dimension into a single degree-of-freedom count and have no element-subset
+# kernel, so handing them a subset is a hard error (RejectSubset in SELF_Data) rather
+# than a silent wrong answer. These tests drive that path deliberately, so they are only
+# meaningful - and only registered - on a CPU build. Fold them back into the lists above
+# once the subset kernels exist.
+if(NOT SELF_ENABLE_GPU AND NOT SELF_ENABLE_APU)
+    add_fortran_tests( "subset_operators_2d.f90" )
+endif()
+
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_sideexchange_mpi.f90"
                        "mappedvectordgdivergence_2d_linear_structuredmesh_mpi.f90"

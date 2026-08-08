@@ -93,6 +93,8 @@ contains
 
     call Resize_Scalar2D_t(this,interp,nVar,nElem)
     if(allocated(this%mortarBuff)) deallocate(this%mortarBuff)
+    if(associated(this%allMortar)) deallocate(this%allMortar)
+    this%allMortar => null()
 
     ! The geometry binding refers to the PREVIOUS mesh's geometry, which the caller is
     ! about to destroy. It must be dropped here so the AssociateGeometry that follows a
@@ -158,20 +160,29 @@ contains
 
   endsubroutine SetInteriorFromEquation_MappedScalar2D_t
 
-  subroutine MPIExchangeAsync_MappedScalar2D_t(this,mesh)
+  subroutine MPIExchangeAsync_MappedScalar2D_t(this,mesh,elems)
+    !! Post the non-blocking sends/receives for the rank-shared conforming sides. elems
+    !! restricts this to a subset of rank-local elements; because a conforming side always
+    !! joins two elements of the same refinement level, restricting both ranks to the same
+    !! level keeps the send/receive pairing intact.
     implicit none
     class(MappedScalar2D_t),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
-    integer :: e1,s1,e2,s2,ivar
+    integer :: ie,e1,s1,e2,s2,ivar,ne
+    integer,pointer,contiguous :: eidx(:)
     integer :: globalSideId,r2,tag
     integer :: iError
     integer :: msgCount
 
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
+
     msgCount = 0
 
     do ivar = 1,this%nvar
-      do e1 = 1,this%nElem
+      do ie = 1,ne
+        e1 = eidx(ie)
         do s1 = 1,4
 
           e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element
@@ -211,19 +222,25 @@ contains
 
   endsubroutine MPIExchangeAsync_MappedScalar2D_t
 
-  subroutine ApplyFlip_MappedScalar2D_t(this,mesh)
-    ! Apply side flips to sides where MPI exchanges took place.
+  subroutine ApplyFlip_MappedScalar2D_t(this,mesh,elems)
+    ! Apply side flips to sides where MPI exchanges took place. elems must match the subset
+    ! passed to MPIExchangeAsync, so that exactly the sides that were received get flipped.
     implicit none
     class(MappedScalar2D_t),intent(inout) :: this
     type(Mesh2D),intent(in) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
-    integer :: e1,s1,e2,s2
+    integer :: ie,e1,s1,e2,s2,ne
+    integer,pointer,contiguous :: eidx(:)
     integer :: i,i2
     integer :: r2,flip,ivar
     real(prec) :: extBuff(1:this%interp%N+1)
 
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
+
     do ivar = 1,this%nvar
-      do e1 = 1,this%nElem
+      do ie = 1,ne
+        e1 = eidx(ie)
         do s1 = 1,4
 
           e2 = mesh%sideInfo(3,s1,e1) ! Neighbor Element (global id)
@@ -258,17 +275,28 @@ contains
 
   endsubroutine ApplyFlip_MappedScalar2D_t
 
-  subroutine SideExchange_MappedScalar2D_t(this,mesh)
+  subroutine SideExchange_MappedScalar2D_t(this,mesh,elems)
+    !! Copy each conforming side's neighbour trace into extBoundary.
+    !!
+    !! elems restricts the exchange to a subset of rank-local elements. Conforming sides
+    !! only ever join elements of equal refinement level (every level jump in the mesh is a
+    !! mortar instead), so a per-level subset is closed under this exchange: every side of
+    !! an element in the subset has its partner in the same level, hence in the matching
+    !! subset on the owning rank.
     implicit none
     class(MappedScalar2D_t),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
-    integer :: e1,e2,s1,s2,e2Global
+    integer :: ie,e1,e2,s1,s2,e2Global,ne
+    integer,pointer,contiguous :: eidx(:)
     integer :: flip
     integer :: i1,i2,ivar
     integer :: r2
     integer :: rankId,offset,N
     integer,pointer :: elemtorank(:)
+
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
 
     ! This mapping is needed to resolve a build error with
     ! amdflang that appears to be caused by referencing
@@ -280,11 +308,12 @@ contains
     N = this%interp%N
 
     if(mesh%decomp%mpiEnabled) then
-      call this%MPIExchangeAsync(mesh)
+      call this%MPIExchangeAsync(mesh,elems)
     endif
 
-    do concurrent(s1=1:4,e1=1:mesh%nElem,ivar=1:this%nvar)
+    do concurrent(s1=1:4,ie=1:ne,ivar=1:this%nvar)
 
+      e1 = eidx(ie)
       e2Global = mesh%sideInfo(3,s1,e1)
       e2 = e2Global-offset
       s2 = mesh%sideInfo(4,s1,e1)/10
@@ -316,33 +345,42 @@ contains
     if(mesh%decomp%mpiEnabled) then
       call mesh%decomp%FinalizeMPIExchangeAsync()
       ! Apply side flips for data exchanged with MPI
-      call this%ApplyFlip(mesh)
+      call this%ApplyFlip(mesh,elems)
     endif
 
   endsubroutine SideExchange_MappedScalar2D_t
 
-  subroutine MPIMortarExchangeAsync_MappedScalar2D_t(this,mesh)
+  subroutine MPIMortarExchangeAsync_MappedScalar2D_t(this,mesh,mortars)
     !! Posts the point-to-point messages required for mortar interfaces whose big and
     !! small elements reside on different ranks. The big-side rank sends its edge trace
     !! to each remote small-side rank and receives each remote small-side trace; tags
     !! are built from the sub-edge global side ids, following the conforming SideExchange
     !! tag convention.
+    !!
+    !! mortars restricts this to a subset of the (rank-replicated) mortar table. The table
+    !! and the subset are identical on every rank, so both ends of each message agree on
+    !! which mortars are being exchanged.
     implicit none
     class(MappedScalar2D_t),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
-    integer :: m,k,ivar
+    integer :: im,m,k,ivar,nm
+    integer,pointer,contiguous :: midx(:)
     integer :: eB,sB,rB,eS,sS,rS
     integer :: globalSideId,tag
     integer :: offset
     integer :: iError
     integer :: msgCount
 
+    call ResolveIndexList(this%allMortar,mesh%nMortars,mortars,midx,nm)
+
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 
     do ivar = 1,this%nvar
-      do m = 1,mesh%nMortars
+      do im = 1,nm
+        m = midx(im)
 
         eB = mesh%mortarInfo(1,m)
         sB = mesh%mortarInfo(2,m)
@@ -402,7 +440,7 @@ contains
 
   endsubroutine MPIMortarExchangeAsync_MappedScalar2D_t
 
-  subroutine MortarExchange_MappedScalar2D_t(this,mesh)
+  subroutine MortarExchange_MappedScalar2D_t(this,mesh,mortars)
     !! Fills the extBoundary attribute on all sides that participate in a 2:1
     !! nonconforming (mortar) interface.
     !!
@@ -414,11 +452,19 @@ contains
     !! sides' orientations and the big side's orientation. Must be called after
     !! BoundaryInterp and may be called before, after, or without SideExchange (the
     !! side sets touched are disjoint from conforming sides).
+    !!
+    !! mortars restricts the exchange to a subset of the mortar table, leaving every other
+    !! mortar's extBoundary untouched. Local time stepping uses this to exchange only the
+    !! level interfaces that the level it is advancing actually touches; note that a mortar
+    !! joins two DIFFERENT levels, so a per-level mortar subset must list every mortar in
+    !! which the level appears as either the big or a small side.
     implicit none
     class(MappedScalar2D_t),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
-    integer :: m,k,ivar,i,ii
+    integer :: im,m,k,ivar,i,ii,nm
+    integer,pointer,contiguous :: midx(:)
     integer :: eB,sB,eS,sS,flip
     integer :: rankId,offset,N
     integer,pointer :: elemtorank(:)
@@ -436,14 +482,17 @@ contains
       allocate(this%mortarBuff(1:N+1,1:4,1:mesh%nMortars,1:this%nvar))
       this%mortarBuff = 0.0_prec
     endif
+    call EnsureIndexList(this%allMortar,mesh%nMortars)
+    call ResolveIndexList(this%allMortar,mesh%nMortars,mortars,midx,nm)
 
     if(mesh%decomp%mpiEnabled) then
-      call this%MPIMortarExchangeAsync(mesh)
+      call this%MPIMortarExchangeAsync(mesh,mortars)
     endif
 
     ! Stage rank-local traces in the big side's edge orientation
-    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar)
+    do concurrent(im=1:nm,ivar=1:this%nvar)
 
+      m = midx(im)
       eB = mesh%mortarInfo(1,m)
       if(elemtorank(eB) == rankId) then
         sB = mesh%mortarInfo(2,m)
@@ -477,7 +526,8 @@ contains
 
       ! Reorient small-side traces received over MPI into the big side's orientation
       do ivar = 1,this%nvar
-        do m = 1,mesh%nMortars
+        do im = 1,nm
+          m = midx(im)
           eB = mesh%mortarInfo(1,m)
           if(elemtorank(eB) == rankId) then
             do k = 1,2
@@ -501,8 +551,9 @@ contains
     ! Compute external states :
     !  small sides get the restricted big-side trace (exact),
     !  the big side gets the L2 projection of the small-side traces
-    do concurrent(m=1:mesh%nMortars,ivar=1:this%nvar)
+    do concurrent(im=1:nm,ivar=1:this%nvar)
 
+      m = midx(im)
       do k = 1,2
         eS = mesh%mortarInfo(2*k+1,m)
         if(elemtorank(eS) == rankId) then

@@ -59,7 +59,22 @@ module SELF_DGModel2D_t
     !! stages device-side instead, leaving this unallocated.
     real(prec),allocatable :: transferStage(:,:,:,:)
 
+    !! Active subsets for local time stepping (AMR Stage 7). While a refinement level is
+    !! being advanced, activeElem lists the rank-local elements of that level and
+    !! activeMortar lists the mortars it participates in (as the big side or as a small
+    !! side); every tendency and RK-update loop below is then restricted to those lists.
+    !!
+    !! Both are NULL in normal (single-rate) operation, which every subset-aware operator
+    !! reads as "the whole mesh" - so the default path is the original full traversal, with
+    !! identical loop order and arithmetic. The lists are owned by the LTS schedule, not by
+    !! the model; the model only points at them for the duration of a substep. See
+    !! SELF_LocalTimeStepping_2D and ResolveIndexList in SELF_Data.
+    integer,pointer,contiguous :: activeElem(:) => null()
+    integer,pointer,contiguous :: activeMortar(:) => null()
+
   contains
+
+    procedure :: ActiveElements => ActiveElements_DGModel2D_t
 
     procedure :: Init => Init_DGModel2D_t
     procedure :: SetMetadata => SetMetadata_DGModel2D_t
@@ -99,6 +114,19 @@ module SELF_DGModel2D_t
   endtype DGModel2D_t
 
 contains
+
+  subroutine ActiveElements_DGModel2D_t(this,eidx,ne)
+    !! Resolve the model's active element subset into the index list eidx(1:ne) that the
+    !! model's own loops traverse. With no subset set (the single-rate default) this returns
+    !! the identity list over 1:mesh%nElem, so the loops are the original ones.
+    implicit none
+    class(DGModel2D_t),intent(in) :: this
+    integer,pointer,contiguous,intent(out) :: eidx(:)
+    integer,intent(out) :: ne
+
+    call ResolveIndexList(this%solution%allElem,this%mesh%nElem,this%activeElem,eidx,ne)
+
+  endsubroutine ActiveElements_DGModel2D_t
 
   subroutine Init_DGModel2D_t(this,mesh,geometry)
     implicit none
@@ -385,7 +413,8 @@ contains
     real(prec),optional,intent(in) :: dt
     ! Local
     real(prec) :: dtLoc
-    integer :: i,j,iEl,iVar
+    integer :: i,j,ie,iEl,iVar,ne
+    integer,pointer,contiguous :: eidx(:)
 
     if(present(dt)) then
       dtLoc = dt
@@ -393,9 +422,12 @@ contains
       dtLoc = this%dt
     endif
 
-    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+    call this%ActiveElements(eidx,ne)
 
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  ie=1:ne,ivar=1:this%nstepped)
+
+      iEl = eidx(ie)
       this%solution%interior(i,j,iEl,iVar) = &
         this%solution%interior(i,j,iEl,iVar)+ &
         dtLoc*this%dSdt%interior(i,j,iEl,iVar)
@@ -409,11 +441,15 @@ contains
     class(DGModel2D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
-    integer :: i,j,iEl,iVar
+    integer :: i,j,ie,iEl,iVar,ne
+    integer,pointer,contiguous :: eidx(:)
+
+    call this%ActiveElements(eidx,ne)
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+                  ie=1:ne,ivar=1:this%nstepped)
 
+      iEl = eidx(ie)
       this%workSol%interior(i,j,iEl,iVar) = rk2_a(m)* &
                                             this%workSol%interior(i,j,iEl,iVar)+ &
                                             this%dSdt%interior(i,j,iEl,iVar)
@@ -431,11 +467,15 @@ contains
     class(DGModel2D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
-    integer :: i,j,iEl,iVar
+    integer :: i,j,ie,iEl,iVar,ne
+    integer,pointer,contiguous :: eidx(:)
+
+    call this%ActiveElements(eidx,ne)
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+                  ie=1:ne,ivar=1:this%nstepped)
 
+      iEl = eidx(ie)
       this%workSol%interior(i,j,iEl,iVar) = rk3_a(m)* &
                                             this%workSol%interior(i,j,iEl,iVar)+ &
                                             this%dSdt%interior(i,j,iEl,iVar)
@@ -453,11 +493,15 @@ contains
     class(DGModel2D_t),intent(inout) :: this
     integer,intent(in) :: m
     ! Local
-    integer :: i,j,iEl,iVar
+    integer :: i,j,ie,iEl,iVar,ne
+    integer,pointer,contiguous :: eidx(:)
+
+    call this%ActiveElements(eidx,ne)
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem,ivar=1:this%nstepped)
+                  ie=1:ne,ivar=1:this%nstepped)
 
+      iEl = eidx(ie)
       this%workSol%interior(i,j,iEl,iVar) = rk4_a(m)* &
                                             this%workSol%interior(i,j,iEl,iVar)+ &
                                             this%dSdt%interior(i,j,iEl,iVar)
@@ -474,21 +518,21 @@ contains
     implicit none
     class(DGModel2D_t),intent(inout) :: this
 
-    call this%solution%AverageSides()
+    call this%solution%AverageSides(this%activeElem)
 
     call this%solution%MappedDGGradient(this%solutionGradient%interior)
 
     ! interpolate the solutiongradient to the element boundaries
-    call this%solutionGradient%BoundaryInterp()
+    call this%solutionGradient%BoundaryInterp(this%activeElem)
 
     ! perform the side exchange to populate the
     ! solutionGradient % extBoundary attribute
-    call this%solutionGradient%SideExchange(this%mesh)
+    call this%solutionGradient%SideExchange(this%mesh,this%activeElem)
 
     ! populate the solutionGradient % extBoundary attribute on
     ! nonconforming (mortar) interfaces
     if(this%mesh%nMortars > 0) then
-      call this%solutionGradient%MortarExchange(this%mesh)
+      call this%solutionGradient%MortarExchange(this%mesh,this%activeMortar)
     endif
 
   endsubroutine CalculateSolutionGradient_DGModel2D_t
@@ -532,14 +576,18 @@ contains
     implicit none
     class(DGModel2D_t),intent(inout) :: this
     ! Local
-    integer :: iel
+    integer :: ie,iel,ne
+    integer,pointer,contiguous :: eidx(:)
     integer :: i
     integer :: j
     real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:2)
 
-    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem)
+    call this%ActiveElements(eidx,ne)
 
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  ie=1:ne)
+
+      iel = eidx(ie)
       s = this%solution%interior(i,j,iel,1:this%nvar)
       dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
       this%flux%interior(i,j,iel,1:this%nvar,1:2) = this%flux2d(s,dsdx)
@@ -555,16 +603,20 @@ contains
     implicit none
     class(DGModel2D_t),intent(inout) :: this
     ! Local
-    integer :: iel
+    integer :: ie,iel,ne
+    integer,pointer,contiguous :: eidx(:)
     integer :: j
     integer :: i
     real(prec) :: sL(1:this%nvar),sR(1:this%nvar)
     real(prec) :: dsdx(1:this%nvar,1:2)
     real(prec) :: nhat(1:2),nmag
 
-    do concurrent(i=1:this%solution%N+1,j=1:4, &
-                  iel=1:this%mesh%nElem)
+    call this%ActiveElements(eidx,ne)
 
+    do concurrent(i=1:this%solution%N+1,j=1:4, &
+                  ie=1:ne)
+
+      iel = eidx(ie)
       ! Get the boundary normals on cell edges from the mesh geometry
       nhat = this%geometry%nHat%boundary(i,j,iEl,1,1:2)
       sL = this%solution%boundary(i,j,iel,1:this%nvar) ! interior solution
@@ -582,14 +634,18 @@ contains
     implicit none
     class(DGModel2D_t),intent(inout) :: this
     ! Local
-    integer :: iel
+    integer :: ie,iel,ne
+    integer,pointer,contiguous :: eidx(:)
     integer :: i
     integer :: j
     real(prec) :: s(1:this%nvar),dsdx(1:this%nvar,1:2)
 
-    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem)
+    call this%ActiveElements(eidx,ne)
 
+    do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
+                  ie=1:ne)
+
+      iel = eidx(ie)
       s = this%solution%interior(i,j,iel,1:this%nvar)
       dsdx = this%solutionGradient%interior(i,j,iel,1:this%nvar,1:2)
       this%source%interior(i,j,iel,1:this%nvar) = this%source2d(s,dsdx)
@@ -716,18 +772,27 @@ contains
   endsubroutine setgradientboundarycondition_DGModel2D_t
 
   subroutine CalculateTendency_DGModel2D_t(this)
+    !! Evaluate dSdt over the model's active element subset (the whole mesh unless local
+    !! time stepping has restricted it - see DGModel2D_t%activeElem).
+    !!
+    !! The subset is threaded into every stage. It is safe to restrict BoundaryInterp to
+    !! the active elements alone because a conforming side only ever joins elements of the
+    !! same refinement level, so an active level's neighbours across conforming sides are
+    !! themselves active; the only cross-level coupling is through the mortars listed in
+    !! activeMortar, whose off-level traces the caller supplies.
     implicit none
     class(DGModel2D_t),intent(inout) :: this
     ! Local
-    integer :: i,j,iEl,iVar
+    integer :: i,j,ie,iEl,iVar,ne
+    integer,pointer,contiguous :: eidx(:)
 
-    call this%solution%BoundaryInterp()
-    call this%solution%SideExchange(this%mesh)
+    call this%solution%BoundaryInterp(this%activeElem)
+    call this%solution%SideExchange(this%mesh,this%activeElem)
 
     ! populate the solution % extBoundary attribute on nonconforming
     ! (mortar) interfaces
     if(this%mesh%nMortars > 0) then
-      call this%solution%MortarExchange(this%mesh)
+      call this%solution%MortarExchange(this%mesh,this%activeMortar)
     endif
 
     call this%PreTendencyHook() ! User-supplied
@@ -736,7 +801,7 @@ contains
     if(this%gradient_enabled) then
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
-      call this%solutionGradient%AverageSides()
+      call this%solutionGradient%AverageSides(this%activeElem)
     endif
 
     call this%SourceMethod() ! User supplied
@@ -745,16 +810,19 @@ contains
     ! On mortar interfaces, replace the big side's surface-flux integrand with the
     ! projection of the small sides' integrands so that the interface is conservative
     if(this%mesh%nMortars > 0) then
-      call this%flux%MortarFluxCollect(this%mesh)
+      call this%flux%MortarFluxCollect(this%mesh,this%activeMortar)
     endif
 
     call this%FluxMethod() ! User supplied
 
-    call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
+    call this%flux%MappedDGDivergence(this%fluxDivergence%interior,this%activeElem)
+
+    call this%ActiveElements(eidx,ne)
 
     do concurrent(i=1:this%solution%N+1,j=1:this%solution%N+1, &
-                  iel=1:this%mesh%nElem,ivar=1:this%solution%nVar)
+                  ie=1:ne,ivar=1:this%solution%nVar)
 
+      iEl = eidx(ie)
       this%dSdt%interior(i,j,iEl,iVar) = &
         this%source%interior(i,j,iEl,iVar)- &
         this%fluxDivergence%interior(i,j,iEl,iVar)

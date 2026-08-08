@@ -181,18 +181,24 @@ contains
 
   endsubroutine UpdateDevice_Scalar2D
 
-  subroutine BoundaryInterp_Scalar2D(this)
+  subroutine BoundaryInterp_Scalar2D(this,elems)
     implicit none
     class(Scalar2D),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     call BoundaryInterp_2D_gpu(this%interp%bMatrix_gpu,this%interior_gpu,this%boundary_gpu, &
                                this%interp%N,this%nvar,this%nelem)
 
   endsubroutine BoundaryInterp_Scalar2D
 
-  subroutine AverageSides_Scalar2D(this)
+  subroutine AverageSides_Scalar2D(this,elems)
     implicit none
     class(Scalar2D),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     call Average_gpu(this%avgBoundary_gpu,this%boundary_gpu,this%extBoundary_gpu,size(this%boundary))
 

@@ -132,6 +132,8 @@ contains
     this%boundarynormal(1:Np,1:4,1:nElem,1:2*nVar) => &
       this%pool_boundarynormal(1:Np*4*nElem*2*nVar)
 
+    call EnsureIndexList(this%allElem,nElem)
+
   endsubroutine MapArrays_Scalar2D_t
 
   subroutine Resize_Scalar2D_t(this,interp,nVar,nElem)
@@ -193,6 +195,10 @@ contains
     if(associated(this%pool_extBoundary)) deallocate(this%pool_extBoundary)
     if(associated(this%pool_avgBoundary)) deallocate(this%pool_avgBoundary)
     if(associated(this%pool_boundarynormal)) deallocate(this%pool_boundarynormal)
+    if(associated(this%allElem)) deallocate(this%allElem)
+    this%allElem => null()
+    if(associated(this%allMortar)) deallocate(this%allMortar)
+    this%allMortar => null()
     deallocate(this%meta)
     deallocate(this%eqn)
 
@@ -210,14 +216,25 @@ contains
     if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
   endsubroutine UpdateDevice_Scalar2D_t
 
-  subroutine BoundaryInterp_Scalar2D_t(this)
+  subroutine BoundaryInterp_Scalar2D_t(this,elems)
+    !! Interpolate the element interior onto the four element edges.
+    !!
+    !! elems, when present, restricts the operation to those rank-local elements and leaves
+    !! every other element's boundary trace untouched; local time stepping uses it to
+    !! interpolate only the refinement level it is about to advance. Omitting it traverses
+    !! 1:nElem exactly as before (see ResolveIndexList in SELF_Data).
     implicit none
     class(Scalar2D_t),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
-    integer :: i,ii,iel,ivar
+    integer :: i,ii,ie,iel,ivar,ne
+    integer,pointer,contiguous :: eidx(:)
     real(prec) :: fbs,fbe,fbn,fbw
 
-    do concurrent(i=1:this%N+1,iel=1:this%nelem,ivar=1:this%nvar)
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
+
+    do concurrent(i=1:this%N+1,ie=1:ne,ivar=1:this%nvar)
+      iel = eidx(ie)
       fbs = 0.0_prec
       fbe = 0.0_prec
       fbn = 0.0_prec
@@ -238,16 +255,25 @@ contains
 
   endsubroutine BoundaryInterp_Scalar2D_t
 
-  subroutine AverageSides_Scalar2D_t(this)
+  subroutine AverageSides_Scalar2D_t(this,elems)
+    !! Average the interior and exterior edge traces. elems restricts the operation to a
+    !! subset of rank-local elements; omitting it covers 1:nElem as before.
     implicit none
     class(Scalar2D_t),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
+    integer :: ie
     integer :: iel
     integer :: iside
     integer :: ivar
     integer :: i
+    integer :: ne
+    integer,pointer,contiguous :: eidx(:)
 
-    do concurrent(i=1:this%interp%N+1,iside=1:4,iel=1:this%nElem,ivar=1:this%nVar)
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
+
+    do concurrent(i=1:this%interp%N+1,iside=1:4,ie=1:ne,ivar=1:this%nVar)
+      iel = eidx(ie)
       this%avgBoundary(i,iside,iel,ivar) = 0.5_prec*( &
                                            this%boundary(i,iside,iel,ivar)+ &
                                            this%extBoundary(i,iside,iel,ivar))

@@ -388,22 +388,26 @@ contains
 
   endsubroutine SideExchangeFinish_MappedScalar2D
 
-  subroutine SideExchange_MappedScalar2D(this,mesh)
+  subroutine SideExchange_MappedScalar2D(this,mesh,elems)
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
+
+    call RejectSubset(elems,__FILE__,__LINE__)
 
     call this%SideExchangeStart(mesh)
     call this%SideExchangeFinish(mesh)
 
   endsubroutine SideExchange_MappedScalar2D
 
-  subroutine MPIMortarExchangeAsync_MappedScalar2D(this,mesh)
+  subroutine MPIMortarExchangeAsync_MappedScalar2D(this,mesh,mortars)
     !! GPU-resident analogue of the base-class mortar message posting; messages are
     !! posted on device memory (GPU-aware MPI), following MPIExchangeAsync.
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
     integer :: m,k,ivar
     integer :: eB,sB,rB,eS,sS,rS
@@ -413,6 +417,8 @@ contains
     integer :: msgCount
     real(prec),pointer :: boundary(:,:,:,:)
     real(prec),pointer :: mortarBuff(:,:,:,:)
+
+    call RejectSubset(mortars,__FILE__,__LINE__)
 
     msgCount = 0
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
@@ -481,16 +487,19 @@ contains
 
   endsubroutine MPIMortarExchangeAsync_MappedScalar2D
 
-  subroutine MortarExchange_MappedScalar2D(this,mesh)
+  subroutine MortarExchange_MappedScalar2D(this,mesh,mortars)
     !! GPU implementation of the mortar exchange (see the base class for the
     !! algorithm) : traces are staged, reoriented, restricted, and projected in
     !! device memory with the SELF_Mortar kernels.
     implicit none
     class(MappedScalar2D),intent(inout) :: this
     type(Mesh2D),intent(inout) :: mesh
+    integer,pointer,contiguous,intent(in),optional :: mortars(:)
     ! Local
     integer :: offset
     integer(c_size_t) :: buffSize
+
+    call RejectSubset(mortars,__FILE__,__LINE__)
 
     offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
 

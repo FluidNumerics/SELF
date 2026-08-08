@@ -149,6 +149,10 @@ contains
     if(associated(this%pool_boundaryNormal)) deallocate(this%pool_boundaryNormal)
     if(associated(this%pool_extBoundary)) deallocate(this%pool_extBoundary)
     if(associated(this%pool_avgBoundary)) deallocate(this%pool_avgBoundary)
+    if(associated(this%allElem)) deallocate(this%allElem)
+    this%allElem => null()
+    if(associated(this%allMortar)) deallocate(this%allMortar)
+    this%allMortar => null()
 
     deallocate(this%meta)
     deallocate(this%eqn)
@@ -182,6 +186,8 @@ contains
     this%extBoundary(1:Np,1:4,1:nElem,1:nVar,1:2) => this%pool_extBoundary(1:nBnd)
     this%avgBoundary(1:Np,1:4,1:nElem,1:nVar,1:2) => this%pool_avgBoundary(1:nBnd)
     this%boundaryNormal(1:Np,1:4,1:nElem,1:nVar) => this%pool_boundaryNormal(1:nNrm)
+
+    call EnsureIndexList(this%allElem,nElem)
 
   endsubroutine MapArrays_Vector2D_t
 
@@ -271,18 +277,27 @@ contains
 
   endsubroutine GridInterp_Vector2D_t
 
-  subroutine AverageSides_Vector2D_t(this)
+  subroutine AverageSides_Vector2D_t(this,elems)
+    !! Average the interior and exterior edge traces. elems restricts the operation to a
+    !! subset of rank-local elements; omitting it covers 1:nElem as before.
     implicit none
     class(Vector2D_t),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
     ! Local
+    integer :: ie
     integer :: iel
     integer :: iside
     integer :: ivar
     integer :: i
     integer :: idir
+    integer :: ne
+    integer,pointer,contiguous :: eidx(:)
 
-    do concurrent(i=1:this%interp%N+1,iside=1:4,iel=1:this%nElem, &
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
+
+    do concurrent(i=1:this%interp%N+1,iside=1:4,ie=1:ne, &
                   ivar=1:this%nVar,idir=1:2)
+      iel = eidx(ie)
       this%avgboundary(i,iside,iel,ivar,idir) = 0.5_prec*( &
                                                 this%boundary(i,iside,iel,ivar,idir)+ &
                                                 this%extBoundary(i,iside,iel,ivar,idir))
@@ -290,16 +305,23 @@ contains
 
   endsubroutine AverageSides_Vector2D_t
 
-  subroutine BoundaryInterp_Vector2D_t(this)
+  subroutine BoundaryInterp_Vector2D_t(this,elems)
+    !! Interpolate the element interior onto the four element edges. elems restricts the
+    !! operation to a subset of rank-local elements; omitting it covers 1:nElem as before.
     implicit none
     class(Vector2D_t),intent(inout) :: this
+    integer,pointer,contiguous,intent(in),optional :: elems(:)
 ! Local
-    integer :: i,ii,idir,iel,ivar
+    integer :: i,ii,idir,ie,iel,ivar,ne
+    integer,pointer,contiguous :: eidx(:)
     real(prec) :: fbs,fbe,fbn,fbw
 
-    do concurrent(i=1:this%N+1,iel=1:this%nelem, &
+    call ResolveIndexList(this%allElem,this%nElem,elems,eidx,ne)
+
+    do concurrent(i=1:this%N+1,ie=1:ne, &
                   ivar=1:this%nvar,idir=1:2)
 
+      iel = eidx(ie)
       fbs = 0.0_prec
       fbe = 0.0_prec
       fbn = 0.0_prec
