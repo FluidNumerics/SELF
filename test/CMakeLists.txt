@@ -257,7 +257,8 @@ set_tests_properties(
 # meaningful - and only registered - on a CPU build. Fold them back into the lists above
 # once the subset kernels exist.
 if(NOT SELF_ENABLE_GPU AND NOT SELF_ENABLE_APU)
-    add_fortran_tests( "subset_operators_2d.f90" )
+    add_fortran_tests( "subset_operators_2d.f90"
+                       "lts_2d_conservation.f90" )
 endif()
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
