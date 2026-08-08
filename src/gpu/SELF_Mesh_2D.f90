@@ -82,6 +82,13 @@ contains
     this%elemMaterial = 1
     this%materialNames(1) = "default"
 
+    ! Default refinement level: a conforming, unrefined mesh. EmitMesh and the built-in
+    ! mortar meshes overwrite this with the per-element quadtree depth. This mirrors
+    ! Init_Mesh2D_t, which this routine deliberately duplicates rather than extends.
+    this%maxElemLevel = 0
+    allocate(this%elemLevel(1:nElem))
+    this%elemLevel = 0
+
     ! Create lookup tables to assist with connectivity generation
     this%CGNSCornerMap(1:2,1) = (/1,1/)
     this%CGNSCornerMap(1:2,2) = (/nGeo+1,1/)
@@ -121,8 +128,11 @@ contains
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
+    if(allocated(this%elemLevel)) deallocate(this%elemLevel)
+    this%maxElemLevel = 0
     if(associated(this%mortarInfo)) deallocate(this%mortarInfo)
     this%mortarInfo => null()
+    if(allocated(this%mortarLevel)) deallocate(this%mortarLevel)
     this%nMortars = 0
     call this%decomp%Free()
 

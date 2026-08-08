@@ -79,6 +79,7 @@ contains
     ! Local
     integer :: nEl,nGeo,nBCs,li,s,node,nbr,ns,nf,e,ne,k
     integer :: m,nMortar,gid,gidA,gidB,t1,t2,c1,c2,es1,es2
+    integer,allocatable :: mlevel(:)
     integer :: eFirst,eLast,nLocal
     type(Lagrange) :: geomInterp
     integer,allocatable :: leafIdx(:)
@@ -109,6 +110,7 @@ contains
     allocate(si(1:5,1:4,1:nEl))
     si = 0
     allocate(minfo(1:8,1:4*nEl)) ! upper bound: at most one mortar per leaf face
+    allocate(mlevel(1:4*nEl))
     nMortar = 0
     gid = 0
 
@@ -180,6 +182,8 @@ contains
           minfo(6,m) = 10*ns+nf
           minfo(7,m) = gidA
           minfo(8,m) = gidB
+          ! Level of the BIG side; the two small elements are one level finer.
+          mlevel(m) = forest%level(node)
         endif
       enddo
     enddo
@@ -230,17 +234,28 @@ contains
       outMesh%elemMaterial(li-eFirst+1) = forest%rootMaterial(forest%rootElem(forest%leaf(li)))
     enddo
 
+    ! Refinement level of each leaf (quadtree depth), for the rank-local slice; maxElemLevel
+    ! is taken from the (rank-replicated) forest and so is identical on every rank. Because
+    ! a conforming side is only ever emitted between two leaves of the same level, every
+    ! level jump recorded here coincides with a mortar entry in mortarInfo.
+    outMesh%maxElemLevel = forest%MaxLevel()
+    do li = eFirst,eLast
+      outMesh%elemLevel(li-eFirst+1) = forest%level(forest%leaf(li))
+    enddo
+
     ! Mortar table.
     outMesh%nMortars = nMortar
     if(associated(outMesh%mortarInfo)) deallocate(outMesh%mortarInfo)
     if(nMortar > 0) then
       allocate(outMesh%mortarInfo(1:8,1:nMortar))
       outMesh%mortarInfo(1:8,1:nMortar) = minfo(1:8,1:nMortar)
+      allocate(outMesh%mortarLevel(1:nMortar))
+      outMesh%mortarLevel(1:nMortar) = mlevel(1:nMortar)
     else
       outMesh%mortarInfo => null()
     endif
 
-    deallocate(leafIdx,si,minfo,coords)
+    deallocate(leafIdx,si,minfo,mlevel,coords)
     call geomInterp%Free()
 
     call outMesh%UpdateDevice()

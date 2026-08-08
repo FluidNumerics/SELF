@@ -128,6 +128,28 @@ module SELF_Mesh_2D_t
     ! side's edge coordinate, flip = 1 when reversed (same convention as sideInfo(4)).
     integer :: nMortars = 0
     integer,pointer,dimension(:,:) :: mortarInfo => null()
+    ! Refinement level of each mortar's BIG side, replicated on every rank like mortarInfo
+    ! itself. The two small sides are then at mortarLevel+1, since the forest is 2:1
+    ! balanced. This is kept here rather than derived from elemLevel because mortarInfo
+    ! carries GLOBAL element ids while elemLevel is the rank-local slice, so a rank cannot
+    ! look up the level of a mortar whose big element it does not own.
+    integer,allocatable :: mortarLevel(:)
+    ! Refinement level of each rank-local element, and the global maximum over all ranks.
+    !
+    ! elemLevel(iEl) is the quadtree depth of the leaf that produced element iEl: 0 on the
+    ! base mesh, incremented by one per 2:1 subdivision, so the element scale is
+    ! h_root / 2**elemLevel. Meshes that carry no refinement (structured, HOPr, HOHQMesh)
+    ! leave it at 0 and maxElemLevel = 0, which is the conforming single-rate case.
+    !
+    ! Levels exist so that local time stepping can subcycle level ell at dt_base/2**ell.
+    ! Because EmitMesh only ever emits a conforming side between two leaves of the SAME
+    ! level, every level jump in the mesh is a 2:1 mortar face; elemLevel and mortarInfo
+    ! together therefore describe the whole inter-level coupling.
+    !
+    ! maxElemLevel is GLOBAL (identical on every rank), whereas elemLevel is the rank-local
+    ! slice, indexed like every other element-sized array.
+    integer :: maxElemLevel = 0
+    integer,allocatable :: elemLevel(:)
     ! Material tracking: every element has an integer material id
     ! indexing into materialNames. Single-material readers (HOPr,
     ! structured, ISM, ISM-v2) leave nMaterials = 1 with the name
@@ -196,6 +218,12 @@ contains
     this%elemMaterial = 1
     this%materialNames(1) = "default"
 
+    ! Default refinement level: a conforming, unrefined mesh. EmitMesh overwrites this
+    ! with the per-leaf quadtree depth.
+    this%maxElemLevel = 0
+    allocate(this%elemLevel(1:nElem))
+    this%elemLevel = 0
+
     ! Create lookup tables to assist with connectivity generation
     this%CGNSCornerMap(1:2,1) = (/1,1/)
     this%CGNSCornerMap(1:2,2) = (/nGeo+1,1/)
@@ -233,8 +261,11 @@ contains
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
+    if(allocated(this%elemLevel)) deallocate(this%elemLevel)
+    this%maxElemLevel = 0
     if(associated(this%mortarInfo)) deallocate(this%mortarInfo)
     this%mortarInfo => null()
+    if(allocated(this%mortarLevel)) deallocate(this%mortarLevel)
     this%nMortars = 0
     call this%decomp%Free()
 
@@ -542,6 +573,8 @@ contains
     real(prec) :: nodeCoords(1:2,1:2,1:2,1:nGlobalElem)
     integer :: globalNodeIDs(1:2,1:2,1:nGlobalElem)
     integer :: sideInfo(1:5,1:4,1:nGlobalElem)
+    ! Big element 1 is level 0; small elements 2 and 3 are its level-1 refinement
+    integer,parameter :: elemLevel(1:nGlobalElem) = [0,1,1]
     integer :: e1,e2
     integer :: nLocalElems
     integer :: nGeo,nBCs
@@ -638,9 +671,17 @@ contains
     this%globalNodeIDs(1:2,1:2,1:nLocalElems) = globalNodeIDs(1:2,1:2,e1:e2)
     this%sideInfo(1:5,1:4,1:nLocalElems) = sideInfo(1:5,1:4,e1:e2)
 
+    ! Refinement levels: the big element is level 0, the two small elements are its 2:1
+    ! refined neighbors at level 1. This mirrors what EmitMesh derives from a quadtree and
+    ! lets the hand-built mesh exercise level-aware machinery (e.g. local time stepping).
+    this%maxElemLevel = 1
+    this%elemLevel(1:nLocalElems) = elemLevel(e1:e2)
+
     ! The mortar table is replicated on all ranks; element ids are global
     this%nMortars = 1
     allocate(this%mortarInfo(1:8,1:1))
+    allocate(this%mortarLevel(1:1))
+    this%mortarLevel(1) = 0 ! big element 1 is level 0; its small sides are level 1
     this%mortarInfo(1:8,1) = [1,2, & ! big element, big local side (east)
                               2,10*4, & ! sub-edge 1 : element 2, west side, flip 0
                               3,10*4, & ! sub-edge 2 : element 3, west side, flip 0
@@ -691,6 +732,8 @@ contains
     real(prec) :: nodeCoords(1:2,1:2,1:2,1:nGlobalElem)
     integer :: globalNodeIDs(1:2,1:2,1:nGlobalElem)
     integer :: sideInfo(1:5,1:4,1:nGlobalElem)
+    ! Big elements 1 and 2 are level 0; small elements 3-6 are their level-1 refinement
+    integer,parameter :: elemLevel(1:nGlobalElem) = [0,0,1,1,1,1]
     integer :: e1,e2
     integer :: nLocalElems
     integer :: nGeo,nBCs
@@ -847,9 +890,16 @@ contains
     this%globalNodeIDs(1:2,1:2,1:nLocalElems) = globalNodeIDs(1:2,1:2,e1:e2)
     this%sideInfo(1:5,1:4,1:nLocalElems) = sideInfo(1:5,1:4,e1:e2)
 
+    ! Refinement levels: the two big elements are level 0, the four small elements are
+    ! their 2:1 refined neighbors at level 1 (see SimpleMortarMesh for the rationale).
+    this%maxElemLevel = 1
+    this%elemLevel(1:nLocalElems) = elemLevel(e1:e2)
+
     ! The mortar table is replicated on all ranks; element ids are global
     this%nMortars = 2
     allocate(this%mortarInfo(1:8,1:2))
+    allocate(this%mortarLevel(1:2))
+    this%mortarLevel(1:2) = 0 ! big elements 1 and 2 are level 0
     this%mortarInfo(1:8,1) = [1,2, & ! big element 1, east side
                               3,10*4, & ! sub-edge 1 : element 3, west side, flip 0
                               4,10*4, & ! sub-edge 2 : element 4, west side, flip 0

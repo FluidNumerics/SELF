@@ -147,6 +147,15 @@ contains
       enddo
     enddo
 
+    ! Refinement levels: every child sits one level below its parent. The refined mesh is
+    ! conforming, so all levels are raised together and no mortar (level jump) is created.
+    meshOut%maxElemLevel = meshIn%maxElemLevel+1
+    do p = 1,nElem
+      do c = 1,4
+        meshOut%elemLevel(4*(p-1)+c) = meshIn%elemLevel(p)+1
+      enddo
+    enddo
+
     deallocate(baseCorner,refSideInfo,refCorner,childCoords)
     call geomInterp%Free()
 
