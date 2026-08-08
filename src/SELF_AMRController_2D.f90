@@ -713,6 +713,11 @@ contains
     !! level, so a time step dtBase that is stable on the base (level-0) mesh scales to
     !! dtBase / 2**MaxLevel on the current forest. Deterministic and exact for the quadtree
     !! (child elements are exact half-scale subdivisions); no geometry reduction is needed.
+    !!
+    !! This is the SINGLE-RATE time step: every element is advanced at the rate the finest
+    !! level demands. Callers using local time stepping (SELF_LocalTimeStepping_2D) should
+    !! NOT pass this to ForwardStepLTS - that routine takes dtBase itself and derives
+    !! dtBase / 2**ell per level internally, which is the whole point of the scheme.
     implicit none
     class(AMRController2D),intent(in) :: this
     real(prec),intent(in) :: dtBase

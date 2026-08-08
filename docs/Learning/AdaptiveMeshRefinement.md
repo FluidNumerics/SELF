@@ -716,14 +716,34 @@ demo cadence (Stage-6 device-side transfer remains the later optimization). Back
   exactly `h_root / 2^maxLevel`, so `dt_epoch = dt_base / 2^maxLevel` with `dt_base` chosen
   for the base mesh by the usual explicit-DG bound `dt ≈ C·h/(c·N²)`. Deterministic, free,
   and no geometry reduction is needed.
-- **Later (optional):** local time stepping (LTS) — leaves at level ℓ subcycle with
-  `dt/2^ℓ`. This touches the RK update and requires time-interpolated interface/mortar data
-  between levels, i.e. exactly the time-integration and flux-exchange machinery that is
-  frozen by policy; it needs its own design + review round (call it Stage 7). Cost analysis
-  for this demo says it is not needed to start: with the refined band confined to the
-  wavefront annulus, a global fine `dt` costs `nElem_total × fine-step-count`, and most
-  elements are coarse *and cheap*; LTS buys roughly `2^maxLevel×` on the coarse bulk — worth
-  having, not blocking.
+- **Local time stepping (Stage 7) — implemented**, opt-in, in
+  `src/SELF_LocalTimeStepping_2D.f90`. Leaves at level ℓ subcycle with `dtBase/2^ℓ` under a
+  Berger–Oliger recursion: advance level ℓ once, recurse twice on level ℓ+1 at half the step,
+  then reflux the interface. The enabling observation is that `EmitMesh` only ever emits a
+  conforming side between two leaves of the *same* level, so **every** level jump is a 2:1
+  mortar and all cross-rate coupling flows through `mortarInfo`; `SideExchange` stays purely
+  intra-level.
+
+  Coarse→fine coupling interpolates the big side's edge trace in time (quadratic through
+  `t0-dtP, t0, t0+dtP`, linear until the history is deep enough) and lets the ordinary
+  `MortarExchange` restrict it onto the small sides, so the MPI path is reused unchanged.
+  Fine→coarse coupling uses **flux registers**: because a Williamson 2N step telescopes into
+  `U^{n+1} = U^n + dt Σ_m c_m R_m` and the DG surface term enters `R` linearly through
+  `flux%boundaryNormal`, the time-integrated interface flux of each side can be accumulated
+  exactly and the difference applied afterwards. Conservation across a level interface is
+  therefore exact to round-off (verified at 1e-16 in `test/lts_2d_conservation.f90` on both a
+  two-level and a three-level mesh); for a *linear* system the correction is exact in full,
+  for a nonlinear one it is the standard AMR refluxing approximation.
+
+  Entry point: `ForwardStepLTS(model, sched, tn, dtBase, ioInterval)` — note it takes
+  `dtBase`, the level-0 step, not the level-derived global `dt` that `RecommendedTimeStep`
+  returns. Current scope: RK3 only, CPU only, hyperbolic (`gradient_enabled = .false.`)
+  only; each of those is a hard error rather than a silent fallback.
+
+  Cost analysis for the demo said this was worth having but not blocking: with the refined
+  band confined to the wavefront annulus, a global fine `dt` costs
+  `nElem_total × fine-step-count`, and most elements are coarse *and cheap*, so LTS buys
+  roughly `2^maxLevel×` on the coarse bulk.
 
 ### 5.5 Gap 4 — The example and its CI-scale test — **implemented**
 
@@ -774,7 +794,7 @@ band tracking the expanding wavefront.
   this needs a localized-forcing hook plus per-epoch source relocation (the containing
   element changes identity on regrid). Physically nicer (continuous-wave and pulse-train
   experiments); not required for the first demo.
-- **LTS (Stage 7)** as scoped in §5.4, and **device-side transfer (Stage 6)**.
+- **LTS on GPU and for parabolic (gradient-enabled) models** — the element-subset form of the operators is CPU-only for now; see §5.4.
 - **Storage compaction** of orphaned forest nodes on long runs (§4, Stage 2 "next").
 
 ### 5.8 Suggested PR sequence
@@ -785,7 +805,7 @@ band tracking the expanding wavefront.
 | 2 | AMR controller (halo flags, regrid orchestration, level-based dt) + adapt-epoch soundwave test | 1 |
 | 3 | Ultrasound example, CI-scale test, plotting script, docs | 2 |
 | 4 | GPU epoch test; device-side transfer (Stage 6a) and amortized capacity (Stage 6b) - both done, profiling justified them | 2 |
-| 5 | (design first) LTS; time-dependent point forcing | 3 |
+| 5 | LTS (done: element/mortar subsetting, Berger–Oliger recursion, flux registers); time-dependent point forcing | 3 |
 
 ---
 

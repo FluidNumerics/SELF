@@ -74,6 +74,11 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
 !!   SELF_AMR_ULTRASOUND_LR        source half-width in m, overriding the maxLevel-derived
 !!                                 value; f0 ~ c0/(4*Lr).
 !!   SELF_AMR_ULTRASOUND_EPOCHLEN  adaptation cadence in s, overriding stepsPerEpoch * dt.
+!!   SELF_AMR_ULTRASOUND_LTS       set to anything other than "0" to use local time stepping
+!!                                 (AMR Stage 7): level ell advances at dtBase/2**ell rather
+!!                                 than every element paying dtBase/2**maxLevel. Default off,
+!!                                 so CI stays on the single-rate path; the BENCH_ block
+!!                                 reports which was used, so a sweep is interpretable.
 !!
 !! The run prints a CONFIG_* block (resolved resolution, f0, points per wavelength) and a
 !! BENCH_* block (wall-clock split between time integration and adaptation) so a sweep over
@@ -89,6 +94,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   use self_mesh_2d
   use SELF_Geometry_2D
   use SELF_AMRController_2D
+  use SELF_LocalTimeStepping_2D
 
   implicit none
 
@@ -121,6 +127,8 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   integer :: nEpochs,epoch,i,envstat
   integer :: maxLevel
   logical :: adapted
+  logical :: useLTS
+  type(LTSSchedule2D) :: ltsSched
   real(prec) :: e0,ef,dt
   real(prec) :: Lr,LrRamp,epochLength,hFinest,lambda,f0,ppw
   character(32) :: envstr
@@ -136,6 +144,16 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   call get_environment_variable("SELF_AMR_ULTRASOUND_EPOCHS",envstr,status=envstat)
   if(envstat == 0) then
     read(envstr,*) nEpochs
+  endif
+
+  ! Local time stepping (AMR Stage 7), off by default so the CI timings and the reference
+  ! output stay on the single-rate path. With it on, level ell is advanced at dtBase/2**ell
+  ! instead of every element paying the finest level's rate; the wavefront band is thin, so
+  ! the coarse bulk is where the saving is. CPU builds only - see SELF_LocalTimeStepping_2D.
+  useLTS = .false.
+  call get_environment_variable("SELF_AMR_ULTRASOUND_LTS",envstr,status=envstat)
+  if(envstat == 0) then
+    useLTS = (trim(envstr) /= "0")
   endif
 
   ! ---- Refinement depth and the quantities that must track it ----
@@ -262,12 +280,24 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   tAdapt = 0.0_real64
   nStepsTotal = 0
   do epoch = 1,nEpochs
-    dt = controller%RecommendedTimeStep(dtBase)
+    ! With local time stepping the level-0 elements keep dtBase and level ell subcycles at
+    ! dtBase/2**ell, so the single-rate level-derived dt is exactly what LTS avoids paying
+    ! on the coarse bulk. dt is still reported for the epoch print, as the finest rate in use.
+    if(useLTS) then
+      dt = dtBase
+    else
+      dt = controller%RecommendedTimeStep(dtBase)
+    endif
     call system_clock(c0clk)
-    ! ioInterval = (tn - t) exactly, so ForwardStep's io count is exactly 1 per epoch
-    ! regardless of accumulated floating-point drift in t.
-    call modelobj%ForwardStep(tn=modelobj%t+epochLength,dt=dt, &
-                              ioInterval=(modelobj%t+epochLength)-modelobj%t)
+    ! ioInterval = (tn - t) exactly, so the io count is exactly 1 per epoch regardless of
+    ! accumulated floating-point drift in t.
+    if(useLTS) then
+      call ForwardStepLTS(modelobj,ltsSched,tn=modelobj%t+epochLength,dtBase=dtBase, &
+                          ioInterval=(modelobj%t+epochLength)-modelobj%t)
+    else
+      call modelobj%ForwardStep(tn=modelobj%t+epochLength,dt=dt, &
+                                ioInterval=(modelobj%t+epochLength)-modelobj%t)
+    endif
     call system_clock(c1clk)
     call controller%Adapt(modelobj,adapted)
     call system_clock(c2clk)
@@ -281,6 +311,11 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   ! ---- Wall-clock summary (fixed BENCH_ keys for machine parsing) ----
   tSim = real(nEpochs,real64)*real(epochLength,real64)
   write(output_unit,'(A)') "BENCH_case = ultrasound_pointsource"
+  if(useLTS) then
+    write(output_unit,'(A)') "BENCH_timeStepping = lts"
+  else
+    write(output_unit,'(A)') "BENCH_timeStepping = global"
+  endif
   write(output_unit,'(A,I0)') "BENCH_nEpochs = ",nEpochs
   write(output_unit,'(A,I0)') "BENCH_nSteps = ",nStepsTotal
   write(output_unit,'(A,I0)') "BENCH_nElemFinal = ",modelobj%mesh%nElem
@@ -315,6 +350,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
     stop 1
   endif
 
+  call ltsSched%Free()
   call modelobj%Free()
   call controller%Free()
   call geometry%Free()
