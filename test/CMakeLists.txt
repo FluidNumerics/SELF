@@ -259,6 +259,7 @@ set_tests_properties(
 if(NOT SELF_ENABLE_GPU AND NOT SELF_ENABLE_APU)
     add_fortran_tests( "subset_operators_2d.f90"
                        "lts_2d_conservation.f90" )
+    add_mpi_fortran_tests( "lts_2d_conservation_mpi.f90" )
 endif()
 
 add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
