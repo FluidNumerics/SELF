@@ -123,6 +123,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   logical :: adapted
   real(prec) :: e0,ef,dt
   real(prec) :: Lr,LrRamp,epochLength,hFinest,lambda,f0,ppw
+  real(prec) :: relativeEnergyFloor
   character(32) :: envstr
   ! Wall-clock instrumentation of the epoch loop. system_clock with an integer(int64) count
   ! is a monotonic wall clock; ForwardStep's own TIMER macro (src/SELF_Macros.h) expands to
@@ -174,6 +175,18 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
     read(envstr,*) epochLength
   endif
 
+  ! Amplitude gate of the refinement indicator (see SELF_RefinementIndicator_2D): elements below
+  ! this fraction of the field's peak ENERGY are treated as quiescent and released. Overridable
+  ! because the useful value is problem-dependent - it has to sit below the dynamic range of
+  ! interest and above the residue left behind the front - and because sweeping it is how the
+  ! saving from coarsening behind the wave is measured. 0 restores the pre-gate behaviour, in
+  ! which the wake is never released and the refined region grows to the whole swept area.
+  relativeEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
+  call get_environment_variable("SELF_AMR_ULTRASOUND_RELFLOOR",envstr,status=envstat)
+  if(envstat == 0) then
+    read(envstr,*) relativeEnergyFloor
+  endif
+
   ! Resolution actually being requested, reported so a sweep over maxLevel is interpretable.
   hFinest = Lx/real(nElemX,prec)/2.0_prec**maxLevel
   lambda = 4.0_prec*Lr ! dominant wavelength of the wavelet
@@ -186,6 +199,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   write(output_unit,'(A,ES16.7E3)') "CONFIG_f0_Hz = ",f0
   write(output_unit,'(A,ES16.7E3)') "CONFIG_pointsPerWavelength = ",ppw
   write(output_unit,'(A,ES16.7E3)') "CONFIG_epochLength_s = ",epochLength
+  write(output_unit,'(A,ES16.7E3)') "CONFIG_relativeEnergyFloor = ",relativeEnergyFloor
 
   bcids(1:4) = [SELF_BC_RADIATION, & ! south
                 SELF_BC_RADIATION, & ! east
@@ -207,7 +221,8 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   call modelobj%SetTimeIntegrator(integrator)
 
   call controller%Init(modelobj,refineThreshold=-3.0_prec,coarsenThreshold=-8.0_prec, &
-                       ivar=3,maxLevel=maxLevel,nHalo=2)
+                       ivar=3,maxLevel=maxLevel,nHalo=2, &
+                       relativeEnergyFloor=relativeEnergyFloor)
 
   ! ---- Initial condition + static refinement to the pulse ----
   ! After each mesh change the pulse is re-evaluated analytically on the new mesh so the

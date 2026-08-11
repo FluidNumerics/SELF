@@ -96,6 +96,62 @@ term is the robustification introduced by **Hennemann, Rueda-Ramírez, Hindenlan
 (2021)** — the shock indicator used in Trixi.jl — which guards against the odd/even parity
 dropouts a single-mode measure suffers for symmetric data. It is only active for \(N\ge 2\).
 
+### 2.1.1 The amplitude gate (relative energy floor)
+
+\(S_e\) is a **ratio**, so it is scale-free by construction: it reports how an element's energy is
+distributed across modes and says nothing about how much energy the element carries. Grid-scale
+residue at \(10^{-5}\) of the field's amplitude has exactly the same \(S_e\approx 1\) as a
+full-amplitude discontinuity.
+
+Guarding the ratio with an *absolute* floor at machine epsilon does not fix this, because
+\(E_{\text{tot}}\) carries the **square** of the field amplitude while \(\varepsilon\) is a fixed
+\(2.2\times10^{-16}\): a wake at \(10^{-5}\) of the peak sits some ten orders of magnitude above the
+floor and is still judged on shape alone. Such elements never reach
+\(\sigma_{\text{coarsen}}\), so the mesh behind a passing front is never released and the refined
+region grows to the whole area the wave has swept (issue #162).
+
+Each element therefore also carries a **gate energy**
+
+$$
+g_e = \sum_v w_v\,E_{\text{tot},e,v},
+$$
+
+a weighted sum of the per-variable modal energies. Since \(E_{\text{tot},e,v}\) is the exact \(L^2\)
+energy of variable \(v\) on the reference element, \(g_e\) is a convex quadratic functional of the
+state — a **discrete entropy integral** over the element when \(w\) is taken from the diagonal of an
+entropy Hessian. It is compared against a field-wide energy scale,
+
+$$
+g_e \;\le\; \max\!\left(\varepsilon,\; \texttt{relativeEnergyFloor}\cdot \texttt{energyScale}\right)
+\quad\Longrightarrow\quad S_e := 0 ,
+$$
+
+so a quiescent element is reported perfectly resolved (\(\sigma_e = \log_{10}\varepsilon\), hence
+`COARSEN`) whatever its modal shape.
+
+Because energy is amplitude squared, `relativeEnergyFloor` is \(10^{dB/10}\) in amplitude terms.
+The default is \(10^{-8}\) — amplitudes below \(10^{-4}\) (−80 dB) of the field scale count as
+quiescent — and it is precision-aware (`max(1e-8, epsilon)`), because in `real32`
+\(\varepsilon = 1.2\times10^{-7}\) would otherwise mask the relative term for any field scale of
+order one. **The right value is problem-dependent**: it must sit below the dynamic range you care
+about and above the residue you want released. A 2-D cylindrical pulse, for instance, leaves a
+genuine algebraically-decaying tail behind its front (Huygens' principle fails in even dimensions),
+which is a physical feature rather than residue and is only released by a much larger floor.
+
+`energyScale` defaults to the largest \(g_e\) over the elements, reduced with `MPI_MAX` when the
+indicator is given a communicator, so the gate follows a decaying front. Two consequences worth
+knowing:
+
+- the automatic scale makes the flags depend on a floating-point reduction, which can differ at
+  round-off between rank counts — `SetEnergyScale` pins it and is the deterministic escape hatch;
+- once a wave has left the domain entirely the scale collapses onto the residue's own peak and the
+  gate stops discriminating; the absolute \(\varepsilon\) floor is what bounds that case.
+
+Note that raising \(\sigma_{\text{coarsen}}\) is **not** a substitute. In a low-amplitude wake
+\(\sigma_e\) is near \(0\), so any threshold high enough to coarsen the wake is also high enough to
+stop the front from refining; the two decisions cannot be separated by thresholds alone, which is
+what motivates an amplitude-based gate.
+
 ### 2.2 Refine / keep / coarsen semantics
 
 With user-supplied thresholds \(\sigma_{\text{refine}} > \sigma_{\text{coarsen}}\), each element
@@ -129,14 +185,30 @@ type(RefinementIndicator2D) :: amr
 ! interp : the model interpolant (Lagrange); nElem : rank-local element count
 call amr%Init(interp, nElem, refineThreshold=-3.0_prec, coarsenThreshold=-8.0_prec)
 
+! Amplitude gate (all optional; these are the defaults unless set).
+call amr%SetRelativeEnergyFloor(1.0e-8_prec)  ! 0 disables the gate
+call amr%SetEnergyScale(pRef**2)              ! pin the scale; ClearEnergyScale undoes it
+call amr%SetEnergyWeights(w)                  ! per-variable gate weights, e.g. from the entropy
+
 ! solution : the model's MappedScalar2D (or any Scalar2D); ivar selects the driving
 ! variable, or SELF_AMR_ALLVARS (=0) reduces over all variables (most conservative).
+! comm : optional, makes the automatic energy scale global (MPI_MAX).
+! gate : optional, a caller-computed per-element gate energy replacing the weighted sum.
 call amr%Estimate(solution, ivar=1)
 
 ! amr%indicator(1:nElem)  -- per-element sigma_e (host)
 ! amr%flag(1:nElem)       -- per-element SELF_AMR_REFINE / KEEP / COARSEN (host)
+! amr%gate(1:nElem)       -- per-element gate energy actually used (host, diagnostic)
 n = amr%CountFlagged(SELF_AMR_REFINE)
 ```
+
+The estimate runs in two phases: an element-local, parallel (device) pass that forms the spectra,
+the raw \(S_e\) and \(g_e\); then a host pass that reduces for the energy scale, applies the gate,
+takes the \(\log_{10}\) and sets the flags. The second phase is host-side because the scale needs a
+reduction that no element-local pass can supply, and it is shared by both backends, so CPU and GPU
+produce identical flags. `AMRController2D` forwards `relativeEnergyFloor` and `energyWeights` from
+its own `Init` and re-applies them after each epoch's indicator resize; it also supplies the
+communicator so the scale is global.
 
 The GPU device kernel uses per-thread scratch bounded to \(N \le 15\); higher degrees fail
 loudly at `Init` with a pointer to the bound (`AMR2D_MAXNP` in `SELF_Refinement.cpp`).

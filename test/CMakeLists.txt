@@ -90,6 +90,7 @@ add_fortran_tests (
     "transfer_plan_2d_guard_range.f90"
     "amr_controller_2d_guard_decomp.f90"
     "lineareuler2d_amr_soundwave.f90"
+    "lineareuler2d_amr_coarsen_wake.f90"
     "dgmodel2d_regrid_guard_uninit.f90"
     "data_2d_device_memory.f90"
     "geometry_2d_reuse.f90"
@@ -104,6 +105,9 @@ add_fortran_tests (
     "refinement_indicator_2d_guard_degree.f90"
     "refinement_indicator_2d_guard_nelem.f90"
     "refinement_indicator_2d_guard_ivar.f90"
+    "refinement_indicator_2d_guard_relfloor.f90"
+    "refinement_indicator_2d_guard_energyscale.f90"
+    "refinement_indicator_2d_guard_energyweights.f90"
     "adaptive_mesh_2d_guard_unbalanced.f90"
     "meshrefine_2d_guard_multirank.f90"
     "quadtree_2d_guard_multirank.f90"
@@ -134,6 +138,7 @@ add_fortran_tests (
     "mappedvectordgdivergence_2d_linear_structuredmesh.f90"
     "mortarprojection_identity.f90"
     "refinement_indicator_2d_spectraldecay.f90"
+    "refinement_indicator_2d_relative_floor.f90"
     "mappedscalarmortarexchange_2d_linear.f90"
     "mappedvectordgdivergence_2d_mortar.f90"
     "mappedscalargradient_3d_constant.f90"
@@ -231,6 +236,9 @@ set_tests_properties(
     refinement_indicator_2d_guard_degree
     refinement_indicator_2d_guard_nelem
     refinement_indicator_2d_guard_ivar
+    refinement_indicator_2d_guard_relfloor
+    refinement_indicator_2d_guard_energyscale
+    refinement_indicator_2d_guard_energyweights
     adaptive_mesh_2d_guard_unbalanced
     meshrefine_2d_guard_multirank
     quadtree_2d_guard_multirank

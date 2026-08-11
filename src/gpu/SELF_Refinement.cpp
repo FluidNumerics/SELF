@@ -5,6 +5,10 @@
 // fails loudly rather than overrunning. Raise this (and rebuild) to support higher degrees.
 #define AMR2D_MAXNP 16
 
+// Absolute (machine-epsilon) guard on the modal energy RATIOS below - it only keeps 0/0 out of
+// r1 and r2. The amplitude gate is RELATIVE to a field-wide energy scale and is applied on the
+// host in FinalizeIndicator, because the scale is a reduction (an MPI collective when the mesh
+// is decomposed) that an element-local device thread cannot supply.
 #ifdef DOUBLE_PRECISION
   #define AMR_ENERGY_FLOOR DBL_EPSILON
 #else
@@ -16,10 +20,13 @@
 //   One device thread per element. Computes the tensor-product Legendre modal spectrum of the
 //   driving field(s) on the element via two matrix passes with the precomputed nodal->modal
 //   transform Pmodal (Pmodal[i + (N+1)*p] = contribution of node i to mode p), forms the total
-//   and clipped modal energies, and writes the log10 smoothness ratio and the refine/keep/coarsen
-//   flag. The mathematics mirror the portable implementation in SELF_RefinementIndicator_2D_t.
-__global__ void RefinementIndicator_2D_gpukernel(real *Pmodal, real *f, real *indicator, int *flag,
-                                                 real refineThreshold, real coarsenThreshold,
+//   and clipped modal energies, and writes the raw smoothness ratio S_e together with the gate
+//   energy g = sum_v w[v]*etot(v). The mathematics mirror the portable implementation in
+//   SELF_RefinementIndicator_2D_t; the log10, the amplitude gate and the refine/keep/coarsen
+//   thresholds are applied host-side by the shared FinalizeIndicator, so both backends produce
+//   identical flags.
+__global__ void RefinementIndicator_2D_gpukernel(real *Pmodal, real *f, real *w,
+                                                 real *ratio, real *gate,
                                                  int N, int nvar, int ivar, int nel){
 
   int iel = threadIdx.x + blockIdx.x*blockDim.x;
@@ -33,7 +40,16 @@ __global__ void RefinementIndicator_2D_gpukernel(real *Pmodal, real *f, real *in
     real uhat[AMR2D_MAXNP*AMR2D_MAXNP];
 
     real semax = 0.0;
-    for(int v=v0; v<=v1; v++){
+    real g = 0.0;
+    for(int v=0; v<nvar; v++){
+
+      // A variable is transformed if it drives the indicator, or if it carries a non-zero gate
+      // weight (its energy is then needed for the gate). With the default weights these
+      // coincide, so the work is exactly what it was before the gate existed.
+      real wv = w[v];
+      bool needSe = ( v >= v0 && v <= v1 );
+      bool needG  = ( wv != 0.0 );
+      if( !(needSe || needG) ) continue;
 
       // Pass 1 (xi): tmp[p + Np*j] = sum_i Pmodal[i + Np*p] * u(i,j)
       for(int j=0; j<Np; j++){
@@ -67,37 +83,39 @@ __global__ void RefinementIndicator_2D_gpukernel(real *Pmodal, real *f, real *in
         }
       }
 
-      real se;
-      if( etot <= (real)AMR_ENERGY_FLOOR ){
-        se = 0.0;
-      } else {
-        real r1 = (etot - eclip1)/etot;
-        real r2 = 0.0;
-        if( N >= 2 && eclip1 > (real)AMR_ENERGY_FLOOR ){
-          r2 = (eclip1 - eclip2)/eclip1;
+      // Gate energy: the discrete (quadratic) entropy integral over the element when the weights
+      // come from an entropy Hessian.
+      if( needG ) g += wv*etot;
+
+      if( needSe ){
+        real se;
+        if( etot <= (real)AMR_ENERGY_FLOOR ){
+          se = 0.0;
+        } else {
+          real r1 = (etot - eclip1)/etot;
+          real r2 = 0.0;
+          if( N >= 2 && eclip1 > (real)AMR_ENERGY_FLOOR ){
+            r2 = (eclip1 - eclip2)/eclip1;
+          }
+          se = (r1 > r2) ? r1 : r2;
         }
-        se = (r1 > r2) ? r1 : r2;
+        if( se > semax ) semax = se;
       }
-      if( se > semax ) semax = se;
     }
 
-    real sigma = log10( (semax > (real)AMR_ENERGY_FLOOR) ? semax : (real)AMR_ENERGY_FLOOR );
-    indicator[iel] = sigma;
-    if( sigma > refineThreshold )      flag[iel] =  1; // SELF_AMR_REFINE
-    else if( sigma < coarsenThreshold) flag[iel] = -1; // SELF_AMR_COARSEN
-    else                               flag[iel] =  0; // SELF_AMR_KEEP
+    ratio[iel] = semax; // raw ratio; the host gates it, takes the log10 and sets the flag
+    gate[iel]  = g;
   }
 }
 
 extern "C"
 {
-  void RefinementIndicator_2D_gpu(real *Pmodal, real *f, real *indicator, int *flag,
-                                  real refineThreshold, real coarsenThreshold,
+  void RefinementIndicator_2D_gpu(real *Pmodal, real *f, real *w, real *ratio, real *gate,
                                   int N, int nvar, int ivar, int nel)
   {
     int threads_per_block = 256;
     int nblocks_x = nel/threads_per_block + 1;
     RefinementIndicator_2D_gpukernel<<<dim3(nblocks_x,1,1), dim3(threads_per_block,1,1), 0, 0>>>(
-      Pmodal, f, indicator, flag, refineThreshold, coarsenThreshold, N, nvar, ivar, nel);
+      Pmodal, f, w, ratio, gate, N, nvar, ivar, nel);
   }
 }

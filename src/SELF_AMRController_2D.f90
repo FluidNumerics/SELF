@@ -127,12 +127,18 @@ module SELF_AMRController_2D
     integer :: nHalo = 1 !! refine-flag halo-expansion passes
     real(prec) :: refineThreshold = 0.0_prec
     real(prec) :: coarsenThreshold = 0.0_prec
+    ! Amplitude-gate settings forwarded to the indicator. They are held here because the indicator
+    ! is Freed and re-Init-ed (intent(out)) at the end of every adapting epoch, which resets its
+    ! own copies; the controller re-applies these afterwards.
+    real(prec) :: relativeEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
+    real(prec),allocatable :: energyWeights(:)
 
   contains
     procedure,public :: Init => Init_AMRController2D
     procedure,public :: Free => Free_AMRController2D
     procedure,public :: Adapt => Adapt_AMRController2D
     procedure,public :: RecommendedTimeStep => RecommendedTimeStep_AMRController2D
+    procedure,private :: ApplyIndicatorSettings => ApplyIndicatorSettings_AMRController2D
     procedure,private :: NextGeomBuffer => NextGeomBuffer_AMRController2D
     procedure,private :: BuildGeometry => BuildGeometry_AMRController2D
 
@@ -141,7 +147,7 @@ module SELF_AMRController_2D
 contains
 
   subroutine Init_AMRController2D(this,model,refineThreshold,coarsenThreshold,ivar, &
-                                  maxLevel,nHalo)
+                                  maxLevel,nHalo,relativeEnergyFloor,energyWeights)
     !! Attach the controller to an initialized model. The model's current mesh becomes the
     !! forest's base mesh (level 0); its geometry interpolant drives the indicator and the
     !! solution transfer. Thresholds are the sigma = log10 modal-energy-ratio cut-offs of the
@@ -149,6 +155,14 @@ contains
     !! SELF_RefinementIndicator_2D). ivar is the driving solution variable (or
     !! SELF_AMR_ALLVARS). maxLevel >= 0 caps the refinement depth; nHalo >= 0 sets the
     !! refine-flag halo width in elements.
+    !!
+    !! relativeEnergyFloor tunes the indicator's amplitude gate: an element whose energy is below
+    !! this fraction of the field's peak element energy is treated as quiescent (hence resolved)
+    !! regardless of its modal shape, which is what allows the mesh to be released behind a
+    !! passing front. It is an energy fraction, so the square of the corresponding amplitude
+    !! fraction; 0 disables the gate. energyWeights optionally weights the per-variable energies
+    !! that form the gate, e.g. from the model's entropy function - see
+    !! RefinementIndicator2D%SetEnergyWeights. Both default to the indicator's own defaults.
     implicit none
     class(AMRController2D),intent(out) :: this
     class(DGModel2D_t),intent(in) :: model
@@ -157,6 +171,8 @@ contains
     integer,intent(in) :: ivar
     integer,intent(in) :: maxLevel
     integer,intent(in) :: nHalo
+    real(prec),intent(in),optional :: relativeEnergyFloor
+    real(prec),intent(in),optional :: energyWeights(:)
 
     if(.not. associated(model%mesh)) then
       print*,__FILE__,':',__LINE__, &
@@ -179,6 +195,11 @@ contains
     this%nHalo = nHalo
     this%refineThreshold = refineThreshold
     this%coarsenThreshold = coarsenThreshold
+    if(present(relativeEnergyFloor)) this%relativeEnergyFloor = relativeEnergyFloor
+    if(present(energyWeights)) then
+      allocate(this%energyWeights(1:size(energyWeights)))
+      this%energyWeights = energyWeights
+    endif
 
     ! Rank-replicated forest: on one rank, straight from the mesh; on several, from the
     ! allgathered global base tables (every rank builds the identical forest).
@@ -188,8 +209,23 @@ contains
       call this%forest%Init(model%mesh)
     endif
     call this%indicator%Init(this%interp,model%mesh%nElem,refineThreshold,coarsenThreshold)
+    call this%ApplyIndicatorSettings()
 
   endsubroutine Init_AMRController2D
+
+  subroutine ApplyIndicatorSettings_AMRController2D(this)
+    !! Push the controller-owned amplitude-gate settings onto the indicator. Called after every
+    !! indicator Init, because Init is intent(out) and therefore resets them to the indicator's
+    !! defaults. The setters carry the validation.
+    implicit none
+    class(AMRController2D),intent(inout) :: this
+
+    call this%indicator%SetRelativeEnergyFloor(this%relativeEnergyFloor)
+    if(allocated(this%energyWeights)) then
+      call this%indicator%SetEnergyWeights(this%energyWeights)
+    endif
+
+  endsubroutine ApplyIndicatorSettings_AMRController2D
 
   subroutine InitForestFromDecomposedMesh(forest,mesh)
     !! Build a rank-replicated forest over a decomposed base mesh: allgather the global
@@ -522,6 +558,7 @@ contains
     this%nGeomGenerated = 0
     this%interp => null()
     this%ownsActive = .false.
+    if(allocated(this%energyWeights)) deallocate(this%energyWeights)
 
   endsubroutine Free_AMRController2D
 
@@ -567,7 +604,16 @@ contains
     ! The indicator is rank-local; the (replicated) forest needs the global per-leaf flags, so
     ! on nRanks > 1 they are allgathered by the active decomposition's element ranges. From
     ! here on every rank applies identical mutations to its identical forest copy.
-    call this%indicator%Estimate(model%solution,this%ivar)
+    ! The indicator's amplitude gate normalizes each element's energy by the peak element energy,
+    ! so on several ranks that peak must be global: otherwise the gate - and hence the flags and
+    ! the adapted mesh - would depend on the decomposition. That is one extra small collective per
+    ! epoch, alongside the flag allgather below, and none inside the time-stepping loop.
+    if(model%mesh%decomp%mpiEnabled) then
+      call this%indicator%Estimate(model%solution,this%ivar, &
+                                   comm=model%mesh%decomp%mpiComm)
+    else
+      call this%indicator%Estimate(model%solution,this%ivar)
+    endif
     nOld = this%forest%nLeaves
     allocate(flag(1:nOld))
     if(model%mesh%decomp%nRanks > 1) then
@@ -703,6 +749,10 @@ contains
     call this%indicator%Free()
     call this%indicator%Init(this%interp,newMesh%nElem, &
                              this%refineThreshold,this%coarsenThreshold)
+    ! Only controller-owned indicator settings survive an epoch. A driver that called
+    ! indicator%SetEnergyScale (or SetEnergyWeights) directly must re-apply it after any epoch
+    ! that reported adapted = .true.
+    call this%ApplyIndicatorSettings()
 
     adapted = .true.
 

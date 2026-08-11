@@ -66,6 +66,44 @@ module SELF_RefinementIndicator_2D_t
 !! the base-10 logarithm sigma_e = log10(S_e); a near-machine-zero floor keeps it finite for a
 !! perfectly resolved (or identically zero) field.
 !!
+!! ## Amplitude gate (relative energy floor)
+!!
+!! S_e is a ratio and therefore scale-free: it says nothing about how much energy an element
+!! carries, only how that energy is distributed across modes. An element holding a negligible
+!! share of the field's energy - low-amplitude grid-scale residue in the wake of a passing wave,
+!! say - still shows a flat modal spectrum and so reads as under-resolved forever. Guarding the
+!! ratio with an absolute floor at machine epsilon does not help: E_tot carries the SQUARE of the
+!! field amplitude, so a wake at 1e-5 of the peak amplitude sits ~1e10 above epsilon and still
+!! takes the ratio branch. Such elements are never flagged for coarsening and the mesh behind a
+!! front is never released.
+!!
+!! The fix is a second, RELATIVE floor. A per-element gate energy
+!!
+!!   g_e = sum_v w_v E_tot,e,v
+!!
+!! is formed from the modal energies of the driving variables with non-negative weights w_v. Since
+!! E_tot,e,v is the exact L2 energy of variable v on the reference element, g_e with w taken from
+!! a quadratic entropy function is the discrete entropy integral over the element: a convex
+!! function of the state, and therefore an amplitude measure that is meaningful across variables of
+!! very different magnitude. Comparing it against a field-wide energy scale,
+!!
+!!   effective floor = max( epsilon, relativeEnergyFloor * energyScale )
+!!   g_e <= effective floor   ->   S_e := 0   (element is quiescent, hence resolved)
+!!
+!! gives an amplitude gate that is independent of the modal shape. Because energy goes as
+!! amplitude squared, relativeEnergyFloor is 10**(dB/10) in amplitude terms: the default 1e-8
+!! treats amplitudes below 1e-4 (-80 dB) of the field scale as quiescent.
+!!
+!! energyScale defaults to the largest gate energy over the elements (globally reduced when
+!! Estimate is given an MPI communicator), which makes the gate track a decaying front. It can be
+!! pinned with SetEnergyScale for callers that need the flag decision to be independent of a
+!! floating-point reduction, and the gate itself can be supplied outright through the optional
+!! gate argument to Estimate (for example an exactly integrated nodal entropy).
+!!
+!! Note that raising coarsenThreshold is NOT a substitute: in a low-amplitude wake sigma_e is near
+!! 0, so any threshold high enough to coarsen the wake also stops a genuine front from refining.
+!! The two decisions cannot be separated by thresholds alone.
+!!
 !! ## Trigger semantics
 !!
 !! With user-supplied thresholds sigma_refine > sigma_coarsen the per-element flag is
@@ -95,6 +133,7 @@ module SELF_RefinementIndicator_2D_t
   use SELF_Lagrange
   use SELF_Scalar_2D
   use iso_c_binding
+  use mpi
 
   implicit none
 
@@ -107,6 +146,13 @@ module SELF_RefinementIndicator_2D_t
   ! driving-variable index to Estimate.
   integer,parameter :: SELF_AMR_ALLVARS = 0
 
+  ! Default relative energy floor of the amplitude gate (see the module header). 1e-8 in energy
+  ! is 1e-4 (-80 dB) in amplitude relative to the field scale. Precision-aware for the same
+  ! reason as locateTolerance in SELF_Constants: the gate is max(epsilon, floor*scale), so in
+  ! real32 (epsilon = 1.2e-7) a fixed 1e-8 would be masked by the absolute term for any field
+  ! scale of order one and the relative gate would never engage. real64 keeps 1e-8.
+  real(prec),parameter :: SELF_AMR_DEFAULT_RELFLOOR = max(1.0e-8_prec,epsilon(1.0_prec))
+
   type :: RefinementIndicator2D_t
     integer :: N = 0
       !! Polynomial degree of the interpolant the indicator is built for.
@@ -116,6 +162,31 @@ module SELF_RefinementIndicator_2D_t
       !! Elements with sigma_e above this value are flagged SELF_AMR_REFINE.
     real(prec) :: coarsenThreshold = 0.0_prec
       !! Elements with sigma_e below this value are flagged SELF_AMR_COARSEN.
+    real(prec) :: relativeEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
+      !! Elements whose gate energy is at or below relativeEnergyFloor*energyScale are treated as
+      !! quiescent (hence perfectly resolved) regardless of their modal shape. Energy goes as
+      !! amplitude squared, so this is 10**(dB/10) in amplitude terms: 1e-8 gates amplitudes
+      !! below 1e-4 (-80 dB) of the field scale. Set to 0 to recover the pure absolute
+      !! (machine-epsilon) floor.
+    real(prec) :: energyScale = 0.0_prec
+      !! Squared field scale the relative floor is measured against, in the units of the gate
+      !! energy. Meaningful only when energyScaleIsSet is true; otherwise the scale is recomputed
+      !! from the current field on every Estimate.
+    logical :: energyScaleIsSet = .false.
+      !! Whether energyScale was pinned by SetEnergyScale (true) or is computed automatically as
+      !! the largest gate energy over the elements (false, the default).
+    logical :: energyWeightsSet = .false.
+      !! Whether energyWeight was supplied by SetEnergyWeights (true) or is regenerated from the
+      !! driving-variable index on every Estimate (false, the default).
+    integer :: nVarWeights = 0
+      !! Allocated length of energyWeight (the solution variable count it was resolved for).
+    real(prec),pointer,contiguous,dimension(:) :: energyWeight => null()
+      !! Non-negative weights w_v of the gate energy g_e = sum_v w_v E_tot,e,v, indexed by
+      !! solution variable. Resolved lazily, because the variable count is a property of the
+      !! solution field and is not known at Init.
+    real(prec),pointer,contiguous,dimension(:) :: gate => null()
+      !! Per-element gate energy g_e from the most recent Estimate. Retained as a diagnostic: it
+      !! is the quantity the amplitude gate actually compared against the effective floor.
     real(prec),pointer,contiguous,dimension(:,:) :: Pmodal => null()
       !! Nodal-to-modal transform. Pmodal(ii,p) is the (p,ii) entry of the inverse Legendre
       !! Vandermonde in the L2-normalized basis, so the 1-D modal coefficients are
@@ -130,6 +201,10 @@ module SELF_RefinementIndicator_2D_t
     procedure,public :: Init => Init_RefinementIndicator2D_t
     procedure,public :: Free => Free_RefinementIndicator2D_t
     procedure,public :: SetThresholds => SetThresholds_RefinementIndicator2D_t
+    procedure,public :: SetRelativeEnergyFloor => SetRelativeEnergyFloor_RefinementIndicator2D_t
+    procedure,public :: SetEnergyScale => SetEnergyScale_RefinementIndicator2D_t
+    procedure,public :: ClearEnergyScale => ClearEnergyScale_RefinementIndicator2D_t
+    procedure,public :: SetEnergyWeights => SetEnergyWeights_RefinementIndicator2D_t
     procedure,public :: UpdateHost => UpdateHost_RefinementIndicator2D_t
     procedure,public :: UpdateDevice => UpdateDevice_RefinementIndicator2D_t
     procedure,public :: Estimate => Estimate_RefinementIndicator2D_t
@@ -142,6 +217,10 @@ contains
   subroutine Init_RefinementIndicator2D_t(this,interp,nElem,refineThreshold,coarsenThreshold)
     !! Allocate the indicator for an interpolant of degree interp%N and nElem elements and
     !! precompute the nodal->modal transform matrix from the interpolant control points.
+    !!
+    !! The amplitude gate is left at its defaults here (relativeEnergyFloor =
+    !! SELF_AMR_DEFAULT_RELFLOOR, automatic energy scale, unit weights); a caller that has tuned
+    !! those must re-apply them after any re-Init, since intent(out) resets them.
     implicit none
     class(RefinementIndicator2D_t),intent(out) :: this
     type(Lagrange),intent(in),target :: interp
@@ -169,11 +248,13 @@ contains
     allocate(this%Pmodal(1:interp%N+1,1:interp%N+1))
     allocate(this%indicator(1:nElem))
     allocate(this%flag(1:nElem))
+    allocate(this%gate(1:nElem))
 
     call BuildModalTransform(interp%controlPoints,interp%N,this%Pmodal)
 
     this%indicator = 0.0_prec
     this%flag = SELF_AMR_KEEP
+    this%gate = 0.0_prec
 
   endsubroutine Init_RefinementIndicator2D_t
 
@@ -186,9 +267,17 @@ contains
     if(associated(this%Pmodal)) deallocate(this%Pmodal)
     if(associated(this%indicator)) deallocate(this%indicator)
     if(associated(this%flag)) deallocate(this%flag)
+    if(associated(this%gate)) deallocate(this%gate)
+    if(associated(this%energyWeight)) deallocate(this%energyWeight)
     this%Pmodal => null()
     this%indicator => null()
     this%flag => null()
+    this%gate => null()
+    this%energyWeight => null()
+    this%nVarWeights = 0
+    this%energyWeightsSet = .false.
+    this%energyScaleIsSet = .false.
+    this%energyScale = 0.0_prec
 
   endsubroutine Free_RefinementIndicator2D_t
 
@@ -209,30 +298,248 @@ contains
 
   endsubroutine SetThresholds_RefinementIndicator2D_t
 
-  subroutine UpdateHost_RefinementIndicator2D_t(this)
+  subroutine SetRelativeEnergyFloor_RefinementIndicator2D_t(this,relativeEnergyFloor)
+    !! Set the relative energy floor of the amplitude gate. An element whose gate energy g
+    !! satisfies
+    !!
+    !!   g <= max( epsilon(1.0_prec), relativeEnergyFloor*energyScale )
+    !!
+    !! carries no resolvable signal at the scale of the field and is reported perfectly resolved
+    !! (sigma_e = log10(epsilon) -> SELF_AMR_COARSEN) whatever the shape of its modal spectrum.
+    !!
+    !! Dimensionless, and an ENERGY fraction, so it is the square of the corresponding amplitude
+    !! fraction: 1e-8 gates amplitudes below 1e-4 (-80 dB) of the field scale, 1e-6 gates
+    !! amplitudes below 1e-3 (-60 dB). Must lie in [0,1); 0 disables the relative floor and
+    !! restores the pure absolute (machine-epsilon) guard.
     implicit none
     class(RefinementIndicator2D_t),intent(inout) :: this
-    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
-  endsubroutine UpdateHost_RefinementIndicator2D_t
+    real(prec),intent(in) :: relativeEnergyFloor
 
-  subroutine UpdateDevice_RefinementIndicator2D_t(this)
-    implicit none
-    class(RefinementIndicator2D_t),intent(inout) :: this
-    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
-  endsubroutine UpdateDevice_RefinementIndicator2D_t
+    if(relativeEnergyFloor < 0.0_prec .or. relativeEnergyFloor >= 1.0_prec) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : relativeEnergyFloor must satisfy 0 <= floor < 1.'
+      stop 1
+    endif
+    this%relativeEnergyFloor = relativeEnergyFloor
 
-  subroutine Estimate_RefinementIndicator2D_t(this,solution,ivar)
-    !! Compute the per-element modal-energy indicator sigma_e and refine/keep/coarsen flag from
-    !! the nodal solution field. ivar selects the driving variable in [1,solution%nVar]; passing
-    !! SELF_AMR_ALLVARS (=0) reduces the indicator over all variables by taking, per element, the
-    !! largest (least smooth) smoothness ratio S_e before the log10.
+  endsubroutine SetRelativeEnergyFloor_RefinementIndicator2D_t
+
+  subroutine SetEnergyScale_RefinementIndicator2D_t(this,energyScale)
+    !! Pin the energy scale that normalizes the relative floor, in the units of the gate energy
+    !! (squared field amplitude times the reference-element area). Two reasons to use this rather
+    !! than the automatic maximum over elements:
+    !!
+    !!   - determinism: the automatic scale is a floating-point reduction, and under MPI it is a
+    !!     collective whose result can differ at round-off between rank counts, which propagates
+    !!     into the flags;
+    !!   - a poor automatic normalizer: a strong steady background would otherwise set the floor
+    !!     for a weak transient that is the feature of interest.
+    !!
+    !! Must be >= 0; 0 makes the gate collapse onto the absolute floor.
     implicit none
     class(RefinementIndicator2D_t),intent(inout) :: this
-    class(Scalar2D),intent(in) :: solution
+    real(prec),intent(in) :: energyScale
+
+    if(energyScale < 0.0_prec) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : energyScale must be non-negative.'
+      stop 1
+    endif
+    this%energyScale = energyScale
+    this%energyScaleIsSet = .true.
+
+  endsubroutine SetEnergyScale_RefinementIndicator2D_t
+
+  subroutine ClearEnergyScale_RefinementIndicator2D_t(this)
+    !! Return to the automatic energy scale (the largest gate energy over the elements).
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+
+    this%energyScale = 0.0_prec
+    this%energyScaleIsSet = .false.
+
+  endsubroutine ClearEnergyScale_RefinementIndicator2D_t
+
+  subroutine SetEnergyWeights_RefinementIndicator2D_t(this,w)
+    !! Set the per-variable weights w_v >= 0 of the gate energy g_e = sum_v w_v E_tot,e,v, where
+    !! E_tot,e,v is the exact L2 energy of variable v on the reference element.
+    !!
+    !! E_tot is a convex quadratic functional of the state, so g_e with these weights is a
+    !! discrete quadratic entropy integral over the element: taking w from the diagonal of the
+    !! entropy Hessian makes the gate an entropy (energy) measure rather than a raw sum of
+    !! squared variables, which is what makes it meaningful for a system whose variables carry
+    !! different units and magnitudes. For LinearEuler2D, whose entropy density is
+    !! 0.5*rho0*(u^2 + v^2) + 0.5*P^2/(rho0 c^2) and whose variables 4 and 5 are the
+    !! time-constant background fields c and rho0,
+    !!
+    !!   w = [ 0.5*rho0, 0.5*rho0, 0.5/(rho0*c0**2), 0.0, 0.0 ]
+    !!
+    !! is the entropy-weighted gate, and the zero weights keep the (large) background fields from
+    !! setting the scale.
+    !!
+    !! size(w) must equal the solution's nVar at Estimate time. Every weight must be >= 0 and at
+    !! least one must be > 0, else no element would ever clear the gate. Note that a weight on a
+    !! variable outside the driving-variable selection makes Estimate transform that variable too
+    !! (it is needed for the gate), which costs one extra modal transform per element per such
+    !! variable.
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+    real(prec),intent(in) :: w(:)
+    ! Local
+    integer :: v
+    logical :: anyPositive
+
+    if(size(w) < 1) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : SetEnergyWeights requires at least one weight.'
+      stop 1
+    endif
+    anyPositive = .false.
+    do v = 1,size(w)
+      if(w(v) < 0.0_prec) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : energy weights must be non-negative.'
+        stop 1
+      endif
+      if(w(v) > 0.0_prec) anyPositive = .true.
+    enddo
+    if(.not. anyPositive) then
+      print*,__FILE__,':',__LINE__, &
+        ' : Error : at least one energy weight must be positive.'
+      stop 1
+    endif
+
+    if(this%nVarWeights /= size(w)) then
+      if(associated(this%energyWeight)) deallocate(this%energyWeight)
+      allocate(this%energyWeight(1:size(w)))
+      this%nVarWeights = size(w)
+    endif
+    do v = 1,size(w)
+      this%energyWeight(v) = w(v)
+    enddo
+    this%energyWeightsSet = .true.
+
+  endsubroutine SetEnergyWeights_RefinementIndicator2D_t
+
+  subroutine ResolveEnergyWeights(this,nVar,ivar)
+    !! Ensure energyWeight is associated and sized to nVar. Weights supplied by SetEnergyWeights
+    !! must match nVar; otherwise the default weights are regenerated: unit weight on the driving
+    !! variable, or on every variable when ivar is SELF_AMR_ALLVARS. Resolved here rather than at
+    !! Init because the variable count belongs to the solution field, not to the indicator.
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+    integer,intent(in) :: nVar
     integer,intent(in) :: ivar
     ! Local
+    integer :: v
+
+    if(this%energyWeightsSet) then
+      if(this%nVarWeights /= nVar) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : energy weights were set for a different variable count.'
+        stop 1
+      endif
+      return
+    endif
+
+    if(this%nVarWeights /= nVar) then
+      if(associated(this%energyWeight)) deallocate(this%energyWeight)
+      allocate(this%energyWeight(1:nVar))
+      this%nVarWeights = nVar
+    endif
+    do v = 1,nVar
+      if(ivar == SELF_AMR_ALLVARS .or. v == ivar) then
+        this%energyWeight(v) = 1.0_prec
+      else
+        this%energyWeight(v) = 0.0_prec
+      endif
+    enddo
+
+  endsubroutine ResolveEnergyWeights
+
+  subroutine ResolveEnergyScale(this,energyScale,comm)
+    !! Determine the energy scale the relative floor is measured against: the pinned value when
+    !! SetEnergyScale was used, otherwise the largest gate energy over the (rank-local) elements.
+    !! When comm is present the maximum is taken over the communicator, so every rank applies the
+    !! same floor and the flags - hence the adapted mesh - do not depend on the decomposition.
+    !! One small collective per indicator evaluation, i.e. per adaptation epoch, never inside the
+    !! time-stepping loop.
+    implicit none
+    class(RefinementIndicator2D_t),intent(in) :: this
+    real(prec),intent(out) :: energyScale
+    integer,intent(in),optional :: comm
+    ! Local
+    integer :: iel,ierror,mpiPrec
+    real(prec) :: gmax
+
+    if(this%energyScaleIsSet) then
+      energyScale = this%energyScale
+      return
+    endif
+
+    gmax = 0.0_prec
+    do iel = 1,this%nElem
+      gmax = max(gmax,this%gate(iel))
+    enddo
+
+    if(present(comm)) then
+      if(prec == real32) then
+        mpiPrec = MPI_FLOAT
+      else
+        mpiPrec = MPI_DOUBLE
+      endif
+      call mpi_allreduce(gmax,energyScale,1,mpiPrec,MPI_MAX,comm,ierror)
+    else
+      energyScale = gmax
+    endif
+
+  endsubroutine ResolveEnergyScale
+
+  subroutine FinalizeIndicator(this,energyScale)
+    !! Second phase of an estimate, shared by every backend so that the flags are identical
+    !! whichever computed the spectra: apply the amplitude gate, take the log10 and set the
+    !! refine/keep/coarsen flags.
+    !!
+    !! On entry indicator(iel) holds the RAW smoothness ratio S_e from the first phase and
+    !! gate(iel) the element's gate energy; on exit indicator(iel) = log10(max(S_e,epsilon)) with
+    !! S_e forced to zero on gated elements. Nothing outside Estimate observes the intermediate
+    !! state.
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+    real(prec),intent(in) :: energyScale
+    ! Local
     integer :: iel
-    real(prec),parameter :: energyFloor = epsilon(1.0_prec)
+    real(prec) :: effFloor,se
+
+    ! The absolute term is the safety net for a field that is identically zero; the relative term
+    ! is what releases low-amplitude (but far-above-epsilon) residue behind a passing front.
+    effFloor = max(epsilon(1.0_prec),this%relativeEnergyFloor*energyScale)
+
+    do iel = 1,this%nElem
+      if(this%gate(iel) <= effFloor) then
+        se = 0.0_prec ! quiescent at the scale of the field: perfectly resolved
+      else
+        se = this%indicator(iel)
+      endif
+      this%indicator(iel) = log10(max(se,epsilon(1.0_prec)))
+      if(this%indicator(iel) > this%refineThreshold) then
+        this%flag(iel) = SELF_AMR_REFINE
+      elseif(this%indicator(iel) < this%coarsenThreshold) then
+        this%flag(iel) = SELF_AMR_COARSEN
+      else
+        this%flag(iel) = SELF_AMR_KEEP
+      endif
+    enddo
+
+  endsubroutine FinalizeIndicator
+
+  subroutine CheckEstimateArguments(this,solution,ivar,gate)
+    !! Argument validation shared by the portable and backend Estimate implementations.
+    implicit none
+    class(RefinementIndicator2D_t),intent(in) :: this
+    class(Scalar2D),intent(in) :: solution
+    integer,intent(in) :: ivar
+    real(prec),intent(in),optional :: gate(:)
 
     if(solution%N /= this%N) then
       print*,__FILE__,':',__LINE__, &
@@ -249,13 +556,70 @@ contains
         ' : Error : driving-variable index out of range.'
       stop 1
     endif
+    if(present(gate)) then
+      if(size(gate) < this%nElem) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : caller-supplied gate array is smaller than the element count.'
+        stop 1
+      endif
+    endif
+
+  endsubroutine CheckEstimateArguments
+
+  subroutine UpdateHost_RefinementIndicator2D_t(this)
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
+  endsubroutine UpdateHost_RefinementIndicator2D_t
+
+  subroutine UpdateDevice_RefinementIndicator2D_t(this)
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+    if(.false.) this%N = this%N ! CPU stub; suppress unused-dummy-argument warning
+  endsubroutine UpdateDevice_RefinementIndicator2D_t
+
+  subroutine Estimate_RefinementIndicator2D_t(this,solution,ivar,comm,gate)
+    !! Compute the per-element modal-energy indicator sigma_e and refine/keep/coarsen flag from
+    !! the nodal solution field. ivar selects the driving variable in [1,solution%nVar]; passing
+    !! SELF_AMR_ALLVARS (=0) reduces the indicator over all variables by taking, per element, the
+    !! largest (least smooth) smoothness ratio S_e before the log10.
+    !!
+    !! The estimate runs in two phases. The first is element-local and parallel: it forms each
+    !! element's modal spectrum, its raw smoothness ratio S_e, and its gate energy
+    !! g = sum_v w_v E_tot,v. The second applies the amplitude gate, the log10 and the thresholds,
+    !! and is deferred because the gate needs a field-wide energy scale (a reduction, and under
+    !! MPI a collective) that no element-local pass can supply. Between the phases indicator(:)
+    !! transiently holds the raw ratio rather than its logarithm.
+    !!
+    !! comm, when present, is the MPI communicator over which the automatic energy scale is
+    !! maximized, so that the flags do not depend on the domain decomposition. gate, when present,
+    !! replaces the weighted-sum gate energy with a caller-computed per-element value - for
+    !! example an exactly integrated nodal entropy - and is used both for the scale and for the
+    !! gate comparison.
+    implicit none
+    class(RefinementIndicator2D_t),intent(inout) :: this
+    class(Scalar2D),intent(in) :: solution
+    integer,intent(in) :: ivar
+    integer,intent(in),optional :: comm
+    real(prec),intent(in),optional :: gate(:)
+    ! Local
+    integer :: iel
+    real(prec) :: energyScale
+
+    call CheckEstimateArguments(this,solution,ivar,gate)
+    call ResolveEnergyWeights(this,solution%nVar,ivar)
 
     do concurrent(iel=1:this%nElem)
       block
         integer :: j,p,q,ii,v,v0,v1,Np
         real(prec) :: tmp(1:this%N+1,1:this%N+1)
         real(prec) :: uhat(1:this%N+1,1:this%N+1)
-        real(prec) :: acc,etot,eclip1,eclip2,r1,r2,se,semax
+        real(prec) :: acc,etot,eclip1,eclip2,r1,r2,se,semax,g,w
+        logical :: needSe,needG
+        ! Absolute (machine-epsilon) guard on the energy RATIOS below. This is not the amplitude
+        ! gate: it only keeps 0/0 out of r1 and r2. The amplitude gate is relative and is applied
+        ! in FinalizeIndicator, once the field-wide energy scale is known.
+        real(prec),parameter :: energyFloor = epsilon(1.0_prec)
 
         Np = this%N+1
         if(ivar == SELF_AMR_ALLVARS) then
@@ -267,7 +631,16 @@ contains
         endif
 
         semax = 0.0_prec
-        do v = v0,v1
+        g = 0.0_prec
+        do v = 1,solution%nVar
+          ! A variable is transformed if it drives the indicator, or if it carries a non-zero gate
+          ! weight (its energy is then needed for the gate). With the default weights these
+          ! coincide, so the work is exactly what it was before the gate existed.
+          w = this%energyWeight(v)
+          needSe = (v >= v0 .and. v <= v1)
+          needG = (w /= 0.0_prec)
+          if(.not.(needSe .or. needG)) cycle
+
           ! Pass 1 (xi direction): tmp(p,j) = sum_i Pmodal(i,p) * u(i,j)
           do j = 1,Np
             do p = 1,Np
@@ -302,32 +675,42 @@ contains
             enddo
           enddo
 
-          if(etot <= energyFloor) then
-            ! Field is (near) identically zero on this element: perfectly resolved.
-            se = 0.0_prec
-          else
-            r1 = (etot-eclip1)/etot
-            if(this%N >= 2 .and. eclip1 > energyFloor) then
-              r2 = (eclip1-eclip2)/eclip1
-            else
-              r2 = 0.0_prec
-            endif
-            se = max(r1,r2)
-          endif
+          ! Gate energy: g = sum_v w_v E_tot,v, the discrete (quadratic) entropy integral over
+          ! the element when the weights come from an entropy Hessian.
+          if(needG) g = g+w*etot
 
-          semax = max(semax,se)
+          if(needSe) then
+            if(etot <= energyFloor) then
+              ! Field is (near) identically zero on this element: perfectly resolved.
+              se = 0.0_prec
+            else
+              r1 = (etot-eclip1)/etot
+              if(this%N >= 2 .and. eclip1 > energyFloor) then
+                r2 = (eclip1-eclip2)/eclip1
+              else
+                r2 = 0.0_prec
+              endif
+              se = max(r1,r2)
+            endif
+
+            semax = max(semax,se)
+          endif
         enddo
 
-        this%indicator(iel) = log10(max(semax,energyFloor))
-        if(this%indicator(iel) > this%refineThreshold) then
-          this%flag(iel) = SELF_AMR_REFINE
-        elseif(this%indicator(iel) < this%coarsenThreshold) then
-          this%flag(iel) = SELF_AMR_COARSEN
-        else
-          this%flag(iel) = SELF_AMR_KEEP
-        endif
+        ! Raw ratio; FinalizeIndicator gates it and takes the log10 in place.
+        this%indicator(iel) = semax
+        this%gate(iel) = g
       endblock
     enddo
+
+    if(present(gate)) then
+      do iel = 1,this%nElem
+        this%gate(iel) = gate(iel)
+      enddo
+    endif
+
+    call ResolveEnergyScale(this,energyScale,comm)
+    call FinalizeIndicator(this,energyScale)
 
   endsubroutine Estimate_RefinementIndicator2D_t
 
