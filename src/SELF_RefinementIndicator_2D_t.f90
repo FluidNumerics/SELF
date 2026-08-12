@@ -368,6 +368,18 @@ contains
     !!
     !! Must satisfy quiescent floor <= significant floor < 1. It defaults to the quiescent floor,
     !! which collapses the band to the single cut and reproduces the ungapped behaviour exactly.
+    !!
+    !! KEEP THE BAND NARROW. Its upper edge is functionally "do not spend levels below this
+    !! energy", which is the same knob as the floor itself and carries the same cost in refinement
+    !! depth. Measured on the ultrasound benchmark's initial adaptation (see
+    !! SELF_AMR_DEFAULT_RELFLOOR), with a quiescent floor of 1e-12:
+    !!
+    !!   significant floor   1e-12   3e-12   1e-11   3e-11   1e-10
+    !!   elements / level    328/2   328/2   268/1   268/1   268/1
+    !!
+    !! A band up to ~3x the floor leaves refinement depth untouched; at 10x it collapses a level,
+    !! exactly as raising the floor to 1e-10 does. The band is a thrash damper, not a savings knob:
+    !! widen it only as far as is needed to stop flags oscillating.
     implicit none
     class(RefinementIndicator2D_t),intent(inout) :: this
     real(prec),intent(in) :: relativeEnergyFloor

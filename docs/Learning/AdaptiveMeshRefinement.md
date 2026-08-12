@@ -158,6 +158,18 @@ unchanged unless a caller opts in. `test/refinement_indicator_2d_energy_hysteres
 three zones and asserts that an in-band energy drifting by a factor of ten either way does not move
 the flag, while the same drift across a degenerate band does.
 
+**Keep the band narrow.** Its upper edge is functionally *"do not spend levels below this energy"* —
+the same knob as the floor, with the same cost in refinement depth. On the ultrasound benchmark's
+initial adaptation, with a quiescent floor of \(10^{-12}\):
+
+| significant floor | 1e-12 | 3e-12 | 1e-11 | 3e-11 | 1e-10 |
+| --- | --- | --- | --- | --- | --- |
+| elements / max level | 328 / 2 | 328 / 2 | **268 / 1** | 268 / 1 | 268 / 1 |
+
+A band up to ~3× the floor leaves depth untouched; at 10× it collapses a level, exactly as raising
+the floor to \(10^{-10}\) does. The band is a thrash damper, not a savings knob — widen it only as
+far as is needed to stop flags oscillating.
+
 **Raising the floor is not free.** The gate cannot distinguish residue from the low-amplitude
 *flank* of a feature that is genuinely under-resolved, so an aggressive floor buys element count at
 the cost of refinement **depth**. Measured on the ultrasound point-source benchmark
