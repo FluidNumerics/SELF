@@ -135,6 +135,29 @@ quiescent. It sits below \(\varepsilon\) in `real32`, so in a single-precision b
 term dominates and the gate is inactive unless a caller raises it — the safe direction, since a
 `real32` field cannot represent −120 dB structure anyway.
 
+#### The energy hysteresis band
+
+As described so far the gate is a **single hard cut**, which reintroduces on the energy axis exactly
+the thrashing the two \(\sigma\) thresholds exist to prevent: an element whose energy drifts across
+that one value flips `COARSEN` ↔ `REFINE` on successive epochs, churning the mesh without the
+solution changing meaningfully. `significantEnergyFloor` opens a band instead:
+
+| gate energy \(g_e\) | flag |
+| --- | --- |
+| \(\le\) quiescent floor | `COARSEN`, whatever the spectrum says |
+| between the floors | `KEEP` — hold the mesh |
+| \(>\) significant floor | the spectrum decides, as before |
+
+The middle zone reads *too weak to be worth spending levels on, too strong to declare resolved*,
+and is stable under a small change in amplitude. Inside the band \(\sigma_e\) still reports the
+**true** spectrum — the band holds the flag, it does not falsify the diagnostic — so for those
+elements `flag` is deliberately not what thresholding \(\sigma_e\) would give.
+
+It defaults to the quiescent floor, collapsing the band to the single cut, so behaviour is
+unchanged unless a caller opts in. `test/refinement_indicator_2d_energy_hysteresis.f90` covers the
+three zones and asserts that an in-band energy drifting by a factor of ten either way does not move
+the flag, while the same drift across a degenerate band does.
+
 **Raising the floor is not free.** The gate cannot distinguish residue from the low-amplitude
 *flank* of a feature that is genuinely under-resolved, so an aggressive floor buys element count at
 the cost of refinement **depth**. Measured on the ultrasound point-source benchmark
@@ -202,6 +225,8 @@ call amr%Init(interp, nElem, refineThreshold=-3.0_prec, coarsenThreshold=-8.0_pr
 
 ! Amplitude gate (all optional; these are the defaults unless set).
 call amr%SetRelativeEnergyFloor(1.0e-12_prec) ! 0 disables the gate
+call amr%SetRelativeEnergyFloor(1.0e-12_prec, &  ! ... or open a hysteresis band
+                                significantEnergyFloor=1.0e-10_prec)
 call amr%SetEnergyScale(pRef**2)              ! pin the scale; ClearEnergyScale undoes it
 call amr%SetEnergyWeights(w)                  ! per-variable gate weights, e.g. from the entropy
 

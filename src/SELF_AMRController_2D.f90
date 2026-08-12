@@ -131,6 +131,7 @@ module SELF_AMRController_2D
     ! is Freed and re-Init-ed (intent(out)) at the end of every adapting epoch, which resets its
     ! own copies; the controller re-applies these afterwards.
     real(prec) :: relativeEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
+    real(prec) :: significantEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
     real(prec),allocatable :: energyWeights(:)
 
   contains
@@ -147,7 +148,8 @@ module SELF_AMRController_2D
 contains
 
   subroutine Init_AMRController2D(this,model,refineThreshold,coarsenThreshold,ivar, &
-                                  maxLevel,nHalo,relativeEnergyFloor,energyWeights)
+                                  maxLevel,nHalo,relativeEnergyFloor,energyWeights, &
+                                  significantEnergyFloor)
     !! Attach the controller to an initialized model. The model's current mesh becomes the
     !! forest's base mesh (level 0); its geometry interpolant drives the indicator and the
     !! solution transfer. Thresholds are the sigma = log10 modal-energy-ratio cut-offs of the
@@ -162,7 +164,9 @@ contains
     !! passing front. It is an energy fraction, so the square of the corresponding amplitude
     !! fraction; 0 disables the gate. energyWeights optionally weights the per-variable energies
     !! that form the gate, e.g. from the model's entropy function - see
-    !! RefinementIndicator2D%SetEnergyWeights. Both default to the indicator's own defaults.
+    !! RefinementIndicator2D%SetEnergyWeights. significantEnergyFloor opens a hysteresis band on
+    !! the energy axis: elements between the two floors hold their mesh (SELF_AMR_KEEP) instead of
+    !! flipping across a single hard cut. All three default to the indicator's own defaults.
     implicit none
     class(AMRController2D),intent(out) :: this
     class(DGModel2D_t),intent(in) :: model
@@ -173,6 +177,7 @@ contains
     integer,intent(in) :: nHalo
     real(prec),intent(in),optional :: relativeEnergyFloor
     real(prec),intent(in),optional :: energyWeights(:)
+    real(prec),intent(in),optional :: significantEnergyFloor
 
     if(.not. associated(model%mesh)) then
       print*,__FILE__,':',__LINE__, &
@@ -195,7 +200,11 @@ contains
     this%nHalo = nHalo
     this%refineThreshold = refineThreshold
     this%coarsenThreshold = coarsenThreshold
-    if(present(relativeEnergyFloor)) this%relativeEnergyFloor = relativeEnergyFloor
+    if(present(relativeEnergyFloor)) then
+      this%relativeEnergyFloor = relativeEnergyFloor
+      this%significantEnergyFloor = relativeEnergyFloor
+    endif
+    if(present(significantEnergyFloor)) this%significantEnergyFloor = significantEnergyFloor
     if(present(energyWeights)) then
       allocate(this%energyWeights(1:size(energyWeights)))
       this%energyWeights = energyWeights
@@ -220,7 +229,8 @@ contains
     implicit none
     class(AMRController2D),intent(inout) :: this
 
-    call this%indicator%SetRelativeEnergyFloor(this%relativeEnergyFloor)
+    call this%indicator%SetRelativeEnergyFloor(this%relativeEnergyFloor, &
+                                               significantEnergyFloor=this%significantEnergyFloor)
     if(allocated(this%energyWeights)) then
       call this%indicator%SetEnergyWeights(this%energyWeights)
     endif

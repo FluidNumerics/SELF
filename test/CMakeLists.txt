@@ -112,6 +112,7 @@ add_fortran_tests (
     "refinement_indicator_2d_guard_emptyweights.f90"
     "refinement_indicator_2d_guard_weightcount.f90"
     "refinement_indicator_2d_guard_gatesize.f90"
+    "refinement_indicator_2d_guard_significantfloor.f90"
     "adaptive_mesh_2d_guard_unbalanced.f90"
     "meshrefine_2d_guard_multirank.f90"
     "quadtree_2d_guard_multirank.f90"
@@ -143,6 +144,7 @@ add_fortran_tests (
     "mortarprojection_identity.f90"
     "refinement_indicator_2d_spectraldecay.f90"
     "refinement_indicator_2d_relative_floor.f90"
+    "refinement_indicator_2d_energy_hysteresis.f90"
     "mappedscalarmortarexchange_2d_linear.f90"
     "mappedvectordgdivergence_2d_mortar.f90"
     "mappedscalargradient_3d_constant.f90"
@@ -247,6 +249,7 @@ set_tests_properties(
     refinement_indicator_2d_guard_emptyweights
     refinement_indicator_2d_guard_weightcount
     refinement_indicator_2d_guard_gatesize
+    refinement_indicator_2d_guard_significantfloor
     adaptive_mesh_2d_guard_unbalanced
     meshrefine_2d_guard_multirank
     quadtree_2d_guard_multirank

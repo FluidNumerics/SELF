@@ -101,6 +101,18 @@ module SELF_RefinementIndicator_2D_t
 !! step and produced a mesh roughly twice as large by the end of the run. Measure before raising
 !! it; see the note on SELF_AMR_DEFAULT_RELFLOOR.
 !!
+!! The gate is a single hard cut by default, which reintroduces on the energy axis exactly the
+!! thrashing the two sigma thresholds exist to prevent: an element whose energy drifts across that
+!! one value flips COARSEN <-> REFINE on successive epochs. Supplying significantEnergyFloor opens
+!! a hysteresis band instead,
+!!
+!!   g_e <= quiescent floor            ->  COARSEN, whatever the spectrum says
+!!   quiescent < g_e <= significant    ->  SELF_AMR_KEEP  (hold the mesh)
+!!   g_e > significant floor           ->  the spectrum decides, as before
+!!
+!! the middle zone reading "too weak to be worth spending levels on, too strong to declare
+!! resolved". Inside the band sigma_e still reports the true spectrum; only the flag is held.
+!!
 !! energyScale defaults to the largest gate energy over the elements (globally reduced when
 !! Estimate is given an MPI communicator), which makes the gate track a decaying front. It can be
 !! pinned with SetEnergyScale for callers that need the flag decision to be independent of a
@@ -186,6 +198,12 @@ module SELF_RefinementIndicator_2D_t
       !! amplitude squared, so this is 10**(dB/10) in amplitude terms: 1e-8 gates amplitudes
       !! below 1e-4 (-80 dB) of the field scale. Set to 0 to recover the pure absolute
       !! (machine-epsilon) floor.
+    real(prec) :: significantEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
+      !! Upper edge of the hysteresis band on the energy axis. Elements between
+      !! relativeEnergyFloor and this fraction of the energy scale are flagged SELF_AMR_KEEP
+      !! whatever their spectrum: too weak to justify spending levels on, too strong to declare
+      !! resolved. Equal to relativeEnergyFloor by default, which collapses the band to a single
+      !! hard cut. See SetRelativeEnergyFloor.
     real(prec) :: energyScale = 0.0_prec
       !! Squared field scale the relative floor is measured against, in the units of the gate
       !! energy. Meaningful only when energyScaleIsSet is true; otherwise the scale is recomputed
@@ -316,7 +334,8 @@ contains
 
   endsubroutine SetThresholds_RefinementIndicator2D_t
 
-  subroutine SetRelativeEnergyFloor_RefinementIndicator2D_t(this,relativeEnergyFloor)
+  subroutine SetRelativeEnergyFloor_RefinementIndicator2D_t(this,relativeEnergyFloor, &
+                                                            significantEnergyFloor)
     !! Set the relative energy floor of the amplitude gate. An element whose gate energy g
     !! satisfies
     !!
@@ -333,9 +352,26 @@ contains
     !! Raising this beyond the default trades against refinement depth - the gate cannot tell
     !! residue from the flank of an under-resolved feature - and has been measured to cost more
     !! than it saves on a propagating-wave problem. See SELF_AMR_DEFAULT_RELFLOOR.
+    !!
+    !! significantEnergyFloor, when supplied, is the UPPER edge of a hysteresis band on the energy
+    !! axis, exactly analogous to the refine/coarsen band on sigma_e:
+    !!
+    !!   g <= quiescent floor                    -> COARSEN, whatever the spectrum says
+    !!   quiescent floor < g <= significant      -> SELF_AMR_KEEP
+    !!   g > significant floor                   -> the spectrum decides, as before
+    !!
+    !! Without it the amplitude gate is a single hard cut, so an element whose energy drifts across
+    !! that one value flips COARSEN <-> REFINE on successive epochs - the thrashing the two sigma
+    !! thresholds exist to prevent, reintroduced on the other axis. The middle zone says "too weak
+    !! to be worth spending levels on, too strong to declare resolved", which is the honest answer
+    !! there and is stable under a small change in amplitude.
+    !!
+    !! Must satisfy quiescent floor <= significant floor < 1. It defaults to the quiescent floor,
+    !! which collapses the band to the single cut and reproduces the ungapped behaviour exactly.
     implicit none
     class(RefinementIndicator2D_t),intent(inout) :: this
     real(prec),intent(in) :: relativeEnergyFloor
+    real(prec),intent(in),optional :: significantEnergyFloor
 
     if(relativeEnergyFloor < 0.0_prec .or. relativeEnergyFloor >= 1.0_prec) then
       print*,__FILE__,':',__LINE__, &
@@ -343,6 +379,16 @@ contains
       stop 1
     endif
     this%relativeEnergyFloor = relativeEnergyFloor
+    this%significantEnergyFloor = relativeEnergyFloor
+    if(present(significantEnergyFloor)) then
+      if(significantEnergyFloor < relativeEnergyFloor .or. &
+         significantEnergyFloor >= 1.0_prec) then
+        print*,__FILE__,':',__LINE__, &
+          ' : Error : significantEnergyFloor must satisfy relativeEnergyFloor <= floor < 1.'
+        stop 1
+      endif
+      this%significantEnergyFloor = significantEnergyFloor
+    endif
 
   endsubroutine SetRelativeEnergyFloor_RefinementIndicator2D_t
 
@@ -524,18 +570,26 @@ contains
     !!
     !! On entry indicator(iel) holds the RAW smoothness ratio S_e from the first phase and
     !! gate(iel) the element's gate energy; on exit indicator(iel) = log10(max(S_e,epsilon)) with
-    !! S_e forced to zero on gated elements. Nothing outside Estimate observes the intermediate
+    !! S_e forced to zero on quiescent elements. Nothing outside Estimate observes the intermediate
     !! state.
+    !!
+    !! Elements inside the energy hysteresis band keep their true spectral sigma_e - it stays a
+    !! faithful diagnostic of the spectrum - but have their flag forced to SELF_AMR_KEEP. So for
+    !! those elements the flag is deliberately NOT the value thresholding sigma_e would give; that
+    !! is the whole point of the band.
     implicit none
     class(RefinementIndicator2D_t),intent(inout) :: this
     real(prec),intent(in) :: energyScale
     ! Local
     integer :: iel
-    real(prec) :: effFloor,se
+    real(prec) :: effFloor,effSignificant,se
 
     ! The absolute term is the safety net for a field that is identically zero; the relative term
     ! is what releases low-amplitude (but far-above-epsilon) residue behind a passing front.
     effFloor = max(epsilon(1.0_prec),this%relativeEnergyFloor*energyScale)
+    ! Upper edge of the band; never below the lower edge, so a degenerate band stays degenerate
+    ! even when the absolute term is what sets the lower edge.
+    effSignificant = max(effFloor,this%significantEnergyFloor*energyScale)
 
     do iel = 1,this%nElem
       if(this%gate(iel) <= effFloor) then
@@ -544,7 +598,12 @@ contains
         se = this%indicator(iel)
       endif
       this%indicator(iel) = log10(max(se,epsilon(1.0_prec)))
-      if(this%indicator(iel) > this%refineThreshold) then
+      if(this%gate(iel) > effFloor .and. this%gate(iel) <= effSignificant) then
+        ! Inside the energy hysteresis band: too weak to justify spending levels on, too strong to
+        ! declare resolved. Holding the mesh here is what keeps an element whose amplitude drifts
+        ! across the gate from flipping REFINE <-> COARSEN on successive epochs.
+        this%flag(iel) = SELF_AMR_KEEP
+      elseif(this%indicator(iel) > this%refineThreshold) then
         this%flag(iel) = SELF_AMR_REFINE
       elseif(this%indicator(iel) < this%coarsenThreshold) then
         this%flag(iel) = SELF_AMR_COARSEN
