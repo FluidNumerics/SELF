@@ -40,6 +40,11 @@ module SELF_RefinementIndicator_2D
     type(c_ptr) :: Pmodal_gpu = c_null_ptr
     type(c_ptr) :: indicator_gpu = c_null_ptr
     type(c_ptr) :: flag_gpu = c_null_ptr
+    type(c_ptr) :: gate_gpu = c_null_ptr
+    type(c_ptr) :: energyWeight_gpu = c_null_ptr
+    integer :: nVarWeights_gpu = 0
+      !! Allocated length of energyWeight_gpu. Zero until the first Estimate fixes the solution's
+      !! variable count, which is not known at Init.
 
   contains
 
@@ -76,6 +81,11 @@ contains
     call gpuCheck(hipMalloc(this%Pmodal_gpu,sizeof(this%Pmodal)))
     call gpuCheck(hipMalloc(this%indicator_gpu,sizeof(this%indicator)))
     call gpuCheck(hipMalloc(this%flag_gpu,sizeof(this%flag)))
+    call gpuCheck(hipMalloc(this%gate_gpu,sizeof(this%gate)))
+    ! The gate weights are sized to the solution's variable count, which the first Estimate
+    ! establishes; nothing is allocated for them here.
+    this%energyWeight_gpu = c_null_ptr
+    this%nVarWeights_gpu = 0
 
     call this%UpdateDevice()
 
@@ -88,9 +98,14 @@ contains
     if(c_associated(this%Pmodal_gpu)) call gpuCheck(hipFree(this%Pmodal_gpu))
     if(c_associated(this%indicator_gpu)) call gpuCheck(hipFree(this%indicator_gpu))
     if(c_associated(this%flag_gpu)) call gpuCheck(hipFree(this%flag_gpu))
+    if(c_associated(this%gate_gpu)) call gpuCheck(hipFree(this%gate_gpu))
+    if(c_associated(this%energyWeight_gpu)) call gpuCheck(hipFree(this%energyWeight_gpu))
     this%Pmodal_gpu = c_null_ptr
     this%indicator_gpu = c_null_ptr
     this%flag_gpu = c_null_ptr
+    this%gate_gpu = c_null_ptr
+    this%energyWeight_gpu = c_null_ptr
+    this%nVarWeights_gpu = 0
 
     call Free_RefinementIndicator2D_t(this)
 
@@ -104,6 +119,8 @@ contains
                             sizeof(this%indicator),hipMemcpyDeviceToHost))
     call gpuCheck(hipMemcpy(c_loc(this%flag),this%flag_gpu, &
                             sizeof(this%flag),hipMemcpyDeviceToHost))
+    call gpuCheck(hipMemcpy(c_loc(this%gate),this%gate_gpu, &
+                            sizeof(this%gate),hipMemcpyDeviceToHost))
 
   endsubroutine UpdateHost_RefinementIndicator2D
 
@@ -117,40 +134,63 @@ contains
                             sizeof(this%indicator),hipMemcpyHostToDevice))
     call gpuCheck(hipMemcpy(this%flag_gpu,c_loc(this%flag), &
                             sizeof(this%flag),hipMemcpyHostToDevice))
+    call gpuCheck(hipMemcpy(this%gate_gpu,c_loc(this%gate), &
+                            sizeof(this%gate),hipMemcpyHostToDevice))
 
   endsubroutine UpdateDevice_RefinementIndicator2D
 
-  subroutine Estimate_RefinementIndicator2D(this,solution,ivar)
-    !! GPU path: one device thread per element computes the modal transform and energy
-    !! ratios, writes the indicator and flag on device, then copies both back to the host so
-    !! the (host-side) mesh-adaptation logic can consume them directly.
+  subroutine Estimate_RefinementIndicator2D(this,solution,ivar,comm,gate)
+    !! GPU path: one device thread per element computes the modal transform, the raw smoothness
+    !! ratio and the gate energy; those are copied back to the host, where the shared second phase
+    !! applies the amplitude gate, the log10 and the thresholds.
+    !!
+    !! The second phase is host-side (rather than a second device kernel) because the amplitude
+    !! gate needs a field-wide energy scale - a reduction, and an MPI collective when the mesh is
+    !! decomposed - that an element-local device thread cannot supply. Running it through the same
+    !! FinalizeIndicator the portable backend uses also makes the flags identical on CPU and GPU
+    !! by construction. The extra traffic is one per-element array each way, once per adaptation
+    !! epoch; nothing is added to the time-stepping loop.
     implicit none
     class(RefinementIndicator2D),intent(inout) :: this
     class(Scalar2D),intent(in) :: solution
     integer,intent(in) :: ivar
+    integer,intent(in),optional :: comm
+    real(prec),intent(in),optional :: gate(:)
+    ! Local
+    integer :: iel
+    real(prec) :: energyScale
 
-    if(solution%N /= this%N) then
-      print*,__FILE__,':',__LINE__, &
-        ' : Error : solution degree does not match indicator degree.'
-      stop 1
-    endif
-    if(solution%nElem /= this%nElem) then
-      print*,__FILE__,':',__LINE__, &
-        ' : Error : solution element count does not match indicator element count.'
-      stop 1
-    endif
-    if(ivar < 0 .or. ivar > solution%nVar) then
-      print*,__FILE__,':',__LINE__, &
-        ' : Error : driving-variable index out of range.'
-      stop 1
-    endif
+    call CheckEstimateArguments(this,solution,ivar,gate)
+    call ResolveEnergyWeights(this,solution%nVar,ivar)
 
+    if(this%nVarWeights_gpu /= this%nVarWeights) then
+      if(c_associated(this%energyWeight_gpu)) call gpuCheck(hipFree(this%energyWeight_gpu))
+      call gpuCheck(hipMalloc(this%energyWeight_gpu,sizeof(this%energyWeight)))
+      this%nVarWeights_gpu = this%nVarWeights
+    endif
+    call gpuCheck(hipMemcpy(this%energyWeight_gpu,c_loc(this%energyWeight), &
+                            sizeof(this%energyWeight),hipMemcpyHostToDevice))
+
+    ! First phase on the device. indicator_gpu transiently holds the RAW ratio S_e, not log10(S_e).
     call RefinementIndicator_2D_gpu(this%Pmodal_gpu,solution%interior_gpu, &
-                                    this%indicator_gpu,this%flag_gpu, &
-                                    this%refineThreshold,this%coarsenThreshold, &
+                                    this%energyWeight_gpu, &
+                                    this%indicator_gpu,this%gate_gpu, &
                                     this%N,solution%nVar,ivar,this%nElem)
 
     call this%UpdateHost()
+
+    if(present(gate)) then
+      do iel = 1,this%nElem
+        this%gate(iel) = gate(iel)
+      enddo
+    endif
+
+    call ResolveEnergyScale(this,energyScale,comm)
+    call FinalizeIndicator(this,energyScale)
+
+    ! Re-establish the device mirrors of indicator/flag/gate, which the host phase has just
+    ! rewritten, so the device copies are never left stale.
+    call this%UpdateDevice()
 
   endsubroutine Estimate_RefinementIndicator2D
 

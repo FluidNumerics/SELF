@@ -74,6 +74,10 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
 !!   SELF_AMR_ULTRASOUND_LR        source half-width in m, overriding the maxLevel-derived
 !!                                 value; f0 ~ c0/(4*Lr).
 !!   SELF_AMR_ULTRASOUND_EPOCHLEN  adaptation cadence in s, overriding stepsPerEpoch * dt.
+!!   SELF_AMR_ULTRASOUND_RELFLOOR  relative energy floor of the indicator's amplitude gate
+!!                                 (default SELF_AMR_DEFAULT_RELFLOOR); 0 disables the gate.
+!!   SELF_AMR_ULTRASOUND_SIGNIFFLOOR  upper edge of the gate's hysteresis band (default: the
+!!                                 floor itself, i.e. a single hard cut).
 !!
 !! The run prints a CONFIG_* block (resolved resolution, f0, points per wavelength) and a
 !! BENCH_* block (wall-clock split between time integration and adaptation) so a sweep over
@@ -123,6 +127,7 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   logical :: adapted
   real(prec) :: e0,ef,dt
   real(prec) :: Lr,LrRamp,epochLength,hFinest,lambda,f0,ppw
+  real(prec) :: relativeEnergyFloor,significantEnergyFloor
   character(32) :: envstr
   ! Wall-clock instrumentation of the epoch loop. system_clock with an integer(int64) count
   ! is a monotonic wall clock; ForwardStep's own TIMER macro (src/SELF_Macros.h) expands to
@@ -174,6 +179,27 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
     read(envstr,*) epochLength
   endif
 
+  ! Amplitude gate of the refinement indicator (see SELF_RefinementIndicator_2D): elements below
+  ! this fraction of the field's peak ENERGY are treated as quiescent and released. Overridable
+  ! because the useful value is problem-dependent - it has to sit below the dynamic range of
+  ! interest and above the residue left behind the front - and because sweeping it is how the
+  ! saving from coarsening behind the wave is measured. 0 restores the pre-gate behaviour, in
+  ! which the wake is never released and the refined region grows to the whole swept area.
+  relativeEnergyFloor = SELF_AMR_DEFAULT_RELFLOOR
+  call get_environment_variable("SELF_AMR_ULTRASOUND_RELFLOOR",envstr,status=envstat)
+  if(envstat == 0) then
+    read(envstr,*) relativeEnergyFloor
+  endif
+
+  ! Upper edge of the amplitude gate's hysteresis band (see SELF_RefinementIndicator_2D).
+  ! Defaults to the floor itself, i.e. a single hard cut; overridable so the band's effect on
+  ! element count can be swept the same way the floor's was.
+  significantEnergyFloor = relativeEnergyFloor
+  call get_environment_variable("SELF_AMR_ULTRASOUND_SIGNIFFLOOR",envstr,status=envstat)
+  if(envstat == 0) then
+    read(envstr,*) significantEnergyFloor
+  endif
+
   ! Resolution actually being requested, reported so a sweep over maxLevel is interpretable.
   hFinest = Lx/real(nElemX,prec)/2.0_prec**maxLevel
   lambda = 4.0_prec*Lr ! dominant wavelength of the wavelet
@@ -186,6 +212,8 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   write(output_unit,'(A,ES16.7E3)') "CONFIG_f0_Hz = ",f0
   write(output_unit,'(A,ES16.7E3)') "CONFIG_pointsPerWavelength = ",ppw
   write(output_unit,'(A,ES16.7E3)') "CONFIG_epochLength_s = ",epochLength
+  write(output_unit,'(A,ES16.7E3)') "CONFIG_relativeEnergyFloor = ",relativeEnergyFloor
+  write(output_unit,'(A,ES16.7E3)') "CONFIG_significantEnergyFloor = ",significantEnergyFloor
 
   bcids(1:4) = [SELF_BC_RADIATION, & ! south
                 SELF_BC_RADIATION, & ! east
@@ -207,7 +235,9 @@ program LinearEuler2D_AMR_Ultrasound_PointSource
   call modelobj%SetTimeIntegrator(integrator)
 
   call controller%Init(modelobj,refineThreshold=-3.0_prec,coarsenThreshold=-8.0_prec, &
-                       ivar=3,maxLevel=maxLevel,nHalo=2)
+                       ivar=3,maxLevel=maxLevel,nHalo=2, &
+                       relativeEnergyFloor=relativeEnergyFloor, &
+                       significantEnergyFloor=significantEnergyFloor)
 
   ! ---- Initial condition + static refinement to the pulse ----
   ! After each mesh change the pulse is re-evaluated analytically on the new mesh so the
