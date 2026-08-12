@@ -91,8 +91,15 @@ module SELF_RefinementIndicator_2D_t
 !!   g_e <= effective floor   ->   S_e := 0   (element is quiescent, hence resolved)
 !!
 !! gives an amplitude gate that is independent of the modal shape. Because energy goes as
-!! amplitude squared, relativeEnergyFloor is 10**(dB/10) in amplitude terms: the default 1e-8
-!! treats amplitudes below 1e-4 (-80 dB) of the field scale as quiescent.
+!! amplitude squared, relativeEnergyFloor is 10**(dB/10) in amplitude terms: the default 1e-12
+!! treats amplitudes below 1e-6 (-120 dB) of the field scale as quiescent.
+!!
+!! Raising the floor is NOT free, and the useful range is narrower than it looks. The gate cannot
+!! distinguish residue from the low-amplitude flank of a feature that is genuinely under-resolved,
+!! so an aggressive floor also suppresses refinement DEPTH: on the ultrasound benchmark a floor of
+!! 1e-8 stopped the source pulse from reaching the level cap, which doubled the level-based time
+!! step and produced a mesh roughly twice as large by the end of the run. Measure before raising
+!! it; see the note on SELF_AMR_DEFAULT_RELFLOOR.
 !!
 !! energyScale defaults to the largest gate energy over the elements (globally reduced when
 !! Estimate is given an MPI communicator), which makes the gate track a decaying front. It can be
@@ -146,12 +153,23 @@ module SELF_RefinementIndicator_2D_t
   ! driving-variable index to Estimate.
   integer,parameter :: SELF_AMR_ALLVARS = 0
 
-  ! Default relative energy floor of the amplitude gate (see the module header). 1e-8 in energy
-  ! is 1e-4 (-80 dB) in amplitude relative to the field scale. Precision-aware for the same
-  ! reason as locateTolerance in SELF_Constants: the gate is max(epsilon, floor*scale), so in
-  ! real32 (epsilon = 1.2e-7) a fixed 1e-8 would be masked by the absolute term for any field
-  ! scale of order one and the relative gate would never engage. real64 keeps 1e-8.
-  real(prec),parameter :: SELF_AMR_DEFAULT_RELFLOOR = max(1.0e-8_prec,epsilon(1.0_prec))
+  ! Default relative energy floor of the amplitude gate (see the module header). 1e-12 in energy
+  ! is 1e-6 (-120 dB) in amplitude relative to the field scale.
+  !
+  ! This default is deliberately conservative, and measured rather than argued. On the ultrasound
+  ! point-source benchmark (examples/linear_euler2d_amr_ultrasound_pointsource, 30 epochs,
+  ! maxLevel 2) it gives 1.40x fewer elements on average than no gate at all, with an initial
+  ! adaptation - and hence a level-based time step - identical to the ungated run. Raising it to
+  ! 1e-8 was measured to be actively HARMFUL there: the gate then also suppresses the source
+  ! pulse's skirt, the forest never reaches the level cap, RecommendedTimeStep doubles dt, and the
+  ! resulting time-integration error drives so much later refinement that the final mesh is
+  ! roughly twice the ungated one (3304 elements against 1732). An aggressive amplitude gate
+  ! trades against refinement DEPTH; that trade is what this value is set to avoid.
+  !
+  ! Note this sits below epsilon in real32 (1.2e-7), so in a single-precision build the absolute
+  ! term of the effective floor dominates and the relative gate is inactive unless a caller raises
+  ! it. That is the safe direction: real32 fields cannot represent -120 dB structure anyway.
+  real(prec),parameter :: SELF_AMR_DEFAULT_RELFLOOR = 1.0e-12_prec
 
   type :: RefinementIndicator2D_t
     integer :: N = 0
@@ -308,9 +326,13 @@ contains
     !! (sigma_e = log10(epsilon) -> SELF_AMR_COARSEN) whatever the shape of its modal spectrum.
     !!
     !! Dimensionless, and an ENERGY fraction, so it is the square of the corresponding amplitude
-    !! fraction: 1e-8 gates amplitudes below 1e-4 (-80 dB) of the field scale, 1e-6 gates
-    !! amplitudes below 1e-3 (-60 dB). Must lie in [0,1); 0 disables the relative floor and
+    !! fraction: 1e-12 gates amplitudes below 1e-6 (-120 dB) of the field scale, 1e-8 gates
+    !! amplitudes below 1e-4 (-80 dB). Must lie in [0,1); 0 disables the relative floor and
     !! restores the pure absolute (machine-epsilon) guard.
+    !!
+    !! Raising this beyond the default trades against refinement depth - the gate cannot tell
+    !! residue from the flank of an under-resolved feature - and has been measured to cost more
+    !! than it saves on a propagating-wave problem. See SELF_AMR_DEFAULT_RELFLOOR.
     implicit none
     class(RefinementIndicator2D_t),intent(inout) :: this
     real(prec),intent(in) :: relativeEnergyFloor

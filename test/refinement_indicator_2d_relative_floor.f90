@@ -56,7 +56,12 @@ contains
     !!   element 2 : a = 1e-2   -> E = 1e-4
     !!   element 3 : a = 0.5    -> E = 0.25
     !!   element 4 : a = 0      -> E = 0      (the absolute-floor path)
-    !!   element 5 : a = 1e-6   -> E = 1e-12
+    !!   element 5 : a = 1e-7   -> E = 1e-14
+    !!
+    !! Element 5 sits two orders below the default floor and element 2 eight orders above it, so
+    !! the default case has wide margins in real64. In real32 the default floor is below epsilon
+    !! and the absolute term takes over, which gates element 5 (1e-14 < 1.2e-7) and leaves element
+    !! 2 (1e-4) alone - the same verdicts, so the assertions hold in both precisions.
     !!
     !! Variable 2 is zero everywhere except on element 1, where it is a large constant. It stands
     !! in for a background field (LinearEuler2D carries the sound speed and background density as
@@ -75,7 +80,7 @@ contains
     real(prec),parameter :: refineThreshold = -3.0_prec
     real(prec),parameter :: coarsenThreshold = -8.0_prec
     ! Amplitudes of the identical top-mode shape on each element; the modal energy is the square.
-    real(prec),parameter :: amp(1:nel) = [1.0_prec,1.0e-2_prec,0.5_prec,0.0_prec,1.0e-6_prec]
+    real(prec),parameter :: amp(1:nel) = [1.0_prec,1.0e-2_prec,0.5_prec,0.0_prec,1.0e-7_prec]
     ! A background-field amplitude on variable 2 of element 1, far above every element's
     ! variable-1 energy: 100**2 * 4 = 4e4 against a largest variable-1 energy of 1.
     real(prec),parameter :: background = 100.0_prec
@@ -115,9 +120,9 @@ contains
       call amr%Init(interp,nel,refineThreshold,coarsenThreshold)
 
       ! ---- 1. The shipped default floor ----
-      ! Energy scale 1, so the effective floor is SELF_AMR_DEFAULT_RELFLOOR: element 5 (1e-12) is
+      ! Energy scale 1, so the effective floor is SELF_AMR_DEFAULT_RELFLOOR: element 5 (1e-14) is
       ! quiescent, element 2 (1e-4) is not. This is the reported bug in miniature - without the
-      ! relative floor element 5 sits ~1e4 above machine epsilon in real64 and is flagged REFINE
+      ! relative floor element 5 sits ~1e2 above machine epsilon in real64 and is flagged REFINE
       ! forever.
       call amr%Estimate(sol,ivar=1)
       call ReportFlags(amr,nel,nodeType,"default floor")

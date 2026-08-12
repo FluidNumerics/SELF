@@ -36,7 +36,7 @@ program LinearEuler2D_AMR_CoarsenWake
 !! adaptivity.
 !!
 !! The field here is prescribed rather than time-integrated: an expanding ring pulse whose radius is
-!! stepped outward, on top of a fixed grid-scale residue at 1e-6 of the ring's amplitude. That is a
+!! stepped outward, on top of a fixed grid-scale residue at 1e-8 of the ring's amplitude. That is a
 !! deliberate choice, and it isolates what the issue is about:
 !!
 !!   - the adaptation loop under test is indicator -> flags -> forest -> emitted mesh, which the
@@ -76,13 +76,14 @@ program LinearEuler2D_AMR_CoarsenWake
   real(prec),parameter :: rho0 = 1.0_prec
   ! Ring amplitude and half-width. Lr is below the base-mesh nodal spacing (dx/controlDegree =
   ! 12.5 mm), so the ring is under-resolved at level 0 and the indicator must refine it.
-  real(prec),parameter :: amp = 1.0e4_prec
+  real(prec),parameter :: amp = 1.0e6_prec
   real(prec),parameter :: Lr = 0.01_prec
-  ! Grid-scale residue left everywhere, at 1e-6 of the ring's amplitude: the highest tensor Legendre
+  ! Grid-scale residue left everywhere, at 1e-8 of the ring's amplitude: the highest tensor Legendre
   ! mode on each element, for which the smoothness ratio is exactly 1 whatever the mesh. Its modal
-  ! energy is 1e-4 - some ten orders of magnitude above machine epsilon in real64, and still ~1e3
-  ! above it in real32, so the absolute floor alone never touches it - against a ring-element
-  ! energy of order 1e7. That energy ratio, ~1e-11, is what the relative floor gates.
+  ! energy is 1e-4 - twelve orders of magnitude above machine epsilon in real64, and still ~1e3
+  ! above it in real32, so the absolute floor alone never touches it and the ungated control really
+  ! does refine on it - against a ring-element energy of order 1e11. That energy ratio, ~1e-15, is
+  ! what the relative floor gates, with three orders of margin below the 1e-12 default.
   real(prec),parameter :: wakeAmp = 1.0e-2_prec
   ! Radii the ring is stepped through (m). The last one leaves a wake several base elements deep.
   real(prec),parameter :: ringRadius(1:5) = &

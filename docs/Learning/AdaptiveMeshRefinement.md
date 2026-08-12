@@ -130,13 +130,28 @@ so a quiescent element is reported perfectly resolved (\(\sigma_e = \log_{10}\va
 `COARSEN`) whatever its modal shape.
 
 Because energy is amplitude squared, `relativeEnergyFloor` is \(10^{dB/10}\) in amplitude terms.
-The default is \(10^{-8}\) — amplitudes below \(10^{-4}\) (−80 dB) of the field scale count as
-quiescent — and it is precision-aware (`max(1e-8, epsilon)`), because in `real32`
-\(\varepsilon = 1.2\times10^{-7}\) would otherwise mask the relative term for any field scale of
-order one. **The right value is problem-dependent**: it must sit below the dynamic range you care
-about and above the residue you want released. A 2-D cylindrical pulse, for instance, leaves a
-genuine algebraically-decaying tail behind its front (Huygens' principle fails in even dimensions),
-which is a physical feature rather than residue and is only released by a much larger floor.
+The default is \(10^{-12}\): amplitudes below \(10^{-6}\) (−120 dB) of the field scale count as
+quiescent. It sits below \(\varepsilon\) in `real32`, so in a single-precision build the absolute
+term dominates and the gate is inactive unless a caller raises it — the safe direction, since a
+`real32` field cannot represent −120 dB structure anyway.
+
+**Raising the floor is not free.** The gate cannot distinguish residue from the low-amplitude
+*flank* of a feature that is genuinely under-resolved, so an aggressive floor buys element count at
+the cost of refinement **depth**. Measured on the ultrasound point-source benchmark
+(`examples/linear_euler2d_amr_ultrasound_pointsource`, 30 epochs, `maxLevel = 2`):
+
+| `relativeEnergyFloor` | initial adaptation | mean elements | final |
+| --- | --- | --- | --- |
+| 0 (no gate) | 328, level 2 | 1482 | 1732 |
+| **1e-12 (default)** | **328, level 2** | **1057 (1.40x fewer)** | **1528** |
+| 1e-8 | 268, level **1** | 2210 | 3304 |
+
+At `1e-8` the gate also suppresses the source pulse's skirt, so the forest never reaches the level
+cap; `RecommendedTimeStep` is tied to the max level, so `dt` doubles, and the resulting
+time-integration error drives enough later refinement to roughly *double* the final mesh. Measure
+before raising this. A related trap: a 2-D cylindrical pulse leaves a genuine algebraically-decaying
+tail behind its front (Huygens' principle fails in even dimensions), which is physics rather than
+residue and should not be gated away.
 
 `energyScale` defaults to the largest \(g_e\) over the elements, reduced with `MPI_MAX` when the
 indicator is given a communicator, so the gate follows a decaying front. Two consequences worth
@@ -186,7 +201,7 @@ type(RefinementIndicator2D) :: amr
 call amr%Init(interp, nElem, refineThreshold=-3.0_prec, coarsenThreshold=-8.0_prec)
 
 ! Amplitude gate (all optional; these are the defaults unless set).
-call amr%SetRelativeEnergyFloor(1.0e-8_prec)  ! 0 disables the gate
+call amr%SetRelativeEnergyFloor(1.0e-12_prec) ! 0 disables the gate
 call amr%SetEnergyScale(pRef**2)              ! pin the scale; ClearEnergyScale undoes it
 call amr%SetEnergyWeights(w)                  ! per-variable gate weights, e.g. from the entropy
 
