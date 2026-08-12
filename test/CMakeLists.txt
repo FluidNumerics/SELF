@@ -108,6 +108,10 @@ add_fortran_tests (
     "refinement_indicator_2d_guard_relfloor.f90"
     "refinement_indicator_2d_guard_energyscale.f90"
     "refinement_indicator_2d_guard_energyweights.f90"
+    "refinement_indicator_2d_guard_negweight.f90"
+    "refinement_indicator_2d_guard_emptyweights.f90"
+    "refinement_indicator_2d_guard_weightcount.f90"
+    "refinement_indicator_2d_guard_gatesize.f90"
     "adaptive_mesh_2d_guard_unbalanced.f90"
     "meshrefine_2d_guard_multirank.f90"
     "quadtree_2d_guard_multirank.f90"
@@ -239,6 +243,10 @@ set_tests_properties(
     refinement_indicator_2d_guard_relfloor
     refinement_indicator_2d_guard_energyscale
     refinement_indicator_2d_guard_energyweights
+    refinement_indicator_2d_guard_negweight
+    refinement_indicator_2d_guard_emptyweights
+    refinement_indicator_2d_guard_weightcount
+    refinement_indicator_2d_guard_gatesize
     adaptive_mesh_2d_guard_unbalanced
     meshrefine_2d_guard_multirank
     quadtree_2d_guard_multirank
