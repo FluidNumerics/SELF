@@ -80,9 +80,12 @@ add_fortran_tests (
     "mesh2d_setup.f90"
     "mesh2d_uniformstructured.f90"
     "mesh2d_uniform_refine.f90"
+    "mesh3d_uniform_refine.f90"
     "solution_transfer_2d.f90"
     "quadtree_balance_2d.f90"
+    "octree_balance_3d.f90"
     "adaptive_mortar_2d.f90"
+    "adaptive_mortar_3d.f90"
     "transfer_plan_2d.f90"
     "transfer_plan_2d_guard_badleaf.f90"
     "transfer_plan_2d_guard_snapshot.f90"
@@ -114,8 +117,11 @@ add_fortran_tests (
     "refinement_indicator_2d_guard_gatesize.f90"
     "refinement_indicator_2d_guard_significantfloor.f90"
     "adaptive_mesh_2d_guard_unbalanced.f90"
+    "adaptive_mesh_3d_guard_unbalanced.f90"
     "meshrefine_2d_guard_multirank.f90"
+    "meshrefine_3d_guard_multirank.f90"
     "quadtree_2d_guard_multirank.f90"
+    "octree_3d_guard_multirank.f90"
     "mesh2d_read_ism.f90"
     "mesh2d_read_ismmm.f90"
     "mesh3d_read_ism.f90"
@@ -257,8 +263,11 @@ set_tests_properties(
     refinement_indicator_2d_guard_gatesize
     refinement_indicator_2d_guard_significantfloor
     adaptive_mesh_2d_guard_unbalanced
+    adaptive_mesh_3d_guard_unbalanced
     meshrefine_2d_guard_multirank
+    meshrefine_3d_guard_multirank
     quadtree_2d_guard_multirank
+    octree_3d_guard_multirank
     transfer_plan_2d_guard_badleaf
     transfer_plan_2d_guard_snapshot
     transfer_plan_2d_guard_unbuilt
