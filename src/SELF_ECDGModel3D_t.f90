@@ -56,6 +56,14 @@ contains
     type(Mesh3D),intent(in),target :: mesh
     type(SEMHex),intent(in),target :: geometry
 
+    ! The entropy-conserving split form requires entropy-stable mortar operators at
+    ! nonconforming interfaces, which are not implemented; the plain L2 mortar
+    ! projection would break the provable entropy estimate.
+    if(mesh%nMortars > 0) then
+      print*,__FILE__,' : Error : EC-DGSEM models do not support nonconforming (mortar) meshes.'
+      error stop 1
+    endif
+
     call Init_DGModel3D_t(this,mesh,geometry)
 
     call this%twoPointFlux%Init(geometry%x%interp,this%nvar,mesh%nElem)

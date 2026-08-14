@@ -34,6 +34,7 @@ module SELF_Mesh_3D
 
   type,extends(Mesh3D_t) :: Mesh3D
     type(c_ptr) :: sideInfo_gpu
+    type(c_ptr) :: mortarInfo_gpu = c_null_ptr
 
   contains
     procedure,public :: Init => Init_Mesh3D
@@ -138,12 +139,21 @@ contains
     deallocate(this%CGNSSideMap)
     deallocate(this%BCType)
     deallocate(this%BCNames)
+    if(associated(this%mortarInfo)) then
+      deallocate(this%mortarInfo)
+      this%mortarInfo => null()
+    endif
+    this%nMortars = 0
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
     call this%decomp%Free()
 
     call gpuCheck(hipFree(this%sideInfo_gpu))
+    if(c_associated(this%mortarInfo_gpu)) then
+      call gpuCheck(hipFree(this%mortarInfo_gpu))
+      this%mortarInfo_gpu = c_null_ptr
+    endif
 
   endsubroutine Free_Mesh3D
 
@@ -152,6 +162,16 @@ contains
     class(Mesh3D),intent(inout) :: this
 
     call gpuCheck(hipMemcpy(this%sideInfo_gpu,c_loc(this%sideInfo),sizeof(this%sideInfo),hipMemcpyHostToDevice))
+
+    ! The mortar table is created by the mesh constructors after Init; allocate its
+    ! device copy on first upload.
+    if(this%nMortars > 0) then
+      if(.not. c_associated(this%mortarInfo_gpu)) then
+        call gpuCheck(hipMalloc(this%mortarInfo_gpu,sizeof(this%mortarInfo)))
+      endif
+      call gpuCheck(hipMemcpy(this%mortarInfo_gpu,c_loc(this%mortarInfo), &
+                              sizeof(this%mortarInfo),hipMemcpyHostToDevice))
+    endif
 
   endsubroutine UpdateDevice_Mesh3D
 

@@ -146,7 +146,9 @@ add_fortran_tests (
     "refinement_indicator_2d_relative_floor.f90"
     "refinement_indicator_2d_energy_hysteresis.f90"
     "mappedscalarmortarexchange_2d_linear.f90"
+    "mappedscalarmortarexchange_3d_linear.f90"
     "mappedvectordgdivergence_2d_mortar.f90"
+    "mappedvectordgdivergence_3d_mortar.f90"
     "mappedscalargradient_3d_constant.f90"
     "mappedscalargradient_3d_linear.f90"
     "mappedscalarbrgradient_3d_constant.f90"
@@ -195,6 +197,8 @@ add_fortran_tests (
     "linear_shallow_water_2d_radiation.f90"
     "lineareuler2d_pml_absorption.f90"
     "lineareuler2d_mortar_soundwave.f90"
+    "lineareuler3d_soundwave.f90"
+    "lineareuler3d_mortar_soundwave.f90"
     "twopointvectordivergence_2d_constant.f90"
     "twopointvectordivergence_2d_linear.f90"
     "twopointvectordivergence_2d_rotational.f90"
@@ -207,6 +211,7 @@ add_fortran_tests (
     "ec_advection_2d_rk3.f90"
     "ec_advection_2d_entropy_conservation.f90"
     "ec_advection_2d_mortar_guard.f90"
+    "ec_advection_3d_mortar_guard.f90"
     "ec_advection_3d_rk3.f90"
     "ec_advection_3d_entropy_conservation.f90"
     "esatmo3d_motionless.f90"
@@ -237,6 +242,7 @@ set_tests_properties(
     points_dirac_delta_2d_nvar_mismatch
     points_dirac_delta_3d_nvar_mismatch
     ec_advection_2d_mortar_guard
+    ec_advection_3d_mortar_guard
     refinement_indicator_2d_guard_thresholds
     refinement_indicator_2d_guard_setthresholds
     refinement_indicator_2d_guard_degree
@@ -278,8 +284,11 @@ add_mpi_fortran_tests( "mappedvectordgdivergence_2d_linear_mpi.f90"
                        "mappedvectordgdivergence_3d_linear_structuredmesh_mpi.f90"
                        "mappedscalarbrgradient_3d_linear_mpi.f90"
                        "mappedscalarmortarexchange_2d_linear_mpi.f90"
+                       "mappedscalarmortarexchange_3d_linear_mpi.f90"
                        "mappedvectordgdivergence_2d_mortar_mpi.f90"
+                       "mappedvectordgdivergence_3d_mortar_mpi.f90"
                        "lineareuler2d_mortar_soundwave_mpi.f90"
+                       "lineareuler3d_mortar_soundwave_mpi.f90"
                        "lineareuler2d_amr_soundwave_mpi.f90"
                        "geometry_2d_reuse_mpi.f90"
                        "advection_diffusion_2d_mortar_mpi.f90"

@@ -175,6 +175,12 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh)
 
+    ! populate the solutionGradient % extBoundary attribute on
+    ! nonconforming (mortar) interfaces
+    if(this%mesh%nMortars > 0) then
+      call this%solutionGradient%MortarExchange(this%mesh)
+    endif
+
   endsubroutine CalculateSolutionGradient_DGModel3D
 
   subroutine CalculateEntropy_DGModel3D(this)
@@ -412,8 +418,14 @@ contains
 
     if(this%gradient_enabled) then
       ! The BR gradient consumes extBoundary (through the side averages), so
-      ! the exchange must complete before the gradient is computed.
+      ! the exchange must complete before the gradient is computed. The mortar
+      ! exchange runs after SideExchangeFinish : it posts its own messages on
+      ! mesh%decomp%requests and fills extBoundary on nonconforming faces,
+      ! which the side averages also consume.
       call this%solution%SideExchangeFinish(this%mesh)
+      if(this%mesh%nMortars > 0) then
+        call this%solution%MortarExchange(this%mesh)
+      endif
       call this%CalculateSolutionGradient()
       call this%SetGradientBoundaryCondition() ! User-supplied
       call this%solutionGradient%AverageSides()
@@ -425,11 +437,21 @@ contains
       ! first consumer of extBoundary and runs after the exchange completes.
       ! FluxMethod and BoundaryFlux write disjoint outputs (flux interior
       ! vs. boundarynormal), so this reordering does not change any
-      ! floating-point results.
+      ! floating-point results. The mortar exchange runs after
+      ! SideExchangeFinish for the same reason.
       call this%SourceMethod() ! User supplied
       call this%FluxMethod() ! User supplied
       call this%solution%SideExchangeFinish(this%mesh)
+      if(this%mesh%nMortars > 0) then
+        call this%solution%MortarExchange(this%mesh)
+      endif
       call this%BoundaryFlux() ! User supplied
+    endif
+
+    ! On mortar interfaces, replace the big face's surface-flux integrand with the
+    ! projection of the small faces' integrands so that the interface is conservative
+    if(this%mesh%nMortars > 0) then
+      call this%flux%MortarFluxCollect(this%mesh)
     endif
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior_gpu)

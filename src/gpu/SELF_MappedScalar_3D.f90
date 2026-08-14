@@ -36,6 +36,7 @@ module SELF_MappedScalar_3D
   type,extends(MappedScalar3D_t),public :: MappedScalar3D
 
     type(c_ptr) :: jas_gpu ! jacobian weighted scalar for gradient calculation
+    type(c_ptr) :: mortarBuff_gpu = c_null_ptr ! mortar trace staging (lazy allocation)
 
     ! Packed device buffers and persistent MPI requests for the aggregated
     ! halo exchange. The side tables are shared across fields and live on
@@ -57,6 +58,8 @@ module SELF_MappedScalar_3D
     procedure,public :: SideExchange => SideExchange_MappedScalar3D
     procedure,public :: SideExchangeStart => SideExchangeStart_MappedScalar3D
     procedure,public :: SideExchangeFinish => SideExchangeFinish_MappedScalar3D
+    procedure,public :: MortarExchange => MortarExchange_MappedScalar3D
+    procedure,private :: MPIMortarExchangeAsync => MPIMortarExchangeAsync_MappedScalar3D
 
     generic,public :: MappedGradient => MappedGradient_MappedScalar3D
     procedure,private :: MappedGradient_MappedScalar3D
@@ -154,6 +157,11 @@ contains
     call gpuCheck(hipFree(this%avgBoundary_gpu))
     call gpuCheck(hipFree(this%boundarynormal_gpu))
     call gpuCheck(hipFree(this%jas_gpu))
+
+    if(c_associated(this%mortarBuff_gpu)) then
+      call gpuCheck(hipFree(this%mortarBuff_gpu))
+      this%mortarBuff_gpu = c_null_ptr
+    endif
 
     if(c_associated(this%halo_sendbuf_gpu)) call gpuCheck(hipFree(this%halo_sendbuf_gpu))
     if(c_associated(this%halo_recvbuf_gpu)) call gpuCheck(hipFree(this%halo_recvbuf_gpu))
@@ -362,6 +370,143 @@ contains
     call this%SideExchangeFinish(mesh)
 
   endsubroutine SideExchange_MappedScalar3D
+
+  subroutine MPIMortarExchangeAsync_MappedScalar3D(this,mesh)
+    !! GPU-resident analogue of the base-class mortar message posting; messages are
+    !! posted on device memory (GPU-aware MPI), following MPIExchangeAsync.
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: m,q,ivar
+    integer :: eB,sB,rB,eS,sS,rS
+    integer :: globalSideId,tag
+    integer :: offset
+    integer :: iError
+    integer :: msgCount
+    real(prec),pointer :: boundary(:,:,:,:,:)
+    real(prec),pointer :: mortarBuff(:,:,:,:,:)
+
+    msgCount = 0
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+    call c_f_pointer(this%boundary_gpu,boundary, &
+                     [this%interp%N+1,this%interp%N+1,6,this%nelem,this%nvar])
+    call c_f_pointer(this%mortarBuff_gpu,mortarBuff, &
+                     [this%interp%N+1,this%interp%N+1,8,mesh%nMortars,this%nvar])
+
+    do ivar = 1,this%nvar
+      do m = 1,mesh%nMortars
+
+        eB = mesh%mortarInfo(1,m)
+        sB = mesh%mortarInfo(2,m)
+        rB = mesh%decomp%elemToRank(eB)
+
+        do q = 1,4
+
+          eS = mesh%mortarInfo(2*q+1,m)
+          sS = mesh%mortarInfo(2*q+2,m)/10
+          rS = mesh%decomp%elemToRank(eS)
+          globalSideId = mesh%mortarInfo(10+q,m)
+          tag = globalSideId+mesh%nUniqueSides*(ivar-1)
+
+          if(rB == mesh%decomp%rankId .and. rS /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(mortarBuff(:,:,4+q,m,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+            msgCount = msgCount+1
+            call MPI_ISEND(boundary(:,:,sB,eB-offset,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rS,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          elseif(rS == mesh%decomp%rankId .and. rB /= mesh%decomp%rankId) then
+
+            msgCount = msgCount+1
+            call MPI_IRECV(mortarBuff(:,:,q,m,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+            msgCount = msgCount+1
+            call MPI_ISEND(boundary(:,:,sS,eS-offset,ivar), &
+                           (this%interp%N+1)*(this%interp%N+1), &
+                           mesh%decomp%mpiPrec, &
+                           rB,tag, &
+                           mesh%decomp%mpiComm, &
+                           mesh%decomp%requests(msgCount),iError)
+
+          endif
+
+        enddo
+      enddo
+    enddo
+
+    mesh%decomp%msgCount = msgCount
+
+  endsubroutine MPIMortarExchangeAsync_MappedScalar3D
+
+  subroutine MortarExchange_MappedScalar3D(this,mesh)
+    !! GPU implementation of the mortar exchange (see the base class for the
+    !! algorithm) : traces are staged, reoriented, restricted, and projected in
+    !! device memory with the SELF_Mortar kernels.
+    implicit none
+    class(MappedScalar3D),intent(inout) :: this
+    type(Mesh3D),intent(inout) :: mesh
+    ! Local
+    integer :: offset
+    integer(c_size_t) :: buffSize
+
+    offset = mesh%decomp%offsetElem(mesh%decomp%rankId+1)
+
+    if(.not. c_associated(this%mortarBuff_gpu)) then
+      ! The MortarFlip_3D kernel stages one face through shared memory
+      ! (MORTAR3D_MAXNP in SELF_Mortar.cpp bounds the block size).
+      if(this%interp%N+1 > 16) then
+        print*,__FILE__,' : Error : 3D mortar kernels support N+1 <= 16.'
+        stop 1
+      endif
+      buffSize = int(this%interp%N+1,c_size_t)*(this%interp%N+1)*8* &
+                 mesh%nMortars*this%nvar*prec
+      call gpuCheck(hipMalloc(this%mortarBuff_gpu,buffSize))
+    endif
+
+    if(mesh%decomp%mpiEnabled) then
+      call this%MPIMortarExchangeAsync(mesh)
+    endif
+
+    ! Stage rank-local traces in the big face's coordinates
+    call MortarGather_3D_gpu(this%mortarBuff_gpu,this%boundary_gpu, &
+                             mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                             mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                             mesh%nMortars,this%nelem)
+
+    if(mesh%decomp%mpiEnabled) then
+      call mesh%decomp%FinalizeMPIExchangeAsync()
+      ! Reorient small-face traces received over MPI
+      call MortarFlip_3D_gpu(this%mortarBuff_gpu,mesh%mortarInfo_gpu, &
+                             mesh%decomp%elemToRank_gpu,mesh%decomp%rankId, &
+                             this%interp%N,this%nvar,mesh%nMortars)
+    endif
+
+    ! Small faces get the restricted big-face trace; the big face gets the L2
+    ! projection of the small-face traces
+    call MortarScatter_3D_gpu(this%extBoundary_gpu,this%mortarBuff_gpu, &
+                              this%interp%mortarR_gpu,this%interp%mortarP_gpu, &
+                              mesh%mortarInfo_gpu,mesh%decomp%elemToRank_gpu, &
+                              mesh%decomp%rankId,offset,this%interp%N,this%nvar, &
+                              mesh%nMortars,this%nelem)
+
+  endsubroutine MortarExchange_MappedScalar3D
 
   subroutine MappedGradient_MappedScalar3D(this,df)
   !! Calculates the gradient of a function using the strong form of the gradient

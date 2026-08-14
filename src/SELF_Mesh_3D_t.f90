@@ -114,6 +114,32 @@ module SELF_Mesh_3D_t
     integer,pointer,dimension(:,:) :: CGNSSideMap
     integer,pointer,dimension(:,:) :: BCType
     character(LEN=255),allocatable :: BCNames(:)
+    ! 2:1 nonconforming (mortar) interface bookkeeping.
+    !
+    ! A mortar interface joins one "big" element face to the four quarter-faces of its
+    ! 2:1 refined neighbors ("small" faces). Faces that participate in a mortar carry
+    ! sideInfo(3) = 0 (no conforming neighbor) and sideInfo(5) = 0 (no boundary
+    ! condition), so all conforming-face machinery (SideExchange, RecalculateFlip,
+    ! boundary-condition mapping) skips them; sideInfo(1) is set to the mortar index
+    ! for reference.
+    !
+    ! The big face is split into four sub-faces ("quadrants") indexed in the big
+    ! face's trace coordinates: q = kx + 2*(ky-1) with kx, ky in {1,2} the
+    ! half-interval index along the face's first and second coordinate
+    ! (1 = [-1,0], 2 = [0,1]).
+    !
+    ! mortarInfo(1:14,1:nMortars) is replicated on all ranks (element ids are global):
+    !   1  - big element id ; 2 - big local face id
+    !   3  - small element id on the sub-face covering big-face quadrant 1
+    !   4  - 10*(small local face) + flip for that sub-face
+    !   5,6   - same for quadrant 2
+    !   7,8   - same for quadrant 3
+    !   9,10  - same for quadrant 4
+    !   11:14 - global side ids of sub-faces 1..4 (used as MPI message tags)
+    ! The flip maps big-face quadrant coordinates to the small face's own coordinates
+    ! (the same receiver-to-donor convention as sideInfo(4); see MortarFaceMap).
+    integer :: nMortars = 0
+    integer,pointer,dimension(:,:) :: mortarInfo => null()
     ! Material tracking: every element has an integer material id
     ! indexing into materialNames. Single-material constructors and
     ! readers (HOPr, structured, periodic) leave nMaterials = 1 with
@@ -131,6 +157,8 @@ module SELF_Mesh_3D_t
 
     generic,public :: StructuredMesh => UniformStructuredMesh_Mesh3D_t
     procedure,private :: UniformStructuredMesh_Mesh3D_t
+
+    procedure,public :: SimpleMortarMesh => SimpleMortarMesh_Mesh3D_t
 
     generic,public :: PeriodicStructuredMesh => UniformPeriodicMesh_Mesh3D_t
     procedure,private :: UniformPeriodicMesh_Mesh3D_t
@@ -188,7 +216,53 @@ module SELF_Mesh_3D_t
     1,7,7,6,1,7, &
     5,3,3,2,5,3/
 
+  ! Half-interval index along the big face's first (kx) and second (ky) trace
+  ! coordinate for each mortar sub-face quadrant q = kx + 2*(ky-1). The 1-D mortar
+  ! restriction/projection matrices (Lagrange % mortarR/mortarP) are applied as the
+  ! tensor product R_kx x R_ky (P_kx x P_ky) on sub-face q.
+  integer,parameter,public :: mortarQuadKx(1:4) = [1,2,1,2]
+  integer,parameter,public :: mortarQuadKy(1:4) = [1,1,2,2]
+
 contains
+
+  pure subroutine MortarFaceMap(i,j,N,flip,i2,j2)
+    !! Maps receiver-face node indices (i,j) to donor-face node indices (i2,j2) for
+    !! each of the eight SELF face flips (see the CGNStoSELFflip table above; indices
+    !! here are 1-based, so the 0-based rule i2 = N-i1 reads i2 = N+2-i). Mortar
+    !! staging uses this to reorient a small face's trace into the big face's
+    !! coordinates and to scatter restricted traces back.
+    implicit none
+    integer,intent(in) :: i,j,N,flip
+    integer,intent(out) :: i2,j2
+
+    select case(flip)
+    case(0)
+      i2 = i
+      j2 = j
+    case(1)
+      i2 = N+2-i
+      j2 = j
+    case(2)
+      i2 = N+2-i
+      j2 = N+2-j
+    case(3)
+      i2 = i
+      j2 = N+2-j
+    case(4)
+      i2 = j
+      j2 = i
+    case(5)
+      i2 = N+2-j
+      j2 = i
+    case(6)
+      i2 = N+2-j
+      j2 = N+2-i
+    case default ! flip == 7
+      i2 = j
+      j2 = N+2-i
+    endselect
+
+  endsubroutine MortarFaceMap
 
   subroutine Init_Mesh3D_t(this,nGeo,nElem,nSides,nNodes,nBCs)
     implicit none
@@ -283,6 +357,11 @@ contains
     deallocate(this%BCType)
 
     deallocate(this%BCNames)
+    if(associated(this%mortarInfo)) then
+      deallocate(this%mortarInfo)
+      this%mortarInfo => null()
+    endif
+    this%nMortars = 0
     if(allocated(this%elemMaterial)) deallocate(this%elemMaterial)
     if(allocated(this%materialNames)) deallocate(this%materialNames)
     this%nMaterials = 0
@@ -313,7 +392,10 @@ contains
 
         e2 = this%sideInfo(3,iSide,iEl)
 
-        if(e2 == 0) then
+        ! Mortar faces carry sideInfo(3) = 0 but are interior faces
+        ! (sideInfo(1) holds the mortar index); they never take a
+        ! physical boundary condition.
+        if(e2 == 0 .and. this%sideInfo(1,iSide,iEl) == 0) then
           this%sideInfo(5,iSide,iEl) = bcid
         endif
 
@@ -738,6 +820,448 @@ contains
     call this%UpdateDevice()
 
   endsubroutine UniformStructuredMesh_Mesh3D_t
+
+  subroutine SimpleMortarMesh_Mesh3D_t(this,dx,bcids,comm,flips)
+  !!
+  !! Create the smallest 3D 2:1 nonconforming (mortar) mesh: one "big" element of size
+  !! 2*dx x 2*dx x 2*dx whose east face is shared with the faces of four "small"
+  !! dx x dx x dx elements stacked 2x2 in (y,z). The mesh is conforming everywhere
+  !! except at the single mortar interface.
+  !!
+  !!        z = 2*dx  ________________ ______ ______
+  !!                 |                | e4   | e5   |     (view of the x = 2*dx plane;
+  !!                 |                |______|______|      e2..e5 sit in the big face's
+  !!                 |      e1        | e2   | e3   |      quadrants 1..4)
+  !!                 |________________|______|______|
+  !!               x = 0            2*dx           3*dx
+  !!
+  !!  Input
+  !!    - this : Fresh/empty Mesh3D_t object
+  !!    - dx : Edge length of the small elements; the big element has edge length 2*dx
+  !!    - bcids(1:6) : Boundary condition flags for the bottom, south, east, north,
+  !!                   west, and top sides of the domain (the side ordering of
+  !!                   StructuredMesh)
+  !!    - flips(1:4) (optional) : requested face flip (0..7) for the small element in
+  !!                   each big-face quadrant. Each small element is rigidly rotated so
+  !!                   that its face on the mortar interface meets the big face with
+  !!                   the requested flip; flips 0,2,5,7 place the small element's west
+  !!                   face on the interface, flips 1,3,4,6 its east face (the flip
+  !!                   fixes the face chirality). Defaults to 0 (no rotation).
+  !!
+  !!  Output
+  !!    - this : Mesh3D_t object with five elements and one mortar interface
+  !!
+  !! All connectivity (conforming interior faces, boundary faces, and the mortar
+  !! table) is derived by sampling the bilinear face maps and matching physical
+  !! positions, so the emitted sideInfo/mortarInfo are correct by construction for
+  !! every rotation. Element geometry is trilinear (nGeo=1). With domain
+  !! decomposition on two or more ranks the mortar interface straddles the rank
+  !! boundary.
+  !!
+    implicit none
+    class(Mesh3D_t),intent(out) :: this
+    real(prec),intent(in) :: dx
+    integer,intent(in) :: bcids(1:6)
+    integer,intent(in),optional :: comm
+    integer,intent(in),optional :: flips(1:4)
+    ! Local
+    integer,parameter :: nGlobalElem = 5
+    ! Signed local axis directions (1=x,2=y,3=z) of the rotated small elements for
+    ! each requested flip; column f holds (d1,d2,d3) such that the face meeting the
+    ! big east face does so with flip f. The donor face is West (5) when d1 = +x and
+    ! East (3) when d1 = -x.
+    integer,parameter :: flipAxes(1:3,0:7) = reshape([ &
+                                                     1,2,3, & ! flip 0 : West donor
+                                                     -1,-2,3, & ! flip 1 : East donor
+                                                     1,-2,-3, & ! flip 2 : West donor
+                                                     -1,2,-3, & ! flip 3 : East donor
+                                                     -1,3,2, & ! flip 4 : East donor
+                                                     1,-3,2, & ! flip 5 : West donor
+                                                     -1,-3,-2, & ! flip 6 : East donor
+                                                     1,3,-2],[3,8]) ! flip 7 : West donor
+    real(prec) :: nodeCoords(1:3,1:2,1:2,1:2,1:nGlobalElem)
+    integer :: sideInfo(1:5,1:6,1:nGlobalElem)
+    integer :: minfo(1:14)
+    integer :: localFlips(1:4)
+    integer,parameter :: invFlip(0:7) = [0,1,2,3,4,7,6,5]
+    real(prec) :: center(1:3),axis(1:3,1:3)
+    real(prec) :: tol
+    integer :: q,f,i,j,k,d
+    integer :: eA,eB,sA,sB,fAB
+    integer :: e1,e2
+    integer :: gid,nUniqueSides
+    integer :: nLocalElems
+    integer :: nGeo,nBCs
+    logical :: matched
+
+    call this%decomp%init(comm)
+
+    nGeo = 1 ! Trilinear element geometry
+    nBCs = 6
+    tol = 1.0e-3_prec*dx
+
+    localFlips = 0
+    if(present(flips)) then
+      localFlips = flips
+      do q = 1,4
+        if(localFlips(q) < 0 .or. localFlips(q) > 7) then
+          print*,"SimpleMortarMesh_Mesh3D_t : requested flip out of range 0..7"
+          stop 1
+        endif
+      enddo
+    endif
+
+    ! Element 1 (big) : [0,2dx]^3, axis aligned
+    do k = 1,2
+      do j = 1,2
+        do i = 1,2
+          nodeCoords(1:3,i,j,k,1) = [real(i-1,prec),real(j-1,prec),real(k-1,prec)]* &
+                                    2.0_prec*dx
+        enddo
+      enddo
+    enddo
+
+    ! Elements 2..5 (small) : [2dx,3dx] x quadrant q of the big east face, each
+    ! rigidly rotated per the requested flip
+    do q = 1,4
+      f = localFlips(q)
+      center(1) = 2.5_prec*dx
+      center(2) = (real(mortarQuadKx(q),prec)-0.5_prec)*dx
+      center(3) = (real(mortarQuadKy(q),prec)-0.5_prec)*dx
+      do d = 1,3
+        axis(1:3,d) = 0.0_prec
+        axis(abs(flipAxes(d,f)),d) = real(sign(1,flipAxes(d,f)),prec)
+      enddo
+      do k = 1,2
+        do j = 1,2
+          do i = 1,2
+            nodeCoords(1:3,i,j,k,1+q) = center+ &
+                                        0.5_prec*dx*(real(2*i-3,prec)*axis(1:3,1)+ &
+                                                     real(2*j-3,prec)*axis(1:3,2)+ &
+                                                     real(2*k-3,prec)*axis(1:3,3))
+          enddo
+        enddo
+      enddo
+    enddo
+
+    sideInfo = 0
+
+    ! Conforming interior faces: match every pair of element faces by sampling the
+    ! bilinear face maps under each of the eight flips.
+    do eA = 1,nGlobalElem
+      do eB = eA+1,nGlobalElem
+        do sA = 1,6
+          if(sideInfo(3,sA,eA) /= 0) cycle
+          do sB = 1,6
+            call MatchFaces3D(nodeCoords(:,:,:,:,eA),sA, &
+                              nodeCoords(:,:,:,:,eB),sB,tol,matched,fAB)
+            if(matched) then
+              sideInfo(3,sA,eA) = eB
+              sideInfo(4,sA,eA) = 10*sB+fAB
+              sideInfo(3,sB,eB) = eA
+              sideInfo(4,sB,eB) = 10*sA+invFlip(fAB)
+              exit
+            endif
+          enddo
+        enddo
+      enddo
+    enddo
+
+    ! Mortar interface: big element east face against each small element. The donor
+    ! face and flip are recovered by matching each quadrant of the big face.
+    minfo = 0
+    minfo(1) = 1
+    minfo(2) = selfSide3D_East
+    do q = 1,4
+      matched = .false.
+      do sB = 1,6
+        do f = 0,7
+          if(QuadrantMatches3D(nodeCoords(:,:,:,:,1),selfSide3D_East,q, &
+                               nodeCoords(:,:,:,:,1+q),sB,f,tol)) then
+            minfo(2*q+1) = 1+q
+            minfo(2*q+2) = 10*sB+f
+            matched = .true.
+            exit
+          endif
+        enddo
+        if(matched) exit
+      enddo
+      if(.not. matched) then
+        print*,"SimpleMortarMesh_Mesh3D_t : failed to match mortar sub-face",q
+        stop 1
+      endif
+    enddo
+
+    ! Physical boundary conditions: any face that is neither conforming nor on the
+    ! mortar interface lies on one of the six domain boundary planes; identify the
+    ! plane from the face centroid.
+    do eA = 1,nGlobalElem
+      do sA = 1,6
+        if(sideInfo(3,sA,eA) /= 0) cycle
+        if(eA == 1 .and. sA == selfSide3D_East) cycle
+        matched = .false.
+        do q = 1,4
+          if(eA == minfo(2*q+1) .and. sA == minfo(2*q+2)/10) matched = .true.
+        enddo
+        if(matched) cycle ! small mortar face
+        sideInfo(5,sA,eA) = DomainBoundaryId3D(nodeCoords(:,:,:,:,eA),sA,dx,tol,bcids)
+      enddo
+    enddo
+
+    ! Global side ids: conforming pairs share one id; the big mortar face shares the
+    ! id of sub-face 1; sub-faces 2..4 get their own ids (MPI message tags).
+    gid = 0
+    do eA = 1,nGlobalElem
+      do sA = 1,6
+        if(sideInfo(2,sA,eA) /= 0) cycle
+        if(eA == 1 .and. sA == selfSide3D_East) cycle ! assigned with the sub-faces
+        matched = .false.
+        do q = 1,4
+          if(eA == minfo(2*q+1) .and. sA == minfo(2*q+2)/10) then
+            matched = .true.
+            exit
+          endif
+        enddo
+        if(matched) cycle ! assigned with the sub-faces below
+        gid = gid+1
+        sideInfo(2,sA,eA) = gid
+        eB = sideInfo(3,sA,eA)
+        if(eB /= 0) then
+          sB = sideInfo(4,sA,eA)/10
+          sideInfo(2,sB,eB) = gid
+        endif
+      enddo
+    enddo
+    do q = 1,4
+      gid = gid+1
+      minfo(10+q) = gid
+      sideInfo(2,minfo(2*q+2)/10,minfo(2*q+1)) = gid
+      sideInfo(1,minfo(2*q+2)/10,minfo(2*q+1)) = 1 ! mortar index
+      if(q == 1) then
+        sideInfo(2,selfSide3D_East,1) = gid
+        sideInfo(1,selfSide3D_East,1) = 1 ! mortar index
+      endif
+    enddo
+    nUniqueSides = gid
+
+    ! Domain decomposition. The message count upper bound is oversized relative to
+    ! nUniqueSides to accommodate the per-variable (and per-direction) mortar and
+    ! conforming side messages on this small mesh.
+    call this%decomp%GenerateDecomposition(nGlobalElem,64*nUniqueSides)
+
+    e1 = this%decomp%offsetElem(this%decomp%rankId+1)+1
+    e2 = this%decomp%offsetElem(this%decomp%rankId+2)
+    nLocalElems = e2-e1+1
+
+    call this%Init(nGeo,nLocalElems,nLocalElems*6,nLocalElems*8,nBCs)
+    this%nUniqueSides = nUniqueSides
+    this%quadrature = UNIFORM
+    this%BCType = 0
+    this%elemInfo = 0
+    this%globalNodeIDs = 0
+
+    this%nodeCoords(1:3,1:2,1:2,1:2,1:nLocalElems) = nodeCoords(1:3,1:2,1:2,1:2,e1:e2)
+    this%sideInfo(1:5,1:6,1:nLocalElems) = sideInfo(1:5,1:6,e1:e2)
+
+    ! The mortar table is replicated on all ranks; element ids are global
+    this%nMortars = 1
+    allocate(this%mortarInfo(1:14,1:1))
+    this%mortarInfo(1:14,1) = minfo(1:14)
+
+    call this%UpdateDevice()
+
+  endsubroutine SimpleMortarMesh_Mesh3D_t
+
+  pure function BilinearFacePoint3D(elemCoords,s,u,v) result(p)
+    !! Evaluates the bilinear map of face s of a trilinear (nGeo=1) element at the
+    !! face coordinates (u,v) in [-1,1]^2, using the face trace-coordinate convention
+    !! of BoundaryInterp: faces 1,6 -> (xi1,xi2); faces 2,4 -> (xi1,xi3);
+    !! faces 3,5 -> (xi2,xi3).
+    implicit none
+    real(prec),intent(in) :: elemCoords(1:3,1:2,1:2,1:2)
+    integer,intent(in) :: s
+    real(prec),intent(in) :: u,v
+    real(prec) :: p(1:3)
+    ! Local
+    real(prec) :: c(1:3,1:2,1:2)
+    real(prec) :: wu(1:2),wv(1:2)
+    integer :: i,j
+
+    select case(s)
+    case(selfSide3D_Bottom)
+      c = elemCoords(1:3,1:2,1:2,1)
+    case(selfSide3D_South)
+      c = elemCoords(1:3,1:2,1,1:2)
+    case(selfSide3D_East)
+      c = elemCoords(1:3,2,1:2,1:2)
+    case(selfSide3D_North)
+      c = elemCoords(1:3,1:2,2,1:2)
+    case(selfSide3D_West)
+      c = elemCoords(1:3,1,1:2,1:2)
+    case default ! selfSide3D_Top
+      c = elemCoords(1:3,1:2,1:2,2)
+    endselect
+
+    wu = [0.5_prec*(1.0_prec-u),0.5_prec*(1.0_prec+u)]
+    wv = [0.5_prec*(1.0_prec-v),0.5_prec*(1.0_prec+v)]
+    p = 0.0_prec
+    do j = 1,2
+      do i = 1,2
+        p = p+wu(i)*wv(j)*c(1:3,i,j)
+      enddo
+    enddo
+
+  endfunction BilinearFacePoint3D
+
+  pure subroutine FlipFaceCoords3D(u,v,flip,u2,v2)
+    !! Coordinate form of MortarFaceMap: maps receiver-face coordinates (u,v) to
+    !! donor-face coordinates (u2,v2) for each of the eight SELF face flips.
+    implicit none
+    real(prec),intent(in) :: u,v
+    integer,intent(in) :: flip
+    real(prec),intent(out) :: u2,v2
+
+    select case(flip)
+    case(0)
+      u2 = u
+      v2 = v
+    case(1)
+      u2 = -u
+      v2 = v
+    case(2)
+      u2 = -u
+      v2 = -v
+    case(3)
+      u2 = u
+      v2 = -v
+    case(4)
+      u2 = v
+      v2 = u
+    case(5)
+      u2 = -v
+      v2 = u
+    case(6)
+      u2 = -v
+      v2 = -u
+    case default ! flip == 7
+      u2 = v
+      v2 = -u
+    endselect
+
+  endsubroutine FlipFaceCoords3D
+
+  subroutine MatchFaces3D(coordsA,sA,coordsB,sB,tol,matched,flip)
+    !! Determines whether face sA of element A coincides with face sB of element B,
+    !! and if so with which flip: face_B(F_flip(u,v)) == face_A(u,v) at the sampled
+    !! points. Bilinear faces are pinned by their four corners plus one interior
+    !! point.
+    implicit none
+    real(prec),intent(in) :: coordsA(1:3,1:2,1:2,1:2)
+    integer,intent(in) :: sA
+    real(prec),intent(in) :: coordsB(1:3,1:2,1:2,1:2)
+    integer,intent(in) :: sB
+    real(prec),intent(in) :: tol
+    logical,intent(out) :: matched
+    integer,intent(out) :: flip
+    ! Local
+    real(prec),parameter :: us(1:5) = [-1.0_prec,1.0_prec,-1.0_prec,1.0_prec,0.25_prec]
+    real(prec),parameter :: vs(1:5) = [-1.0_prec,-1.0_prec,1.0_prec,1.0_prec,-0.5_prec]
+    real(prec) :: pA(1:3),pB(1:3)
+    real(prec) :: u2,v2
+    integer :: f,n
+    logical :: ok
+
+    matched = .false.
+    flip = 0
+    do f = 0,7
+      ok = .true.
+      do n = 1,5
+        pA = BilinearFacePoint3D(coordsA,sA,us(n),vs(n))
+        call FlipFaceCoords3D(us(n),vs(n),f,u2,v2)
+        pB = BilinearFacePoint3D(coordsB,sB,u2,v2)
+        if(maxval(abs(pA-pB)) > tol) then
+          ok = .false.
+          exit
+        endif
+      enddo
+      if(ok) then
+        matched = .true.
+        flip = f
+        return
+      endif
+    enddo
+
+  endsubroutine MatchFaces3D
+
+  function QuadrantMatches3D(coordsBig,sBig,q,coordsSmall,sSmall,flip,tol) result(matched)
+    !! Determines whether face sSmall of the small element coincides with quadrant q
+    !! of face sBig of the big element under the given flip:
+    !! face_small(F_flip(u,v)) == face_big(quadrant_q(u,v)) at the sampled points.
+    implicit none
+    real(prec),intent(in) :: coordsBig(1:3,1:2,1:2,1:2)
+    integer,intent(in) :: sBig,q
+    real(prec),intent(in) :: coordsSmall(1:3,1:2,1:2,1:2)
+    integer,intent(in) :: sSmall,flip
+    real(prec),intent(in) :: tol
+    logical :: matched
+    ! Local
+    real(prec),parameter :: us(1:5) = [-1.0_prec,1.0_prec,-1.0_prec,1.0_prec,0.25_prec]
+    real(prec),parameter :: vs(1:5) = [-1.0_prec,-1.0_prec,1.0_prec,1.0_prec,-0.5_prec]
+    real(prec) :: pBig(1:3),pSmall(1:3)
+    real(prec) :: uq,vq,u2,v2
+    integer :: n
+
+    matched = .true.
+    do n = 1,5
+      ! Big-face coordinates of the quadrant point
+      uq = 0.5_prec*(us(n)+real(2*mortarQuadKx(q)-3,prec))
+      vq = 0.5_prec*(vs(n)+real(2*mortarQuadKy(q)-3,prec))
+      pBig = BilinearFacePoint3D(coordsBig,sBig,uq,vq)
+      call FlipFaceCoords3D(us(n),vs(n),flip,u2,v2)
+      pSmall = BilinearFacePoint3D(coordsSmall,sSmall,u2,v2)
+      if(maxval(abs(pBig-pSmall)) > tol) then
+        matched = .false.
+        return
+      endif
+    enddo
+
+  endfunction QuadrantMatches3D
+
+  function DomainBoundaryId3D(elemCoords,s,dx,tol,bcids) result(bcid)
+    !! Identifies which of the six domain boundary planes of the SimpleMortarMesh
+    !! contains face s of the element, and returns the corresponding boundary
+    !! condition id. The domain is [0,3dx] x [0,2dx] x [0,2dx] with the region
+    !! x > 2dx, above/below the small elements, outside the mesh; the x = 3dx plane
+    !! is the domain east.
+    implicit none
+    real(prec),intent(in) :: elemCoords(1:3,1:2,1:2,1:2)
+    integer,intent(in) :: s
+    real(prec),intent(in) :: dx,tol
+    integer,intent(in) :: bcids(1:6)
+    integer :: bcid
+    ! Local
+    real(prec) :: c(1:3)
+
+    c = BilinearFacePoint3D(elemCoords,s,0.0_prec,0.0_prec)
+
+    if(abs(c(3)) < tol) then
+      bcid = bcids(1) ! bottom, z = 0
+    elseif(abs(c(2)) < tol) then
+      bcid = bcids(2) ! south, y = 0
+    elseif(abs(c(1)-3.0_prec*dx) < tol) then
+      bcid = bcids(3) ! east, x = 3dx
+    elseif(abs(c(2)-2.0_prec*dx) < tol) then
+      bcid = bcids(4) ! north, y = 2dx
+    elseif(abs(c(1)) < tol) then
+      bcid = bcids(5) ! west, x = 0
+    elseif(abs(c(3)-2.0_prec*dx) < tol) then
+      bcid = bcids(6) ! top, z = 2dx
+    else
+      print*,"DomainBoundaryId3D : face centroid is not on a domain boundary plane"
+      stop 1
+    endif
+
+  endfunction DomainBoundaryId3D
 
   subroutine UniformPeriodicMesh_Mesh3D_t(this,nxPerTile,nyPerTile,nzPerTile, &
                                           nTileX,nTileY,nTileZ,dx,dy,dz,comm)

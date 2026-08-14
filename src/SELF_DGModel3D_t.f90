@@ -343,6 +343,12 @@ contains
     ! solutionGradient % extBoundary attribute
     call this%solutionGradient%SideExchange(this%mesh)
 
+    ! populate the solutionGradient % extBoundary attribute on
+    ! nonconforming (mortar) interfaces
+    if(this%mesh%nMortars > 0) then
+      call this%solutionGradient%MortarExchange(this%mesh)
+    endif
+
   endsubroutine CalculateSolutionGradient_DGModel3D_t
 
   subroutine CalculateEntropy_DGModel3D_t(this)
@@ -567,6 +573,12 @@ contains
     call this%solution%BoundaryInterp()
     call this%solution%SideExchange(this%mesh)
 
+    ! populate the solution % extBoundary attribute on nonconforming
+    ! (mortar) interfaces
+    if(this%mesh%nMortars > 0) then
+      call this%solution%MortarExchange(this%mesh)
+    endif
+
     call this%PreTendencyHook() ! User-supplied
     call this%SetBoundaryCondition() ! User-supplied
 
@@ -579,6 +591,13 @@ contains
 
     call this%SourceMethod() ! User supplied
     call this%BoundaryFlux() ! User supplied
+
+    ! On mortar interfaces, replace the big face's surface-flux integrand with the
+    ! projection of the small faces' integrands so that the interface is conservative
+    if(this%mesh%nMortars > 0) then
+      call this%flux%MortarFluxCollect(this%mesh)
+    endif
+
     call this%FluxMethod() ! User supplied
 
     call this%flux%MappedDGDivergence(this%fluxDivergence%interior)
